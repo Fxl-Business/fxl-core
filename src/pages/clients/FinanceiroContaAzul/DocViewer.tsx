@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import MarkdownRenderer from '@/components/docs/MarkdownRenderer'
 
 import briefingRaw from '../../../../clients/financeiro-conta-azul/docs/briefing.md?raw'
 import blueprintRaw from '../../../../clients/financeiro-conta-azul/docs/blueprint.md?raw'
@@ -39,11 +38,7 @@ export default function DocViewer() {
           {entry.filename}
         </span>
       </div>
-      <div className="prose">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {entry.content}
-        </ReactMarkdown>
-      </div>
+      <MarkdownRenderer content={entry.content} />
     </div>
   )
 }

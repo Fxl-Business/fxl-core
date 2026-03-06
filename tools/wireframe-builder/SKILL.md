@@ -3,7 +3,7 @@
 ## Identidade
 
 Ferramenta AI-first para geracao de wireframes navegaveis em React.
-Os componentes vivem em `skills/wireframe-builder/components/`.
+Os componentes vivem em `tools/wireframe-builder/components/`.
 
 ## Quando usar
 
@@ -16,8 +16,8 @@ Os componentes vivem em `skills/wireframe-builder/components/`.
 O Claude Code importa componentes desta skill nas telas de wireframe do cliente:
 
 ```tsx
-import KpiCard from '@skills/wireframe-builder/components/KpiCard'
-import BarLineChart from '@skills/wireframe-builder/components/BarLineChart'
+import KpiCard from '@tools/wireframe-builder/components/KpiCard'
+import BarLineChart from '@tools/wireframe-builder/components/BarLineChart'
 ```
 
 ## Componentes disponiveis

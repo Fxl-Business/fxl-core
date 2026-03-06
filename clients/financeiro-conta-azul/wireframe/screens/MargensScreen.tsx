@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import WireframeFilterBar from '@skills/wireframe-builder/components/WireframeFilterBar'
-import KpiCardFull from '@skills/wireframe-builder/components/KpiCardFull'
-import BarLineChart from '@skills/wireframe-builder/components/BarLineChart'
+import WireframeFilterBar from '@tools/wireframe-builder/components/WireframeFilterBar'
+import KpiCardFull from '@tools/wireframe-builder/components/KpiCardFull'
+import BarLineChart from '@tools/wireframe-builder/components/BarLineChart'
 
 export default function MargensScreen() {
   const [compareMode, setCompareMode] = useState(false)

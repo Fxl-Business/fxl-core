@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import WireframeFilterBar from '@skills/wireframe-builder/components/WireframeFilterBar'
-import KpiCardFull from '@skills/wireframe-builder/components/KpiCardFull'
-import BarLineChart from '@skills/wireframe-builder/components/BarLineChart'
-import ManualInputSection from '@skills/wireframe-builder/components/ManualInputSection'
-import ClickableTable from '@skills/wireframe-builder/components/ClickableTable'
-import type { ClickRow, ClickColumn } from '@skills/wireframe-builder/components/ClickableTable'
+import WireframeFilterBar from '@tools/wireframe-builder/components/WireframeFilterBar'
+import KpiCardFull from '@tools/wireframe-builder/components/KpiCardFull'
+import BarLineChart from '@tools/wireframe-builder/components/BarLineChart'
+import ManualInputSection from '@tools/wireframe-builder/components/ManualInputSection'
+import ClickableTable from '@tools/wireframe-builder/components/ClickableTable'
+import type { ClickRow, ClickColumn } from '@tools/wireframe-builder/components/ClickableTable'
 
 const MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 

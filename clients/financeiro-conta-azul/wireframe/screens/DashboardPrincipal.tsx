@@ -1,9 +1,9 @@
-import KpiCard from '@skills/wireframe-builder/components/KpiCard'
-import BarLineChart from '@skills/wireframe-builder/components/BarLineChart'
-import DataTable from '@skills/wireframe-builder/components/DataTable'
-import GlobalFilters from '@skills/wireframe-builder/components/GlobalFilters'
-import CommentOverlay from '@skills/wireframe-builder/components/CommentOverlay'
-import WireframeSidebar from '@skills/wireframe-builder/components/WireframeSidebar'
+import KpiCard from '@tools/wireframe-builder/components/KpiCard'
+import BarLineChart from '@tools/wireframe-builder/components/BarLineChart'
+import DataTable from '@tools/wireframe-builder/components/DataTable'
+import GlobalFilters from '@tools/wireframe-builder/components/GlobalFilters'
+import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
+import WireframeSidebar from '@tools/wireframe-builder/components/WireframeSidebar'
 
 const SCREENS = [
   { label: 'Dashboard Principal', active: true },

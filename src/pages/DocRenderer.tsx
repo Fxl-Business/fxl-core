@@ -1,7 +1,6 @@
 import { useLocation } from 'react-router-dom'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { getDoc, type DocSection } from '@/lib/docs-parser'
+import MarkdownRenderer from '@/components/docs/MarkdownRenderer'
 import PromptBlock from '@/components/docs/PromptBlock'
 import Callout from '@/components/docs/Callout'
 import Operational from '@/components/docs/Operational'
@@ -10,11 +9,7 @@ import PhaseCard from '@/components/docs/PhaseCard'
 function SectionRenderer({ section }: { section: DocSection }) {
   switch (section.type) {
     case 'markdown':
-      return (
-        <div className="prose max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{section.content}</ReactMarkdown>
-        </div>
-      )
+      return <MarkdownRenderer content={section.content} />
     case 'prompt':
       return <PromptBlock label={section.label} prompt={section.content} />
     case 'callout':

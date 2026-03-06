@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import MarkdownRenderer from '@/components/docs/MarkdownRenderer'
 import PromptBlock from '@/components/ui/PromptBlock'
 
 // Process
@@ -91,11 +90,7 @@ function splitPromptBlock(raw: string, sectionHeading: string): SplitContent | n
 }
 
 function Markdown({ content }: { content: string }) {
-  return (
-    <div className="prose">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-    </div>
-  )
+  return <MarkdownRenderer content={content} />
 }
 
 export default function ProcessDocsViewer() {

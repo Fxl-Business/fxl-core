@@ -1,6 +1,6 @@
-import InputsScreen from '@skills/wireframe-builder/components/InputsScreen'
-import CommentOverlay from '@skills/wireframe-builder/components/CommentOverlay'
-import WireframeSidebar from '@skills/wireframe-builder/components/WireframeSidebar'
+import InputsScreen from '@tools/wireframe-builder/components/InputsScreen'
+import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
+import WireframeSidebar from '@tools/wireframe-builder/components/WireframeSidebar'
 
 const SCREENS = [
   { label: 'Dashboard Principal' },

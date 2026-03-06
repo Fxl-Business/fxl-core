@@ -1,4 +1,4 @@
-import UploadSection from '@skills/wireframe-builder/components/UploadSection'
+import UploadSection from '@tools/wireframe-builder/components/UploadSection'
 
 const HISTORY_RECEITAS = [
   { id: 'h1', date: '04/03/2026', type: 'Contas a Receber', period: 'Fev/2026', records: 342, status: 'success' as const },

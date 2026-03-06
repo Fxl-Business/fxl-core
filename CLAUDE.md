@@ -4,7 +4,7 @@
 
 Voce esta operando no FXL Core (Nucleo FXL), monorepo central da FXL, empresa de BI para PMEs.
 Este repositorio contem: documentacao de processo, knowledge de clientes,
-skills (ferramentas AI-first) e o app React que renderiza tudo.
+tools (ferramentas AI-first) e o app React que renderiza tudo.
 
 A visao de longo prazo da FXL e ter um processo capaz de entender qualquer negocio
 e, a partir de perguntas e respostas estruturadas, gerar qualquer produto digital —
@@ -35,7 +35,7 @@ fxl/
 │       ├── docs/            ← briefing, blueprint, branding, changelog
 │       └── wireframe/       ← screens/ com .tsx de wireframe
 │
-├── skills/                  ← ferramentas AI-first do processo
+├── tools/                   ← ferramentas AI-first do processo
 │   └── wireframe-builder/
 │       ├── SKILL.md         ← instrucoes para o Claude Code
 │       └── components/      ← componentes React reutilizaveis
@@ -72,12 +72,12 @@ O Claude Code nunca altera a subpasta de um cliente ao executar tarefa de outro.
 
 ---
 
-## Regra de escopo — skills/
+## Regra de escopo — tools/
 
-Cada skill tem seu `SKILL.md` com instrucoes de uso.
-Componentes de skill sao importados via `@skills/[nome]/components/`.
+Cada tool tem seu `SKILL.md` com instrucoes de uso.
+Componentes de tool sao importados via `@tools/[nome]/components/`.
 Nunca criar componentes locais na pasta de um cliente — sinalizar para
-adicionar ao modulo compartilhado da skill.
+adicionar ao modulo compartilhado da tool.
 
 ---
 
@@ -105,7 +105,7 @@ Tags customizadas disponiveis (parseadas pelo docs-parser):
 
 - Alteracoes em docs/: `docs: [o que mudou]`
 - Alteracoes de cliente: `[client-slug]: [o que mudou]`
-- Alteracoes de skill: `skill([nome]): [o que mudou]`
+- Alteracoes de tool: `tool([nome]): [o que mudou]`
 - Alteracoes em src/ (app shell): `app: [o que mudou]`
 - Alteracoes estruturais: `infra: [o que mudou]`
 

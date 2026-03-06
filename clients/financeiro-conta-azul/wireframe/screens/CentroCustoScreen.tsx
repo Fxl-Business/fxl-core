@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import WireframeFilterBar from '@skills/wireframe-builder/components/WireframeFilterBar'
-import type { FilterOption } from '@skills/wireframe-builder/components/WireframeFilterBar'
-import KpiCardFull from '@skills/wireframe-builder/components/KpiCardFull'
-import BarLineChart from '@skills/wireframe-builder/components/BarLineChart'
-import DonutChart from '@skills/wireframe-builder/components/DonutChart'
-import ClickableTable from '@skills/wireframe-builder/components/ClickableTable'
-import WireframeModal from '@skills/wireframe-builder/components/WireframeModal'
-import type { ClickRow, ClickColumn } from '@skills/wireframe-builder/components/ClickableTable'
+import WireframeFilterBar from '@tools/wireframe-builder/components/WireframeFilterBar'
+import type { FilterOption } from '@tools/wireframe-builder/components/WireframeFilterBar'
+import KpiCardFull from '@tools/wireframe-builder/components/KpiCardFull'
+import BarLineChart from '@tools/wireframe-builder/components/BarLineChart'
+import DonutChart from '@tools/wireframe-builder/components/DonutChart'
+import ClickableTable from '@tools/wireframe-builder/components/ClickableTable'
+import WireframeModal from '@tools/wireframe-builder/components/WireframeModal'
+import type { ClickRow, ClickColumn } from '@tools/wireframe-builder/components/ClickableTable'
 
 const CC_FILTERS: FilterOption[] = [
   { key: 'centro-custo', label: 'Centro de Custo' },

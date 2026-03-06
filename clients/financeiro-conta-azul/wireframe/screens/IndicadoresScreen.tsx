@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import WireframeFilterBar from '@skills/wireframe-builder/components/WireframeFilterBar'
-import type { FilterOption } from '@skills/wireframe-builder/components/WireframeFilterBar'
-import KpiCardFull from '@skills/wireframe-builder/components/KpiCardFull'
-import BarLineChart from '@skills/wireframe-builder/components/BarLineChart'
-import ParetoChart from '@skills/wireframe-builder/components/ParetoChart'
-import DataTable from '@skills/wireframe-builder/components/DataTable'
+import WireframeFilterBar from '@tools/wireframe-builder/components/WireframeFilterBar'
+import type { FilterOption } from '@tools/wireframe-builder/components/WireframeFilterBar'
+import KpiCardFull from '@tools/wireframe-builder/components/KpiCardFull'
+import BarLineChart from '@tools/wireframe-builder/components/BarLineChart'
+import ParetoChart from '@tools/wireframe-builder/components/ParetoChart'
+import DataTable from '@tools/wireframe-builder/components/DataTable'
 
 type Col = { key: string; label: string; align?: 'left' | 'right' | 'center' }
 

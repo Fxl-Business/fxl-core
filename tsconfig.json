@@ -18,13 +18,13 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@skills/*": ["skills/*"],
+      "@tools/*": ["tools/*"],
       "@clients/*": ["clients/*"]
     }
   },
   "include": [
     "src",
-    "skills",
+    "tools",
     "clients",
     "markdoc.config.ts",
     "vite-env.d.ts"

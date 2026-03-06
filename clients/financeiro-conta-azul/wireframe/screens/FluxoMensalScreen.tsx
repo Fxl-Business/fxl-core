@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import WireframeFilterBar from '@skills/wireframe-builder/components/WireframeFilterBar'
-import KpiCardFull from '@skills/wireframe-builder/components/KpiCardFull'
-import BarLineChart from '@skills/wireframe-builder/components/BarLineChart'
-import SaldoBancoInput from '@skills/wireframe-builder/components/SaldoBancoInput'
-import ManualInputSection from '@skills/wireframe-builder/components/ManualInputSection'
-import ClickableTable from '@skills/wireframe-builder/components/ClickableTable'
-import WireframeModal from '@skills/wireframe-builder/components/WireframeModal'
-import type { ClickRow, ClickColumn } from '@skills/wireframe-builder/components/ClickableTable'
+import WireframeFilterBar from '@tools/wireframe-builder/components/WireframeFilterBar'
+import KpiCardFull from '@tools/wireframe-builder/components/KpiCardFull'
+import BarLineChart from '@tools/wireframe-builder/components/BarLineChart'
+import SaldoBancoInput from '@tools/wireframe-builder/components/SaldoBancoInput'
+import ManualInputSection from '@tools/wireframe-builder/components/ManualInputSection'
+import ClickableTable from '@tools/wireframe-builder/components/ClickableTable'
+import WireframeModal from '@tools/wireframe-builder/components/WireframeModal'
+import type { ClickRow, ClickColumn } from '@tools/wireframe-builder/components/ClickableTable'
 
 const COLS_BASE: ClickColumn[] = [
   { key: 'descricao',  label: 'Descrição' },

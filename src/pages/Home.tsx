@@ -1,4 +1,27 @@
 import { Link } from 'react-router-dom'
+import { ArrowRight, Pencil, Users, Cpu } from 'lucide-react'
+
+const quickActions = [
+  {
+    icon: Pencil,
+    title: 'Evoluir o processo FXL',
+    description: 'Criar ou refinar prompts para o Claude Code',
+    href: '/operacao/prompt-abertura',
+  },
+  {
+    icon: Users,
+    title: 'Trabalhar em um cliente',
+    description: 'Acessar knowledge, wireframes e docs de um cliente',
+    href: '#clientes',
+    isAnchor: true,
+  },
+  {
+    icon: Cpu,
+    title: 'Conferir tecnologias',
+    description: 'Stack, premissas e decisoes tecnicas do processo',
+    href: '/build/tech-radar',
+  },
+]
 
 const sections = [
   {
@@ -35,14 +58,51 @@ const clients = [
 export default function Home() {
   return (
     <div>
+      {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Nucleo FXL</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Processo, knowledge, skills e clientes — o nucleo operacional da FXL.
+          Processo, knowledge e ferramentas — o nucleo operacional da FXL.
         </p>
       </div>
 
-      {/* Secoes de documentacao */}
+      {/* Quick actions */}
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
+        O que vai fazer hoje?
+      </h2>
+      <div className="mb-8 grid gap-4 md:grid-cols-3">
+        {quickActions.map((action) => {
+          const Icon = action.icon
+          const inner = (
+            <div className="flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-slate-400">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                <Icon className="h-4 w-4" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-slate-900">{action.title}</h3>
+                <p className="mt-0.5 text-xs text-slate-500">{action.description}</p>
+              </div>
+              <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+            </div>
+          )
+
+          if (action.isAnchor) {
+            return (
+              <a key={action.href} href={action.href}>
+                {inner}
+              </a>
+            )
+          }
+
+          return (
+            <Link key={action.href} to={action.href}>
+              {inner}
+            </Link>
+          )
+        })}
+      </div>
+
+      {/* Documentacao */}
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
         Documentacao
       </h2>
@@ -63,7 +123,7 @@ export default function Home() {
       </div>
 
       {/* Clientes */}
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
+      <h2 id="clientes" className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
         Clientes
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

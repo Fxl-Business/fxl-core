@@ -1,5 +1,5 @@
-import ConfigTable from '@skills/wireframe-builder/components/ConfigTable'
-import type { ConfigColumn, ConfigRow } from '@skills/wireframe-builder/components/ConfigTable'
+import ConfigTable from '@tools/wireframe-builder/components/ConfigTable'
+import type { ConfigColumn, ConfigRow } from '@tools/wireframe-builder/components/ConfigTable'
 
 const CAT_COLS: ConfigColumn[] = [
   { key: 'nome',   label: 'Categoria',          width: '220px' },

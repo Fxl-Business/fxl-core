@@ -10,6 +10,7 @@ type NavItem = {
 }
 
 const navigation: NavItem[] = [
+  { label: 'Home', href: '/' },
   {
     label: 'Operacao',
     children: [

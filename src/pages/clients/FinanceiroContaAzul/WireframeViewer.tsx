@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import CommentOverlay from '@skills/wireframe-builder/components/CommentOverlay'
-import WireframeHeader from '@skills/wireframe-builder/components/WireframeHeader'
+import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
+import WireframeHeader from '@tools/wireframe-builder/components/WireframeHeader'
 import DFCScreen from '@clients/financeiro-conta-azul/wireframe/screens/DFCScreen'
 import ReceitaScreen from '@clients/financeiro-conta-azul/wireframe/screens/ReceitaScreen'
 import DespesasScreen from '@clients/financeiro-conta-azul/wireframe/screens/DespesasScreen'
