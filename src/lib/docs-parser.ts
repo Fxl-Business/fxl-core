@@ -15,9 +15,17 @@ export type DocSection =
   | { type: 'operational'; content: string }
   | { type: 'phase-card'; number: number; title: string; description: string; href: string }
 
+export type DocHeading = {
+  id: string
+  text: string
+  level: 2 | 3
+}
+
 export type ParsedDoc = {
   frontmatter: DocFrontmatter
   sections: DocSection[]
+  headings: DocHeading[]
+  rawBody: string
 }
 
 function extractFrontmatter(raw: string): { frontmatter: DocFrontmatter; body: string } {
@@ -39,7 +47,7 @@ function parseAttributes(attrString: string): Record<string, string | number> {
   return attrs
 }
 
-const TAG_REGEX = /\{%\s*(\/?\s*[\w][\w-]*)((?:\s+\w+\s*=\s*(?:"[^"]*"|\d+))*)\s*(\/?)%\}/g
+const TAG_REGEX = /\{%\s*(\/?\s*[\w][\w-]*)((?:\s+\w+\s*=\s*(?:"[^"]*"|\d+))*)\s*(\/)?\s*%\}/g
 
 function parseBody(body: string): DocSection[] {
   const sections: DocSection[] = []
@@ -117,6 +125,22 @@ function parseBody(body: string): DocSection[] {
   return sections
 }
 
+export function extractHeadings(markdown: string): DocHeading[] {
+  const lines = markdown.split('\n')
+  return lines
+    .filter(line => /^#{2,3}\s/.test(line))
+    .map(line => {
+      const level: 2 | 3 = line.startsWith('### ') ? 3 : 2
+      const text = line.replace(/^#{2,3}\s+/, '').trim()
+      const id = text
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+      return { id, text, level }
+    })
+}
+
 export function getDoc(urlPath: string): ParsedDoc | null {
   const cleanPath = urlPath.replace(/^\//, '').replace(/\/$/, '')
   const filePath = `/docs/${cleanPath}.md`
@@ -125,7 +149,8 @@ export function getDoc(urlPath: string): ParsedDoc | null {
 
   const { frontmatter, body } = extractFrontmatter(raw)
   const sections = parseBody(body)
-  return { frontmatter, sections }
+  const headings = extractHeadings(body)
+  return { frontmatter, sections, headings, rawBody: body }
 }
 
 export function getAllDocPaths(): string[] {

@@ -70,32 +70,36 @@ export default function Home() {
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
         O que vai fazer hoje?
       </h2>
-      <div className="mb-8 grid gap-4 md:grid-cols-3">
+      <div className="mb-8 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-3">
         {quickActions.map((action) => {
           const Icon = action.icon
           const inner = (
-            <div className="flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-slate-400">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                <Icon className="h-4 w-4" />
+            <div className="flex h-full min-h-[120px] flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 transition-all hover:border-fxl-navy hover:shadow-md">
+              <div className="flex flex-1 items-start gap-4">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-slate-900">{action.title}</h3>
+                  <p className="mt-0.5 text-xs text-slate-500">{action.description}</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold text-slate-900">{action.title}</h3>
-                <p className="mt-0.5 text-xs text-slate-500">{action.description}</p>
+              <div className="flex justify-end">
+                <ArrowRight className="h-4 w-4 text-slate-400" />
               </div>
-              <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
             </div>
           )
 
           if (action.isAnchor) {
             return (
-              <a key={action.href} href={action.href}>
+              <a key={action.href} href={action.href} className="h-full">
                 {inner}
               </a>
             )
           }
 
           return (
-            <Link key={action.href} to={action.href}>
+            <Link key={action.href} to={action.href} className="h-full">
               {inner}
             </Link>
           )

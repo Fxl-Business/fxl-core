@@ -20,6 +20,7 @@ export default function App() {
           <Route path="/build/*" element={<DocRenderer />} />
           <Route path="/referencias/*" element={<DocRenderer />} />
           <Route path="/operacao/*" element={<DocRenderer />} />
+          <Route path="/ferramentas/*" element={<DocRenderer />} />
 
           {/* Paginas interativas de clientes */}
           <Route path="/clients/financeiro-conta-azul" element={<FinanceiroIndex />} />

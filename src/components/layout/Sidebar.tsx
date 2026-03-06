@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, Home } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { Separator } from '@/components/ui/separator'
 
 type NavItem = {
   label: string
@@ -13,6 +14,7 @@ const navigation: NavItem[] = [
   { label: 'Home', href: '/' },
   {
     label: 'Operacao',
+    href: '/operacao/index',
     children: [
       { label: 'Prompt de Abertura — Project FXL', href: '/operacao/prompt-abertura' },
       { label: 'Fluxo de Trabalho', href: '/operacao/fluxo-trabalho' },
@@ -22,6 +24,7 @@ const navigation: NavItem[] = [
   },
   {
     label: 'Processo',
+    href: '/processo/index',
     children: [
       { label: 'Visao Geral (Master)', href: '/processo/master' },
       { label: 'BI Personalizado', href: '/processo/bi-personalizado' },
@@ -43,14 +46,22 @@ const navigation: NavItem[] = [
     ],
   },
   {
-    label: 'Referencias',
+    label: 'Ferramentas',
+    href: '/ferramentas/index',
     children: [
-      { label: 'Biblioteca de KPIs', href: '/referencias/biblioteca-kpis' },
-      { label: 'Blocos Disponiveis', href: '/referencias/blocos-disponiveis' },
+      {
+        label: 'Wireframe Builder',
+        href: '/ferramentas/wireframe-builder',
+        children: [
+          { label: 'Biblioteca de KPIs', href: '/referencias/biblioteca-kpis' },
+          { label: 'Blocos Disponíveis', href: '/referencias/blocos-disponiveis' },
+        ],
+      },
     ],
   },
   {
     label: 'Build',
+    href: '/build/index',
     children: [
       { label: 'Tech Radar', href: '/build/tech-radar' },
       {
@@ -73,8 +84,7 @@ const navigation: NavItem[] = [
           { label: 'Keycloak', href: '/build/techs/keycloak' },
         ],
       },
-      { label: 'Indice', href: '/build/index' },
-      { label: 'Premissas Gerais', href: '/build/premissas-gerais' },
+{ label: 'Premissas Gerais', href: '/build/premissas-gerais' },
       { label: 'Seguranca', href: '/build/seguranca' },
       { label: 'Testes', href: '/build/testes' },
       { label: 'Template de Sprint', href: '/build/master-prompt' },
@@ -123,6 +133,7 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
     }
   }, [childIsActive])
 
+  // Leaf node (no children, has href)
   if (!hasChildren && item.href) {
     return (
       <NavLink
@@ -143,6 +154,55 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
     )
   }
 
+  // Parent with href — navigable label + independent chevron toggle
+  if (hasChildren && item.href) {
+    return (
+      <div>
+        <div className={cn(
+          'flex items-center justify-between rounded-md transition-colors',
+          depth === 0
+            ? 'text-left text-xs font-semibold uppercase tracking-[0.18em] text-foreground'
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          childIsActive && depth > 0 && 'text-foreground',
+        )}>
+          <NavLink
+            to={item.href}
+            className={({ isActive }) =>
+              cn(
+                'flex-1 truncate px-3 py-1.5 text-xs',
+                depth === 0
+                  ? 'font-semibold uppercase tracking-[0.18em]'
+                  : '',
+                isActive && depth > 0
+                  ? 'font-medium text-fxl-navy'
+                  : '',
+              )
+            }
+          >
+            {item.label}
+          </NavLink>
+          {depth > 0 && (
+            <button
+              type="button"
+              onClick={() => setOpen((c) => !c)}
+              className="px-2 py-1.5 text-muted-foreground hover:text-foreground"
+            >
+              {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+            </button>
+          )}
+        </div>
+        {(open || depth === 0) && item.children && (
+          <div className={cn('mt-0.5 space-y-0.5', depth === 0 && 'mb-4')}>
+            {item.children.map((child) => (
+              <NavSection key={child.label} item={child} depth={depth + 1} />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Parent without href — toggle only
   return (
     <div>
       <button
@@ -172,10 +232,32 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
 }
 
 export default function Sidebar() {
+  const homeItem = navigation[0]
+  const rest = navigation.slice(1)
+
   return (
     <aside className="w-full flex-shrink-0 border-b border-border/80 bg-white/80 backdrop-blur md:w-64 md:border-b-0 md:border-r">
       <nav className="max-h-72 overflow-y-auto p-4 md:max-h-none md:space-y-1">
-        {navigation.map((item) => (
+        {/* Home link with icon */}
+        <NavLink
+          to={homeItem.href!}
+          className={({ isActive }) =>
+            cn(
+              'flex w-full items-center rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+              isActive
+                ? 'bg-fxl-navy text-white shadow-sm'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            )
+          }
+        >
+          <Home className="mr-2 h-3.5 w-3.5 flex-shrink-0" />
+          {homeItem.label}
+        </NavLink>
+
+        <Separator className="my-3" />
+
+        {/* Remaining groups */}
+        {rest.map((item) => (
           <NavSection key={item.label} item={item} depth={0} />
         ))}
       </nav>

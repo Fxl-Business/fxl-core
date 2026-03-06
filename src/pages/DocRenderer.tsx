@@ -5,6 +5,10 @@ import PromptBlock from '@/components/docs/PromptBlock'
 import Callout from '@/components/docs/Callout'
 import Operational from '@/components/docs/Operational'
 import PhaseCard from '@/components/docs/PhaseCard'
+import DocBreadcrumb from '@/components/docs/DocBreadcrumb'
+import DocPageHeader from '@/components/docs/DocPageHeader'
+import DocTableOfContents from '@/components/docs/DocTableOfContents'
+import { Separator } from '@/components/ui/separator'
 
 function SectionRenderer({ section }: { section: DocSection }) {
   switch (section.type) {
@@ -45,25 +49,34 @@ export default function DocRenderer() {
     )
   }
 
-  const { frontmatter, sections } = doc
+  const { frontmatter, sections, headings, rawBody } = doc
 
   return (
-    <div>
-      <div className="mb-8">
-        {frontmatter.badge && (
-          <span className="mb-2 inline-block rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-            {frontmatter.badge}
-          </span>
-        )}
-        <h1 className="text-2xl font-bold text-slate-900">{frontmatter.title}</h1>
-        {frontmatter.description && (
-          <p className="mt-2 text-sm text-slate-500">{frontmatter.description}</p>
-        )}
+    <div className="flex gap-10">
+      {/* Main content */}
+      <div className="min-w-0 flex-1">
+        <DocBreadcrumb section={frontmatter.badge} title={frontmatter.title} />
+
+        <DocPageHeader
+          badge={frontmatter.badge}
+          title={frontmatter.title}
+          description={frontmatter.description}
+          rawContent={rawBody}
+        />
+
+        <Separator className="my-6" />
+
+        <div className="space-y-4">
+          {sections.map((section, i) => (
+            <SectionRenderer key={i} section={section} />
+          ))}
+        </div>
       </div>
 
-      {sections.map((section, i) => (
-        <SectionRenderer key={i} section={section} />
-      ))}
+      {/* Right TOC */}
+      {headings.length > 1 && (
+        <DocTableOfContents headings={headings} />
+      )}
     </div>
   )
 }

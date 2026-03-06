@@ -1,5 +1,5 @@
 ---
-title: Arquitetura — Indice
+title: Build
 badge: Build
 description: Ponto de entrada da base tecnica FXL
 ---
