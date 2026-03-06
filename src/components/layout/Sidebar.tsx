@@ -11,6 +11,15 @@ type NavItem = {
 
 const navigation: NavItem[] = [
   {
+    label: 'Operacao',
+    children: [
+      { label: 'Prompt de Abertura — Project FXL', href: '/operacao/prompt-abertura' },
+      { label: 'Fluxo de Trabalho', href: '/operacao/fluxo-trabalho' },
+      { label: 'Padrao de Prompt Code', href: '/operacao/padrao-prompt-code' },
+      { label: 'Padrao de Conversa', href: '/operacao/padrao-conversa-project' },
+    ],
+  },
+  {
     label: 'Processo',
     children: [
       { label: 'Visao Geral (Master)', href: '/processo/master' },
@@ -18,7 +27,7 @@ const navigation: NavItem[] = [
       { label: 'Produto FXL', href: '/processo/produto' },
       { label: 'Identidade FXL', href: '/processo/identidade' },
       { label: 'Pacote de Cliente', href: '/processo/pacote-cliente' },
-      { label: 'Prompt Master', href: '/processo/prompt-master' },
+      { label: 'Prompt de Abertura — Cliente', href: '/processo/prompt-master' },
       {
         label: 'Fases',
         children: [
@@ -33,19 +42,6 @@ const navigation: NavItem[] = [
     ],
   },
   {
-    label: 'Build',
-    children: [
-      { label: 'Indice', href: '/build/index' },
-      { label: 'Premissas Gerais', href: '/build/premissas-gerais' },
-      { label: 'Supabase', href: '/build/supabase' },
-      { label: 'Deploy — Vercel', href: '/build/deploy-vercel' },
-      { label: 'Seguranca', href: '/build/seguranca' },
-      { label: 'Testes', href: '/build/testes' },
-      { label: 'Master Prompt', href: '/build/master-prompt' },
-      { label: 'CLAUDE.md — Template', href: '/build/claude-md-template' },
-    ],
-  },
-  {
     label: 'Referencias',
     children: [
       { label: 'Biblioteca de KPIs', href: '/referencias/biblioteca-kpis' },
@@ -53,11 +49,35 @@ const navigation: NavItem[] = [
     ],
   },
   {
-    label: 'Operacao',
+    label: 'Build',
     children: [
-      { label: 'Fluxo de Trabalho', href: '/operacao/fluxo-trabalho' },
-      { label: 'Padrao de Prompt Code', href: '/operacao/padrao-prompt-code' },
-      { label: 'Padrao de Conversa', href: '/operacao/padrao-conversa-project' },
+      { label: 'Tech Radar', href: '/build/tech-radar' },
+      {
+        label: 'Techs',
+        children: [
+          { label: 'Vite + React + TS', href: '/build/techs/vite-react-ts' },
+          { label: 'Tailwind + shadcn/ui', href: '/build/techs/tailwind-shadcn' },
+          { label: 'Next.js', href: '/build/techs/nextjs' },
+          { label: 'Supabase', href: '/build/techs/supabase' },
+          { label: 'Vercel', href: '/build/techs/vercel' },
+          { label: 'GitHub', href: '/build/techs/github' },
+          { label: 'GitHub Actions', href: '/build/techs/github-actions' },
+          { label: 'Backend — Node.js', href: '/build/techs/backend-node' },
+          { label: 'Backend — Python', href: '/build/techs/backend-python' },
+          { label: 'Docker', href: '/build/techs/docker' },
+          { label: 'Kubernetes', href: '/build/techs/kubernetes' },
+          { label: 'Terraform', href: '/build/techs/terraform' },
+          { label: 'API Gateway', href: '/build/techs/api-gateway' },
+          { label: 'Kafka', href: '/build/techs/kafka' },
+          { label: 'Keycloak', href: '/build/techs/keycloak' },
+        ],
+      },
+      { label: 'Indice', href: '/build/index' },
+      { label: 'Premissas Gerais', href: '/build/premissas-gerais' },
+      { label: 'Seguranca', href: '/build/seguranca' },
+      { label: 'Testes', href: '/build/testes' },
+      { label: 'Template de Sprint', href: '/build/master-prompt' },
+      { label: 'CLAUDE.md — Template', href: '/build/claude-md-template' },
     ],
   },
   {

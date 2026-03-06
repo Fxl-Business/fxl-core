@@ -2,11 +2,18 @@
 title: Supabase
 badge: Build
 description: Conexao, Auth, RLS e migrations
+status: Ativo
 ---
 
-# Supabase — Padrão FXL
+# Supabase — Padrao FXL
 
-## Configuração inicial
+## Status no Tech Radar
+
+✅ **Ativo** — Padrao FXL para banco de dados, autenticacao e RLS em todos os projetos.
+
+---
+
+## Configuracao inicial
 
 ### Client (`src/lib/supabase.ts`)
 
@@ -17,13 +24,13 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase URL e Anon Key são obrigatórios. Verifique o arquivo .env')
+  throw new Error('Supabase URL e Anon Key sao obrigatorios. Verifique o arquivo .env')
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 ```
 
-### Variáveis de ambiente mínimas
+### Variaveis de ambiente minimas
 
 ```
 VITE_SUPABASE_URL=https://xxxx.supabase.co
@@ -36,23 +43,23 @@ VITE_SUPABASE_ANON_KEY=eyJ...
 
 ## Auth
 
-Supabase Auth é o padrão para todos os projetos FXL. Não usar bibliotecas de auth externas.
+Supabase Auth e o padrao para todos os projetos FXL. Nao usar bibliotecas de auth externas.
 
-**Método primário:** Email + senha
+**Metodo primario:** Email + senha
 **Alternativa:** Magic link (link por email)
-**Não usar por padrão:** OAuth social (requer configuração adicional e caso de uso claro)
+**Nao usar por padrao:** OAuth social (requer configuracao adicional e caso de uso claro)
 
 ### Estrutura de arquivos de auth
 
 ```
 src/
 ├── hooks/
-│   └── useAuth.ts              ← hook principal de autenticação
+│   └── useAuth.ts              ← hook principal de autenticacao
 ├── components/
 │   └── auth/
 │       ├── AuthGuard.tsx       ← protege rotas autenticadas
-│       ├── LoginForm.tsx       ← formulário de login
-│       └── SignUpForm.tsx      ← formulário de cadastro
+│       ├── LoginForm.tsx       ← formulario de login
+│       └── SignUpForm.tsx      ← formulario de cadastro
 ```
 
 O hook `useAuth.ts` deve expor: `user`, `session`, `loading`, `signIn`, `signUp`, `signOut`.
@@ -62,7 +69,7 @@ Usar `supabase.auth.onAuthStateChange` para manter estado reativo.
 
 ## Row Level Security (RLS)
 
-**Regra absoluta:** TODA tabela tem RLS habilitado, sem exceção.
+**Regra absoluta:** TODA tabela tem RLS habilitado, sem excecao.
 
 ### Habilitar RLS (incluir em toda migration)
 
@@ -70,34 +77,34 @@ Usar `supabase.auth.onAuthStateChange` para manter estado reativo.
 ALTER TABLE nome_da_tabela ENABLE ROW LEVEL SECURITY;
 ```
 
-### Policies para dados do usuário
+### Policies para dados do usuario
 
 ```sql
--- Usuário vê apenas seus próprios dados
+-- Usuario ve apenas seus proprios dados
 CREATE POLICY "users_select_own" ON nome_da_tabela
   FOR SELECT USING (auth.uid() = user_id);
 
--- Usuário insere apenas com seu próprio user_id
+-- Usuario insere apenas com seu proprio user_id
 CREATE POLICY "users_insert_own" ON nome_da_tabela
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- Usuário atualiza apenas seus próprios dados
+-- Usuario atualiza apenas seus proprios dados
 CREATE POLICY "users_update_own" ON nome_da_tabela
   FOR UPDATE USING (auth.uid() = user_id);
 
--- Usuário deleta apenas seus próprios dados
+-- Usuario deleta apenas seus proprios dados
 CREATE POLICY "users_delete_own" ON nome_da_tabela
   FOR DELETE USING (auth.uid() = user_id);
 ```
 
-### Policies para tabelas públicas (leitura pública)
+### Policies para tabelas publicas (leitura publica)
 
 ```sql
 CREATE POLICY "public_read" ON nome_da_tabela
   FOR SELECT USING (true);
 ```
 
-### Policies para SaaS multi-tenant (isolamento por organização)
+### Policies para SaaS multi-tenant (isolamento por organizacao)
 
 ```sql
 CREATE POLICY "org_isolation_select" ON nome_da_tabela
@@ -115,9 +122,9 @@ CREATE POLICY "org_isolation_select" ON nome_da_tabela
 
 - Pasta: `supabase/migrations/`
 - Nomes incrementais: `001_create_users.sql`, `002_create_transactions.sql`
-- Cada migration faz **uma coisa** — nunca misturar criações de tabelas não relacionadas
-- **Nunca editar uma migration existente** — criar nova migration com a correção
-- Toda criação de tabela deve incluir as policies RLS correspondentes
+- Cada migration faz **uma coisa** — nunca misturar criacoes de tabelas nao relacionadas
+- **Nunca editar uma migration existente** — criar nova migration com a correcao
+- Toda criacao de tabela deve incluir as policies RLS correspondentes
 
 ---
 
@@ -125,9 +132,9 @@ CREATE POLICY "org_isolation_select" ON nome_da_tabela
 
 Usar Edge Functions quando:
 - Precisa usar a `service_role` key
-- Integrações com APIs externas (webhooks, pagamentos)
-- Processamento pesado que não deve rodar no cliente
+- Integracoes com APIs externas (webhooks, pagamentos)
+- Processamento pesado que nao deve rodar no cliente
 
-Não usar para:
-- CRUD simples — queries diretas do client são suficientes
-- Validação que o Zod resolve no frontend
+Nao usar para:
+- CRUD simples — queries diretas do client sao suficientes
+- Validacao que o Zod resolve no frontend

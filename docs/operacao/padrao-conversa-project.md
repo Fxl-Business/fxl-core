@@ -79,41 +79,13 @@ Antes de gerar, revisar o bloco de estado para garantir que nenhuma decisão foi
 - [ ] A estrutura de arquivos está definida?
 - [ ] A mensagem de commit está incluída?
 
-## Prompt padrão de abertura — Claude Project FXL
+## Prompt de Abertura
 
-{% prompt label="Prompt padrão de abertura — Claude Project FXL" %}
-Olá. Vamos trabalhar na evolução do processo FXL.
+O prompt de abertura para novas conversas no Claude Project FXL está em:
 
-Antes de começar, leia os arquivos de contexto do repositório:
+`/operacao/prompt-abertura`
 
-- CLAUDE.md
-- docs/processo/master.md
-
-⚠️ REGRA INVIOLÁVEL ANTES DE QUALQUER AÇÃO
-
-Os arquivos em /docs/ são a fonte da verdade operacional do processo FXL.
-Eles SÓ devem ser alterados quando o objetivo da sessão for explicitamente
-atualizar o conteúdo do processo.
-
-Se a tarefa envolver estrutura, layout, navegação ou componentes visuais,
-as alterações acontecem EXCLUSIVAMENTE em /src/.
-
-Nunca inferir que uma mudança em /src/ implica mudança em /docs/.
-
-Meu objetivo nesta conversa é: [DESCREVA AQUI]
-
-Ao final da nossa discussão, quero receber um prompt estruturado e completo
-para colar no Claude Code, especificando exatamente quais arquivos serão
-tocados, por quê, e com mensagem de commit.
-{% /prompt %}
-
-## Checklist de entrega (obrigatório ao finalizar)
-
-- [ ] Prompt exibido no corpo da conversa
-- [ ] Arquivo `.md` gerado para download, nomeado `prompt_[escopo]_[acao].md`
-- [ ] Mensagem de commit destacada ao final da resposta
-
-⚠️ A entrega só está completa quando os três itens acima estão marcados.
+Foi separado para facilitar o acesso — é o item mais utilizado do sistema.
 
 ---
 

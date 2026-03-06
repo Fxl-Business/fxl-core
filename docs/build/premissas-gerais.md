@@ -6,29 +6,11 @@ description: Stack padrao, estrutura de pastas e convencoes
 
 # Premissas Gerais — Projetos FXL
 
-## Stack Padrão FXL
+## Stack padrao
 
-### Default: React + Vite
+A stack padrao FXL esta documentada e atualizada no [Tech Radar](/build/tech-radar).
 
-| Camada | Tecnologia | Versão mínima |
-|---|---|---|
-| UI Framework | React | 18+ |
-| Linguagem | TypeScript | 5+ (strict mode obrigatório) |
-| Estilos | Tailwind CSS | 3+ |
-| Componentes | shadcn/ui | última estável |
-| Banco de dados | Supabase (PostgreSQL) | — |
-| Auth | Supabase Auth | — |
-| Deploy | Vercel | — |
-| Build tool | Vite | 5+ |
-
-### Exceção: Next.js
-
-Usar Next.js **apenas quando**:
-- Projeto precisa de SEO (landing page, blog, marketing)
-- SSR é requisito do negócio
-- Precisa de API routes complexas no mesmo repositório
-
-Se Next.js for escolhido, documentar justificativa no README do projeto. **Nunca usar "por padrão" ou "porque é mais moderno".**
+Consulte cada pagina de tech para versoes minimas, regras obrigatorias e quando usar.
 
 ---
 
