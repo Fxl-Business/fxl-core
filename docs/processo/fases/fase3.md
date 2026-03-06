@@ -120,7 +120,7 @@ Antes de iniciar, ler (via caminho absoluto no CLAUDE.md do projeto):
 
 #### Prompt — Gerar Prompt de Desenvolvimento
 
-```
+{% prompt label="Prompt — Gerar Prompt de Desenvolvimento" %}
 O wireframe foi aprovado. Com base no Blueprint e no Documento de Briefing, gere o Prompt de Desenvolvimento completo para o Lovable.
 
 Incluir:
@@ -132,7 +132,7 @@ Incluir:
 - Regras de tratamento de dados
 
 [COLE O BLUEPRINT AQUI]
-```
+{% /prompt %}
 
 #### Regras de desenvolvimento (Lovable)
 

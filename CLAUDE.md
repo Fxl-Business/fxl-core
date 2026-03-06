@@ -22,7 +22,7 @@ fxl/
 ├── package.json
 │
 ├── docs/                    ← TODA documentacao (fonte unica de verdade)
-│   │                           Cada .md = uma pagina renderizada via Markdoc
+│   │                           Cada .md = uma pagina renderizada via parser proprio
 │   ├── processo/            ← roteamento, POPs, fases, identidade
 │   │   └── fases/           ← fase1.md a fase6.md
 │   ├── build/               ← premissas tecnicas de stack e deploy
@@ -43,11 +43,10 @@ fxl/
 └── src/                     ← app shell React (estrutura, nao conteudo)
     ├── components/
     │   ├── layout/          ← Layout, Sidebar
-    │   ├── markdoc/         ← componentes dos tags Markdoc
-    │   ├── docs/            ← InfoBlock, PageHeader, PhaseCard, PromptBlock
+    │   ├── docs/            ← Callout, Operational, PageHeader, PhaseCard, PromptBlock
     │   └── ui/              ← shadcn/ui
     ├── pages/               ← SO paginas interativas (Home, clients)
-    ├── lib/                 ← markdoc loader, utils
+    ├── lib/                 ← docs-parser, utils
     └── App.tsx
 ```
 
@@ -55,7 +54,7 @@ fxl/
 
 ## Regra principal — docs/ e a fonte de verdade
 
-Cada `.md` em `docs/` e renderizado como pagina via Markdoc.
+Cada `.md` em `docs/` e renderizado como pagina via parser proprio com react-markdown.
 Nao existe duplicacao entre docs e pages.
 
 Se um conteudo precisa ser lido pelo Claude E exibido para humanos,
@@ -82,7 +81,7 @@ adicionar ao modulo compartilhado da skill.
 
 ---
 
-## Formato dos docs (Markdoc)
+## Formato dos docs
 
 Todo `.md` em `docs/` deve ter frontmatter YAML:
 
@@ -94,7 +93,7 @@ description: Uma frase descrevendo o conteudo
 ---
 ```
 
-Tags Markdoc disponiveis:
+Tags customizadas disponiveis (parseadas pelo docs-parser):
 - `{% callout type="warning|info" %}` — destaque visual
 - `{% prompt label="texto" %}` — bloco de prompt com botao de copia
 - `{% operational %}` — secao operacional (colapsavel na UI, lida pelo Claude)
@@ -117,8 +116,7 @@ Tags Markdoc disponiveis:
 - React 18 + TypeScript 5 (strict: true)
 - Tailwind CSS 3 + shadcn/ui
 - Vite 5
-- Markdoc (renderizacao de docs)
-- react-markdown + remark-gfm (renderizacao de docs de clientes)
+- react-markdown + remark-gfm (renderizacao de docs e docs de clientes)
 - recharts (graficos em wireframes)
 - lucide-react (icones)
 - Vercel (deploy)

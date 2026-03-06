@@ -1,28 +1,24 @@
 import { useState } from 'react'
 import { Check, Copy } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
-type PromptBlockProps = {
-  label?: string
+type Props = {
+  label: string
   prompt: string
-  className?: string
 }
 
-export default function PromptBlock({ label, prompt, className }: PromptBlockProps) {
+export default function PromptBlock({ label, prompt }: Props) {
   const [copied, setCopied] = useState(false)
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(prompt)
+  const handleCopy = () => {
+    navigator.clipboard.writeText(prompt)
     setCopied(true)
-    window.setTimeout(() => setCopied(false), 2000)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
-    <div className={cn('mb-6 overflow-hidden rounded-lg border border-border', className)}>
+    <div className="not-prose mb-6 overflow-hidden rounded-lg border border-border">
       <div className="flex items-center justify-between border-b border-border bg-fxl-navy/5 px-4 py-2.5">
-        <span className="text-xs font-medium text-fxl-navy">
-          {label ?? 'Use este prompt para iniciar a conversa'}
-        </span>
+        <span className="text-xs font-medium text-fxl-navy">{label}</span>
         <button
           type="button"
           onClick={handleCopy}

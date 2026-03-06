@@ -106,7 +106,7 @@ Gerado pela equipe funcional a partir do Formulário Comercial + relatórios rec
 
 #### Prompt — Gerar Documento de Briefing
 
-```
+{% prompt label="Prompt — Gerar Documento de Briefing" %}
 Leia o Formulário Comercial e os relatórios abaixo. Gere o Documento de Briefing FXL completo.
 
 Cruze os KPIs declarados com a Biblioteca de KPIs (docs/suporte/biblioteca_kpis.md).
@@ -117,7 +117,7 @@ Liste todas as decisões pendentes que bloqueiam o avanço.
 [COLE O FORMULÁRIO COMERCIAL AQUI]
 
 [COLE OS RELATÓRIOS / LISTA DE COLUNAS AQUI]
-```
+{% /prompt %}
 
 #### Saída esperada
 
@@ -187,7 +187,7 @@ Liste todas as decisões pendentes que bloqueiam o avanço.
 
 #### Prompt — Gerar Documento de Definição de Produto
 
-```
+{% prompt label="Prompt — Gerar Documento de Definição de Produto" %}
 Vou descrever um produto FXL. Gere o Documento de Definição de Produto estruturado.
 
 Organize as informações nas seções padrão.
@@ -196,7 +196,7 @@ Para cada decisão, apresente as opções e sua recomendação.
 Identifique restrições técnicas ou gaps de informação.
 
 [DESCREVA O PRODUTO AQUI]
-```
+{% /prompt %}
 
 #### Saída esperada
 

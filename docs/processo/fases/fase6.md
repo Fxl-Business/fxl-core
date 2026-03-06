@@ -46,7 +46,7 @@ Garantir que o usuário final saiba usar o sistema. O formato varia conforme o t
 
 #### Prompt — Gerar Roteiro do Tutorial
 
-```
+{% prompt label="Prompt — Gerar Roteiro do Tutorial" %}
 Com base no Documento de Briefing e na maturidade analítica deste cliente, gere:
 
 1. Roteiro completo do vídeo tutorial (texto para narração + indicações de tela)
@@ -58,7 +58,7 @@ Adapte a linguagem conforme a maturidade analítica.
 Maturidade analítica: [BAIXA / MÉDIA / ALTA]
 
 [COLE O DOCUMENTO DE BRIEFING AQUI]
-```
+{% /prompt %}
 
 #### Saída esperada
 
@@ -105,7 +105,7 @@ Maturidade analítica: [BAIXA / MÉDIA / ALTA]
 
 #### Prompt — Gerar Documentação de Produto
 
-```
+{% prompt label="Prompt — Gerar Documentação de Produto" %}
 Com base no Documento de Definição de Produto, gere a documentação completa para usuários.
 
 A documentação deve ser autoexplicativa — o usuário não terá onboarding personalizado.
@@ -113,7 +113,7 @@ Use linguagem clara e acessível.
 Inclua exemplos práticos de uso.
 
 [COLE O DOCUMENTO DE DEFINIÇÃO AQUI]
-```
+{% /prompt %}
 
 #### Saída esperada
 

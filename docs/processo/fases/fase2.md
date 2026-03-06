@@ -90,7 +90,7 @@ Documento textual que descreve cada tela do sistema. Gerado pelo Claude Project 
 
 #### Prompt — Gerar Blueprint (no Wireframe Builder)
 
-```
+{% prompt label="Prompt — Gerar Blueprint (Wireframe Builder)" %}
 Analise o Documento de Briefing abaixo e gere o Blueprint completo.
 
 Para cada tela: nome, objetivo, filtros, cards de KPI, gráficos e tabelas.
@@ -102,7 +102,7 @@ O prompt deve instruir o Claude Code a gerar cada tela como arquivo .tsx,
 importando os componentes de skills/wireframe-builder/components/ no repositório fxl.
 
 [COLE O DOCUMENTO DE BRIEFING AQUI]
-```
+{% /prompt %}
 
 #### Processo de revisão
 
@@ -139,7 +139,7 @@ importando os componentes de skills/wireframe-builder/components/ no repositóri
 
 #### Prompt — Gerar Blueprint (Produto)
 
-```
+{% prompt label="Prompt — Gerar Blueprint (Produto)" %}
 Analise o Documento de Definição de Produto abaixo e gere o Blueprint completo.
 
 Para cada tela: nome, objetivo, filtros, cards de KPI, gráficos e tabelas.
@@ -151,7 +151,7 @@ O prompt deve instruir o Claude Code a gerar cada tela como arquivo .tsx,
 importando os componentes de skills/wireframe-builder/components/ no repositório fxl.
 
 [COLE O DOCUMENTO DE DEFINIÇÃO AQUI]
-```
+{% /prompt %}
 
 #### Saída esperada
 

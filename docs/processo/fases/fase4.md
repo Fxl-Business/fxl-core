@@ -57,7 +57,7 @@ Verificar que o sistema funciona corretamente antes da entrega. A auditoria é e
 
 #### Prompt — Gerar Checklist Específico
 
-```
+{% prompt label="Prompt — Gerar Checklist de Auditoria" %}
 Com base no Documento de Briefing deste projeto, gere o Checklist de Auditoria completo.
 
 Incluir:
@@ -67,7 +67,7 @@ Incluir:
 - Regras de negócio que precisam ser testadas
 
 [COLE O DOCUMENTO DE BRIEFING AQUI]
-```
+{% /prompt %}
 
 #### Critério de avanço
 

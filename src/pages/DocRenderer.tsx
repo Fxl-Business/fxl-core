@@ -1,15 +1,38 @@
 import { useLocation } from 'react-router-dom'
-import Markdoc from '@markdoc/markdoc'
-import React from 'react'
-import { getDoc } from '@/lib/markdoc'
-import Callout from '@/components/markdoc/Callout'
-import Operational from '@/components/markdoc/Operational'
-import MarkdocPromptBlock from '@/components/markdoc/MarkdocPromptBlock'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { getDoc, type DocSection } from '@/lib/docs-parser'
+import PromptBlock from '@/components/docs/PromptBlock'
+import Callout from '@/components/docs/Callout'
+import Operational from '@/components/docs/Operational'
+import PhaseCard from '@/components/docs/PhaseCard'
 
-const components = {
-  Callout,
-  Operational,
-  PromptBlock: MarkdocPromptBlock,
+function SectionRenderer({ section }: { section: DocSection }) {
+  switch (section.type) {
+    case 'markdown':
+      return (
+        <div className="prose max-w-none">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{section.content}</ReactMarkdown>
+        </div>
+      )
+    case 'prompt':
+      return <PromptBlock label={section.label} prompt={section.content} />
+    case 'callout':
+      return <Callout type={section.variant} content={section.content} />
+    case 'operational':
+      return <Operational content={section.content} />
+    case 'phase-card':
+      return (
+        <PhaseCard
+          number={section.number}
+          title={section.title}
+          description={section.description}
+          href={section.href}
+        />
+      )
+    default:
+      return null
+  }
 }
 
 export default function DocRenderer() {
@@ -27,7 +50,7 @@ export default function DocRenderer() {
     )
   }
 
-  const { frontmatter, content } = doc
+  const { frontmatter, sections } = doc
 
   return (
     <div>
@@ -43,9 +66,9 @@ export default function DocRenderer() {
         )}
       </div>
 
-      <div className="prose max-w-none">
-        {Markdoc.renderers.react(content, React, { components })}
-      </div>
+      {sections.map((section, i) => (
+        <SectionRenderer key={i} section={section} />
+      ))}
     </div>
   )
 }

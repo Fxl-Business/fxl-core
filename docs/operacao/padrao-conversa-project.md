@@ -22,8 +22,7 @@ Toda resposta deve terminar com um bloco de **Estado da Conversa** que registra 
 
 ## Estrutura do bloco de estado
 
-```
----
+{% prompt label="Bloco de estado — Processo Padrão" %}
 ## Estado da conversa
 
 **Objetivo:** [o que estamos tentando alcançar nesta conversa]
@@ -38,8 +37,7 @@ Toda resposta deve terminar com um bloco de **Estado da Conversa** que registra 
 - [perguntas ou decisões que ainda precisam de resposta]
 
 **Próximo passo:** [o que faremos a seguir]
----
-```
+{% /prompt %}
 
 ---
 
@@ -83,20 +81,13 @@ Antes de gerar, revisar o bloco de estado para garantir que nenhuma decisão foi
 
 ## Prompt padrão de abertura — Claude Project FXL
 
-Será utilizado o seguinte prompt padrão ao iniciar uma nova conversa neste Project:
-
----
-
+{% prompt label="Prompt padrão de abertura — Claude Project FXL" %}
 Olá. Vamos trabalhar na evolução do processo FXL.
 
 Antes de começar, leia os arquivos de contexto do repositório:
 
-**Raiz:**
 - CLAUDE.md
-- README.md
 - docs/processo/master.md
-
----
 
 ⚠️ REGRA INVIOLÁVEL ANTES DE QUALQUER AÇÃO
 
@@ -105,21 +96,16 @@ Eles SÓ devem ser alterados quando o objetivo da sessão for explicitamente
 atualizar o conteúdo do processo.
 
 Se a tarefa envolver estrutura, layout, navegação ou componentes visuais,
-as alterações acontecem EXCLUSIVAMENTE em /src/ do repositório especificado.
+as alterações acontecem EXCLUSIVAMENTE em /src/.
 
 Nunca inferir que uma mudança em /src/ implica mudança em /docs/.
-Nunca inferir que uma mudança num repositório implica mudança no outro.
-
----
 
 Meu objetivo nesta conversa é: [DESCREVA AQUI]
 
----
 Ao final da nossa discussão, quero receber um prompt estruturado e completo
 para colar no Claude Code, especificando exatamente quais arquivos serão
-tocados, por quê, e com mensagem de commit para cada repositório afetado.
-
----
+tocados, por quê, e com mensagem de commit.
+{% /prompt %}
 
 ## Checklist de entrega (obrigatório ao finalizar)
 
@@ -141,8 +127,7 @@ O output padrão é sempre um prompt para o Claude Code atualizar essa subpasta.
 
 ### Bloco de estado adaptado para Project de cliente
 
-```
----
+{% prompt label="Bloco de estado — Project de cliente" %}
 ## Estado da conversa
 
 **Cliente:** [nome] | **Slug:** [client-slug]
@@ -158,8 +143,7 @@ O output padrão é sempre um prompt para o Claude Code atualizar essa subpasta.
 - [perguntas ou decisões abertas]
 
 **Próximo passo:** [o que faremos a seguir]
----
-```
+{% /prompt %}
 
 ### Regra de escopo obrigatória
 

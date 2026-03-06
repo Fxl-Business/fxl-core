@@ -1,11 +1,13 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 type Props = {
-  children: ReactNode
+  content: string
 }
 
-export default function Operational({ children }: Props) {
+export default function Operational({ content }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -18,8 +20,10 @@ export default function Operational({ children }: Props) {
         Instrucoes operacionais
       </button>
       {open && (
-        <div className="border-t border-slate-200 px-4 py-3 text-sm text-slate-700">
-          {children}
+        <div className="border-t border-slate-200 px-4 py-3">
+          <div className="prose prose-sm max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          </div>
         </div>
       )}
     </div>

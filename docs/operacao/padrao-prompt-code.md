@@ -37,25 +37,18 @@ Nomenclatura do arquivo: `prompt_[escopo]_[acao].md`
 
 Todo prompt para o Claude Code deve seguir esta estrutura:
 
-```
+{% prompt label="Estrutura obrigatória — copie e adapte" %}
 # Prompt para Claude Code — [Título descritivo]
 
 Olá. Vamos trabalhar na evolução do processo FXL.
 
-Antes de começar, leia os arquivos de contexto dos repositórios relevantes:
-
-- `CLAUDE.md` (raiz fxl/)
-- `fxl/CLAUDE.md` (se o escopo tocar este repo)
-- `fxl/CLAUDE.md` (se o escopo tocar este repo)
+Antes de começar, leia:
+- CLAUDE.md
 - [outros arquivos relevantes para o contexto]
-
----
 
 ## Objetivo desta sessão
 
 [Descrição clara do que será feito]
-
----
 
 ## [Seções de conteúdo]
 
@@ -64,13 +57,9 @@ Antes de começar, leia os arquivos de contexto dos repositórios relevantes:
 - Conteúdo completo (não parcial)
 - Se é criação ou alteração
 
----
-
 ## Verificação em cascata
 
 - [ ] [lista de arquivos verificados]
-
----
 
 ## Execução — ordem obrigatória
 
@@ -81,17 +70,13 @@ Antes de começar, leia os arquivos de contexto dos repositórios relevantes:
 Ao concluir, informar:
 ✅ Etapa [N] concluída — [resumo]
 
----
-
 ## Mensagem de commit sugerida
 
-Um commit por repositório afetado:
-
-`docs: [o que mudou]` — para alterações em docs/
-`[client-slug]: [o que mudou]` — para alterações de cliente
-`skill([nome]): [o que mudou]` — para alterações de skill
-`app: [o que mudou]` — para alterações em src/
-```
+docs: [o que mudou] — para alterações em docs/
+[client-slug]: [o que mudou] — para alterações de cliente
+skill([nome]): [o que mudou] — para alterações de skill
+app: [o que mudou] — para alterações em src/
+{% /prompt %}
 
 ---
 
@@ -100,8 +85,8 @@ Um commit por repositório afetado:
 1. **Conteúdo completo, não parcial**
    - Nunca dizer "adicione X aqui". Sempre fornecer o conteúdo completo do arquivo ou da seção.
 
-2. **Pares obrigatórios**
-   - Se o prompt cria ou altera um `.md` em `docs/`, deve incluir a página React correspondente em `src/pages/`.
+2. **Docs renderizados via Markdoc**
+   - Cada `.md` em `docs/` é renderizado automaticamente. Não é necessário criar página React correspondente em `src/pages/`.
 
 3. **Verificação em cascata obrigatória**
    - Sempre incluir a seção de verificação, mesmo que a conclusão seja "não impacta outros arquivos".
