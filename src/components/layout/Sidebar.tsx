@@ -11,29 +11,53 @@ type NavItem = {
 
 const navigation: NavItem[] = [
   {
-    label: 'Documentação',
+    label: 'Processo',
     children: [
+      { label: 'Visao Geral (Master)', href: '/processo/master' },
+      { label: 'BI Personalizado', href: '/processo/bi-personalizado' },
+      { label: 'Produto FXL', href: '/processo/produto' },
+      { label: 'Identidade FXL', href: '/processo/identidade' },
+      { label: 'Pacote de Cliente', href: '/processo/pacote-cliente' },
+      { label: 'Prompt Master', href: '/processo/prompt-master' },
       {
-        label: 'Processo',
+        label: 'Fases',
         children: [
-          { label: 'POP — BI Personalizado', href: '/docs/process/pop-bi-personalizado' },
-          { label: 'POP — Produto FXL', href: '/docs/process/pop-produto' },
-          { label: 'Pacote de Cliente', href: '/docs/process/pacote-cliente' },
-          { label: 'Prompt Master', href: '/docs/process/prompt-master' },
+          { label: 'Fase 1 — Diagnostico', href: '/processo/fases/fase1' },
+          { label: 'Fase 2 — Wireframe', href: '/processo/fases/fase2' },
+          { label: 'Fase 3 — Desenvolvimento', href: '/processo/fases/fase3' },
+          { label: 'Fase 4 — Auditoria', href: '/processo/fases/fase4' },
+          { label: 'Fase 5 — Entrega', href: '/processo/fases/fase5' },
+          { label: 'Fase 6 — Tutorial', href: '/processo/fases/fase6' },
         ],
       },
-      {
-        label: 'Wireframe',
-        children: [
-          { label: 'Blocos Disponíveis', href: '/docs/wireframe/blocos-disponiveis' },
-        ],
-      },
-      {
-        label: 'Suporte',
-        children: [
-          { label: 'Biblioteca de KPIs', href: '/docs/suporte/biblioteca-kpis' },
-        ],
-      },
+    ],
+  },
+  {
+    label: 'Build',
+    children: [
+      { label: 'Indice', href: '/build/index' },
+      { label: 'Premissas Gerais', href: '/build/premissas-gerais' },
+      { label: 'Supabase', href: '/build/supabase' },
+      { label: 'Deploy — Vercel', href: '/build/deploy-vercel' },
+      { label: 'Seguranca', href: '/build/seguranca' },
+      { label: 'Testes', href: '/build/testes' },
+      { label: 'Master Prompt', href: '/build/master-prompt' },
+      { label: 'CLAUDE.md — Template', href: '/build/claude-md-template' },
+    ],
+  },
+  {
+    label: 'Referencias',
+    children: [
+      { label: 'Biblioteca de KPIs', href: '/referencias/biblioteca-kpis' },
+      { label: 'Blocos Disponiveis', href: '/referencias/blocos-disponiveis' },
+    ],
+  },
+  {
+    label: 'Operacao',
+    children: [
+      { label: 'Fluxo de Trabalho', href: '/operacao/fluxo-trabalho' },
+      { label: 'Padrao de Prompt Code', href: '/operacao/padrao-prompt-code' },
+      { label: 'Padrao de Conversa', href: '/operacao/padrao-conversa-project' },
     ],
   },
   {
@@ -42,7 +66,7 @@ const navigation: NavItem[] = [
       {
         label: 'Financeiro Conta Azul',
         children: [
-          { label: 'Visão Geral', href: '/clients/financeiro-conta-azul' },
+          { label: 'Visao Geral', href: '/clients/financeiro-conta-azul' },
           { label: 'Briefing', href: '/clients/financeiro-conta-azul/briefing' },
           { label: 'Blueprint', href: '/clients/financeiro-conta-azul/blueprint' },
           { label: 'Branding', href: '/clients/financeiro-conta-azul/branding' },
