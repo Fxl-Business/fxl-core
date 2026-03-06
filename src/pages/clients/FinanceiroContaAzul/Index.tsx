@@ -29,7 +29,7 @@ const PROMPT_MASTER = `Olá. Vamos trabalhar no projeto Financeiro Conta Azul.
 Antes de começar qualquer tarefa, leia todos os arquivos disponíveis no knowledge deste Project.
 ---
 Slug do cliente: financeiro-conta-azul
-Repositório alvo: fxl-vault
+Repositório alvo: fxl-core
 Subpasta do cliente: clients/financeiro-conta-azul/
 ---
 ⚠️ REGRA DE ESCOPO

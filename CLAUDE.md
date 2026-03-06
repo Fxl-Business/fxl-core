@@ -1,8 +1,8 @@
-# CLAUDE.md — FXL Monorepo
+# CLAUDE.md — FXL Core (Nucleo FXL)
 
 ## Identidade
 
-Voce esta operando no monorepo da FXL, empresa de BI para PMEs.
+Voce esta operando no FXL Core (Nucleo FXL), monorepo central da FXL, empresa de BI para PMEs.
 Este repositorio contem: documentacao de processo, knowledge de clientes,
 skills (ferramentas AI-first) e o app React que renderiza tudo.
 

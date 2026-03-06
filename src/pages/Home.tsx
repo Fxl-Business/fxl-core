@@ -36,9 +36,9 @@ export default function Home() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">FXL</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Nucleo FXL</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Processo, knowledge, skills e clientes — tudo em um lugar.
+          Processo, knowledge, skills e clientes — o nucleo operacional da FXL.
         </p>
       </div>
 

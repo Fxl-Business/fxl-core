@@ -23,7 +23,7 @@ Definir a arquitetura completa do produto antes de qualquer linha de código. O 
 | Claude Project do Cliente | Analisa o Briefing e gera o Blueprint + prompt para Claude Code |
 | Claude Code (`fxl`) | Gera os arquivos `.tsx` do wireframe usando componentes do módulo |
 | `skills/wireframe-builder/components/` | Módulo oficial de componentes React reutilizáveis de wireframe |
-| Acervo FXL (Vercel) | Hospeda o app React com viewer de wireframe, docs de processo e overlay de comentários |
+| Nucleo FXL (Vercel) | Hospeda o app React com viewer de wireframe, docs de processo e overlay de comentários |
 
 ### Fluxo geral
 
@@ -117,7 +117,7 @@ importando os componentes de skills/wireframe-builder/components/ no repositóri
 
 - Blueprint textual completo
 - Prompt de Wireframe para Claude Code
-- Wireframe em React/TSX publicado via Vercel no Acervo FXL
+- Wireframe em React/TSX publicado via Vercel no Nucleo FXL
 - Comentários do cliente resolvidos
 - Aprovação formal do cliente (escrita)
 
@@ -157,7 +157,7 @@ importando os componentes de skills/wireframe-builder/components/ no repositóri
 
 - Blueprint textual completo
 - Prompt de Wireframe para Claude Code
-- Wireframe em React/TSX publicado via Vercel no Acervo FXL
+- Wireframe em React/TSX publicado via Vercel no Nucleo FXL
 - Aprovação interna da equipe FXL
 
 #### Critério de avanço
@@ -175,4 +175,4 @@ importando os componentes de skills/wireframe-builder/components/ no repositóri
 - [ ] Nenhuma referência ao Whimsical ou a HTML+CSS+JS
 - [ ] Nenhuma referência a fxl-wireframes (repo inexistente)
 - [ ] Fluxo com ambientes documentado
-- [ ] Processo de revisão via Acervo FXL (Vercel) documentado
+- [ ] Processo de revisão via Nucleo FXL (Vercel) documentado

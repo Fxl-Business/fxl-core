@@ -8,9 +8,9 @@ export default function TopNav() {
           <span className="text-xs font-bold leading-none text-white">FXL</span>
         </div>
         <div className="flex flex-col">
-          <span className="text-sm font-semibold text-foreground">Acervo FXL</span>
+          <span className="text-sm font-semibold text-foreground">Nucleo FXL</span>
           <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            fxl-vault
+            fxl-core
           </span>
         </div>
       </Link>

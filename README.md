@@ -1,6 +1,6 @@
-# FXL — Monorepo
+# FXL Core — Nucleo FXL
 
-Documentacao, knowledge de clientes, skills AI-first e app React — tudo em um lugar.
+Processo, knowledge, skills AI-first e clientes — o nucleo operacional da FXL.
 
 ## Visao de Longo Prazo
 

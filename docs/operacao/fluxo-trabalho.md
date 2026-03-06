@@ -4,7 +4,7 @@ badge: Operacao
 description: Como operar o monorepo FXL com Claude Code e Claude Projects.
 ---
 
-# Fluxo de Trabalho — FXL Monorepo
+# Fluxo de Trabalho — FXL Core
 
 ## Estrutura
 
