@@ -17,7 +17,7 @@ import WireframeSidebar from '@tools/wireframe-builder/components/WireframeSideb
 import WireframeHeader from '@tools/wireframe-builder/components/WireframeHeader'
 import WireframeFilterBar from '@tools/wireframe-builder/components/WireframeFilterBar'
 import GlobalFilters from '@tools/wireframe-builder/components/GlobalFilters'
-import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
+
 import InputsScreen from '@tools/wireframe-builder/components/InputsScreen'
 import DetailViewSwitcher from '@tools/wireframe-builder/components/DetailViewSwitcher'
 import UploadSection from '@tools/wireframe-builder/components/UploadSection'
@@ -41,7 +41,7 @@ import {
   wireframeHeaderMock,
   wireframeFilterBarMock,
   globalFiltersMock,
-  commentOverlayMock,
+
   inputsScreenMock,
   detailViewSwitcherMock,
   uploadSectionMock,
@@ -286,11 +286,9 @@ function CommentOverlayPreview() {
   return (
     <div className="relative h-32 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
       <p className="p-4 text-xs text-gray-400">
-        O botão de comentários aparece fixo no canto inferior direito da tela.
+        Drawer lateral de comentarios com Supabase. Requer autenticacao e conexao ao banco.
+        Props: clientSlug, screenId, targetId, authorName, authorRole, open, onClose.
       </p>
-      <div className="pointer-events-none absolute inset-0">
-        <CommentOverlay {...commentOverlayMock} />
-      </div>
     </div>
   )
 }

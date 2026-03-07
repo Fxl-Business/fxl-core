@@ -201,21 +201,14 @@ export const globalFiltersMock = {
 
 // CommentOverlay
 export const commentOverlayMock = {
-  screenName: 'Resultado Mensal',
-  comments: [
-    {
-      id: '1',
-      author: 'FXL',
-      text: 'Verificar se os KPIs estão corretos',
-      timestamp: '05/03/2026',
-    },
-    {
-      id: '2',
-      author: 'Cliente',
-      text: 'Gostaria de ver margem bruta aqui',
-      timestamp: '04/03/2026',
-    },
-  ],
+  clientSlug: 'financeiro-conta-azul',
+  screenId: 'resultado-mensal',
+  targetId: 'screen:resultado-mensal',
+  targetLabel: 'Resultado Mensal',
+  authorName: 'Operador FXL',
+  authorRole: 'operador' as const,
+  open: true,
+  onClose: () => { /* noop for gallery preview */ },
 }
 
 // InputsScreen
