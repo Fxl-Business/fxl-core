@@ -4,105 +4,99 @@ badge: Processo
 description: Revisao de dados, seguranca e aderencia ao Blueprint
 ---
 
-# Fase 4 — Auditoria e Validação
+# Fase 4 — Auditoria e Validacao
 
-## Objetivo
-
-Verificar que o sistema funciona corretamente antes da entrega. A auditoria é executada por um profissional FXL — não pelo desenvolvedor que construiu.
-
----
-
-## Checklist base — obrigatório em todos os projetos
-
-### Validação de dados
-- [ ] Faturamento total bate com relatório de origem (tolerância: 0%)
-- [ ] Ticket médio = Faturamento ÷ Pedidos (verificar para período filtrado)
-- [ ] Margem bruta calculada corretamente (se aplicável)
-- [ ] Top rankings ordenados corretamente (verificar 3 primeiros e 3 últimos)
-- [ ] Totais e subtotais consistentes entre cards e tabelas
-
-### Filtros e interações
-- [ ] Filtro de período funciona e atualiza todos os KPIs
-- [ ] Filtro de segmento/unidade isola corretamente os dados
-- [ ] Seletor de período: mês atual como padrão ao abrir
-- [ ] Drill-down funciona onde especificado
-
-### Tela de Inputs
-- [ ] Upload funciona com arquivo no formato esperado
-- [ ] Dados aparecem no dashboard após upload
-- [ ] Feedback de erro claro para arquivo inválido
-- [ ] Histórico de uploads visível (se aplicável)
-
-### UI e UX
-- [ ] Skeleton loading aparece antes dos dados ao recarregar
-- [ ] Sem erros de console
-- [ ] Sem telas quebradas ou elementos desalinhados
-- [ ] Responsivo: verificar em desktop e mobile
-
-### Completude
-- [ ] Todos os KPIs do briefing/definição estão presentes
-- [ ] Todas as telas do Blueprint estão implementadas
-- [ ] Nomenclaturas consistentes com o briefing
+Verifica que o sistema funciona corretamente antes da entrega.
+A auditoria e executada por um profissional FXL — nao pelo desenvolvedor que construiu.
 
 ---
 
-## Por tipo de projeto
+## Operacao
 
-### BI Personalizado
+1. Atribuir auditor (diferente do desenvolvedor)
+2. Aplicar o checklist base completo (ver abaixo)
+3. Para BI Personalizado: gerar checklist especifico a partir do briefing (usar prompt abaixo)
+4. Para Produto FXL: aplicar itens adicionais de Produto
+5. Registrar resultado da auditoria (data, responsavel, itens aprovados, ressalvas, bloqueantes)
+6. Zero itens bloqueantes → Fase 5
 
-#### Itens adicionais
-- [ ] KPIs específicos do cliente calculados corretamente
-- [ ] Regras de negócio do segmento respeitadas
-- [ ] Dados do cliente (não dados de teste) carregados
-
-#### Prompt — Gerar Checklist Específico
-
-{% prompt label="Prompt — Gerar Checklist de Auditoria" %}
+{% prompt label="Gerar Checklist de Auditoria" %}
 Com base no Documento de Briefing deste projeto, gere o Checklist de Auditoria completo.
 
 Incluir:
-- Checklist base (todos os itens padrão)
-- Itens específicos para cada KPI contratado
-- Verificações específicas do segmento
-- Regras de negócio que precisam ser testadas
+- Checklist base (todos os itens padrao)
+- Itens especificos para cada KPI contratado
+- Verificacoes especificas do segmento
+- Regras de negocio que precisam ser testadas
 
 [COLE O DOCUMENTO DE BRIEFING AQUI]
 {% /prompt %}
 
-#### Critério de avanço
+### Checklist base — obrigatorio em todos os projetos
 
-✅ Zero itens bloqueantes. Melhorias menores podem ser registradas para correção, mas não bloqueiam a entrega.
+**Validacao de dados:**
+- Faturamento total bate com relatorio de origem (tolerancia: 0%)
+- Ticket medio = Faturamento / Pedidos (verificar para periodo filtrado)
+- Margem bruta calculada corretamente (se aplicavel)
+- Top rankings ordenados corretamente (verificar 3 primeiros e 3 ultimos)
+- Totais e subtotais consistentes entre cards e tabelas
+
+**Filtros e interacoes:**
+- Filtro de periodo funciona e atualiza todos os KPIs
+- Filtro de segmento/unidade isola corretamente os dados
+- Seletor de periodo: mes atual como padrao ao abrir
+- Drill-down funciona onde especificado
+
+**Tela de Inputs:**
+- Upload funciona com arquivo no formato esperado
+- Dados aparecem no dashboard apos upload
+- Feedback de erro claro para arquivo invalido
+- Historico de uploads visivel (se aplicavel)
+
+**UI e UX:**
+- Skeleton loading aparece antes dos dados ao recarregar
+- Sem erros de console
+- Sem telas quebradas ou elementos desalinhados
+- Responsivo: verificar em desktop e mobile
+
+**Completude:**
+- Todos os KPIs do briefing/definicao estao presentes
+- Todas as telas do Blueprint estao implementadas
+- Nomenclaturas consistentes com o briefing
 
 ---
 
-### Produto FXL
+## Detalhes
 
-#### Itens adicionais
-- [ ] Sistema funciona com dados de múltiplos perfis sem cruzamento
-- [ ] Nenhum dado hardcoded de contexto específico
-- [ ] UI autoexplicativa sem dependência de onboarding
-- [ ] Para BI de Plataforma: testado com arquivo real exportado do software de origem
-- [ ] Para SaaS: isolamento de dados entre tenants verificado
+### Por tipo de projeto
 
-#### Critério de avanço
+#### BI Personalizado
 
-✅ Zero itens bloqueantes. Validação interna pela equipe FXL.
+**Itens adicionais:**
+- KPIs especificos do cliente calculados corretamente
+- Regras de negocio do segmento respeitadas
+- Dados do cliente (nao dados de teste) carregados
 
----
+#### Produto FXL
 
-## Registro de auditoria
+**Itens adicionais:**
+- Sistema funciona com dados de multiplos perfis sem cruzamento
+- Nenhum dado hardcoded de contexto especifico
+- UI autoexplicativa sem dependencia de onboarding
+- Para BI de Plataforma: testado com arquivo real exportado do software de origem
+- Para SaaS: isolamento de dados entre tenants verificado
 
-Após a auditoria, registrar:
+### Registro de auditoria
+
+Apos a auditoria, registrar:
 - Data da auditoria
-- Responsável
+- Responsavel
 - Itens aprovados
-- Itens com ressalva (não bloqueantes)
+- Itens com ressalva (nao bloqueantes)
 - Itens bloqueantes (se houver)
 
----
+### Criterio de avanco
 
-## Checklist de validação MD ↔ HTML
+**BI Personalizado:** Zero itens bloqueantes. Melhorias menores podem ser registradas para correcao, mas nao bloqueiam a entrega.
 
-- [ ] Checklist base completo e formatado
-- [ ] Itens específicos por tipo claramente separados
-- [ ] Prompt para geração de checklist específico
+**Produto FXL:** Zero itens bloqueantes. Validacao interna pela equipe FXL.

@@ -4,175 +4,124 @@ badge: Processo
 description: Blueprint, geracao de wireframe e aprovacao
 ---
 
-# Fase 2 — Wireframe Estratégico
+# Fase 2 — Wireframe Estrategico
 
-## Objetivo
-
-Definir a arquitetura completa do produto antes de qualquer linha de código. O wireframe é aprovado antes do desenvolvimento — isso evita retrabalho caro.
-
-> ⚠️ Não inicie o desenvolvimento sem aprovação formal do wireframe. Para BI Personalizado, a aprovação precisa ser do cliente. Para Produto, da equipe FXL.
+Define a arquitetura completa do produto antes de qualquer linha de codigo.
+O wireframe e aprovado antes do desenvolvimento — isso evita retrabalho caro.
 
 ---
 
-## Arquitetura do processo
-
-### Ambientes envolvidos
-
-| Ambiente | Função na Fase 2 |
-|---|---|
-| Claude Project do Cliente | Analisa o Briefing e gera o Blueprint + prompt para Claude Code |
-| Claude Code (`fxl`) | Gera os arquivos `.tsx` do wireframe usando componentes do módulo |
-| `tools/wireframe-builder/components/` | Módulo oficial de componentes React reutilizáveis de wireframe |
-| Nucleo FXL (Vercel) | Hospeda o app React com viewer de wireframe, docs de processo e overlay de comentários |
-
-### Fluxo geral
-
-1. Operador abre o Claude Project do cliente
-2. Cola o Documento de Briefing validado (Fase 1)
-3. Claude Project analisa o Briefing e gera o Blueprint tela a tela
-4. Blueprint sai como prompt pronto para o Claude Code
-5. Operador cola o prompt no Claude Code (`fxl`)
-6. Claude Code gera os arquivos `.tsx` em `clients/[client-slug]/wireframe/screens/`
-   usando componentes de `tools/wireframe-builder/components/`
-7. Wireframe é publicado automaticamente via Vercel
-8. Operador compartilha o link com o cliente
-9. Cliente navega e usa o overlay de comentários por tela ou por bloco
-10. Iterações até aprovação formal → Fase 3
-
-### Módulo de componentes
-
-O wireframe não é mais gerado como HTML puro. O Claude Code importa componentes
-React pré-montados de `tools/wireframe-builder/components/`, passando dados fictícios
-coerentes com o segmento do cliente. Componentes disponíveis:
-
-- `KpiCard` — valor, rótulo, variação
-- `BarLineChart` — gráfico de barras ou linha com dados fictícios
-- `DataTable` — tabela com colunas configuráveis
-- `InputsScreen` — tela de upload de dados
-- `WireframeSidebar` — menu lateral de navegação entre telas
-- `GlobalFilters` — filtros de período, segmento e outros
-- `CommentOverlay` — overlay flutuante de comentários por tela/bloco
-
-Se uma tela exigir um componente ainda não existente no módulo, o Claude Code
-deve sinalizar antes de prosseguir — nunca criar componente local na pasta do cliente.
-
----
-
-## Por tipo de projeto
+## Operacao
 
 ### BI Personalizado
 
-**Contexto:** Blueprint gerado a partir do Documento de Briefing. Cliente aprova visualmente antes do desenvolvimento.
+1. Partir do Documento de Briefing validado (Fase 1)
+2. Consultar a [Biblioteca de KPIs](/referencias/biblioteca-kpis) e os [Blocos Disponiveis](/referencias/blocos-disponiveis)
+3. Gerar o Blueprint tela a tela (usar prompt abaixo)
+4. O wireframe e gerado via Claude Code usando o [Wireframe Builder](/ferramentas/wireframe-builder)
+5. Claude Code gera os arquivos `.tsx` em `clients/[slug]/wireframe/screens/` usando componentes de `tools/wireframe-builder/components/`
+6. Wireframe publicado via Vercel
+7. Compartilhar link com o cliente
+8. Cliente navega e usa overlay de comentarios por tela ou bloco
+9. Iterar ate aprovacao formal escrita → Fase 3
 
-#### Entradas
-
-- Documento de Briefing validado (Fase 1)
-- Biblioteca de KPIs (`docs/suporte/biblioteca_kpis.md`)
-- Padrões de blocos (`docs/build/wireframe/blocos_disponiveis.md`)
-
-#### Blueprint
-
-Documento textual que descreve cada tela do sistema. Gerado pelo Claude Project "FXL — Wireframe Builder" a partir do Briefing.
-
-**Para cada tela, especificar:**
-- Nome da tela
-- Objetivo (o que o usuário resolve nesta tela)
-- Filtros disponíveis (período, segmento, unidade, etc.)
-- Cards de KPI (nome, lógica de cálculo, comparativo)
-- Gráficos (tipo, eixos, dados)
-- Tabelas (colunas, ordenação padrão)
-- Ações disponíveis (exportar, drill-down, etc.)
-
-**Telas obrigatórias:**
-- Dashboard principal (visão consolidada)
-- Uma tela por módulo contratado
-- Tela de Inputs (upload de dados)
-
-#### Prompt — Gerar Blueprint (no Wireframe Builder)
-
-{% prompt label="Prompt — Gerar Blueprint (Wireframe Builder)" %}
+{% prompt label="Gerar Blueprint (BI Personalizado)" %}
 Analise o Documento de Briefing abaixo e gere o Blueprint completo.
 
-Para cada tela: nome, objetivo, filtros, cards de KPI, gráficos e tabelas.
-Inclua a tela de Inputs com instruções de upload.
-Siga os padrões de blocos disponíveis em docs/build/wireframe/blocos_disponiveis.md.
+Para cada tela: nome, objetivo, filtros, cards de KPI, graficos e tabelas.
+Inclua a tela de Inputs com instrucoes de upload.
+Siga os padroes de blocos disponiveis em /referencias/blocos-disponiveis.
 
-Ao final, gere o Prompt de Wireframe pronto para colar no Claude Code.
+Ao final, gere o Prompt de Wireframe pronto para o Claude Code.
 O prompt deve instruir o Claude Code a gerar cada tela como arquivo .tsx,
-importando os componentes de tools/wireframe-builder/components/ no repositório fxl.
+importando componentes de tools/wireframe-builder/components/.
 
 [COLE O DOCUMENTO DE BRIEFING AQUI]
 {% /prompt %}
 
-#### Processo de revisão
-
-1. Wireframe publicado na plataforma
-2. Operador envia convite por email ao cliente
-3. Cliente navega tela a tela na plataforma
-4. Comentários por tela (observações gerais) e por elemento (ajustes específicos)
-5. Equipe FXL analisa comentários e implementa ajustes
-6. Novo ciclo de revisão até aprovação formal
-
-#### Saída esperada
-
-- Blueprint textual completo
-- Prompt de Wireframe para Claude Code
-- Wireframe em React/TSX publicado via Vercel no Nucleo FXL
-- Comentários do cliente resolvidos
-- Aprovação formal do cliente (escrita)
-
-#### Critério de avanço
-
-✅ Cliente visualiza o wireframe na plataforma e dá aprovação formal escrita. Sem aprovação, a Fase 3 não inicia.
-
----
-
 ### Produto FXL
 
-**Contexto:** Idêntico ao BI Personalizado, exceto que a aprovação é interna. Não há cliente externo para validar — a equipe FXL decide quando o wireframe está aprovado.
+1. Partir do Documento de Definicao de Produto (Fase 1)
+2. Fluxo identico ao BI Personalizado
+3. Diferenca: **aprovacao e interna** (equipe FXL decide)
+4. Aprovacao interna atingida → Fase 3
 
-#### Entradas
+{% prompt label="Gerar Blueprint (Produto)" %}
+Analise o Documento de Definicao de Produto abaixo e gere o Blueprint completo.
 
-- Documento de Definição de Produto validado (Fase 1)
-- Biblioteca de KPIs
-- Padrões de blocos
+Para cada tela: nome, objetivo, filtros, cards de KPI, graficos e tabelas.
+Inclua a tela de Inputs (se aplicavel).
+Considere que e um produto para multiplos usuarios — UI autoexplicativa.
 
-#### Prompt — Gerar Blueprint (Produto)
-
-{% prompt label="Prompt — Gerar Blueprint (Produto)" %}
-Analise o Documento de Definição de Produto abaixo e gere o Blueprint completo.
-
-Para cada tela: nome, objetivo, filtros, cards de KPI, gráficos e tabelas.
-Inclua a tela de Inputs (se aplicável).
-Considere que este é um produto para múltiplos usuários — a UI deve ser autoexplicativa.
-
-Ao final, gere o Prompt de Wireframe pronto para colar no Claude Code.
+Ao final, gere o Prompt de Wireframe pronto para o Claude Code.
 O prompt deve instruir o Claude Code a gerar cada tela como arquivo .tsx,
-importando os componentes de tools/wireframe-builder/components/ no repositório fxl.
+importando componentes de tools/wireframe-builder/components/.
 
-[COLE O DOCUMENTO DE DEFINIÇÃO AQUI]
+[COLE O DOCUMENTO DE DEFINICAO AQUI]
 {% /prompt %}
 
-#### Saída esperada
-
-- Blueprint textual completo
-- Prompt de Wireframe para Claude Code
-- Wireframe em React/TSX publicado via Vercel no Nucleo FXL
-- Aprovação interna da equipe FXL
-
-#### Critério de avanço
-
-✅ Equipe FXL aprova o wireframe internamente. Decisões de UI resolvidas.
+{% callout type="warning" %}
+Nao inicie o desenvolvimento sem aprovacao formal do wireframe.
+Para BI Personalizado: aprovacao do cliente. Para Produto: aprovacao da equipe FXL.
+{% /callout %}
 
 ---
 
-## Checklist de validação MD ↔ React
+## Detalhes
 
-- [ ] Seções BI Personalizado e Produto claramente separadas
-- [ ] Prompts em blocos destacados usando componente PromptBlock
-- [ ] Critérios de avanço diferenciados (cliente vs interno)
-- [ ] Referências aos arquivos de suporte corretas
-- [ ] Nenhuma referência ao Whimsical ou a HTML+CSS+JS
-- [ ] Nenhuma referência a fxl-wireframes (repo inexistente)
-- [ ] Fluxo com ambientes documentado
-- [ ] Processo de revisão via Nucleo FXL (Vercel) documentado
+### Ambientes envolvidos
+
+| Ambiente | Funcao na Fase 2 |
+|----------|------------------|
+| Claude Code (`fxl`) | Gera os arquivos `.tsx` do wireframe usando componentes do modulo |
+| `tools/wireframe-builder/components/` | Modulo oficial de componentes React reutilizaveis de wireframe |
+| Nucleo FXL (Vercel) | Hospeda o app React com viewer de wireframe e overlay de comentarios |
+
+### Modulo de componentes
+
+O wireframe usa componentes React pre-montados de `tools/wireframe-builder/components/`:
+
+- `KpiCard` — valor, rotulo, variacao
+- `BarLineChart` — grafico de barras ou linha com dados ficticios
+- `DataTable` — tabela com colunas configuraveis
+- `InputsScreen` — tela de upload de dados
+- `WireframeSidebar` — menu lateral de navegacao entre telas
+- `GlobalFilters` — filtros de periodo, segmento e outros
+- `CommentOverlay` — overlay flutuante de comentarios por tela/bloco
+
+Se uma tela exigir componente ainda nao existente no modulo, o Claude Code
+deve sinalizar antes de prosseguir — nunca criar componente local na pasta do cliente.
+
+### Blueprint — estrutura por tela
+
+Para cada tela, especificar:
+- Nome da tela e objetivo
+- Filtros disponiveis (periodo, segmento, unidade)
+- Cards de KPI (nome, logica de calculo, comparativo)
+- Graficos (tipo, eixos, dados)
+- Tabelas (colunas, ordenacao padrao)
+- Acoes disponiveis (exportar, drill-down)
+
+**Telas obrigatorias:** Dashboard principal, uma tela por modulo, tela de Inputs.
+
+### Por tipo de projeto
+
+#### BI Personalizado
+
+**Entradas:** Documento de Briefing validado, [Biblioteca de KPIs](/referencias/biblioteca-kpis), [Blocos Disponiveis](/referencias/blocos-disponiveis).
+
+**Processo de revisao:** Wireframe publicado → cliente navega → comentarios por tela/bloco → ajustes → novo ciclo ate aprovacao formal.
+
+**Saida:** Blueprint textual + wireframe React/TSX publicado + aprovacao formal do cliente.
+
+#### Produto FXL
+
+**Entradas:** Documento de Definicao de Produto, Biblioteca de KPIs, Blocos Disponiveis.
+
+**Saida:** Blueprint textual + wireframe React/TSX publicado + aprovacao interna FXL.
+
+### Criterio de avanco
+
+**BI Personalizado:** Cliente visualiza o wireframe na plataforma e da aprovacao formal escrita. Sem aprovacao, a Fase 3 nao inicia.
+
+**Produto FXL:** Equipe FXL aprova o wireframe internamente. Decisoes de UI resolvidas.

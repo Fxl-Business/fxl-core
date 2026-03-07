@@ -6,149 +6,72 @@ description: Sprints com stack padrao e referencias de build
 
 # Fase 3 — Desenvolvimento
 
-## Objetivo
-
-Transformar o wireframe aprovado em sistema funcional. O desenvolvimento segue o Blueprint — sem desvios de escopo.
-
----
-
-## Caminhos de desenvolvimento
-
-| Caminho | Quando usar | Status |
-|---|---|---|
-| Claude Code | Padrão para todos os novos projetos | ✅ Padrão |
-| Lovable | Projetos já em andamento no Lovable | ⚠️ Temporário |
+Transforma o wireframe aprovado em sistema funcional.
+O desenvolvimento segue o Blueprint — sem desvios de escopo.
 
 ---
 
-## Caminho 1: Claude Code (Padrão)
+## Operacao
 
-### Fluxo
+1. Criar repositorio do projeto no GitHub
+2. Configurar `CLAUDE.md` do projeto usando o [template](/ferramentas/claude-md-template)
+3. Planejar sprints (tabela com escopo, dependencia, criterio de aceite por sprint)
+4. Montar o Master Prompt usando o [Template de Sprint](/ferramentas/master-prompt)
+5. Ler as referencias obrigatorias antes de iniciar (ver abaixo)
+6. Executar o sprint no Claude Code com GSD
+7. Revisar: testes, seguranca, documentacao
+8. Repetir passos 4-7 para cada sprint
+9. Sistema completo → Fase 4
 
-1. Criar repositório do projeto no GitHub
-2. Copiar template `CLAUDE.md` de `docs/build/arquitetura/claude_md_projeto.md` e preencher
-3. Planejar sprints (tabela com escopo, dependência, critério de aceite por sprint)
-4. Montar o Master Prompt usando o template de `docs/build/arquitetura/master_prompt.md`
-5. Executar o sprint no Claude Code
-6. Revisar: testes, segurança, documentação
-7. Repetir passos 4–6 para cada sprint
-8. Sistema completo → Fase 4
+### Referencias obrigatorias
 
-### Referências obrigatórias
+Antes de iniciar, ler:
+- [Premissas Gerais](/ferramentas/premissas-gerais) — stack e estrutura de pastas
+- [Seguranca](/ferramentas/seguranca) — checklist anti AI-slop
+- [Testes](/ferramentas/testes) — o que testar e quando
+- [Template de Sprint](/ferramentas/master-prompt) — template do prompt de sprint
+- [CLAUDE.md Template](/ferramentas/claude-md-template) — template do CLAUDE.md do projeto
 
-Antes de iniciar, ler (via caminho absoluto no CLAUDE.md do projeto):
-- `docs/build/arquitetura/premissas_gerais.md` — stack e estrutura de pastas
-- `docs/build/arquitetura/supabase.md` — conexão, Auth, RLS
-- `docs/build/arquitetura/deploy_vercel.md` — setup e checklist de deploy
-- `docs/build/arquitetura/seguranca.md` — checklist anti AI-slop
-- `docs/build/arquitetura/testes.md` — o que testar e quando
-- `docs/build/arquitetura/master_prompt.md` — template do prompt de sprint
-- `docs/build/arquitetura/claude_md_projeto.md` — template do CLAUDE.md do projeto
+Para tecnologias especificas:
+- [Supabase](/ferramentas/techs/supabase) — conexao, Auth, RLS
+- [Vercel](/ferramentas/techs/vercel) — setup e checklist de deploy
 
 ### Regras de desenvolvimento
 
-- Seguir stack padrão: React + TypeScript + Tailwind + shadcn/ui + Supabase + Vercel + Vite
-- Seguir design system FXL (`docs/build/design/design_system.md`)
-- Skeleton loading obrigatório em todas as telas que carregam dados
-- Filtro de período com mês atual como padrão
-- Responsivo: desktop prioritário, mobile funcional
-- Sem dependências não autorizadas (ver `docs/build/arquitetura/premissas_gerais.md`)
+- Stack padrao: React + TypeScript + Tailwind + shadcn/ui + Supabase + Vercel + Vite
+- Skeleton loading obrigatorio em todas as telas que carregam dados
+- Filtro de periodo com mes atual como padrao
+- Responsivo: desktop prioritario, mobile funcional
+- Sem dependencias nao autorizadas (ver [Premissas Gerais](/ferramentas/premissas-gerais))
 - TypeScript strict mode — nunca usar `any`
-- RLS obrigatório em toda tabela Supabase
-- Executar checklist de segurança antes de concluir cada sprint
-- Documentar decisões técnicas em `docs/SPRINTS.md` e `docs/CHANGELOG.md`
+- RLS obrigatorio em toda tabela Supabase
+- Checklist de seguranca antes de concluir cada sprint
+- Documentar decisoes tecnicas em `docs/SPRINTS.md` e `docs/CHANGELOG.md`
 
 ---
 
-## Por tipo de projeto
+## Detalhes
 
-### BI Personalizado
+### Por tipo de projeto
 
-#### Entradas
+#### BI Personalizado
 
-- Blueprint aprovado (Fase 2)
-- Wireframe visual (referência)
-- Design system FXL (`docs/build/design/design_system.md`)
-- Dados reais ou amostra do cliente
+**Entradas:** Blueprint aprovado (Fase 2), wireframe visual, dados reais ou amostra do cliente.
 
-#### Saída esperada
+**Saida:** Repositorio com codigo-fonte, aplicacao deployada na Vercel, documentacao tecnica, dados de teste carregados.
 
-- Repositório com código-fonte versionado
-- Aplicação funcional deployada na Vercel
-- Documentação técnica em `docs/`
-- Dados de teste carregados
+#### Produto FXL
 
-#### Critério de avanço
+**Consideracoes adicionais:**
+- Testar com dados de multiplos perfis ficticios
+- Garantir que nao ha dados hardcoded de um contexto especifico
+- UI autoexplicativa (usuario nao tera onboarding personalizado)
+- Se SaaS: considerar isolamento de dados entre tenants desde o inicio
 
-✅ Sistema funcional com todas as telas do Blueprint implementadas. Checklist de segurança aprovado. Pronto para auditoria.
+**Saida:** Repositorio com codigo-fonte, aplicacao deployada, testado com multiplos perfis de dados.
 
----
+### Criterio de avanco
 
-### Produto FXL
+**BI Personalizado:** Sistema funcional com todas as telas do Blueprint implementadas. Checklist de seguranca aprovado. Pronto para auditoria.
 
-#### Considerações adicionais para Produto
-
-- Testar com dados de múltiplos perfis fictícios
-- Garantir que não há dados hardcoded de um contexto específico
-- UI autoexplicativa (usuário não terá onboarding personalizado)
-- Se SaaS: considerar isolamento de dados entre tenants desde o início
-
-#### Critério de avanço
-
-✅ Sistema funcional. Testado com múltiplos perfis de dados. Checklist de segurança aprovado. Pronto para auditoria.
-
----
-
-## Caminho 2: Lovable (Temporário)
-
-> ⚠️ Este caminho está em descontinuação. Usar apenas para projetos já iniciados no Lovable. Novos projetos devem usar o Caminho 1 (Claude Code).
-
-### Fluxo
-
-1. Claude gera o Prompt de Desenvolvimento a partir do Blueprint
-2. Operador cola o prompt no Lovable
-3. Lovable gera a aplicação
-4. Operador ajusta e refina
-5. Sistema funcional → Fase 4
-
-#### Entradas
-
-- Blueprint aprovado (Fase 2)
-- Wireframe visual (referência)
-- Design system FXL (`docs/build/design/design_system.md`)
-- Dados reais ou amostra do cliente
-
-#### Prompt — Gerar Prompt de Desenvolvimento
-
-{% prompt label="Prompt — Gerar Prompt de Desenvolvimento" %}
-O wireframe foi aprovado. Com base no Blueprint e no Documento de Briefing, gere o Prompt de Desenvolvimento completo para o Lovable.
-
-Incluir:
-- Contexto do projeto
-- Estrutura de navegação
-- Especificação de cada tela (componentes, dados, interações)
-- Regras de UI do design system FXL
-- Tela de Inputs (upload, validação, feedback)
-- Regras de tratamento de dados
-
-[COLE O BLUEPRINT AQUI]
-{% /prompt %}
-
-#### Regras de desenvolvimento (Lovable)
-
-- Seguir design system FXL
-- Skeleton loading obrigatório em todas as telas
-- Filtro de período com mês atual como padrão
-- Responsivo: desktop prioritário, mobile funcional
-- Sem dependências externas desnecessárias
-
----
-
-## Checklist de validação MD ↔ HTML
-
-- [ ] Dois caminhos de desenvolvimento documentados (Claude Code e Lovable)
-- [ ] Claude Code claramente marcado como padrão
-- [ ] Lovable claramente marcado como temporário com aviso de descontinuação
-- [ ] Regras de desenvolvimento expandidas para Claude Code
-- [ ] Referências à pasta `docs/build/arquitetura/` presentes
-- [ ] Seções BI Personalizado e Produto com critérios de avanço
+**Produto FXL:** Sistema funcional. Testado com multiplos perfis de dados. Checklist de seguranca aprovado. Pronto para auditoria.
