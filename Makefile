@@ -1,4 +1,4 @@
-.PHONY: dev build lint preview install
+.PHONY: dev build lint preview install migrate
 
 dev:
 	npm run dev
@@ -14,3 +14,8 @@ preview:
 
 install:
 	npm install
+
+migrate:
+	@set -a && . ./.env.local && set +a && \
+		supabase link --project-ref $$SUPABASE_PROJECT_REF -p $$SUPABASE_DB_PASSWORD && \
+		supabase db push -p $$SUPABASE_DB_PASSWORD --yes
