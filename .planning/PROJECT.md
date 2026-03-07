@@ -6,7 +6,7 @@ Monorepo central da FXL, empresa de BI para PMEs. Contem documentacao de process
 
 ## Core Value
 
-Transformar wireframes aprovados em sistemas funcionais automaticamente — o Blueprint e a ponte entre o que o cliente quer e o que o sistema entrega.
+O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooling vivem juntos para que o Claude Code tenha contexto completo ao executar qualquer tarefa.
 
 ## Requirements
 
@@ -23,39 +23,42 @@ Transformar wireframes aprovados em sistemas funcionais automaticamente — o Bl
 - ✓ Client knowledge layer (clients/[slug]/ com docs, wireframe, CLAUDE.md) — existing
 - ✓ Busca global com cmdk (Cmd+K) sobre todos os docs — existing
 - ✓ Deploy automatico via Vercel como SPA estatico — existing
-- ✓ CommentOverlay para feedback por tela/bloco no wireframe — existing
+- ✓ CommentOverlay basico para feedback por tela/bloco no wireframe — existing
 
 ### Active
 
-- [ ] Configuracao Tecnica como nova etapa da Fase 2 (fonte de dados, logica de negocio, auth, design system)
-- [ ] Geracao automatica de sistema a partir do Blueprint + Config Tecnica (Fase 3)
-- [ ] Sistema gerado em repo separado por cliente
-- [ ] Dashboard BI como primeiro tipo de projeto suportado na Fase 3
-- [ ] Claude sugere Config Tecnica, operador revisa e ajusta (hibrido)
-- [ ] Sistema gerado funcional com dados reais do cliente
+- [ ] Reorganizar navegacao e estrutura dos docs para refletir melhor o processo
+- [ ] Comentarios interativos no wireframe com persistencia em Supabase
+- [ ] Edicao visual completa do wireframe (layout, componentes, telas) com sync para blueprint
+- [ ] Processo de coleta de branding estruturado
+- [ ] Configuracao Tecnica como nova etapa da Fase 2
+- [ ] Geracao automatica de sistema (Dashboard BI) a partir do Blueprint + Config Tecnica
 
 ### Out of Scope
 
 - Mobile apps — foco web-first, mobile e futuro
 - SaaS completo como output da v1 — comecar com Dashboard BI, expandir depois
 - Geracao de sistemas sem revisao humana — sempre semi-automatico com revisao
-- Backend proprio no FXL Core — FXL Core e documentacao/tooling, sistemas de clientes vivem em repos separados
+- Backend proprio no FXL Core para funcionalidades alem de comentarios — FXL Core e documentacao/tooling
+- Drag-and-drop generico de dashboards — o Blueprint-driven process e o produto
 
 ## Context
 
-O processo FXL hoje vai ate a Fase 2 (wireframe aprovado). A Fase 3 (desenvolvimento) existe como documentacao mas nunca foi executada de forma estruturada. O gap entre wireframe aprovado e sistema real e significativo — falta especificacao de fontes de dados, logica de negocio, auth/permissoes e design system.
+O FXL Core tem tres areas que precisam de melhorias antes de avancar para geracao automatica de sistemas:
 
-A proposta e criar uma nova etapa na Fase 2 chamada "Configuracao Tecnica" que serve como contrato entre Fase 2 e Fase 3. O fluxo completo da Fase 2 ficaria: Briefing → Blueprint → Wireframe → Branding → Configuracao Tecnica.
+**1. Documentacao (docs/):** A navegacao na sidebar esta confusa e nao reflete bem a estrutura do processo. Precisam ser reorganizados para que novos operadores encontrem informacoes facilmente.
 
-Ja existe 1 cliente mapeado (financeiro-conta-azul) com briefing, blueprint, branding e wireframe completos — candidato natural para piloto da Fase 3.
+**2. Wireframe Builder (tools/wireframe-builder/):** Ja funciona com renderizacao declarativa via BlueprintConfig, mas precisa evoluir para permitir: (a) comentarios persistentes com Supabase para feedback de clientes, (b) edicao visual completa — mover secoes, alterar props de componentes, adicionar/remover telas — com sync bidirecional para o blueprint.config.ts.
 
-A stack dos sistemas gerados varia por projeto (nao necessariamente React + Vite). O FXL Core mantem a documentacao e tooling; cada sistema de cliente vive em seu proprio repositorio.
+**3. Processo de branding:** Nao tem fluxo claro de como coletar branding do cliente. Precisa de formato padrao parseavel e processo documentado.
+
+**4. Fase 3 automatizada:** So faz sentido apos as melhorias acima. O sistema gerado vive em repo separado. O piloto e financeiro-conta-azul (10 telas, blueprint completo).
 
 ## Constraints
 
 - **Stack FXL Core**: React 18 + TypeScript strict + Tailwind + Vite + Vercel — nao muda
 - **Zero `any`**: TypeScript strict com `tsc --noEmit` como gate de aceite
-- **Sem backend no Core**: FXL Core e estatico, sem API routes ou serverless
+- **Sem backend pesado no Core**: Supabase apenas para comentarios e features interativas. FXL Core e primariamente estatico.
 - **Blueprint prevalece**: Se blueprint e wireframe divergirem, blueprint e a fonte da verdade
 - **Componentes compartilhados**: Nunca criar componentes locais em clients/ — tudo em tools/
 
@@ -63,10 +66,11 @@ A stack dos sistemas gerados varia por projeto (nao necessariamente React + Vite
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Dashboard BI como primeiro tipo de projeto para Fase 3 | Mais previsivel — blueprint ja define quase tudo, menor distancia entre wireframe e sistema real | — Pending |
-| Config Tecnica como nova etapa da Fase 2 (nao fase separada) | Mantem o fluxo linear da Fase 2, config tecnica e parte da especificacao nao da execucao | — Pending |
-| Geracao hibrida (Claude sugere, operador revisa) | Automacao total e arriscada, revisao humana garante qualidade | — Pending |
+| Docs primeiro, depois wireframe, depois Fase 3 | Fundacao organizada antes de construir features complexas | — Pending |
+| Supabase para comentarios interativos no wireframe | Ja e padrao da FXL para dados, integra bem com Vercel | — Pending |
+| Edicao visual com sync bidirecional para blueprint | Permite iteracao rapida sem editar config manualmente | — Pending |
+| Dashboard BI como primeiro tipo de projeto para Fase 3 | Mais previsivel — blueprint ja define quase tudo | — Pending |
 | Sistema de cliente em repo separado | Isolamento, deploy independente, stack variavel por projeto | — Pending |
 
 ---
-*Last updated: 2026-03-07 after initialization*
+*Last updated: 2026-03-07 after scope revision*
