@@ -119,8 +119,13 @@ Tags customizadas disponiveis (parseadas pelo docs-parser):
 - react-markdown + remark-gfm (renderizacao de docs e docs de clientes)
 - recharts (graficos em wireframes)
 - lucide-react (icones)
+- @supabase/supabase-js 2.x (comentarios em wireframe, auth de operador)
 - Vercel (deploy)
-- SEM Supabase neste repositorio
+
+### Environment Variables
+
+- `VITE_SUPABASE_URL` — URL do projeto Supabase (Dashboard -> Settings -> API -> Project URL)
+- `VITE_SUPABASE_PUBLISHABLE_KEY` — chave anon publica (Dashboard -> Settings -> API -> anon public key)
 
 ---
 
