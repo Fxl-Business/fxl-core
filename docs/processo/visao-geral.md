@@ -34,8 +34,8 @@ Antes de iniciar qualquer projeto:
 3. Identificar quais documentos e arquivos serao afetados
 4. Executar a fase correspondente
 
-Se o projeto e para um cliente especifico com dados unicos → BI Personalizado.
-Se o escopo e definido internamente e pode atender multiplos usuarios → Produto FXL.
+Se o projeto e para um cliente especifico com dados unicos -> BI Personalizado.
+Se o escopo e definido internamente e pode atender multiplos usuarios -> Produto FXL.
 
 ---
 
@@ -54,23 +54,28 @@ Cada fase tem criterio de avanco — sem cumpri-lo, a proxima fase nao inicia.
 
 ---
 
-## Workflow operacional
+## Workflow operacional — Claude Code com GSD
 
 O operador trabalha diretamente no Claude Code com o framework GSD (Get Shit Done).
+A IA e tratada como equipe de desenvolvimento — Skills substituem bases de conhecimento,
+Agents substituem instrucoes customizadas, e comandos GSD substituem construcao manual de prompts.
 
 **Fluxo padrao:**
 
 1. Abrir Claude Code na raiz do repositorio `fxl`
 2. O Claude Code carrega `CLAUDE.md` automaticamente (regras do monorepo)
 3. Para projetos de cliente: contexto em `clients/[slug]/CLAUDE.md`
-4. Usar comandos GSD para planejar e executar tarefas
+4. Usar comandos GSD para planejar e executar tarefas:
+   - `/gsd:plan-phase` — planejar uma fase de trabalho
+   - `/gsd:execute-phase` — executar planos de uma fase
 5. Commit seguindo a convencao do projeto
+
+**Contexto de projeto:** Cada projeto tem seu `CLAUDE.md` que define identidade, stack, regras
+e referencias. O Claude Code le esse arquivo automaticamente ao abrir o repositorio.
+Nao e necessario copiar ou colar prompts — o contexto e injetado diretamente.
 
 **Contexto de cliente:** Todo conhecimento do cliente vive em `clients/[slug]/` —
 briefing, blueprint, branding e wireframe. O Claude Code le esses arquivos diretamente.
-
-**Claude Project como secundario:** Para discussoes exploratorias longas, o Claude Project
-ainda pode ser usado. Mas o fluxo principal e direto no Claude Code com GSD.
 
 ---
 
@@ -79,4 +84,4 @@ ainda pode ser usado. Mas o fluxo principal e direto no Claude Code com GSD.
 Toda alteracao estrutural no processo deve verificar impacto em:
 - `docs/processo/fases/` — detalhamento de cada fase
 - `docs/processo/` — paginas de processo e roteamento
-- `docs/referencias/` — se a mudanca afeta wireframe ou KPIs
+- Secao [Padroes](/padroes/index) — se a mudanca afeta padronizacao tecnica
