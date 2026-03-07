@@ -1,6 +1,6 @@
 ---
 title: Keycloak
-badge: Build
+badge: Ferramentas
 description: Auth avancada para projetos enterprise com SSO/OIDC — decisao pendente
 status: TBD
 ---

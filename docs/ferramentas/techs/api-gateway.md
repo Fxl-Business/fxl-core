@@ -1,6 +1,6 @@
 ---
 title: API Gateway
-badge: Build
+badge: Ferramentas
 description: Gateway de API para projetos com multiplos servicos — decisao pendente
 status: TBD
 ---

@@ -1,6 +1,6 @@
 ---
 title: Vite + React + TypeScript
-badge: Build
+badge: Ferramentas
 description: Stack frontend padrao FXL para SPAs sem requisito de SSR
 status: Ativo
 ---

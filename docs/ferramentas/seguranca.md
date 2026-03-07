@@ -1,6 +1,6 @@
 ---
 title: Seguranca
-badge: Build
+badge: Ferramentas
 description: Checklist anti AI-slop, rate-limit e validacao
 ---
 

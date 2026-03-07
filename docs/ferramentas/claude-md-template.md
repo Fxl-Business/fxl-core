@@ -1,6 +1,6 @@
 ---
 title: CLAUDE.md — Template de Projeto
-badge: Build
+badge: Ferramentas
 description: Template do CLAUDE.md para repositorios de projeto
 ---
 

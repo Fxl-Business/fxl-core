@@ -1,6 +1,6 @@
 ---
 title: Kubernetes
-badge: Build
+badge: Ferramentas
 description: Orquestracao de containers — decisao pendente
 status: TBD
 ---

@@ -1,6 +1,6 @@
 ---
 title: Next.js
-badge: Build
+badge: Ferramentas
 description: Framework React com SSR — uso apenas em excecoes justificadas
 status: Excecao
 ---

@@ -1,6 +1,6 @@
 ---
 title: Testes
-badge: Build
+badge: Ferramentas
 description: O que testar, quando testar, criterios
 ---
 

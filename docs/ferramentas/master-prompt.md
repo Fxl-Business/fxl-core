@@ -1,6 +1,6 @@
 ---
 title: Master Prompt
-badge: Build
+badge: Ferramentas
 description: Template para montar prompt de desenvolvimento
 ---
 

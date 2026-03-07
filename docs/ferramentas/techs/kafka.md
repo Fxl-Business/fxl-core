@@ -1,6 +1,6 @@
 ---
 title: Kafka
-badge: Build
+badge: Ferramentas
 description: Mensageria para arquiteturas event-driven — decisao pendente
 status: TBD
 ---

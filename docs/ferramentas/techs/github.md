@@ -1,6 +1,6 @@
 ---
 title: GitHub
-badge: Build
+badge: Ferramentas
 description: Versionamento padrao FXL — repositorios, branches e commits
 status: Ativo
 ---

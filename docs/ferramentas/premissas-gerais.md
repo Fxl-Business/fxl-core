@@ -1,6 +1,6 @@
 ---
 title: Premissas Gerais
-badge: Build
+badge: Ferramentas
 description: Stack padrao, estrutura de pastas e convencoes
 ---
 
