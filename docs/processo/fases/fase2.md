@@ -16,7 +16,7 @@ O wireframe e aprovado antes do desenvolvimento — isso evita retrabalho caro.
 ### BI Personalizado
 
 1. Partir do Documento de Briefing validado (Fase 1)
-2. Consultar a [Biblioteca de KPIs](/referencias/biblioteca-kpis) e os [Blocos Disponiveis](/referencias/blocos-disponiveis)
+2. Consultar os [Blocos Disponiveis](/referencias/blocos-disponiveis)
 3. Gerar o Blueprint tela a tela (usar prompt abaixo)
 4. O wireframe e gerado via Claude Code usando o [Wireframe Builder](/ferramentas/wireframe-builder)
 5. Claude Code gera os arquivos `.tsx` em `clients/[slug]/wireframe/screens/` usando componentes de `tools/wireframe-builder/components/`
@@ -108,7 +108,7 @@ Para cada tela, especificar:
 
 #### BI Personalizado
 
-**Entradas:** Documento de Briefing validado, [Biblioteca de KPIs](/referencias/biblioteca-kpis), [Blocos Disponiveis](/referencias/blocos-disponiveis).
+**Entradas:** Documento de Briefing validado, [Blocos Disponiveis](/referencias/blocos-disponiveis).
 
 **Processo de revisao:** Wireframe publicado → cliente navega → comentarios por tela/bloco → ajustes → novo ciclo ate aprovacao formal.
 
@@ -116,7 +116,7 @@ Para cada tela, especificar:
 
 #### Produto FXL
 
-**Entradas:** Documento de Definicao de Produto, Biblioteca de KPIs, Blocos Disponiveis.
+**Entradas:** Documento de Definicao de Produto, [Blocos Disponiveis](/referencias/blocos-disponiveis).
 
 **Saida:** Blueprint textual + wireframe React/TSX publicado + aprovacao interna FXL.
 

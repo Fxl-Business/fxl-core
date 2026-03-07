@@ -1,7 +1,7 @@
 ---
 title: Fase 3 — Desenvolvimento
 badge: Processo
-description: Sprints com stack padrao e referencias de build
+description: Sprints de codigo com GSD, padroes tecnicos e regras de operacao
 ---
 
 # Fase 3 — Desenvolvimento
@@ -14,14 +14,13 @@ O desenvolvimento segue o Blueprint — sem desvios de escopo.
 ## Operacao
 
 1. Criar repositorio do projeto no GitHub
-2. Configurar `CLAUDE.md` do projeto usando o [template](/ferramentas/claude-md-template)
-3. Planejar sprints (tabela com escopo, dependencia, criterio de aceite por sprint)
-4. Montar o Master Prompt usando o [Template de Sprint](/ferramentas/master-prompt)
+2. Configurar `CLAUDE.md` na raiz do projeto (define identidade, stack, regras e referencias do projeto)
+3. Planejar sprints usando GSD: `/gsd:plan-phase` define pesquisa, planos e tarefas
+4. Executar cada sprint: `/gsd:execute-phase` executa os planos com commits atomicos por tarefa
 5. Ler as referencias obrigatorias antes de iniciar (ver abaixo)
-6. Executar o sprint no Claude Code com GSD
-7. Revisar: testes, seguranca, documentacao
-8. Repetir passos 4-7 para cada sprint
-9. Sistema completo → Fase 4
+6. Revisar: testes, seguranca, documentacao
+7. Repetir passos 3-6 para cada sprint
+8. Sistema completo -> Fase 4
 
 ### Referencias obrigatorias
 
@@ -29,15 +28,38 @@ Antes de iniciar, ler:
 - [Premissas Gerais](/ferramentas/premissas-gerais) — stack e estrutura de pastas
 - [Seguranca](/ferramentas/seguranca) — checklist anti AI-slop
 - [Testes](/ferramentas/testes) — o que testar e quando
-- [Template de Sprint](/ferramentas/master-prompt) — template do prompt de sprint
-- [CLAUDE.md Template](/ferramentas/claude-md-template) — template do CLAUDE.md do projeto
 
-Para tecnologias especificas:
+Para tecnologias especificas, consultar o [Tech Radar](/ferramentas/tech-radar):
 - [Supabase](/ferramentas/techs/supabase) — conexao, Auth, RLS
 - [Vercel](/ferramentas/techs/vercel) — setup e checklist de deploy
 
-### Regras de desenvolvimento
+### Workflow com GSD
 
+O GSD organiza o desenvolvimento em fases e planos. Cada plano contém tarefas atomicas
+que sao comitadas individualmente, garantindo rastreabilidade e reversibilidade.
+
+{% prompt label="Iniciar sprint com GSD" %}
+Vamos iniciar um sprint de desenvolvimento para o projeto [NOME].
+
+Antes de comecar:
+- Leia CLAUDE.md do projeto
+- Leia o Blueprint aprovado
+- Consulte os padroes em docs/ferramentas/premissas-gerais.md e docs/ferramentas/seguranca.md
+
+Escopo deste sprint:
+[LISTE AS TELAS/FUNCIONALIDADES]
+
+Use /gsd:plan-phase para planejar o sprint.
+Depois use /gsd:execute-phase para executar.
+{% /prompt %}
+
+### Regras de operacao
+
+A IA opera como equipe de desenvolvimento — com autonomia para executar, mas dentro de regras claras:
+
+- **Autonomia com limites:** executa tarefas do plano sem perguntar, mas para em decisoes arquiteturais
+- **Documentacao continua:** toda decisao tecnica e registrada nos commits e no changelog
+- **Seguranca-first:** checklist de seguranca aplicado antes de concluir cada sprint
 - Stack padrao: React + TypeScript + Tailwind + shadcn/ui + Supabase + Vercel + Vite
 - Skeleton loading obrigatorio em todas as telas que carregam dados
 - Filtro de periodo com mes atual como padrao
@@ -46,7 +68,6 @@ Para tecnologias especificas:
 - TypeScript strict mode — nunca usar `any`
 - RLS obrigatorio em toda tabela Supabase
 - Checklist de seguranca antes de concluir cada sprint
-- Documentar decisoes tecnicas em `docs/SPRINTS.md` e `docs/CHANGELOG.md`
 
 ---
 
