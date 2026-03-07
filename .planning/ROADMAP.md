@@ -46,7 +46,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Supabase infrastructure, auth, types, CRUD functions, and migration SQL (WCMT-01, WCMT-02)
+- [x] 02-01-PLAN.md — Supabase infrastructure, auth, types, CRUD functions, and migration SQL (WCMT-01, WCMT-02)
 - [ ] 02-02-PLAN.md — Comment UI: refactor CommentOverlay to Supabase, section wrappers with hover icons and badges (WCMT-01)
 - [ ] 02-03-PLAN.md — Client access via shared link, comment management panel with resolve (WCMT-02, WCMT-03)
 
@@ -120,7 +120,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Documentation | 2/2 | Complete | 2026-03-07 |
-| 2. Wireframe Comments | 0/3 | Planning Complete | - |
+| 2. Wireframe Comments | 1/3 | In Progress | - |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |
 | 4. Branding Process | 0/2 | Not started | - |
 | 5. Technical Configuration | 0/2 | Not started | - |

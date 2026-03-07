@@ -15,8 +15,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Wireframe Comments
 
-- [ ] **WCMT-01**: Comentarios persistentes por tela/bloco salvos em Supabase
-- [ ] **WCMT-02**: Usuario externo (cliente) acessa wireframe e deixa comentarios sem precisar de conta dev
+- [x] **WCMT-01**: Comentarios persistentes por tela/bloco salvos em Supabase
+- [x] **WCMT-02**: Usuario externo (cliente) acessa wireframe e deixa comentarios sem precisar de conta dev
 - [ ] **WCMT-03**: Operador visualiza todos os comentarios e marca como resolvidos
 
 ### Wireframe Visual Editor
@@ -86,8 +86,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOCS-01 | Phase 1 | Complete |
 | DOCS-02 | Phase 1 | Complete |
 | DOCS-03 | Phase 1 | Complete |
-| WCMT-01 | Phase 2 | Pending |
-| WCMT-02 | Phase 2 | Pending |
+| WCMT-01 | Phase 2 | Complete |
+| WCMT-02 | Phase 2 | Complete |
 | WCMT-03 | Phase 2 | Pending |
 | WEDT-01 | Phase 3 | Pending |
 | WEDT-02 | Phase 3 | Pending |
