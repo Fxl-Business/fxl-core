@@ -8,7 +8,7 @@ description: Stack padrao, estrutura de pastas e convencoes
 
 ## Stack padrao
 
-A stack padrao FXL esta documentada e atualizada no [Tech Radar](/build/tech-radar).
+A stack padrao FXL esta documentada e atualizada no [Tech Radar](/ferramentas/tech-radar).
 
 Consulte cada pagina de tech para versoes minimas, regras obrigatorias e quando usar.
 

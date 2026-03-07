@@ -53,11 +53,11 @@ Para cada sprint, definir antes de escrever o prompt:
 
 ## Premissas técnicas
 Antes de começar, leia obrigatoriamente:
-- [CAMINHO_ABSOLUTO]/docs/build/premissas_gerais.md
-- [CAMINHO_ABSOLUTO]/docs/build/supabase.md
-- [CAMINHO_ABSOLUTO]/docs/build/deploy_vercel.md
-- [CAMINHO_ABSOLUTO]/docs/build/seguranca.md
-- [CAMINHO_ABSOLUTO]/docs/build/testes.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/premissas_gerais.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/supabase.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/deploy_vercel.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/seguranca.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/testes.md
 
 ## Sprint atual: Sprint [N] — [Nome do Sprint]
 
@@ -125,11 +125,11 @@ Usuário primário: gestor financeiro da empresa. Um usuário = uma empresa.
 
 ## Premissas técnicas
 Antes de começar, leia obrigatoriamente:
-- [CAMINHO_ABSOLUTO]/docs/build/premissas_gerais.md
-- [CAMINHO_ABSOLUTO]/docs/build/supabase.md
-- [CAMINHO_ABSOLUTO]/docs/build/deploy_vercel.md
-- [CAMINHO_ABSOLUTO]/docs/build/seguranca.md
-- [CAMINHO_ABSOLUTO]/docs/build/testes.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/premissas_gerais.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/supabase.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/deploy_vercel.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/seguranca.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/testes.md
 
 ## Sprint atual: Sprint 1 — Setup + Autenticação
 

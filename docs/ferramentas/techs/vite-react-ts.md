@@ -45,4 +45,4 @@ src/
 ## Quando NAO usar
 
 Quando o projeto exigir SSR, SEO estrutural ou API routes no mesmo repositorio.
-Nesses casos, ver [Next.js](/build/techs/nextjs).
+Nesses casos, ver [Next.js](/ferramentas/techs/nextjs).

@@ -21,48 +21,48 @@ description: Status de todas as tecnologias adotadas, em avaliacao ou pendentes 
 
 | Tecnologia | Status | Pagina |
 |---|---|---|
-| Vite + React + TypeScript | ✅ Ativo | [ver pagina](/build/techs/vite-react-ts) |
-| Tailwind CSS + shadcn/ui | ✅ Ativo | [ver pagina](/build/techs/tailwind-shadcn) |
-| Next.js | ⚠️ Excecao | [ver pagina](/build/techs/nextjs) |
+| Vite + React + TypeScript | ✅ Ativo | [ver pagina](/ferramentas/techs/vite-react-ts) |
+| Tailwind CSS + shadcn/ui | ✅ Ativo | [ver pagina](/ferramentas/techs/tailwind-shadcn) |
+| Next.js | ⚠️ Excecao | [ver pagina](/ferramentas/techs/nextjs) |
 
 ## Banco de Dados e Auth
 
 | Tecnologia | Status | Pagina |
 |---|---|---|
-| Supabase (PostgreSQL + Auth + RLS) | ✅ Ativo | [ver pagina](/build/techs/supabase) |
+| Supabase (PostgreSQL + Auth + RLS) | ✅ Ativo | [ver pagina](/ferramentas/techs/supabase) |
 
 ## Deploy e Infraestrutura
 
 | Tecnologia | Status | Pagina |
 |---|---|---|
-| Vercel | ✅ Ativo | [ver pagina](/build/techs/vercel) |
-| Docker | 🔵 Em avaliacao | [ver pagina](/build/techs/docker) |
-| Kubernetes | ⬜ TBD | [ver pagina](/build/techs/kubernetes) |
-| Terraform | ⬜ TBD | [ver pagina](/build/techs/terraform) |
+| Vercel | ✅ Ativo | [ver pagina](/ferramentas/techs/vercel) |
+| Docker | 🔵 Em avaliacao | [ver pagina](/ferramentas/techs/docker) |
+| Kubernetes | ⬜ TBD | [ver pagina](/ferramentas/techs/kubernetes) |
+| Terraform | ⬜ TBD | [ver pagina](/ferramentas/techs/terraform) |
 
 ## CI/CD e Versionamento
 
 | Tecnologia | Status | Pagina |
 |---|---|---|
-| GitHub | ✅ Ativo | [ver pagina](/build/techs/github) |
-| GitHub Actions | 🔵 Em avaliacao | [ver pagina](/build/techs/github-actions) |
+| GitHub | ✅ Ativo | [ver pagina](/ferramentas/techs/github) |
+| GitHub Actions | 🔵 Em avaliacao | [ver pagina](/ferramentas/techs/github-actions) |
 
 ## Backend
 
 | Tecnologia | Status | Pagina |
 |---|---|---|
-| Node.js | 🔵 Em avaliacao | [ver pagina](/build/techs/backend-node) |
-| Python | 🔵 Em avaliacao | [ver pagina](/build/techs/backend-python) |
+| Node.js | 🔵 Em avaliacao | [ver pagina](/ferramentas/techs/backend-node) |
+| Python | 🔵 Em avaliacao | [ver pagina](/ferramentas/techs/backend-python) |
 
 ## Gateways e Mensageria
 
 | Tecnologia | Status | Pagina |
 |---|---|---|
-| API Gateway | ⬜ TBD | [ver pagina](/build/techs/api-gateway) |
-| Kafka | ⬜ TBD | [ver pagina](/build/techs/kafka) |
+| API Gateway | ⬜ TBD | [ver pagina](/ferramentas/techs/api-gateway) |
+| Kafka | ⬜ TBD | [ver pagina](/ferramentas/techs/kafka) |
 
 ## Auth Avancada
 
 | Tecnologia | Status | Pagina |
 |---|---|---|
-| Keycloak | ⬜ TBD | [ver pagina](/build/techs/keycloak) |
+| Keycloak | ⬜ TBD | [ver pagina](/ferramentas/techs/keycloak) |

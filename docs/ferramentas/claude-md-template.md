@@ -11,7 +11,7 @@ description: Template do CLAUDE.md para repositorios de projeto
 Copie este template para o `CLAUDE.md` do repositório do projeto. Substitua todos os campos `[PREENCHER]` antes de iniciar o desenvolvimento.
 
 Substitua `[CAMINHO_ABSOLUTO]` pelo caminho real na máquina do operador.
-Exemplo: `/Users/operador/projetos` → os arquivos ficam em `/Users/operador/projetos/docs/build/premissas_gerais.md`
+Exemplo: `/Users/operador/projetos` → os arquivos ficam em `/Users/operador/projetos/docs/ferramentas/premissas_gerais.md`
 
 ---
 
@@ -33,11 +33,11 @@ Exemplo: `/Users/operador/projetos` → os arquivos ficam em `/Users/operador/pr
 
 Antes de executar qualquer tarefa, leia os seguintes arquivos:
 
-- [CAMINHO_ABSOLUTO]/docs/build/premissas_gerais.md
-- [CAMINHO_ABSOLUTO]/docs/build/supabase.md
-- [CAMINHO_ABSOLUTO]/docs/build/deploy_vercel.md
-- [CAMINHO_ABSOLUTO]/docs/build/seguranca.md
-- [CAMINHO_ABSOLUTO]/docs/build/testes.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/premissas_gerais.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/supabase.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/deploy_vercel.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/seguranca.md
+- [CAMINHO_ABSOLUTO]/docs/ferramentas/testes.md
 
 ---
 
