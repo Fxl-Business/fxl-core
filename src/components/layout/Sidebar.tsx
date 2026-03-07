@@ -55,6 +55,7 @@ const navigation: NavItem[] = [
         children: [
           { label: 'Biblioteca de KPIs', href: '/referencias/biblioteca-kpis' },
           { label: 'Blocos Disponíveis', href: '/referencias/blocos-disponiveis' },
+          { label: 'Galeria de Componentes', href: '/ferramentas/wireframe-builder/galeria' },
         ],
       },
     ],

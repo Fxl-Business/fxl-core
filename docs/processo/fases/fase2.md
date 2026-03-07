@@ -22,7 +22,7 @@ Definir a arquitetura completa do produto antes de qualquer linha de código. O 
 |---|---|
 | Claude Project do Cliente | Analisa o Briefing e gera o Blueprint + prompt para Claude Code |
 | Claude Code (`fxl`) | Gera os arquivos `.tsx` do wireframe usando componentes do módulo |
-| `skills/wireframe-builder/components/` | Módulo oficial de componentes React reutilizáveis de wireframe |
+| `tools/wireframe-builder/components/` | Módulo oficial de componentes React reutilizáveis de wireframe |
 | Nucleo FXL (Vercel) | Hospeda o app React com viewer de wireframe, docs de processo e overlay de comentários |
 
 ### Fluxo geral
@@ -33,7 +33,7 @@ Definir a arquitetura completa do produto antes de qualquer linha de código. O 
 4. Blueprint sai como prompt pronto para o Claude Code
 5. Operador cola o prompt no Claude Code (`fxl`)
 6. Claude Code gera os arquivos `.tsx` em `clients/[client-slug]/wireframe/screens/`
-   usando componentes de `skills/wireframe-builder/components/`
+   usando componentes de `tools/wireframe-builder/components/`
 7. Wireframe é publicado automaticamente via Vercel
 8. Operador compartilha o link com o cliente
 9. Cliente navega e usa o overlay de comentários por tela ou por bloco
@@ -42,7 +42,7 @@ Definir a arquitetura completa do produto antes de qualquer linha de código. O 
 ### Módulo de componentes
 
 O wireframe não é mais gerado como HTML puro. O Claude Code importa componentes
-React pré-montados de `skills/wireframe-builder/components/`, passando dados fictícios
+React pré-montados de `tools/wireframe-builder/components/`, passando dados fictícios
 coerentes com o segmento do cliente. Componentes disponíveis:
 
 - `KpiCard` — valor, rótulo, variação
@@ -99,7 +99,7 @@ Siga os padrões de blocos disponíveis em docs/build/wireframe/blocos_disponive
 
 Ao final, gere o Prompt de Wireframe pronto para colar no Claude Code.
 O prompt deve instruir o Claude Code a gerar cada tela como arquivo .tsx,
-importando os componentes de skills/wireframe-builder/components/ no repositório fxl.
+importando os componentes de tools/wireframe-builder/components/ no repositório fxl.
 
 [COLE O DOCUMENTO DE BRIEFING AQUI]
 {% /prompt %}
@@ -148,7 +148,7 @@ Considere que este é um produto para múltiplos usuários — a UI deve ser aut
 
 Ao final, gere o Prompt de Wireframe pronto para colar no Claude Code.
 O prompt deve instruir o Claude Code a gerar cada tela como arquivo .tsx,
-importando os componentes de skills/wireframe-builder/components/ no repositório fxl.
+importando os componentes de tools/wireframe-builder/components/ no repositório fxl.
 
 [COLE O DOCUMENTO DE DEFINIÇÃO AQUI]
 {% /prompt %}

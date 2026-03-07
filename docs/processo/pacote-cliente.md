@@ -89,7 +89,7 @@ O prompt gerado para o Claude Code deve instruir:
 1. Repositório alvo: `fxl`
 2. Subpasta: `clients/[client-slug]/wireframe/screens/`
 3. Um arquivo `.tsx` por tela
-4. Importar exclusivamente de `skills/wireframe-builder/components/`
+4. Importar exclusivamente de `tools/wireframe-builder/components/`
 5. Usar dados fictícios coerentes com o segmento do cliente
 6. Nunca criar componentes locais — sinalizar para adicionar ao módulo compartilhado
 7. Nenhum wireframe deve incluir comparativos temporais hardcoded. Toda comparação deve ser controlada pelo switch "Comparar" da WireframeFilterBar. Sparklines e semáforos são exceções.

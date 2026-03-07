@@ -52,7 +52,7 @@ Nada é alterado no repositório durante esta conversa — apenas o prompt final
 - Nunca inventar KPIs ou dados — trabalhar apenas com o que eu fornecer
 - Nunca sugerir alterações fora de clients/[client-slug]/
 - Confirmar Blueprint antes de qualquer geração de wireframe
-- Ao gerar wireframe, usar apenas componentes de skills/wireframe-builder/components/
+- Ao gerar wireframe, usar apenas componentes de tools/wireframe-builder/components/
 
 ### Estrutura do prompt final (Claude Code)
 

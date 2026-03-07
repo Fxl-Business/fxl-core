@@ -17,93 +17,22 @@
 
 ---
 
-## Regra de processo — Blueprint como fonte da verdade
+## Comparação temporal por tela
 
-O Blueprint é a única fonte de verdade do produto.
-Nenhuma tela, componente ou comportamento pode existir no wireframe sem estar
-previamente documentado aqui.
-
-**Fluxo obrigatório para qualquer mudança:**
-1. Atualizar o Blueprint (este arquivo)
-2. Atualizar o wireframe com base no Blueprint atualizado
-
-Se o Blueprint e o wireframe divergirem, o Blueprint prevalece.
-O wireframe deve sempre poder ser regenerado a partir do Blueprint sem surpresas.
-
----
-
-## Padrão de qualidade visual obrigatório
-
-Todo wireframe desta versão deve seguir o padrão do HTML de referência, incluindo:
-- KpiCard com **sparkline embutido** (mini gráfico de linha)
-- KpiCard com **semáforo** (verde/amarelo/vermelho) quando o KPI tem meta
-- Tabelas com **drill-down expansível** (linhas pai/filho) onde aplicável
-- **Modal de detalhe** nas tabelas com `clickable-row`
-- Gráficos **donut** para distribuições percentuais
-- Gráficos **Pareto** (barra + linha acumulada) onde aplicável
-- Seções de **input manual** dentro das telas (não apenas tela dedicada)
-- Sidebar do wireframe com fundo escuro (`#212121`) e itens com ícone
-
-> ⚠️ O wireframe React deve ter qualidade equivalente ao wireframe HTML de referência.
-> Criar os componentes necessários em `skills/wireframe-builder/components/` antes de implementar as telas.
-
----
-
-## Padrão de comparação temporal — Switch "Comparar"
-
-### Princípio
-
-Nenhuma tela exibe comparativos por padrão. Todas as telas que analisam um período possuem um switch "Comparar" na barra de filtros que, quando ativado, expande a visualização com dados de um período de referência.
-
-### Modo padrão (switch OFF)
-
-- KPIs: valor + sparkline + semáforo (se houver meta). Sem variação temporal.
-- Gráficos: dados exclusivamente do período selecionado no header (mês ou ano).
-- Tabelas: colunas do período atual apenas. Colunas de comparação ocultas.
-
-### Modo comparação (switch ON)
-
-- Switch visível no final da WireframeFilterBar.
-- Ao ativar, aparece um seletor de período de comparação:
-  - Telas mensais: seletor de mês/ano (default: mês anterior)
-  - Telas anuais: seletor de ano (default: ano anterior)
-- KPIs ganham linha de variação (▲/▼ X% vs [período]).
-- Gráficos se adaptam com barras agrupadas (atual vs comparação) ou linhas sobrepostas.
-- Tabelas ganham colunas extras: período de comparação + variação %.
-
-### Exceções
-
-- Sparklines nos KPIs: sempre visíveis (tendência, não comparação).
-- Semáforos nos KPIs: sempre visíveis (saúde vs meta fixa, não comparação temporal).
-- Comparações "Previsto vs Realizado" (ex: Fluxo de Caixa): sempre visíveis — são intrínsecas ao mês, não temporais.
-
-### Telas que implementam o switch
+> Padrão detalhado em `tools/wireframe-builder/SKILL.md` (Padrão 3 — Switch "Comparar").
 
 | Tela | Tipo | Switch |
 |---|---|---|
-| 1 — DFC | Mensal | ✅ Comparar com mês X |
-| 2 — Receita | Mensal | ✅ Comparar com mês X |
-| 3 — Despesas | Mensal | ✅ Comparar com mês X |
-| 4 — Centro de Custo | Mensal | ✅ Comparar com mês X |
-| 5 — Margens | Mensal | ✅ Comparar com mês X |
-| 6 — Fluxo Mensal | Mensal | ✅ Comparar com mês X |
-| 7 — Fluxo Anual | Anual | ✅ Comparar com ano X |
-| 8 — Indicadores | Mensal | ✅ Comparar com mês X |
-| 9 — Upload | — | ❌ Sem switch |
-| 10 — Configurações | — | ❌ Sem switch |
-
----
-
-## Padrão obrigatório — Tipo de Período Analisado
-
-Toda tela que exibe KPIs deve declarar o campo **Tipo de Período Analisado**.
-Este campo documenta o recorte temporal exibido e orienta o wireframe.
-
-Valores possíveis:
-- **Análise Mensal** — exibe um único mês por vez
-- **Análise Acumulada (YTD)** — exibe do início do ano até o mês selecionado
-- **Análise de Período** — exibe um intervalo definido pelo usuário (ex: 3 ou 12 meses)
-- **Análise Diária** — exibe dias dentro de um mês
+| 1 — DFC | Mensal | Comparar com mês X |
+| 2 — Receita | Mensal | Comparar com mês X |
+| 3 — Despesas | Mensal | Comparar com mês X |
+| 4 — Centro de Custo | Mensal | Comparar com mês X |
+| 5 — Margens | Mensal | Comparar com mês X |
+| 6 — Fluxo Mensal | Mensal | Comparar com mês X |
+| 7 — Fluxo Anual | Anual | Comparar com ano X |
+| 8 — Indicadores | Mensal | Comparar com mês X |
+| 9 — Upload | — | Sem switch |
+| 10 — Configurações | — | Sem switch |
 
 ---
 
@@ -445,34 +374,3 @@ Nenhum KPI desta tela usa semáforo. A comparação temporal (▲/▼ % vs Perí
 3. Semáforos por Indicador — Editar limites Verde/Amarelo/Vermelho por KPI
 4. Vínculo Categoria → Grupo — Select inline: cada categoria do Conta Azul vinculada a um grupo
 
----
-
-## Componentes necessários antes da implementação
-
-| Componente | Status |
-|---|---|
-| `KpiCard` | ✅ Disponível — sem sparkline e sem semáforo |
-| `KpiCardFull` | ❌ Criar — variante com sparkline SVG e semáforo opcional |
-| `BarLineChart` | ✅ Disponível |
-| `DonutChart` | ❌ Criar |
-| `ParetoChart` | ❌ Criar |
-| `DataTable` | ✅ Disponível — sem drill-down e sem clickable-row |
-| `DrillDownTable` | ❌ Criar |
-| `ClickableTable` | ❌ Criar |
-| `WireframeModal` | ❌ Criar |
-| `InputsScreen` | ✅ Disponível — sem feedback de validação |
-| `UploadSection` | ❌ Criar |
-| `ManualInputSection` | ❌ Criar |
-| `SaldoBancoInput` | ❌ Criar |
-| `ConfigTable` | ❌ Criar |
-| `GlobalFilters` | ✅ Disponível |
-| `WireframeSidebar` | ✅ Disponível — sem dark mode e sem ícones |
-| `CommentOverlay` | ✅ Disponível |
-| `CalculoCard` | ❌ Criar — cascata de cálculo financeiro com operadores (+/−/=), valor R$ e % s/ faturamento. Modo comparação adiciona colunas período anterior e Var. % |
-
----
-
-## Padrão de exibição do wireframe
-
-- Rota de visualização: `/clients/financeiro-conta-azul/wireframe-view` — fora do `<Layout />`
-- A página `/wireframe` exibe apenas botão que abre a rota acima em nova aba

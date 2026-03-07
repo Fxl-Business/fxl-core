@@ -19,7 +19,7 @@ Antes de implementar qualquer tela, verificar se os componentes necessários já
 
 ---
 
-## Componentes disponíveis (`skills/wireframe-builder/components/`)
+## Componentes disponíveis (`tools/wireframe-builder/components/`)
 
 ### ✅ Disponíveis
 
@@ -36,7 +36,7 @@ Antes de implementar qualquer tela, verificar se os componentes necessários já
 | `WireframeFilterBar` | Barra de filtros flutuante (sticky) com labels inline, search opcional e switch "Comparar" no final. Nunca incluir filtro de período. | Props: `filters`, `showSearch?`, `showCompareSwitch?`, `compareMode?`, `onCompareModeChange?`, `comparePeriodType?`, `comparePeriod?`, `onComparePeriodChange?` |
 | `WaterfallChart` | Gráfico waterfall/cascata com barras flutuantes. Cores: verde (positive), vermelho (negative), azul (subtotal). | Props: `title`, `bars: WaterfallBar[]`, `height?` |
 
-### ❌ Pendentes — criar em `skills/wireframe-builder/components/` antes de usar
+### ❌ Pendentes — criar em `tools/wireframe-builder/components/` antes de usar
 
 | Componente | Descrição | Quando usar |
 |---|---|---|
@@ -52,7 +52,7 @@ Antes de implementar qualquer tela, verificar se os componentes necessários já
 | `ConfigTable` | Tabela com selects inline e ações por linha (Editar/Excluir) | Tela de Configurações |
 | `CalculoCard` | Cascata de cálculo financeiro vertical. Cada linha tem: operador opcional (−/=), label, valor R$, % s/ faturamento. Linhas com `highlight: true` recebem fundo diferenciado (linhas de resultado). Modo comparação: adiciona coluna período anterior + Var. %. Props: `title?`, `rows: CalculoRow[]`, `compareMode?`, `comparePeriodLabel?`. Tipo `CalculoRow`: `{ operator?: '(-)' \| '(=)' \| '(+)'; label: string; value: string; pct?: string; highlight?: boolean; valueCompare?: string; variation?: string }`. Regra de cor invertida: linhas com operador `(-)` invertem a lógica do `variationPositive` — custo que sobe é vermelho, custo que desce é verde. Todas as linhas exibem comparação no modo comparativo, não apenas as linhas highlight. | Tela 1 DFC — Resumo do Resultado |
 
-> ⚠️ Se uma tela exigir um componente pendente, criar primeiro em `skills/wireframe-builder/components/`.
+> ⚠️ Se uma tela exigir um componente pendente, criar primeiro em `tools/wireframe-builder/components/`.
 > Nunca criar componente local na pasta do cliente.
 
 ---
@@ -65,20 +65,13 @@ Antes de implementar qualquer tela, verificar se os componentes necessários já
 - `GlobalFilters` permanece disponível para compatibilidade com telas v1, mas não deve ser usado em telas novas
 
 ### Padrão de comparação temporal
-Nenhuma tela exibe comparativos por padrão. O switch "Comparar" na WireframeFilterBar controla a exibição de:
-- Variações nos KPIs (prop `compareMode` no `KpiCardFull`)
-- Gráficos comparativos (barras agrupadas atual vs período)
-- Colunas extras nas tabelas
 
-**Sempre visíveis (independente do switch):** sparklines, semáforos, dados de "Previsto vs Realizado".
+> Padrão completo em `tools/wireframe-builder/SKILL.md` (Padrão 3 — Switch "Comparar").
 
-**Telas sem switch:** Upload, Configurações, e qualquer tela sem KPIs.
-
-> ⚠️ Regra global — comparação nunca cria novos blocos
-> O modo comparativo transforma internamente os componentes existentes.
-> É proibido renderizar condicionalmente um novo `<BarLineChart>`, `<WaterfallChart>`
-> ou qualquer outro bloco exclusivamente quando `compareMode=true`.
-> O componente existente recebe a prop `compareMode` e se adapta por conta própria.
+Resumo: nenhuma tela exibe comparativos por padrão. O switch "Comparar" na WireframeFilterBar
+ativa variações nos KPIs, barras agrupadas nos gráficos e colunas extras nas tabelas.
+Sparklines, semáforos e "Previsto vs Realizado" são sempre visíveis.
+O modo comparativo NUNCA cria novos blocos — transforma os existentes via prop `compareMode`.
 
 
 ### DRE / Resultado mensal
@@ -109,24 +102,10 @@ Nenhuma tela exibe comparativos por padrão. O switch "Comparar" na WireframeFil
 
 ## Padrão de exibição do wireframe
 
-O wireframe **não deve ser renderizado dentro do Layout da aplicação**.
+> Padrão completo em `tools/wireframe-builder/SKILL.md` (Padrão 5 — Exibição do wireframe).
 
-### Padrão obrigatório
-1. A rota `/clients/[slug]/wireframe` (dentro do Layout) exibe apenas botão **"Visualizar Wireframe →"**
-2. O botão abre `/clients/[slug]/wireframe-view` em **nova aba** (`target="_blank"`)
-3. A rota `/clients/[slug]/wireframe-view` fica **fora** do `<Route element={<Layout />}>` no `App.tsx`
-4. O componente renderiza apenas: sidebar escura (`#212121`) + área de conteúdo, sem TopNav e sem sidebar de documentação
-
-### Exemplo em `App.tsx`
-```tsx
-// Dentro do Layout — apenas botão de acesso
-<Route element={<Layout />}>
-  <Route path="/clients/[slug]/wireframe" element={<WireframeAccess />} />
-</Route>
-
-// Fora do Layout — visualização completa
-<Route path="/clients/[slug]/wireframe-view" element={<WireframeViewer />} />
-```
+O wireframe não é renderizado dentro do Layout. A rota `/clients/[slug]/wireframe-view`
+fica fora do `<Route element={<Layout />}>` e renderiza sidebar escura + área de conteúdo.
 
 ---
 

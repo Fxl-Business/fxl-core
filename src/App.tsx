@@ -6,6 +6,7 @@ import FinanceiroIndex from '@/pages/clients/FinanceiroContaAzul/Index'
 import FinanceiroDocViewer from '@/pages/clients/FinanceiroContaAzul/DocViewer'
 import FinanceiroWireframe from '@/pages/clients/FinanceiroContaAzul/Wireframe'
 import FinanceiroWireframeViewer from '@/pages/clients/FinanceiroContaAzul/WireframeViewer'
+import ComponentGallery from '@/pages/tools/ComponentGallery'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/build/*" element={<DocRenderer />} />
           <Route path="/referencias/*" element={<DocRenderer />} />
           <Route path="/operacao/*" element={<DocRenderer />} />
+          <Route path="/ferramentas/wireframe-builder/galeria" element={<ComponentGallery />} />
           <Route path="/ferramentas/*" element={<DocRenderer />} />
 
           {/* Paginas interativas de clientes */}

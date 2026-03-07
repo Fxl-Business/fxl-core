@@ -47,7 +47,7 @@ Nenhuma fase subsequente começa sem briefing validado.
 O Blueprint é gerado diretamente no Claude Project do cliente, a partir do Documento
 de Briefing. O Claude Code gera os arquivos `.tsx` do wireframe no repositório
 `fxl`, usando o módulo oficial de componentes React em
-`skills/wireframe-builder/components/`. O wireframe é publicado via Vercel.
+`tools/wireframe-builder/components/`. O wireframe é publicado via Vercel.
 
 O diferencial do BI Personalizado: o cliente precisa dar **aprovação formal escrita**
 antes do desenvolvimento iniciar — sem essa aprovação, a Fase 3 não começa.
