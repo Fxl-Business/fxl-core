@@ -83,34 +83,34 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DOCS-01 | — | Pending |
-| DOCS-02 | — | Pending |
-| DOCS-03 | — | Pending |
-| WCMT-01 | — | Pending |
-| WCMT-02 | — | Pending |
-| WCMT-03 | — | Pending |
-| WEDT-01 | — | Pending |
-| WEDT-02 | — | Pending |
-| WEDT-03 | — | Pending |
-| WEDT-04 | — | Pending |
-| BRND-01 | — | Pending |
-| BRND-02 | — | Pending |
-| BRND-03 | — | Pending |
-| TCONF-01 | — | Pending |
-| TCONF-02 | — | Pending |
-| TCONF-03 | — | Pending |
-| TCONF-04 | — | Pending |
-| SGEN-01 | — | Pending |
-| SGEN-02 | — | Pending |
-| SGEN-03 | — | Pending |
-| SGEN-04 | — | Pending |
-| SGEN-05 | — | Pending |
+| DOCS-01 | Phase 1 | Pending |
+| DOCS-02 | Phase 1 | Pending |
+| DOCS-03 | Phase 1 | Pending |
+| WCMT-01 | Phase 2 | Pending |
+| WCMT-02 | Phase 2 | Pending |
+| WCMT-03 | Phase 2 | Pending |
+| WEDT-01 | Phase 3 | Pending |
+| WEDT-02 | Phase 3 | Pending |
+| WEDT-03 | Phase 3 | Pending |
+| WEDT-04 | Phase 3 | Pending |
+| BRND-01 | Phase 4 | Pending |
+| BRND-02 | Phase 4 | Pending |
+| BRND-03 | Phase 4 | Pending |
+| TCONF-01 | Phase 5 | Pending |
+| TCONF-02 | Phase 5 | Pending |
+| TCONF-03 | Phase 5 | Pending |
+| TCONF-04 | Phase 5 | Pending |
+| SGEN-01 | Phase 6 | Pending |
+| SGEN-02 | Phase 6 | Pending |
+| SGEN-03 | Phase 6 | Pending |
+| SGEN-04 | Phase 6 | Pending |
+| SGEN-05 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 22 total
-- Mapped to phases: 0
-- Unmapped: 22
+- Mapped to phases: 22
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-07*
-*Last updated: 2026-03-07 after scope revision*
+*Last updated: 2026-03-07 — traceability updated after roadmap revision*
