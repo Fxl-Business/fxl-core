@@ -8,6 +8,7 @@ type Props = {
   screenId: string
   targetId: string
   targetLabel?: string
+  authorId: string
   authorName: string
   authorRole: 'operador' | 'cliente'
   open: boolean
@@ -19,6 +20,7 @@ export default function CommentOverlay({
   screenId,
   targetId,
   targetLabel,
+  authorId,
   authorName,
   authorRole,
   open,
@@ -49,7 +51,7 @@ export default function CommentOverlay({
 
     setSubmitting(true)
     try {
-      await addComment({ clientSlug, targetId, authorName, authorRole, text })
+      await addComment({ clientSlug, targetId, authorId, authorName, authorRole, text })
       setDraft('')
       await fetchComments()
     } catch {

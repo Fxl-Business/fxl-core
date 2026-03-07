@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { MessageSquare, Loader2 } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
 import { validateToken } from '@tools/wireframe-builder/lib/tokens'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
@@ -11,7 +10,17 @@ import WireframeHeader from '@tools/wireframe-builder/components/WireframeHeader
 import BlueprintRenderer from '@tools/wireframe-builder/components/BlueprintRenderer'
 import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
 
-const STORAGE_KEY = 'fxl_client_name'
+const STORAGE_KEY_NAME = 'fxl_client_name'
+const STORAGE_KEY_ID = 'fxl_client_id'
+
+function getClientId(): string {
+  let id = localStorage.getItem(STORAGE_KEY_ID)
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem(STORAGE_KEY_ID, id)
+  }
+  return id
+}
 
 const blueprintMap: Record<string, () => Promise<{ default: BlueprintConfig }>> = {
   'financeiro-conta-azul': () => import('@clients/financeiro-conta-azul/wireframe/blueprint.config'),
@@ -51,15 +60,8 @@ export default function SharedWireframeView() {
 
       const clientSlug = result.clientSlug
 
-      // Anonymous sign-in for client auth
-      const { error: authError } = await supabase.auth.signInAnonymously()
-      if (authError) {
-        setViewState({ step: 'invalid', message: 'Erro de autenticacao. Tente novamente.' })
-        return
-      }
-
       // Check for stored name
-      const storedName = localStorage.getItem(STORAGE_KEY)
+      const storedName = localStorage.getItem(STORAGE_KEY_NAME)
       if (storedName) {
         await loadBlueprint(clientSlug, storedName)
       } else {
@@ -92,7 +94,7 @@ export default function SharedWireframeView() {
     if (!name) return
     if (viewState.step !== 'name-entry') return
 
-    localStorage.setItem(STORAGE_KEY, name)
+    localStorage.setItem(STORAGE_KEY_NAME, name)
     loadBlueprint(viewState.clientSlug, name)
   }
 
@@ -198,6 +200,7 @@ export default function SharedWireframeView() {
 
   // viewState.step === 'wireframe'
   const { blueprint: bp, clientSlug, clientName } = viewState
+  const clientId = getClientId()
   const screens = bp.screens
   const activeScreen = screens[activeIndex]
 
@@ -291,6 +294,7 @@ export default function SharedWireframeView() {
           screenId={activeScreen.id}
           targetId={drawerTarget.targetId}
           targetLabel={drawerTarget.label}
+          authorId={clientId}
           authorName={clientName}
           authorRole="cliente"
           open={drawerOpen}

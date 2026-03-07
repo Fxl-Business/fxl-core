@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { SignUp } from '@clerk/react'
 import Layout from '@/components/layout/Layout'
+import ProtectedRoute from '@/components/ProtectedRoute'
 import Home from '@/pages/Home'
 import DocRenderer from '@/pages/DocRenderer'
 import FinanceiroIndex from '@/pages/clients/FinanceiroContaAzul/Index'
@@ -9,6 +11,7 @@ import FinanceiroWireframe from '@/pages/clients/FinanceiroContaAzul/Wireframe'
 import FinanceiroWireframeViewer from '@/pages/clients/FinanceiroContaAzul/WireframeViewer'
 import ComponentGallery from '@/pages/tools/ComponentGallery'
 import Login from '@/pages/Login'
+import Profile from '@/pages/Profile'
 
 const SharedWireframeView = lazy(() => import('@/pages/SharedWireframeView'))
 
@@ -16,7 +19,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<Layout />}>
+        {/* Protected operator routes (inside Layout) */}
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           {/* Home */}
           <Route path="/" element={<Home />} />
 
@@ -32,16 +36,30 @@ export default function App() {
           <Route path="/clients/financeiro-conta-azul/:doc" element={<FinanceiroDocViewer />} />
         </Route>
 
-        {/* Login — fora do Layout (tela cheia, sem sidebar) */}
-        <Route path="/login" element={<Login />} />
-
-        {/* Wireframe viewer — fora do Layout (tela cheia) */}
+        {/* Auth pages — public, full screen */}
+        <Route path="/login/*" element={<Login />} />
         <Route
-          path="/clients/financeiro-conta-azul/wireframe-view"
-          element={<FinanceiroWireframeViewer />}
+          path="/signup/*"
+          element={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+              <SignUp routing="path" path="/signup" signInUrl="/login" />
+            </div>
+          }
         />
 
-        {/* Shared wireframe viewer for external clients (token-gated) */}
+        {/* Profile — protected, full screen */}
+        <Route
+          path="/perfil/*"
+          element={<ProtectedRoute><Profile /></ProtectedRoute>}
+        />
+
+        {/* Wireframe viewer — protected, full screen */}
+        <Route
+          path="/clients/financeiro-conta-azul/wireframe-view"
+          element={<ProtectedRoute><FinanceiroWireframeViewer /></ProtectedRoute>}
+        />
+
+        {/* Shared wireframe viewer for external clients (token-gated, public) */}
         <Route
           path="/wireframe-view"
           element={

@@ -4,19 +4,17 @@ import type { Comment } from '../types/comments'
 export async function addComment(params: {
   clientSlug: string
   targetId: string
+  authorId: string
   authorName: string
   authorRole: 'operador' | 'cliente'
   text: string
 }): Promise<Comment> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
-
   const { data, error } = await supabase
     .from('comments')
     .insert({
       client_slug: params.clientSlug,
       target_id: params.targetId,
-      author_id: user.id,
+      author_id: params.authorId,
       author_name: params.authorName,
       author_role: params.authorRole,
       text: params.text,

@@ -18,11 +18,9 @@ export async function validateToken(
 
 export async function createShareToken(
   clientSlug: string,
+  createdBy: string,
   expiresInDays = 30
 ): Promise<ShareToken> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
-
   const expiresAt = new Date()
   expiresAt.setDate(expiresAt.getDate() + expiresInDays)
 
@@ -30,7 +28,7 @@ export async function createShareToken(
     .from('share_tokens')
     .insert({
       client_slug: clientSlug,
-      created_by: user.id,
+      created_by: createdBy,
       expires_at: expiresAt.toISOString(),
     })
     .select()
