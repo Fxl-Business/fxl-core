@@ -22,6 +22,7 @@ const navigation: NavItem[] = [
       { label: 'Identidade FXL', href: '/processo/identidade' },
       {
         label: 'Fases',
+        href: '/processo/fases/index',
         children: [
           { label: 'Fase 1 — Diagnostico', href: '/processo/fases/fase1' },
           { label: 'Fase 2 — Wireframe', href: '/processo/fases/fase2' },
@@ -35,21 +36,12 @@ const navigation: NavItem[] = [
     ],
   },
   {
-    label: 'Ferramentas',
-    href: '/ferramentas/index',
+    label: 'Padroes',
+    href: '/padroes/index',
     children: [
       {
-        label: 'Wireframe Builder',
-        href: '/ferramentas/wireframe-builder',
-        children: [
-          { label: 'Biblioteca de KPIs', href: '/referencias/biblioteca-kpis' },
-          { label: 'Blocos Disponiveis', href: '/referencias/blocos-disponiveis' },
-          { label: 'Galeria de Componentes', href: '/ferramentas/wireframe-builder/galeria' },
-        ],
-      },
-      { label: 'Tech Radar', href: '/ferramentas/tech-radar' },
-      {
-        label: 'Techs',
+        label: 'Tech Radar',
+        href: '/ferramentas/tech-radar',
         children: [
           { label: 'Vite + React + TS', href: '/ferramentas/techs/vite-react-ts' },
           { label: 'Tailwind + shadcn/ui', href: '/ferramentas/techs/tailwind-shadcn' },
@@ -71,8 +63,20 @@ const navigation: NavItem[] = [
       { label: 'Premissas Gerais', href: '/ferramentas/premissas-gerais' },
       { label: 'Seguranca', href: '/ferramentas/seguranca' },
       { label: 'Testes', href: '/ferramentas/testes' },
-      { label: 'Template de Sprint', href: '/ferramentas/master-prompt' },
-      { label: 'CLAUDE.md — Template', href: '/ferramentas/claude-md-template' },
+    ],
+  },
+  {
+    label: 'Ferramentas',
+    href: '/ferramentas/index',
+    children: [
+      {
+        label: 'Wireframe Builder',
+        href: '/ferramentas/wireframe-builder',
+        children: [
+          { label: 'Blocos Disponiveis', href: '/referencias/blocos-disponiveis' },
+          { label: 'Galeria de Componentes', href: '/ferramentas/wireframe-builder/galeria' },
+        ],
+      },
     ],
   },
   {
