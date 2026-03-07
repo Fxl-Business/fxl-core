@@ -7,6 +7,7 @@ import FinanceiroDocViewer from '@/pages/clients/FinanceiroContaAzul/DocViewer'
 import FinanceiroWireframe from '@/pages/clients/FinanceiroContaAzul/Wireframe'
 import FinanceiroWireframeViewer from '@/pages/clients/FinanceiroContaAzul/WireframeViewer'
 import ComponentGallery from '@/pages/tools/ComponentGallery'
+import Login from '@/pages/Login'
 
 export default function App() {
   return (
@@ -27,6 +28,9 @@ export default function App() {
           <Route path="/clients/financeiro-conta-azul/wireframe" element={<FinanceiroWireframe />} />
           <Route path="/clients/financeiro-conta-azul/:doc" element={<FinanceiroDocViewer />} />
         </Route>
+
+        {/* Login — fora do Layout (tela cheia, sem sidebar) */}
+        <Route path="/login" element={<Login />} />
 
         {/* Wireframe viewer — fora do Layout (tela cheia) */}
         <Route
