@@ -19,6 +19,30 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **WCMT-02**: Usuario externo (cliente) acessa wireframe e deixa comentarios sem precisar de conta dev
 - [x] **WCMT-03**: Operador visualiza todos os comentarios e marca como resolvidos
 
+### Domain Reorganization (Phase 02.1)
+
+- [ ] **REORG-01**: Sidebar com 4 secoes top-level (Processo, Padroes, Ferramentas, Clientes)
+- [ ] **REORG-02**: Tech Radar + techs + Premissas + Seguranca + Testes agrupados sob Padroes
+- [ ] **REORG-03**: Landing pages para Fases e Padroes com navegacao por cards
+- [ ] **REORG-04**: Docs de processo reescritos para Claude Code + GSD (sem Claude Project)
+- [ ] **REORG-05**: CLAUDE.md e README refletem taxonomia Padroes
+- [ ] **REORG-06**: Roadmap inclui fases 02.2, 02.3, 02.4
+
+### Blocos Disponiveis Evolution (Phase 02.2)
+
+- [ ] **BLKSPEC-01**: Blocos Disponiveis como spec detalhada que serve de prompt para criar componentes
+- [ ] **BLKSPEC-02**: Galeria de componentes sincronizada com specs de blocos
+
+### Global Skills (Phase 02.3)
+
+- [ ] **GSKILL-01**: Premissas/Seguranca/Testes como Skills globais do Claude Code
+- [ ] **GSKILL-02**: Skills acessiveis via .claude/skills/ ou .agents/skills/
+
+### Visual Overhaul (Phase 02.4)
+
+- [ ] **VISUAL-01**: Design system atualizado com paleta, tipografia e componentes revisados
+- [ ] **VISUAL-02**: Todas as paginas da aplicacao com visual production-grade
+
 ### Wireframe Visual Editor
 
 - [ ] **WEDT-01**: Operador edita layout de secoes dentro de uma tela (mover, adicionar, remover)
@@ -89,6 +113,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WCMT-01 | Phase 2 | Complete |
 | WCMT-02 | Phase 2 | Complete |
 | WCMT-03 | Phase 2 | Complete |
+| REORG-01 | Phase 02.1 | Pending |
+| REORG-02 | Phase 02.1 | Pending |
+| REORG-03 | Phase 02.1 | Pending |
+| REORG-04 | Phase 02.1 | Pending |
+| REORG-05 | Phase 02.1 | Pending |
+| REORG-06 | Phase 02.1 | Pending |
+| BLKSPEC-01 | Phase 02.2 | Pending |
+| BLKSPEC-02 | Phase 02.2 | Pending |
+| GSKILL-01 | Phase 02.3 | Pending |
+| GSKILL-02 | Phase 02.3 | Pending |
+| VISUAL-01 | Phase 02.4 | Pending |
+| VISUAL-02 | Phase 02.4 | Pending |
 | WEDT-01 | Phase 3 | Pending |
 | WEDT-02 | Phase 3 | Pending |
 | WEDT-03 | Phase 3 | Pending |
@@ -107,8 +143,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SGEN-05 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 22 total
-- Mapped to phases: 22
+- v1 requirements: 34 total
+- Mapped to phases: 34
 - Unmapped: 0
 
 ---

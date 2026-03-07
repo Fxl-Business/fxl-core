@@ -15,6 +15,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Documentation** - Reorganize docs navigation and content so operators find information naturally
 - [x] **Phase 2: Wireframe Comments** - Persistent comments on wireframes with Supabase so clients give feedback directly
 - [ ] **Phase 02.1: Melhoria e organizacao de dominio** - Reorganize navigation, badges, content for Padroes taxonomy and Claude Code + GSD workflow (INSERTED)
+- [ ] **Phase 02.2: Evolucao de Blocos Disponiveis** - Evolve Blocos Disponiveis spec as detailed prompt for component creation (INSERTED)
+- [ ] **Phase 02.3: Skills Globais** - Transform Premissas/Seguranca/Testes into global Claude Code Skills (INSERTED)
+- [ ] **Phase 02.4: Reformulacao Visual** - Visual overhaul of the FXL Core application (INSERTED)
 - [ ] **Phase 3: Wireframe Visual Editor** - Edit wireframe layout, components, and screens via UI with blueprint sync
 - [ ] **Phase 4: Branding Process** - Structured branding collection with automatic application to wireframes
 - [ ] **Phase 5: Technical Configuration** - TechnicalConfig schema and config resolver bridging wireframe to functional system
@@ -61,12 +64,51 @@ Plans:
   2. All process docs reference Claude Code + GSD as the workflow (not Claude Project)
   3. CLAUDE.md and README reflect the Padroes taxonomy
   4. Roadmap includes phases 02.2, 02.3, 02.4
-**Plans:** 1/3 plans executed
+**Plans:** 3 plans
 
 Plans:
-- [ ] 02.1-01-PLAN.md — Navigation restructuring: sidebar, routes, badges, landing pages, file deletions (REORG-01, REORG-02, REORG-03)
+- [x] 02.1-01-PLAN.md — Navigation restructuring: sidebar, routes, badges, landing pages, file deletions (REORG-01, REORG-02, REORG-03)
 - [ ] 02.1-02-PLAN.md — Content rewrite: 9 process docs updated for Claude Code + GSD workflow (REORG-04)
-- [ ] 02.1-03-PLAN.md — Meta updates: CLAUDE.md, README, ROADMAP with phases 02.2-02.4, REQUIREMENTS (REORG-05, REORG-06)
+- [x] 02.1-03-PLAN.md — Meta updates: CLAUDE.md, README, ROADMAP with phases 02.2-02.4, REQUIREMENTS (REORG-05, REORG-06)
+
+### Phase 02.2: Evolucao de Blocos Disponiveis (INSERTED)
+
+**Goal:** Blocos Disponiveis serves as a detailed spec/prompt that can generate any wireframe component
+**Requirements**: BLKSPEC-01, BLKSPEC-02
+**Depends on:** Phase 02.1
+**Success Criteria** (what must be TRUE):
+  1. Blocos Disponiveis spec is detailed enough to serve as a prompt for component creation
+  2. Component gallery is synchronized with block specs
+**Plans:** TBD
+
+Plans:
+- [ ] 02.2-01: TBD
+
+### Phase 02.3: Skills Globais (INSERTED)
+
+**Goal:** Premissas, Seguranca, and Testes are global Claude Code Skills, not just documentation
+**Requirements**: GSKILL-01, GSKILL-02
+**Depends on:** Phase 02.1
+**Success Criteria** (what must be TRUE):
+  1. Premissas/Seguranca/Testes exist as Claude Code Skills under .claude/skills/ or .agents/skills/
+  2. Skills are accessible and usable by Claude Code during development
+**Plans:** TBD
+
+Plans:
+- [ ] 02.3-01: TBD
+
+### Phase 02.4: Reformulacao Visual (INSERTED)
+
+**Goal:** FXL Core application has a refreshed, production-grade visual design
+**Requirements**: VISUAL-01, VISUAL-02
+**Depends on:** Phase 02.1
+**Success Criteria** (what must be TRUE):
+  1. Design system updated with revised palette, typography, and components
+  2. All application pages have production-grade visual quality
+**Plans:** TBD
+
+Plans:
+- [ ] 02.4-01: TBD
 
 ### Phase 3: Wireframe Visual Editor
 **Goal**: Operators can visually modify wireframe layout and components without touching code, with all changes synced to the blueprint config
@@ -133,13 +175,16 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 02.1 -> 3 -> 4 -> 5 -> 6
+Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3/02.4 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Documentation | 2/2 | Complete | 2026-03-07 |
 | 2. Wireframe Comments | 3/3 | Complete | 2026-03-07 |
-| 02.1. Melhoria e organizacao de dominio | 1/3 | In Progress|  |
+| 02.1. Melhoria e organizacao de dominio | 2/3 | In Progress |  |
+| 02.2. Evolucao de Blocos Disponiveis | 0/1 | Not started | - |
+| 02.3. Skills Globais | 0/1 | Not started | - |
+| 02.4. Reformulacao Visual | 0/1 | Not started | - |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |
 | 4. Branding Process | 0/2 | Not started | - |
 | 5. Technical Configuration | 0/2 | Not started | - |
