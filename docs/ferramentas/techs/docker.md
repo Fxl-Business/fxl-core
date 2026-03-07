@@ -1,6 +1,6 @@
 ---
 title: Docker
-badge: Ferramentas
+badge: Padroes
 description: Containerizacao de backends customizados
 status: Em avaliacao
 ---

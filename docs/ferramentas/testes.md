@@ -1,6 +1,6 @@
 ---
 title: Testes
-badge: Ferramentas
+badge: Padroes
 description: O que testar, quando testar, criterios
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: GitHub
-badge: Ferramentas
+badge: Padroes
 description: Versionamento padrao FXL — repositorios, branches e commits
 status: Ativo
 ---

@@ -1,6 +1,6 @@
 ---
 title: Backend — Node.js
-badge: Ferramentas
+badge: Padroes
 description: Backend customizado quando Supabase nao for suficiente
 status: Em avaliacao
 ---

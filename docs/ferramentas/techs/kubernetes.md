@@ -1,6 +1,6 @@
 ---
 title: Kubernetes
-badge: Ferramentas
+badge: Padroes
 description: Orquestracao de containers — decisao pendente
 status: TBD
 ---

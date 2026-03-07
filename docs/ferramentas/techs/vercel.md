@@ -1,6 +1,6 @@
 ---
 title: Deploy — Vercel
-badge: Ferramentas
+badge: Padroes
 description: Setup, environment variables e dominios
 status: Ativo
 ---

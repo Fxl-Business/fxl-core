@@ -15,5 +15,5 @@ atraves de 6 fases sequenciais, operadas via Claude Code com GSD.
 - [Prompts](/processo/prompts) — prompts reutilizaveis por contexto
 - [Cliente vs Produto](/processo/cliente-vs-produto) — os dois tipos de projeto
 - [Identidade FXL](/processo/identidade) — identidade e posicionamento
-- [Fases 1-6](/processo/fases/fase1) — detalhamento de cada fase
+- [Fases](/processo/fases/index) — as 6 fases do processo, do diagnostico a entrega
 - [Onboarding](/processo/onboarding) — guia passo a passo

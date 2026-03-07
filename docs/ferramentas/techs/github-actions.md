@@ -1,6 +1,6 @@
 ---
 title: GitHub Actions
-badge: Ferramentas
+badge: Padroes
 description: CI/CD automatizado para lint, test e deploy
 status: Em avaliacao
 ---

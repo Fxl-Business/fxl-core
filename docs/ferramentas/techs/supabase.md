@@ -1,6 +1,6 @@
 ---
 title: Supabase
-badge: Ferramentas
+badge: Padroes
 description: Conexao, Auth, RLS e migrations
 status: Ativo
 ---

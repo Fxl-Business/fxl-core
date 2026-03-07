@@ -1,6 +1,6 @@
 ---
 title: Tech Radar FXL
-badge: Ferramentas
+badge: Padroes
 description: Status de todas as tecnologias adotadas, em avaliacao ou pendentes de decisao
 ---
 

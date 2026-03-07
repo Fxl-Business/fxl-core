@@ -1,6 +1,6 @@
 ---
 title: Backend — Python
-badge: Ferramentas
+badge: Padroes
 description: Backend para workloads de dados, ML ou automacoes
 status: Em avaliacao
 ---

@@ -1,6 +1,6 @@
 ---
 title: Terraform
-badge: Ferramentas
+badge: Padroes
 description: Infrastructure as Code — decisao pendente
 status: TBD
 ---

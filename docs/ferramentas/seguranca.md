@@ -1,6 +1,6 @@
 ---
 title: Seguranca
-badge: Ferramentas
+badge: Padroes
 description: Checklist anti AI-slop, rate-limit e validacao
 ---
 

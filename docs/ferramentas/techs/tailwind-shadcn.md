@@ -1,6 +1,6 @@
 ---
 title: Tailwind CSS + shadcn/ui
-badge: Ferramentas
+badge: Padroes
 description: Camada de estilos e componentes padrao FXL
 status: Ativo
 ---

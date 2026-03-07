@@ -1,6 +1,6 @@
 ---
 title: Blocos Disponiveis
-badge: Referencias
+badge: Ferramentas
 description: Componentes disponiveis para Blueprint
 ---
 
@@ -59,20 +59,7 @@ Antes de implementar qualquer tela, verificar se os componentes necessários já
 
 ## Blocos por objetivo de tela
 
-### Padrão global de filtros
-- O filtro de período é sempre controlado pelo `WireframeHeader` — nunca duplicar nas telas
-- Usar `WireframeFilterBar` no lugar de `GlobalFilters` em todas as novas telas
-- `GlobalFilters` permanece disponível para compatibilidade com telas v1, mas não deve ser usado em telas novas
-
-### Padrão de comparação temporal
-
-> Padrão completo em `tools/wireframe-builder/SKILL.md` (Padrão 3 — Switch "Comparar").
-
-Resumo: nenhuma tela exibe comparativos por padrão. O switch "Comparar" na WireframeFilterBar
-ativa variações nos KPIs, barras agrupadas nos gráficos e colunas extras nas tabelas.
-Sparklines, semáforos e "Previsto vs Realizado" são sempre visíveis.
-O modo comparativo NUNCA cria novos blocos — transforma os existentes via prop `compareMode`.
-
+> Para padroes de implementacao (filtros, comparacao temporal, compareMode), consulte `tools/wireframe-builder/SKILL.md`.
 
 ### DRE / Resultado mensal
 - WireframeFilterBar (com switch Comparar) · 4× KpiCardFull (value=R$, sub=%, compareMode) · Layout empilhado: CalculoCard + WaterfallChart (ambos recebem compareMode, transformam internamente) · DetailViewSwitcher · DrillDownTable (colunas condicionais)
