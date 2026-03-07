@@ -25,8 +25,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **REORG-02**: Tech Radar + techs + Premissas + Seguranca + Testes agrupados sob Padroes
 - [ ] **REORG-03**: Landing pages para Fases e Padroes com navegacao por cards
 - [ ] **REORG-04**: Docs de processo reescritos para Claude Code + GSD (sem Claude Project)
-- [ ] **REORG-05**: CLAUDE.md e README refletem taxonomia Padroes
-- [ ] **REORG-06**: Roadmap inclui fases 02.2, 02.3, 02.4
+- [x] **REORG-05**: CLAUDE.md e README refletem taxonomia Padroes
+- [x] **REORG-06**: Roadmap inclui fases 02.2, 02.3, 02.4
 
 ### Blocos Disponiveis Evolution (Phase 02.2)
 
@@ -117,8 +117,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REORG-02 | Phase 02.1 | Pending |
 | REORG-03 | Phase 02.1 | Pending |
 | REORG-04 | Phase 02.1 | Pending |
-| REORG-05 | Phase 02.1 | Pending |
-| REORG-06 | Phase 02.1 | Pending |
+| REORG-05 | Phase 02.1 | Complete |
+| REORG-06 | Phase 02.1 | Complete |
 | BLKSPEC-01 | Phase 02.2 | Pending |
 | BLKSPEC-02 | Phase 02.2 | Pending |
 | GSKILL-01 | Phase 02.3 | Pending |
