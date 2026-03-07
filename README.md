@@ -1,6 +1,6 @@
-# FXL Core — Nucleo FXL
+# FXL Core — Plataforma Operacional FXL
 
-Processo, knowledge, skills AI-first e clientes — o nucleo operacional da FXL.
+Processo, padroes, ferramentas e clientes — o nucleo operacional da FXL.
 
 ## Visao de Longo Prazo
 
@@ -11,10 +11,14 @@ estruturadas, gerar qualquer produto digital de forma progressivamente automatiz
 
 | Pasta | Para quem | O que contem |
 |---|---|---|
-| `docs/` | Claude + Humanos | Documentacao renderizada via Markdoc — fonte unica de verdade |
+| `docs/processo/` | Claude + Humanos | Regras normativas, fases, identidade, fluxos |
+| `docs/padroes/` + `docs/ferramentas/techs/` | Claude + Humanos | Padroes — regras base, stack aprovada, padroes tecnicos |
+| `docs/ferramentas/` | Claude + Humanos | Ferramentas — Wireframe Builder, blocos, galeria |
+| `docs/referencias/` | Claude + Humanos | Blocos Disponiveis (spec de componentes) |
+| `tools/` | Claude + Humanos | Ferramentas AI-first do processo (wireframe-builder etc.) |
 | `clients/` | Claude + Humanos | Knowledge base e wireframes por cliente |
-| `skills/` | Claude Code | Ferramentas AI-first do processo (wireframe-builder etc.) |
-| `src/` | App | Shell React — layout, renderer Markdoc, paginas interativas |
+| `src/` | App | Shell React — layout, renderer, paginas interativas |
+| `.claude/ + .agents/` | Claude Code | AI runtime — GSD, commands, hooks, skills |
 
 ## Desenvolvimento local
 
