@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { MessageSquare } from 'lucide-react'
 import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
+import CommentManager from '@tools/wireframe-builder/components/CommentManager'
 import WireframeHeader from '@tools/wireframe-builder/components/WireframeHeader'
 import BlueprintRenderer from '@tools/wireframe-builder/components/BlueprintRenderer'
 import blueprint from '@clients/financeiro-conta-azul/wireframe/blueprint.config'
@@ -20,6 +21,7 @@ export default function FinanceiroWireframeViewer() {
   const [comments, setComments] = useState<Comment[]>([])
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [drawerTarget, setDrawerTarget] = useState<{ targetId: string; label: string } | null>(null)
+  const [managerOpen, setManagerOpen] = useState(false)
 
   const fetchComments = useCallback(async () => {
     try {
@@ -35,6 +37,7 @@ export default function FinanceiroWireframeViewer() {
   }, [fetchComments])
 
   function handleOpenComments(targetId: string, label: string) {
+    setManagerOpen(false) // Mutual exclusion: close manager when overlay opens
     setDrawerTarget({ targetId, label })
     setDrawerOpen(true)
   }
@@ -47,6 +50,16 @@ export default function FinanceiroWireframeViewer() {
   function handleCloseDrawer() {
     setDrawerOpen(false)
     fetchComments()
+  }
+
+  function handleOpenManager() {
+    setDrawerOpen(false) // Mutual exclusion: close overlay when manager opens
+    setManagerOpen(true)
+  }
+
+  function handleCloseManager() {
+    setManagerOpen(false)
+    fetchComments() // Refresh badge counts after managing comments
   }
 
   const authorName = user?.user_metadata?.name ?? user?.email ?? 'Operador'
@@ -102,8 +115,29 @@ export default function FinanceiroWireframeViewer() {
             </button>
           ))}
         </nav>
-        <div style={{ padding: '16px 24px', borderTop: '1px solid #424242', fontSize: 11, color: '#757575' }}>
-          Desenvolvido por FXL
+        <div style={{ padding: '16px 24px', borderTop: '1px solid #424242' }}>
+          {user && (
+            <button
+              type="button"
+              onClick={handleOpenManager}
+              style={{
+                display: 'block',
+                background: 'transparent',
+                border: 'none',
+                padding: 0,
+                marginBottom: 8,
+                fontSize: 11,
+                color: '#9E9E9E',
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#FFFFFF' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#9E9E9E' }}
+            >
+              Gerenciar
+            </button>
+          )}
+          <span style={{ fontSize: 11, color: '#757575' }}>Desenvolvido por FXL</span>
         </div>
       </aside>
 
@@ -142,6 +176,13 @@ export default function FinanceiroWireframeViewer() {
           onClose={handleCloseDrawer}
         />
       )}
+
+      {/* Comment management panel */}
+      <CommentManager
+        clientSlug={blueprint.slug}
+        open={managerOpen}
+        onClose={handleCloseManager}
+      />
     </div>
   )
 }
