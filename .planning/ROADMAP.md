@@ -29,11 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Sidebar navigation reflects the process structure (fases, build, referencias, operacao) and a new operator can find any topic in under 3 clicks
   2. All docs content accurately describes the current process (no outdated instructions or dead references)
   3. A new operator visiting the app for the first time can follow the onboarding page to understand the full process end-to-end
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Structure + Navigation: move files, rewrite sidebar, update routes and Home links (DOCS-01)
+- [ ] 01-02-PLAN.md — Content + Onboarding: rewrite content, create merged pages, restructure fases, create onboarding (DOCS-02, DOCS-03)
 
 ### Phase 2: Wireframe Comments
 **Goal**: Clients and operators can have persistent feedback conversations directly on wireframe screens and blocks
@@ -118,7 +118,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Documentation | 0/2 | Not started | - |
+| 1. Documentation | 0/2 | Planned | - |
 | 2. Wireframe Comments | 0/2 | Not started | - |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |
 | 4. Branding Process | 0/2 | Not started | - |
