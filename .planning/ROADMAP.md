@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Structure + Navigation: move files, rewrite sidebar, update routes and Home links (DOCS-01)
+- [x] 01-01-PLAN.md — Structure + Navigation: move files, rewrite sidebar, update routes and Home links (DOCS-01)
 - [ ] 01-02-PLAN.md — Content + Onboarding: rewrite content, create merged pages, restructure fases, create onboarding (DOCS-02, DOCS-03)
 
 ### Phase 2: Wireframe Comments
@@ -118,7 +118,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Documentation | 0/2 | Planned | - |
+| 1. Documentation | 1/2 | In Progress | - |
 | 2. Wireframe Comments | 0/2 | Not started | - |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |
 | 4. Branding Process | 0/2 | Not started | - |

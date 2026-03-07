@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Documentation
 
-- [ ] **DOCS-01**: Sidebar reorganizada com navegacao que reflete a estrutura do processo (fases, build, referencias, operacao)
+- [x] **DOCS-01**: Sidebar reorganizada com navegacao que reflete a estrutura do processo (fases, build, referencias, operacao)
 - [ ] **DOCS-02**: Conteudo dos docs revisado e atualizado para refletir processo atual
 - [ ] **DOCS-03**: Pagina de onboarding que guia novos operadores pelo processo
 
@@ -83,7 +83,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DOCS-01 | Phase 1 | Pending |
+| DOCS-01 | Phase 1 | Complete |
 | DOCS-02 | Phase 1 | Pending |
 | DOCS-03 | Phase 1 | Pending |
 | WCMT-01 | Phase 2 | Pending |
