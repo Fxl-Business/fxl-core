@@ -18,9 +18,7 @@ export default function App() {
 
           {/* Documentacao via Markdoc — catch-all para docs/ */}
           <Route path="/processo/*" element={<DocRenderer />} />
-          <Route path="/build/*" element={<DocRenderer />} />
           <Route path="/referencias/*" element={<DocRenderer />} />
-          <Route path="/operacao/*" element={<DocRenderer />} />
           <Route path="/ferramentas/wireframe-builder/galeria" element={<ComponentGallery />} />
           <Route path="/ferramentas/*" element={<DocRenderer />} />
 

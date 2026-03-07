@@ -6,7 +6,7 @@ const quickActions = [
     icon: Pencil,
     title: 'Evoluir o processo FXL',
     description: 'Criar ou refinar prompts para o Claude Code',
-    href: '/operacao/prompt-abertura',
+    href: '/processo/prompts',
   },
   {
     icon: Users,
@@ -19,7 +19,7 @@ const quickActions = [
     icon: Cpu,
     title: 'Conferir tecnologias',
     description: 'Stack, premissas e decisoes tecnicas do processo',
-    href: '/build/tech-radar',
+    href: '/ferramentas/tech-radar',
   },
 ]
 
@@ -28,13 +28,13 @@ const sections = [
     badge: 'Processo',
     title: 'Roteamento do trabalho',
     description: 'Decide qual POP usar, qual fase vem na sequencia e como o processo evolui.',
-    href: '/processo/master',
+    href: '/processo/visao-geral',
   },
   {
-    badge: 'Build',
-    title: 'Base tecnica padrao',
-    description: 'Consulta obrigatoria para qualquer sprint: stack, banco, seguranca e deploy.',
-    href: '/build/index',
+    badge: 'Ferramentas',
+    title: 'Ferramentas e base tecnica',
+    description: 'Stack, premissas, seguranca, deploy e todas as ferramentas do processo.',
+    href: '/ferramentas/index',
   },
   {
     badge: 'Referencias',
