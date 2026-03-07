@@ -181,7 +181,7 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3/02.4 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Documentation | 2/2 | Complete | 2026-03-07 |
 | 2. Wireframe Comments | 3/3 | Complete | 2026-03-07 |
-| 02.1. Melhoria e organizacao de dominio | 3/3 | Complete   | 2026-03-07 |
+| 02.1. Melhoria e organizacao de dominio | 3/3 | Complete    | 2026-03-07 |
 | 02.2. Evolucao de Blocos Disponiveis | 0/1 | Not started | - |
 | 02.3. Skills Globais | 0/1 | Not started | - |
 | 02.4. Reformulacao Visual | 0/1 | Not started | - |
