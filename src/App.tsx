@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import Home from '@/pages/Home'
@@ -8,6 +9,8 @@ import FinanceiroWireframe from '@/pages/clients/FinanceiroContaAzul/Wireframe'
 import FinanceiroWireframeViewer from '@/pages/clients/FinanceiroContaAzul/WireframeViewer'
 import ComponentGallery from '@/pages/tools/ComponentGallery'
 import Login from '@/pages/Login'
+
+const SharedWireframeView = lazy(() => import('@/pages/SharedWireframeView'))
 
 export default function App() {
   return (
@@ -36,6 +39,16 @@ export default function App() {
         <Route
           path="/clients/financeiro-conta-azul/wireframe-view"
           element={<FinanceiroWireframeViewer />}
+        />
+
+        {/* Shared wireframe viewer for external clients (token-gated) */}
+        <Route
+          path="/wireframe-view"
+          element={
+            <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>Carregando...</div>}>
+              <SharedWireframeView />
+            </Suspense>
+          }
         />
       </Routes>
     </BrowserRouter>
