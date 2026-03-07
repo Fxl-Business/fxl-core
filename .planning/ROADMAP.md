@@ -61,7 +61,7 @@ Plans:
   2. All process docs reference Claude Code + GSD as the workflow (not Claude Project)
   3. CLAUDE.md and README reflect the Padroes taxonomy
   4. Roadmap includes phases 02.2, 02.3, 02.4
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 02.1-01-PLAN.md — Navigation restructuring: sidebar, routes, badges, landing pages, file deletions (REORG-01, REORG-02, REORG-03)
@@ -139,7 +139,7 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Documentation | 2/2 | Complete | 2026-03-07 |
 | 2. Wireframe Comments | 3/3 | Complete | 2026-03-07 |
-| 02.1. Melhoria e organizacao de dominio | 0/3 | In progress | - |
+| 02.1. Melhoria e organizacao de dominio | 1/3 | In Progress|  |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |
 | 4. Branding Process | 0/2 | Not started | - |
 | 5. Technical Configuration | 0/2 | Not started | - |

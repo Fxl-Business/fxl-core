@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 02.1 context gathered
-last_updated: "2026-03-07T22:47:55.988Z"
-last_activity: 2026-03-07 -- Completed 02-03 Client Access + Comment Management (3 tasks, 6 commits)
+status: executing
+stopped_at: Completed 02.1-01-PLAN.md
+last_updated: "2026-03-07T23:10:46.881Z"
+last_activity: 2026-03-07 -- Completed 02.1-01 Navigation restructuring (2 tasks, 2 commits)
 progress:
   total_phases: 7
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
-  percent: 100
+  total_plans: 8
+  completed_plans: 6
+  percent: 75
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 2 Complete - Ready for Phase 3
+**Current focus:** Phase 02.1 - Melhoria e organizacao de dominio (Plan 1 of 3 complete)
 
 ## Current Position
 
-Phase: 2 of 6 (Wireframe Comments) -- COMPLETE
-Plan: 3 of 3 in current phase (all complete)
-Status: Phase 02 Complete
-Last activity: 2026-03-07 -- Completed 02-03 Client Access + Comment Management (3 tasks, 6 commits)
+Phase: 02.1 of 7 (Melhoria e organizacao de dominio)
+Plan: 1 of 3 in current phase
+Status: In Progress
+Last activity: 2026-03-07 -- Completed 02.1-01 Navigation restructuring (2 tasks, 2 commits)
 
-Progress: [##########] 100%
+Progress: [########--] 75%
 
 ## Performance Metrics
 
@@ -48,10 +48,11 @@ Progress: [##########] 100%
 | 02 | P01 | 4min | 2 | 12 |
 | 02 | P02 | 4min | 2 | 8 |
 | 02 | P03 | multi-session | 3 | 22 |
+| 02.1 | P01 | 4min | 2 | 32 |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 6min, 4min, 4min, multi-session
-- Trend: stable (02-03 was checkpoint-gated, not a velocity issue)
+- Last 5 plans: 6min, 4min, 4min, multi-session, 4min
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -84,6 +85,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Share token generation UI added to operator wireframe viewer
 - [Phase 02]: Comment UX overhaul -- all fonts min 12px, touch targets 32px
 - [Phase 02]: Added make migrate automation for Supabase CLI deployments
+- [Phase 02.1]: Sidebar hrefs point to actual file paths, sidebar grouping independent of file location
+- [Phase 02.1]: Padroes replaces Referencias in breadcrumb sectionSlugMap
+- [Phase 02.1]: Wireframe Builder page shows Blocos + Galeria instead of KPIs + Blocos
 
 ### Pending Todos
 
@@ -100,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07T22:47:55.978Z
-Stopped at: Phase 02.1 context gathered
-Resume file: .planning/phases/02.1-melhoria-e-organizacao-de-dominio/02.1-CONTEXT.md
+Last session: 2026-03-07T23:10:46.876Z
+Stopped at: Completed 02.1-01-PLAN.md
+Resume file: None
