@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 02-01 Foundation plan
-last_updated: "2026-03-07T19:48:59Z"
-last_activity: 2026-03-07 -- Completed 02-01 Foundation (2 tasks, 2 commits)
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-03-07T19:57:00Z"
+last_activity: 2026-03-07 -- Completed 02-02 Comment UI (2 tasks, 2 commits)
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 5
-  completed_plans: 3
-  percent: 60
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State
@@ -26,18 +26,18 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 2 of 6 (Wireframe Comments)
-Plan: 1 of 3 in current phase
-Status: Plan 02-01 Complete
-Last activity: 2026-03-07 -- Completed 02-01 Foundation (2 tasks, 2 commits)
+Plan: 2 of 3 in current phase
+Status: Plan 02-02 Complete
+Last activity: 2026-03-07 -- Completed 02-02 Comment UI (2 tasks, 2 commits)
 
-Progress: [██████----] 60%
+Progress: [████████--] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
+- Total plans completed: 4
 - Average duration: 5min
-- Total execution time: 15min
+- Total execution time: 19min
 
 **By Phase:**
 
@@ -46,9 +46,10 @@ Progress: [██████----] 60%
 | 01 | P01 | 5min | 3 | 40 |
 | 01 | P02 | 6min | 3 | 12 |
 | 02 | P01 | 4min | 2 | 12 |
+| 02 | P02 | 4min | 2 | 8 |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 6min, 4min
+- Last 5 plans: 5min, 6min, 4min, 4min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -74,6 +75,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Login page is full-screen outside Layout (no sidebar)
 - [Phase 02]: Comment target anchoring uses deterministic screenId:sectionIndex pattern
 - [Phase 02]: Token validation uses server-side expires_at comparison via Supabase query
+- [Phase 02]: CommentOverlay is controlled component (open/onClose props) not self-managed
+- [Phase 02]: Comments refetched on drawer close to update badge counts
+- [Phase 02]: BlueprintRenderer backward compatible without comment props
 
 ### Pending Todos
 
@@ -86,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07T19:48:59Z
-Stopped at: Completed 02-01-PLAN.md
-Resume file: .planning/phases/02-wireframe-comments/02-01-SUMMARY.md
+Last session: 2026-03-07T19:57:00Z
+Stopped at: Completed 02-02-PLAN.md
+Resume file: .planning/phases/02-wireframe-comments/02-02-SUMMARY.md
