@@ -2,6 +2,9 @@
 
 > Status: **Aprovado — Revisão v2 em 2026-03-05**
 > Revisão baseada no wireframe HTML de referência aprovado internamente.
+>
+> **Fonte da verdade:** `wireframe/blueprint.config.ts` — o wireframe é gerado dinamicamente a partir deste arquivo.
+> Este documento serve como referência narrativa da arquitetura de telas.
 
 ---
 

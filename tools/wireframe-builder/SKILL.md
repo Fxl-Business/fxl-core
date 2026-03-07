@@ -133,13 +133,40 @@ O wireframe nao deve ser renderizado dentro do Layout da aplicacao.
 
 ---
 
+## Arquitetura declarativa (Blueprint-driven)
+
+O wireframe e gerado dinamicamente a partir de um arquivo de config tipado:
+
+```
+clients/[slug]/wireframe/blueprint.config.ts  → BlueprintConfig (fonte da verdade)
+tools/wireframe-builder/types/blueprint.ts    → Schema TypeScript
+tools/wireframe-builder/components/BlueprintRenderer.tsx → Renderer principal
+tools/wireframe-builder/components/sections/  → Adaptadores por tipo de secao
+```
+
+O `BlueprintConfig` define todas as telas como objetos declarativos.
+Cada tela (`BlueprintScreen`) contem: id, title, periodType, filters,
+hasCompareSwitch e um array de `sections` (discriminated union).
+
+Tipos de secao disponiveis:
+`kpi-grid`, `bar-line-chart`, `donut-chart`, `waterfall-chart`, `pareto-chart`,
+`calculo-card`, `data-table`, `drill-down-table`, `clickable-table`,
+`saldo-banco`, `manual-input`, `upload-section`, `config-table`,
+`chart-grid`, `info-block`.
+
+O `BlueprintRenderer` consome a config e renderiza os componentes.
+Comportamentos tecnicos (inversao de cor, desaturacao, transformacao no
+modo comparacao) sao internos aos componentes — nao aparecem na config.
+
+---
+
 ## Invocacao como sub-agente
 
 Quando Claude Code for invocado para tarefas de wireframe:
 1. Ler este SKILL.md para regras e padroes
-2. Ler `clients/[slug]/docs/blueprint.md` para dados do cliente
+2. Ler `clients/[slug]/wireframe/blueprint.config.ts` para config declarativa (fonte da verdade)
 3. Ler `clients/[slug]/docs/branding.md` para identidade visual
-4. Gerar/alterar arquivos em `clients/[slug]/wireframe/screens/`
+4. Alterar `blueprint.config.ts` para modificar telas (nunca criar screens .tsx avulsos)
 5. Componentes: importar de `@tools/wireframe-builder/components/`
 
 ---
@@ -147,6 +174,8 @@ Quando Claude Code for invocado para tarefas de wireframe:
 ## Regras
 
 - Nunca criar componentes locais na pasta do cliente
+- Nunca criar arquivos .tsx de tela avulsos — toda tela vive no `blueprint.config.ts`
 - Se uma tela exigir componente ainda nao existente, sinalizar antes de prosseguir
 - Todo componente novo adicionado ao modulo deve ser documentado neste SKILL.md
 - Nenhum wireframe deve incluir comparativos temporais hardcoded
+- Detalhes de comportamento de componentes nao devem aparecer no blueprint — ficam internos ao componente

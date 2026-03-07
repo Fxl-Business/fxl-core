@@ -1,71 +1,14 @@
 import { useState } from 'react'
 import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
 import WireframeHeader from '@tools/wireframe-builder/components/WireframeHeader'
-import DFCScreen from '@clients/financeiro-conta-azul/wireframe/screens/DFCScreen'
-import ReceitaScreen from '@clients/financeiro-conta-azul/wireframe/screens/ReceitaScreen'
-import DespesasScreen from '@clients/financeiro-conta-azul/wireframe/screens/DespesasScreen'
-import CentroCustoScreen from '@clients/financeiro-conta-azul/wireframe/screens/CentroCustoScreen'
-import MargensScreen from '@clients/financeiro-conta-azul/wireframe/screens/MargensScreen'
-import FluxoMensalScreen from '@clients/financeiro-conta-azul/wireframe/screens/FluxoMensalScreen'
-import FluxoAnualScreen from '@clients/financeiro-conta-azul/wireframe/screens/FluxoAnualScreen'
-import IndicadoresScreen from '@clients/financeiro-conta-azul/wireframe/screens/IndicadoresScreen'
-import UploadScreen from '@clients/financeiro-conta-azul/wireframe/screens/UploadScreen'
-import ConfiguracaoScreen from '@clients/financeiro-conta-azul/wireframe/screens/ConfiguracaoScreen'
+import BlueprintRenderer from '@tools/wireframe-builder/components/BlueprintRenderer'
+import blueprint from '@clients/financeiro-conta-azul/wireframe/blueprint.config'
 
-type ScreenKey =
-  | 'Resultado Mensal (DFC)'
-  | 'Visão por Receita'
-  | 'Visão por Despesas'
-  | 'Visão por Centro de Custo'
-  | 'Margens Reais da Operação'
-  | 'Fluxo de Caixa Mensal'
-  | 'Fluxo de Caixa Anual Projetado'
-  | 'Indicadores de Desempenho'
-  | 'Upload de Relatórios'
-  | 'Configurações'
-
-const SCREENS: ScreenKey[] = [
-  'Resultado Mensal (DFC)',
-  'Visão por Receita',
-  'Visão por Despesas',
-  'Visão por Centro de Custo',
-  'Margens Reais da Operação',
-  'Fluxo de Caixa Mensal',
-  'Fluxo de Caixa Anual Projetado',
-  'Indicadores de Desempenho',
-  'Upload de Relatórios',
-  'Configurações',
-]
-
-const SCREEN_PERIOD_TYPE: Record<ScreenKey, 'mensal' | 'anual' | 'none'> = {
-  'Resultado Mensal (DFC)':         'mensal',
-  'Visão por Receita':              'mensal',
-  'Visão por Despesas':             'mensal',
-  'Visão por Centro de Custo':      'mensal',
-  'Margens Reais da Operação':      'mensal',
-  'Fluxo de Caixa Mensal':          'mensal',
-  'Fluxo de Caixa Anual Projetado': 'anual',
-  'Indicadores de Desempenho':      'mensal',
-  'Upload de Relatórios':           'none',
-  'Configurações':                  'none',
-}
-
-const SCREEN_COMPONENTS: Record<ScreenKey, React.ComponentType> = {
-  'Resultado Mensal (DFC)':         DFCScreen,
-  'Visão por Receita':              ReceitaScreen,
-  'Visão por Despesas':             DespesasScreen,
-  'Visão por Centro de Custo':      CentroCustoScreen,
-  'Margens Reais da Operação':      MargensScreen,
-  'Fluxo de Caixa Mensal':          FluxoMensalScreen,
-  'Fluxo de Caixa Anual Projetado': FluxoAnualScreen,
-  'Indicadores de Desempenho':      IndicadoresScreen,
-  'Upload de Relatórios':           UploadScreen,
-  'Configurações':                  ConfiguracaoScreen,
-}
+const screens = blueprint.screens
 
 export default function FinanceiroWireframeViewer() {
-  const [activeScreen, setActiveScreen] = useState<ScreenKey>(SCREENS[0])
-  const ActiveComponent = SCREEN_COMPONENTS[activeScreen]
+  const [activeIndex, setActiveIndex] = useState(0)
+  const activeScreen = screens[activeIndex]
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Inter, sans-serif', background: '#F5F5F5' }}>
@@ -95,26 +38,26 @@ export default function FinanceiroWireframeViewer() {
           <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>FXL</span>
         </div>
         <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
-          {SCREENS.map((screen) => (
+          {screens.map((screen, i) => (
             <button
-              key={screen}
+              key={screen.id}
               type="button"
-              onClick={() => setActiveScreen(screen)}
+              onClick={() => setActiveIndex(i)}
               style={{
                 display: 'block',
                 width: '100%',
                 textAlign: 'left',
                 padding: '10px 24px',
                 fontSize: 13,
-                fontWeight: activeScreen === screen ? 500 : 400,
-                color: activeScreen === screen ? '#FFF' : '#BDBDBD',
-                background: activeScreen === screen ? '#424242' : 'transparent',
+                fontWeight: activeIndex === i ? 500 : 400,
+                color: activeIndex === i ? '#FFF' : '#BDBDBD',
+                background: activeIndex === i ? '#424242' : 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 fontFamily: 'Inter, sans-serif',
               }}
             >
-              {screen}
+              {screen.title}
             </button>
           ))}
         </nav>
@@ -125,14 +68,14 @@ export default function FinanceiroWireframeViewer() {
 
       {/* Área principal */}
       <main style={{ flex: 1, marginLeft: 240, display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <WireframeHeader title={activeScreen} periodType={SCREEN_PERIOD_TYPE[activeScreen]} />
+        <WireframeHeader title={activeScreen.title} periodType={activeScreen.periodType} />
         <div style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}>
-          <ActiveComponent />
+          <BlueprintRenderer screen={activeScreen} />
         </div>
       </main>
 
       <CommentOverlay
-        screenName={`wireframe-view-${activeScreen.toLowerCase().replace(/\s+/g, '-')}`}
+        screenName={`wireframe-view-${activeScreen.id}`}
       />
     </div>
   )
