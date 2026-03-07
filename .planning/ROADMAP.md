@@ -47,8 +47,8 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Supabase infrastructure, auth, types, CRUD functions, and migration SQL (WCMT-01, WCMT-02)
-- [ ] 02-02-PLAN.md — Comment UI: refactor CommentOverlay to Supabase, section wrappers with hover icons and badges (WCMT-01)
-- [ ] 02-03-PLAN.md — Client access via shared link, comment management panel with resolve (WCMT-02, WCMT-03)
+- [x] 02-02-PLAN.md — Comment UI: refactor CommentOverlay to Supabase, section wrappers with hover icons and badges (WCMT-01)
+- [x] 02-03-PLAN.md — Client access via shared link, comment management panel with resolve (WCMT-02, WCMT-03)
 
 ### Phase 3: Wireframe Visual Editor
 **Goal**: Operators can visually modify wireframe layout and components without touching code, with all changes synced to the blueprint config
@@ -120,7 +120,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Documentation | 2/2 | Complete | 2026-03-07 |
-| 2. Wireframe Comments | 1/3 | In Progress | - |
+| 2. Wireframe Comments | 3/3 | Complete | 2026-03-07 |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |
 | 4. Branding Process | 0/2 | Not started | - |
 | 5. Technical Configuration | 0/2 | Not started | - |
