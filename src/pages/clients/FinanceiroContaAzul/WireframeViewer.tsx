@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { MessageSquare } from 'lucide-react'
+import { useUser } from '@clerk/react'
 import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
 import CommentManager from '@tools/wireframe-builder/components/CommentManager'
 import WireframeHeader from '@tools/wireframe-builder/components/WireframeHeader'
 import BlueprintRenderer from '@tools/wireframe-builder/components/BlueprintRenderer'
 import blueprint from '@clients/financeiro-conta-azul/wireframe/blueprint.config'
-import { useAuth } from '@/contexts/AuthContext'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
 import type { Comment } from '@tools/wireframe-builder/types/comments'
@@ -16,7 +16,7 @@ export default function FinanceiroWireframeViewer() {
   const [activeIndex, setActiveIndex] = useState(0)
   const activeScreen = screens[activeIndex]
 
-  const { user } = useAuth()
+  const { user } = useUser()
 
   const [comments, setComments] = useState<Comment[]>([])
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -37,7 +37,7 @@ export default function FinanceiroWireframeViewer() {
   }, [fetchComments])
 
   function handleOpenComments(targetId: string, label: string) {
-    setManagerOpen(false) // Mutual exclusion: close manager when overlay opens
+    setManagerOpen(false)
     setDrawerTarget({ targetId, label })
     setDrawerOpen(true)
   }
@@ -53,16 +53,17 @@ export default function FinanceiroWireframeViewer() {
   }
 
   function handleOpenManager() {
-    setDrawerOpen(false) // Mutual exclusion: close overlay when manager opens
+    setDrawerOpen(false)
     setManagerOpen(true)
   }
 
   function handleCloseManager() {
     setManagerOpen(false)
-    fetchComments() // Refresh badge counts after managing comments
+    fetchComments()
   }
 
-  const authorName = user?.user_metadata?.name ?? user?.email ?? 'Operador'
+  const authorId = user?.id ?? 'unknown'
+  const authorName = user?.fullName ?? user?.primaryEmailAddress?.emailAddress ?? 'Operador'
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Inter, sans-serif', background: '#F5F5F5' }}>
@@ -116,27 +117,25 @@ export default function FinanceiroWireframeViewer() {
           ))}
         </nav>
         <div style={{ padding: '16px 24px', borderTop: '1px solid #424242' }}>
-          {user && (
-            <button
-              type="button"
-              onClick={handleOpenManager}
-              style={{
-                display: 'block',
-                background: 'transparent',
-                border: 'none',
-                padding: 0,
-                marginBottom: 8,
-                fontSize: 11,
-                color: '#9E9E9E',
-                cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#FFFFFF' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = '#9E9E9E' }}
-            >
-              Gerenciar
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleOpenManager}
+            style={{
+              display: 'block',
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              marginBottom: 8,
+              fontSize: 11,
+              color: '#9E9E9E',
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = '#FFFFFF' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = '#9E9E9E' }}
+          >
+            Gerenciar
+          </button>
           <span style={{ fontSize: 11, color: '#757575' }}>Desenvolvido por FXL</span>
         </div>
       </aside>
@@ -170,6 +169,7 @@ export default function FinanceiroWireframeViewer() {
           screenId={activeScreen.id}
           targetId={drawerTarget.targetId}
           targetLabel={drawerTarget.label}
+          authorId={authorId}
           authorName={authorName}
           authorRole="operador"
           open={drawerOpen}

@@ -286,8 +286,8 @@ function CommentOverlayPreview() {
   return (
     <div className="relative h-32 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
       <p className="p-4 text-xs text-gray-400">
-        Drawer lateral de comentarios com Supabase. Requer autenticacao e conexao ao banco.
-        Props: clientSlug, screenId, targetId, authorName, authorRole, open, onClose.
+        Drawer lateral de comentarios com Supabase. Requer autenticacao (Clerk) e conexao ao banco.
+        Props: clientSlug, screenId, targetId, authorId, authorName, authorRole, open, onClose.
       </p>
     </div>
   )
