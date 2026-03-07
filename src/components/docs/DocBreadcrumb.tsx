@@ -7,9 +7,7 @@ type Props = {
 
 const sectionSlugMap: Record<string, string> = {
   Processo: '/processo/index',
-  Build: '/build/index',
   Referencias: '/referencias/index',
-  Operacao: '/operacao/index',
   Ferramentas: '/ferramentas/index',
 }
 
