@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Documentation** - Reorganize docs navigation and content so operators find information naturally
 - [x] **Phase 2: Wireframe Comments** - Persistent comments on wireframes with Supabase so clients give feedback directly
-- [ ] **Phase 02.1: Melhoria e organizacao de dominio** - Reorganize navigation, badges, content for Padroes taxonomy and Claude Code + GSD workflow (INSERTED)
+- [x] **Phase 02.1: Melhoria e organizacao de dominio** - Reorganize navigation, badges, content for Padroes taxonomy and Claude Code + GSD workflow (INSERTED) (completed 2026-03-07)
 - [ ] **Phase 02.2: Evolucao de Blocos Disponiveis** - Evolve Blocos Disponiveis spec as detailed prompt for component creation (INSERTED)
 - [ ] **Phase 02.3: Skills Globais** - Transform Premissas/Seguranca/Testes into global Claude Code Skills (INSERTED)
 - [ ] **Phase 02.4: Reformulacao Visual** - Visual overhaul of the FXL Core application (INSERTED)
@@ -64,7 +64,7 @@ Plans:
   2. All process docs reference Claude Code + GSD as the workflow (not Claude Project)
   3. CLAUDE.md and README reflect the Padroes taxonomy
   4. Roadmap includes phases 02.2, 02.3, 02.4
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 02.1-01-PLAN.md — Navigation restructuring: sidebar, routes, badges, landing pages, file deletions (REORG-01, REORG-02, REORG-03)
@@ -181,7 +181,7 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3/02.4 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Documentation | 2/2 | Complete | 2026-03-07 |
 | 2. Wireframe Comments | 3/3 | Complete | 2026-03-07 |
-| 02.1. Melhoria e organizacao de dominio | 2/3 | In Progress|  |
+| 02.1. Melhoria e organizacao de dominio | 3/3 | Complete   | 2026-03-07 |
 | 02.2. Evolucao de Blocos Disponiveis | 0/1 | Not started | - |
 | 02.3. Skills Globais | 0/1 | Not started | - |
 | 02.4. Reformulacao Visual | 0/1 | Not started | - |
