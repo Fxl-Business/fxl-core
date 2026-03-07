@@ -8,6 +8,7 @@ const config: Config = {
     './src/**/*.{js,ts,jsx,tsx}',
     './skills/**/*.{js,ts,jsx,tsx}',
     './clients/**/*.{js,ts,jsx,tsx}',
+    './tools/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
   	extend: {

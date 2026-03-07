@@ -38,6 +38,21 @@ export async function createShareToken(
   return data as ShareToken
 }
 
+export async function getTokensForClient(
+  clientSlug: string
+): Promise<ShareToken[]> {
+  const { data, error } = await supabase
+    .from('share_tokens')
+    .select('*')
+    .eq('client_slug', clientSlug)
+    .eq('revoked', false)
+    .gt('expires_at', new Date().toISOString())
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as ShareToken[]
+}
+
 export async function revokeToken(tokenId: string): Promise<void> {
   const { error } = await supabase
     .from('share_tokens')
