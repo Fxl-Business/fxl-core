@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 02.3-01-PLAN.md
-last_updated: "2026-03-08T19:35:04Z"
-last_activity: 2026-03-08 -- Completed 02.3-01 Design system foundation (2 tasks, 2 commits)
+stopped_at: Completed 02.3-03-PLAN.md
+last_updated: "2026-03-08T19:40:32Z"
+last_activity: 2026-03-08 -- Completed 02.3-03 Core pages token migration (2 tasks, 2 commits)
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 15
-  completed_plans: 12
-  percent: 80
+  completed_plans: 14
+  percent: 87
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 02.3 - Reformulacao Visual (IN PROGRESS - 1 of 4 plans)
+**Current focus:** Phase 02.3 - Reformulacao Visual (IN PROGRESS - 2 of 4 plans)
 
 ## Current Position
 
 Phase: 02.3 of 9 (Reformulacao Visual)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In Progress
-Last activity: 2026-03-08 -- Completed 02.3-01 Design system foundation (2 tasks, 2 commits)
+Last activity: 2026-03-08 -- Completed 02.3-02 Doc components token migration (2 tasks, 2 commits)
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 87%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [████████░░] 80%
 | Phase 02.2 PP01 | 5min | 2 tasks | 12 files |
 | Phase 02.2 P03 | 3min | 2 tasks | 11 files |
 | Phase 02.3 P01 | 2min | 2 tasks | 6 files |
+| Phase 02.3 P02 | 2min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,9 @@ Recent decisions affecting current work:
 - [Phase 02.3]: Sidebar active state: bg-primary/10 text-primary pattern (subtle, both modes)
 - [Phase 02.3]: Layout background: clean bg-background replacing hardcoded gradient
 - [Phase 02.3]: Logo badge: bg-primary semantic token instead of hardcoded brand color
+- [Phase 02.3]: Inline code in MarkdownRenderer uses bg-muted text-primary (matches prose code style from globals.css)
+- [Phase 02.3]: PhaseCard bg-white/80 replaced with bg-card/80 for dark mode card elevation semantics
+- [Phase 02.3]: Both PromptBlock variants (docs + ui) kept separate -- different import consumers, migrated identically
 
 ### Pending Todos
 
@@ -133,6 +137,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08T19:35:04Z
-Stopped at: Completed 02.3-01-PLAN.md
-Resume file: .planning/phases/02.3-reformulacao-visual/02.3-02-PLAN.md
+Last session: 2026-03-08T19:41:31.939Z
+Stopped at: Completed 02.3-02-PLAN.md
+Resume file: None

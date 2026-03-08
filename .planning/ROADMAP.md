@@ -93,7 +93,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Design system updated with revised palette, typography, and components
   2. All application pages have production-grade visual quality
-**Plans:** 1/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 - [ ] 02.3-01-PLAN.md — Design token foundation: CSS variables (light+dark), Tailwind config, ThemeToggle, layout shell migration (VISUAL-01)
@@ -174,7 +174,7 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3 -> 3 -> 4 -> 5 -> 6
 | 2. Wireframe Comments | 3/3 | Complete | 2026-03-07 |
 | 02.1. Melhoria e organizacao de dominio | 3/3 | Complete    | 2026-03-07 |
 | 02.2. Evolucao de Blocos Disponiveis | 3/3 | Complete    | 2026-03-08 |
-| 02.3. Reformulacao Visual | 1/4 | In Progress|  |
+| 02.3. Reformulacao Visual | 3/4 | In Progress|  |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |
 | 4. Branding Process | 0/2 | Not started | - |
 | 5. Technical Configuration | 0/2 | Not started | - |
