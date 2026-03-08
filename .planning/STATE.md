@@ -5,7 +5,7 @@ milestone_name: milestone
 status: completed
 stopped_at: Completed quick-1 (Fix sidebar Clientes landing page pattern)
 last_updated: "2026-03-08T14:24:18.092Z"
-last_activity: 2026-03-08 -- Completed 02.2-03 Wiring spec pages into app (2 tasks, 2 commits)
+last_activity: 2026-03-08 -- Completed quick task 1: Fix sidebar Clientes landing page pattern + sub-item indentation
 progress:
   total_phases: 10
   completed_phases: 4
@@ -112,6 +112,12 @@ None yet.
 
 - [Research] Formula expression engine design (SQL subset vs custom DSL) must be resolved in Phase 5
 - [Research] Conta Azul export format specifics need investigation before Phase 6 data pipeline work
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 1 | Fix sidebar Clientes landing page pattern + sub-item indentation | 2026-03-08 | d6a170d | [1-fix-sidebar](./quick/1-fix-sidebar-clientes-landing-page-patter/) |
 
 ### Roadmap Evolution
 
