@@ -4,7 +4,7 @@ import TopNav from './TopNav'
 
 export default function Layout() {
   return (
-    <div className="flex min-h-screen flex-col bg-[linear-gradient(180deg,#f7fafc_0%,#ffffff_28%,#f4f7fb_100%)]">
+    <div className="flex min-h-screen flex-col bg-background">
       <TopNav />
       <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
         <Sidebar />

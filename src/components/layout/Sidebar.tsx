@@ -161,7 +161,7 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
             depth === 3 && 'pl-11',
             depth >= 4 && 'pl-14',
             isActive
-              ? 'bg-fxl-navy text-white font-medium shadow-sm'
+              ? 'bg-primary/10 text-primary font-medium'
               : 'text-muted-foreground hover:bg-muted hover:text-foreground',
           )
         }
@@ -194,7 +194,7 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
                   ? 'font-semibold uppercase tracking-[0.18em]'
                   : '',
                 isActive && depth > 0
-                  ? 'font-medium text-fxl-navy'
+                  ? 'font-medium text-primary'
                   : '',
               )
             }
@@ -259,7 +259,7 @@ export default function Sidebar() {
   const rest = navigation.slice(1)
 
   return (
-    <aside className="w-full flex-shrink-0 border-b border-border/80 bg-white/80 backdrop-blur md:w-64 md:border-b-0 md:border-r">
+    <aside className="w-full flex-shrink-0 border-b border-sidebar-border bg-sidebar/80 backdrop-blur md:w-64 md:border-b-0 md:border-r">
       <nav className="max-h-72 overflow-y-auto p-4 md:max-h-none md:space-y-1">
         {/* Home link with icon */}
         <NavLink
@@ -268,7 +268,7 @@ export default function Sidebar() {
             cn(
               'flex w-full items-center rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
               isActive
-                ? 'bg-fxl-navy text-white shadow-sm'
+                ? 'bg-primary/10 text-primary font-medium'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',
             )
           }
