@@ -37,10 +37,10 @@ const sections = [
     href: '/ferramentas/index',
   },
   {
-    badge: 'Referencias',
-    title: 'Bibliotecas e padroes',
-    description: 'KPIs, blocos de wireframe e repertorio para acelerar a execucao.',
-    href: '/referencias/biblioteca-kpis',
+    badge: 'Padroes',
+    title: 'Padroes e decisoes tecnicas',
+    description: 'Tech radar, premissas, seguranca, testes e decisoes tecnicas do processo.',
+    href: '/padroes/index',
   },
 ]
 
@@ -60,32 +60,32 @@ export default function Home() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Nucleo FXL</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-foreground">Nucleo FXL</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Processo, knowledge e ferramentas — o nucleo operacional da FXL.
         </p>
       </div>
 
       {/* Quick actions */}
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         O que vai fazer hoje?
       </h2>
       <div className="mb-8 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-3">
         {quickActions.map((action) => {
           const Icon = action.icon
           const inner = (
-            <div className="flex h-full min-h-[120px] flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 transition-all hover:border-fxl-navy hover:shadow-md">
+            <div className="flex h-full min-h-[120px] flex-col justify-between rounded-xl border border-border bg-card p-5 transition-all hover:border-primary hover:shadow-md">
               <div className="flex flex-1 items-start gap-4">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-slate-900">{action.title}</h3>
-                  <p className="mt-0.5 text-xs text-slate-500">{action.description}</p>
+                  <h3 className="text-sm font-semibold text-foreground">{action.title}</h3>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{action.description}</p>
                 </div>
               </div>
               <div className="flex justify-end">
-                <ArrowRight className="h-4 w-4 text-slate-400" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </div>
             </div>
           )
@@ -107,7 +107,7 @@ export default function Home() {
       </div>
 
       {/* Documentacao */}
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         Documentacao
       </h2>
       <div className="mb-8 grid gap-4 md:grid-cols-3">
@@ -115,19 +115,19 @@ export default function Home() {
           <Link
             key={s.href}
             to={s.href}
-            className="rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-slate-400"
+            className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary"
           >
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
               {s.badge}
             </p>
-            <h3 className="mb-1 text-sm font-semibold text-slate-900">{s.title}</h3>
-            <p className="text-xs text-slate-500">{s.description}</p>
+            <h3 className="mb-1 text-sm font-semibold text-foreground">{s.title}</h3>
+            <p className="text-xs text-muted-foreground">{s.description}</p>
           </Link>
         ))}
       </div>
 
       {/* Clientes */}
-      <h2 id="clientes" className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
+      <h2 id="clientes" className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         Clientes
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -135,20 +135,20 @@ export default function Home() {
           <Link
             key={c.slug}
             to={c.href}
-            className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+            className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
           >
             <div className="mb-3 flex items-start justify-between">
-              <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              <span className="rounded bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                 {c.badge}
               </span>
               <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-700">
                 {c.status}
               </span>
             </div>
-            <h3 className="text-sm font-semibold text-slate-900 group-hover:text-blue-700">
+            <h3 className="text-sm font-semibold text-foreground group-hover:text-primary">
               {c.name}
             </h3>
-            <p className="mt-1 text-xs text-slate-500">{c.description}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{c.description}</p>
           </Link>
         ))}
       </div>
