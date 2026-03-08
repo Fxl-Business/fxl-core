@@ -1,3 +1,4 @@
+import type { ScreenRow } from './editor'
 import type { CalculoRow } from '../components/CalculoCard'
 import type { DrilRow, DrilColumn } from '../components/DrillDownTable'
 import type { WaterfallBar } from '../components/WaterfallChart'
@@ -201,6 +202,7 @@ export type BlueprintScreen = {
   filters: FilterOption[]
   hasCompareSwitch: boolean
   sections: BlueprintSection[]
+  rows?: ScreenRow[] // source of truth when present; sections kept for backward compat
 }
 
 export type BlueprintConfig = {
