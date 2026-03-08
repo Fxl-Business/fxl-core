@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { Components } from 'react-markdown'
+import { cn } from '@/lib/utils'
 
 function slugify(text: string): string {
   return text
@@ -32,15 +33,7 @@ const components: Components = {
   },
   pre({ children }) {
     return (
-      <pre
-        style={{
-          background: '#0f172a',
-          borderRadius: '8px',
-          padding: '1rem',
-          overflowX: 'auto',
-          margin: '1rem 0',
-        }}
-      >
+      <pre className="my-4 overflow-x-auto rounded-lg bg-[hsl(var(--code-bg))] p-4 text-[hsl(var(--code-fg))]">
         {children}
       </pre>
     )
@@ -49,29 +42,13 @@ const components: Components = {
     const isInline = !className
     if (isInline) {
       return (
-        <code
-          style={{
-            background: '#1e293b',
-            color: '#e2e8f0',
-            borderRadius: '4px',
-            padding: '2px 6px',
-            fontSize: '0.85em',
-          }}
-        >
+        <code className="rounded bg-muted px-1.5 py-0.5 text-[0.85em] text-primary">
           {children}
         </code>
       )
     }
     return (
-      <code
-        className={className}
-        style={{
-          color: '#e2e8f0',
-          background: 'transparent',
-          fontSize: '0.875rem',
-          lineHeight: '1.7',
-        }}
-      >
+      <code className={cn(className, 'bg-transparent text-sm leading-[1.7] text-[hsl(var(--code-fg))]')}>
         {children}
       </code>
     )
