@@ -40,7 +40,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Visual Overhaul (Phase 02.4)
 
-- [ ] **VISUAL-01**: Design system atualizado com paleta, tipografia e componentes revisados
+- [x] **VISUAL-01**: Design system atualizado com paleta, tipografia e componentes revisados
 - [ ] **VISUAL-02**: Todas as paginas da aplicacao com visual production-grade
 
 ### Wireframe Visual Editor
@@ -123,7 +123,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BLKSPEC-02 | Phase 02.2 | Complete |
 | GSKILL-01 | Phase 02.3 | Pending |
 | GSKILL-02 | Phase 02.3 | Pending |
-| VISUAL-01 | Phase 02.4 | Pending |
+| VISUAL-01 | Phase 02.4 | Complete |
 | VISUAL-02 | Phase 02.4 | Pending |
 | WEDT-01 | Phase 3 | Pending |
 | WEDT-02 | Phase 3 | Pending |
