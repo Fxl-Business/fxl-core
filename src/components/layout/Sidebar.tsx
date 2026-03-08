@@ -111,8 +111,8 @@ const navigation: NavItem[] = [
     children: [
       {
         label: 'Financeiro Conta Azul',
+        href: '/clients/financeiro-conta-azul',
         children: [
-          { label: 'Visao Geral', href: '/clients/financeiro-conta-azul' },
           { label: 'Briefing', href: '/clients/financeiro-conta-azul/briefing' },
           { label: 'Blueprint', href: '/clients/financeiro-conta-azul/blueprint' },
           { label: 'Branding', href: '/clients/financeiro-conta-azul/branding' },
@@ -156,8 +156,9 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
         className={({ isActive }) =>
           cn(
             'flex w-full items-center rounded-md px-3 py-1.5 text-xs transition-colors',
-            depth === 2 && 'pl-6',
-            depth === 3 && 'pl-9',
+            depth === 2 && 'pl-8',
+            depth === 3 && 'pl-11',
+            depth >= 4 && 'pl-14',
             isActive
               ? 'bg-fxl-navy text-white font-medium shadow-sm'
               : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -178,6 +179,8 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
           depth === 0
             ? 'text-left text-xs font-semibold uppercase tracking-[0.18em] text-foreground'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          depth === 2 && 'pl-8',
+          depth === 3 && 'pl-11',
           childIsActive && depth > 0 && 'text-foreground',
         )}>
           <NavLink
@@ -228,6 +231,8 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
           depth === 0
             ? 'text-left text-xs font-semibold uppercase tracking-[0.18em] text-foreground'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          depth === 2 && 'pl-8',
+          depth === 3 && 'pl-11',
           childIsActive && depth > 0 && 'text-foreground',
         )}
       >
