@@ -79,10 +79,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Blocos Disponiveis spec is detailed enough to serve as a prompt for component creation
   2. Component gallery is synchronized with block specs
-**Plans:** TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 02.2-01: TBD
+- [ ] 02.2-01-PLAN.md — Create landing page + Cards/Charts/Tables spec files (12 files: index + 11 specs) (BLKSPEC-01)
+- [ ] 02.2-02-PLAN.md — Create Layout and Inputs spec files (11 specs) (BLKSPEC-01)
+- [ ] 02.2-03-PLAN.md — Wire specs into app: Sidebar navigation, Gallery cross-links, SKILL.md sync rule, reference migration, old file deletion (BLKSPEC-01, BLKSPEC-02)
 
 ### Phase 02.3: Skills Globais (INSERTED)
 
@@ -182,7 +184,7 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3/02.4 -> 3 -> 4 -> 5
 | 1. Documentation | 2/2 | Complete | 2026-03-07 |
 | 2. Wireframe Comments | 3/3 | Complete | 2026-03-07 |
 | 02.1. Melhoria e organizacao de dominio | 3/3 | Complete    | 2026-03-07 |
-| 02.2. Evolucao de Blocos Disponiveis | 0/1 | Not started | - |
+| 02.2. Evolucao de Blocos Disponiveis | 0/3 | Not started | - |
 | 02.3. Skills Globais | 0/1 | Not started | - |
 | 02.4. Reformulacao Visual | 0/1 | Not started | - |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |
