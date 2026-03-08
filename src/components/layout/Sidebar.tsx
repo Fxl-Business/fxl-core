@@ -156,6 +156,7 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
         className={({ isActive }) =>
           cn(
             'flex w-full items-center rounded-md px-3 py-1.5 text-xs transition-colors',
+            depth === 1 && 'pl-5',
             depth === 2 && 'pl-8',
             depth === 3 && 'pl-11',
             depth >= 4 && 'pl-14',
@@ -179,6 +180,7 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
           depth === 0
             ? 'text-left text-xs font-semibold uppercase tracking-[0.18em] text-foreground'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          depth === 1 && 'pl-2',
           depth === 2 && 'pl-5',
           depth === 3 && 'pl-8',
           childIsActive && depth > 0 && 'text-foreground',
@@ -231,6 +233,7 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
           depth === 0
             ? 'text-left text-xs font-semibold uppercase tracking-[0.18em] text-foreground'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          depth === 1 && 'pl-5',
           depth === 2 && 'pl-8',
           depth === 3 && 'pl-11',
           childIsActive && depth > 0 && 'text-foreground',
