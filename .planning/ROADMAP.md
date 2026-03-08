@@ -102,20 +102,21 @@ Plans:
 - [ ] 02.3-04-PLAN.md — ComponentGallery + client pages + wireframe viewers migration to semantic tokens (VISUAL-02)
 
 ### Phase 3: Wireframe Visual Editor
-**Goal**: Operators can visually modify wireframe layout and components without touching code, with all changes synced to the blueprint config
+**Goal**: Operators can visually modify wireframe layout and components without touching code, with all changes synced to Supabase-stored blueprint config
 **Depends on**: Phase 02.1
 **Requirements**: WEDT-01, WEDT-02, WEDT-03, WEDT-04
 **Success Criteria** (what must be TRUE):
   1. Operator can drag sections within a screen to reorder them, and add or remove sections from a screen via the UI
   2. Operator can click on any component (KPI card, chart, table) and edit its properties (title, chart type, columns) through a visual panel
   3. Operator can create new screens and delete existing screens from the wireframe without editing any file manually
-  4. Every visual edit (section moves, prop changes, screen additions/removals) is automatically reflected in the blueprint.config.ts file and the wireframe re-renders from the updated config
-**Plans**: TBD
+  4. Every visual edit (section moves, prop changes, screen additions/removals) is automatically reflected in the Supabase blueprint config and the wireframe re-renders from the updated config
+**Plans**: 4 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md — Foundation: editor types, Supabase migration, blueprint-store, defaults, grid-layouts (WEDT-04)
+- [ ] 03-02-PLAN.md — Editor shell: AdminToolbar, EditableSectionWrapper, AddSectionButton, ComponentPicker, GridLayoutPicker (WEDT-01)
+- [ ] 03-03-PLAN.md — PropertyPanel with 15 section forms, ScreenManager, IconPicker (WEDT-02, WEDT-03)
+- [ ] 03-04-PLAN.md — Integration: wire editor into WireframeViewer + SharedWireframeView with Supabase data source (WEDT-01, WEDT-02, WEDT-03, WEDT-04)
 
 ### Phase 4: Branding Process
 **Goal**: Client branding is collected in a structured format and automatically applied to wireframes
@@ -175,7 +176,7 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3 -> 3 -> 4 -> 5 -> 6
 | 02.1. Melhoria e organizacao de dominio | 3/3 | Complete    | 2026-03-07 |
 | 02.2. Evolucao de Blocos Disponiveis | 3/3 | Complete    | 2026-03-08 |
 | 02.3. Reformulacao Visual | 4/4 | Complete    | 2026-03-08 |
-| 3. Wireframe Visual Editor | 0/3 | Not started | - |
+| 3. Wireframe Visual Editor | 0/4 | Not started | - |
 | 4. Branding Process | 0/2 | Not started | - |
 | 5. Technical Configuration | 0/2 | Not started | - |
 | 6. System Generation | 0/3 | Not started | - |
