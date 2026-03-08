@@ -87,16 +87,19 @@ Plans:
 
 ### Phase 02.3: Reformulacao Visual (INSERTED)
 
-**Goal:** FXL Core application has a refreshed, production-grade visual design
+**Goal:** FXL Core application has a refreshed, production-grade visual design with new palette, gold accent, dark mode, and semantic token system
 **Requirements**: VISUAL-01, VISUAL-02
 **Depends on:** Phase 02.1
 **Success Criteria** (what must be TRUE):
   1. Design system updated with revised palette, typography, and components
   2. All application pages have production-grade visual quality
-**Plans:** TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 02.3-01: TBD
+- [ ] 02.3-01-PLAN.md — Design token foundation: CSS variables (light+dark), Tailwind config, ThemeToggle, layout shell migration (VISUAL-01)
+- [ ] 02.3-02-PLAN.md — Doc components migration: PageHeader, PhaseCard, PromptBlock, MarkdownRenderer to semantic tokens (VISUAL-02)
+- [ ] 02.3-03-PLAN.md — Core pages migration: Home (with stale content fix), DocRenderer, Login, Profile, App (VISUAL-02)
+- [ ] 02.3-04-PLAN.md — ComponentGallery + client pages + wireframe viewers migration to semantic tokens (VISUAL-02)
 
 ### Phase 3: Wireframe Visual Editor
 **Goal**: Operators can visually modify wireframe layout and components without touching code, with all changes synced to the blueprint config
@@ -171,7 +174,7 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3 -> 3 -> 4 -> 5 -> 6
 | 2. Wireframe Comments | 3/3 | Complete | 2026-03-07 |
 | 02.1. Melhoria e organizacao de dominio | 3/3 | Complete    | 2026-03-07 |
 | 02.2. Evolucao de Blocos Disponiveis | 3/3 | Complete    | 2026-03-08 |
-| 02.3. Reformulacao Visual | 0/1 | Not started | - |
+| 02.3. Reformulacao Visual | 0/4 | Not started | - |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |
 | 4. Branding Process | 0/2 | Not started | - |
 | 5. Technical Configuration | 0/2 | Not started | - |
