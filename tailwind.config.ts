@@ -13,13 +13,6 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
-  			fxl: {
-  				navy: '#1B3A5C',
-  				'navy-light': '#244d7a',
-  				'navy-dark': '#122840',
-  				blue: '#2563EB',
-  				'blue-muted': '#90B4D4'
-  			},
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
@@ -52,6 +45,14 @@ const config: Config = {
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
+  			},
+  			sidebar: {
+  				DEFAULT: 'hsl(var(--sidebar))',
+  				foreground: 'hsl(var(--sidebar-foreground))',
+  				accent: 'hsl(var(--sidebar-accent))',
+  				border: 'hsl(var(--sidebar-border))',
+  				muted: 'hsl(var(--sidebar-muted))',
+  				'muted-foreground': 'hsl(var(--sidebar-muted-foreground))'
   			},
   			chart: {
   				'1': 'hsl(var(--chart-1))',
