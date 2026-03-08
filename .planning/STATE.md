@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 02.3 - Reformulacao Visual (IN PROGRESS - 2 of 4 plans)
+**Current focus:** Phase 02.3 - Reformulacao Visual (IN PROGRESS - 3 of 4 plans)
 
 ## Current Position
 
 Phase: 02.3 of 9 (Reformulacao Visual)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In Progress
-Last activity: 2026-03-08 -- Completed 02.3-02 Doc components token migration (2 tasks, 2 commits)
+Last activity: 2026-03-08 -- Completed 02.3-03 Core pages token migration (2 tasks, 2 commits)
 
-Progress: [█████████░] 87%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [█████████░] 87%
 | Phase 02.2 P03 | 3min | 2 tasks | 11 files |
 | Phase 02.3 P01 | 2min | 2 tasks | 6 files |
 | Phase 02.3 P02 | 2min | 2 tasks | 8 files |
+| Phase 02.3 P03 | 2min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,9 @@ Recent decisions affecting current work:
 - [Phase 02.3]: Inline code in MarkdownRenderer uses bg-muted text-primary (matches prose code style from globals.css)
 - [Phase 02.3]: PhaseCard bg-white/80 replaced with bg-card/80 for dark mode card elevation semantics
 - [Phase 02.3]: Both PromptBlock variants (docs + ui) kept separate -- different import consumers, migrated identically
+- [Phase 02.3]: Home stale content fixed: Referencias -> Padroes, href -> /padroes/index
+- [Phase 02.3]: ProcessDocsViewer section label uses text-primary (brand), title text-foreground, filename text-muted-foreground
+- [Phase 02.3]: Semantic status colors (bg-green-50, text-green-700) intentionally preserved for status badges
 
 ### Pending Todos
 
@@ -137,6 +141,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08T19:41:31.939Z
-Stopped at: Completed 02.3-02-PLAN.md
-Resume file: None
+Last session: 2026-03-08T19:40:32Z
+Stopped at: Completed 02.3-03-PLAN.md
+Resume file: .planning/phases/02.3-reformulacao-visual/02.3-04-PLAN.md
