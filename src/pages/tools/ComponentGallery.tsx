@@ -77,7 +77,7 @@ function ModalPreview() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md bg-gray-800 px-4 py-2 text-xs font-medium text-white hover:bg-gray-700"
+        className="rounded-md bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90"
       >
         Abrir Modal
       </button>
@@ -87,19 +87,19 @@ function ModalPreview() {
         onClose={() => setOpen(false)}
         size={wireframeModalMock.size}
         footer={
-          <div className="flex w-full items-center justify-between text-xs text-gray-500">
+          <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
             <span>Total: R$ 12.500,00</span>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-md bg-gray-800 px-3 py-1.5 text-xs font-medium text-white"
+              className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
             >
               Fechar
             </button>
           </div>
         }
       >
-        <p className="text-sm text-gray-600">Conteudo do modal renderizado com dados fictícios.</p>
+        <p className="text-sm text-muted-foreground">Conteudo do modal renderizado com dados fictícios.</p>
         <DataTable
           title="Movimentações do Dia"
           columns={[
@@ -127,14 +127,14 @@ function DetailViewSwitcherPreview() {
 function PropToggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[11px] font-medium text-gray-500">{label}</span>
-      <div className="flex overflow-hidden rounded-md border border-gray-200">
+      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+      <div className="flex overflow-hidden rounded-md border border-border">
         <button
           type="button"
           onClick={() => onChange(false)}
           className={cn(
             'px-2.5 py-1 text-[11px] font-medium transition-colors',
-            !value ? 'bg-gray-800 text-white' : 'bg-white text-gray-500 hover:bg-gray-50',
+            !value ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-muted',
           )}
         >
           OFF
@@ -144,7 +144,7 @@ function PropToggle({ label, value, onChange }: { label: string; value: boolean;
           onClick={() => onChange(true)}
           className={cn(
             'px-2.5 py-1 text-[11px] font-medium transition-colors',
-            value ? 'bg-gray-800 text-white' : 'bg-white text-gray-500 hover:bg-gray-50',
+            value ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-muted',
           )}
         >
           ON
@@ -157,8 +157,8 @@ function PropToggle({ label, value, onChange }: { label: string; value: boolean;
 function PropPills<T extends string>({ label, options, value, onChange }: { label: string; options: T[]; value: T; onChange: (v: T) => void }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[11px] font-medium text-gray-500">{label}</span>
-      <div className="flex overflow-hidden rounded-md border border-gray-200">
+      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+      <div className="flex overflow-hidden rounded-md border border-border">
         {options.map((opt) => (
           <button
             key={opt}
@@ -166,7 +166,7 @@ function PropPills<T extends string>({ label, options, value, onChange }: { labe
             onClick={() => onChange(opt)}
             className={cn(
               'px-2.5 py-1 text-[11px] font-medium transition-colors',
-              value === opt ? 'bg-gray-800 text-white' : 'bg-white text-gray-500 hover:bg-gray-50',
+              value === opt ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-muted',
             )}
           >
             {opt}
@@ -179,7 +179,7 @@ function PropPills<T extends string>({ label, options, value, onChange }: { labe
 
 function PropsToolbar({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-t-lg border border-b-0 border-gray-200 bg-gray-100 px-4 py-2.5">
+    <div className="flex flex-wrap items-center gap-4 rounded-t-lg border border-b-0 border-border bg-muted px-4 py-2.5">
       {children}
     </div>
   )
@@ -192,7 +192,7 @@ function KpiCardPreview() {
       <PropsToolbar>
         <PropToggle label="variationPositive" value={positive} onChange={setPositive} />
       </PropsToolbar>
-      <div className="rounded-b-lg border border-gray-200 bg-gray-50/50 p-4">
+      <div className="rounded-b-lg border border-border bg-muted/50 p-4">
         <div className="max-w-xs">
           <KpiCard {...kpiCardMock} variationPositive={positive} />
         </div>
@@ -208,7 +208,7 @@ function KpiCardFullPreview() {
       <PropsToolbar>
         <PropToggle label="compareMode" value={compareMode} onChange={setCompareMode} />
       </PropsToolbar>
-      <div className="rounded-b-lg border border-gray-200 bg-gray-50/50 p-4">
+      <div className="rounded-b-lg border border-border bg-muted/50 p-4">
         <div className="max-w-xs">
           <KpiCardFull {...kpiCardFullMock} compareMode={compareMode} />
         </div>
@@ -224,7 +224,7 @@ function BarLineChartPreview() {
       <PropsToolbar>
         <PropPills label="type" options={['bar', 'line', 'bar-line']} value={type} onChange={setType} />
       </PropsToolbar>
-      <div className="rounded-b-lg border border-gray-200 bg-gray-50/50 p-4">
+      <div className="rounded-b-lg border border-border bg-muted/50 p-4">
         <BarLineChart title={barLineChartMock.title} type={type} />
       </div>
     </div>
@@ -238,7 +238,7 @@ function WaterfallChartPreview() {
       <PropsToolbar>
         <PropToggle label="compareMode" value={compareMode} onChange={setCompareMode} />
       </PropsToolbar>
-      <div className="rounded-b-lg border border-gray-200 bg-gray-50/50 p-4">
+      <div className="rounded-b-lg border border-border bg-muted/50 p-4">
         <WaterfallChart
           {...waterfallChartMock}
           compareMode={compareMode}
@@ -257,7 +257,7 @@ function CalculoCardPreview() {
       <PropsToolbar>
         <PropToggle label="compareMode" value={compareMode} onChange={setCompareMode} />
       </PropsToolbar>
-      <div className="rounded-b-lg border border-gray-200 bg-gray-50/50 p-4">
+      <div className="rounded-b-lg border border-border bg-muted/50 p-4">
         <CalculoCard
           title={calculoCardMock.title}
           rows={compareMode ? calculoCardCompareRows : calculoCardMock.rows}
@@ -276,7 +276,7 @@ function WireframeHeaderPreview() {
       <PropsToolbar>
         <PropPills label="periodType" options={['mensal', 'anual', 'none']} value={periodType} onChange={setPeriodType} />
       </PropsToolbar>
-      <div className="overflow-hidden rounded-b-lg border border-gray-200">
+      <div className="overflow-hidden rounded-b-lg border border-border">
         <WireframeHeader title={wireframeHeaderMock.title} periodType={periodType} />
       </div>
     </div>
@@ -285,8 +285,8 @@ function WireframeHeaderPreview() {
 
 function CommentOverlayPreview() {
   return (
-    <div className="relative h-32 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-      <p className="p-4 text-xs text-gray-400">
+    <div className="relative h-32 overflow-hidden rounded-lg border border-border bg-muted">
+      <p className="p-4 text-xs text-muted-foreground">
         Drawer lateral de comentarios com Supabase. Requer autenticacao (Clerk) e conexao ao banco.
         Props: clientSlug, screenId, targetId, authorId, authorName, authorRole, open, onClose.
       </p>
@@ -404,7 +404,7 @@ const categories: Category[] = [
         status: 'available',
         props: ['screens: Screen[]', 'onSelect?'],
         render: () => (
-          <div className="h-48 w-56 overflow-hidden rounded border border-gray-200">
+          <div className="h-48 w-56 overflow-hidden rounded border border-border">
             <WireframeSidebar {...wireframeSidebarMock} />
           </div>
         ),
@@ -496,14 +496,14 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
   const isAvailable = entry.status === 'available'
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="rounded-xl border border-border bg-card shadow-sm">
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
         className="flex w-full items-center justify-between px-5 py-4"
       >
         <div className="flex items-center gap-3">
-          <code className="text-sm font-semibold text-gray-800">{entry.name}</code>
+          <code className="text-sm font-semibold text-foreground">{entry.name}</code>
           {isAvailable ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-0.5 text-[11px] font-medium text-green-700">
               <CheckCircle2 className="h-3 w-3" /> Disponível
@@ -516,29 +516,29 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
         </div>
         <ChevronDown
           className={cn(
-            'h-4 w-4 text-gray-400 transition-transform',
+            'h-4 w-4 text-muted-foreground transition-transform',
             !expanded && '-rotate-90',
           )}
         />
       </button>
 
       {expanded && (
-        <div className="border-t border-gray-100 px-5 py-4 space-y-3">
+        <div className="border-t border-border px-5 py-4 space-y-3">
           {isAvailable && entry.render ? (
             entry.hasToolbar ? (
               entry.render()
             ) : (
-            <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/50 p-4">
+            <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
               {entry.render()}
             </div>
             )
           ) : (
-            <div className="flex items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10">
+            <div className="flex items-center justify-center rounded-lg border border-dashed border-border bg-muted px-6 py-10">
               <div className="text-center">
-                <Clock className="mx-auto mb-2 h-6 w-6 text-gray-300" />
-                <p className="text-sm font-medium text-gray-400">Componente pendente de implementação</p>
+                <Clock className="mx-auto mb-2 h-6 w-6 text-muted-foreground/50" />
+                <p className="text-sm font-medium text-muted-foreground">Componente pendente de implementação</p>
                 {entry.description && (
-                  <p className="mt-1 max-w-md text-xs text-gray-400">{entry.description}</p>
+                  <p className="mt-1 max-w-md text-xs text-muted-foreground">{entry.description}</p>
                 )}
               </div>
             </div>
@@ -546,12 +546,12 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
 
           {entry.props && (
             <div>
-              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Props</p>
+              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Props</p>
               <div className="flex flex-wrap gap-1.5">
                 {entry.props.map((prop) => (
                   <code
                     key={prop}
-                    className="rounded bg-gray-100 px-2 py-0.5 text-[11px] text-gray-600"
+                    className="rounded bg-muted px-2 py-0.5 text-[11px] text-foreground"
                   >
                     {prop}
                   </code>
@@ -563,7 +563,7 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
           {entry.specHref && (
             <a
               href={entry.specHref}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:underline"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
             >
               Ver spec completa
             </a>
@@ -590,10 +590,10 @@ export default function ComponentGallery() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
       <div>
-        <h1 className="text-xl font-bold text-gray-800">
+        <h1 className="text-xl font-bold text-foreground">
           Galeria de Componentes — Wireframe Builder
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           {availableCount} de {totalComponents} componentes disponíveis.
           Cada preview usa dados fictícios para demonstração.
         </p>
@@ -606,8 +606,8 @@ export default function ComponentGallery() {
           className={cn(
             'rounded-full px-4 py-1.5 text-xs font-medium transition-colors',
             activeCategory === 'all'
-              ? 'bg-gray-800 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80',
           )}
         >
           Todos
@@ -620,8 +620,8 @@ export default function ComponentGallery() {
             className={cn(
               'rounded-full px-4 py-1.5 text-xs font-medium transition-colors',
               activeCategory === cat.id
-                ? 'bg-gray-800 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80',
             )}
           >
             {cat.label}
@@ -634,7 +634,7 @@ export default function ComponentGallery() {
 
       {filtered.map((category) => (
         <section key={category.id}>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-400">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             {category.label}
           </h2>
           <div className="space-y-4">
