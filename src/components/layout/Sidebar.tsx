@@ -179,8 +179,8 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
           depth === 0
             ? 'text-left text-xs font-semibold uppercase tracking-[0.18em] text-foreground'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-          depth === 2 && 'pl-8',
-          depth === 3 && 'pl-11',
+          depth === 2 && 'pl-5',
+          depth === 3 && 'pl-8',
           childIsActive && depth > 0 && 'text-foreground',
         )}>
           <NavLink
