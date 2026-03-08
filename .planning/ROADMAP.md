@@ -79,7 +79,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Blocos Disponiveis spec is detailed enough to serve as a prompt for component creation
   2. Component gallery is synchronized with block specs
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 02.2-01-PLAN.md — Create landing page + Cards/Charts/Tables spec files (12 files: index + 11 specs) (BLKSPEC-01)
@@ -184,7 +184,7 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3/02.4 -> 3 -> 4 -> 5
 | 1. Documentation | 2/2 | Complete | 2026-03-07 |
 | 2. Wireframe Comments | 3/3 | Complete | 2026-03-07 |
 | 02.1. Melhoria e organizacao de dominio | 3/3 | Complete    | 2026-03-07 |
-| 02.2. Evolucao de Blocos Disponiveis | 0/3 | Not started | - |
+| 02.2. Evolucao de Blocos Disponiveis | 2/3 | In Progress|  |
 | 02.3. Skills Globais | 0/1 | Not started | - |
 | 02.4. Reformulacao Visual | 0/1 | Not started | - |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |

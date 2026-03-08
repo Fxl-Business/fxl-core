@@ -30,7 +30,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Blocos Disponiveis Evolution (Phase 02.2)
 
-- [ ] **BLKSPEC-01**: Blocos Disponiveis como spec detalhada que serve de prompt para criar componentes
+- [x] **BLKSPEC-01**: Blocos Disponiveis como spec detalhada que serve de prompt para criar componentes
 - [ ] **BLKSPEC-02**: Galeria de componentes sincronizada com specs de blocos
 
 ### Global Skills (Phase 02.3)
@@ -119,7 +119,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REORG-04 | Phase 02.1 | Complete |
 | REORG-05 | Phase 02.1 | Complete |
 | REORG-06 | Phase 02.1 | Complete |
-| BLKSPEC-01 | Phase 02.2 | Pending |
+| BLKSPEC-01 | Phase 02.2 | Complete |
 | BLKSPEC-02 | Phase 02.2 | Pending |
 | GSKILL-01 | Phase 02.3 | Pending |
 | GSKILL-02 | Phase 02.3 | Pending |
