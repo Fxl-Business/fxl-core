@@ -112,11 +112,11 @@ export default function ProcessDocsViewer() {
   return (
     <div>
       <div className="mb-6">
-        <span className="text-xs font-semibold uppercase tracking-widest text-fxl-navy">
+        <span className="text-xs font-semibold uppercase tracking-widest text-primary">
           {entry.section}
         </span>
-        <h1 className="mt-1 text-2xl font-bold text-fxl-navy">{entry.title}</h1>
-        <span className="mt-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-fxl-navy">
+        <h1 className="mt-1 text-2xl font-bold text-foreground">{entry.title}</h1>
+        <span className="mt-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
           {entry.filename}
         </span>
       </div>

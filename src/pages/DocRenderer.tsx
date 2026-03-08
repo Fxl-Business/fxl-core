@@ -41,8 +41,8 @@ export default function DocRenderer() {
   if (!doc) {
     return (
       <div className="py-12 text-center">
-        <h1 className="text-lg font-semibold text-slate-700">Pagina nao encontrada</h1>
-        <p className="mt-2 text-sm text-slate-500">
+        <h1 className="text-lg font-semibold text-foreground">Pagina nao encontrada</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Nao foi possivel encontrar um documento para: {location.pathname}
         </p>
       </div>
