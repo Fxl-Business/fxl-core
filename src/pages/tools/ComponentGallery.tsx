@@ -61,6 +61,7 @@ type ComponentEntry = {
   props?: string[]
   render?: () => React.ReactNode
   hasToolbar?: boolean
+  specHref?: string
 }
 
 type Category = {
@@ -304,6 +305,7 @@ const categories: Category[] = [
         hasToolbar: true,
         props: ['label', 'value', 'variation?', 'description?', 'variationPositive?'],
         render: () => <KpiCardPreview />,
+        specHref: '/ferramentas/blocos/kpi-card',
       },
       {
         name: 'KpiCardFull',
@@ -311,6 +313,7 @@ const categories: Category[] = [
         hasToolbar: true,
         props: ['label', 'value', 'sub?', 'variation?', 'variationPositive?', 'semaforo?', 'semaforoLabel?', 'sparkline?', 'wide?', 'compareMode?'],
         render: () => <KpiCardFullPreview />,
+        specHref: '/ferramentas/blocos/kpi-card-full',
       },
       {
         name: 'CalculoCard',
@@ -318,6 +321,7 @@ const categories: Category[] = [
         hasToolbar: true,
         props: ['title?', 'rows: CalculoRow[]', 'compareMode?', 'comparePeriodLabel?'],
         render: () => <CalculoCardPreview />,
+        specHref: '/ferramentas/blocos/calculo-card',
       },
     ],
   },
@@ -331,6 +335,7 @@ const categories: Category[] = [
         hasToolbar: true,
         props: ['title', 'type: bar | line | bar-line', 'height?'],
         render: () => <BarLineChartPreview />,
+        specHref: '/ferramentas/blocos/bar-line-chart',
       },
       {
         name: 'WaterfallChart',
@@ -338,18 +343,21 @@ const categories: Category[] = [
         hasToolbar: true,
         props: ['title', 'bars: WaterfallBar[]', 'height?', 'compareMode?', 'compareBars?', 'comparePeriodLabel?'],
         render: () => <WaterfallChartPreview />,
+        specHref: '/ferramentas/blocos/waterfall-chart',
       },
       {
         name: 'DonutChart',
         status: 'available',
         props: ['title', 'data: Slice[]', 'centerValue?', 'centerLabel?', 'height?'],
         render: () => <DonutChart {...donutChartMock} />,
+        specHref: '/ferramentas/blocos/donut-chart',
       },
       {
         name: 'ParetoChart',
         status: 'available',
         props: ['title', 'data: Entry[]', 'height?', 'valueLabel?'],
         render: () => <ParetoChart {...paretoChartMock} />,
+        specHref: '/ferramentas/blocos/pareto-chart',
       },
     ],
   },
@@ -362,24 +370,28 @@ const categories: Category[] = [
         status: 'available',
         props: ['title?', 'columns: Column[]', 'rowCount?'],
         render: () => <DataTable {...dataTableMock} />,
+        specHref: '/ferramentas/blocos/data-table',
       },
       {
         name: 'DrillDownTable',
         status: 'available',
         props: ['title?', 'subtitle?', 'columns: DrilColumn[]', 'rows: DrilRow[]'],
         render: () => <DrillDownTable {...drillDownTableMock} />,
+        specHref: '/ferramentas/blocos/drill-down-table',
       },
       {
         name: 'ClickableTable',
         status: 'available',
         props: ['title?', 'subtitle?', 'columns: ClickColumn[]', 'rows: ClickRow[]', 'onRowClick?'],
         render: () => <ClickableTable {...clickableTableMock} />,
+        specHref: '/ferramentas/blocos/clickable-table',
       },
       {
         name: 'ConfigTable',
         status: 'available',
         props: ['title', 'addLabel?', 'columns: ConfigColumn[]', 'rows: ConfigRow[]'],
         render: () => <ConfigTable {...configTableMock} />,
+        specHref: '/ferramentas/blocos/config-table',
       },
     ],
   },
@@ -396,6 +408,7 @@ const categories: Category[] = [
             <WireframeSidebar {...wireframeSidebarMock} />
           </div>
         ),
+        specHref: '/ferramentas/blocos/wireframe-sidebar',
       },
       {
         name: 'WireframeHeader',
@@ -403,36 +416,42 @@ const categories: Category[] = [
         hasToolbar: true,
         props: ['title', 'periodType?: mensal | anual | none'],
         render: () => <WireframeHeaderPreview />,
+        specHref: '/ferramentas/blocos/wireframe-header',
       },
       {
         name: 'WireframeFilterBar',
         status: 'available',
         props: ['filters: FilterOption[]', 'showSearch?', 'showCompareSwitch?', 'compareMode?', 'comparePeriodType?'],
         render: () => <WireframeFilterBar {...wireframeFilterBarMock} />,
+        specHref: '/ferramentas/blocos/wireframe-filter-bar',
       },
       {
         name: 'GlobalFilters',
         status: 'available',
         props: ['filters: FilterType[]'],
         render: () => <GlobalFilters {...globalFiltersMock} />,
+        specHref: '/ferramentas/blocos/global-filters',
       },
       {
         name: 'CommentOverlay',
         status: 'available',
         props: ['screenName', 'comments?'],
         render: () => <CommentOverlayPreview />,
+        specHref: '/ferramentas/blocos/comment-overlay',
       },
       {
         name: 'WireframeModal',
         status: 'available',
         props: ['title', 'open', 'onClose', 'children', 'footer?', 'size?: md | lg | xl'],
         render: () => <ModalPreview />,
+        specHref: '/ferramentas/blocos/wireframe-modal',
       },
       {
         name: 'DetailViewSwitcher',
         status: 'available',
         props: ['options: string[]', 'activeOption', 'onChange'],
         render: () => <DetailViewSwitcherPreview />,
+        specHref: '/ferramentas/blocos/detail-view-switcher',
       },
     ],
   },
@@ -445,24 +464,28 @@ const categories: Category[] = [
         status: 'available',
         props: ['acceptedFormats: string[]', 'instructions?', 'fieldName?'],
         render: () => <InputsScreen {...inputsScreenMock} />,
+        specHref: '/ferramentas/blocos/inputs-screen',
       },
       {
         name: 'UploadSection',
         status: 'available',
         props: ['label', 'acceptedFormats?', 'successMessage?', 'errorMessages?', 'history?'],
         render: () => <UploadSection {...uploadSectionMock} />,
+        specHref: '/ferramentas/blocos/upload-section',
       },
       {
         name: 'ManualInputSection',
         status: 'available',
         props: ['title?', 'initialBalance?', 'entries?'],
         render: () => <ManualInputSection {...manualInputSectionMock} />,
+        specHref: '/ferramentas/blocos/manual-input-section',
       },
       {
         name: 'SaldoBancoInput',
         status: 'available',
         props: ['title?', 'note?', 'banks: BankEntry[]', 'total'],
         render: () => <SaldoBancoInput {...saldoBancoInputMock} />,
+        specHref: '/ferramentas/blocos/saldo-banco-input',
       },
     ],
   },
@@ -535,6 +558,15 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
                 ))}
               </div>
             </div>
+          )}
+
+          {entry.specHref && (
+            <a
+              href={entry.specHref}
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:underline"
+            >
+              Ver spec completa
+            </a>
           )}
         </div>
       )}

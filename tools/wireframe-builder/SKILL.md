@@ -24,6 +24,7 @@ import BarLineChart from '@tools/wireframe-builder/components/BarLineChart'
 
 Todos os componentes usam dados ficticios por padrao, configuraveis via props.
 Nenhum componente contem dados reais.
+Specs completas: `docs/ferramentas/blocos/` ([ver no app](/ferramentas/blocos/index))
 
 | Componente | Funcao |
 |---|---|
@@ -179,3 +180,4 @@ Quando Claude Code for invocado para tarefas de wireframe:
 - Todo componente novo adicionado ao modulo deve ser documentado neste SKILL.md
 - Nenhum wireframe deve incluir comparativos temporais hardcoded
 - Detalhes de comportamento de componentes nao devem aparecer no blueprint — ficam internos ao componente
+- Ao criar ou alterar um componente, atualizar AMBOS: a spec em `docs/ferramentas/blocos/[nome].md` E a entrada na galeria (`src/pages/tools/ComponentGallery.tsx`). Spec e galeria devem sempre refletir as mesmas capabilities.
