@@ -23,11 +23,11 @@ export default function PhaseCard({
     <Link
       to={href}
       className={cn(
-        'group flex items-start gap-4 rounded-lg border border-border bg-white/80 p-4 transition-all hover:border-fxl-navy/40 hover:bg-muted/30 hover:shadow-sm',
+        'group flex items-start gap-4 rounded-lg border border-border bg-card/80 p-4 transition-all hover:border-primary/40 hover:bg-muted/30 hover:shadow-sm',
         className,
       )}
     >
-      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-fxl-navy text-sm font-bold text-white">
+      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
         {number}
       </div>
       <div className="min-w-0 flex-1">
@@ -37,7 +37,7 @@ export default function PhaseCard({
         </div>
         <p className="text-xs text-muted-foreground">{description}</p>
       </div>
-      <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground transition-colors group-hover:text-fxl-navy" />
+      <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
     </Link>
   )
 }

@@ -50,7 +50,7 @@ export default function DocTableOfContents({ headings }: Props) {
                 'block text-xs transition-colors hover:text-foreground',
                 h.level === 3 && 'pl-3',
                 activeId === h.id
-                  ? 'font-medium text-fxl-navy'
+                  ? 'font-medium text-primary'
                   : 'text-muted-foreground',
               )}
             >

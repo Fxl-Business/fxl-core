@@ -19,8 +19,8 @@ export default function PromptBlock({ label, prompt, className }: PromptBlockPro
 
   return (
     <div className={cn('mb-6 overflow-hidden rounded-lg border border-border', className)}>
-      <div className="flex items-center justify-between border-b border-border bg-fxl-navy/5 px-4 py-2.5">
-        <span className="text-xs font-medium text-fxl-navy">
+      <div className="flex items-center justify-between border-b border-border bg-primary/5 px-4 py-2.5">
+        <span className="text-xs font-medium text-primary">
           {label ?? 'Use este prompt para iniciar a conversa'}
         </span>
         <button
@@ -41,7 +41,7 @@ export default function PromptBlock({ label, prompt, className }: PromptBlockPro
           )}
         </button>
       </div>
-      <pre className="overflow-x-auto whitespace-pre-wrap bg-slate-50 p-4 font-mono text-xs leading-relaxed text-slate-700">
+      <pre className="overflow-x-auto whitespace-pre-wrap bg-muted p-4 font-mono text-xs leading-relaxed text-muted-foreground">
         {prompt}
       </pre>
     </div>
