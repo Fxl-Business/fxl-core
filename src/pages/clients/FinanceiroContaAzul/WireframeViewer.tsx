@@ -1,36 +1,123 @@
 import { useCallback, useEffect, useState } from 'react'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Loader2 } from 'lucide-react'
 import { useUser } from '@clerk/react'
+import { arrayMove } from '@dnd-kit/sortable'
 import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
 import CommentManager from '@tools/wireframe-builder/components/CommentManager'
 import WireframeHeader from '@tools/wireframe-builder/components/WireframeHeader'
 import BlueprintRenderer from '@tools/wireframe-builder/components/BlueprintRenderer'
-import blueprint from '@clients/financeiro-conta-azul/wireframe/blueprint.config'
+import AdminToolbar from '@tools/wireframe-builder/components/editor/AdminToolbar'
+import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPanel'
+import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
+import seedConfig from '@clients/financeiro-conta-azul/wireframe/blueprint.config'
+import {
+  loadBlueprint as loadBlueprintFromDb,
+  saveBlueprint as saveBlueprintToDb,
+  seedFromFile,
+} from '@tools/wireframe-builder/lib/blueprint-store'
+import { sectionsToRows, getCellCount } from '@tools/wireframe-builder/lib/grid-layouts'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
 import type { Comment } from '@tools/wireframe-builder/types/comments'
+import type {
+  BlueprintConfig,
+  BlueprintScreen,
+  BlueprintSection,
+} from '@tools/wireframe-builder/types/blueprint'
+import type { EditModeState, GridLayout, ScreenRow } from '@tools/wireframe-builder/types/editor'
 
-const screens = blueprint.screens
+const CLIENT_SLUG = 'financeiro-conta-azul'
 
 export default function FinanceiroWireframeViewer() {
-  const [activeIndex, setActiveIndex] = useState(0)
-  const activeScreen = screens[activeIndex]
-
   const { user } = useUser()
 
+  // Data loading
+  const [config, setConfig] = useState<BlueprintConfig | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  // Edit mode
+  const [editMode, setEditMode] = useState<EditModeState>({
+    active: false,
+    dirty: false,
+    saving: false,
+    selectedSection: null,
+  })
+  const [workingConfig, setWorkingConfig] = useState<BlueprintConfig | null>(null)
+  const [pendingExitEdit, setPendingExitEdit] = useState(false)
+
+  // Screen navigation
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  // Comments
   const [comments, setComments] = useState<Comment[]>([])
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [drawerTarget, setDrawerTarget] = useState<{ targetId: string; label: string } | null>(null)
+  const [drawerTarget, setDrawerTarget] = useState<{
+    targetId: string
+    label: string
+  } | null>(null)
   const [managerOpen, setManagerOpen] = useState(false)
 
+  // --- Data loading ---
+
+  useEffect(() => {
+    async function init() {
+      try {
+        let bp = await loadBlueprintFromDb(CLIENT_SLUG)
+        if (!bp) {
+          await seedFromFile(CLIENT_SLUG, seedConfig, user?.id ?? 'system')
+          bp = await loadBlueprintFromDb(CLIENT_SLUG)
+        }
+        setConfig(bp)
+      } catch (err) {
+        console.error('Failed to load blueprint:', err)
+        setLoadError('Erro ao carregar wireframe.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    init()
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // --- Derived state ---
+
+  const activeConfig =
+    editMode.active && workingConfig ? workingConfig : config
+  const screens = activeConfig?.screens ?? []
+  const safeActiveIndex = Math.min(activeIndex, Math.max(screens.length - 1, 0))
+  const activeScreen: BlueprintScreen | undefined = screens[safeActiveIndex]
+
+  // Compute rows for active screen
+  const rows: ScreenRow[] = activeScreen
+    ? activeScreen.rows ?? sectionsToRows(activeScreen.sections)
+    : []
+
+  // Find selected section data for property panel
+  const selectedSectionData: BlueprintSection | null =
+    editMode.selectedSection && activeScreen
+      ? (() => {
+          const { rowIndex, cellIndex } = editMode.selectedSection
+          const r = rows[rowIndex]
+          return r?.sections[cellIndex] ?? null
+        })()
+      : null
+
+  // --- Comments ---
+
   const fetchComments = useCallback(async () => {
+    if (!config || !activeScreen) return
     try {
-      const data = await getCommentsByScreen(blueprint.slug, activeScreen.id)
+      const data = await getCommentsByScreen(
+        config.slug,
+        activeScreen.id,
+      )
       setComments(data)
     } catch {
       // Silently fail -- comments list stays empty or stale
     }
-  }, [activeScreen.id])
+  }, [config, activeScreen])
 
   useEffect(() => {
     fetchComments()
@@ -43,7 +130,11 @@ export default function FinanceiroWireframeViewer() {
   }
 
   function handleOpenScreenComments() {
-    const targetId = toTargetId({ type: 'screen', screenId: activeScreen.id })
+    if (!activeScreen) return
+    const targetId = toTargetId({
+      type: 'screen',
+      screenId: activeScreen.id,
+    })
     handleOpenComments(targetId, activeScreen.title)
   }
 
@@ -62,11 +153,322 @@ export default function FinanceiroWireframeViewer() {
     fetchComments()
   }
 
+  // --- Edit mode ---
+
+  function handleToggleEdit() {
+    if (editMode.active) {
+      // Exiting edit mode
+      if (editMode.dirty) {
+        setPendingExitEdit(true)
+        return
+      }
+      exitEditMode()
+    } else {
+      // Entering edit mode
+      if (!config) return
+      setWorkingConfig(structuredClone(config))
+      setEditMode({
+        active: true,
+        dirty: false,
+        saving: false,
+        selectedSection: null,
+      })
+    }
+  }
+
+  function exitEditMode() {
+    setWorkingConfig(null)
+    setEditMode({
+      active: false,
+      dirty: false,
+      saving: false,
+      selectedSection: null,
+    })
+    setPendingExitEdit(false)
+  }
+
+  function confirmExitEdit() {
+    exitEditMode()
+  }
+
+  function cancelExitEdit() {
+    setPendingExitEdit(false)
+  }
+
+  async function handleSave() {
+    if (!workingConfig || !user) return
+    setEditMode((prev) => ({ ...prev, saving: true }))
+    try {
+      await saveBlueprintToDb(CLIENT_SLUG, workingConfig, user.id)
+      setConfig(structuredClone(workingConfig))
+      setEditMode((prev) => ({
+        ...prev,
+        dirty: false,
+        saving: false,
+      }))
+    } catch (err) {
+      console.error('Failed to save blueprint:', err)
+      setEditMode((prev) => ({ ...prev, saving: false }))
+    }
+  }
+
+  // --- Working config mutation helpers ---
+
+  function updateWorkingScreen(
+    updater: (screen: BlueprintScreen) => BlueprintScreen,
+  ) {
+    setWorkingConfig((prev) => {
+      if (!prev) return prev
+      const newScreens = [...prev.screens]
+      const screen = newScreens[safeActiveIndex]
+      if (!screen) return prev
+      newScreens[safeActiveIndex] = updater(screen)
+      return { ...prev, screens: newScreens }
+    })
+    setEditMode((prev) => ({ ...prev, dirty: true }))
+  }
+
+  function getScreenRows(screen: BlueprintScreen): ScreenRow[] {
+    return screen.rows ?? sectionsToRows(screen.sections)
+  }
+
+  function setScreenRows(
+    screen: BlueprintScreen,
+    newRows: ScreenRow[],
+  ): BlueprintScreen {
+    return {
+      ...screen,
+      rows: newRows,
+      sections: newRows.flatMap((r) => r.sections),
+    }
+  }
+
+  // --- Section operations ---
+
+  function handleSelectSection(rowIndex: number, cellIndex: number) {
+    setEditMode((prev) => ({
+      ...prev,
+      selectedSection: { rowIndex, cellIndex },
+    }))
+  }
+
+  function handleDeleteSection(rowIndex: number, cellIndex: number) {
+    updateWorkingScreen((screen) => {
+      const currentRows = getScreenRows(screen)
+      const newRows = [...currentRows]
+      const row = { ...newRows[rowIndex] }
+      const newSections = [...row.sections]
+      newSections.splice(cellIndex, 1)
+
+      if (newSections.length === 0) {
+        // Remove the entire row
+        newRows.splice(rowIndex, 1)
+      } else {
+        row.sections = newSections
+        newRows[rowIndex] = row
+      }
+
+      return setScreenRows(screen, newRows)
+    })
+    // Clear selection if deleted section was selected
+    if (
+      editMode.selectedSection?.rowIndex === rowIndex &&
+      editMode.selectedSection?.cellIndex === cellIndex
+    ) {
+      setEditMode((prev) => ({ ...prev, selectedSection: null }))
+    }
+  }
+
+  function handleAddSection(afterRowIndex: number, section: BlueprintSection) {
+    updateWorkingScreen((screen) => {
+      const currentRows = getScreenRows(screen)
+      const newRow: ScreenRow = {
+        id: crypto.randomUUID(),
+        layout: '1',
+        sections: [section],
+      }
+
+      const newRows = [...currentRows]
+      const insertIndex = afterRowIndex + 1
+      newRows.splice(insertIndex, 0, newRow)
+
+      return setScreenRows(screen, newRows)
+    })
+  }
+
+  function handleReorderRows(oldIndex: number, newIndex: number) {
+    updateWorkingScreen((screen) => {
+      const currentRows = getScreenRows(screen)
+      const reordered = arrayMove(currentRows, oldIndex, newIndex)
+      return setScreenRows(screen, reordered)
+    })
+  }
+
+  function handleChangeLayout(rowIndex: number, layout: GridLayout) {
+    updateWorkingScreen((screen) => {
+      const currentRows = getScreenRows(screen)
+      const newRows = [...currentRows]
+      const row = { ...newRows[rowIndex] }
+      const newCellCount = getCellCount(layout)
+      const oldCellCount = row.sections.length
+
+      if (newCellCount < oldCellCount) {
+        // Move excess sections to new rows below
+        const kept = row.sections.slice(0, newCellCount)
+        const excess = row.sections.slice(newCellCount)
+        row.sections = kept
+        row.layout = layout
+        newRows[rowIndex] = row
+
+        // Create new single-column rows for overflow
+        const overflowRows: ScreenRow[] = excess.map((s) => ({
+          id: crypto.randomUUID(),
+          layout: '1' as GridLayout,
+          sections: [s],
+        }))
+        newRows.splice(rowIndex + 1, 0, ...overflowRows)
+      } else {
+        row.layout = layout
+        newRows[rowIndex] = row
+      }
+
+      return setScreenRows(screen, newRows)
+    })
+  }
+
+  function handlePropertyChange(updated: BlueprintSection) {
+    if (!editMode.selectedSection) return
+    const { rowIndex, cellIndex } = editMode.selectedSection
+
+    updateWorkingScreen((screen) => {
+      const currentRows = getScreenRows(screen)
+      const newRows = [...currentRows]
+      const row = { ...newRows[rowIndex] }
+      const newSections = [...row.sections]
+      newSections[cellIndex] = updated
+      row.sections = newSections
+      newRows[rowIndex] = row
+      return setScreenRows(screen, newRows)
+    })
+  }
+
+  // --- Screen management ---
+
+  function handleScreenSelect(index: number) {
+    setActiveIndex(index)
+    setEditMode((prev) => ({ ...prev, selectedSection: null }))
+  }
+
+  function handleAddScreen(screen: BlueprintScreen) {
+    setWorkingConfig((prev) => {
+      if (!prev) return prev
+      return { ...prev, screens: [...prev.screens, screen] }
+    })
+    setEditMode((prev) => ({ ...prev, dirty: true }))
+  }
+
+  function handleDeleteScreen(index: number) {
+    setWorkingConfig((prev) => {
+      if (!prev) return prev
+      const newScreens = prev.screens.filter((_, i) => i !== index)
+      return { ...prev, screens: newScreens }
+    })
+    if (safeActiveIndex >= screens.length - 1) {
+      setActiveIndex(Math.max(0, screens.length - 2))
+    }
+    setEditMode((prev) => ({
+      ...prev,
+      dirty: true,
+      selectedSection: null,
+    }))
+  }
+
+  function handleRenameScreen(index: number, title: string) {
+    setWorkingConfig((prev) => {
+      if (!prev) return prev
+      const newScreens = [...prev.screens]
+      newScreens[index] = { ...newScreens[index], title }
+      return { ...prev, screens: newScreens }
+    })
+    setEditMode((prev) => ({ ...prev, dirty: true }))
+  }
+
+  function handleReorderScreens(reorderedScreens: BlueprintScreen[]) {
+    setWorkingConfig((prev) => {
+      if (!prev) return prev
+      return { ...prev, screens: reorderedScreens }
+    })
+    setEditMode((prev) => ({ ...prev, dirty: true }))
+  }
+
+  // --- Auth info ---
   const authorId = user?.id ?? 'unknown'
-  const authorName = user?.fullName ?? user?.primaryEmailAddress?.emailAddress ?? 'Operador'
+  const authorName =
+    user?.fullName ??
+    user?.primaryEmailAddress?.emailAddress ??
+    'Operador'
+
+  // --- Render: loading/error states ---
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          gap: 12,
+          fontFamily: 'Inter, sans-serif',
+        }}
+      >
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <p style={{ fontSize: 14, color: '#757575' }}>
+          Carregando wireframe...
+        </p>
+      </div>
+    )
+  }
+
+  if (loadError || !config || !activeScreen) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          fontFamily: 'Inter, sans-serif',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 400,
+            padding: 32,
+            borderRadius: 12,
+            border: '1px solid #E0E0E0',
+            background: '#FFFFFF',
+            textAlign: 'center',
+          }}
+        >
+          <p style={{ fontSize: 14, color: '#757575' }}>
+            {loadError ?? 'Wireframe nao encontrado.'}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', fontFamily: 'Inter, sans-serif', background: '#F5F5F5' }}>
+    <div
+      style={{
+        display: 'flex',
+        height: '100vh',
+        fontFamily: 'Inter, sans-serif',
+        background: '#F5F5F5',
+      }}
+    >
       {/* Sidebar escura */}
       <aside
         style={{
@@ -82,41 +484,38 @@ export default function FinanceiroWireframeViewer() {
           top: 0,
         }}
       >
-        <div style={{
-          height: 56,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 24px',
-          borderBottom: '1px solid #424242',
-          flexShrink: 0,
-        }}>
-          <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>FXL</span>
+        <div
+          style={{
+            height: 56,
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 24px',
+            borderBottom: '1px solid #424242',
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
+            FXL
+          </span>
         </div>
         <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
-          {screens.map((screen, i) => (
-            <button
-              key={screen.id}
-              type="button"
-              onClick={() => setActiveIndex(i)}
-              style={{
-                display: 'block',
-                width: '100%',
-                textAlign: 'left',
-                padding: '10px 24px',
-                fontSize: 13,
-                fontWeight: activeIndex === i ? 500 : 400,
-                color: activeIndex === i ? '#FFF' : '#BDBDBD',
-                background: activeIndex === i ? '#424242' : 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              {screen.title}
-            </button>
-          ))}
+          <ScreenManager
+            screens={screens}
+            activeIndex={safeActiveIndex}
+            editMode={editMode.active}
+            onSelectScreen={handleScreenSelect}
+            onAddScreen={handleAddScreen}
+            onDeleteScreen={handleDeleteScreen}
+            onRenameScreen={handleRenameScreen}
+            onReorderScreens={handleReorderScreens}
+          />
         </nav>
-        <div style={{ padding: '16px 24px', borderTop: '1px solid #424242' }}>
+        <div
+          style={{
+            padding: '16px 24px',
+            borderTop: '1px solid #424242',
+          }}
+        >
           <button
             type="button"
             onClick={handleOpenManager}
@@ -131,27 +530,75 @@ export default function FinanceiroWireframeViewer() {
               cursor: 'pointer',
               fontFamily: 'Inter, sans-serif',
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = '#FFFFFF' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#9E9E9E' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#FFFFFF'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#9E9E9E'
+            }}
           >
             Gerenciar
           </button>
-          <span style={{ fontSize: 11, color: '#757575' }}>Desenvolvido por FXL</span>
+          <span style={{ fontSize: 11, color: '#757575' }}>
+            Desenvolvido por FXL
+          </span>
         </div>
       </aside>
 
       {/* Area principal */}
-      <main style={{ flex: 1, marginLeft: 240, display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <WireframeHeader title={activeScreen.title} periodType={activeScreen.periodType} />
-        <div style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}>
+      <main
+        style={{
+          flex: 1,
+          marginLeft: 240,
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100vh',
+        }}
+      >
+        {user && (
+          <AdminToolbar
+            screenTitle={activeScreen.title}
+            editMode={editMode.active}
+            dirty={editMode.dirty}
+            saving={editMode.saving}
+            onToggleEdit={handleToggleEdit}
+            onSave={handleSave}
+            onOpenComments={handleOpenScreenComments}
+          />
+        )}
+        <WireframeHeader
+          title={activeScreen.title}
+          periodType={activeScreen.periodType}
+        />
+        <div
+          style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}
+        >
           <BlueprintRenderer
             screen={activeScreen}
-            clientSlug={blueprint.slug}
+            clientSlug={activeConfig?.slug}
             comments={comments}
             onOpenComments={handleOpenComments}
+            editMode={editMode.active}
+            selectedSection={editMode.selectedSection}
+            onSelectSection={handleSelectSection}
+            onDeleteSection={handleDeleteSection}
+            onAddSection={handleAddSection}
+            onReorderRows={handleReorderRows}
+            onChangeLayout={handleChangeLayout}
+            rows={rows}
           />
         </div>
       </main>
+
+      {/* Property panel */}
+      <PropertyPanel
+        open={editMode.selectedSection !== null}
+        section={selectedSectionData}
+        onClose={() =>
+          setEditMode((prev) => ({ ...prev, selectedSection: null }))
+        }
+        onChange={handlePropertyChange}
+      />
 
       {/* Screen-level comment FAB */}
       <button
@@ -162,10 +609,40 @@ export default function FinanceiroWireframeViewer() {
         <MessageSquare className="h-5 w-5 text-white" />
       </button>
 
+      {/* Unsaved changes confirmation dialog */}
+      {pendingExitEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm rounded-lg border bg-background p-6 shadow-lg">
+            <h3 className="text-base font-semibold text-foreground">
+              Alteracoes nao salvas
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Voce tem alteracoes nao salvas. Deseja sair sem salvar?
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelExitEdit}
+                className="rounded-md border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                Continuar editando
+              </button>
+              <button
+                type="button"
+                onClick={confirmExitEdit}
+                className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90"
+              >
+                Sair sem salvar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Comment drawer */}
       {drawerTarget && (
         <CommentOverlay
-          clientSlug={blueprint.slug}
+          clientSlug={config.slug}
           screenId={activeScreen.id}
           targetId={drawerTarget.targetId}
           targetLabel={drawerTarget.label}
@@ -179,7 +656,7 @@ export default function FinanceiroWireframeViewer() {
 
       {/* Comment management panel */}
       <CommentManager
-        clientSlug={blueprint.slug}
+        clientSlug={config.slug}
         open={managerOpen}
         onClose={handleCloseManager}
       />

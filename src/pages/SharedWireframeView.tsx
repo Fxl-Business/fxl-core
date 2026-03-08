@@ -3,6 +3,10 @@ import { useSearchParams } from 'react-router-dom'
 import { MessageSquare, Loader2 } from 'lucide-react'
 import { validateToken } from '@tools/wireframe-builder/lib/tokens'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
+import {
+  loadBlueprint as loadBlueprintFromDb,
+  seedFromFile,
+} from '@tools/wireframe-builder/lib/blueprint-store'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
 import type { Comment } from '@tools/wireframe-builder/types/comments'
 import type { BlueprintConfig } from '@tools/wireframe-builder/types/blueprint'
@@ -22,15 +26,25 @@ function getClientId(): string {
   return id
 }
 
-const blueprintMap: Record<string, () => Promise<{ default: BlueprintConfig }>> = {
-  'financeiro-conta-azul': () => import('@clients/financeiro-conta-azul/wireframe/blueprint.config'),
+/** Fallback dynamic import map for seeding when Supabase has no data yet */
+const blueprintMap: Record<
+  string,
+  () => Promise<{ default: BlueprintConfig }>
+> = {
+  'financeiro-conta-azul': () =>
+    import('@clients/financeiro-conta-azul/wireframe/blueprint.config'),
 }
 
 type ViewState =
   | { step: 'loading' }
   | { step: 'invalid'; message: string }
   | { step: 'name-entry'; clientSlug: string }
-  | { step: 'wireframe'; clientSlug: string; clientName: string; blueprint: BlueprintConfig }
+  | {
+      step: 'wireframe'
+      clientSlug: string
+      clientName: string
+      blueprint: BlueprintConfig
+    }
 
 export default function SharedWireframeView() {
   const [searchParams] = useSearchParams()
@@ -43,18 +57,29 @@ export default function SharedWireframeView() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [comments, setComments] = useState<Comment[]>([])
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [drawerTarget, setDrawerTarget] = useState<{ targetId: string; label: string } | null>(null)
+  const [drawerTarget, setDrawerTarget] = useState<{
+    targetId: string
+    label: string
+  } | null>(null)
 
   useEffect(() => {
     async function init() {
       if (!token) {
-        setViewState({ step: 'invalid', message: 'Link invalido ou expirado. Solicite um novo link ao operador.' })
+        setViewState({
+          step: 'invalid',
+          message:
+            'Link invalido ou expirado. Solicite um novo link ao operador.',
+        })
         return
       }
 
       const result = await validateToken(token)
       if (!result.valid || !result.clientSlug) {
-        setViewState({ step: 'invalid', message: 'Link invalido ou expirado. Solicite um novo link ao operador.' })
+        setViewState({
+          step: 'invalid',
+          message:
+            'Link invalido ou expirado. Solicite um novo link ao operador.',
+        })
         return
       }
 
@@ -74,17 +99,33 @@ export default function SharedWireframeView() {
   }, [token])
 
   async function loadBlueprint(clientSlug: string, clientName: string) {
-    const loader = blueprintMap[clientSlug]
-    if (!loader) {
-      setViewState({ step: 'invalid', message: 'Cliente nao encontrado.' })
-      return
-    }
-
     try {
-      const mod = await loader()
-      setViewState({ step: 'wireframe', clientSlug, clientName, blueprint: mod.default })
+      // First try Supabase
+      let bp = await loadBlueprintFromDb(clientSlug)
+
+      if (!bp) {
+        // Supabase has no data -- try dynamic import fallback and seed
+        const loader = blueprintMap[clientSlug]
+        if (!loader) {
+          setViewState({ step: 'invalid', message: 'Cliente nao encontrado.' })
+          return
+        }
+        const mod = await loader()
+        await seedFromFile(clientSlug, mod.default, 'system')
+        bp = mod.default
+      }
+
+      setViewState({
+        step: 'wireframe',
+        clientSlug,
+        clientName,
+        blueprint: bp,
+      })
     } catch {
-      setViewState({ step: 'invalid', message: 'Erro ao carregar wireframe.' })
+      setViewState({
+        step: 'invalid',
+        message: 'Erro ao carregar wireframe.',
+      })
     }
   }
 
@@ -130,7 +171,17 @@ export default function SharedWireframeView() {
 
   if (viewState.step === 'loading') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: 12, fontFamily: 'Inter, sans-serif' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          gap: 12,
+          fontFamily: 'Inter, sans-serif',
+        }}
+      >
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         <p style={{ fontSize: 14, color: '#757575' }}>Validando acesso...</p>
       </div>
@@ -139,13 +190,59 @@ export default function SharedWireframeView() {
 
   if (viewState.step === 'invalid') {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
-        <div style={{ maxWidth: 400, padding: 32, borderRadius: 12, border: '1px solid #E0E0E0', background: '#FFFFFF', textAlign: 'center' }}>
-          <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          fontFamily: 'Inter, sans-serif',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 400,
+            padding: 32,
+            borderRadius: 12,
+            border: '1px solid #E0E0E0',
+            background: '#FFFFFF',
+            textAlign: 'center',
+          }}
+        >
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: '50%',
+              background: '#FEE2E2',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+            }}
+          >
             <span style={{ fontSize: 20 }}>!</span>
           </div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: '#212121', margin: '0 0 8px' }}>Acesso indisponivel</h2>
-          <p style={{ fontSize: 13, color: '#757575', margin: 0, lineHeight: 1.5 }}>{viewState.message}</p>
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              color: '#212121',
+              margin: '0 0 8px',
+            }}
+          >
+            Acesso indisponivel
+          </h2>
+          <p
+            style={{
+              fontSize: 13,
+              color: '#757575',
+              margin: 0,
+              lineHeight: 1.5,
+            }}
+          >
+            {viewState.message}
+          </p>
         </div>
       </div>
     )
@@ -153,10 +250,45 @@ export default function SharedWireframeView() {
 
   if (viewState.step === 'name-entry') {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
-        <form onSubmit={handleNameSubmit} style={{ maxWidth: 400, width: '100%', padding: 32, borderRadius: 12, border: '1px solid #E0E0E0', background: '#FFFFFF' }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: '#212121', margin: '0 0 4px' }}>Bem-vindo ao wireframe</h2>
-          <p style={{ fontSize: 13, color: '#757575', margin: '0 0 20px' }}>Informe seu nome para continuar.</p>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          fontFamily: 'Inter, sans-serif',
+        }}
+      >
+        <form
+          onSubmit={handleNameSubmit}
+          style={{
+            maxWidth: 400,
+            width: '100%',
+            padding: 32,
+            borderRadius: 12,
+            border: '1px solid #E0E0E0',
+            background: '#FFFFFF',
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              color: '#212121',
+              margin: '0 0 4px',
+            }}
+          >
+            Bem-vindo ao wireframe
+          </h2>
+          <p
+            style={{
+              fontSize: 13,
+              color: '#757575',
+              margin: '0 0 20px',
+            }}
+          >
+            Informe seu nome para continuar.
+          </p>
           <input
             type="text"
             value={nameInput}
@@ -205,12 +337,22 @@ export default function SharedWireframeView() {
   const activeScreen = screens[activeIndex]
 
   function handleOpenScreenComments() {
-    const targetId = toTargetId({ type: 'screen', screenId: activeScreen.id })
+    const targetId = toTargetId({
+      type: 'screen',
+      screenId: activeScreen.id,
+    })
     handleOpenComments(targetId, activeScreen.title)
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', fontFamily: 'Inter, sans-serif', background: '#F5F5F5' }}>
+    <div
+      style={{
+        display: 'flex',
+        height: '100vh',
+        fontFamily: 'Inter, sans-serif',
+        background: '#F5F5F5',
+      }}
+    >
       {/* Sidebar escura */}
       <aside
         style={{
@@ -226,15 +368,19 @@ export default function SharedWireframeView() {
           top: 0,
         }}
       >
-        <div style={{
-          height: 56,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 24px',
-          borderBottom: '1px solid #424242',
-          flexShrink: 0,
-        }}>
-          <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>FXL</span>
+        <div
+          style={{
+            height: 56,
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 24px',
+            borderBottom: '1px solid #424242',
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
+            FXL
+          </span>
         </div>
         <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
           {screens.map((screen, i) => (
@@ -260,15 +406,35 @@ export default function SharedWireframeView() {
             </button>
           ))}
         </nav>
-        <div style={{ padding: '16px 24px', borderTop: '1px solid #424242', fontSize: 11, color: '#757575' }}>
+        <div
+          style={{
+            padding: '16px 24px',
+            borderTop: '1px solid #424242',
+            fontSize: 11,
+            color: '#757575',
+          }}
+        >
           Desenvolvido por FXL
         </div>
       </aside>
 
       {/* Area principal */}
-      <main style={{ flex: 1, marginLeft: 240, display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <WireframeHeader title={activeScreen.title} periodType={activeScreen.periodType} />
-        <div style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}>
+      <main
+        style={{
+          flex: 1,
+          marginLeft: 240,
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100vh',
+        }}
+      >
+        <WireframeHeader
+          title={activeScreen.title}
+          periodType={activeScreen.periodType}
+        />
+        <div
+          style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}
+        >
           <BlueprintRenderer
             screen={activeScreen}
             clientSlug={clientSlug}
