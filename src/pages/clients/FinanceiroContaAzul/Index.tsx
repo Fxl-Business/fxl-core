@@ -18,7 +18,7 @@ const docs: DocStatus[] = [
 
 const STATUS_COLORS: Record<string, string> = {
   Rascunho:    'bg-yellow-50 text-yellow-700',
-  Pendente:    'bg-gray-100 text-gray-500',
+  Pendente:    'bg-muted text-muted-foreground',
   Iniciado:    'bg-blue-50 text-blue-700',
   Concluído:   'bg-green-50 text-green-700',
   'Em revisão':'bg-orange-50 text-orange-700',
@@ -42,21 +42,21 @@ export default function FinanceiroIndex() {
   return (
     <div>
       <div className="mb-1">
-        <span className="text-xs font-semibold uppercase tracking-widest text-fxl-navy">
+        <span className="text-xs font-semibold uppercase tracking-widest text-primary">
           financeiro-conta-azul
         </span>
       </div>
-      <h1 className="text-2xl font-bold text-fxl-navy">Financeiro Conta Azul</h1>
+      <h1 className="text-2xl font-bold text-foreground">Financeiro Conta Azul</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Dashboard financeiro focado em análise de dados exportados do Conta Azul.
       </p>
 
       <div className="mt-8">
         <h2 className="mb-3 text-sm font-semibold text-foreground">Documentos</h2>
-        <div className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
+        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-border bg-muted/40">
+              <tr className="border-b border-border bg-muted">
                 <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Documento</th>
                 <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Status</th>
                 <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Ação</th>
@@ -67,14 +67,14 @@ export default function FinanceiroIndex() {
                 <tr key={item.doc} className="border-t border-border">
                   <td className="px-4 py-3 font-medium text-foreground">{item.label}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[item.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`rounded px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[item.status] ?? 'bg-muted text-muted-foreground'}`}>
                       {item.status}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <Link
                       to={item.href}
-                      className="text-fxl-blue underline-offset-2 hover:underline"
+                      className="text-primary underline-offset-2 hover:underline"
                     >
                       Abrir
                     </Link>

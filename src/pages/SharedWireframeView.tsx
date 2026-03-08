@@ -131,7 +131,7 @@ export default function SharedWireframeView() {
   if (viewState.step === 'loading') {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: 12, fontFamily: 'Inter, sans-serif' }}>
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         <p style={{ fontSize: 14, color: '#757575' }}>Validando acesso...</p>
       </div>
     )
@@ -282,7 +282,7 @@ export default function SharedWireframeView() {
       <button
         type="button"
         onClick={handleOpenScreenComments}
-        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-fxl-navy shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary shadow-lg transition-transform hover:scale-105"
       >
         <MessageSquare className="h-5 w-5 text-white" />
       </button>
