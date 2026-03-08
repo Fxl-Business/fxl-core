@@ -19,14 +19,14 @@ Um diagnostico incompleto gera retrabalho em todas as fases seguintes.
 2. Preencher o Formulario Comercial durante ou apos a reuniao
 3. Equipe Funcional + Dev analisa formulario e relatorios recebidos
 4. Gerar o Documento de Briefing (usar prompt abaixo)
-5. Cruzar KPIs com os [Blocos Disponiveis](/referencias/blocos-disponiveis)
+5. Cruzar KPIs com os [Blocos Disponiveis](/ferramentas/blocos/index)
 6. Cliente valida o briefing (confirma colunas, prioridades)
 7. Criterio de avanco atingido -> Fase 2
 
 {% prompt label="Gerar Documento de Briefing" %}
 Leia o Formulario Comercial e os relatorios abaixo. Gere o Documento de Briefing FXL completo.
 
-Cruze os KPIs declarados com os Blocos Disponiveis (/referencias/blocos-disponiveis).
+Cruze os KPIs declarados com os Blocos Disponiveis (/ferramentas/blocos/index).
 Proponha KPIs adicionais relevantes para o segmento.
 Sinalize gaps onde o KPI desejado nao tem coluna de dados confirmada.
 Liste todas as decisoes pendentes que bloqueiam o avanco.

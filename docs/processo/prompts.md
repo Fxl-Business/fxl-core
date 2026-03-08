@@ -108,7 +108,7 @@ Antes de comecar:
 - Leia CLAUDE.md
 - Leia clients/[slug]/CLAUDE.md
 - Leia o Blueprint em clients/[slug]/docs/blueprint.md
-- Consulte os Blocos Disponiveis em docs/referencias/blocos-disponiveis.md
+- Consulte os Blocos Disponiveis em docs/ferramentas/blocos/index.md
 
 Gere os arquivos .tsx em clients/[slug]/wireframe/screens/
 usando componentes de tools/wireframe-builder/components/.

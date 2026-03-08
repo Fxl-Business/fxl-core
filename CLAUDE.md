@@ -42,7 +42,7 @@ Todo novo conteudo deve ser classificado em uma delas.
 
 ### Limites entre Knowledge, Tools e Client Workspaces
 
-- Spec/catalogo de blocos = Ferramentas (docs/referencias/blocos-disponiveis.md)
+- Spec/catalogo de blocos = Ferramentas (docs/ferramentas/blocos/index.md)
 - Componentes .tsx dos blocos = Ferramentas (tools/wireframe-builder/components/)
 - Uso dos blocos em um cliente = Clientes (clients/[slug]/wireframe/)
 - Nunca misturar spec com implementation no mesmo arquivo
@@ -65,7 +65,7 @@ fxl/
 │   ├── ferramentas/         ← Ferramentas + Padroes — tools, premissas, seguranca, testes
 │   │   └── techs/           ← Padroes — catalogo de tecnologias (badge: Padroes)
 │   ├── padroes/             ← Padroes — landing page da secao
-│   └── referencias/         ← Ferramentas — blocos-disponiveis.md
+│   └── referencias/         ← Ferramentas (legacy)
 │
 ├── clients/                 ← Clientes — contexto isolado por cliente
 │   └── [client-slug]/

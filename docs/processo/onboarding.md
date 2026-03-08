@@ -112,5 +112,5 @@ Zero erros TypeScript e condicao de aceite em qualquer alteracao de codigo.
 | Entender o processo completo | [Visao Geral](/processo/visao-geral) |
 | Prompts prontos | [Prompts Operacionais](/processo/prompts) |
 | Padroes tecnicos (stack, seguranca, testes) | [Padroes](/padroes/index) |
-| Blocos de wireframe | [Blocos Disponiveis](/referencias/blocos-disponiveis) |
+| Blocos de wireframe | [Blocos Disponiveis](/ferramentas/blocos/index) |
 | Wireframe Builder | [Wireframe Builder](/ferramentas/wireframe-builder) |
