@@ -16,8 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Wireframe Comments** - Persistent comments on wireframes with Supabase so clients give feedback directly
 - [x] **Phase 02.1: Melhoria e organizacao de dominio** - Reorganize navigation, badges, content for Padroes taxonomy and Claude Code + GSD workflow (INSERTED) (completed 2026-03-07)
 - [x] **Phase 02.2: Evolucao de Blocos Disponiveis** - Evolve Blocos Disponiveis spec as detailed prompt for component creation (INSERTED) (completed 2026-03-08)
-- [ ] **Phase 02.3: Skills Globais** - Transform Premissas/Seguranca/Testes into global Claude Code Skills (INSERTED)
-- [ ] **Phase 02.4: Reformulacao Visual** - Visual overhaul of the FXL Core application (INSERTED)
+- [ ] **Phase 02.3: Reformulacao Visual** - Visual overhaul of the FXL Core application (INSERTED)
 - [ ] **Phase 3: Wireframe Visual Editor** - Edit wireframe layout, components, and screens via UI with blueprint sync
 - [ ] **Phase 4: Branding Process** - Structured branding collection with automatic application to wireframes
 - [ ] **Phase 5: Technical Configuration** - TechnicalConfig schema and config resolver bridging wireframe to functional system
@@ -86,20 +85,7 @@ Plans:
 - [ ] 02.2-02-PLAN.md — Create Layout and Inputs spec files (11 specs) (BLKSPEC-01)
 - [ ] 02.2-03-PLAN.md — Wire specs into app: Sidebar navigation, Gallery cross-links, SKILL.md sync rule, reference migration, old file deletion (BLKSPEC-01, BLKSPEC-02)
 
-### Phase 02.3: Skills Globais (INSERTED)
-
-**Goal:** Premissas, Seguranca, and Testes are global Claude Code Skills, not just documentation
-**Requirements**: GSKILL-01, GSKILL-02
-**Depends on:** Phase 02.1
-**Success Criteria** (what must be TRUE):
-  1. Premissas/Seguranca/Testes exist as Claude Code Skills under .claude/skills/ or .agents/skills/
-  2. Skills are accessible and usable by Claude Code during development
-**Plans:** TBD
-
-Plans:
-- [ ] 02.3-01: TBD
-
-### Phase 02.4: Reformulacao Visual (INSERTED)
+### Phase 02.3: Reformulacao Visual (INSERTED)
 
 **Goal:** FXL Core application has a refreshed, production-grade visual design
 **Requirements**: VISUAL-01, VISUAL-02
@@ -110,7 +96,7 @@ Plans:
 **Plans:** TBD
 
 Plans:
-- [ ] 02.4-01: TBD
+- [ ] 02.3-01: TBD
 
 ### Phase 3: Wireframe Visual Editor
 **Goal**: Operators can visually modify wireframe layout and components without touching code, with all changes synced to the blueprint config
@@ -177,7 +163,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3/02.4 -> 3 -> 4 -> 5 -> 6
+Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -185,8 +171,7 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3/02.4 -> 3 -> 4 -> 5
 | 2. Wireframe Comments | 3/3 | Complete | 2026-03-07 |
 | 02.1. Melhoria e organizacao de dominio | 3/3 | Complete    | 2026-03-07 |
 | 02.2. Evolucao de Blocos Disponiveis | 3/3 | Complete    | 2026-03-08 |
-| 02.3. Skills Globais | 0/1 | Not started | - |
-| 02.4. Reformulacao Visual | 0/1 | Not started | - |
+| 02.3. Reformulacao Visual | 0/1 | Not started | - |
 | 3. Wireframe Visual Editor | 0/3 | Not started | - |
 | 4. Branding Process | 0/2 | Not started | - |
 | 5. Technical Configuration | 0/2 | Not started | - |
