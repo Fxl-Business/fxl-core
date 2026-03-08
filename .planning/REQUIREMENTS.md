@@ -45,7 +45,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Wireframe Visual Editor
 
-- [ ] **WEDT-01**: Operador edita layout de secoes dentro de uma tela (mover, adicionar, remover)
+- [x] **WEDT-01**: Operador edita layout de secoes dentro de uma tela (mover, adicionar, remover)
 - [ ] **WEDT-02**: Operador edita props de componentes via UI (titulo, tipo de grafico, colunas de tabela)
 - [ ] **WEDT-03**: Operador adiciona e remove telas do wireframe via UI
 - [x] **WEDT-04**: Todas as edicoes visuais sincronizam automaticamente com blueprint.config.ts
@@ -125,7 +125,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GSKILL-02 | Phase 02.3 | Pending |
 | VISUAL-01 | Phase 02.4 | Complete |
 | VISUAL-02 | Phase 02.4 | Complete |
-| WEDT-01 | Phase 3 | Pending |
+| WEDT-01 | Phase 3 | Complete |
 | WEDT-02 | Phase 3 | Pending |
 | WEDT-03 | Phase 3 | Pending |
 | WEDT-04 | Phase 3 | Complete |
