@@ -14,12 +14,12 @@ const MESES = [
 
 const arrowButtonStyle: React.CSSProperties = {
   background: 'transparent',
-  border: '1px solid #E0E0E0',
+  border: '1px solid var(--wf-card-border)',
   borderRadius: 4,
   width: 24,
   height: 24,
   fontSize: 16,
-  color: '#424242',
+  color: 'var(--wf-body)',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
@@ -49,8 +49,8 @@ export default function WireframeHeader({ title, periodType = 'mensal' }: Props)
     <header
       style={{
         height: 56,
-        background: '#FFFFFF',
-        borderBottom: '1px solid #E0E0E0',
+        background: 'var(--wf-header-bg)',
+        borderBottom: '1px solid var(--wf-header-border)',
         display: 'flex',
         alignItems: 'center',
         padding: '0 32px',
@@ -60,13 +60,13 @@ export default function WireframeHeader({ title, periodType = 'mensal' }: Props)
         flexShrink: 0,
       }}
     >
-      <h1 style={{ fontSize: 15, fontWeight: 600, color: '#212121', margin: 0, flex: 1 }}>{title}</h1>
+      <h1 style={{ fontSize: 15, fontWeight: 600, color: 'var(--wf-heading)', margin: 0, flex: 1 }}>{title}</h1>
 
       <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
         {periodType === 'mensal' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button style={arrowButtonStyle} onClick={prevMensal}>‹</button>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#212121', minWidth: 130, textAlign: 'center' }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--wf-heading)', minWidth: 130, textAlign: 'center' }}>
               {MESES[mensal.monthIndex]} / {String(mensal.year).slice(2)}
             </span>
             <button style={arrowButtonStyle} onClick={nextMensal}>›</button>
@@ -76,7 +76,7 @@ export default function WireframeHeader({ title, periodType = 'mensal' }: Props)
         {periodType === 'anual' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button style={arrowButtonStyle} onClick={() => setAnualYear((y) => y - 1)}>‹</button>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#212121', minWidth: 60, textAlign: 'center' }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--wf-heading)', minWidth: 60, textAlign: 'center' }}>
               {anualYear}
             </span>
             <button style={arrowButtonStyle} onClick={() => setAnualYear((y) => y + 1)}>›</button>

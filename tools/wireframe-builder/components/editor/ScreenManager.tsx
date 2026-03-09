@@ -108,8 +108,8 @@ function SortableScreenItem({
         className={cn(
           'flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer text-sm transition-colors',
           isActive
-            ? 'bg-[#424242] text-white'
-            : 'text-gray-300 hover:bg-[#333333]'
+            ? 'bg-wf-sidebar-active text-wf-sidebar-fg'
+            : 'text-wf-sidebar-muted hover:bg-wf-sidebar-active/10'
         )}
         onClick={() => {
           if (!renaming && !confirmDelete) onSelect()
@@ -118,7 +118,7 @@ function SortableScreenItem({
         {editMode && (
           <button
             type="button"
-            className="cursor-grab active:cursor-grabbing text-gray-500 hover:text-gray-300 shrink-0"
+            className="cursor-grab active:cursor-grabbing text-wf-sidebar-muted hover:text-wf-sidebar-fg shrink-0"
             {...attributes}
             {...listeners}
           >
@@ -129,7 +129,7 @@ function SortableScreenItem({
 
         {renaming ? (
           <Input
-            className="h-6 bg-[#333333] border-[#555555] text-white text-sm px-1"
+            className="h-6 bg-wf-sidebar border-wf-sidebar-border text-wf-sidebar-fg text-sm px-1"
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
             onBlur={handleRenameSubmit}
@@ -151,7 +151,7 @@ function SortableScreenItem({
         {editMode && !renaming && !confirmDelete && (
           <button
             type="button"
-            className="ml-auto text-gray-500 hover:text-gray-300 shrink-0"
+            className="ml-auto text-wf-sidebar-muted hover:text-wf-sidebar-fg shrink-0"
             onClick={(e) => {
               e.stopPropagation()
               setMenuOpen(!menuOpen)
@@ -164,10 +164,10 @@ function SortableScreenItem({
 
       {/* Dropdown menu */}
       {menuOpen && !renaming && !confirmDelete && (
-        <div className="absolute right-0 top-full z-10 mt-1 w-36 rounded-md border border-[#555555] bg-[#2a2a2a] py-1 shadow-lg">
+        <div className="absolute right-0 top-full z-10 mt-1 w-36 rounded-md border border-wf-sidebar-border bg-wf-sidebar py-1" style={{ boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)' }}>
           <button
             type="button"
-            className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3a3a3a]"
+            className="w-full px-3 py-1.5 text-left text-xs text-wf-sidebar-muted hover:bg-wf-sidebar-active/10"
             onClick={(e) => {
               e.stopPropagation()
               setRenameValue(screen.title)
@@ -179,7 +179,7 @@ function SortableScreenItem({
           </button>
           <button
             type="button"
-            className="w-full px-3 py-1.5 text-left text-xs text-red-400 hover:bg-[#3a3a3a]"
+            className="w-full px-3 py-1.5 text-left text-xs text-red-400 hover:bg-wf-sidebar-active/10"
             onClick={(e) => {
               e.stopPropagation()
               setConfirmDelete(true)
@@ -193,7 +193,7 @@ function SortableScreenItem({
 
       {/* Delete confirmation */}
       {confirmDelete && (
-        <div className="mt-1 rounded-md border border-[#555555] bg-[#2a2a2a] p-2 text-xs text-gray-300">
+        <div className="mt-1 rounded-md border border-wf-sidebar-border bg-wf-sidebar p-2 text-xs text-wf-sidebar-muted">
           <p>
             Esta tela tem {screen.sections.length} secoes. Deseja excluir?
           </p>
@@ -213,7 +213,7 @@ function SortableScreenItem({
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 text-xs text-gray-400"
+              className="h-6 text-xs text-wf-sidebar-muted"
               onClick={(e) => {
                 e.stopPropagation()
                 setConfirmDelete(false)
@@ -386,8 +386,8 @@ export default function ScreenManager({
               className={cn(
                 'flex w-full items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors',
                 index === activeIndex
-                  ? 'bg-[#424242] text-white'
-                  : 'text-gray-300 hover:bg-[#333333]'
+                  ? 'bg-wf-sidebar-active text-wf-sidebar-fg'
+                  : 'text-wf-sidebar-muted hover:bg-wf-sidebar-active/10'
               )}
               onClick={() => onSelectScreen(index)}
             >
@@ -402,7 +402,7 @@ export default function ScreenManager({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2 text-gray-400 hover:text-white hover:bg-[#333333] mt-2"
+          className="w-full justify-start gap-2 text-wf-sidebar-muted hover:text-wf-sidebar-fg hover:bg-wf-sidebar-active/10 mt-2"
           onClick={() => setAddDialogOpen(true)}
         >
           <Plus className="h-3.5 w-3.5" />

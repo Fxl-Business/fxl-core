@@ -68,17 +68,16 @@ export default function WireframeFilterBar({
         display: 'flex',
         alignItems: 'center',
         gap: 8,
-        background: '#FFFFFF',
-        border: '1px solid #E0E0E0',
+        background: 'var(--wf-card)',
+        border: '1px solid var(--wf-card-border)',
         borderRadius: 12,
         padding: '8px 16px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         flexWrap: 'wrap',
       }}
     >
       {showSearch && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 180 }}>
-          <Search size={13} color="#9E9E9E" />
+          <Search size={13} color="var(--wf-muted)" />
           <input
             disabled
             placeholder={searchPlaceholder}
@@ -86,7 +85,7 @@ export default function WireframeFilterBar({
               border: 'none',
               outline: 'none',
               fontSize: 12,
-              color: '#9E9E9E',
+              color: 'var(--wf-muted)',
               background: 'transparent',
               width: '100%',
               fontFamily: 'Inter, sans-serif',
@@ -96,19 +95,19 @@ export default function WireframeFilterBar({
       )}
 
       {showSearch && filters.length > 0 && (
-        <div style={{ width: 1, height: 20, background: '#E0E0E0', margin: '0 4px' }} />
+        <div style={{ width: 1, height: 20, background: 'var(--wf-card-border)', margin: '0 4px' }} />
       )}
 
       {filters.map((filter) => (
         <div key={filter.key} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ fontSize: 11, color: '#757575', fontWeight: 500, whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
             {filter.label}:
           </span>
           <select
             disabled
             style={{
               fontSize: 12,
-              color: '#424242',
+              color: 'var(--wf-body)',
               border: 'none',
               background: 'transparent',
               cursor: 'default',
@@ -135,10 +134,10 @@ export default function WireframeFilterBar({
                   onChange={(e) => handlePeriodChange(e.target.value)}
                   style={{
                     fontSize: 12,
-                    color: '#2563EB',
-                    border: '1px solid #BFDBFE',
+                    color: 'var(--wf-accent)',
+                    border: '1px solid var(--wf-accent-muted)',
                     borderRadius: 6,
-                    background: '#EFF6FF',
+                    background: 'var(--wf-accent-muted)',
                     fontFamily: 'Inter, sans-serif',
                     fontWeight: 600,
                     padding: '2px 8px',
@@ -152,9 +151,9 @@ export default function WireframeFilterBar({
               </>
             )}
 
-            <div style={{ width: 1, height: 20, background: '#E0E0E0' }} />
+            <div style={{ width: 1, height: 20, background: 'var(--wf-card-border)' }} />
 
-            <span style={{ fontSize: 11, color: '#757575', fontWeight: 500, whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
               Comparar
             </span>
 
@@ -167,7 +166,7 @@ export default function WireframeFilterBar({
                 width: 36,
                 height: 20,
                 borderRadius: 10,
-                background: isCompareOn ? '#2563EB' : '#D1D5DB',
+                background: isCompareOn ? 'var(--wf-accent)' : 'var(--wf-card-border)',
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'background 0.2s',
@@ -181,7 +180,7 @@ export default function WireframeFilterBar({
                   width: 16,
                   height: 16,
                   borderRadius: '50%',
-                  background: '#FFFFFF',
+                  background: 'var(--wf-card)',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
                   transform: isCompareOn ? 'translateX(18px)' : 'translateX(2px)',
                   transition: 'transform 0.2s',

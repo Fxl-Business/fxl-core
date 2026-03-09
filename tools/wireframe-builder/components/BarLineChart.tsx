@@ -36,34 +36,34 @@ export default function BarLineChart({ title, type, height = 250, categories, xL
   const data = buildMockData(categories ?? DEFAULT_CATEGORIES)
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <p className="mb-3 text-sm font-semibold text-gray-700">{title}</p>
+    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
+      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         {type === 'bar' ? (
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--wf-card-border)" />
             <XAxis dataKey="category" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={xLabel ? { value: xLabel, position: 'insideBottom', offset: -5, fontSize: 10 } : undefined} />
             <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <Tooltip />
-            <Bar dataKey="bar" fill={chartColors?.[0] ?? '#d1d5db'} radius={[3, 3, 0, 0]} />
+            <Bar dataKey="bar" fill={chartColors?.[0] ?? 'var(--wf-chart-1)'} radius={[3, 3, 0, 0]} />
           </BarChart>
         ) : type === 'line' ? (
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--wf-card-border)" />
             <XAxis dataKey="category" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={xLabel ? { value: xLabel, position: 'insideBottom', offset: -5, fontSize: 10 } : undefined} />
             <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <Tooltip />
-            <Line type="monotone" dataKey="line" stroke={chartColors?.[1] ?? '#9ca3af'} strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="line" stroke={chartColors?.[1] ?? 'var(--wf-chart-2)'} strokeWidth={2} dot={false} />
           </LineChart>
         ) : (
           <ComposedChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--wf-card-border)" />
             <XAxis dataKey="category" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={xLabel ? { value: xLabel, position: 'insideBottom', offset: -5, fontSize: 10 } : undefined} />
             <YAxis yAxisId="left" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
             <Tooltip />
-            <Bar yAxisId="left" dataKey="bar" fill={chartColors?.[0] ?? '#d1d5db'} radius={[3, 3, 0, 0]} />
-            <Line yAxisId="right" type="monotone" dataKey="line" stroke={chartColors?.[1] ?? '#6b7280'} strokeWidth={2} dot={false} />
+            <Bar yAxisId="left" dataKey="bar" fill={chartColors?.[0] ?? 'var(--wf-chart-1)'} radius={[3, 3, 0, 0]} />
+            <Line yAxisId="right" type="monotone" dataKey="line" stroke={chartColors?.[1] ?? 'var(--wf-chart-2)'} strokeWidth={2} dot={false} />
           </ComposedChart>
         )}
       </ResponsiveContainer>

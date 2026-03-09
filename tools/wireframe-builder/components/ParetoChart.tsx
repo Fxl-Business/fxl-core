@@ -24,11 +24,11 @@ export default function ParetoChart({ title, data, height = 250, valueLabel = 'V
   })
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <p className="mb-3 text-sm font-semibold text-gray-700">{title}</p>
+    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
+      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={enriched} margin={{ top: 4, right: 32, bottom: 4, left: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--wf-card-border)" />
           <XAxis dataKey="label" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
           <YAxis
             yAxisId="left"
@@ -52,15 +52,15 @@ export default function ParetoChart({ title, data, height = 250, valueLabel = 'V
             }
             labelFormatter={(l) => l}
           />
-          <Bar yAxisId="left" dataKey="value" name={valueLabel} fill={chartColors?.primary ?? '#374151'} radius={[3, 3, 0, 0]} />
+          <Bar yAxisId="left" dataKey="value" name={valueLabel} fill={chartColors?.primary ?? 'var(--wf-chart-1)'} radius={[3, 3, 0, 0]} />
           <Line
             yAxisId="right"
             type="monotone"
             dataKey="accumulated"
             name="% Acumulado"
-            stroke={chartColors?.accent ?? '#DC2626'}
+            stroke={chartColors?.accent ?? 'var(--wf-chart-2)'}
             strokeWidth={1.5}
-            dot={{ r: 3, fill: chartColors?.accent ?? '#DC2626' }}
+            dot={{ r: 3, fill: chartColors?.accent ?? 'var(--wf-chart-2)' }}
           />
         </ComposedChart>
       </ResponsiveContainer>

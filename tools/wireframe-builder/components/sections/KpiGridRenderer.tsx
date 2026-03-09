@@ -12,7 +12,7 @@ export default function KpiGridRenderer({ section, compareMode, brandPrimary }: 
   return (
     <div>
       {section.groupLabel && (
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-wf-muted">
           {section.groupLabel}
         </p>
       )}

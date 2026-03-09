@@ -9,8 +9,8 @@ type Props = {
 
 export default function WireframeSidebar({ screens, onSelect }: Props) {
   return (
-    <aside className="w-48 flex-shrink-0 rounded-lg border border-gray-200 bg-gray-50 p-2">
-      <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+    <aside className="w-48 flex-shrink-0 rounded-lg border border-wf-sidebar-border bg-wf-sidebar p-2">
+      <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-wf-sidebar-muted">
         Telas
       </p>
       <nav className="space-y-0.5">
@@ -22,8 +22,8 @@ export default function WireframeSidebar({ screens, onSelect }: Props) {
             className={cn(
               'flex w-full items-center rounded-md px-2 py-1.5 text-left text-xs transition-colors',
               screen.active
-                ? 'bg-gray-200 font-medium text-gray-800'
-                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700',
+                ? 'bg-wf-sidebar-active font-medium text-wf-sidebar-fg'
+                : 'text-wf-sidebar-muted hover:bg-wf-sidebar-active/10 hover:text-wf-sidebar-fg',
             )}
           >
             {screen.label}

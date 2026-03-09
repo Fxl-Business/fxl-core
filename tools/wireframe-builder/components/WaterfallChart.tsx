@@ -29,15 +29,15 @@ interface WaterfallChartProps {
 }
 
 const DEFAULT_FILL: Record<WaterfallBar['type'], string> = {
-  positive: '#22c55e',
-  negative: '#ef4444',
-  subtotal: '#3b82f6',
+  positive: 'var(--wf-positive)',
+  negative: 'var(--wf-negative)',
+  subtotal: 'var(--wf-chart-1)',
 }
 
 const DEFAULT_FILL_COMPARE: Record<WaterfallBar['type'], string> = {
-  positive: '#a8d5b5',
-  negative: '#f5a9a9',
-  subtotal: '#a9c4f5',
+  positive: 'color-mix(in srgb, var(--wf-positive) 40%, transparent)',
+  negative: 'color-mix(in srgb, var(--wf-negative) 40%, transparent)',
+  subtotal: 'color-mix(in srgb, var(--wf-chart-1) 40%, transparent)',
 }
 
 function resolveFill(chartColors?: { primary: string; accent: string }) {
@@ -134,9 +134,9 @@ function CustomTooltip({
   const entry = payload.find((p) => p.name === 'barValue')
   if (!entry) return null
   return (
-    <div className="rounded border border-gray-200 bg-white px-3 py-2 text-xs shadow">
-      <p className="font-semibold text-gray-700">{label}</p>
-      <p className="text-gray-600">{formatBRL(entry.payload.display)}</p>
+    <div className="rounded border border-wf-card-border bg-wf-card px-3 py-2 text-xs">
+      <p className="font-semibold text-wf-heading">{label}</p>
+      <p className="text-wf-body">{formatBRL(entry.payload.display)}</p>
     </div>
   )
 }
@@ -162,13 +162,13 @@ function GroupedTooltip({
   const cur = payload.find((p) => p.name === 'current')
   const cmp = payload.find((p) => p.name === 'compare')
   return (
-    <div className="rounded border border-gray-200 bg-white px-3 py-2 text-xs shadow">
-      <p className="mb-1 font-semibold text-gray-700">{label}</p>
+    <div className="rounded border border-wf-card-border bg-wf-card px-3 py-2 text-xs">
+      <p className="mb-1 font-semibold text-wf-heading">{label}</p>
       {cur && (
-        <p className="text-gray-600">Mês Atual: {formatBRL(cur.payload.displayCurrent)}</p>
+        <p className="text-wf-body">Mês Atual: {formatBRL(cur.payload.displayCurrent)}</p>
       )}
       {cmp && (
-        <p className="text-gray-500">
+        <p className="text-wf-muted">
           {comparePeriodLabel ?? 'Período Anterior'}: {formatBRL(cmp.payload.displayCompare)}
         </p>
       )}
@@ -180,7 +180,7 @@ function CustomLabel(props: { x?: number; y?: number; width?: number; value?: nu
   const { x = 0, y = 0, width = 0, value = 0 } = props
   const text = formatBRL(Math.abs(value))
   return (
-    <text x={x + width / 2} y={y - 4} fill="#374151" fontSize={9} textAnchor="middle">
+    <text x={x + width / 2} y={y - 4} fill="var(--wf-heading)" fontSize={9} textAnchor="middle">
       {text}
     </text>
   )
@@ -201,10 +201,10 @@ export default function WaterfallChart({
     const groupedData = buildGroupedData(bars, compareBars, fill, fillCompare)
 
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-sm font-semibold text-gray-700">{title}</p>
-          <div className="flex items-center gap-3 text-xs text-gray-500">
+          <p className="text-sm font-semibold text-wf-heading">{title}</p>
+          <div className="flex items-center gap-3 text-xs text-wf-muted">
             <span className="flex items-center gap-1">
               <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
               Mês Atual
@@ -222,7 +222,7 @@ export default function WaterfallChart({
             barCategoryGap="20%"
             barGap={2}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--wf-card-border)" vertical={false} />
             <XAxis dataKey="label" tick={{ fontSize: 9 }} tickLine={false} axisLine={false} />
             <YAxis
               tick={{ fontSize: 10 }}
@@ -252,11 +252,11 @@ export default function WaterfallChart({
   const data = processData(bars, fill)
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <p className="mb-3 text-sm font-semibold text-gray-700">{title}</p>
+    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
+      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} margin={{ top: 24, right: 8, left: 8, bottom: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--wf-card-border)" vertical={false} />
           <XAxis dataKey="label" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
           <YAxis
             tick={{ fontSize: 10 }}
