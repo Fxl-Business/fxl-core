@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wireframe Evolution
 status: in-progress
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-03-09T23:19:16Z"
-last_activity: 2026-03-09 -- Completed 08-01 token CSS, theme provider, Tailwind extension, branding override
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-03-09T23:32:36Z"
+last_activity: 2026-03-09 -- Completed 08-02 (component token migration, 26 files migrated)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -21,31 +21,31 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 8 in-progress -- Wireframe Design System (Plan 1 of 3 complete)
+**Current focus:** Phase 8 in-progress -- Wireframe Design System (Plan 2 of 3 complete)
 
 ## Current Position
 
 Phase: 8 of 11 (Wireframe Design System) -- IN PROGRESS
-Plan: 1 of 3
-Status: Plan 1 complete -- token CSS, theme provider, Tailwind extension, branding override
-Last activity: 2026-03-09 -- Completed 08-01 (wireframe design system foundation)
+Plan: 2 of 3
+Status: Plan 2 complete -- all 26 wireframe components migrated to --wf-* tokens
+Last activity: 2026-03-09 -- Completed 08-02 (component token migration)
 
-Progress: [██████░░░░] 67%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 27 (v1.0)
-- v1.1 plans completed: 4
-- Average duration: 6.3min
-- Total execution time: 25min
+- v1.1 plans completed: 5
+- Average duration: 6.8min
+- Total execution time: 34min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 7. Blueprint Infrastructure | 3/3 | 19min | 6.3min |
-| 8. Wireframe Design System | 1/3 | 6min | 6min |
+| 8. Wireframe Design System | 2/3 | 15min | 7.5min |
 | 9. Component Library Expansion | 0/? | - | - |
 | 10. Briefing & Blueprint Views | 0/? | - | - |
 | 11. AI-Assisted Generation | 0/? | - | - |
@@ -75,6 +75,11 @@ v1.1 decisions:
 - [08-01] Sidebar fg contrast threshold at L > 50 for dark/light text selection
 - [08-01] jsdom pinned to v25 for vitest compatibility (v27 ESM issues)
 - [08-01] Corrected getChartPalette JSDoc: Recharts SVG fill/stroke DO support CSS var()
+- [08-02] color-mix(in srgb) for semi-transparent positive/negative badge backgrounds (Tailwind opacity modifiers don't work with CSS var hex)
+- [08-02] CalculoCard values use var(--wf-accent) for positive, var(--wf-negative) for negative
+- [08-02] WaterfallChart DEFAULT_FILL migrated to var(--wf-*) with color-mix compare fills
+- [08-02] EditableSectionWrapper keeps app tokens (bg-background, shadow-sm) -- editor chrome, not wireframe content
+- [08-02] WireframeFilterBar boxShadow removed per user decision
 
 ### Pending Todos
 
@@ -104,6 +109,6 @@ v1.1:
 
 ## Session Continuity
 
-Last session: 2026-03-09T23:19:16Z
-Stopped at: Completed 08-01-PLAN.md
-Resume file: .planning/phases/08-wireframe-design-system/08-01-SUMMARY.md
+Last session: 2026-03-09T23:32:36Z
+Stopped at: Completed 08-02-PLAN.md
+Resume file: .planning/phases/08-wireframe-design-system/08-02-SUMMARY.md
