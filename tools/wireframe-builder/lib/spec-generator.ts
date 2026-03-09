@@ -299,9 +299,9 @@ function renderDatabaseSchema(manifest: GenerationManifest): string {
   const { tables, indexes, rlsPolicies } = manifest.supabaseSchema
   const sections: string[] = []
 
-  sections.push('-- Database Schema')
-  sections.push(`-- Client: ${manifest.meta.clientLabel} (${manifest.meta.clientSlug})`)
-  sections.push(`-- Generated: ${manifest.meta.generatedAt}`)
+  sections.push(`-- Database Schema for ${manifest.meta.clientLabel}`)
+  sections.push('-- Generated from GenerationManifest')
+  sections.push('-- Apply via Supabase SQL Editor or migration')
   sections.push('')
 
   // CREATE TABLE statements
@@ -569,6 +569,32 @@ function renderBrandingSpec(branding: BrandingConfig): string {
   sections.push(`  --brand-body-font: '${branding.bodyFont}', sans-serif;`)
   sections.push('}')
   sections.push('```')
+  sections.push('')
+
+  sections.push('## Tailwind Config')
+  sections.push('')
+  sections.push('Extend the default Tailwind theme with brand colors:')
+  sections.push('')
+  sections.push('```js')
+  sections.push('// tailwind.config.js')
+  sections.push('module.exports = {')
+  sections.push('  theme: {')
+  sections.push('    extend: {')
+  sections.push('      colors: {')
+  sections.push('        brand: {')
+  sections.push(`          primary: '${branding.primaryColor}',`)
+  sections.push(`          secondary: '${branding.secondaryColor}',`)
+  sections.push(`          accent: '${branding.accentColor}',`)
+  sections.push('        },')
+  sections.push('      },')
+  sections.push('      fontFamily: {')
+  sections.push(`        heading: ["'${branding.headingFont}'", 'sans-serif'],`)
+  sections.push(`        body: ["'${branding.bodyFont}'", 'sans-serif'],`)
+  sections.push('      },')
+  sections.push('    },')
+  sections.push('  },')
+  sections.push('}')
+  sections.push('```')
 
   return sections.join('\n')
 }
@@ -619,6 +645,14 @@ function renderUploadRules(manifest: GenerationManifest): string {
     }
     sections.push('')
   }
+
+  sections.push('## Validation Rules')
+  sections.push('')
+  sections.push('- `period_month`: integer 1-12')
+  sections.push('- `period_year`: 4-digit integer (e.g. 2026)')
+  sections.push('- No duplicate uploads for the same period + report type combination')
+  sections.push('- All required columns must be present in the uploaded file')
+  sections.push('- Numeric columns must parse successfully after BR format normalization')
 
   return sections.join('\n')
 }
