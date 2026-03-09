@@ -14,6 +14,7 @@ import brandingConfigSeed from '@clients/financeiro-conta-azul/wireframe/brandin
 import {
   loadBlueprint as loadBlueprintFromDb,
   saveBlueprint as saveBlueprintToDb,
+  checkForUpdates,
 } from '@tools/wireframe-builder/lib/blueprint-store'
 import {
   resolveBranding,
@@ -48,9 +49,12 @@ export default function FinanceiroWireframeViewer() {
   const [config, setConfig] = useState<BlueprintConfig | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
-  // Tracks DB row timestamp -- consumed by Plan 03 for optimistic locking
+  // Tracks DB row timestamp for optimistic locking
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null)
-  void lastUpdatedAt // Will be consumed by Plan 03 (optimistic locking)
+
+  // Conflict resolution
+  const [conflictOpen, setConflictOpen] = useState(false)
+  const [staleWarning, setStaleWarning] = useState(false)
 
   // Edit mode
   const [editMode, setEditMode] = useState<EditModeState>({
@@ -126,6 +130,25 @@ export default function FinanceiroWireframeViewer() {
       }
     }
   }, [])
+
+  // --- Stale data polling (active in edit mode only) ---
+
+  useEffect(() => {
+    if (!editMode.active || !lastUpdatedAt) return
+
+    const interval = setInterval(async () => {
+      try {
+        const remoteUpdatedAt = await checkForUpdates(CLIENT_SLUG)
+        if (remoteUpdatedAt && remoteUpdatedAt !== lastUpdatedAt) {
+          setStaleWarning(true)
+        }
+      } catch {
+        // Polling failure is non-critical -- silently ignore
+      }
+    }, 30_000)
+
+    return () => clearInterval(interval)
+  }, [editMode.active, lastUpdatedAt])
 
   // --- Derived state ---
 
@@ -224,6 +247,7 @@ export default function FinanceiroWireframeViewer() {
 
   function exitEditMode() {
     setWorkingConfig(null)
+    setStaleWarning(false)
     setEditMode({
       active: false,
       dirty: false,
@@ -245,14 +269,76 @@ export default function FinanceiroWireframeViewer() {
     if (!workingConfig || !user) return
     setEditMode((prev) => ({ ...prev, saving: true }))
     try {
-      await saveBlueprintToDb(CLIENT_SLUG, workingConfig, user.id)
+      const result = await saveBlueprintToDb(
+        CLIENT_SLUG,
+        workingConfig,
+        user.id,
+        lastUpdatedAt,
+      )
+
+      if (result.conflict) {
+        setConflictOpen(true)
+        setEditMode((prev) => ({ ...prev, saving: false }))
+        return
+      }
+
       setConfig(structuredClone(workingConfig))
+      if (result.updatedAt) {
+        setLastUpdatedAt(result.updatedAt)
+      }
+      setStaleWarning(false)
       toast.success('Blueprint salvo com sucesso')
       setEditMode((prev) => ({ ...prev, dirty: false, saving: false }))
     } catch (err) {
       console.error('Failed to save blueprint:', err)
       const message = err instanceof Error ? err.message : 'Erro ao salvar blueprint.'
       toast.error('Erro ao salvar', { description: message })
+      setEditMode((prev) => ({ ...prev, saving: false }))
+    }
+  }
+
+  // --- Conflict resolution handlers ---
+
+  async function handleConflictReload() {
+    // "Recarregar" -- discard local edits, fetch fresh from DB
+    setConflictOpen(false)
+    try {
+      const result = await loadBlueprintFromDb(CLIENT_SLUG)
+      if (result) {
+        setConfig(result.config)
+        setLastUpdatedAt(result.updatedAt)
+        setWorkingConfig(structuredClone(result.config))
+        setStaleWarning(false)
+        toast.info('Blueprint recarregado do banco de dados')
+        setEditMode((prev) => ({ ...prev, dirty: false }))
+      }
+    } catch {
+      toast.error('Erro ao recarregar blueprint')
+    }
+  }
+
+  async function handleConflictOverwrite() {
+    // "Sobrescrever" -- force save with null lastKnownUpdatedAt (upsert)
+    setConflictOpen(false)
+    if (!workingConfig || !user) return
+    setEditMode((prev) => ({ ...prev, saving: true }))
+    try {
+      const result = await saveBlueprintToDb(
+        CLIENT_SLUG,
+        workingConfig,
+        user.id,
+        null, // null = force upsert, bypasses locking
+      )
+      setConfig(structuredClone(workingConfig))
+      if (result.updatedAt) {
+        setLastUpdatedAt(result.updatedAt)
+      }
+      setStaleWarning(false)
+      toast.success('Blueprint sobrescrito com sucesso')
+      setEditMode((prev) => ({ ...prev, dirty: false, saving: false }))
+    } catch (err) {
+      console.error('Failed to overwrite blueprint:', err)
+      toast.error('Erro ao sobrescrever')
       setEditMode((prev) => ({ ...prev, saving: false }))
     }
   }
@@ -636,6 +722,28 @@ export default function FinanceiroWireframeViewer() {
             onOpenComments={handleOpenScreenComments}
           />
         )}
+        {staleWarning && (
+          <div className="mx-4 mt-2 flex items-center justify-between rounded-md border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm text-yellow-800">
+            <span>Este blueprint foi atualizado externamente. Suas edicoes podem causar conflito ao salvar.</span>
+            <button
+              type="button"
+              onClick={async () => {
+                const result = await loadBlueprintFromDb(CLIENT_SLUG)
+                if (result) {
+                  setConfig(result.config)
+                  setWorkingConfig(structuredClone(result.config))
+                  setLastUpdatedAt(result.updatedAt)
+                  setStaleWarning(false)
+                  setEditMode((prev) => ({ ...prev, dirty: false }))
+                  toast.info('Blueprint recarregado')
+                }
+              }}
+              className="ml-4 whitespace-nowrap rounded border border-yellow-300 px-3 py-1 text-xs font-medium text-yellow-800 hover:bg-yellow-100"
+            >
+              Recarregar
+            </button>
+          </div>
+        )}
         <WireframeHeader
           title={activeScreen.title}
           periodType={activeScreen.periodType}
@@ -706,6 +814,37 @@ export default function FinanceiroWireframeViewer() {
                 className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90"
               >
                 Sair sem salvar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Conflict resolution modal */}
+      {conflictOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm rounded-lg border bg-background p-6 shadow-lg">
+            <h3 className="text-base font-semibold text-foreground">
+              Conflito detectado
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Este blueprint foi modificado por outra sessao desde a ultima leitura.
+              Escolha como deseja prosseguir.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={handleConflictReload}
+                className="rounded-md border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                Recarregar
+              </button>
+              <button
+                type="button"
+                onClick={handleConflictOverwrite}
+                className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90"
+              >
+                Sobrescrever
               </button>
             </div>
           </div>
