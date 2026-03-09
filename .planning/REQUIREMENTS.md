@@ -58,10 +58,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Technical Configuration (Fase 3 prep)
 
-- [ ] **TCONF-01**: TechnicalConfig schema TypeScript que define fonte de dados, formulas KPI e regras de negocio por secao
+- [x] **TCONF-01**: TechnicalConfig schema TypeScript que define fonte de dados, formulas KPI e regras de negocio por secao
 - [ ] **TCONF-02**: Config Resolver que merge Blueprint + TechnicalConfig + Branding em GenerationManifest
 - [ ] **TCONF-03**: Claude sugere TechnicalConfig draft a partir do briefing/blueprint para operador revisar
-- [ ] **TCONF-04**: Validacao automatica de que TechnicalConfig cobre todas as secoes do blueprint
+- [x] **TCONF-04**: Validacao automatica de que TechnicalConfig cobre todas as secoes do blueprint
 
 ### System Generation (Fase 3)
 
@@ -132,10 +132,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRND-01 | Phase 4 | Complete |
 | BRND-02 | Phase 4 | Complete |
 | BRND-03 | Phase 4 | Complete |
-| TCONF-01 | Phase 5 | Pending |
+| TCONF-01 | Phase 5 | Complete |
 | TCONF-02 | Phase 5 | Pending |
 | TCONF-03 | Phase 5 | Pending |
-| TCONF-04 | Phase 5 | Pending |
+| TCONF-04 | Phase 5 | Complete |
 | SGEN-01 | Phase 6 | Pending |
 | SGEN-02 | Phase 6 | Pending |
 | SGEN-03 | Phase 6 | Pending |
