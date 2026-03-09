@@ -1,7 +1,7 @@
 # Requirements: FXL Core
 
 **Defined:** 2026-03-09
-**Core Value:** FXL Core e o cerebro operacional da empresa — documentacao, processo e tooling juntos
+**Core Value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
 
 ## v1.1 Requirements
 
@@ -43,7 +43,7 @@ Requirements for Wireframe Evolution milestone. Each maps to roadmap phases.
 ### AI Generation
 
 - [ ] **AIGE-01**: Claude Code pode gerar blueprint a partir de briefing no Supabase + analise de blueprints existentes
-- [ ] **AIGE-02**: Screen recipes tipadas disponíveis como contexto para geracao (ex: tela de faturamento, estoque)
+- [ ] **AIGE-02**: Screen recipes tipadas disponveis como contexto para geracao (ex: tela de faturamento, estoque)
 - [ ] **AIGE-03**: Templates de blueprint pre-definidos para verticais FXL (financeiro, varejo, servicos)
 
 ## v2 Requirements
@@ -90,36 +90,36 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| DSGN-01 | — | Pending |
-| DSGN-02 | — | Pending |
-| DSGN-03 | — | Pending |
-| DSGN-04 | — | Pending |
-| COMP-01 | — | Pending |
-| COMP-02 | — | Pending |
-| COMP-03 | — | Pending |
-| COMP-04 | — | Pending |
-| COMP-05 | — | Pending |
-| COMP-06 | — | Pending |
-| COMP-07 | — | Pending |
-| COMP-08 | — | Pending |
-| COMP-09 | — | Pending |
-| BRFG-01 | — | Pending |
-| BRFG-02 | — | Pending |
-| BRFG-03 | — | Pending |
-| BRFG-04 | — | Pending |
-| AIGE-01 | — | Pending |
-| AIGE-02 | — | Pending |
-| AIGE-03 | — | Pending |
+| INFRA-01 | Phase 7 | Pending |
+| INFRA-02 | Phase 7 | Pending |
+| INFRA-03 | Phase 7 | Pending |
+| INFRA-04 | Phase 7 | Pending |
+| DSGN-01 | Phase 8 | Pending |
+| DSGN-02 | Phase 8 | Pending |
+| DSGN-03 | Phase 8 | Pending |
+| DSGN-04 | Phase 8 | Pending |
+| COMP-01 | Phase 9 | Pending |
+| COMP-02 | Phase 9 | Pending |
+| COMP-03 | Phase 9 | Pending |
+| COMP-04 | Phase 9 | Pending |
+| COMP-05 | Phase 9 | Pending |
+| COMP-06 | Phase 9 | Pending |
+| COMP-07 | Phase 9 | Pending |
+| COMP-08 | Phase 9 | Pending |
+| COMP-09 | Phase 9 | Pending |
+| BRFG-01 | Phase 10 | Pending |
+| BRFG-02 | Phase 10 | Pending |
+| BRFG-03 | Phase 10 | Pending |
+| BRFG-04 | Phase 10 | Pending |
+| AIGE-01 | Phase 11 | Pending |
+| AIGE-02 | Phase 11 | Pending |
+| AIGE-03 | Phase 11 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 22 total
-- Mapped to phases: 0
-- Unmapped: 22 ⚠️
+- Mapped to phases: 22
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-09*
-*Last updated: 2026-03-09 after initial definition*
+*Last updated: 2026-03-09 after roadmap creation*
