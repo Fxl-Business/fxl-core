@@ -10,8 +10,8 @@ Requirements for Wireframe Evolution milestone. Each maps to roadmap phases.
 ### Infrastructure
 
 - [ ] **INFRA-01**: Operador pode salvar e carregar blueprint exclusivamente do Supabase (arquivo .ts removido como fonte de verdade)
-- [ ] **INFRA-02**: Blueprint armazenado com campo schemaVersion e funcoes de migracao para evolucao segura
-- [ ] **INFRA-03**: Blueprint validado em runtime via zod parse em vez de cast TypeScript
+- [x] **INFRA-02**: Blueprint armazenado com campo schemaVersion e funcoes de migracao para evolucao segura
+- [x] **INFRA-03**: Blueprint validado em runtime via zod parse em vez de cast TypeScript
 - [ ] **INFRA-04**: Edicao concorrente de blueprint protegida por optimistic locking (updated_at check)
 
 ### Design System
@@ -91,8 +91,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INFRA-01 | Phase 7 | Pending |
-| INFRA-02 | Phase 7 | Pending |
-| INFRA-03 | Phase 7 | Pending |
+| INFRA-02 | Phase 7 | Complete |
+| INFRA-03 | Phase 7 | Complete |
 | INFRA-04 | Phase 7 | Pending |
 | DSGN-01 | Phase 8 | Pending |
 | DSGN-02 | Phase 8 | Pending |

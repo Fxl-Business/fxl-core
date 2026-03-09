@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wireframe Evolution
-status: planning
-stopped_at: Phase 7 context gathered
-last_updated: "2026-03-09T19:11:21.465Z"
-last_activity: 2026-03-09 -- Roadmap created for v1.1 Wireframe Evolution
+status: executing
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-03-09T19:44:27.663Z"
+last_activity: 2026-03-09 -- Completed Plan 07-01 (Zod schema + migrations + store refactor)
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 3
+  completed_plans: 1
+  percent: 33
 ---
 
 # Project State
@@ -26,25 +26,25 @@ See: .planning/PROJECT.md (updated 2026-03-09)
 ## Current Position
 
 Phase: 7 of 11 (Blueprint Infrastructure) -- first phase of v1.1
-Plan: --
-Status: Ready to plan
-Last activity: 2026-03-09 -- Roadmap created for v1.1 Wireframe Evolution
+Plan: 2 of 3
+Status: Executing -- Plan 01 complete
+Last activity: 2026-03-09 -- Completed Plan 07-01 (Zod schema + migrations + store refactor)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 27 (v1.0)
-- v1.1 plans completed: 0
-- Average duration: TBD
-- Total execution time: TBD
+- v1.1 plans completed: 1
+- Average duration: 7min
+- Total execution time: 7min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 7. Blueprint Infrastructure | 0/? | - | - |
+| 7. Blueprint Infrastructure | 1/3 | 7min | 7min |
 | 8. Wireframe Design System | 0/? | - | - |
 | 9. Component Library Expansion | 0/? | - | - |
 | 10. Briefing & Blueprint Views | 0/? | - | - |
@@ -57,7 +57,12 @@ Progress: [░░░░░░░░░░] 0%
 ### Decisions
 
 All v1.0 decisions logged in PROJECT.md Key Decisions table (12 decisions, all good).
-No new v1.1 decisions yet.
+
+v1.1 decisions:
+- [07-01] Used Zod v4 (4.3.6) with z.ZodType annotation for recursive ChartGridSection type inference
+- [07-01] Kept manual TS types alongside Zod schemas for component-level type safety
+- [07-01] loadBlueprint returns null on validation failure (non-throwing)
+- [07-01] Migration save-back uses 'system:migration' as updated_by identifier
 
 ### Pending Todos
 
@@ -87,6 +92,6 @@ v1.1:
 
 ## Session Continuity
 
-Last session: 2026-03-09T19:11:21.454Z
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/07-blueprint-infrastructure/07-CONTEXT.md
+Last session: 2026-03-09T19:44:27.659Z
+Stopped at: Completed 07-01-PLAN.md
+Resume file: None
