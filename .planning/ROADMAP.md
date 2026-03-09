@@ -62,7 +62,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md -- Token CSS layer, WireframeThemeProvider, Tailwind extension, branding override helper
+- [x] 08-01-PLAN.md -- Token CSS layer, WireframeThemeProvider, Tailwind extension, branding override helper
 - [ ] 08-02-PLAN.md -- Migrate 26 wireframe components from hardcoded colors to --wf-* tokens
 - [ ] 08-03-PLAN.md -- Wire theme provider into viewers, add dark/light toggle, apply branding overrides
 
@@ -115,7 +115,7 @@ Phase 7 -> 8 -> 9 (and 10 in parallel) -> 11
 | 5. Technical Configuration | v1.0 | 2/2 | Complete | 2026-03-09 |
 | 6. System Generation | v1.0 | 3/3 | Complete | 2026-03-09 |
 | 7. Blueprint Infrastructure | v1.1 | 3/3 | Complete | 2026-03-09 |
-| 8. Wireframe Design System | v1.1 | 0/3 | Planned | - |
+| 8. Wireframe Design System | v1.1 | 1/3 | In Progress | - |
 | 9. Component Library Expansion | v1.1 | 0/? | Not started | - |
 | 10. Briefing & Blueprint Views | v1.1 | 0/? | Not started | - |
 | 11. AI-Assisted Generation | v1.1 | 0/? | Not started | - |

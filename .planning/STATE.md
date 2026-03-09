@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wireframe Evolution
-status: completed
-stopped_at: Phase 8 context gathered
-last_updated: "2026-03-09T22:52:46.141Z"
-last_activity: 2026-03-09 -- Completed Phase 7 (optimistic locking, conflict modal, stale polling)
+status: in-progress
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-03-09T23:19:16Z"
+last_activity: 2026-03-09 -- Completed 08-01 token CSS, theme provider, Tailwind extension, branding override
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 100
+  total_plans: 6
+  completed_plans: 4
+  percent: 67
 ---
 
 # Project State
@@ -21,31 +21,31 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 7 complete -- next: Phase 8 (Wireframe Design System)
+**Current focus:** Phase 8 in-progress -- Wireframe Design System (Plan 1 of 3 complete)
 
 ## Current Position
 
-Phase: 7 of 11 (Blueprint Infrastructure) -- COMPLETE
-Plan: 3 of 3
-Status: Phase 7 complete -- all 4 INFRA requirements satisfied
-Last activity: 2026-03-09 -- Completed Phase 7 (optimistic locking, conflict modal, stale polling)
+Phase: 8 of 11 (Wireframe Design System) -- IN PROGRESS
+Plan: 1 of 3
+Status: Plan 1 complete -- token CSS, theme provider, Tailwind extension, branding override
+Last activity: 2026-03-09 -- Completed 08-01 (wireframe design system foundation)
 
-Progress: [██████████] 100%
+Progress: [██████░░░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 27 (v1.0)
-- v1.1 plans completed: 3
+- v1.1 plans completed: 4
 - Average duration: 6.3min
-- Total execution time: 19min
+- Total execution time: 25min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 7. Blueprint Infrastructure | 3/3 | 19min | 6.3min |
-| 8. Wireframe Design System | 0/? | - | - |
+| 8. Wireframe Design System | 1/3 | 6min | 6min |
 | 9. Component Library Expansion | 0/? | - | - |
 | 10. Briefing & Blueprint Views | 0/? | - | - |
 | 11. AI-Assisted Generation | 0/? | - | - |
@@ -70,6 +70,11 @@ v1.1 decisions:
 - [07-03] Conflict modal with Recarregar (reload) and Sobrescrever (force overwrite)
 - [07-03] 30s polling interval in edit mode only, non-blocking stale warning banner
 - [07-03] null lastKnownUpdatedAt triggers upsert path for force overwrite
+- [08-01] Wireframe tokens use hex/rgba values (not HSL) for chart SVG compatibility
+- [08-01] Tailwind wf-* utilities use plain var(--wf-*) without hsl() wrapper
+- [08-01] Sidebar fg contrast threshold at L > 50 for dark/light text selection
+- [08-01] jsdom pinned to v25 for vitest compatibility (v27 ESM issues)
+- [08-01] Corrected getChartPalette JSDoc: Recharts SVG fill/stroke DO support CSS var()
 
 ### Pending Todos
 
@@ -99,6 +104,6 @@ v1.1:
 
 ## Session Continuity
 
-Last session: 2026-03-09T22:52:46.131Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-wireframe-design-system/08-CONTEXT.md
+Last session: 2026-03-09T23:19:16Z
+Stopped at: Completed 08-01-PLAN.md
+Resume file: .planning/phases/08-wireframe-design-system/08-01-SUMMARY.md
