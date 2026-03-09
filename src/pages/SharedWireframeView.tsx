@@ -3,10 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { MessageSquare, Loader2 } from 'lucide-react'
 import { validateToken } from '@tools/wireframe-builder/lib/tokens'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
-import {
-  loadBlueprint as loadBlueprintFromDb,
-  seedFromFile,
-} from '@tools/wireframe-builder/lib/blueprint-store'
+import { loadBlueprint as loadBlueprintFromDb } from '@tools/wireframe-builder/lib/blueprint-store'
 import {
   resolveBranding,
   brandingToCssVars,
@@ -33,15 +30,6 @@ function getClientId(): string {
     localStorage.setItem(STORAGE_KEY_ID, id)
   }
   return id
-}
-
-/** Fallback dynamic import map for seeding when Supabase has no data yet */
-const blueprintMap: Record<
-  string,
-  () => Promise<{ default: BlueprintConfig }>
-> = {
-  'financeiro-conta-azul': () =>
-    import('@clients/financeiro-conta-azul/wireframe/blueprint.config'),
 }
 
 /** Dynamic import map for per-client branding configs */
@@ -119,22 +107,11 @@ export default function SharedWireframeView() {
 
   async function loadBlueprint(clientSlug: string, clientName: string) {
     try {
-      // First try Supabase
-      let result = await loadBlueprintFromDb(clientSlug)
-      let bp: BlueprintConfig | undefined
+      const result = await loadBlueprintFromDb(clientSlug)
 
-      if (result) {
-        bp = result.config
-      } else {
-        // Supabase has no data -- try dynamic import fallback and seed
-        const loader = blueprintMap[clientSlug]
-        if (!loader) {
-          setViewState({ step: 'invalid', message: 'Cliente nao encontrado.' })
-          return
-        }
-        const mod = await loader()
-        await seedFromFile(clientSlug, mod.default, 'system')
-        bp = mod.default
+      if (!result) {
+        setViewState({ step: 'invalid', message: 'Blueprint nao encontrado.' })
+        return
       }
 
       // Load branding config (fallback to defaults if not found)
@@ -149,16 +126,11 @@ export default function SharedWireframeView() {
         }
       }
 
-      if (!bp) {
-        setViewState({ step: 'invalid', message: 'Cliente nao encontrado.' })
-        return
-      }
-
       setViewState({
         step: 'wireframe',
         clientSlug,
         clientName,
-        blueprint: bp,
+        blueprint: result.config,
         branding: brandConfig,
       })
     } catch {

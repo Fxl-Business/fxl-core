@@ -129,27 +129,151 @@ describe('writeProductSpec', () => {
 })
 
 // ─── Integration test with pilot client configs ──────────────────────────
+// Blueprint data lives in Supabase only (deleted .ts file in Plan 07-02).
+// These tests use self-contained inline fixtures that replicate pilot
+// client structure (slug, screen IDs, section types) paired with the real
+// branding .ts config (still on disk) to exercise the full pipeline.
+
+const pilotBlueprint = {
+  slug: 'financeiro-conta-azul',
+  label: 'Financeiro Conta Azul',
+  screens: [
+    {
+      id: 'resultado-mensal',
+      title: 'Resultado Mensal (DFC)',
+      periodType: 'mensal' as const,
+      filters: [],
+      hasCompareSwitch: false,
+      sections: [{ type: 'kpi-grid' as const, columns: 4, items: [{ label: 'Receita', value: 'R$ 100' }] }],
+    },
+    {
+      id: 'receita',
+      title: 'Receita',
+      periodType: 'mensal' as const,
+      filters: [],
+      hasCompareSwitch: false,
+      sections: [{ type: 'kpi-grid' as const, columns: 2, items: [{ label: 'Total', value: 'R$ 50' }] }],
+    },
+    {
+      id: 'despesas',
+      title: 'Despesas',
+      periodType: 'mensal' as const,
+      filters: [],
+      hasCompareSwitch: false,
+      sections: [{ type: 'kpi-grid' as const, columns: 2, items: [{ label: 'Total', value: 'R$ 30' }] }],
+    },
+    {
+      id: 'centro-custo',
+      title: 'Centro de Custo',
+      periodType: 'mensal' as const,
+      filters: [],
+      hasCompareSwitch: false,
+      sections: [{ type: 'kpi-grid' as const, columns: 2, items: [{ label: 'Total', value: 'R$ 20' }] }],
+    },
+    {
+      id: 'margens',
+      title: 'Margens Reais',
+      periodType: 'mensal' as const,
+      filters: [],
+      hasCompareSwitch: false,
+      sections: [{ type: 'kpi-grid' as const, columns: 2, items: [{ label: 'Margem', value: '15%' }] }],
+    },
+    {
+      id: 'fluxo-mensal',
+      title: 'Fluxo de Caixa Mensal',
+      periodType: 'mensal' as const,
+      filters: [],
+      hasCompareSwitch: false,
+      sections: [{ type: 'kpi-grid' as const, columns: 2, items: [{ label: 'Saldo', value: 'R$ 10' }] }],
+    },
+    {
+      id: 'fluxo-anual',
+      title: 'Fluxo de Caixa Anual',
+      periodType: 'anual' as const,
+      filters: [],
+      hasCompareSwitch: false,
+      sections: [{ type: 'kpi-grid' as const, columns: 2, items: [{ label: 'Saldo', value: 'R$ 120' }] }],
+    },
+    {
+      id: 'indicadores',
+      title: 'Indicadores de Desempenho',
+      periodType: 'mensal' as const,
+      filters: [],
+      hasCompareSwitch: false,
+      sections: [{ type: 'kpi-grid' as const, columns: 4, items: [{ label: 'ROI', value: '12%' }] }],
+    },
+    {
+      id: 'upload',
+      title: 'Upload',
+      periodType: 'mensal' as const,
+      filters: [],
+      hasCompareSwitch: false,
+      sections: [{ type: 'kpi-grid' as const, columns: 1, items: [{ label: 'Status', value: 'OK' }] }],
+    },
+    {
+      id: 'config',
+      title: 'Configuracoes',
+      periodType: 'mensal' as const,
+      filters: [],
+      hasCompareSwitch: false,
+      sections: [{ type: 'kpi-grid' as const, columns: 1, items: [{ label: 'Versao', value: '1.0' }] }],
+    },
+  ],
+} satisfies BlueprintConfig
+
+/** Technical config matching pilotBlueprint structure (1 kpi-grid per screen) */
+const pilotTechnical: TechnicalConfig = {
+  slug: 'financeiro-conta-azul',
+  version: '1.0',
+  reportTypes: [
+    {
+      id: 'contas_a_receber',
+      label: 'Contas a Receber',
+      periodModel: 'monthly',
+      filesPerPeriod: 1,
+      columns: [
+        { sourceColumn: 'Valor', targetField: 'valor', dataType: 'currency', format: '1.234,56' },
+      ],
+    },
+  ],
+  fields: [
+    { id: 'receita_total', label: 'Receita Total', source: 'contas_a_receber', column: 'valor', aggregation: 'SUM' },
+  ],
+  formulas: [],
+  manualInputs: [],
+  settings: [],
+  classifications: [],
+  thresholds: [],
+  bindings: [
+    { sectionType: 'kpi-grid', screenId: 'resultado-mensal', sectionIndex: 0, items: [{ fieldOrFormula: 'receita_total' }] },
+    { sectionType: 'kpi-grid', screenId: 'receita', sectionIndex: 0, items: [{ fieldOrFormula: 'receita_total' }] },
+    { sectionType: 'kpi-grid', screenId: 'despesas', sectionIndex: 0, items: [{ fieldOrFormula: 'receita_total' }] },
+    { sectionType: 'kpi-grid', screenId: 'centro-custo', sectionIndex: 0, items: [{ fieldOrFormula: 'receita_total' }] },
+    { sectionType: 'kpi-grid', screenId: 'margens', sectionIndex: 0, items: [{ fieldOrFormula: 'receita_total' }] },
+    { sectionType: 'kpi-grid', screenId: 'fluxo-mensal', sectionIndex: 0, items: [{ fieldOrFormula: 'receita_total' }] },
+    { sectionType: 'kpi-grid', screenId: 'fluxo-anual', sectionIndex: 0, items: [{ fieldOrFormula: 'receita_total' }] },
+    { sectionType: 'kpi-grid', screenId: 'indicadores', sectionIndex: 0, items: [{ fieldOrFormula: 'receita_total' }] },
+    { sectionType: 'kpi-grid', screenId: 'upload', sectionIndex: 0, items: [{ fieldOrFormula: 'receita_total' }] },
+    { sectionType: 'kpi-grid', screenId: 'config', sectionIndex: 0, items: [{ fieldOrFormula: 'receita_total' }] },
+  ],
+}
 
 describe('writeProductSpec integration (pilot client)', () => {
-  it('succeeds with real pilot client configs', async () => {
-    const blueprint = (await import('@clients/financeiro-conta-azul/wireframe/blueprint.config')).default
-    const technical = (await import('@clients/financeiro-conta-azul/wireframe/technical.config')).default
+  it('succeeds with pilot client configs', async () => {
     const branding = (await import('@clients/financeiro-conta-azul/wireframe/branding.config')).default
 
     const outputDir = createTempDir()
-    const result = writeProductSpec(blueprint, technical, branding, outputDir)
+    const result = writeProductSpec(pilotBlueprint, pilotTechnical, branding, outputDir)
 
     expect(result.success).toBe(true)
     expect(result.files).toHaveLength(6)
   })
 
   it('produces 6 non-empty files on disk', async () => {
-    const blueprint = (await import('@clients/financeiro-conta-azul/wireframe/blueprint.config')).default
-    const technical = (await import('@clients/financeiro-conta-azul/wireframe/technical.config')).default
     const branding = (await import('@clients/financeiro-conta-azul/wireframe/branding.config')).default
 
     const outputDir = createTempDir()
-    writeProductSpec(blueprint, technical, branding, outputDir)
+    writeProductSpec(pilotBlueprint, pilotTechnical, branding, outputDir)
 
     const expectedFiles = [
       'product-spec.md',
@@ -169,36 +293,30 @@ describe('writeProductSpec integration (pilot client)', () => {
   })
 
   it('product-spec.md contains pilot client label', async () => {
-    const blueprint = (await import('@clients/financeiro-conta-azul/wireframe/blueprint.config')).default
-    const technical = (await import('@clients/financeiro-conta-azul/wireframe/technical.config')).default
     const branding = (await import('@clients/financeiro-conta-azul/wireframe/branding.config')).default
 
     const outputDir = createTempDir()
-    writeProductSpec(blueprint, technical, branding, outputDir)
+    writeProductSpec(pilotBlueprint, pilotTechnical, branding, outputDir)
 
     const content = readFileSync(join(outputDir, 'product-spec.md'), 'utf-8')
     expect(content).toContain('Financeiro Conta Azul')
   })
 
   it('database-schema.sql contains contas_a_receber table', async () => {
-    const blueprint = (await import('@clients/financeiro-conta-azul/wireframe/blueprint.config')).default
-    const technical = (await import('@clients/financeiro-conta-azul/wireframe/technical.config')).default
     const branding = (await import('@clients/financeiro-conta-azul/wireframe/branding.config')).default
 
     const outputDir = createTempDir()
-    writeProductSpec(blueprint, technical, branding, outputDir)
+    writeProductSpec(pilotBlueprint, pilotTechnical, branding, outputDir)
 
     const content = readFileSync(join(outputDir, 'database-schema.sql'), 'utf-8')
     expect(content).toContain('contas_a_receber')
   })
 
   it('screens.md contains all 10 pilot client screen titles', async () => {
-    const blueprint = (await import('@clients/financeiro-conta-azul/wireframe/blueprint.config')).default
-    const technical = (await import('@clients/financeiro-conta-azul/wireframe/technical.config')).default
     const branding = (await import('@clients/financeiro-conta-azul/wireframe/branding.config')).default
 
     const outputDir = createTempDir()
-    writeProductSpec(blueprint, technical, branding, outputDir)
+    writeProductSpec(pilotBlueprint, pilotTechnical, branding, outputDir)
 
     const content = readFileSync(join(outputDir, 'screens.md'), 'utf-8')
 

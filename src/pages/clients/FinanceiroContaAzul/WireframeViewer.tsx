@@ -9,12 +9,11 @@ import BlueprintRenderer from '@tools/wireframe-builder/components/BlueprintRend
 import AdminToolbar from '@tools/wireframe-builder/components/editor/AdminToolbar'
 import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPanel'
 import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
-import seedConfig from '@clients/financeiro-conta-azul/wireframe/blueprint.config'
+import { toast } from 'sonner'
 import brandingConfigSeed from '@clients/financeiro-conta-azul/wireframe/branding.config'
 import {
   loadBlueprint as loadBlueprintFromDb,
   saveBlueprint as saveBlueprintToDb,
-  seedFromFile,
 } from '@tools/wireframe-builder/lib/blueprint-store'
 import {
   resolveBranding,
@@ -49,6 +48,9 @@ export default function FinanceiroWireframeViewer() {
   const [config, setConfig] = useState<BlueprintConfig | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
+  // Tracks DB row timestamp -- consumed by Plan 03 for optimistic locking
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null)
+  void lastUpdatedAt // Will be consumed by Plan 03 (optimistic locking)
 
   // Edit mode
   const [editMode, setEditMode] = useState<EditModeState>({
@@ -77,15 +79,18 @@ export default function FinanceiroWireframeViewer() {
   useEffect(() => {
     async function init() {
       try {
-        let result = await loadBlueprintFromDb(CLIENT_SLUG)
+        const result = await loadBlueprintFromDb(CLIENT_SLUG)
         if (!result) {
-          await seedFromFile(CLIENT_SLUG, seedConfig, user?.id ?? 'system')
-          result = await loadBlueprintFromDb(CLIENT_SLUG)
+          setLoadError('Blueprint nao encontrado no banco de dados.')
+          return
         }
-        setConfig(result?.config ?? null)
+        setConfig(result.config)
+        setLastUpdatedAt(result.updatedAt)
       } catch (err) {
         console.error('Failed to load blueprint:', err)
-        setLoadError('Erro ao carregar wireframe.')
+        const message = err instanceof Error ? err.message : 'Erro ao carregar wireframe.'
+        toast.error('Erro ao carregar blueprint', { description: message })
+        setLoadError(message)
       } finally {
         setLoading(false)
       }
@@ -242,13 +247,12 @@ export default function FinanceiroWireframeViewer() {
     try {
       await saveBlueprintToDb(CLIENT_SLUG, workingConfig, user.id)
       setConfig(structuredClone(workingConfig))
-      setEditMode((prev) => ({
-        ...prev,
-        dirty: false,
-        saving: false,
-      }))
+      toast.success('Blueprint salvo com sucesso')
+      setEditMode((prev) => ({ ...prev, dirty: false, saving: false }))
     } catch (err) {
       console.error('Failed to save blueprint:', err)
+      const message = err instanceof Error ? err.message : 'Erro ao salvar blueprint.'
+      toast.error('Erro ao salvar', { description: message })
       setEditMode((prev) => ({ ...prev, saving: false }))
     }
   }
