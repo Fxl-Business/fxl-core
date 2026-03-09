@@ -1,25 +1,37 @@
 # Branding — Financeiro Conta Azul
 
-> ⚠️ Documento pendente. Será preenchido na sessão de branding (passo 5 do processo).
-
 ## Paleta de cores
-> A preencher
+
+| Funcao | Cor | Hex |
+|--------|-----|-----|
+| Primaria | Azul petroleo | `#1B6B93` |
+| Secundaria | Ciano claro | `#4FC0D0` |
+| Destaque | Verde neon | `#A2FF86` |
 
 ## Tipografia
-> A preencher
+
+- **Titulos:** Poppins
+- **Corpo:** Inter
 
 ## Logo
-> A preencher
+
+- Arquivo: pendente (aguardando envio pelo cliente)
+- Formato: PNG com fundo transparente (recomendado)
 
 ## Tom e voz
-> A preencher
 
-## Referências visuais
-> A preencher
+- Profissional e objetivo, voltado para gestao financeira
+- Linguagem clara, sem jargao tecnico excessivo
+- Tom confiavel — o dashboard e uma ferramenta de decisao
 
-## Como realizar a sessão de branding
+## Referencias visuais
 
-1. Abrir o Claude Project FXL — Financeiro Conta Azul
-2. Compartilhar logo, referências visuais e preferências
-3. Claude estrutura o branding.md completo
-4. Output: prompt para o Claude Code atualizar este arquivo
+- [Conta Azul](https://contaazul.com) — paleta de referencia extraida do produto
+- Dashboard financeiro com foco em clareza e legibilidade
+
+## Como realizar a sessao de branding
+
+1. Usar o Claude Code com o GSD workflow para coletar informacoes de branding
+2. Preencher os campos acima com logo, cores e fontes do cliente
+3. Executar o prompt de geracao para criar `branding.config.ts` automaticamente
+4. Output: arquivo `wireframe/branding.config.ts` com tipagem BrandingConfig
