@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 3: Wireframe Visual Editor** - Edit wireframe layout, components, and screens via UI with blueprint sync
 - [ ] **Phase 4: Branding Process** - Structured branding collection with automatic application to wireframes
 - [ ] **Phase 5: Technical Configuration** - TechnicalConfig schema and config resolver bridging wireframe to functional system
-- [ ] **Phase 6: System Generation** - Generate standalone Next.js BI dashboards from Blueprint + TechnicalConfig + Branding
+- [ ] **Phase 6: System Generation** - Generate standalone BI dashboards from Blueprint + TechnicalConfig + Branding
 
 ## Phase Details
 
@@ -149,21 +149,21 @@ Plans:
 - [ ] 05-02-PLAN.md — Config Resolver + SKILL.md renderer, operator workflow documentation with AI draft generation (TCONF-02, TCONF-03)
 
 ### Phase 6: System Generation
-**Goal**: A standalone BI dashboard is generated in a separate repository from the merged configuration, with real data and auth
+**Goal**: Running the product spec generator with the pilot client's configs produces a multi-file product spec that fully describes a Vite+React frontend + NestJS backend BI dashboard, ready for Claude Code to generate in a separate repository
 **Depends on**: Phase 5
 **Requirements**: SGEN-01, SGEN-02, SGEN-03, SGEN-04, SGEN-05
 **Success Criteria** (what must be TRUE):
-  1. Running the generator with the pilot client's GenerationManifest produces a Next.js 16 project in a separate repo with Supabase, Tailwind, and correct folder structure that starts with `npm run dev`
-  2. Generated pages render KPI cards, charts, and tables matching the blueprint layout, connected to real data from Supabase
-  3. User can upload a CSV/XLSX file through the generated system, with Brazilian formats (1.234,56 / dd/mm/yyyy) normalized automatically
-  4. Users can log in with email/password and the system enforces role-based access (admin vs viewer)
-  5. Client branding (colors, fonts, logo) from the branding config is applied automatically throughout the generated dashboard
-**Plans**: TBD
+  1. Running generateProductSpec with the pilot client's GenerationManifest produces 6 spec files describing a Vite+React + NestJS project with Supabase, Tailwind, Clerk auth, and correct structure
+  2. The screens.md output contains all blueprint screens with section bindings and visual properties for KPI cards, charts, and tables
+  3. The upload-rules.md output contains column mappings with BR format normalization rules (1.234,56 / dd/mm/yyyy)
+  4. The product-spec.md output defines 3 auth roles (admin, editor, viewer) with correct permission boundaries
+  5. The branding.md output contains CSS variables with --brand-* prefix and Google Fonts loading instructions
+**Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
-- [ ] 06-03: TBD
+- [ ] 06-01-PLAN.md — TDD foundation: Vitest setup, SpecFile type, generateProductSpec skeleton, BR normalizer (SGEN-01, SGEN-03)
+- [ ] 06-02-PLAN.md — Rich renderers: implement all 6 product spec file renderers adapted from skill-renderer.ts (SGEN-01, SGEN-02, SGEN-04, SGEN-05)
+- [ ] 06-03-PLAN.md — Pipeline orchestrator: writeProductSpec end-to-end, pilot client integration test, operator process docs (SGEN-01, SGEN-02, SGEN-03, SGEN-04, SGEN-05)
 
 ## Progress
 
@@ -179,5 +179,5 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3 -> 3 -> 4 -> 5 -> 6
 | 02.3. Reformulacao Visual | 4/4 | Complete    | 2026-03-08 |
 | 3. Wireframe Visual Editor | 4/4 | Complete | 2026-03-09 |
 | 4. Branding Process | 3/3 | Complete | 2026-03-09 |
-| 5. Technical Configuration | 0/2 | Not started | - |
+| 5. Technical Configuration | 2/2 | Complete | 2026-03-09 |
 | 6. System Generation | 0/3 | Not started | - |
