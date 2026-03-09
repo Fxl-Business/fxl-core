@@ -7,6 +7,15 @@ import {
   loadBlueprint as loadBlueprintFromDb,
   seedFromFile,
 } from '@tools/wireframe-builder/lib/blueprint-store'
+import {
+  resolveBranding,
+  brandingToCssVars,
+  getChartPalette,
+  getFontLinks,
+  derivePalette,
+} from '@tools/wireframe-builder/lib/branding'
+import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'
+import type { BrandingConfig } from '@tools/wireframe-builder/types/branding'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
 import type { Comment } from '@tools/wireframe-builder/types/comments'
 import type { BlueprintConfig } from '@tools/wireframe-builder/types/blueprint'
@@ -35,6 +44,15 @@ const blueprintMap: Record<
     import('@clients/financeiro-conta-azul/wireframe/blueprint.config'),
 }
 
+/** Dynamic import map for per-client branding configs */
+const brandingMap: Record<
+  string,
+  () => Promise<{ default: BrandingConfig }>
+> = {
+  'financeiro-conta-azul': () =>
+    import('@clients/financeiro-conta-azul/wireframe/branding.config'),
+}
+
 type ViewState =
   | { step: 'loading' }
   | { step: 'invalid'; message: string }
@@ -44,6 +62,7 @@ type ViewState =
       clientSlug: string
       clientName: string
       blueprint: BlueprintConfig
+      branding: BrandingConfig
     }
 
 export default function SharedWireframeView() {
@@ -115,11 +134,24 @@ export default function SharedWireframeView() {
         bp = mod.default
       }
 
+      // Load branding config (fallback to defaults if not found)
+      let brandConfig: BrandingConfig = DEFAULT_BRANDING
+      const brandLoader = brandingMap[clientSlug]
+      if (brandLoader) {
+        try {
+          const brandMod = await brandLoader()
+          brandConfig = brandMod.default
+        } catch {
+          // Branding load failed -- use defaults silently
+        }
+      }
+
       setViewState({
         step: 'wireframe',
         clientSlug,
         clientName,
         blueprint: bp,
+        branding: brandConfig,
       })
     } catch {
       setViewState({
@@ -331,10 +363,16 @@ export default function SharedWireframeView() {
   }
 
   // viewState.step === 'wireframe'
-  const { blueprint: bp, clientSlug, clientName } = viewState
+  const { blueprint: bp, clientSlug, clientName, branding: brandConfig } = viewState
   const clientId = getClientId()
   const screens = bp.screens
   const activeScreen = screens[activeIndex]
+
+  // Resolve branding for rendering
+  const resolvedBranding = resolveBranding(brandConfig)
+  const sharedBrandVars = brandingToCssVars(resolvedBranding)
+  const sharedChartPalette = getChartPalette(resolvedBranding)
+  const sharedBrandPalette = derivePalette(resolvedBranding)
 
   function handleOpenScreenComments() {
     const targetId = toTargetId({
@@ -345,20 +383,18 @@ export default function SharedWireframeView() {
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        height: '100vh',
-        fontFamily: 'Inter, sans-serif',
-        background: '#F5F5F5',
-      }}
+    <SharedWireframeShell
+      branding={resolvedBranding}
+      brandVars={sharedBrandVars}
+      brandPalette={sharedBrandPalette}
+      label={bp.label}
     >
-      {/* Sidebar escura */}
+      {/* Sidebar escura -- uses dark variant of brand primary */}
       <aside
         style={{
           width: 240,
           minWidth: 240,
-          background: '#212121',
+          background: sharedBrandPalette.primaryDark,
           color: '#FFF',
           display: 'flex',
           flexDirection: 'column',
@@ -374,13 +410,21 @@ export default function SharedWireframeView() {
             display: 'flex',
             alignItems: 'center',
             padding: '0 24px',
-            borderBottom: '1px solid #424242',
+            borderBottom: `1px solid ${resolvedBranding.primaryColor}`,
             flexShrink: 0,
           }}
         >
-          <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
-            FXL
-          </span>
+          {resolvedBranding.logoUrl ? (
+            <img
+              src={resolvedBranding.logoUrl}
+              alt={bp.label}
+              style={{ maxHeight: 32, maxWidth: 120, objectFit: 'contain' as const }}
+            />
+          ) : (
+            <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
+              FXL
+            </span>
+          )}
         </div>
         <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
           {screens.map((screen, i) => (
@@ -396,10 +440,10 @@ export default function SharedWireframeView() {
                 fontSize: 13,
                 fontWeight: activeIndex === i ? 500 : 400,
                 color: activeIndex === i ? '#FFF' : '#BDBDBD',
-                background: activeIndex === i ? '#424242' : 'transparent',
+                background: activeIndex === i ? resolvedBranding.primaryColor : 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: `${resolvedBranding.bodyFont}, Inter, sans-serif`,
               }}
             >
               {screen.title}
@@ -409,7 +453,7 @@ export default function SharedWireframeView() {
         <div
           style={{
             padding: '16px 24px',
-            borderTop: '1px solid #424242',
+            borderTop: `1px solid ${resolvedBranding.primaryColor}`,
             fontSize: 11,
             color: '#757575',
           }}
@@ -440,6 +484,8 @@ export default function SharedWireframeView() {
             clientSlug={clientSlug}
             comments={comments}
             onOpenComments={handleOpenComments}
+            chartColors={sharedChartPalette}
+            brandPrimary={resolvedBranding.primaryColor}
           />
         </div>
       </main>
@@ -467,6 +513,67 @@ export default function SharedWireframeView() {
           onClose={handleCloseDrawer}
         />
       )}
+    </SharedWireframeShell>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Shell wrapper: injects brand CSS vars, font loading, and favicon
+// ---------------------------------------------------------------------------
+
+function SharedWireframeShell({
+  branding: brandingProp,
+  brandVars: vars,
+  brandPalette: palette,
+  label,
+  children,
+}: {
+  branding: BrandingConfig
+  brandVars: React.CSSProperties
+  brandPalette: ReturnType<typeof derivePalette>
+  label: string
+  children: React.ReactNode
+}) {
+  // Font loading + favicon
+  useEffect(() => {
+    const fontUrls = getFontLinks(brandingProp)
+    const links: HTMLLinkElement[] = []
+
+    for (const url of fontUrls) {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      document.head.appendChild(link)
+      links.push(link)
+    }
+
+    if (brandingProp.faviconUrl) {
+      const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+      if (icon) icon.href = brandingProp.faviconUrl
+    }
+
+    return () => {
+      for (const link of links) {
+        document.head.removeChild(link)
+      }
+    }
+  }, [brandingProp])
+
+  // Suppress unused var warnings — palette and label are used by the parent for sidebar
+  void palette
+  void label
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        height: '100vh',
+        fontFamily: `${brandingProp.bodyFont}, Inter, sans-serif`,
+        background: '#F5F5F5',
+        ...vars,
+      }}
+    >
+      {children}
     </div>
   )
 }

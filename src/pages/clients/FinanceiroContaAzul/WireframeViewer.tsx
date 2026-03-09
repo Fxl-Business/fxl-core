@@ -10,11 +10,19 @@ import AdminToolbar from '@tools/wireframe-builder/components/editor/AdminToolba
 import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPanel'
 import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
 import seedConfig from '@clients/financeiro-conta-azul/wireframe/blueprint.config'
+import brandingConfigSeed from '@clients/financeiro-conta-azul/wireframe/branding.config'
 import {
   loadBlueprint as loadBlueprintFromDb,
   saveBlueprint as saveBlueprintToDb,
   seedFromFile,
 } from '@tools/wireframe-builder/lib/blueprint-store'
+import {
+  resolveBranding,
+  brandingToCssVars,
+  getChartPalette,
+  getFontLinks,
+  derivePalette,
+} from '@tools/wireframe-builder/lib/branding'
 import { sectionsToRows, getCellCount } from '@tools/wireframe-builder/lib/grid-layouts'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
@@ -27,6 +35,12 @@ import type {
 import type { EditModeState, GridLayout, ScreenRow } from '@tools/wireframe-builder/types/editor'
 
 const CLIENT_SLUG = 'financeiro-conta-azul'
+
+// Resolve branding once at module level (static import, no async needed)
+const branding = resolveBranding(brandingConfigSeed)
+const brandVars = brandingToCssVars(branding)
+const chartPalette = getChartPalette(branding)
+const brandPalette = derivePalette(branding)
 
 export default function FinanceiroWireframeViewer() {
   const { user } = useUser()
@@ -79,6 +93,33 @@ export default function FinanceiroWireframeViewer() {
     init()
     // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // --- Font loading ---
+
+  useEffect(() => {
+    const fontUrls = getFontLinks(branding)
+    const links: HTMLLinkElement[] = []
+
+    for (const url of fontUrls) {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      document.head.appendChild(link)
+      links.push(link)
+    }
+
+    // Favicon override
+    if (branding.faviconUrl) {
+      const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+      if (icon) icon.href = branding.faviconUrl
+    }
+
+    return () => {
+      for (const link of links) {
+        document.head.removeChild(link)
+      }
+    }
   }, [])
 
   // --- Derived state ---
@@ -481,16 +522,17 @@ export default function FinanceiroWireframeViewer() {
       style={{
         display: 'flex',
         height: '100vh',
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: `${branding.bodyFont}, Inter, sans-serif`,
         background: '#F5F5F5',
+        ...brandVars,
       }}
     >
-      {/* Sidebar escura */}
+      {/* Sidebar escura — uses dark variant of brand primary */}
       <aside
         style={{
           width: 240,
           minWidth: 240,
-          background: '#212121',
+          background: brandPalette.primaryDark,
           color: '#FFF',
           display: 'flex',
           flexDirection: 'column',
@@ -506,13 +548,21 @@ export default function FinanceiroWireframeViewer() {
             display: 'flex',
             alignItems: 'center',
             padding: '0 24px',
-            borderBottom: '1px solid #424242',
+            borderBottom: `1px solid ${branding.primaryColor}`,
             flexShrink: 0,
           }}
         >
-          <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
-            FXL
-          </span>
+          {branding.logoUrl ? (
+            <img
+              src={branding.logoUrl}
+              alt={config.label}
+              style={{ maxHeight: 32, maxWidth: 120, objectFit: 'contain' as const }}
+            />
+          ) : (
+            <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
+              FXL
+            </span>
+          )}
         </div>
         <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
           <ScreenManager
@@ -529,7 +579,7 @@ export default function FinanceiroWireframeViewer() {
         <div
           style={{
             padding: '16px 24px',
-            borderTop: '1px solid #424242',
+            borderTop: `1px solid ${branding.primaryColor}`,
           }}
         >
           <button
@@ -594,6 +644,8 @@ export default function FinanceiroWireframeViewer() {
             clientSlug={activeConfig?.slug}
             comments={comments}
             onOpenComments={handleOpenComments}
+            chartColors={chartPalette}
+            brandPrimary={branding.primaryColor}
             editMode={editMode.active}
             selectedSection={editMode.selectedSection}
             onSelectSection={handleSelectSection}
