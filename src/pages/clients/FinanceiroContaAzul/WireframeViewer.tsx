@@ -77,12 +77,12 @@ export default function FinanceiroWireframeViewer() {
   useEffect(() => {
     async function init() {
       try {
-        let bp = await loadBlueprintFromDb(CLIENT_SLUG)
-        if (!bp) {
+        let result = await loadBlueprintFromDb(CLIENT_SLUG)
+        if (!result) {
           await seedFromFile(CLIENT_SLUG, seedConfig, user?.id ?? 'system')
-          bp = await loadBlueprintFromDb(CLIENT_SLUG)
+          result = await loadBlueprintFromDb(CLIENT_SLUG)
         }
-        setConfig(bp)
+        setConfig(result?.config ?? null)
       } catch (err) {
         console.error('Failed to load blueprint:', err)
         setLoadError('Erro ao carregar wireframe.')

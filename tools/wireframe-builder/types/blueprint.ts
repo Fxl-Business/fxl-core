@@ -215,5 +215,6 @@ export type BlueprintScreen = {
 export type BlueprintConfig = {
   slug: string
   label: string
+  schemaVersion?: number
   screens: BlueprintScreen[]
 }

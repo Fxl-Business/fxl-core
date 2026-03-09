@@ -243,18 +243,15 @@ const InfoBlockSectionSchema = z.object({
   variant: z.enum(['info', 'warning']).optional(),
 })
 
-// ChartGridSection has recursive items: BlueprintSection[]
-const ChartGridSectionSchema = z.object({
-  type: z.literal('chart-grid'),
-  columns: z.number().optional(),
-  items: z.lazy(() => z.array(BlueprintSectionSchema)),
-})
-
 // ---------------------------------------------------------------------------
 // Discriminated union of all 15 section types
+// Note: ChartGridSection has recursive items: BlueprintSection[]
+// We define the non-recursive schemas first, then build the union
+// with ChartGrid inline using z.lazy() for the recursive reference.
 // ---------------------------------------------------------------------------
 
-export const BlueprintSectionSchema = z.discriminatedUnion('type', [
+// Non-recursive section schemas (14 types)
+const nonRecursiveSections = [
   KpiGridSectionSchema,
   BarLineChartSectionSchema,
   DonutChartSectionSchema,
@@ -269,7 +266,17 @@ export const BlueprintSectionSchema = z.discriminatedUnion('type', [
   UploadSectionSchema,
   ConfigTableSectionSchema,
   InfoBlockSectionSchema,
-  ChartGridSectionSchema,
+] as const
+
+// ChartGridSection is defined inline to avoid circular const reference.
+// The explicit z.ZodType annotation breaks the TS inference cycle.
+export const BlueprintSectionSchema: z.ZodType = z.discriminatedUnion('type', [
+  ...nonRecursiveSections,
+  z.object({
+    type: z.literal('chart-grid'),
+    columns: z.number().optional(),
+    items: z.lazy(() => z.array(BlueprintSectionSchema)),
+  }),
 ])
 
 // ---------------------------------------------------------------------------
@@ -281,7 +288,7 @@ const GridLayoutSchema = z.enum(['1', '2', '3', '2-1', '1-2'])
 export const ScreenRowSchema = z.object({
   id: z.string(),
   layout: GridLayoutSchema,
-  sections: z.lazy(() => z.array(BlueprintSectionSchema)),
+  sections: z.array(BlueprintSectionSchema),
 })
 
 // ---------------------------------------------------------------------------

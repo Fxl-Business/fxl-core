@@ -120,9 +120,12 @@ export default function SharedWireframeView() {
   async function loadBlueprint(clientSlug: string, clientName: string) {
     try {
       // First try Supabase
-      let bp = await loadBlueprintFromDb(clientSlug)
+      let result = await loadBlueprintFromDb(clientSlug)
+      let bp: BlueprintConfig | undefined
 
-      if (!bp) {
+      if (result) {
+        bp = result.config
+      } else {
         // Supabase has no data -- try dynamic import fallback and seed
         const loader = blueprintMap[clientSlug]
         if (!loader) {
@@ -144,6 +147,11 @@ export default function SharedWireframeView() {
         } catch {
           // Branding load failed -- use defaults silently
         }
+      }
+
+      if (!bp) {
+        setViewState({ step: 'invalid', message: 'Cliente nao encontrado.' })
+        return
       }
 
       setViewState({
