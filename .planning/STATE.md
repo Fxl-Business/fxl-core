@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 6 context gathered
-last_updated: "2026-03-09T15:39:06.800Z"
-last_activity: 2026-03-09 -- Completed 05-02 Config Resolver and SKILL.md Renderer (2/2 tasks)
+status: in-progress
+stopped_at: Completed 06-01 Test Infrastructure and Spec Generator
+last_updated: "2026-03-09T17:14:22.357Z"
+last_activity: 2026-03-09 -- Completed 06-01 Test Infrastructure and Spec Generator (2/2 tasks)
 progress:
   total_phases: 9
   completed_phases: 8
-  total_plans: 24
-  completed_plans: 24
+  total_plans: 27
+  completed_plans: 25
   percent: 100
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 05 - Technical Configuration (2 of 2 plans complete -- PHASE COMPLETE)
+**Current focus:** Phase 06 - System Generation (1 of 3 plans complete)
 
 ## Current Position
 
-Phase: 05 of 9 (Technical Configuration)
-Plan: 2 of 2 in current phase
-Status: Phase Complete
-Last activity: 2026-03-09 -- Completed 05-02 Config Resolver and SKILL.md Renderer (2/2 tasks)
+Phase: 06 of 9 (System Generation)
+Plan: 1 of 3 in current phase
+Status: In Progress
+Last activity: 2026-03-09 -- Completed 06-01 Test Infrastructure and Spec Generator (2/2 tasks)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [██████████] 100%
 | Phase 04 P03 | 4min | 3 tasks | 5 files |
 | Phase 05 P01 | 4min | 2 tasks | 4 files |
 | Phase 05 P02 | 4min | 2 tasks | 3 files |
+| Phase 06 P01 | 4min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -154,6 +155,10 @@ Recent decisions affecting current work:
 - [Phase 05]: Formulas are string literal specifications, not runtime-evaluated; section bindings addressed by screenId + sectionIndex composite key
 - [Phase 05]: resolveConfig is pure function (no I/O, deterministic) with slug validation and automatic Supabase schema derivation
 - [Phase 05]: SKILL.md renderer handles all 15 section types exhaustively with binding + visual property rendering
+- [Phase 06]: Vitest configured with node environment and path aliases matching tsconfig
+- [Phase 06]: Spec generator renders 6 self-contained files (product-spec.md, database-schema.sql, data-layer.md, screens.md, branding.md, upload-rules.md)
+- [Phase 06]: Database schema output is raw SQL (not Markdown-wrapped) for direct use
+- [Phase 06]: Upload rules include BR format normalization reference table and per-column mapping
 
 ### Pending Todos
 
@@ -178,6 +183,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T15:39:06.787Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-system-generation/06-CONTEXT.md
+Last session: 2026-03-09T17:13:34Z
+Stopped at: Completed 06-01 Test Infrastructure and Spec Generator
+Resume file: .planning/phases/06-system-generation/06-01-SUMMARY.md
