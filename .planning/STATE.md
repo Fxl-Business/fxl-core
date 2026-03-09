@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: MVP
-status: milestone_complete
-stopped_at: v1.0 milestone archived
+milestone: v1.1
+milestone_name: Wireframe Evolution
+status: defining_requirements
+stopped_at: null
 last_updated: "2026-03-09"
-last_activity: 2026-03-09 -- v1.0 MVP milestone completed and archived
+last_activity: 2026-03-09 -- Milestone v1.1 started
 progress:
-  total_phases: 9
-  completed_phases: 9
-  total_plans: 27
-  completed_plans: 27
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,15 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Planning next milestone
+**Current focus:** v1.1 Wireframe Evolution — defining requirements
 
 ## Current Position
 
-Milestone: v1.0 MVP — SHIPPED 2026-03-09
-Status: Milestone Complete
-Next: `/gsd:new-milestone` to start v1.1+ planning
-
-Progress: [██████████] 100% (v1.0)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-09 — Milestone v1.1 started
 
 ## Accumulated Context
 

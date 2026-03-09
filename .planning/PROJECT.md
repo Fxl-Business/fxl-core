@@ -50,7 +50,20 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
-(Fresh for next milestone — define with `/gsd:new-milestone`)
+## Current Milestone: v1.1 Wireframe Evolution
+
+**Goal:** Evoluir o sistema de wireframe para pipeline completo Briefing → Blueprint → Wireframe com dados dinamicos no Supabase, biblioteca de componentes expandida e design system moderno.
+
+**Target features:**
+- Redesign visual dos wireframes (paleta branco/preto/cinza/dourado, dark+light mode)
+- Expansao da biblioteca de componentes (settings pages, inputs, filtros, novos blocos)
+- Blueprint como dado dinamico no Supabase com renderizacao textual na UI
+- Sync bidirecional blueprint ↔ wireframe mantido com blueprint no DB
+- Blueprint acessivel ao Claude Code (MD export ou MCP Supabase)
+- Geracao de blueprint via Claude Code a partir de briefing + historico
+- Input de briefing diretamente pela UI
+- Componentes dinamicos (page types, filtros configuráveis, input blocks)
+- Bug fixes (share link, regra de no-removal)
 
 ### Out of Scope
 
@@ -110,4 +123,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete blueprint + branding +
 - **Componentes compartilhados**: Nunca criar componentes locais em clients/ — tudo em tools/
 
 ---
-*Last updated: 2026-03-09 after v1.0 milestone*
+*Last updated: 2026-03-09 after v1.1 milestone started*
