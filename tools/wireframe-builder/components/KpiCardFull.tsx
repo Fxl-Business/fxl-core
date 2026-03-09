@@ -13,9 +13,11 @@ type Props = {
   sparkline?: number[]
   wide?: boolean
   compareMode?: boolean
+  /** Brand primary color (resolved hex). Used for value text emphasis and sparkline stroke. */
+  brandPrimary?: string
 }
 
-function Sparkline({ points }: { points: number[] }) {
+function Sparkline({ points, strokeColor }: { points: number[]; strokeColor?: string }) {
   const max = Math.max(...points)
   const min = Math.min(...points)
   const range = max - min || 1
@@ -34,7 +36,7 @@ function Sparkline({ points }: { points: number[] }) {
       preserveAspectRatio="none"
       className="mt-2 h-8 w-full"
     >
-      <polyline points={coords} fill="none" stroke="#9CA3AF" strokeWidth="1.5" />
+      <polyline points={coords} fill="none" stroke={strokeColor ?? '#9CA3AF'} strokeWidth="1.5" />
     </svg>
   )
 }
@@ -48,11 +50,12 @@ const SEMAFORO: Record<SemaforoStatus, { dot: string; text: string }> = {
 export default function KpiCardFull({
   label, value, sub, variation, variationPositive = true,
   semaforo, semaforoLabel, sparkline, wide = false, compareMode = false,
+  brandPrimary,
 }: Props) {
   return (
     <div className={cn('rounded-lg border border-gray-200 bg-white p-4 shadow-sm', wide && 'col-span-2')}>
       <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-gray-800">{value}</p>
+      <p className="mt-1 text-2xl font-bold text-gray-800" style={brandPrimary ? { color: brandPrimary } : undefined}>{value}</p>
       {sub && <p className="mt-0.5 text-xs text-gray-400">{sub}</p>}
       {compareMode && semaforo && (
         <div className="mt-1.5 flex items-center gap-1.5">
@@ -72,7 +75,7 @@ export default function KpiCardFull({
           {variation}
         </span>
       )}
-      {sparkline && <Sparkline points={sparkline} />}
+      {sparkline && <Sparkline points={sparkline} strokeColor={brandPrimary} />}
     </div>
   )
 }

@@ -6,9 +6,11 @@ type Props = {
   title?: string
   columns: Column[]
   rowCount?: number
+  /** Brand primary color (resolved hex). Used for header background with white text. */
+  brandPrimary?: string
 }
 
-export default function DataTable({ title, columns, rowCount = 5 }: Props) {
+export default function DataTable({ title, columns, rowCount = 5, brandPrimary }: Props) {
   const rows = Array.from({ length: rowCount }, (_, i) => i)
 
   return (
@@ -21,12 +23,16 @@ export default function DataTable({ title, columns, rowCount = 5 }: Props) {
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-gray-100">
+            <tr
+              className={brandPrimary ? undefined : 'bg-gray-100'}
+              style={brandPrimary ? { backgroundColor: brandPrimary } : undefined}
+            >
               {columns.map((col) => (
                 <th
                   key={col.key}
                   className={cn(
-                    'px-4 py-2.5 font-medium text-gray-500',
+                    'px-4 py-2.5 font-medium',
+                    brandPrimary ? 'text-white' : 'text-gray-500',
                     col.align === 'right' && 'text-right',
                     col.align === 'center' && 'text-center',
                     (!col.align || col.align === 'left') && 'text-left',

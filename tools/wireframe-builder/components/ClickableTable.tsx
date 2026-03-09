@@ -18,9 +18,11 @@ type Props = {
   columns: ClickColumn[]
   rows: ClickRow[]
   onRowClick?: (row: ClickRow) => void
+  /** Brand primary color (resolved hex). Used for header background with white text. */
+  brandPrimary?: string
 }
 
-export default function ClickableTable({ title, subtitle, columns, rows, onRowClick }: Props) {
+export default function ClickableTable({ title, subtitle, columns, rows, onRowClick, brandPrimary }: Props) {
   return (
     <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
       {title && (
@@ -32,12 +34,16 @@ export default function ClickableTable({ title, subtitle, columns, rows, onRowCl
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-gray-100">
+            <tr
+              className={brandPrimary ? undefined : 'bg-gray-100'}
+              style={brandPrimary ? { backgroundColor: brandPrimary } : undefined}
+            >
               {columns.map((col) => (
                 <th
                   key={col.key}
                   className={cn(
-                    'px-4 py-2.5 font-medium text-gray-500 whitespace-nowrap',
+                    'px-4 py-2.5 font-medium whitespace-nowrap',
+                    brandPrimary ? 'text-white' : 'text-gray-500',
                     col.align === 'right' && 'text-right',
                     col.align === 'center' && 'text-center',
                     (!col.align || col.align === 'left') && 'text-left',
