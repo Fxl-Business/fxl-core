@@ -173,10 +173,11 @@ export function validateConfig(
     })
   }
 
-  // Build lookup sets for field and formula IDs
+  // Build lookup sets for field, formula, and report type IDs
   const fieldIds = new Set(technical.fields.map((f) => f.id))
   const formulaIds = new Set(technical.formulas.map((f) => f.id))
-  const allRefIds = new Set([...fieldIds, ...formulaIds])
+  const reportTypeIds = new Set(technical.reportTypes.map((rt) => rt.id))
+  const allRefIds = new Set([...fieldIds, ...formulaIds, ...reportTypeIds])
 
   // 2. Section coverage -- walk all screens and sections
   for (const screen of blueprint.screens) {
