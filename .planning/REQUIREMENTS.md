@@ -65,10 +65,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### System Generation (Fase 3)
 
-- [ ] **SGEN-01**: Scaffold de projeto Next.js 16 com Supabase, Tailwind, estrutura de pastas
+- [ ] **SGEN-01**: Scaffold de projeto Vite+React (frontend) + NestJS (backend) com Supabase, Tailwind, estrutura de pastas
 - [ ] **SGEN-02**: Geracao de paginas com KPIs, graficos, tabelas a partir do blueprint com dados reais
 - [ ] **SGEN-03**: Upload CSV/XLSX com normalizacao de formatos BR e storage em Supabase
-- [ ] **SGEN-04**: Auth basico (email/senha) com roles (admin, viewer)
+- [ ] **SGEN-04**: Auth Clerk com roles (admin, editor, viewer)
 - [ ] **SGEN-05**: Branding do cliente aplicado automaticamente no sistema gerado
 
 ## v2 Requirements
