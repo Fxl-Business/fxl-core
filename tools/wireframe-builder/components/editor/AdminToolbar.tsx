@@ -1,5 +1,6 @@
-import { MessageSquare, Pencil, X } from 'lucide-react'
+import { MessageSquare, Moon, Pencil, Sun, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
 
 type Props = {
   screenTitle: string
@@ -20,6 +21,8 @@ export default function AdminToolbar({
   onSave,
   onOpenComments,
 }: Props) {
+  const { theme, toggle } = useWireframeTheme()
+
   return (
     <div className="flex items-center gap-3 border-b bg-background px-6 py-2 shrink-0">
       <span className="text-sm font-medium text-foreground">{screenTitle}</span>
@@ -28,6 +31,10 @@ export default function AdminToolbar({
         <Button variant="ghost" size="sm" onClick={onOpenComments}>
           <MessageSquare className="h-4 w-4" />
           Comentarios
+        </Button>
+
+        <Button variant="ghost" size="sm" onClick={toggle}>
+          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
         </Button>
 
         {editMode && dirty && (
