@@ -7,7 +7,7 @@ import { DEFAULT_BRANDING } from '../types/branding'
 // ---------------------------------------------------------------------------
 
 /** Parse hex (#RRGGBB or #RGB) to [H 0-360, S 0-100, L 0-100]. */
-function hexToHsl(hex: string): [number, number, number] {
+export function hexToHsl(hex: string): [number, number, number] {
   const raw = hex.replace('#', '')
   const full =
     raw.length === 3
@@ -80,7 +80,7 @@ function lighten(hex: string, amount: number): string {
 }
 
 /** Darken a hex color by `amount` lightness units (0-100). */
-function darken(hex: string, amount: number): string {
+export function darken(hex: string, amount: number): string {
   const [h, s, l] = hexToHsl(hex)
   return hslToHex(h, s, Math.max(0, l - amount))
 }
@@ -162,8 +162,9 @@ export function brandingToCssVars(branding: BrandingConfig): React.CSSProperties
 /**
  * Return an array of 5 resolved hex strings for recharts components.
  *
- * Recharts SVG fill/stroke attributes do NOT support CSS var() —
- * pass these hex values directly as props to chart components.
+ * Recharts SVG fill/stroke attributes DO support CSS var(). This function
+ * is still useful for branding resolution where resolved hex values give
+ * more control (e.g., dynamically changing brand colors at runtime).
  *
  * Order: primary, secondary, accent, primary-secondary mix, secondary-accent mix.
  */
@@ -196,4 +197,41 @@ export function getFontLinks(branding: BrandingConfig): string[] {
     const encoded = encodeURIComponent(font)
     return `https://fonts.googleapis.com/css2?family=${encoded}:wght@400;500;600;700&display=swap`
   })
+}
+
+/**
+ * Compute wireframe token overrides from client branding.
+ *
+ * Overrides --wf-accent and --wf-sidebar-* tokens so the wireframe
+ * adopts the client's brand identity. Apply the returned style object
+ * on the wireframe container to cascade overrides into all children.
+ *
+ * Sidebar fg is computed for contrast: light text on dark backgrounds,
+ * dark text on light backgrounds (threshold: L > 50).
+ *
+ * Usage:
+ * ```tsx
+ * <div style={brandingToWfOverrides(branding)}>
+ *   {wireframe content}
+ * </div>
+ * ```
+ */
+export function brandingToWfOverrides(branding: BrandingConfig): React.CSSProperties {
+  const sidebarBg = darken(branding.primaryColor, 20)
+
+  // Contrast computation: dark bg -> light text, light bg -> dark text
+  const [, , sidebarL] = hexToHsl(sidebarBg)
+  const sidebarFg = sidebarL > 50 ? '#1c1917' : '#fafaf9' // wf-neutral-900 : wf-neutral-50
+
+  const [, , accentL] = hexToHsl(branding.primaryColor)
+  const accentFg = accentL > 50 ? '#1c1917' : '#fafaf9'
+
+  return {
+    '--wf-accent': branding.primaryColor,
+    '--wf-accent-fg': accentFg,
+    '--wf-sidebar-bg': sidebarBg,
+    '--wf-sidebar-fg': sidebarFg,
+    '--wf-sidebar-active': branding.primaryColor,
+    '--wf-sidebar-border': branding.primaryColor,
+  } as React.CSSProperties
 }
