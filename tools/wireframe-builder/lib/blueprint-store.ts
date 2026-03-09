@@ -12,6 +12,12 @@ export type LoadBlueprintResult = {
   updatedAt: string
 }
 
+export type SaveBlueprintResult = {
+  success: boolean
+  conflict: boolean
+  updatedAt?: string
+}
+
 // ---------------------------------------------------------------------------
 // Load
 // ---------------------------------------------------------------------------
@@ -72,24 +78,69 @@ export async function loadBlueprint(
 export async function saveBlueprint(
   clientSlug: string,
   config: BlueprintConfig,
-  updatedBy: string
-): Promise<void> {
+  updatedBy: string,
+  lastKnownUpdatedAt: string | null
+): Promise<SaveBlueprintResult> {
   // Validate via Zod parse before writing (throws on invalid)
   const validated = BlueprintConfigSchema.parse(config)
 
-  const { error } = await supabase
+  const now = new Date().toISOString()
+
+  // If no lastKnownUpdatedAt, use upsert (new record or force overwrite)
+  if (lastKnownUpdatedAt === null) {
+    const { error } = await supabase
+      .from('blueprint_configs')
+      .upsert(
+        {
+          client_slug: clientSlug,
+          config: validated,
+          updated_by: updatedBy,
+          updated_at: now,
+        },
+        { onConflict: 'client_slug' }
+      )
+
+    if (error) throw error
+    return { success: true, conflict: false, updatedAt: now }
+  }
+
+  // Optimistic locking: conditional update where updated_at must match
+  const { data, error } = await supabase
     .from('blueprint_configs')
-    .upsert(
-      {
-        client_slug: clientSlug,
-        config: validated,
-        updated_by: updatedBy,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'client_slug' }
-    )
+    .update({
+      config: validated,
+      updated_by: updatedBy,
+      updated_at: now,
+    })
+    .eq('client_slug', clientSlug)
+    .eq('updated_at', lastKnownUpdatedAt)
+    .select('updated_at')
+    .maybeSingle()
 
   if (error) throw error
+
+  // If no row matched, updated_at changed -- conflict detected
+  if (!data) {
+    return { success: false, conflict: true }
+  }
+
+  // Return the DB-assigned updated_at for next comparison
+  return { success: true, conflict: false, updatedAt: data.updated_at }
+}
+
+// ---------------------------------------------------------------------------
+// Polling utility
+// ---------------------------------------------------------------------------
+
+export async function checkForUpdates(
+  clientSlug: string
+): Promise<string | null> {
+  const { data } = await supabase
+    .from('blueprint_configs')
+    .select('updated_at')
+    .eq('client_slug', clientSlug)
+    .single()
+  return data?.updated_at ?? null
 }
 
 // ---------------------------------------------------------------------------
@@ -105,5 +156,5 @@ export async function seedFromFile(
   const existing = await loadBlueprint(clientSlug)
   if (existing) return
 
-  await saveBlueprint(clientSlug, config, seededBy)
+  await saveBlueprint(clientSlug, config, seededBy, null)
 }

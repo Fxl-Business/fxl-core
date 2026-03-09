@@ -5,17 +5,27 @@ import type { BlueprintConfig } from '../types/blueprint'
 // Mock Supabase client
 // ---------------------------------------------------------------------------
 
+// Supabase's fluent chain uses deep self-referencing types.
+// We type mocks loosely via vi.fn() -- return values are wired in wireDefaultMockChain().
 const mockMaybeSingle = vi.fn()
 const mockSingle = vi.fn()
-const mockSelect = vi.fn(() => ({ eq: mockEq }))
-const mockEq = vi.fn(() => ({ maybeSingle: mockMaybeSingle, eq: mockEq, select: mockSelect }))
-const mockUpsert = vi.fn(() => ({ error: null }))
-const mockUpdate = vi.fn(() => ({ eq: mockEq }))
-const mockFrom = vi.fn((_table: string) => ({
-  select: mockSelect,
-  upsert: mockUpsert,
-  update: mockUpdate,
-}))
+const mockSelect = vi.fn()
+const mockEq = vi.fn()
+const mockUpsert = vi.fn()
+const mockUpdate = vi.fn()
+const mockFrom = vi.fn()
+
+// Wire default chain returns
+function wireDefaultMockChain() {
+  const eqReturn = { maybeSingle: mockMaybeSingle, eq: mockEq, select: mockSelect, single: mockSingle }
+  mockEq.mockReturnValue(eqReturn)
+  mockSelect.mockReturnValue({ eq: mockEq, maybeSingle: mockMaybeSingle })
+  mockUpdate.mockReturnValue({ eq: mockEq })
+  mockUpsert.mockReturnValue({ error: null })
+  mockFrom.mockReturnValue({ select: mockSelect, upsert: mockUpsert, update: mockUpdate })
+}
+
+wireDefaultMockChain()
 
 vi.mock('@/lib/supabase', () => ({
   supabase: {
@@ -58,14 +68,7 @@ const FAKE_UPDATED_AT = '2026-03-09T12:00:00.000Z'
 describe('loadBlueprint', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-
-    // Reset chain: from -> select -> eq -> maybeSingle
-    mockFrom.mockReturnValue({
-      select: mockSelect,
-      upsert: mockUpsert,
-    })
-    mockSelect.mockReturnValue({ eq: mockEq })
-    mockEq.mockReturnValue({ maybeSingle: mockMaybeSingle })
+    wireDefaultMockChain()
   })
 
   it('returns { config, updatedAt } tuple for valid data', async () => {
@@ -150,15 +153,7 @@ describe('saveBlueprint', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockFrom.mockReturnValue({
-      select: mockSelect,
-      upsert: mockUpsert,
-      update: mockUpdate,
-    })
-    mockUpsert.mockReturnValue({ error: null })
-    mockUpdate.mockReturnValue({ eq: mockEq })
-    mockSelect.mockReturnValue({ eq: mockEq })
-    mockEq.mockReturnValue({ eq: mockEq, maybeSingle: mockMaybeSingle, select: mockSelect })
+    wireDefaultMockChain()
     mockMaybeSingle.mockResolvedValue({
       data: { updated_at: NEW_UPDATED_AT },
       error: null,
@@ -241,11 +236,7 @@ describe('saveBlueprint', () => {
 describe('checkForUpdates', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockFrom.mockReturnValue({
-      select: mockSelect,
-    })
-    mockSelect.mockReturnValue({ eq: mockEq })
-    mockEq.mockReturnValue({ single: mockSingle })
+    wireDefaultMockChain()
   })
 
   it('returns updated_at when row exists', async () => {
@@ -272,16 +263,7 @@ describe('checkForUpdates', () => {
 describe('seedFromFile', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-
-    mockFrom.mockReturnValue({
-      select: mockSelect,
-      upsert: mockUpsert,
-      update: mockUpdate,
-    })
-    mockSelect.mockReturnValue({ eq: mockEq })
-    mockEq.mockReturnValue({ maybeSingle: mockMaybeSingle, eq: mockEq, select: mockSelect })
-    mockUpsert.mockReturnValue({ error: null })
-    mockUpdate.mockReturnValue({ eq: mockEq })
+    wireDefaultMockChain()
   })
 
   it('does not seed if data already exists', async () => {
