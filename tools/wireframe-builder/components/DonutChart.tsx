@@ -8,11 +8,14 @@ type Props = {
   centerValue?: string
   centerLabel?: string
   height?: number
+  /** Brand color palette (resolved hex strings). Replaces default COLORS array. Falls back to grayscale. */
+  chartColors?: string[]
 }
 
 const COLORS = ['#212121', '#757575', '#BDBDBD', '#424242', '#9E9E9E']
 
-export default function DonutChart({ title, data, centerValue, centerLabel, height = 200 }: Props) {
+export default function DonutChart({ title, data, centerValue, centerLabel, height = 200, chartColors }: Props) {
+  const palette = chartColors ?? COLORS
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
       <p className="mb-3 text-sm font-semibold text-gray-700">{title}</p>
@@ -31,7 +34,7 @@ export default function DonutChart({ title, data, centerValue, centerLabel, heig
                 endAngle={-270}
               >
                 {data.map((_, i) => (
-                  <Cell key={i} fill={data[i].color ?? COLORS[i % COLORS.length]} />
+                  <Cell key={i} fill={data[i].color ?? palette[i % palette.length]} />
                 ))}
               </Pie>
               <Tooltip formatter={(v: number) => v.toLocaleString('pt-BR')} />
@@ -49,7 +52,7 @@ export default function DonutChart({ title, data, centerValue, centerLabel, heig
             <div key={d.label} className="flex items-center gap-2">
               <span
                 className="h-3 w-3 flex-shrink-0 rounded-sm"
-                style={{ background: d.color ?? COLORS[i % COLORS.length] }}
+                style={{ background: d.color ?? palette[i % palette.length] }}
               />
               <span className="flex-1 truncate text-xs text-gray-600">{d.label}</span>
               <span className="text-xs font-medium text-gray-700 tabular-nums">

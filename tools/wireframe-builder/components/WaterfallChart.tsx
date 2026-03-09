@@ -24,18 +24,34 @@ interface WaterfallChartProps {
   compareMode?: boolean
   compareBars?: WaterfallBar[]
   comparePeriodLabel?: string
+  /** Brand colors for subtotal and positive bars. Negative (red) stays semantic. */
+  chartColors?: { primary: string; accent: string }
 }
 
-const FILL: Record<WaterfallBar['type'], string> = {
+const DEFAULT_FILL: Record<WaterfallBar['type'], string> = {
   positive: '#22c55e',
   negative: '#ef4444',
   subtotal: '#3b82f6',
 }
 
-const FILL_COMPARE: Record<WaterfallBar['type'], string> = {
+const DEFAULT_FILL_COMPARE: Record<WaterfallBar['type'], string> = {
   positive: '#a8d5b5',
   negative: '#f5a9a9',
   subtotal: '#a9c4f5',
+}
+
+function resolveFill(chartColors?: { primary: string; accent: string }) {
+  const fill: Record<WaterfallBar['type'], string> = {
+    subtotal: chartColors?.primary ?? DEFAULT_FILL.subtotal,
+    positive: chartColors?.accent ?? DEFAULT_FILL.positive,
+    negative: DEFAULT_FILL.negative, // semantic red -- never branded
+  }
+  const fillCompare: Record<WaterfallBar['type'], string> = {
+    subtotal: chartColors?.primary ? `${chartColors.primary}66` : DEFAULT_FILL_COMPARE.subtotal,
+    positive: chartColors?.accent ? `${chartColors.accent}66` : DEFAULT_FILL_COMPARE.positive,
+    negative: DEFAULT_FILL_COMPARE.negative, // semantic -- never branded
+  }
+  return { fill, fillCompare }
 }
 
 function formatK(v: number) {
@@ -50,7 +66,7 @@ function formatBRL(v: number) {
   }).format(v)
 }
 
-function processData(bars: WaterfallBar[]) {
+function processData(bars: WaterfallBar[], fill: Record<WaterfallBar['type'], string>) {
   let running = 0
   return bars.map((bar) => {
     let spacer: number
@@ -74,21 +90,26 @@ function processData(bars: WaterfallBar[]) {
       label: bar.label,
       spacer,
       barValue,
-      fill: FILL[bar.type],
+      fill: fill[bar.type],
       display: bar.value,
     }
   })
 }
 
-function buildGroupedData(bars: WaterfallBar[], compareBars: WaterfallBar[]) {
+function buildGroupedData(
+  bars: WaterfallBar[],
+  compareBars: WaterfallBar[],
+  fill: Record<WaterfallBar['type'], string>,
+  fillCompare: Record<WaterfallBar['type'], string>,
+) {
   return bars.map((bar, i) => {
     const cmp = compareBars[i]
     return {
       label: bar.label,
       current: Math.abs(bar.value),
       compare: cmp ? Math.abs(cmp.value) : 0,
-      fillCurrent: FILL[bar.type],
-      fillCompare: FILL_COMPARE[bar.type],
+      fillCurrent: fill[bar.type],
+      fillCompare: fillCompare[bar.type],
       displayCurrent: bar.value,
       displayCompare: cmp ? cmp.value : 0,
     }
@@ -172,9 +193,12 @@ export default function WaterfallChart({
   compareMode = false,
   compareBars,
   comparePeriodLabel = 'Período Anterior',
+  chartColors,
 }: WaterfallChartProps) {
+  const { fill, fillCompare } = resolveFill(chartColors)
+
   if (compareMode && compareBars && compareBars.length > 0) {
-    const groupedData = buildGroupedData(bars, compareBars)
+    const groupedData = buildGroupedData(bars, compareBars, fill, fillCompare)
 
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
@@ -225,7 +249,7 @@ export default function WaterfallChart({
     )
   }
 
-  const data = processData(bars)
+  const data = processData(bars, fill)
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">

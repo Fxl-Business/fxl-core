@@ -10,9 +10,11 @@ type Props = {
   data: Entry[]
   height?: number
   valueLabel?: string
+  /** Brand colors for bar fill and cumulative line. Falls back to gray/red. */
+  chartColors?: { primary: string; accent: string }
 }
 
-export default function ParetoChart({ title, data, height = 250, valueLabel = 'Valor' }: Props) {
+export default function ParetoChart({ title, data, height = 250, valueLabel = 'Valor', chartColors }: Props) {
   const sorted = [...data].sort((a, b) => b.value - a.value)
   const total = sorted.reduce((s, d) => s + d.value, 0)
   let acc = 0
@@ -50,15 +52,15 @@ export default function ParetoChart({ title, data, height = 250, valueLabel = 'V
             }
             labelFormatter={(l) => l}
           />
-          <Bar yAxisId="left" dataKey="value" name={valueLabel} fill="#374151" radius={[3, 3, 0, 0]} />
+          <Bar yAxisId="left" dataKey="value" name={valueLabel} fill={chartColors?.primary ?? '#374151'} radius={[3, 3, 0, 0]} />
           <Line
             yAxisId="right"
             type="monotone"
             dataKey="accumulated"
             name="% Acumulado"
-            stroke="#DC2626"
+            stroke={chartColors?.accent ?? '#DC2626'}
             strokeWidth={1.5}
-            dot={{ r: 3, fill: '#DC2626' }}
+            dot={{ r: 3, fill: chartColors?.accent ?? '#DC2626' }}
           />
         </ComposedChart>
       </ResponsiveContainer>

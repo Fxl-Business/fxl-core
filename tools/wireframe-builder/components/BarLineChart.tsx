@@ -18,6 +18,8 @@ type Props = {
   yLabel?: string
   height?: number
   categories?: string[]
+  /** Brand color palette (resolved hex strings). [0]=bar fill, [1]=line stroke. Falls back to hardcoded grays. */
+  chartColors?: string[]
 }
 
 const DEFAULT_CATEGORIES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
@@ -30,7 +32,7 @@ function buildMockData(categories: string[]) {
   }))
 }
 
-export default function BarLineChart({ title, type, height = 250, categories, xLabel, yLabel }: Props) {
+export default function BarLineChart({ title, type, height = 250, categories, xLabel, yLabel, chartColors }: Props) {
   const data = buildMockData(categories ?? DEFAULT_CATEGORIES)
 
   return (
@@ -43,7 +45,7 @@ export default function BarLineChart({ title, type, height = 250, categories, xL
             <XAxis dataKey="category" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={xLabel ? { value: xLabel, position: 'insideBottom', offset: -5, fontSize: 10 } : undefined} />
             <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <Tooltip />
-            <Bar dataKey="bar" fill="#d1d5db" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="bar" fill={chartColors?.[0] ?? '#d1d5db'} radius={[3, 3, 0, 0]} />
           </BarChart>
         ) : type === 'line' ? (
           <LineChart data={data}>
@@ -51,7 +53,7 @@ export default function BarLineChart({ title, type, height = 250, categories, xL
             <XAxis dataKey="category" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={xLabel ? { value: xLabel, position: 'insideBottom', offset: -5, fontSize: 10 } : undefined} />
             <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <Tooltip />
-            <Line type="monotone" dataKey="line" stroke="#9ca3af" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="line" stroke={chartColors?.[1] ?? '#9ca3af'} strokeWidth={2} dot={false} />
           </LineChart>
         ) : (
           <ComposedChart data={data}>
@@ -60,8 +62,8 @@ export default function BarLineChart({ title, type, height = 250, categories, xL
             <YAxis yAxisId="left" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
             <Tooltip />
-            <Bar yAxisId="left" dataKey="bar" fill="#d1d5db" radius={[3, 3, 0, 0]} />
-            <Line yAxisId="right" type="monotone" dataKey="line" stroke="#6b7280" strokeWidth={2} dot={false} />
+            <Bar yAxisId="left" dataKey="bar" fill={chartColors?.[0] ?? '#d1d5db'} radius={[3, 3, 0, 0]} />
+            <Line yAxisId="right" type="monotone" dataKey="line" stroke={chartColors?.[1] ?? '#6b7280'} strokeWidth={2} dot={false} />
           </ComposedChart>
         )}
       </ResponsiveContainer>
