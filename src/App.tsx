@@ -12,6 +12,7 @@ import FinanceiroWireframeViewer from '@/pages/clients/FinanceiroContaAzul/Wiref
 import ComponentGallery from '@/pages/tools/ComponentGallery'
 import Login from '@/pages/Login'
 import Profile from '@/pages/Profile'
+import { Toaster } from '@/components/ui/sonner'
 
 const SharedWireframeView = lazy(() => import('@/pages/SharedWireframeView'))
 
@@ -70,6 +71,7 @@ export default function App() {
           }
         />
       </Routes>
+      <Toaster />
     </BrowserRouter>
   )
 }
