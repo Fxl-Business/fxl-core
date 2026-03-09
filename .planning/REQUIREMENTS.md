@@ -1,0 +1,125 @@
+# Requirements: FXL Core
+
+**Defined:** 2026-03-09
+**Core Value:** FXL Core e o cerebro operacional da empresa — documentacao, processo e tooling juntos
+
+## v1.1 Requirements
+
+Requirements for Wireframe Evolution milestone. Each maps to roadmap phases.
+
+### Infrastructure
+
+- [ ] **INFRA-01**: Operador pode salvar e carregar blueprint exclusivamente do Supabase (arquivo .ts removido como fonte de verdade)
+- [ ] **INFRA-02**: Blueprint armazenado com campo schemaVersion e funcoes de migracao para evolucao segura
+- [ ] **INFRA-03**: Blueprint validado em runtime via zod parse em vez de cast TypeScript
+- [ ] **INFRA-04**: Edicao concorrente de blueprint protegida por optimistic locking (updated_at check)
+
+### Design System
+
+- [ ] **DSGN-01**: Wireframe renderizado com tokens semanticos --wf-* (paleta neutra 10 tons + dourado accent)
+- [ ] **DSGN-02**: WireframeThemeProvider gerencia tema do wireframe via data-wf-theme attribute
+- [ ] **DSGN-03**: Operador pode alternar dark/light mode no wireframe viewer
+- [ ] **DSGN-04**: Branding do cliente aplicado como override sobre tokens wireframe sem colisao com tema do app
+
+### Components
+
+- [ ] **COMP-01**: Section types registrados via registry pattern (substituindo switch statements dispersos)
+- [ ] **COMP-02**: Operador pode adicionar bloco settings-page com input groups e toggles
+- [ ] **COMP-03**: Operador pode adicionar bloco form-section com inputs variaveis (text, number, date, select)
+- [ ] **COMP-04**: Operador pode adicionar bloco filter-config para filtros de periodo/tipo no topo da tela
+- [ ] **COMP-05**: Operador pode adicionar bloco stat-card para metricas standalone
+- [ ] **COMP-06**: Operador pode adicionar bloco progress-bar para indicadores de progresso
+- [ ] **COMP-07**: Operador pode adicionar bloco divider para separacao visual de secoes
+- [ ] **COMP-08**: Operador pode usar 5 tipos de chart adicionais (Radar, Treemap, Funnel, Scatter, Area)
+- [ ] **COMP-09**: Wireframe viewer generico parametrizado por :clientSlug (substituindo paginas hardcoded por cliente)
+
+### Briefing
+
+- [ ] **BRFG-01**: Operador pode inserir briefing de cliente via formulario estruturado persistido no Supabase
+- [ ] **BRFG-02**: Operador pode visualizar blueprint como texto estruturado/explicativo (view read-only)
+- [ ] **BRFG-03**: Blueprint exportavel como Markdown para acesso do Claude Code
+- [ ] **BRFG-04**: Operador pode gerar share link para cliente (botao restaurado)
+
+### AI Generation
+
+- [ ] **AIGE-01**: Claude Code pode gerar blueprint a partir de briefing no Supabase + analise de blueprints existentes
+- [ ] **AIGE-02**: Screen recipes tipadas disponíveis como contexto para geracao (ex: tela de faturamento, estoque)
+- [ ] **AIGE-03**: Templates de blueprint pre-definidos para verticais FXL (financeiro, varejo, servicos)
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Advanced Wireframe
+
+- **ADVW-01**: Blueprint diff e merge visual (comparacao de versoes)
+- **ADVW-02**: Refinamento progressivo (regenerar telas individuais)
+- **ADVW-03**: Edicao colaborativa em tempo real (CRDT)
+- **ADVW-04**: Drag-and-drop visual estilo Figma
+- **ADVW-05**: Edicao por linguagem natural ("aumenta o grafico")
+- **ADVW-06**: Criacao de componentes customizados via UI
+
+### Briefing Advanced
+
+- **BRFA-01**: Geracao de briefing a partir de formularios pre-definidos
+- **BRFA-02**: Supabase MCP para acesso direto do Claude Code ao banco
+
+### Infrastructure Advanced
+
+- **INFA-01**: pg_jsonschema CHECK constraints no banco
+- **INFA-02**: Global Skills do Claude Code via .claude/skills/ (GSKILL-01/02)
+
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Mobile apps | Foco web-first, mobile e futuro |
+| SaaS completo como output | Comecar com Dashboard BI, expandir depois |
+| Geracao sem revisao humana | Sempre semi-automatico com revisao do operador |
+| Backend pesado no Core | Supabase apenas para features interativas |
+| Visual drag-and-drop Figma-like | Complexidade desproporcional para v1.1 |
+| Real-time collaborative editing | CRDT complexity para 1-2 operadores |
+| Recharts 3.x upgrade | Breaking changes, 2.x tem todos os charts necessarios |
+| React 19 / Tailwind v4 | Estabilidade da stack, upgrade futuro |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| INFRA-01 | — | Pending |
+| INFRA-02 | — | Pending |
+| INFRA-03 | — | Pending |
+| INFRA-04 | — | Pending |
+| DSGN-01 | — | Pending |
+| DSGN-02 | — | Pending |
+| DSGN-03 | — | Pending |
+| DSGN-04 | — | Pending |
+| COMP-01 | — | Pending |
+| COMP-02 | — | Pending |
+| COMP-03 | — | Pending |
+| COMP-04 | — | Pending |
+| COMP-05 | — | Pending |
+| COMP-06 | — | Pending |
+| COMP-07 | — | Pending |
+| COMP-08 | — | Pending |
+| COMP-09 | — | Pending |
+| BRFG-01 | — | Pending |
+| BRFG-02 | — | Pending |
+| BRFG-03 | — | Pending |
+| BRFG-04 | — | Pending |
+| AIGE-01 | — | Pending |
+| AIGE-02 | — | Pending |
+| AIGE-03 | — | Pending |
+
+**Coverage:**
+- v1.1 requirements: 22 total
+- Mapped to phases: 0
+- Unmapped: 22 ⚠️
+
+---
+*Requirements defined: 2026-03-09*
+*Last updated: 2026-03-09 after initial definition*
