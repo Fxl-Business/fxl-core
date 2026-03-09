@@ -1,4 +1,5 @@
 @import '@clerk/ui/themes/shadcn.css';
+@import '../../tools/wireframe-builder/styles/wireframe-tokens.css';
 
 @tailwind base;
 @tailwind components;

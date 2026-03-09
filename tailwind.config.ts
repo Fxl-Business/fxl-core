@@ -60,6 +60,33 @@ const config: Config = {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
+  			},
+  			/* Wireframe design system tokens (--wf-* CSS variables, hex/rgba values) */
+  			wf: {
+  				canvas: 'var(--wf-canvas)',
+  				card: 'var(--wf-card)',
+  				'card-border': 'var(--wf-card-border)',
+  				heading: 'var(--wf-heading)',
+  				body: 'var(--wf-body)',
+  				muted: 'var(--wf-muted)',
+  				accent: 'var(--wf-accent)',
+  				'accent-muted': 'var(--wf-accent-muted)',
+  				'accent-fg': 'var(--wf-accent-fg)',
+  				positive: 'var(--wf-positive)',
+  				negative: 'var(--wf-negative)',
+  				sidebar: {
+  					DEFAULT: 'var(--wf-sidebar-bg)',
+  					fg: 'var(--wf-sidebar-fg)',
+  					active: 'var(--wf-sidebar-active)',
+  					muted: 'var(--wf-sidebar-muted)',
+  					border: 'var(--wf-sidebar-border)',
+  				},
+  				'table-header': {
+  					DEFAULT: 'var(--wf-table-header-bg)',
+  					fg: 'var(--wf-table-header-fg)',
+  				},
+  				'table-row-alt': 'var(--wf-table-row-alt)',
+  				'table-border': 'var(--wf-table-border)',
   			}
   		},
   		borderRadius: {
