@@ -142,11 +142,11 @@ Plans:
   2. The Config Resolver merges BlueprintConfig + TechnicalConfig + Branding into a single GenerationManifest without data loss
   3. Given the pilot client's briefing and blueprint, Claude produces a TechnicalConfig draft that an operator can review and adjust
   4. Running validation against the pilot blueprint flags any section missing from TechnicalConfig (zero uncovered sections)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md — Schema foundation: TechnicalConfig + GenerationManifest types, config validator, pilot client config (TCONF-01, TCONF-04)
+- [ ] 05-02-PLAN.md — Config Resolver + SKILL.md renderer, operator workflow documentation with AI draft generation (TCONF-02, TCONF-03)
 
 ### Phase 6: System Generation
 **Goal**: A standalone BI dashboard is generated in a separate repository from the merged configuration, with real data and auth
