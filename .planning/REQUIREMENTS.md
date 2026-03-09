@@ -21,9 +21,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Domain Reorganization (Phase 02.1)
 
-- [ ] **REORG-01**: Sidebar com 4 secoes top-level (Processo, Padroes, Ferramentas, Clientes)
-- [ ] **REORG-02**: Tech Radar + techs + Premissas + Seguranca + Testes agrupados sob Padroes
-- [ ] **REORG-03**: Landing pages para Fases e Padroes com navegacao por cards
+- [x] **REORG-01**: Sidebar com 4 secoes top-level (Processo, Padroes, Ferramentas, Clientes)
+- [x] **REORG-02**: Tech Radar + techs + Premissas + Seguranca + Testes agrupados sob Padroes
+- [x] **REORG-03**: Landing pages para Fases e Padroes com navegacao por cards
 - [x] **REORG-04**: Docs de processo reescritos para Claude Code + GSD (sem Claude Project)
 - [x] **REORG-05**: CLAUDE.md e README refletem taxonomia Padroes
 - [x] **REORG-06**: Roadmap inclui fases 02.2, 02.3, 02.4
@@ -33,12 +33,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **BLKSPEC-01**: Blocos Disponiveis como spec detalhada que serve de prompt para criar componentes
 - [x] **BLKSPEC-02**: Galeria de componentes sincronizada com specs de blocos
 
-### Global Skills (Phase 02.3)
-
-- [ ] **GSKILL-01**: Premissas/Seguranca/Testes como Skills globais do Claude Code
-- [ ] **GSKILL-02**: Skills acessiveis via .claude/skills/ ou .agents/skills/
-
-### Visual Overhaul (Phase 02.4)
+### Visual Overhaul (Phase 02.3)
 
 - [x] **VISUAL-01**: Design system atualizado com paleta, tipografia e componentes revisados
 - [x] **VISUAL-02**: Todas as paginas da aplicacao com visual production-grade
@@ -86,6 +81,11 @@ Deferred to future release. Tracked but not in current roadmap.
 - **AGEN-02**: React Query hooks com loading/error states
 - **AGEN-03**: Deploy automatico na Vercel do sistema gerado
 
+### Global Skills
+
+- **GSKILL-01**: Premissas/Seguranca/Testes como Skills globais do Claude Code
+- **GSKILL-02**: Skills acessiveis via .claude/skills/ ou .agents/skills/
+
 ### Advanced Features
 
 - **ADV-01**: Conectores universais de dados (APIs, bancos externos)
@@ -113,18 +113,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WCMT-01 | Phase 2 | Complete |
 | WCMT-02 | Phase 2 | Complete |
 | WCMT-03 | Phase 2 | Complete |
-| REORG-01 | Phase 02.1 | Pending |
-| REORG-02 | Phase 02.1 | Pending |
-| REORG-03 | Phase 02.1 | Pending |
+| REORG-01 | Phase 02.1 | Complete |
+| REORG-02 | Phase 02.1 | Complete |
+| REORG-03 | Phase 02.1 | Complete |
 | REORG-04 | Phase 02.1 | Complete |
 | REORG-05 | Phase 02.1 | Complete |
 | REORG-06 | Phase 02.1 | Complete |
 | BLKSPEC-01 | Phase 02.2 | Complete |
 | BLKSPEC-02 | Phase 02.2 | Complete |
-| GSKILL-01 | Phase 02.3 | Pending |
-| GSKILL-02 | Phase 02.3 | Pending |
-| VISUAL-01 | Phase 02.4 | Complete |
-| VISUAL-02 | Phase 02.4 | Complete |
+| VISUAL-01 | Phase 02.3 | Complete |
+| VISUAL-02 | Phase 02.3 | Complete |
 | WEDT-01 | Phase 3 | Complete |
 | WEDT-02 | Phase 3 | Complete |
 | WEDT-03 | Phase 3 | Complete |
@@ -143,10 +141,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SGEN-05 | Phase 6 | Complete |
 
 **Coverage:**
-- v1 requirements: 34 total
-- Mapped to phases: 34
+- v1 requirements: 32 total
+- Mapped to phases: 32
 - Unmapped: 0
+- Deferred to v2: GSKILL-01, GSKILL-02
 
 ---
 *Requirements defined: 2026-03-07*
-*Last updated: 2026-03-07 — traceability updated after roadmap revision*
+*Last updated: 2026-03-09 — GSKILL deferred to v2, REORG checkboxes fixed, VISUAL mapped to Phase 02.3*
