@@ -31,6 +31,9 @@ type Props = {
   clientSlug?: string
   comments?: Comment[]
   onOpenComments?: (targetId: string, label: string) => void
+  // Brand color props (optional for backward compat)
+  chartColors?: string[]
+  brandPrimary?: string
   // Edit mode props (all optional for backward compat)
   editMode?: boolean
   selectedSection?: { rowIndex: number; cellIndex: number } | null
@@ -94,6 +97,8 @@ export default function BlueprintRenderer({
   clientSlug,
   comments,
   onOpenComments,
+  chartColors,
+  brandPrimary,
   editMode,
   selectedSection,
   onSelectSection,
@@ -199,6 +204,8 @@ export default function BlueprintRenderer({
                             section={section}
                             compareMode={compareMode}
                             comparePeriod={comparePeriod}
+                            chartColors={chartColors}
+                            brandPrimary={brandPrimary}
                           />
                         )
 
