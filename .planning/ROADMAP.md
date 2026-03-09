@@ -26,7 +26,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 ### v1.1 Wireframe Evolution
 
-- [ ] **Phase 7: Blueprint Infrastructure** - DB as sole source of truth with schema versioning, runtime validation, and optimistic locking
+- [x] **Phase 7: Blueprint Infrastructure** - DB as sole source of truth with schema versioning, runtime validation, and optimistic locking
 - [ ] **Phase 8: Wireframe Design System** - Semantic token layer for wireframes with dark/light mode and branding integration
 - [ ] **Phase 9: Component Library Expansion** - Registry pattern + 6 new section types + 5 chart types + generic wireframe viewer
 - [ ] **Phase 10: Briefing & Blueprint Views** - Structured briefing input, blueprint text view, MD export, and share link fix
@@ -46,9 +46,9 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 **Plans**: 3 plans
 
 Plans:
-- [ ] 07-01-PLAN.md -- Zod schema, migration framework, and store refactor (TDD)
-- [ ] 07-02-PLAN.md -- Migrate viewers to DB-only loading, add sonner, delete .ts config
-- [ ] 07-03-PLAN.md -- Optimistic locking, conflict modal, stale data polling
+- [x] 07-01-PLAN.md -- Zod schema, migration framework, and store refactor (TDD)
+- [x] 07-02-PLAN.md -- Migrate viewers to DB-only loading, add sonner, delete .ts config
+- [x] 07-03-PLAN.md -- Optimistic locking, conflict modal, stale data polling
 
 ### Phase 8: Wireframe Design System
 **Goal**: Wireframes render with their own visual identity (neutral palette + gold accent) independent of the app theme, with dark/light toggle and client branding layered on top
@@ -109,7 +109,7 @@ Phase 7 -> 8 -> 9 (and 10 in parallel) -> 11
 | 4. Branding Process | v1.0 | 3/3 | Complete | 2026-03-09 |
 | 5. Technical Configuration | v1.0 | 2/2 | Complete | 2026-03-09 |
 | 6. System Generation | v1.0 | 3/3 | Complete | 2026-03-09 |
-| 7. Blueprint Infrastructure | v1.1 | 2/3 | In Progress | - |
+| 7. Blueprint Infrastructure | v1.1 | 3/3 | Complete | 2026-03-09 |
 | 8. Wireframe Design System | v1.1 | 0/? | Not started | - |
 | 9. Component Library Expansion | v1.1 | 0/? | Not started | - |
 | 10. Briefing & Blueprint Views | v1.1 | 0/? | Not started | - |
