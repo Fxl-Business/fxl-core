@@ -66,10 +66,10 @@ Requirements for initial release. Each maps to roadmap phases.
 ### System Generation (Fase 3)
 
 - [x] **SGEN-01**: Scaffold de projeto Vite+React (frontend) + NestJS (backend) com Supabase, Tailwind, estrutura de pastas
-- [ ] **SGEN-02**: Geracao de paginas com KPIs, graficos, tabelas a partir do blueprint com dados reais
+- [x] **SGEN-02**: Geracao de paginas com KPIs, graficos, tabelas a partir do blueprint com dados reais
 - [x] **SGEN-03**: Upload CSV/XLSX com normalizacao de formatos BR e storage em Supabase
-- [ ] **SGEN-04**: Auth Clerk com roles (admin, editor, viewer)
-- [ ] **SGEN-05**: Branding do cliente aplicado automaticamente no sistema gerado
+- [x] **SGEN-04**: Auth Clerk com roles (admin, editor, viewer)
+- [x] **SGEN-05**: Branding do cliente aplicado automaticamente no sistema gerado
 
 ## v2 Requirements
 
@@ -137,10 +137,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TCONF-03 | Phase 5 | Complete |
 | TCONF-04 | Phase 5 | Complete |
 | SGEN-01 | Phase 6 | Complete |
-| SGEN-02 | Phase 6 | Pending |
+| SGEN-02 | Phase 6 | Complete |
 | SGEN-03 | Phase 6 | Complete |
-| SGEN-04 | Phase 6 | Pending |
-| SGEN-05 | Phase 6 | Pending |
+| SGEN-04 | Phase 6 | Complete |
+| SGEN-05 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 34 total
