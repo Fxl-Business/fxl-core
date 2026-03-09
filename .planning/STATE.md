@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-03-09T01:51:44.447Z"
-last_activity: 2026-03-09 -- Completed 04-01 Branding Foundation (2/2 tasks)
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-03-09T02:00:03.106Z"
+last_activity: 2026-03-09 -- Completed 04-02 Component Migration (2/2 tasks)
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 22
-  completed_plans: 20
-  percent: 100
+  completed_plans: 21
+  percent: 95
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 04 - Branding Process (1 of 3 plans complete)
+**Current focus:** Phase 04 - Branding Process (2 of 3 plans complete)
 
 ## Current Position
 
 Phase: 04 of 9 (Branding Process)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In Progress
-Last activity: 2026-03-09 -- Completed 04-01 Branding Foundation (2/2 tasks)
+Last activity: 2026-03-09 -- Completed 04-02 Component Migration (2/2 tasks)
 
-Progress: [██████████] 100%
+Progress: [██████████] 95%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [██████████] 100%
 | Phase 03 P03 | 4min | 2 tasks | 19 files |
 | Phase 03 P04 | 2min | 2 tasks | 11 files |
 | Phase 04 P01 | 2min | 2 tasks | 5 files |
+| Phase 04 P02 | 5min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -140,6 +141,9 @@ Recent decisions affecting current work:
 - [Phase 04]: getChartPalette returns hex array because recharts SVG fill/stroke does not support CSS var()
 - [Phase 04]: DEFAULT_BRANDING uses neutral gray-700/gray-500/blue-500 so unbranded clients look clean
 - [Phase 04]: Pilot client uses Poppins for headings, Inter for body, matching Conta Azul brand feel
+- [Phase 04]: WaterfallChart negative fill stays semantic red -- never overridden by brand colors
+- [Phase 04]: ChartRenderer derives { primary, accent } from chartColors[0] and [2] for waterfall/pareto
+- [Phase 04]: Table header text switches to white only when brandPrimary is set (conditional className)
 
 ### Pending Todos
 
@@ -164,6 +168,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T01:51:44.441Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-03-09T02:00:03.102Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None

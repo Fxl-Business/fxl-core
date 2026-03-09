@@ -54,7 +54,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **BRND-01**: Formato padrao parseavel para branding do cliente (cores, tipografia, logo)
 - [x] **BRND-02**: Processo documentado de coleta de branding com template estruturado
-- [ ] **BRND-03**: Branding aplicado automaticamente no wireframe (cores, fontes)
+- [x] **BRND-03**: Branding aplicado automaticamente no wireframe (cores, fontes)
 
 ### Technical Configuration (Fase 3 prep)
 
@@ -131,7 +131,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WEDT-04 | Phase 3 | Complete |
 | BRND-01 | Phase 4 | Complete |
 | BRND-02 | Phase 4 | Complete |
-| BRND-03 | Phase 4 | Pending |
+| BRND-03 | Phase 4 | Complete |
 | TCONF-01 | Phase 5 | Pending |
 | TCONF-02 | Phase 5 | Pending |
 | TCONF-03 | Phase 5 | Pending |
