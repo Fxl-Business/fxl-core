@@ -126,11 +126,12 @@ Plans:
   1. A parseable branding file exists for a client with defined fields for colors (primary, secondary, accent), typography (font family, sizes), and logo URL
   2. The branding collection process is documented with a template that an operator follows step-by-step to gather brand assets from any client
   3. When a client's branding file is populated, the wireframe renders using those brand colors and fonts instead of defaults
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — Foundation: BrandingConfig type, branding utility library, collection template doc, pilot client config (BRND-01, BRND-02)
+- [ ] 04-02-PLAN.md — Component migration: all wireframe chart, KPI, and table components accept brand color props (BRND-03)
+- [ ] 04-03-PLAN.md — Integration: wire branding through BlueprintRenderer pipeline into WireframeViewer and SharedWireframeView (BRND-03)
 
 ### Phase 5: Technical Configuration
 **Goal**: Operators can define data semantics for any blueprint and get a validated, merge-ready configuration for system generation
@@ -176,7 +177,7 @@ Phases execute in numeric order: 1 -> 2 -> 02.1 -> 02.2/02.3 -> 3 -> 4 -> 5 -> 6
 | 02.1. Melhoria e organizacao de dominio | 3/3 | Complete    | 2026-03-07 |
 | 02.2. Evolucao de Blocos Disponiveis | 3/3 | Complete    | 2026-03-08 |
 | 02.3. Reformulacao Visual | 4/4 | Complete    | 2026-03-08 |
-| 3. Wireframe Visual Editor | 0/4 | Not started | - |
-| 4. Branding Process | 0/2 | Not started | - |
+| 3. Wireframe Visual Editor | 4/4 | Complete | 2026-03-09 |
+| 4. Branding Process | 0/3 | Not started | - |
 | 5. Technical Configuration | 0/2 | Not started | - |
 | 6. System Generation | 0/3 | Not started | - |
