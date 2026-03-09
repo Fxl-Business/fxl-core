@@ -77,11 +77,16 @@ export type BarLineChartSection = {
   chartType: 'bar' | 'line' | 'bar-line'
   height?: number
   compareOnly?: boolean
+  categories?: string[] // Custom X axis labels (default: Jan-Dez)
+  xLabel?: string
+  yLabel?: string
 }
 
 export type DonutChartSection = {
   type: 'donut-chart'
   title: string
+  height?: number
+  slices?: { label: string; value: number }[]
 }
 
 export type WaterfallChartSection = {
@@ -95,6 +100,8 @@ export type WaterfallChartSection = {
 export type ParetoChartSection = {
   type: 'pareto-chart'
   title: string
+  height?: number
+  data?: { label: string; value: number }[]
 }
 
 export type CalculoCardSection = {

@@ -296,6 +296,22 @@ export default function FinanceiroWireframeViewer() {
     })
   }
 
+  function handleAddToCell(rowIndex: number, cellIndex: number, section: BlueprintSection) {
+    updateWorkingScreen((screen) => {
+      const currentRows = getScreenRows(screen)
+      const newRows = [...currentRows]
+      const row = { ...newRows[rowIndex] }
+      const newSections = [...row.sections]
+
+      // Insert at the specific cell index
+      newSections.splice(cellIndex, 0, section)
+      row.sections = newSections
+      newRows[rowIndex] = row
+
+      return setScreenRows(screen, newRows)
+    })
+  }
+
   function handleReorderRows(oldIndex: number, newIndex: number) {
     updateWorkingScreen((screen) => {
       const currentRows = getScreenRows(screen)
@@ -583,6 +599,7 @@ export default function FinanceiroWireframeViewer() {
             onSelectSection={handleSelectSection}
             onDeleteSection={handleDeleteSection}
             onAddSection={handleAddSection}
+            onAddToCell={handleAddToCell}
             onReorderRows={handleReorderRows}
             onChangeLayout={handleChangeLayout}
             rows={rows}

@@ -29,10 +29,19 @@ export default function ChartRenderer({ section, compareMode, comparePeriod }: P
           title={section.title}
           type={section.chartType}
           height={section.height}
+          categories={section.categories}
+          xLabel={section.xLabel}
+          yLabel={section.yLabel}
         />
       )
     case 'donut-chart':
-      return <DonutChart title={section.title} data={[]} />
+      return (
+        <DonutChart
+          title={section.title}
+          data={section.slices ?? []}
+          height={section.height}
+        />
+      )
     case 'waterfall-chart':
       return (
         <WaterfallChart
@@ -45,6 +54,12 @@ export default function ChartRenderer({ section, compareMode, comparePeriod }: P
         />
       )
     case 'pareto-chart':
-      return <ParetoChart title={section.title} data={[]} />
+      return (
+        <ParetoChart
+          title={section.title}
+          data={section.data ?? []}
+          height={section.height}
+        />
+      )
   }
 }

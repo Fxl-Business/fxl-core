@@ -18,7 +18,7 @@ import { CSS } from '@dnd-kit/utilities'
 import type { BlueprintScreen, BlueprintSection } from '../types/blueprint'
 import type { GridLayout, ScreenRow } from '../types/editor'
 import type { Comment } from '../types/comments'
-import { GRID_LAYOUTS, sectionsToRows } from '../lib/grid-layouts'
+import { GRID_LAYOUTS, getCellCount, sectionsToRows } from '../lib/grid-layouts'
 import WireframeFilterBar from './WireframeFilterBar'
 import SectionRenderer from './sections/SectionRenderer'
 import SectionWrapper from './SectionWrapper'
@@ -37,6 +37,7 @@ type Props = {
   onSelectSection?: (rowIndex: number, cellIndex: number) => void
   onDeleteSection?: (rowIndex: number, cellIndex: number) => void
   onAddSection?: (rowIndex: number, section: BlueprintSection) => void
+  onAddToCell?: (rowIndex: number, cellIndex: number, section: BlueprintSection) => void
   onReorderRows?: (oldIndex: number, newIndex: number) => void
   onChangeLayout?: (rowIndex: number, layout: GridLayout) => void
   rows?: ScreenRow[]
@@ -98,6 +99,7 @@ export default function BlueprintRenderer({
   onSelectSection,
   onDeleteSection,
   onAddSection,
+  onAddToCell,
   onReorderRows,
   onChangeLayout,
   rows: rowsProp,
@@ -238,6 +240,25 @@ export default function BlueprintRenderer({
                           </div>
                         )
                       })}
+
+                      {/* Empty cell placeholders for multi-column layouts (edit mode) */}
+                      {editMode && onAddToCell && (() => {
+                        const totalCells = getCellCount(row.layout)
+                        const filledCells = row.sections.length
+                        if (filledCells >= totalCells) return null
+                        return Array.from({ length: totalCells - filledCells }, (_, i) => {
+                          const cellIndex = filledCells + i
+                          const cellClass = getCellClassName(row.layout, cellIndex)
+                          return (
+                            <div key={`${row.id}-empty-${cellIndex}`} className={cellClass}>
+                              <AddSectionButton
+                                onAdd={(section) => onAddToCell(rowIndex, cellIndex, section)}
+                                variant="cell"
+                              />
+                            </div>
+                          )
+                        })
+                      })()}
                     </div>
                   </div>
 

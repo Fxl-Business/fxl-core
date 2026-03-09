@@ -17,49 +17,47 @@ type Props = {
   xLabel?: string
   yLabel?: string
   height?: number
+  categories?: string[]
 }
 
-const MOCK_DATA = [
-  { month: 'Jan', bar: 42, line: 38 },
-  { month: 'Fev', bar: 55, line: 47 },
-  { month: 'Mar', bar: 61, line: 52 },
-  { month: 'Abr', bar: 48, line: 44 },
-  { month: 'Mai', bar: 70, line: 63 },
-  { month: 'Jun', bar: 65, line: 58 },
-  { month: 'Jul', bar: 74, line: 66 },
-  { month: 'Ago', bar: 80, line: 71 },
-  { month: 'Set', bar: 68, line: 60 },
-  { month: 'Out', bar: 85, line: 76 },
-  { month: 'Nov', bar: 90, line: 82 },
-  { month: 'Dez', bar: 78, line: 72 },
-]
+const DEFAULT_CATEGORIES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
-export default function BarLineChart({ title, type, height = 250 }: Props) {
+function buildMockData(categories: string[]) {
+  return categories.map((cat, i) => ({
+    category: cat,
+    bar: 40 + Math.round(Math.sin(i * 0.8) * 20 + i * 4),
+    line: 35 + Math.round(Math.sin(i * 0.6) * 18 + i * 3.5),
+  }))
+}
+
+export default function BarLineChart({ title, type, height = 250, categories, xLabel, yLabel }: Props) {
+  const data = buildMockData(categories ?? DEFAULT_CATEGORIES)
+
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
       <p className="mb-3 text-sm font-semibold text-gray-700">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         {type === 'bar' ? (
-          <BarChart data={MOCK_DATA}>
+          <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+            <XAxis dataKey="category" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={xLabel ? { value: xLabel, position: 'insideBottom', offset: -5, fontSize: 10 } : undefined} />
+            <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <Tooltip />
             <Bar dataKey="bar" fill="#d1d5db" radius={[3, 3, 0, 0]} />
           </BarChart>
         ) : type === 'line' ? (
-          <LineChart data={MOCK_DATA}>
+          <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+            <XAxis dataKey="category" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={xLabel ? { value: xLabel, position: 'insideBottom', offset: -5, fontSize: 10 } : undefined} />
+            <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <Tooltip />
             <Line type="monotone" dataKey="line" stroke="#9ca3af" strokeWidth={2} dot={false} />
           </LineChart>
         ) : (
-          <ComposedChart data={MOCK_DATA}>
+          <ComposedChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-            <YAxis yAxisId="left" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+            <XAxis dataKey="category" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={xLabel ? { value: xLabel, position: 'insideBottom', offset: -5, fontSize: 10 } : undefined} />
+            <YAxis yAxisId="left" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
             <Tooltip />
             <Bar yAxisId="left" dataKey="bar" fill="#d1d5db" radius={[3, 3, 0, 0]} />
