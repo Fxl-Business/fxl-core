@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wireframe Evolution
 status: executing
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-03-09T19:44:27.663Z"
-last_activity: 2026-03-09 -- Completed Plan 07-01 (Zod schema + migrations + store refactor)
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-03-09T19:54:18.368Z"
+last_activity: 2026-03-09 -- Completed Plan 07-02 (DB-only viewers, sonner toast, delete .ts config)
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -26,25 +26,25 @@ See: .planning/PROJECT.md (updated 2026-03-09)
 ## Current Position
 
 Phase: 7 of 11 (Blueprint Infrastructure) -- first phase of v1.1
-Plan: 2 of 3
-Status: Executing -- Plan 01 complete
-Last activity: 2026-03-09 -- Completed Plan 07-01 (Zod schema + migrations + store refactor)
+Plan: 3 of 3
+Status: Executing -- Plan 02 complete
+Last activity: 2026-03-09 -- Completed Plan 07-02 (DB-only viewers, sonner toast, delete .ts config)
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 27 (v1.0)
-- v1.1 plans completed: 1
-- Average duration: 7min
-- Total execution time: 7min
+- v1.1 plans completed: 2
+- Average duration: 6.5min
+- Total execution time: 13min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 7. Blueprint Infrastructure | 1/3 | 7min | 7min |
+| 7. Blueprint Infrastructure | 2/3 | 13min | 6.5min |
 | 8. Wireframe Design System | 0/? | - | - |
 | 9. Component Library Expansion | 0/? | - | - |
 | 10. Briefing & Blueprint Views | 0/? | - | - |
@@ -63,6 +63,9 @@ v1.1 decisions:
 - [07-01] Kept manual TS types alongside Zod schemas for component-level type safety
 - [07-01] loadBlueprint returns null on validation failure (non-throwing)
 - [07-01] Migration save-back uses 'system:migration' as updated_by identifier
+- [07-02] Clean cutover: deleted blueprint.config.ts entirely, DB is sole source of truth
+- [07-02] Used void pattern for lastUpdatedAt to satisfy noUnusedLocals while reserving state for Plan 03
+- [07-02] Converted spec-writer integration tests to inline fixtures after blueprint.config.ts deletion
 
 ### Pending Todos
 
@@ -92,6 +95,6 @@ v1.1:
 
 ## Session Continuity
 
-Last session: 2026-03-09T19:44:27.659Z
-Stopped at: Completed 07-01-PLAN.md
+Last session: 2026-03-09T19:54:18.365Z
+Stopped at: Completed 07-02-PLAN.md
 Resume file: None
