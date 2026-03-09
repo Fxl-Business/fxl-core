@@ -18,11 +18,11 @@ import {
 } from '@tools/wireframe-builder/lib/blueprint-store'
 import {
   resolveBranding,
-  brandingToCssVars,
+  brandingToWfOverrides,
   getChartPalette,
   getFontLinks,
-  derivePalette,
 } from '@tools/wireframe-builder/lib/branding'
+import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
 import { sectionsToRows, getCellCount } from '@tools/wireframe-builder/lib/grid-layouts'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
@@ -38,9 +38,8 @@ const CLIENT_SLUG = 'financeiro-conta-azul'
 
 // Resolve branding once at module level (static import, no async needed)
 const branding = resolveBranding(brandingConfigSeed)
-const brandVars = brandingToCssVars(branding)
+const wfBrandOverrides = brandingToWfOverrides(branding)
 const chartPalette = getChartPalette(branding)
-const brandPalette = derivePalette(branding)
 
 export default function FinanceiroWireframeViewer() {
   const { user } = useUser()
@@ -608,170 +607,174 @@ export default function FinanceiroWireframeViewer() {
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        height: '100vh',
-        fontFamily: `${branding.bodyFont}, Inter, sans-serif`,
-        background: '#F5F5F5',
-        ...brandVars,
-      }}
-    >
-      {/* Sidebar escura — uses dark variant of brand primary */}
-      <aside
-        style={{
-          width: 240,
-          minWidth: 240,
-          background: brandPalette.primaryDark,
-          color: '#FFF',
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100vh',
-          position: 'fixed',
-          left: 0,
-          top: 0,
-        }}
-      >
+    <>
+      <WireframeThemeProvider>
         <div
           style={{
-            height: 56,
             display: 'flex',
-            alignItems: 'center',
-            padding: '0 24px',
-            borderBottom: `1px solid ${branding.primaryColor}`,
-            flexShrink: 0,
+            height: '100vh',
+            fontFamily: `${branding.bodyFont}, Inter, sans-serif`,
+            background: 'var(--wf-canvas)',
+            ...wfBrandOverrides,
           }}
         >
-          {branding.logoUrl ? (
-            <img
-              src={branding.logoUrl}
-              alt={config.label}
-              style={{ maxHeight: 32, maxWidth: 120, objectFit: 'contain' as const }}
-            />
-          ) : (
-            <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
-              FXL
-            </span>
-          )}
-        </div>
-        <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
-          <ScreenManager
-            screens={screens}
-            activeIndex={safeActiveIndex}
-            editMode={editMode.active}
-            onSelectScreen={handleScreenSelect}
-            onAddScreen={handleAddScreen}
-            onDeleteScreen={handleDeleteScreen}
-            onRenameScreen={handleRenameScreen}
-            onReorderScreens={handleReorderScreens}
-          />
-        </nav>
-        <div
-          style={{
-            padding: '16px 24px',
-            borderTop: `1px solid ${branding.primaryColor}`,
-          }}
-        >
-          <button
-            type="button"
-            onClick={handleOpenManager}
+          {/* Sidebar -- uses --wf-sidebar-* tokens with branding overrides */}
+          <aside
             style={{
-              display: 'block',
-              background: 'transparent',
-              border: 'none',
-              padding: 0,
-              marginBottom: 8,
-              fontSize: 11,
-              color: '#9E9E9E',
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#FFFFFF'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#9E9E9E'
+              width: 240,
+              minWidth: 240,
+              background: 'var(--wf-sidebar-bg)',
+              color: 'var(--wf-sidebar-fg)',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100vh',
+              position: 'fixed',
+              left: 0,
+              top: 0,
             }}
           >
-            Gerenciar
-          </button>
-          <span style={{ fontSize: 11, color: '#757575' }}>
-            Desenvolvido por FXL
-          </span>
-        </div>
-      </aside>
-
-      {/* Area principal */}
-      <main
-        style={{
-          flex: 1,
-          marginLeft: 240,
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100vh',
-        }}
-      >
-        {user && (
-          <AdminToolbar
-            screenTitle={activeScreen.title}
-            editMode={editMode.active}
-            dirty={editMode.dirty}
-            saving={editMode.saving}
-            onToggleEdit={handleToggleEdit}
-            onSave={handleSave}
-            onOpenComments={handleOpenScreenComments}
-          />
-        )}
-        {staleWarning && (
-          <div className="mx-4 mt-2 flex items-center justify-between rounded-md border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm text-yellow-800">
-            <span>Este blueprint foi atualizado externamente. Suas edicoes podem causar conflito ao salvar.</span>
-            <button
-              type="button"
-              onClick={async () => {
-                const result = await loadBlueprintFromDb(CLIENT_SLUG)
-                if (result) {
-                  setConfig(result.config)
-                  setWorkingConfig(structuredClone(result.config))
-                  setLastUpdatedAt(result.updatedAt)
-                  setStaleWarning(false)
-                  setEditMode((prev) => ({ ...prev, dirty: false }))
-                  toast.info('Blueprint recarregado')
-                }
+            <div
+              style={{
+                height: 56,
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 24px',
+                borderBottom: '1px solid var(--wf-sidebar-border)',
+                flexShrink: 0,
               }}
-              className="ml-4 whitespace-nowrap rounded border border-yellow-300 px-3 py-1 text-xs font-medium text-yellow-800 hover:bg-yellow-100"
             >
-              Recarregar
-            </button>
-          </div>
-        )}
-        <WireframeHeader
-          title={activeScreen.title}
-          periodType={activeScreen.periodType}
-        />
-        <div
-          style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}
-        >
-          <BlueprintRenderer
-            screen={activeScreen}
-            clientSlug={activeConfig?.slug}
-            comments={comments}
-            onOpenComments={handleOpenComments}
-            chartColors={chartPalette}
-            brandPrimary={branding.primaryColor}
-            editMode={editMode.active}
-            selectedSection={editMode.selectedSection}
-            onSelectSection={handleSelectSection}
-            onDeleteSection={handleDeleteSection}
-            onAddSection={handleAddSection}
-            onAddToCell={handleAddToCell}
-            onReorderRows={handleReorderRows}
-            onChangeLayout={handleChangeLayout}
-            rows={rows}
-          />
-        </div>
-      </main>
+              {branding.logoUrl ? (
+                <img
+                  src={branding.logoUrl}
+                  alt={config.label}
+                  style={{ maxHeight: 32, maxWidth: 120, objectFit: 'contain' as const }}
+                />
+              ) : (
+                <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
+                  FXL
+                </span>
+              )}
+            </div>
+            <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
+              <ScreenManager
+                screens={screens}
+                activeIndex={safeActiveIndex}
+                editMode={editMode.active}
+                onSelectScreen={handleScreenSelect}
+                onAddScreen={handleAddScreen}
+                onDeleteScreen={handleDeleteScreen}
+                onRenameScreen={handleRenameScreen}
+                onReorderScreens={handleReorderScreens}
+              />
+            </nav>
+            <div
+              style={{
+                padding: '16px 24px',
+                borderTop: '1px solid var(--wf-sidebar-border)',
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleOpenManager}
+                style={{
+                  display: 'block',
+                  background: 'transparent',
+                  border: 'none',
+                  padding: 0,
+                  marginBottom: 8,
+                  fontSize: 11,
+                  color: 'var(--wf-sidebar-muted)',
+                  cursor: 'pointer',
+                  fontFamily: 'Inter, sans-serif',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--wf-sidebar-fg)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
+                }}
+              >
+                Gerenciar
+              </button>
+              <span style={{ fontSize: 11, color: 'var(--wf-sidebar-muted)' }}>
+                Desenvolvido por FXL
+              </span>
+            </div>
+          </aside>
 
-      {/* Property panel */}
+          {/* Area principal */}
+          <main
+            style={{
+              flex: 1,
+              marginLeft: 240,
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100vh',
+            }}
+          >
+            {user && (
+              <AdminToolbar
+                screenTitle={activeScreen.title}
+                editMode={editMode.active}
+                dirty={editMode.dirty}
+                saving={editMode.saving}
+                onToggleEdit={handleToggleEdit}
+                onSave={handleSave}
+                onOpenComments={handleOpenScreenComments}
+              />
+            )}
+            {staleWarning && (
+              <div className="mx-4 mt-2 flex items-center justify-between rounded-md border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm text-yellow-800">
+                <span>Este blueprint foi atualizado externamente. Suas edicoes podem causar conflito ao salvar.</span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const result = await loadBlueprintFromDb(CLIENT_SLUG)
+                    if (result) {
+                      setConfig(result.config)
+                      setWorkingConfig(structuredClone(result.config))
+                      setLastUpdatedAt(result.updatedAt)
+                      setStaleWarning(false)
+                      setEditMode((prev) => ({ ...prev, dirty: false }))
+                      toast.info('Blueprint recarregado')
+                    }
+                  }}
+                  className="ml-4 whitespace-nowrap rounded border border-yellow-300 px-3 py-1 text-xs font-medium text-yellow-800 hover:bg-yellow-100"
+                >
+                  Recarregar
+                </button>
+              </div>
+            )}
+            <WireframeHeader
+              title={activeScreen.title}
+              periodType={activeScreen.periodType}
+            />
+            <div
+              style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}
+            >
+              <BlueprintRenderer
+                screen={activeScreen}
+                clientSlug={activeConfig?.slug}
+                comments={comments}
+                onOpenComments={handleOpenComments}
+                chartColors={chartPalette}
+                brandPrimary={branding.primaryColor}
+                editMode={editMode.active}
+                selectedSection={editMode.selectedSection}
+                onSelectSection={handleSelectSection}
+                onDeleteSection={handleDeleteSection}
+                onAddSection={handleAddSection}
+                onAddToCell={handleAddToCell}
+                onReorderRows={handleReorderRows}
+                onChangeLayout={handleChangeLayout}
+                rows={rows}
+              />
+            </div>
+          </main>
+        </div>
+      </WireframeThemeProvider>
+
+      {/* App-level overlays -- outside wireframe theme */}
       <PropertyPanel
         open={editMode.selectedSection !== null}
         section={selectedSectionData}
@@ -781,16 +784,6 @@ export default function FinanceiroWireframeViewer() {
         onChange={handlePropertyChange}
       />
 
-      {/* Screen-level comment FAB */}
-      <button
-        type="button"
-        onClick={handleOpenScreenComments}
-        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary shadow-lg transition-transform hover:scale-105"
-      >
-        <MessageSquare className="h-5 w-5 text-white" />
-      </button>
-
-      {/* Unsaved changes confirmation dialog */}
       {pendingExitEdit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm rounded-lg border bg-background p-6 shadow-lg">
@@ -820,7 +813,6 @@ export default function FinanceiroWireframeViewer() {
         </div>
       )}
 
-      {/* Conflict resolution modal */}
       {conflictOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm rounded-lg border bg-background p-6 shadow-lg">
@@ -851,7 +843,6 @@ export default function FinanceiroWireframeViewer() {
         </div>
       )}
 
-      {/* Comment drawer */}
       {drawerTarget && (
         <CommentOverlay
           clientSlug={config.slug}
@@ -866,12 +857,19 @@ export default function FinanceiroWireframeViewer() {
         />
       )}
 
-      {/* Comment management panel */}
       <CommentManager
         clientSlug={config.slug}
         open={managerOpen}
         onClose={handleCloseManager}
       />
-    </div>
+
+      <button
+        type="button"
+        onClick={handleOpenScreenComments}
+        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary shadow-lg transition-transform hover:scale-105"
+      >
+        <MessageSquare className="h-5 w-5 text-white" />
+      </button>
+    </>
   )
 }

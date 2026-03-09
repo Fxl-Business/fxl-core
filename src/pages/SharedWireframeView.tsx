@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { MessageSquare, Loader2 } from 'lucide-react'
+import { MessageSquare, Moon, Sun, Loader2 } from 'lucide-react'
 import { validateToken } from '@tools/wireframe-builder/lib/tokens'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { loadBlueprint as loadBlueprintFromDb } from '@tools/wireframe-builder/lib/blueprint-store'
 import {
   resolveBranding,
-  brandingToCssVars,
+  brandingToWfOverrides,
   getChartPalette,
   getFontLinks,
-  derivePalette,
 } from '@tools/wireframe-builder/lib/branding'
+import { WireframeThemeProvider, useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
 import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'
 import type { BrandingConfig } from '@tools/wireframe-builder/types/branding'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
@@ -350,9 +350,8 @@ export default function SharedWireframeView() {
 
   // Resolve branding for rendering
   const resolvedBranding = resolveBranding(brandConfig)
-  const sharedBrandVars = brandingToCssVars(resolvedBranding)
+  const wfOverrides = brandingToWfOverrides(resolvedBranding)
   const sharedChartPalette = getChartPalette(resolvedBranding)
-  const sharedBrandPalette = derivePalette(resolvedBranding)
 
   function handleOpenScreenComments() {
     const targetId = toTargetId({
@@ -363,114 +362,118 @@ export default function SharedWireframeView() {
   }
 
   return (
-    <SharedWireframeShell
-      branding={resolvedBranding}
-      brandVars={sharedBrandVars}
-      brandPalette={sharedBrandPalette}
-      label={bp.label}
-    >
-      {/* Sidebar escura -- uses dark variant of brand primary */}
-      <aside
-        style={{
-          width: 240,
-          minWidth: 240,
-          background: sharedBrandPalette.primaryDark,
-          color: '#FFF',
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100vh',
-          position: 'fixed',
-          left: 0,
-          top: 0,
-        }}
-      >
-        <div
-          style={{
-            height: 56,
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 24px',
-            borderBottom: `1px solid ${resolvedBranding.primaryColor}`,
-            flexShrink: 0,
-          }}
+    <>
+      <WireframeThemeProvider>
+        <SharedWireframeShell
+          branding={resolvedBranding}
+          wfOverrides={wfOverrides}
         >
-          {resolvedBranding.logoUrl ? (
-            <img
-              src={resolvedBranding.logoUrl}
-              alt={bp.label}
-              style={{ maxHeight: 32, maxWidth: 120, objectFit: 'contain' as const }}
-            />
-          ) : (
-            <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
-              FXL
-            </span>
-          )}
-        </div>
-        <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
-          {screens.map((screen, i) => (
-            <button
-              key={screen.id}
-              type="button"
-              onClick={() => setActiveIndex(i)}
+          {/* Sidebar -- uses --wf-sidebar-* tokens with branding overrides */}
+          <aside
+            style={{
+              width: 240,
+              minWidth: 240,
+              background: 'var(--wf-sidebar-bg)',
+              color: 'var(--wf-sidebar-fg)',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100vh',
+              position: 'fixed',
+              left: 0,
+              top: 0,
+            }}
+          >
+            <div
               style={{
-                display: 'block',
-                width: '100%',
-                textAlign: 'left',
-                padding: '10px 24px',
-                fontSize: 13,
-                fontWeight: activeIndex === i ? 500 : 400,
-                color: activeIndex === i ? '#FFF' : '#BDBDBD',
-                background: activeIndex === i ? resolvedBranding.primaryColor : 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontFamily: `${resolvedBranding.bodyFont}, Inter, sans-serif`,
+                height: 56,
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 24px',
+                borderBottom: '1px solid var(--wf-sidebar-border)',
+                flexShrink: 0,
               }}
             >
-              {screen.title}
-            </button>
-          ))}
-        </nav>
-        <div
-          style={{
-            padding: '16px 24px',
-            borderTop: `1px solid ${resolvedBranding.primaryColor}`,
-            fontSize: 11,
-            color: '#757575',
-          }}
-        >
-          Desenvolvido por FXL
-        </div>
-      </aside>
+              {resolvedBranding.logoUrl ? (
+                <img
+                  src={resolvedBranding.logoUrl}
+                  alt={bp.label}
+                  style={{ maxHeight: 32, maxWidth: 120, objectFit: 'contain' as const }}
+                />
+              ) : (
+                <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
+                  FXL
+                </span>
+              )}
+            </div>
+            <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
+              {screens.map((screen, i) => (
+                <button
+                  key={screen.id}
+                  type="button"
+                  onClick={() => setActiveIndex(i)}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '10px 24px',
+                    fontSize: 13,
+                    fontWeight: activeIndex === i ? 500 : 400,
+                    color: activeIndex === i ? 'var(--wf-sidebar-fg)' : 'var(--wf-sidebar-muted)',
+                    background: activeIndex === i ? 'var(--wf-sidebar-active)' : 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: `${resolvedBranding.bodyFont}, Inter, sans-serif`,
+                  }}
+                >
+                  {screen.title}
+                </button>
+              ))}
+            </nav>
+            <div
+              style={{
+                padding: '16px 24px',
+                borderTop: '1px solid var(--wf-sidebar-border)',
+                fontSize: 11,
+                color: 'var(--wf-sidebar-muted)',
+              }}
+            >
+              Desenvolvido por FXL
+            </div>
+          </aside>
 
-      {/* Area principal */}
-      <main
-        style={{
-          flex: 1,
-          marginLeft: 240,
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100vh',
-        }}
-      >
-        <WireframeHeader
-          title={activeScreen.title}
-          periodType={activeScreen.periodType}
-        />
-        <div
-          style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}
-        >
-          <BlueprintRenderer
-            screen={activeScreen}
-            clientSlug={clientSlug}
-            comments={comments}
-            onOpenComments={handleOpenComments}
-            chartColors={sharedChartPalette}
-            brandPrimary={resolvedBranding.primaryColor}
-          />
-        </div>
-      </main>
+          {/* Area principal */}
+          <main
+            style={{
+              flex: 1,
+              marginLeft: 240,
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100vh',
+            }}
+          >
+            {/* Theme toggle for shared view */}
+            <SharedThemeToggle />
+            <WireframeHeader
+              title={activeScreen.title}
+              periodType={activeScreen.periodType}
+            />
+            <div
+              style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}
+            >
+              <BlueprintRenderer
+                screen={activeScreen}
+                clientSlug={clientSlug}
+                comments={comments}
+                onOpenComments={handleOpenComments}
+                chartColors={sharedChartPalette}
+                brandPrimary={resolvedBranding.primaryColor}
+              />
+            </div>
+          </main>
+        </SharedWireframeShell>
+      </WireframeThemeProvider>
 
-      {/* Screen-level comment FAB */}
+      {/* App-level overlays -- outside wireframe theme */}
       <button
         type="button"
         onClick={handleOpenScreenComments}
@@ -479,7 +482,6 @@ export default function SharedWireframeView() {
         <MessageSquare className="h-5 w-5 text-white" />
       </button>
 
-      {/* Comment drawer */}
       {drawerTarget && (
         <CommentOverlay
           clientSlug={clientSlug}
@@ -493,25 +495,21 @@ export default function SharedWireframeView() {
           onClose={handleCloseDrawer}
         />
       )}
-    </SharedWireframeShell>
+    </>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Shell wrapper: injects brand CSS vars, font loading, and favicon
+// Shell wrapper: injects wf override tokens, font loading, and favicon
 // ---------------------------------------------------------------------------
 
 function SharedWireframeShell({
   branding: brandingProp,
-  brandVars: vars,
-  brandPalette: palette,
-  label,
+  wfOverrides,
   children,
 }: {
   branding: BrandingConfig
-  brandVars: React.CSSProperties
-  brandPalette: ReturnType<typeof derivePalette>
-  label: string
+  wfOverrides: React.CSSProperties
   children: React.ReactNode
 }) {
   // Font loading + favicon
@@ -539,21 +537,51 @@ function SharedWireframeShell({
     }
   }, [brandingProp])
 
-  // Suppress unused var warnings — palette and label are used by the parent for sidebar
-  void palette
-  void label
-
   return (
     <div
       style={{
         display: 'flex',
         height: '100vh',
         fontFamily: `${brandingProp.bodyFont}, Inter, sans-serif`,
-        background: '#F5F5F5',
-        ...vars,
+        background: 'var(--wf-canvas)',
+        ...wfOverrides,
       }}
     >
       {children}
     </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Theme toggle for shared/client view
+// ---------------------------------------------------------------------------
+
+function SharedThemeToggle() {
+  const { theme, toggle } = useWireframeTheme()
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      style={{
+        position: 'fixed',
+        top: 16,
+        right: 16,
+        zIndex: 40,
+        width: 36,
+        height: 36,
+        borderRadius: '50%',
+        border: '1px solid var(--wf-card-border)',
+        background: 'var(--wf-card)',
+        color: 'var(--wf-body)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        boxShadow: 'none',
+      }}
+    >
+      {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+    </button>
   )
 }
