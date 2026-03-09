@@ -59,7 +59,12 @@ Plans:
   2. Operator can toggle dark/light mode in the wireframe viewer and all wireframe components respond to the theme change
   3. Client branding colors override wireframe tokens in the viewer without affecting the surrounding app shell colors
   4. Wireframe palette renders 10-step neutral scale plus gold accent, visually distinct from the app's blue/purple palette
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 08-01-PLAN.md -- Token CSS layer, WireframeThemeProvider, Tailwind extension, branding override helper
+- [ ] 08-02-PLAN.md -- Migrate 26 wireframe components from hardcoded colors to --wf-* tokens
+- [ ] 08-03-PLAN.md -- Wire theme provider into viewers, add dark/light toggle, apply branding overrides
 
 ### Phase 9: Component Library Expansion
 **Goal**: Operators can build richer wireframes with 6 new block types, 5 additional chart types, and a single generic viewer that works for any client
@@ -110,7 +115,7 @@ Phase 7 -> 8 -> 9 (and 10 in parallel) -> 11
 | 5. Technical Configuration | v1.0 | 2/2 | Complete | 2026-03-09 |
 | 6. System Generation | v1.0 | 3/3 | Complete | 2026-03-09 |
 | 7. Blueprint Infrastructure | v1.1 | 3/3 | Complete | 2026-03-09 |
-| 8. Wireframe Design System | v1.1 | 0/? | Not started | - |
+| 8. Wireframe Design System | v1.1 | 0/3 | Planned | - |
 | 9. Component Library Expansion | v1.1 | 0/? | Not started | - |
 | 10. Briefing & Blueprint Views | v1.1 | 0/? | Not started | - |
 | 11. AI-Assisted Generation | v1.1 | 0/? | Not started | - |
