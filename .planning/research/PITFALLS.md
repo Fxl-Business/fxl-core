@@ -1,270 +1,330 @@
-# Domain Pitfalls
+# Pitfalls Research
 
-**Domain:** Automated BI dashboard generation from declarative BlueprintConfig specifications
-**Researched:** 2026-03-07
-**Confidence:** HIGH (grounded in codebase analysis + verified stack specifics)
+**Domain:** Wireframe evolution -- file-to-DB migration, component library expansion, design system coexistence, AI-assisted blueprint generation
+**Researched:** 2026-03-09
+**Confidence:** HIGH (grounded in codebase analysis of existing 16,808 LOC TypeScript, verified Supabase JSONB patterns, design system architecture review)
 
 ## Critical Pitfalls
 
-### Pitfall 1: Conflating Wireframe Shape with Data Shape
+### Pitfall 1: Dual Source of Truth During File-to-DB Migration
 
 **What goes wrong:**
-The existing BlueprintConfig contains hardcoded display values (`value: 'R$ 485.200'`, `variation: '8,3% vs Fev/2026'`). The generation system naively maps these static wireframe fields into generated code as if they were the data model. The result is a dashboard that renders once with dummy data but cannot compute real numbers from imported data.
+The codebase currently has `blueprint.config.ts` as a static file AND `blueprint_configs` table in Supabase. `WireframeViewer.tsx` seeds DB from file on first load (`seedFromFile`), then reads from DB thereafter. `SharedWireframeView.tsx` has a parallel `blueprintMap` with dynamic imports as fallback. During the v1.1 migration to "blueprint as dynamic data in Supabase," both paths continue to exist. Developers edit the `.ts` file thinking it is the source of truth, but the DB already has a diverged copy. Or the DB gets updated through the visual editor, but the `.ts` file stays stale and re-seeds on a fresh Supabase instance, overwriting DB changes.
 
 **Why it happens:**
-BlueprintConfig was designed for wireframe rendering. Its types (`KpiConfig`, `CalculoRow`) describe visual layout, not data semantics. A `KpiConfig.value` is a formatted string, not a reference to a query or calculation.
+The `seedFromFile` function in `blueprint-store.ts` checks `if (existing) return` -- it only seeds when DB is empty. This works today because there is one client and one deployment. But in v1.1, blueprints are dynamic DB data. The file still exists as a TypeScript import. Nothing prevents a developer from modifying the file, and nothing warns that the file is now a historical artifact, not the source of truth.
 
-**Consequences:**
-Generated dashboards display correctly with seed data but break when filters change. KPI values are hardcoded strings in components instead of computed from queries. Comparisons show identical values in both columns.
+**How to avoid:**
+1. Make the migration a clean cutover, not a gradual fade. Pick a date: before it, file is truth. After it, DB is truth. Delete or freeze the file.
+2. Rename `blueprint.config.ts` to `blueprint.config.seed.ts` to signal it is seed data only. Add a `/** @deprecated - Source of truth is now Supabase blueprint_configs table */` JSDoc.
+3. Remove `seedFromFile` entirely once DB has been seeded for all clients. The fallback import map in `SharedWireframeView.tsx` (lines 39-45) must also be removed.
+4. Add a startup check: if a blueprint exists in DB but the `.ts` file has been modified more recently than `updated_at`, log a warning.
 
-**Prevention:**
-Create an explicit TechnicalConfig layer that maps each BlueprintConfig element to its data semantics. For every section: `dataSource`, `computation`, `periodBinding`, `formatSpec`. The TechnicalConfig is a separate type system that references BlueprintConfig sections but adds the data layer.
+**Warning signs:**
+- Visual editor changes "disappear" after a fresh Supabase reset
+- Two developers see different wireframes for the same client
+- `blueprint.config.ts` has uncommitted changes while DB has different data
+- `seedFromFile` runs unexpectedly and overwrites DB edits
 
-**Detection:**
-- KPI values do not change when the period selector changes
-- Compare mode shows the same numbers in both columns
-- The word "R$" appears as a literal string in generated component files
+**Phase to address:**
+Phase 1 (Blueprint to DB migration) -- this must be the FIRST thing done. Every subsequent feature depends on a single, clear source of truth.
 
 ---
 
-### Pitfall 2: The "Compare Mode" Complexity Explosion
+### Pitfall 2: JSONB Schema Drift Without Versioning
 
 **What goes wrong:**
-Compare mode is deeply embedded in 8 of 10 screens. In wireframes it is visual (show/hide a column). In a real system it means: fetch data for TWO periods, align by dimension, compute deltas, handle categories existing in one period but not the other, and apply inverted color logic for cost lines (Tela 1 blueprint: "lines with operator `(-)` use inverted color logic").
+The `blueprint_configs` table stores the entire `BlueprintConfig` as a single `jsonb` column with no schema version. When v1.1 adds new section types (settings pages, filter blocks, input blocks), new screen properties, or changes the `BlueprintSection` discriminated union, existing JSONB documents in the DB become structurally incompatible. The `SectionRenderer.tsx` switch statement (15 cases today) silently returns `undefined` for unknown types. The TypeScript type system cannot validate JSONB at runtime.
 
 **Why it happens:**
-Compare mode looks simple in the wireframe toggle. But the data logic is fundamentally different. The blueprint doc for Tela 1 alone has a multi-paragraph rule about color inversion for subtraction lines in CalculoCard. This domain-specific business logic cannot be inferred from types alone.
+JSONB's flexibility is its trap. Adding a field to the TypeScript type is instant. But existing DB rows do not have that field. PostgreSQL JSONB does not enforce structure -- the `config` column accepts anything. The current `config jsonb NOT NULL` constraint only checks for valid JSON, not schema conformance. Today's `BlueprintSection` union has 15 variants. Adding new ones means old data lacks them, but worse: changing the shape of existing variants (adding required fields to `KpiGridSection`, for example) breaks silently.
 
-**Consequences:**
-Comparisons show wrong signs (costs going up shown in green). Categories existing in period A but not B cause blank rows or crashes. Developer manually fixing compare logic in 8+ screens after generation.
+**How to avoid:**
+1. Add a `schemaVersion` field to the JSONB document root: `{ schemaVersion: 2, slug: '...', screens: [...] }`. The config resolver already uses `schemaVersion: '1.0'` in `GenerationManifest` -- extend this pattern to blueprint storage.
+2. Write a migration function per schema version bump: `function migrateV1toV2(config: unknown): BlueprintConfigV2`. Run on read, not on write. This avoids batch-migrating all rows and handles lazy migration.
+3. Use Supabase's `pg_jsonschema` extension to add a CHECK constraint on the `config` column. This prevents writes of structurally invalid data at the DB level.
+4. Make `SectionRenderer` explicitly handle unknown types with a fallback "Unknown section" block in edit mode (to make the problem visible) and `null` in view mode (to not break the wireframe).
+5. Never add required fields to existing section types without a default. All new fields on existing types must be optional with a sensible default in the renderer.
 
-**Prevention:**
-1. Treat compare mode as first-class in TechnicalConfig. For each section: what is "period A", what is "period B", the alignment strategy, and delta computation rules including `invertedCostLines`.
-2. Build `useCompareData()` as a shared hook in the generated project, not inline logic per component.
-3. Encode business rules like cost-inversion in TechnicalConfig per section.
+**Warning signs:**
+- `SectionRenderer` returns nothing for a section (blank gap in the wireframe)
+- TypeScript compiles but runtime data does not match the type (no runtime validation)
+- A newly added section type works in the visual editor but existing clients see blank spaces
+- DB has rows with different structural shapes for the same field
 
-**Detection:**
-- Toggle compare mode and check if cost reductions are shown in green (correct) vs red (wrong)
-- Navigate to a period with fewer categories than the comparison period
+**Phase to address:**
+Phase 1 (Blueprint to DB migration) -- add `schemaVersion` and migration infrastructure before any schema changes. Every subsequent phase that adds new section types depends on this.
 
 ---
 
-### Pitfall 3: Generating Monolithic Components
+### Pitfall 3: Component Library Sprawl Without Governance
 
 **What goes wrong:**
-The generator produces one large component per screen (500+ lines) with all KPIs, charts, tables, and data-fetching inline. This mirrors BlueprintConfig structure but produces unmaintainable code that violates FXL's 150-line component limit.
+The component library grows from 15 section types to 20+ as settings pages, filter components, input blocks, and new chart types are added. Each new component gets its own renderer, property form, and default factory in `defaults.ts`. But without governance: visual styling diverges (some components use raw Tailwind, others use CSS vars, others use shadcn tokens), prop interfaces become inconsistent (some use `title`, others `label`, others `heading`), and the `BlueprintSection` discriminated union becomes a dumping ground where adding one variant requires touching 5+ files.
 
 **Why it happens:**
-BlueprintConfig is organized as `screens[].sections[]` -- a flat list per screen. The simplest generation strategy mirrors `BlueprintRenderer.tsx`. But the wireframe renderer has no data-fetching, no state management, no error handling. A real dashboard component is much more complex.
+The current architecture requires changes in 5-6 places to add a new section type:
+1. Type definition in `blueprint.ts` (add to union)
+2. Default factory in `defaults.ts` (add case)
+3. Section renderer in `SectionRenderer.tsx` (add case)
+4. Component implementation (new file)
+5. Property form in `editor/property-forms/` (new file)
+6. Component picker in `ComponentPicker.tsx` (add to list)
 
-**Prevention:**
-Generate a layered architecture per screen:
-1. **Data layer**: custom hooks per data concern (`useResultadoMensal()`)
-2. **Section components**: one per section type, receiving data via props
-3. **Screen orchestrator**: thin page that composes hooks and sections
-Follow the 150-line rule from `premissas-gerais.md`.
+This is already 6 touchpoints for 15 types. At 25 types, the combinatorial overhead becomes the primary source of bugs. Developers skip the property form ("we'll add it later"), skip defaults ("just copy from another component"), or skip the picker entry. The result is components that exist in the type system but cannot be added via the visual editor.
 
-**Detection:**
-Generated files exceeding 200 lines. Data-fetching logic mixed with rendering.
+**How to avoid:**
+1. Create a component registry pattern: a single `SECTION_REGISTRY` object that maps type string to `{ renderer, propertyForm, defaultFactory, pickerMeta }`. Adding a new section type = adding one entry to the registry. No switch statements, no scattered cases.
+2. Enforce a component contract interface: every section component must accept `section: T` and optional `editMode` props. Property forms must implement `PropertyFormProps<T>`. Use TypeScript generics to enforce this at compile time.
+3. Add a lint rule or test: "every type in the `BlueprintSection` union must have a corresponding entry in `SECTION_REGISTRY`." This catches missing registrations at build time.
+4. Standardize prop naming: `title` (not `label` or `heading`), `items` for arrays, `variant` for visual variations. Document this convention in the SKILL.md.
+
+**Warning signs:**
+- A section type exists in `blueprint.ts` but has no property form (cannot be edited)
+- Two section components use different approaches for the same visual pattern (one uses `bg-muted`, another uses `bg-gray-100`)
+- Adding a new section type requires modifying more than 3 files
+- `SectionRenderer.tsx` switch statement exceeds 20 cases
+- `defaults.ts` has inconsistent default structures (some return minimal objects, others return fully populated mock data)
+
+**Phase to address:**
+Phase 2 (Component library expansion) -- refactor to registry pattern BEFORE adding new components. Adding new components to the old scattered architecture will make the refactor harder later.
 
 ---
 
-### Pitfall 4: Underestimating the Upload/ETL Pipeline
+### Pitfall 4: Theme Collision Between App Design System and Wireframe Design System
 
 **What goes wrong:**
-The generator treats Tela 9 (Upload) as a simple file upload form. In reality, it is the entire data foundation. Behind the simple config lies: parsing XLS/XLSX/CSV with varying column orders, validating columns, normalizing category names, handling Brazilian date formats, converting `R$ 1.234,56` to numbers, detecting duplicates, and structuring data for all dashboard queries.
+The FXL Core app uses shadcn/ui semantic tokens (`--primary`, `--accent`, `--foreground`, `--background`) defined in `globals.css`. Wireframe rendering uses `--brand-*` prefixed CSS variables injected at the wireframe container level via `brandingToCssVars()`. The v1.1 redesign introduces a third layer: a wireframe-specific design system with white/black/gray/gold palette for wireframe chrome (headers, sidebars, navigation) distinct from both the app theme and the client brand colors. This creates three competing CSS variable namespaces on the same page, and any leak between them causes visual corruption.
 
 **Why it happens:**
-Dashboard screens are visually impressive. Upload screens are boring. The BlueprintConfig for upload is minimal (`type: 'upload-section'`). But all other screens depend on correctly ingested data.
+CSS custom properties inherit through the DOM tree. The wireframe renders inside the FXL Core app shell (at least in the editor/preview path). The current `--brand-*` prefix was a deliberate decision (noted in KEY_DECISIONS: "Avoid collision with FXL Core app theme") and it works today. But adding a wireframe chrome design system (`--wf-*` or similar) creates a third layer. Worse: if the wireframe uses shadcn/ui components internally (the component library already imports from `@/components/ui/`), those components inherit `--primary` from the app, not from the wireframe context.
 
-**Consequences:**
-Dashboard screens are "done" but show placeholder data. Upload works with the test file but fails on real Conta Azul exports. Category-to-group mapping has no data to map.
+The `WireframeViewer` mounts as a full-screen view outside the Layout component, which reduces collision risk. But `SharedWireframeView` and the visual editor run within the app shell, where both variable sets coexist.
 
-**Prevention:**
-1. TechnicalConfig must include `dataIngestion` section specifying: expected columns, validation rules, normalization pipeline, target table, and conflict resolution.
-2. Build upload as the FIRST functional piece, not the last.
-3. Use Next.js Route Handlers for server-side parsing -- not client-side JavaScript. File parsing with xlsx in the browser is slow and fragile for large files.
+**How to avoid:**
+1. Strict three-tier variable namespace with NO overlap:
+   - `--primary`, `--accent`, etc: FXL Core app only. Never referenced in wireframe components.
+   - `--brand-*`: Client brand identity (already exists). Applied at wireframe container.
+   - `--wf-*`: Wireframe chrome (new). Applied at wireframe container alongside `--brand-*`.
+2. Wireframe components must NEVER import from `@/components/ui/` directly. Create wireframe-specific wrappers in `tools/wireframe-builder/components/ui/` that remap variables or use explicit values.
+3. The wireframe container (`WireframeViewer`, `SharedWireframeView`) should use CSS `all: initial` or a CSS layer (`@layer wireframe { ... }`) to prevent app token inheritance.
+4. Test for collision explicitly: render a wireframe with brand primary = red inside the app shell with app primary = blue. If any element is blue inside the wireframe, there is a leak.
 
-**Detection:**
-- Dashboard screens show "no data" after generation
-- Upload works with the team's test file but fails on real exports
+**Warning signs:**
+- Wireframe sidebar shows the FXL Core gold accent instead of the client's brand color
+- shadcn/ui `Button` inside wireframe uses app theme instead of wireframe theme
+- Dark mode toggle in the app affects wireframe rendering
+- Chart colors in the wireframe change when the app's color scheme changes
+
+**Phase to address:**
+Phase 1 (Design system setup) -- establish variable namespaces and isolation strategy BEFORE the visual redesign. Retrofitting CSS isolation is much harder than establishing it upfront.
 
 ---
 
-### Pitfall 5: Supabase Schema Without RLS from Day One
+### Pitfall 5: Breaking Existing Wireframes When Expanding Blueprint Schema
 
 **What goes wrong:**
-The generator creates Supabase migrations for tables but defers RLS policies to "later." Tables without RLS allow any authenticated user to see all data. Retrofitting RLS onto tables with existing queries is significantly harder because queries that worked without RLS may fail or return wrong results with RLS.
+The v1.1 milestone adds new capabilities to blueprints: page types beyond dashboards (settings pages, forms), configurable filters, dynamic input blocks. This means changing the `BlueprintScreen` type (new fields like `pageType`, `layoutMode`) and the `BlueprintSection` union (new variants). The pilot client `financeiro-conta-azul` has 10 screens with 50+ sections already in the DB. Schema changes that add required fields or restructure existing types break the pilot's wireframe rendering.
 
 **Why it happens:**
-RLS policies are security infrastructure with no visible UI impact. AI-assisted code generation is particularly prone to skipping RLS. The `seguranca.md` checklist warns about this explicitly.
+TypeScript types evolve at compile time. DB data does not. The `BlueprintConfig` type is the contract between the visual editor (writes), the renderer (reads), and the DB (stores). Changing the type without migrating existing data creates a runtime mismatch. The `as BlueprintConfig` cast in `blueprint-store.ts` line 16 (`return data.config as BlueprintConfig`) suppresses all type checking on data read from DB -- the actual JSON could be anything.
 
-**Prevention:**
-1. Every migration template MUST include `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` and policies. Non-negotiable generator invariant.
-2. TechnicalConfig declares access model (per-user, per-organization). Generator selects correct RLS template from existing patterns in `docs/build/techs/supabase.md`.
-3. Add automated check: scan migrations, fail if any `CREATE TABLE` lacks corresponding RLS.
+**How to avoid:**
+1. Every new field on existing types MUST be optional with a default. Example: `pageType?: 'dashboard' | 'settings' | 'form'` defaults to `'dashboard'` in the renderer if absent.
+2. Replace the `as BlueprintConfig` cast with a runtime validation function using a schema library (zod or valibot). Parse, don't assert. `const result = BlueprintConfigSchema.safeParse(data.config)`. This catches mismatches at read time with clear error messages.
+3. Write the migration function BEFORE changing the type. The sequence is: (a) write `migrateV1toV2`, (b) update the type, (c) update the renderers. Never do (b) and (c) without (a).
+4. Keep backward compatibility tests: a fixture of the v1.0 `financeiro-conta-azul` config must render without errors in the v1.1 renderer. Add this as a test case.
 
-**Detection:**
-- Generated migrations contain `CREATE TABLE` without `ENABLE ROW LEVEL SECURITY`
-- "Everything works" during development with no test for cross-user isolation
+**Warning signs:**
+- The pilot client's wireframe crashes after a type change
+- `as BlueprintConfig` hides a runtime type error
+- New optional fields are not handled in renderers (showing `undefined` in the UI)
+- A "working" wireframe in development breaks when loaded from DB because the dev was using the local seed file (which has the new fields) not the DB data (which does not)
+
+**Phase to address:**
+Phase 1 (Schema evolution infrastructure) -- add runtime validation and migration framework. Then Phase 2 (component expansion) can safely add new types knowing the infrastructure catches incompatibilities.
 
 ---
 
-### Pitfall 6: Generator Tightly Coupled to Pilot Client
+### Pitfall 6: AI-Assisted Blueprint Generation Producing Inconsistent or Invalid Output
 
 **What goes wrong:**
-The generator works for `financeiro-conta-azul` but fails for the next client. Templates are unconsciously tuned to the pilot's specific combination of sections, filters, and domain logic (DRE structure, margin calculations, Conta Azul formats).
+The v1.1 milestone includes "blueprint generation via Claude Code from briefing + history." Claude Code reads the briefing, analyzes patterns, and generates a `BlueprintConfig` JSON. The output is structurally valid JSON but semantically inconsistent: section types that do not match the visual intent, KPI labels that are generic placeholders, filter configurations that reference nonexistent data fields, screen IDs that collide, or sections that reference component types not yet in the registry.
 
 **Why it happens:**
-Building with one example makes it impossible to distinguish "how all BI dashboards work" from "how this specific financial dashboard works."
+LLM-generated code suffers from inconsistency at scale. Research shows only 68.3% of AI-generated projects are reproducible without manual intervention. For structured JSON like `BlueprintConfig` (which has a 15-variant discriminated union, nested arrays, cross-references between screens and filters), the probability of a valid-but-wrong output is high. The model may generate a `drill-down-table` when a `data-table` is appropriate, or omit required fields that TypeScript would catch at compile time but that JSONB storage does not enforce.
 
-**Prevention:**
-1. Design around the BlueprintConfig type system (15 section types), not the pilot's config.
-2. Before building, write a minimal second BlueprintConfig for a hypothetical different client as a design validation exercise.
-3. Separate domain logic (financial calculations) from structural generation (layout, navigation, filters).
+Additionally, the generation context is massive: the briefing document, the existing component catalog (22 block specs), the type definitions, and example configs. Claude Code may not consistently apply all constraints from all sources simultaneously.
 
-**Detection:**
-- Generator code contains `if (slug === 'financeiro-conta-azul')`
-- Adding a new section type requires touching more than one file
+**How to avoid:**
+1. Generate in two passes: (a) structure pass -- screen list, section types, layout -- validated against the type schema before proceeding; (b) detail pass -- populate section properties, KPI labels, filter configs.
+2. Validate generated output with the same runtime schema validator from Pitfall 5 (zod/valibot). The generation pipeline must include `BlueprintConfigSchema.parse(output)` before writing to DB. Invalid output should produce actionable error messages, not silent data corruption.
+3. Provide Claude Code with a minimal, focused prompt -- not the entire codebase. Include: the `BlueprintSection` type union, the `BlueprintScreen` type, one example config (the pilot), and the specific briefing. Exclude: renderer implementation details, editor code, CSS.
+4. Add a "blueprint review" UI step between generation and acceptance. The operator sees the generated blueprint as a textual summary (not just the rendered wireframe) and can approve, reject, or modify before it becomes the source of truth.
+5. Enforce uniqueness constraints: screen IDs must be unique slugs, section types must be from the known union, filter keys must not collide within a screen.
+
+**Warning signs:**
+- Generated blueprints render but have wrong section types (chart where a table should be)
+- Generated screen IDs contain spaces or special characters (breaking URL routing)
+- Generated KPI labels are generic ("KPI 1", "Metric 2") instead of domain-specific
+- Two consecutive generations from the same briefing produce structurally different blueprints
+- Generated config references a section type that does not exist in `SectionRenderer`
+
+**Phase to address:**
+Phase 4 (AI-assisted generation) -- this is a later phase because it depends on runtime validation (Phase 1) and the expanded component registry (Phase 2). AI generation without validation infrastructure is dangerous.
 
 ---
 
-### Pitfall 7: Configuracoes Screen Disconnected from Other Screens
+### Pitfall 7: Bidirectional Sync Complexity When Blueprint Moves to DB
 
 **What goes wrong:**
-Tela 10 (Configuracoes) is treated as "just another CRUD screen." But it controls business logic across ALL screens: expense groups determine DRE structure, bank mappings affect cash flow, semaphore thresholds control KPI colors, category-to-group bindings drive the financial model.
+Today, the visual editor creates a `workingConfig` (deep clone via `structuredClone`), mutates it in memory during editing, and saves the entire config to Supabase on explicit "Save." This is a simple optimistic update pattern. But v1.1 introduces new sync requirements: blueprint must be accessible to Claude Code (for AI generation), must be renderable as text in the UI, must support concurrent editing scenarios (operator edits in UI while Claude Code generates sections), and must handle the transition period where some clients have file-based configs and others have DB configs.
+
+The existing save pattern (`upsert` with `onConflict: 'client_slug'`) does a full document replacement. If Claude Code generates a blueprint section while an operator is editing a different section in the visual editor, the operator's save overwrites Claude's changes (or vice versa).
 
 **Why it happens:**
-In BlueprintConfig, Configuracoes is just another screen with `config-table` sections. No indication its data feeds other screens.
+Document-level granularity (save entire config as one JSONB blob) is simple and worked for single-user editing. Multi-actor editing (human + AI) with document-level saves creates last-write-wins conflicts. The `updated_at` timestamp exists but is not used for conflict detection -- it is informational only.
 
-**Prevention:**
-1. TechnicalConfig must declare cross-screen dependencies (`crossScreenDeps`).
-2. Generated project uses shared `useAppConfig()` hook consumed by all dependent screens.
-3. Config tables generate CRUD operations, not just display components.
+**How to avoid:**
+1. Add optimistic locking: include `updated_at` in the save query's WHERE clause. `UPDATE blueprint_configs SET config = $1, updated_at = now() WHERE client_slug = $2 AND updated_at = $3`. If the row was modified since read, the update affects 0 rows -- detect this and show a conflict resolution UI.
+2. For Claude Code access: provide a read-only export path (MD or JSON) that does not participate in the editing flow. Claude Code reads from DB, generates a proposed config, and presents it to the operator for merge -- it does not write directly to the live blueprint.
+3. Do NOT implement real-time collaborative editing (Supabase Realtime + OT/CRDT). This is massive complexity for a 1-2 operator tool. Optimistic locking with manual conflict resolution is sufficient.
+4. Keep the `structuredClone` + explicit save pattern. It is correct for this scale. Just add conflict detection.
 
-**Detection:**
-- Changing a semaphore threshold does not update KPI colors in other screens
-- Adding an expense group does not appear in DRE drill-down options
+**Warning signs:**
+- An operator's edits disappear after saving (overwritten by another actor)
+- Claude Code's generated sections do not appear in the wireframe (overwritten by operator save)
+- The `updated_at` field shows a time that does not match the operator's last save
+- Two browser tabs editing the same client silently overwrite each other
+
+**Phase to address:**
+Phase 1 (Blueprint to DB migration) -- add optimistic locking to the save path before any multi-actor scenarios exist. Retrofitting conflict detection after data loss incidents is reactive, not preventive.
 
 ---
 
-### Pitfall 8: Next.js 16 Specifics Mishandled
+## Technical Debt Patterns
 
-**What goes wrong:**
-The generator produces Next.js code using patterns from older versions. Specifically: Pages Router patterns instead of App Router, `getServerSideProps` instead of async Server Components, missing `await` on `params` in Route Handlers, or client-side Supabase auth instead of cookie-based `@supabase/ssr`.
+Shortcuts that seem reasonable but create long-term problems.
 
-**Why it happens:**
-Most Next.js examples online and in training data are from v12-14 era. Next.js 16 has significant API changes: `context.params` is now a Promise (must be awaited), Turbopack is the default bundler, `next build` no longer runs linter, and the recommended auth pattern uses `@supabase/ssr` with middleware.
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| `as BlueprintConfig` cast on DB read | Avoids writing a validator | Silent runtime failures when schema evolves | Never after schema versioning is needed (i.e., now) |
+| Full-document upsert without version check | Simple save logic | Last-write-wins data loss with multiple actors | Only while single-operator editing is guaranteed |
+| Hardcoded `blueprintMap` in SharedWireframeView | Quick client lookup for seeding | Must be updated for every new client; prevents dynamic client discovery | Only during migration period; remove once all clients are DB-only |
+| Switch statements in SectionRenderer + defaults.ts | Clear, readable dispatch | Adding a section type requires 6 file changes; easy to miss one | Acceptable at 15 types; unacceptable at 25+. Refactor to registry. |
+| CSS variables without namespace enforcement | Less typing | Theme collision between app, brand, and wireframe chrome | Never -- establish prefixes from day one |
+| Importing shadcn/ui components inside wireframe components | Reuse existing UI primitives | App theme leaks into wireframe rendering | Only if components are wrapped to remap variables |
 
-**Consequences:**
-Generated Route Handlers fail at runtime because `params` is not awaited. Auth breaks because tokens are stored in localStorage instead of httpOnly cookies. Build warnings flood the console because Webpack patterns are used instead of Turbopack.
+## Integration Gotchas
 
-**Prevention:**
-1. All generator templates must use Next.js 16 App Router patterns exclusively.
-2. Route Handler templates must `await params` (verified in official docs: `const { team } = await params`).
-3. Auth must use `@supabase/ssr` with middleware pattern, not client-side `onAuthStateChange`.
-4. Templates must not reference `getServerSideProps`, `getStaticProps`, or `pages/` directory.
+Common mistakes when connecting to external services.
 
-**Detection:**
-- TypeScript errors about `Promise<{ slug: string }>` not assignable to `string`
-- Auth state lost on page refresh (indicates localStorage, not cookies)
-- `next build` produces warnings about deprecated patterns
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| Supabase JSONB storage | Trusting `as T` casts -- no runtime validation of stored JSON | Parse with zod/valibot on read. Log validation failures. Return null + show recovery UI rather than crash. |
+| Supabase upsert | Using `onConflict` without checking affected row count | Check response `count` or use `updated_at` in WHERE clause for optimistic locking |
+| Supabase RLS with anon | Current `anon_*` policies allow any anonymous user to read/write all blueprints | Acceptable for internal tool; but if share links expose blueprint data, scope policies to read-only for share token holders |
+| Clerk auth + Supabase | Assuming Clerk user ID format is stable | Store Clerk user ID as `text` (already done). Never parse or structure it. Use as opaque string. |
+| Claude Code DB access | Giving Claude Code direct write access to live blueprint | Claude Code should propose, not commit. Read access via MD export or Supabase read query. Write access only through operator-approved merge. |
+| pg_jsonschema extension | Adding CHECK constraint on existing column with non-conforming data | Run data migration FIRST, then add constraint. Or use `ALTER TABLE ... ADD CONSTRAINT ... NOT VALID` followed by `VALIDATE CONSTRAINT` |
 
----
+## Performance Traps
 
-## Moderate Pitfalls
+Patterns that work at small scale but fail as usage grows.
 
-### Pitfall 9: Brazilian Number/Date Format Handling
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Loading entire BlueprintConfig on every page render | Slow initial load for complex wireframes | Cache in React state (already done). Add stale-while-revalidate pattern if adding realtime updates. | At 50+ screens per client (unlikely for dashboards; possible for forms/settings expansion) |
+| `structuredClone` on every edit toggle | Noticeable freeze on large configs | Already acceptable at current size. Monitor if configs grow past 500KB. Consider immer for structural sharing. | At 1MB+ config size |
+| Unrestricted JSONB column size | Supabase query timeouts on large documents | Add application-level size check before save (warn at 500KB, reject at 2MB). Consider normalizing screens into separate rows if size becomes an issue. | At 2MB+ per config row |
+| No index on JSONB contents | Cannot query blueprints by screen type or section type | Add GIN index on `config` column if cross-client queries are needed. Not needed for single-client lookups by `client_slug`. | When searching across all clients' blueprints |
 
-**What goes wrong:**
-Data imported from Conta Azul uses Brazilian formats (`1.234,56` for numbers, `DD/MM/YYYY` for dates). The normalization pipeline either ignores this or handles it inconsistently, producing NaN values or incorrect dates.
+## Security Mistakes
 
-**Prevention:**
-1. Normalization rules in TechnicalConfig per column. Generate `parse-brl` and `parse-date-br` utilities in the output project's `lib/format.ts`.
-2. Use `Intl.NumberFormat('pt-BR')` for formatting display values. Store raw numbers (not formatted strings) in Supabase.
-3. Use `date-fns` with `pt-BR` locale for date operations.
+Domain-specific security issues beyond general web security.
 
-### Pitfall 10: Recharts Version Mismatch
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Share links exposing blueprint edit capability | External client could modify the wireframe | Share link flow already uses read-only path. Verify new DB-backed blueprint does not accidentally expose write endpoints via share tokens. |
+| AI generation writing directly to production blueprint | LLM hallucination corrupts live wireframe | Generation writes to a `draft` status or separate `blueprint_drafts` table. Operator promotes draft to live. |
+| Blueprint JSONB containing client-sensitive data | If blueprints include real financial figures from briefings, share links expose them | Blueprint should contain display labels and mock data only. Real financial data stays in briefing docs (not in DB). |
+| Anon RLS policies on blueprint_configs | Any Supabase anon key holder can read/write all blueprints | Acceptable for internal tool. If deploying externally, scope write policies to authenticated Clerk users only. Current migration 003 has full anon read/write. |
 
-**What goes wrong:**
-FXL Core uses recharts 2.13.3. Generated projects should use recharts 3.8.0 (current). The wireframe-builder component patterns may not work identically in recharts 3.x due to API changes between major versions.
+## UX Pitfalls
 
-**Prevention:**
-1. Pin recharts@3.8.0 in generated `package.json`. Do NOT use semver ranges.
-2. Test each chart type (bar, line, donut, waterfall, pareto) with recharts 3.x before using templates.
-3. The wireframe-builder components are reference implementations, not copy-paste targets. Generated components should follow recharts 3.x API.
+Common user experience mistakes in this domain.
 
-### Pitfall 11: Filter State Lost on Navigation
-
-**What goes wrong:**
-User configures period filter on DRE screen, navigates to Receita, period resets to default. User enables compare mode, navigates away, compare mode turns off.
-
-**Prevention:**
-1. Use nuqs@2.8.9 for URL-based filter state. Filters are part of the URL, preserved across navigation.
-2. Compare mode state should also be URL-encoded.
-3. Generate a shared filter context that nuqs hooks into.
-
-### Pitfall 12: Empty State After Deployment
-
-**What goes wrong:**
-User opens the generated dashboard after setup. All 10 screens show blank. User thinks the dashboard is broken.
-
-**Prevention:**
-Generate an onboarding flow: detect zero-data state, show "Upload your first report" call-to-action on every empty screen. The EmptyState component should link directly to Tela 9 (Upload).
-
-## Phase-Specific Warnings
-
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| TechnicalConfig schema design | Conflating wireframe types with data types (Pitfall 1) | Separate type systems. TechnicalConfig references BlueprintConfig but adds data semantics. |
-| Config Resolver implementation | Missing cross-reference validation | Validate every section->dataSource binding. Fail fast with clear errors. |
-| Next.js scaffold generation | Using wrong Next.js patterns (Pitfall 8) | All templates verified against Next.js 16.1.6 docs. Route Handlers await params. App Router only. |
-| Upload/ETL pipeline | Underestimating complexity (Pitfall 4) | Build upload FIRST. Server-side parsing via Route Handlers. Validate with real Conta Azul exports. |
-| Dashboard screen generation | Monolithic components (Pitfall 3) | Enforce 150-line limit. Generate hooks, sections, and orchestrators separately. |
-| Compare mode implementation | Complexity explosion (Pitfall 2) | Shared `useCompareData()` hook. Cost-inversion rules in TechnicalConfig. |
-| Supabase migration generation | Missing RLS (Pitfall 5) | Automated check. Every CREATE TABLE has ENABLE ROW LEVEL SECURITY. |
-| Configuracoes (Tela 10) generation | Disconnected from other screens (Pitfall 7) | Cross-screen deps in TechnicalConfig. Shared `useAppConfig()` hook. |
-| Second client onboarding | Generator rigidity (Pitfall 6) | Synthetic second BlueprintConfig as design validation. Section-type dispatch. |
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| No visual diff when blueprint schema migrates | Operator does not know what changed in their wireframe after an update | Show a "migration applied" banner listing changes: "2 new section types available, 1 field added to KPI cards" |
+| Component picker showing all 25+ types in a flat list | Operator overwhelmed; picks wrong component type | Group by category: Charts, Tables, Inputs, Layout, Info. Show preview thumbnails. |
+| AI-generated blueprint replacing existing without comparison | Operator loses manual customizations | Show side-by-side diff of current vs generated. Allow per-section accept/reject. |
+| Edit mode changes lost on accidental navigation | Operator loses 20 minutes of work | Already partially addressed with `dirty` state and exit confirmation. Extend to browser `beforeunload` event. |
+| Wireframe redesign changes client-facing appearance without operator preview | Client sees unexpected visual changes in share link | Add "preview as client" mode that shows exactly what the share link renders |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **KPI Cards:** Sparklines update with real data, not static arrays from BlueprintConfig
-- [ ] **Compare Mode:** Comparison shows actual calculated differences, not hardcoded variation strings
-- [ ] **Compare Mode:** Cost-inversion colors are correct (cost decrease = green)
-- [ ] **Drill-down Tables:** Expanding a parent row fetches real sub-rows
-- [ ] **Upload Screen:** Missing columns show specific validation errors, not a generic crash
-- [ ] **Filters:** Changing a filter re-fetches data from Supabase with new parameter
-- [ ] **Config Tables:** CRUD persists to Supabase, not just local state
-- [ ] **Semaphore Colors:** Read from Configuracoes table, not from BlueprintConfig
-- [ ] **Period Selector:** Defaults to current month dynamically (`new Date()`)
-- [ ] **Skeleton Loading:** Every data-dependent component shows skeleton during loading
-- [ ] **Route Handlers:** `params` is awaited (Next.js 16 requirement)
-- [ ] **Auth:** Cookie-based via `@supabase/ssr`, not localStorage tokens
-- [ ] **RLS:** Every table has `ENABLE ROW LEVEL SECURITY` in migrations
+Things that appear complete but are missing critical pieces.
+
+- [ ] **Blueprint DB migration:** Seed function removed or deprecated, not just bypassed. Check that `seedFromFile` is not silently re-seeding on fresh deploys.
+- [ ] **Schema versioning:** `schemaVersion` field exists in stored JSON, not just in TypeScript types. Verify by querying Supabase directly.
+- [ ] **New section types:** Every new type has ALL 6 touchpoints: type definition, default factory, section renderer, component, property form, component picker entry.
+- [ ] **CSS isolation:** Render wireframe inside app shell with conflicting theme. Verify no app tokens leak into wireframe.
+- [ ] **Backward compatibility:** Load the v1.0 pilot config JSON (before v1.1 schema changes) and verify it renders without errors or blank sections.
+- [ ] **Optimistic locking:** Open two browser tabs, edit in both, save from both. Second save must show conflict warning, not silently overwrite.
+- [ ] **AI generation validation:** Generate a blueprint from a briefing. Verify all section types are in the registry. Verify all screen IDs are valid URL slugs. Verify no required fields are missing.
+- [ ] **Dark mode wireframe:** Toggle dark mode in FXL Core app. Verify wireframe rendering is unaffected (wireframe has its own dark/light mode independent of app).
+- [ ] **Component picker completeness:** Open component picker in edit mode. Verify every type in `BlueprintSection` union appears. Verify clicking each one adds a valid default section.
+- [ ] **Share link after migration:** Access a share link for the pilot client. Verify it loads from DB, not from file fallback.
 
 ## Recovery Strategies
 
+When pitfalls occur despite prevention, how to recover.
+
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Wireframe shape as data model | HIGH | New TechnicalConfig layer, rewrite all data hooks, possibly new schema |
-| Compare mode broken | MEDIUM | Build shared `useCompareData` hook, refactor per screen |
-| Monolithic components | MEDIUM | Extract hooks and sub-components (tedious but mechanical) |
-| Upload/ETL skipped | HIGH | Entire data pipeline needs building; schema may need revision |
-| RLS missing | HIGH | Audit every table, add RLS + policies, test every query |
-| Generator too rigid | MEDIUM | Refactor to section-type dispatch; may need regeneration |
-| Config screen disconnected | MEDIUM | Add shared config hooks and wire to consuming screens |
-| Wrong Next.js patterns | MEDIUM | Find-and-replace Pages Router patterns. Route Handler param fixes are mechanical. |
+| Dual source of truth (file + DB diverged) | LOW | Query DB for current state. Freeze file. Manually reconcile if needed. One-time operation. |
+| JSONB schema drift (old data incompatible) | MEDIUM | Write migration function for each version gap. Run `UPDATE blueprint_configs SET config = migrate(config)` per row. Test each migrated config in renderer. |
+| Component sprawl (inconsistent implementations) | HIGH | Audit all section components against contract interface. Refactor to registry. Requires touching every component file. |
+| Theme collision (app tokens in wireframe) | MEDIUM | Add CSS layer or `all: initial` to wireframe container. Find-and-replace direct `--primary` references in wireframe components with `--brand-primary` or `--wf-primary`. |
+| Broken pilot wireframe after schema change | LOW | Restore from `schemaVersion` migration. If no versioning exists: query Supabase for last known good config via `updated_at`, or restore from seed file. |
+| AI generation overwrites manual edits | LOW-MEDIUM | If using draft table: discard draft, keep production config. If wrote directly to production: restore from Supabase backup or version history (if implemented). Without either: manual recreation from memory/screenshots. |
+| Last-write-wins conflict (operator changes lost) | HIGH without prevention, LOW with optimistic locking | Without locking: lost data requires manual recreation. With locking: conflict is detected, operator resolves by choosing which version to keep. |
+
+## Pitfall-to-Phase Mapping
+
+How roadmap phases should address these pitfalls.
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Dual source of truth (Pitfall 1) | Phase 1 -- Blueprint DB migration | `seedFromFile` removed. No file-based imports in rendering paths. DB is the only read source. |
+| JSONB schema drift (Pitfall 2) | Phase 1 -- Schema versioning infrastructure | `schemaVersion` field in all stored configs. Migration function exists for v1->v2 transition. |
+| Component sprawl (Pitfall 3) | Phase 2 -- Component expansion, but refactor BEFORE adding | Registry pattern in place. Adding a new type = 1 registry entry + 2 new files (component + form). |
+| Theme collision (Pitfall 4) | Phase 1 -- Design system setup | Variable namespace documented. CSS isolation tested. No `--primary` references in wireframe components. |
+| Breaking existing wireframes (Pitfall 5) | Phase 1 -- Runtime validation | zod/valibot schema exists. `as BlueprintConfig` cast replaced with `parse()`. Backward compat test passes. |
+| AI generation inconsistency (Pitfall 6) | Phase 4 -- AI-assisted generation | Validation pipeline in place. Two-pass generation. Operator review before commit. |
+| Bidirectional sync conflicts (Pitfall 7) | Phase 1 -- Blueprint DB migration | Optimistic locking on save. `updated_at` in WHERE clause. Conflict UI exists. |
 
 ## Sources
 
-- FXL Core codebase: `tools/wireframe-builder/types/blueprint.ts`, `blueprint.config.ts` (1400+ lines with hardcoded display values)
-- FXL Core codebase: `clients/financeiro-conta-azul/docs/blueprint.md` (business rules: cost-inversion, cross-screen deps)
-- FXL Core codebase: `docs/build/seguranca.md` (AI-slop security warnings)
-- FXL Core codebase: `docs/build/premissas-gerais.md` (150-line limit, folder structure)
-- FXL Core codebase: `docs/build/techs/supabase.md` (RLS patterns, Edge Functions)
-- Next.js 16.1.6 docs (verified 2026-03-07): Route Handlers must await params, Turbopack default, App Router required
-- npm registry (verified 2026-03-07): recharts@3.8.0, @tanstack/react-query@5.90.21, nuqs@2.8.9
+- FXL Core codebase: `tools/wireframe-builder/lib/blueprint-store.ts` -- current seed/load/save implementation with `as BlueprintConfig` cast (line 16)
+- FXL Core codebase: `supabase/migrations/003_blueprint_configs.sql` -- `config jsonb NOT NULL` without schema constraint, anon RLS policies
+- FXL Core codebase: `tools/wireframe-builder/types/blueprint.ts` -- 15-variant `BlueprintSection` union, `BlueprintScreen` with optional `rows` field for backward compat
+- FXL Core codebase: `tools/wireframe-builder/components/sections/SectionRenderer.tsx` -- switch dispatch returning undefined for unmatched types
+- FXL Core codebase: `tools/wireframe-builder/lib/defaults.ts` -- 15-case switch for default section creation
+- FXL Core codebase: `src/pages/clients/FinanceiroContaAzul/WireframeViewer.tsx` -- `seedFromFile` pattern, `structuredClone` for edit mode, full-document `saveBlueprintToDb`
+- FXL Core codebase: `src/pages/SharedWireframeView.tsx` -- hardcoded `blueprintMap` for dynamic imports, parallel seed fallback
+- FXL Core codebase: `tools/wireframe-builder/types/branding.ts` -- `--brand-*` prefix convention, JSDoc noting "never --primary/--accent"
+- FXL Core codebase: `src/styles/globals.css` -- shadcn semantic tokens (`--primary`, `--accent`), chart tokens, sidebar tokens
+- FXL Core codebase: `tools/wireframe-builder/lib/config-resolver.ts` -- `schemaVersion: '1.0'` pattern in GenerationManifest
+- FXL Core PROJECT.md: KEY_DECISIONS -- `--brand-*` CSS var prefix to avoid collision, `seedFromFile` only-if-empty pattern
+- [Supabase JSONB docs](https://supabase.com/docs/guides/database/json) -- JSONB usage guidelines, schema validation options
+- [pg_jsonschema extension](https://supabase.com/docs/guides/database/extensions/pg_jsonschema) -- JSON Schema validation for Postgres CHECK constraints
+- [PostgreSQL JSONB migration guide](https://medium.com/@shinyjai2011/zero-downtime-postgresql-jsonb-migration-a-practical-guide-for-scalable-schema-evolution-9f74124ef4a1) -- version tracking, batched migration, transformation functions
+- [Design system implementation challenges](https://www.uxpin.com/studio/blog/solving-common-design-system-implementation-challenges/) -- component sprawl, version mismatches, governance
+- [AI code generation reproducibility](https://arxiv.org/html/2512.22387v2) -- 68.3% reproducibility rate, dependency gaps
+- [Addy Osmani's LLM coding workflow](https://addyosmani.com/blog/ai-coding-workflow/) -- incremental generation, human oversight, context management
 
 ---
-*Pitfalls research for: Automated BI dashboard generation from declarative BlueprintConfig*
-*Researched: 2026-03-07*
+*Pitfalls research for: Wireframe evolution -- file-to-DB migration, component expansion, design system coexistence, AI blueprint generation*
+*Researched: 2026-03-09*

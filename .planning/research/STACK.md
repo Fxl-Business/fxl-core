@@ -1,220 +1,399 @@
-# Stack Research
+# Stack Research: v1.1 Wireframe Evolution
 
-**Domain:** Automated BI Dashboard Generation from Declarative Blueprints
-**Researched:** 2026-03-07
-**Confidence:** HIGH
+**Domain:** Internal BI platform -- wireframe editor expansion, dynamic blueprints, briefing input
+**Researched:** 2026-03-09
+**Confidence:** HIGH (all recommendations verified against official docs/npm)
 
-## Context
+## Scope
 
-FXL needs to generate standalone BI dashboard applications from BlueprintConfig specifications. The generated projects live in separate repositories per client, deployed independently. The first target is `financeiro-conta-azul` -- a 10-screen financial dashboard consuming CSV/XLSX exports from Conta Azul.
+This research covers ONLY additions/changes needed for v1.1 features. The existing stack (React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, shadcn/ui, recharts 2.x, dnd-kit, lucide-react) is validated and unchanged.
 
-The existing FXL ecosystem already has strong opinions documented in the Tech Radar (`docs/build/tech-radar.md`). This research aligns with those decisions while recommending specific additions for the code generation use case.
+Five target areas:
+1. Expanded component library (charts, inputs, form builders)
+2. Blueprint data in Supabase (already stored, needs typed client + text rendering)
+3. Wireframe design system (white/black/gray/gold palette, dark+light mode)
+4. Claude Code access to Supabase data (MCP or MD export)
+5. Briefing input UI (forms, validation, persistence)
 
-## Recommended Stack
+---
 
-### Core Framework (Generated Projects)
+## Recommended Stack Additions
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Next.js (App Router) | 16.1.6 | Full-stack framework for generated dashboards | API Route Handlers needed for CSV/XLSX import, data processing, and server-side data aggregation. This is the exact "exception" case documented in FXL's Tech Radar -- generated dashboards need API routes in the same repo. Verified: Next.js 16.1.6 is current stable (npm registry, 2026-03-07). Turbopack is now the default bundler. |
-| React | 19.2.4 | UI layer | Next.js 16 uses React canary with all stable React 19 features. Server Components for data-heavy dashboard pages reduce client bundle. |
-| TypeScript | 5.9.3 | Type safety | Strict mode mandatory per FXL policy. The BlueprintConfig types already exist in `tools/wireframe-builder/types/blueprint.ts` -- generated projects will consume an extended version of these types. |
-| Tailwind CSS | 4.2.1 | Styling | FXL standard. Tailwind v4 is current but uses a new CSS-first config approach. **Decision point: use Tailwind 3.x (3.4.x) for generated projects initially** to match FXL Core's existing Tailwind 3 config and component styles. Migrating to v4 adds risk with no BI-specific benefit. |
-
-**Confidence:** HIGH -- Next.js version verified via npm registry and official docs. The Vite-to-Next.js shift is justified because generated dashboards need server-side data processing (CSV parsing, aggregation queries) that a pure SPA cannot handle without a separate backend.
-
-### Database & Auth
+### 1. Form Infrastructure (Briefing Input UI)
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| Supabase (PostgreSQL) | JS SDK 2.98.0 | Database, Auth, RLS | FXL standard (Tech Radar: Active). Already documented with RLS patterns, migration conventions, and auth flows in `docs/build/techs/supabase.md`. No reason to deviate. |
-| Supabase Auth | (included in SDK) | Authentication | Email + password as primary method per FXL policy. Magic link as alternative. RLS provides row-level data isolation per client organization. |
-| Supabase Edge Functions | (platform feature) | Server-side processing | For heavy data processing that should not run in Route Handlers (long CSV parsing, scheduled data refresh). Use when `service_role` key is needed. |
+| react-hook-form | ^7.71.2 | Form state management | De facto React form library. Uncontrolled by default = minimal re-renders. shadcn/ui Form component is built on it. Zero-config TypeScript support. 85M+ weekly npm downloads. |
+| zod | ^3.24.0 (v3 line) | Schema validation + type inference | TypeScript-first validation. Infers TS types from schemas = single source of truth for briefing data shapes. Stable with @hookform/resolvers. |
+| @hookform/resolvers | ^5.2.2 | Connects zod to react-hook-form | Official bridge. zodResolver plugs zod schemas into react-hook-form validation pipeline. |
 
-**Confidence:** HIGH -- Supabase is the documented FXL standard with detailed patterns already in place. SDK version verified via npm.
+**Why zod v3, NOT v4:** Zod v4 (4.3.x) has known type incompatibilities with @hookform/resolvers as of March 2026. GitHub issues #12829 and #799 document ZodError thrown instead of captured by zodResolver, and input/output type mismatches in TypeScript. The v3 line (3.24.x) is stable and battle-tested with the react-hook-form ecosystem. Upgrade to v4 when @hookform/resolvers ships native v4 support without workarounds.
 
-### Data Layer
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Zod | 4.3.6 | Schema validation | FXL standard (permitted without justification). Validates CSV import structure, API inputs, and BlueprintConfig at runtime. |
-| @tanstack/react-query | 5.90.21 | Async state management | FXL standard (permitted without justification). Handles dashboard data fetching with caching, background refetching, and stale-while-revalidate for real-time feel. |
-| xlsx (SheetJS Community) | 0.18.5 | XLSX/XLS/CSV parsing | The blueprint requires importing Conta Azul exports in XLS, XLSX, and CSV formats. SheetJS is the de facto standard for spreadsheet parsing in JS. Runs both server-side (Route Handlers) and client-side (validation preview). |
-| date-fns | 4.1.0 | Date manipulation | FXL standard (permitted without justification). Financial dashboards are date-intensive -- period filtering, month comparison, YoY calculations. Tree-shakeable, no Moment.js bulk. |
-
-**Confidence:** HIGH -- All libraries are either FXL-approved or de facto standards. Versions verified via npm.
-
-### Visualization
+### 2. Toast Notifications (Save/Sync Feedback)
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| recharts | 3.8.0 | Charts (bar, line, donut, waterfall, pareto) | FXL standard. The wireframe-builder already uses recharts extensively. Generated projects reuse the same chart component patterns. Recharts 3.x is a significant upgrade from the 2.x in FXL Core -- use 3.x for new generated projects. |
-| @tanstack/react-table | 8.21.3 | Data tables with sorting, filtering, drill-down | The blueprint has complex table requirements: drill-down, clickable rows, modals, view switching. TanStack Table is headless (works with any UI) and handles these patterns natively. More powerful than the custom DataTable in wireframe-builder for production use with real data. |
-| lucide-react | 0.577.0 | Icons | FXL standard. |
+| sonner | ^2.0.0 | Toast notifications | shadcn/ui's recommended toast library. Simpler API than Radix Toast primitive. Supports stacking, promise-based toasts (ideal for Supabase save operations), custom JSX. Integrated via `npx shadcn@latest add sonner`. |
 
-**Confidence:** HIGH -- recharts is the established FXL choice. TanStack Table is the dominant React table library. Versions verified via npm.
+### 3. Additional shadcn/ui Primitives
 
-### Supporting Libraries
+These are NOT npm packages -- generated via `npx shadcn@latest add [name]`. Each auto-installs the correct Radix primitive version.
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| nuqs | 2.8.9 | URL-based state for filters/periods | Dashboard filter state (period, centro de custo, comparison mode) should be URL-encoded so users can bookmark and share specific views. Works natively with Next.js App Router. |
-| papaparse | 5.5.3 | CSV-specific parsing | Alternative to xlsx for CSV-only parsing. Faster and streaming-capable for large CSV files. Use alongside xlsx when CSV is the primary format. |
-| clsx + tailwind-merge | (latest) | Class composition | Already used in FXL Core. Standard for conditional Tailwind classes in shadcn/ui components. |
-| shadcn/ui | (latest) | UI component primitives | FXL standard. Generated projects use the same component library. Copy components into generated project (shadcn/ui is copy-paste by design, not a dependency). |
+**Already installed:** button, badge, dialog, separator, scroll-area, command, sheet, select, input, label, popover, textarea.
 
-**Confidence:** HIGH for core libraries. MEDIUM for nuqs (strong fit but FXL has not used it before -- needs validation during implementation).
+| Component | Needed For | New Radix Dependency |
+|-----------|-----------|---------------------|
+| `form` | Briefing input with error states, field validation | react-hook-form (via npm install above) |
+| `checkbox` | Multi-select in briefing (data sources, features needed) | @radix-ui/react-checkbox |
+| `switch` | Toggle dark/light mode, boolean briefing options | @radix-ui/react-switch |
+| `tabs` | Briefing section navigation, blueprint text/visual toggle | @radix-ui/react-tabs |
+| `radio-group` | Single-select in briefing (project type, frequency) | @radix-ui/react-radio-group |
+| `accordion` | Collapsible briefing sections, settings panels | @radix-ui/react-accordion |
+| `card` | Form section containers, settings cards | None (pure Tailwind) |
+| `dropdown-menu` | Editor toolbar actions, export options | @radix-ui/react-dropdown-menu |
+| `sonner` | Toast wrapper component for shadcn styling | sonner (via npm install above) |
+| `slider` | Numeric config values (column count, chart height) | @radix-ui/react-slider |
 
-### Infrastructure & Deploy
+**Installation approach:** Run `npx shadcn@latest add [component]` one at a time. The CLI auto-manages Radix package versions. Do NOT manually add @radix-ui/* packages to avoid version conflicts.
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Vercel | (platform) | Hosting & deployment | FXL standard (Tech Radar: Active). Auto-deploys from GitHub. Preview URLs per PR. Handles Next.js natively (it is Vercel's own framework). |
-| GitHub | (platform) | Source control | FXL standard. One repo per client project. |
-| GitHub Actions | (platform) | CI/CD | FXL standard (Tech Radar: In evaluation). Use for: `tsc --noEmit` gate, lint, test on PR. Lightweight -- Vercel handles actual deployment. |
+### 4. Supabase MCP Server (Claude Code Access)
 
-**Confidence:** HIGH -- All are existing FXL standards.
+| Technology | Setup | Purpose | Why Recommended |
+|------------|-------|---------|-----------------|
+| Supabase MCP (hosted) | Claude Code config | Claude Code reads/queries blueprint data from Supabase | Official Supabase MCP server. OAuth auth (no PAT needed). `execute_sql` tool lets Claude query blueprint_configs directly. Project-scoped + read-only for safety. |
 
-### Code Generation Layer (in FXL Core)
+**This is NOT an npm dependency.** It is a Claude Code MCP server configuration added via CLI or settings file.
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Node.js fs + path | (built-in) | File generation | The code generator lives in FXL Core's `tools/` directory and outputs files to a target directory. No need for a template engine library -- TypeScript template literals with the existing BlueprintConfig types are sufficient. The config is already structured data; transformation to code is straightforward. |
-| Zod | 4.3.6 | Config validation before generation | Validate the TechnicalConfig (extended BlueprintConfig) before generating code. Catch errors at generation time, not at runtime in the generated project. |
-| ts-morph | (latest) | AST-based code generation (optional) | For generating TypeScript files that need to be syntactically correct. Consider only if string-based templates become error-prone. Start without it. |
+---
 
-**Confidence:** MEDIUM -- The code generation approach (template-based vs AST-based) needs validation during implementation. Starting with simple string templates is the pragmatic choice; ts-morph is a fallback if complexity grows.
+## What Stays Unchanged
 
-## Development Tools
+| Technology | Current Version | Why No Change |
+|------------|----------------|---------------|
+| react | ^18.3.1 | Stable. React 19 migration not needed and would break Clerk/shadcn. |
+| typescript | ^5.6.3 | Strict mode with zero `any`. Current. |
+| tailwindcss | ^3.4.15 | v4 migration is breaking (CSS-first config). shadcn/ui compatibility uncertain. |
+| vite | ^5.4.10 | Stable build tooling. No benefit from Vite 6 for this scope. |
+| @supabase/supabase-js | ^2.98.0 | Already used for blueprint_configs + comments. No API changes needed. |
+| @clerk/react | ^6.0.1 | Auth unchanged for v1.1. |
+| recharts | ^2.13.3 | All needed chart types available. See detailed analysis below. |
+| @dnd-kit/core + sortable | ^6.3.1 / ^10.0.0 | Drag-reorder works. No changes. |
+| lucide-react | ^0.460.0 | Icon library. Sufficient. |
+| react-markdown + remark-gfm | ^9.0.1 / ^4.0.0 | Used for blueprint text rendering. May also render briefing previews. |
+| yaml | ^2.4.0 | Frontmatter parsing. Unchanged. |
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| ESLint (flat config) | Linting | Next.js 16 uses flat ESLint config by default. `next build` no longer runs linter automatically (verified in docs). |
-| Biome | Fast lint + format alternative | Next.js 16 supports Biome natively. Consider as ESLint replacement for speed. |
-| Turbopack | Dev bundler | Default in Next.js 16. No configuration needed. |
-| Vitest | Unit/integration testing | Compatible with Next.js via `@vitejs/plugin-react`. Preferred over Jest for speed and Vite ecosystem alignment. |
+---
 
-## Installation (Generated Project)
+## What NOT to Add
+
+### Recharts Upgrade (2.x to 3.x): DEFER
+
+Recharts 3.8.0 is current but introduces breaking changes:
+- `CategoricalChartState` removed from event handlers and Customized components
+- Z-index now determined by SVG render order (JSX ordering matters)
+- `accessibilityLayer` defaults to true
+- `recharts-scale` and `react-smooth` internalized
+
+The current codebase uses standard recharts components (BarChart, LineChart, ComposedChart, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid) without CategoricalChartState or Customized. Migration would likely succeed, BUT:
+- v1.1 scope is already large (5 feature areas)
+- Recharts 2.x already has ALL needed chart types
+- Risk of subtle rendering regressions in existing 10-screen pilot wireframe
+
+**Recommendation:** Stay on recharts ^2.13.3 for v1.1. Migrate to 3.x in a dedicated maintenance phase later.
+
+### New Chart Libraries (nivo, visx, chart.js, echarts): NOT NEEDED
+
+Recharts 2.x already provides every chart type needed for expanded component library:
+- `RadarChart` + `Radar` + `PolarGrid` + `PolarAngleAxis` -- multi-axis comparisons
+- `Treemap` -- hierarchical data visualization
+- `FunnelChart` + `Funnel` -- conversion/pipeline funnels
+- `ScatterChart` + `Scatter` + `ZAxis` -- correlation analysis
+- `AreaChart` + `Area` -- cumulative/trend data
+- `Sankey` -- flow diagrams
+
+All available via standard `import { ... } from 'recharts'`. No new package needed. Just new renderer components following the existing pattern (section type + renderer + property form + ComponentPicker entry).
+
+### State Management (Redux, Zustand, Jotai): NOT NEEDED
+
+Current architecture uses:
+- Local state (`useState`) for UI state
+- Props for the BlueprintRenderer component tree
+- Supabase as persistent state (blueprint_configs, comments)
+- react-hook-form (new) will handle form state
+
+This is correct for a declarative rendering pipeline. Global state adds complexity without solving a real problem here.
+
+### tanstack-query / SWR: DEFERRED
+
+Explicitly out of scope per PROJECT.md: "React Query hooks with loading/error states -- v2 (AGEN-02)". Current direct Supabase calls are fine for v1.1.
+
+### CSS-in-JS / Styled Components: NOT NEEDED
+
+The design system already uses CSS custom properties with Tailwind utility classes. The wireframe palette (white/black/gray/gold) is achievable by adding scoped CSS variables -- no new styling paradigm needed.
+
+### Form Builder Libraries (formik, react-jsonschema-form, survey.js): NOT NEEDED
+
+react-hook-form + zod + shadcn Form component covers all briefing input needs. The briefing form structure is known at build time (not dynamically generated from JSON schema), so a generic form builder adds unnecessary abstraction.
+
+### Separate Rich Text Editor (tiptap, slate, lexical): NOT NEEDED
+
+Briefing input is structured Q&A (text fields, selects, checkboxes), not free-form rich text. react-markdown handles display of briefing previews. If rich text is ever needed, re-evaluate then.
+
+---
+
+## Installation Plan
 
 ```bash
-# Create project
-npx create-next-app@latest [client-slug]-dashboard --yes
+# New runtime dependencies
+npm install react-hook-form@^7.71.2 zod@^3.24.0 @hookform/resolvers@^5.2.2 sonner@^2.0.0
 
-# Core data layer
-npm install @supabase/supabase-js @tanstack/react-query zod date-fns
-
-# Visualization
-npm install recharts @tanstack/react-table lucide-react
-
-# Data import
-npm install xlsx papaparse
-
-# URL state
-npm install nuqs
-
-# UI (then add shadcn components via CLI)
-npx shadcn@latest init
-
-# Dev dependencies
-npm install -D vitest @testing-library/react @testing-library/jest-dom
+# New shadcn/ui components (run sequentially, each auto-installs Radix deps)
+npx shadcn@latest add form
+npx shadcn@latest add checkbox
+npx shadcn@latest add switch
+npx shadcn@latest add tabs
+npx shadcn@latest add radio-group
+npx shadcn@latest add accordion
+npx shadcn@latest add card
+npx shadcn@latest add dropdown-menu
+npx shadcn@latest add sonner
+npx shadcn@latest add slider
 ```
 
-## Installation (FXL Core -- Generator Tool)
+No new dev dependencies. The project already has vitest, typescript, and vite configured.
+
+---
+
+## Integration Details
+
+### A. Briefing Forms Integration
+
+react-hook-form + zod + shadcn Form compose into a type-safe form pipeline:
+
+```typescript
+// 1. Define schema (single source of truth for validation + types)
+import { z } from 'zod'
+
+const briefingSchema = z.object({
+  companyName: z.string().min(1, 'Required'),
+  industry: z.string().min(1, 'Required'),
+  dataSources: z.array(z.string()).min(1, 'Select at least one'),
+  frequency: z.enum(['daily', 'weekly', 'monthly']),
+  goals: z.string().optional(),
+})
+
+type BriefingFormData = z.infer<typeof briefingSchema>
+
+// 2. Wire into form (shadcn Form wraps react-hook-form)
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+const form = useForm<BriefingFormData>({
+  resolver: zodResolver(briefingSchema),
+})
+```
+
+The zod schema also validates data before Supabase persistence, and can be shared with Claude Code for blueprint generation context.
+
+### B. Supabase MCP Configuration
+
+Add to project-level MCP settings. Two options:
+
+**Option 1 -- Claude Code CLI (recommended):**
+```bash
+claude mcp add supabase --type http \
+  "https://mcp.supabase.com/mcp?project_ref=YOUR_PROJECT_REF&read_only=true"
+```
+
+**Option 2 -- Manual config file (.mcp.json at project root):**
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_PROJECT_REF&read_only=true"
+    }
+  }
+}
+```
+
+This gives Claude Code:
+- `execute_sql` -- query blueprint_configs, briefings, comments
+- `list_tables` -- discover/verify schema
+- `generate_typescript_types` -- keep Database types in sync
+
+Project-scoped (`project_ref`) + read-only = safe for development. Claude Code can read blueprints to generate improved versions from briefing context.
+
+**Fallback if MCP is unreliable:** Write a Makefile target that exports blueprint data as markdown:
+```bash
+# In Makefile
+blueprint-export:
+    supabase db dump --data-only -t blueprint_configs | \
+    node scripts/blueprint-to-md.js > .planning/blueprint-export.md
+```
+But MCP is strongly preferred because it provides live, queryable access without file sync overhead.
+
+### C. Blueprint Typed Client
+
+The blueprint_configs table already exists (migration 003). For v1.1, add type-safe queries:
 
 ```bash
-# No new dependencies needed for basic generation
-# The generator uses Node.js built-ins + existing Zod
-
-# Only if AST-based generation is needed later:
-npm install -D ts-morph
+# Generate types from existing schema
+npx supabase gen types typescript --project-id "$SUPABASE_PROJECT_REF" > src/lib/database.types.ts
 ```
+
+Then use in the Supabase client:
+
+```typescript
+import { createClient } from '@supabase/supabase-js'
+import type { Database } from './database.types'
+
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey)
+
+// Now typed: supabase.from('blueprint_configs').select('*')
+// Returns: { id: string, client_slug: string, config: Json, ... }
+```
+
+No schema migration needed for blueprint storage. The existing `config jsonb` column holds the full BlueprintConfig. Add a `briefings` table for the new briefing data:
+
+```sql
+CREATE TABLE public.briefings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_slug text NOT NULL,
+  version integer NOT NULL DEFAULT 1,
+  answers jsonb NOT NULL,
+  status text NOT NULL DEFAULT 'draft'
+    CHECK (status IN ('draft', 'complete', 'archived')),
+  created_by text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.briefings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "anon_all_briefings" ON briefings FOR ALL TO anon USING (true);
+CREATE INDEX idx_briefings_client_slug ON briefings(client_slug);
+```
+
+### D. Wireframe Design System (No New Libraries)
+
+The white/black/gray/gold palette uses the EXISTING CSS custom property system. Add a `.wireframe` scope class in globals.css:
+
+```css
+/* Wireframe-specific palette -- neutral + gold accent */
+.wireframe {
+  --background: 0 0% 100%;       /* Pure white */
+  --foreground: 0 0% 7%;         /* Near black */
+  --muted: 0 0% 96%;             /* Light gray */
+  --muted-foreground: 0 0% 45%;  /* Medium gray */
+  --border: 0 0% 90%;            /* Subtle gray */
+  --accent: 43 96% 56%;          /* Gold */
+  --card: 0 0% 100%;             /* White cards */
+  --card-foreground: 0 0% 7%;    /* Near black text */
+}
+
+.wireframe.dark {
+  --background: 0 0% 7%;         /* Near black */
+  --foreground: 0 0% 96%;        /* Near white */
+  --muted: 0 0% 12%;             /* Dark gray */
+  --muted-foreground: 0 0% 65%;  /* Medium gray */
+  --border: 0 0% 17%;            /* Subtle dark border */
+  --accent: 43 85% 50%;          /* Gold (desaturated) */
+  --card: 0 0% 9%;               /* Dark card */
+  --card-foreground: 0 0% 96%;   /* Near white text */
+}
+```
+
+This scoping means wireframe components automatically use the neutral palette while the FXL Core app shell keeps its blue-gray theme. Client branding (--brand-*) overrides work unchanged because they target chart colors and specific brand elements, not the base palette.
+
+### E. New Recharts Components (No New Imports Needed)
+
+For expanded chart types, use existing recharts 2.x:
+
+```typescript
+// All available in recharts ^2.13.3 -- no new packages
+import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts'
+import { Treemap } from 'recharts'
+import { FunnelChart, Funnel, LabelList } from 'recharts'
+import { ScatterChart, Scatter, ZAxis } from 'recharts'
+import { AreaChart, Area } from 'recharts'
+```
+
+Each new chart type follows the established pattern:
+1. New type in `BlueprintSection` union (`tools/wireframe-builder/types/blueprint.ts`)
+2. New component (`tools/wireframe-builder/components/RadarChartComponent.tsx`, etc.)
+3. New renderer or case in SectionRenderer switch
+4. New property form (`tools/wireframe-builder/components/editor/property-forms/`)
+5. Entry in ComponentPicker for editor add-section flow
+
+---
 
 ## Alternatives Considered
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| Next.js 16 (App Router) | Vite + React SPA | Only if the dashboard has zero server-side needs (no CSV processing, no API routes). Unlikely for BI dashboards with data import. |
-| Supabase | Prisma + PostgreSQL (self-hosted) | Only if client requires on-premise database or Supabase's free tier limits are exceeded. Prisma 7.4.2 is excellent but adds operational complexity FXL does not need. |
-| Supabase Auth | NextAuth/Auth.js 4.24.x | Only if the client requires OAuth providers not supported by Supabase (rare). NextAuth adds complexity; Supabase Auth is simpler and already standardized at FXL. |
-| recharts | Tremor / Nivo / Victory | Only if recharts cannot handle a specific visualization. Tremor is beautiful but opinionated (locks you into its design system). Nivo is powerful but heavier. FXL already has recharts expertise and component library. |
-| xlsx (SheetJS) | ExcelJS | If the generated dashboard needs to also WRITE Excel files (reports export). ExcelJS is better at writing; SheetJS is better at reading/parsing. For import-only (Conta Azul use case), SheetJS is sufficient. |
-| @tanstack/react-table | AG Grid / custom tables | AG Grid is more feature-complete but adds 200KB+ to bundle and has a commercial license for advanced features. TanStack Table is headless, free, and covers the drill-down/modal patterns in the blueprint. |
-| Template string generation | Plop / Hygen / Yeoman | Full scaffolding tools add overhead for what is essentially "read BlueprintConfig, write files." FXL's generator is a custom tool anyway (it reads FXL-specific config). Generic scaffolders would need heavy customization. |
-| Tailwind 3.x | Tailwind 4.x | Use Tailwind 4 only after FXL Core migrates. Generated projects should match the component library source. Tailwind 4's CSS-first config is a breaking change from the JS-based tailwind.config.ts. |
+| Recommended | Alternative | Why Not |
+|-------------|-------------|---------|
+| react-hook-form + zod | formik + yup | Formik re-renders on every keystroke (controlled). Yup has weaker TypeScript type inference. shadcn/ui Form component is built specifically on RHF. |
+| zod v3 (3.24.x) | zod v4 (4.3.x) | Type incompatibilities with @hookform/resolvers documented in multiple GitHub issues. Upgrade when resolver ecosystem stabilizes. |
+| sonner for toasts | @radix-ui/react-toast (shadcn toast) | Sonner has simpler API, better stacking behavior, promise-based toasts for async operations. shadcn recommends sonner. |
+| Supabase MCP (hosted) | Custom Edge Function exporting MD | MCP provides live SQL access + type generation. Edge Function needs deploy + maintenance. |
+| Supabase MCP (hosted) | Local Supabase MCP (localhost:54321) | Hosted works without running local Supabase. Production data accessible directly. |
+| CSS variable scoping | CSS Modules / styled-components | Already using CSS vars for theming. New pattern creates inconsistency. |
+| recharts 2.x (keep) | recharts 3.x (upgrade) | Breaking changes + large v1.1 scope = unnecessary risk. Upgrade separately later. |
+| recharts 2.x (keep) | nivo / visx / echarts | Recharts already has all needed chart types. Switching = rewrite 4+ chart components + all property forms. |
+| react-hook-form | tanstack-form | TanStack Form is newer with less ecosystem adoption. shadcn/ui Form is built on RHF. |
 
-## What NOT to Use
+---
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| Prisma for generated projects | Adds ORM complexity on top of Supabase. Supabase client already provides typed queries, RLS, and migrations. Double abstraction. | Supabase JS client directly |
-| Redux / Zustand for dashboard state | React Query handles async state (data fetching). URL params handle filter state. Local state handles UI state. No global state store needed. | @tanstack/react-query + nuqs + useState |
-| axios | Supabase client handles DB queries. fetch() handles any external API calls. axios adds unnecessary bundle size. FXL explicitly prohibits it. | Native fetch + Supabase client |
-| Moment.js | Large bundle (300KB+), mutable API, officially in maintenance mode. | date-fns (tree-shakeable, immutable) |
-| CSS-in-JS (styled-components, emotion) | FXL standard is Tailwind. CSS-in-JS adds runtime cost and conflicts with server components. | Tailwind CSS |
-| D3.js directly | Low-level, imperative. recharts provides the declarative React wrapper FXL already uses. | recharts |
-| Metabase / Superset embedded | Heavy, requires separate infrastructure, fights FXL's custom design system and component library. | Custom dashboard with recharts + TanStack Table |
-| create-react-app (CRA) | Deprecated. No longer maintained. | Next.js (for generated projects) or Vite (for SPAs) |
-| Webpack | Turbopack is now default in Next.js 16. Webpack is the fallback, not the primary. | Turbopack (default) |
-
-## Stack Patterns by Variant
-
-**If the generated dashboard is read-only (no data import, data loaded externally):**
-- Skip xlsx/papaparse
-- Supabase client-only queries are sufficient
-- Could potentially use Vite + React SPA (no API routes needed)
-- Still recommend Next.js for consistency across generated projects
-
-**If the generated dashboard needs multi-tenant isolation:**
-- Supabase RLS with organization_id pattern (already documented in `docs/build/techs/supabase.md`)
-- Add organization selector in dashboard header
-- Edge Functions for cross-tenant aggregation (admin views)
-
-**If the generated dashboard needs scheduled data refresh (future):**
-- Supabase Edge Functions with cron triggers
-- Or Vercel Cron Jobs (built into Next.js on Vercel)
-- Not needed for v1 (manual upload via Tela 9)
-
-**If a future generated project needs Python data processing:**
-- Supabase Edge Functions support Deno (not Python directly)
-- Consider a separate Python microservice (FXL Tech Radar has Python "in evaluation")
-- Route Handler in Next.js calls the Python service
-- Not needed for v1 dashboard generation
-
-## Version Compatibility
+## Version Compatibility Matrix
 
 | Package | Compatible With | Notes |
 |---------|-----------------|-------|
-| next@16.1.6 | react@19.2.4, react-dom@19.2.4 | Next.js 16 requires React 19 canary. Uses canary releases with all stable React 19 features. |
-| @supabase/supabase-js@2.98.0 | next@16.x | Supabase JS client works in both client and server components. Use `@supabase/ssr` helper for server-side auth in Next.js. |
-| recharts@3.8.0 | react@19.x | recharts 3.x supports React 19. Major upgrade from 2.x with improved performance. |
-| @tanstack/react-query@5.90.x | react@19.x | Full React 19 support. Use with Next.js App Router via QueryClientProvider in root layout. |
-| @tanstack/react-table@8.21.x | react@19.x | Headless, no React version constraints. |
-| tailwindcss@3.4.x | next@16.x | Tailwind 3 works with Next.js 16 via PostCSS. Do NOT use Tailwind 4 yet. |
-| shadcn/ui | tailwindcss@3.x, react@19.x | shadcn/ui components are copied in. Ensure generated project uses matching Tailwind version. |
-| nuqs@2.8.x | next@16.x | Built specifically for Next.js App Router. Handles URL state with server component support. |
+| react-hook-form@^7.71.2 | react@^18.3.1 | Requires React 16.8+. Fully tested with React 18. |
+| zod@^3.24.0 | @hookform/resolvers@^5.2.2 | v3 line stable. Resolvers@5.2.x has native v3 support. |
+| @hookform/resolvers@^5.2.2 | react-hook-form@^7.x, zod@>=3.22.0 | Requires zod >=3.22.0 for proper module resolution. |
+| sonner@^2.0.0 | react@^18.3.1 | Standalone. No Radix dependency. |
+| recharts@^2.13.3 | react@^18.3.1 | All chart types (Radar, Treemap, Funnel, Scatter, Area) available. |
+| shadcn/ui components | @radix-ui/* (auto-managed by CLI) | CLI pins correct Radix versions per component. |
+| Supabase MCP (hosted) | @supabase/supabase-js@^2.x | MCP reads same DB. No version coupling with app client. |
 
-## Key Architectural Decision: Why NOT Vite + React SPA
+---
 
-The FXL Tech Radar marks Vite + React as the default and Next.js as an exception. Generated BI dashboards are precisely the exception case, for these reasons:
+## Summary of Changes
 
-1. **CSV/XLSX Processing**: Parsing large spreadsheet files (Conta Azul exports can be thousands of rows) should happen server-side. Route Handlers in Next.js handle this without a separate backend service.
+**4 npm packages to install:**
+- `react-hook-form` -- form state for briefing UI
+- `zod` -- validation schemas for briefing + blueprint data
+- `@hookform/resolvers` -- zod-to-RHF bridge
+- `sonner` -- toast notifications
 
-2. **Data Aggregation**: KPIs, chart data, and table rollups involve SQL queries that benefit from server-side execution (closer to database, no client bundle overhead).
+**10 shadcn/ui components to add** (via CLI, auto-install Radix deps):
+- form, checkbox, switch, tabs, radio-group, accordion, card, dropdown-menu, sonner, slider
 
-3. **Auth Flow**: Supabase Auth with Next.js App Router uses `@supabase/ssr` for proper cookie-based session management. Pure SPA auth is simpler but less secure (token in localStorage vs httpOnly cookies).
+**1 MCP server to configure** (not a code dependency):
+- Supabase MCP for Claude Code access to blueprint data
 
-4. **Vercel Optimization**: Vercel is the FXL deploy standard. Next.js on Vercel gets edge caching, ISR, and zero-config serverless functions. A Vite SPA on Vercel is just static hosting -- wastes the platform.
+**1 SQL migration** (new table):
+- `briefings` table for briefing input persistence
 
-5. **Consistency**: All generated dashboard projects use the same framework. One code generator, one deployment pattern, one debugging mental model.
+**0 existing packages changed.** Everything else stays at current versions.
+
+---
 
 ## Sources
 
-- Next.js 16.1.6 official docs (https://nextjs.org/docs/app/getting-started/installation) -- verified via WebFetch 2026-03-07. Confirmed: Turbopack default, React 19 canary, App Router standard.
-- Next.js Route Handlers docs (https://nextjs.org/docs/app/api-reference/file-conventions/route) -- verified via WebFetch 2026-03-07. Confirmed: FormData handling, streaming, standard Web APIs.
-- npm registry -- all version numbers verified via `npm view [package] version` on 2026-03-07.
-- FXL internal documentation -- `docs/build/tech-radar.md`, `docs/build/techs/supabase.md`, `docs/build/techs/vercel.md`, `docs/build/techs/nextjs.md`, `docs/build/premissas-gerais.md`, `docs/build/seguranca.md`.
-- FXL existing codebase -- `tools/wireframe-builder/types/blueprint.ts`, `clients/financeiro-conta-azul/wireframe/blueprint.config.ts`.
+- [react-hook-form npm](https://www.npmjs.com/package/react-hook-form) -- v7.71.2 verified current
+- [zod npm](https://www.npmjs.com/package/zod) -- v3.24.x and v4.3.6 both maintained
+- [Zod v4 + hookform resolvers issues](https://github.com/react-hook-form/react-hook-form/issues/12829) -- type incompatibilities documented
+- [@hookform/resolvers npm](https://www.npmjs.com/package/@hookform/resolvers) -- v5.2.2 verified current
+- [shadcn/ui forms docs](https://ui.shadcn.com/docs/forms/react-hook-form) -- RHF + zod integration guide
+- [shadcn/ui component list](https://ui.shadcn.com/docs/components) -- available primitives
+- [recharts npm](https://www.npmjs.com/package/recharts) -- v3.8.0 current, v2.x still works
+- [recharts 3.0 migration guide](https://github.com/recharts/recharts/wiki/3.0-migration-guide) -- breaking changes documented
+- [recharts specialized charts](https://deepwiki.com/recharts/recharts/3.3-specialized-charts) -- Treemap, Funnel, Radar confirmed available in 2.x
+- [Supabase MCP docs](https://supabase.com/docs/guides/getting-started/mcp) -- hosted setup, project scoping
+- [Supabase MCP GitHub](https://github.com/supabase-community/supabase-mcp) -- configuration, auth, tools list
+- [Supabase type generation](https://supabase.com/docs/guides/api/rest/generating-types) -- CLI command for Database types
+- [sonner npm](https://www.npmjs.com/package/sonner) -- v2.x, recommended by shadcn/ui
 
 ---
-*Stack research for: Automated BI Dashboard Generation from Declarative Blueprints*
-*Researched: 2026-03-07*
+*Stack research for: FXL Core v1.1 Wireframe Evolution*
+*Researched: 2026-03-09*
