@@ -36,7 +36,7 @@ function Sparkline({ points, strokeColor }: { points: number[]; strokeColor?: st
       preserveAspectRatio="none"
       className="mt-2 h-8 w-full"
     >
-      <polyline points={coords} fill="none" stroke={strokeColor ?? '#9CA3AF'} strokeWidth="1.5" />
+      <polyline points={coords} fill="none" stroke={strokeColor ?? 'var(--wf-muted)'} strokeWidth="1.5" />
     </svg>
   )
 }
@@ -53,10 +53,10 @@ export default function KpiCardFull({
   brandPrimary,
 }: Props) {
   return (
-    <div className={cn('rounded-lg border border-gray-200 bg-white p-4 shadow-sm', wide && 'col-span-2')}>
-      <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-gray-800" style={brandPrimary ? { color: brandPrimary } : undefined}>{value}</p>
-      {sub && <p className="mt-0.5 text-xs text-gray-400">{sub}</p>}
+    <div className={cn('rounded-lg border border-wf-card-border bg-wf-card p-4', wide && 'col-span-2')}>
+      <p className="text-[10px] font-medium uppercase tracking-wider text-wf-muted">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-wf-heading" style={brandPrimary ? { color: brandPrimary } : undefined}>{value}</p>
+      {sub && <p className="mt-0.5 text-xs text-wf-muted">{sub}</p>}
       {compareMode && semaforo && (
         <div className="mt-1.5 flex items-center gap-1.5">
           <span className={cn('h-2 w-2 rounded-full flex-shrink-0', SEMAFORO[semaforo].dot)} />
@@ -67,10 +67,13 @@ export default function KpiCardFull({
       )}
       {compareMode && variation && (
         <span
-          className={cn(
-            'mt-1.5 inline-block rounded px-1.5 py-0.5 text-[11px] font-medium',
-            variationPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700',
-          )}
+          className="mt-1.5 inline-block rounded px-1.5 py-0.5 text-[11px] font-medium"
+          style={{
+            backgroundColor: variationPositive
+              ? 'color-mix(in srgb, var(--wf-positive) 10%, transparent)'
+              : 'color-mix(in srgb, var(--wf-negative) 10%, transparent)',
+            color: variationPositive ? 'var(--wf-positive)' : 'var(--wf-negative)',
+          }}
         >
           {variation}
         </span>

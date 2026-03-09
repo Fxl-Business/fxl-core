@@ -32,9 +32,9 @@ function Row({ row, columns, depth }: { row: DrilRow; columns: DrilColumn[]; dep
       <tr
         onClick={() => hasKids && setOpen((v) => !v)}
         className={cn(
-          'border-t border-gray-100 transition-colors',
-          hasKids && 'cursor-pointer hover:bg-gray-50',
-          row.isTotal && 'bg-gray-50',
+          'border-t border-wf-card-border transition-colors',
+          hasKids && 'cursor-pointer hover:bg-wf-canvas',
+          row.isTotal && 'bg-wf-canvas',
           row.className,
         )}
       >
@@ -43,7 +43,7 @@ function Row({ row, columns, depth }: { row: DrilRow; columns: DrilColumn[]; dep
             key={col.key}
             className={cn(
               'px-4 py-2.5 text-xs',
-              row.isTotal ? 'font-semibold text-gray-800' : 'text-gray-600',
+              row.isTotal ? 'font-semibold text-wf-heading' : 'text-wf-body',
               col.align === 'right' && 'text-right',
               col.align === 'center' && 'text-center',
             )}
@@ -54,7 +54,7 @@ function Row({ row, columns, depth }: { row: DrilRow; columns: DrilColumn[]; dep
                 style={{ paddingLeft: depth * 16 }}
               >
                 {hasKids && (
-                  <span className="w-4 flex-shrink-0 text-gray-400 text-[11px]">
+                  <span className="w-4 flex-shrink-0 text-wf-muted text-[11px]">
                     {open ? '▾' : '▸'}
                   </span>
                 )}
@@ -75,18 +75,18 @@ function Row({ row, columns, depth }: { row: DrilRow; columns: DrilColumn[]; dep
 
 export default function DrillDownTable({ title, subtitle, columns, rows, brandPrimary }: Props) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-lg border border-wf-card-border bg-wf-card overflow-hidden">
       {title && (
-        <div className="border-b border-gray-200 px-4 py-3">
-          <p className="text-sm font-semibold text-gray-700">{title}</p>
-          {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+        <div className="border-b border-wf-card-border px-4 py-3">
+          <p className="text-sm font-semibold text-wf-heading">{title}</p>
+          {subtitle && <p className="text-xs text-wf-muted mt-0.5">{subtitle}</p>}
         </div>
       )}
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr
-              className={brandPrimary ? undefined : 'bg-gray-100'}
+              className={brandPrimary ? undefined : 'bg-wf-table-header'}
               style={brandPrimary ? { backgroundColor: brandPrimary } : undefined}
             >
               {columns.map((col) => (
@@ -94,7 +94,7 @@ export default function DrillDownTable({ title, subtitle, columns, rows, brandPr
                   key={col.key}
                   className={cn(
                     'px-4 py-2.5 font-medium whitespace-nowrap',
-                    brandPrimary ? 'text-white' : 'text-gray-500',
+                    brandPrimary ? 'text-wf-table-header-fg' : 'text-wf-table-header-fg',
                     col.align === 'right' && 'text-right',
                     col.align === 'center' && 'text-center',
                     (!col.align || col.align === 'left') && 'text-left',

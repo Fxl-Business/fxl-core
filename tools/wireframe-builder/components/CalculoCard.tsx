@@ -27,15 +27,15 @@ export default function CalculoCard({
   comparePeriodLabel,
 }: CalculoCardProps) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+    <div className="rounded-lg border border-wf-card-border bg-wf-card">
       {title && (
-        <div className="border-b border-gray-200 px-4 py-2">
-          <p className="text-sm font-semibold text-gray-700">{title}</p>
+        <div className="border-b border-wf-card-border px-4 py-2">
+          <p className="text-sm font-semibold text-wf-heading">{title}</p>
         </div>
       )}
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-slate-800 text-white">
+          <tr className="bg-wf-table-header text-wf-table-header-fg">
             <th className="px-3 py-2 text-left font-medium">Resumo</th>
             <th className="px-3 py-2 text-right font-medium">Valores</th>
             <th className="px-3 py-2 text-right font-medium">% s/ Faturamento</th>
@@ -52,49 +52,57 @@ export default function CalculoCard({
         <tbody>
           {rows.map((row, i) => {
             const bgClass = row.highlight
-              ? 'bg-green-50 font-semibold border-t border-green-200'
+              ? 'font-semibold border-t'
               : i % 2 === 0
-                ? 'bg-white'
-                : 'bg-gray-50'
+                ? 'bg-wf-card'
+                : 'bg-wf-canvas'
 
             return (
-              <tr key={i} className={bgClass}>
+              <tr
+                key={i}
+                className={bgClass}
+                style={row.highlight ? {
+                  backgroundColor: 'color-mix(in srgb, var(--wf-positive) 10%, transparent)',
+                  borderColor: 'color-mix(in srgb, var(--wf-positive) 30%, transparent)',
+                } : undefined}
+              >
                 <td className="px-3 py-2 text-left">
                   {row.operator && (
-                    <span className="mr-1.5 font-mono text-[10px] text-gray-400">
+                    <span className="mr-1.5 font-mono text-[10px] text-wf-muted">
                       {row.operator}
                     </span>
                   )}
-                  <span className="text-gray-800">{row.label}</span>
+                  <span className="text-wf-heading">{row.label}</span>
                 </td>
                 <td
-                  className={`px-3 py-2 text-right tabular-nums ${
-                    isNegativeValue(row.value) ? 'text-red-600' : 'text-blue-700'
-                  }`}
+                  className="px-3 py-2 text-right tabular-nums"
+                  style={{ color: isNegativeValue(row.value) ? 'var(--wf-negative)' : 'var(--wf-accent)' }}
                 >
                   {row.value}
                 </td>
-                <td className="px-3 py-2 text-right text-gray-500">
+                <td className="px-3 py-2 text-right text-wf-muted">
                   {row.pct ?? '—'}
                 </td>
                 {compareMode && (
                   <>
-                    <td className="px-3 py-2 text-right tabular-nums text-gray-600">
+                    <td className="px-3 py-2 text-right tabular-nums text-wf-body">
                       {row.valueCompare ?? '—'}
                     </td>
                     <td className="px-3 py-2 text-right">
                       {row.variation ? (
                         <span
-                          className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-medium ${
-                            row.variationPositive
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}
+                          className="inline-block rounded px-1.5 py-0.5 text-[10px] font-medium"
+                          style={{
+                            backgroundColor: row.variationPositive
+                              ? 'color-mix(in srgb, var(--wf-positive) 15%, transparent)'
+                              : 'color-mix(in srgb, var(--wf-negative) 15%, transparent)',
+                            color: row.variationPositive ? 'var(--wf-positive)' : 'var(--wf-negative)',
+                          }}
                         >
                           {row.variation}
                         </span>
                       ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-wf-muted">—</span>
                       )}
                     </td>
                   </>

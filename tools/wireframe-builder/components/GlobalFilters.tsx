@@ -16,15 +16,15 @@ type Props = {
 
 export default function GlobalFilters({ filters }: Props) {
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+    <div className="flex flex-wrap items-end gap-3 rounded-lg border border-wf-card-border bg-wf-canvas px-4 py-3">
       {filters.map((filter) => (
         <div key={filter} className="flex flex-col gap-1">
-          <label className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+          <label className="text-[10px] font-medium uppercase tracking-wide text-wf-muted">
             {FILTER_LABELS[filter]}
           </label>
           <select
             disabled
-            className="cursor-default rounded border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-400 shadow-sm"
+            className="cursor-default rounded border border-wf-card-border bg-wf-card px-2.5 py-1.5 text-xs text-wf-muted"
           >
             <option>Todos</option>
           </select>

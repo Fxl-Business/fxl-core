@@ -14,17 +14,17 @@ export default function DataTable({ title, columns, rowCount = 5, brandPrimary }
   const rows = Array.from({ length: rowCount }, (_, i) => i)
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+    <div className="rounded-lg border border-wf-card-border bg-wf-card">
       {title && (
-        <div className="border-b border-gray-200 px-4 py-3">
-          <p className="text-sm font-semibold text-gray-700">{title}</p>
+        <div className="border-b border-wf-card-border px-4 py-3">
+          <p className="text-sm font-semibold text-wf-heading">{title}</p>
         </div>
       )}
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr
-              className={brandPrimary ? undefined : 'bg-gray-100'}
+              className={brandPrimary ? undefined : 'bg-wf-table-header'}
               style={brandPrimary ? { backgroundColor: brandPrimary } : undefined}
             >
               {columns.map((col) => (
@@ -32,7 +32,7 @@ export default function DataTable({ title, columns, rowCount = 5, brandPrimary }
                   key={col.key}
                   className={cn(
                     'px-4 py-2.5 font-medium',
-                    brandPrimary ? 'text-white' : 'text-gray-500',
+                    brandPrimary ? 'text-wf-table-header-fg' : 'text-wf-table-header-fg',
                     col.align === 'right' && 'text-right',
                     col.align === 'center' && 'text-center',
                     (!col.align || col.align === 'left') && 'text-left',
@@ -45,12 +45,12 @@ export default function DataTable({ title, columns, rowCount = 5, brandPrimary }
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row} className="border-t border-gray-200">
+              <tr key={row} className="border-t border-wf-card-border">
                 {columns.map((col) => (
                   <td
                     key={col.key}
                     className={cn(
-                      'px-4 py-2.5 text-gray-400',
+                      'px-4 py-2.5 text-wf-muted',
                       col.align === 'right' && 'text-right',
                       col.align === 'center' && 'text-center',
                     )}

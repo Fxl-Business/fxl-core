@@ -34,16 +34,16 @@ export default function UploadSection({
   successMessage, errorMessages, history,
 }: Props) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-      <p className="mb-3 text-sm font-semibold text-gray-700">{label}</p>
+    <div className="rounded-lg border border-wf-card-border bg-wf-card p-5">
+      <p className="mb-3 text-sm font-semibold text-wf-heading">{label}</p>
 
-      <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-8 py-10 cursor-default">
-        <Upload className="mb-3 h-8 w-8 text-gray-300" />
-        <p className="text-sm font-medium text-gray-500">
+      <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-wf-card-border bg-wf-canvas px-8 py-10 cursor-default">
+        <Upload className="mb-3 h-8 w-8 text-wf-muted" />
+        <p className="text-sm font-medium text-wf-muted">
           Arraste o arquivo aqui ou{' '}
-          <span className="underline text-gray-600">clique para selecionar</span>
+          <span className="underline text-wf-body">clique para selecionar</span>
         </p>
-        <p className="mt-1.5 text-xs text-gray-400">
+        <p className="mt-1.5 text-xs text-wf-muted">
           Formatos aceitos: {acceptedFormats.join(', ')}
         </p>
       </div>
@@ -85,32 +85,32 @@ export default function UploadSection({
 
       {history && history.length > 0 && (
         <div className="mt-5">
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-wf-muted">
             Histórico de Importações
           </p>
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
+          <div className="overflow-x-auto rounded-lg border border-wf-card-border">
             <table className="w-full text-xs">
-              <thead className="bg-gray-50">
+              <thead className="bg-wf-canvas">
                 <tr>
                   {['Data', 'Tipo', 'Período', 'Registros', 'Status', 'Ação'].map((h) => (
-                    <th key={h} className="px-3 py-2 text-left font-medium text-gray-500">{h}</th>
+                    <th key={h} className="px-3 py-2 text-left font-medium text-wf-muted">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {history.map((h) => (
-                  <tr key={h.id} className="border-t border-gray-100">
-                    <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{h.date}</td>
-                    <td className="px-3 py-2 text-gray-600">{h.type}</td>
-                    <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{h.period}</td>
-                    <td className="px-3 py-2 text-right text-gray-600 tabular-nums">{h.records}</td>
+                  <tr key={h.id} className="border-t border-wf-card-border">
+                    <td className="px-3 py-2 text-wf-body whitespace-nowrap">{h.date}</td>
+                    <td className="px-3 py-2 text-wf-body">{h.type}</td>
+                    <td className="px-3 py-2 text-wf-body whitespace-nowrap">{h.period}</td>
+                    <td className="px-3 py-2 text-right text-wf-body tabular-nums">{h.records}</td>
                     <td className="px-3 py-2">
                       <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium', STATUS_STYLES[h.status])}>
                         {STATUS_LABEL[h.status]}
                       </span>
                     </td>
                     <td className="px-3 py-2">
-                      <button type="button" disabled className="cursor-default rounded border border-gray-200 px-2 py-0.5 text-gray-400">
+                      <button type="button" disabled className="cursor-default rounded border border-wf-card-border px-2 py-0.5 text-wf-muted">
                         Ver detalhes
                       </button>
                     </td>

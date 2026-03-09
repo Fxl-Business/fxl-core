@@ -1,5 +1,3 @@
-import { cn } from '@/lib/utils'
-
 type Props = {
   label: string
   value: string
@@ -10,23 +8,24 @@ type Props = {
 
 export default function KpiCard({ label, value, variation, description, variationPositive = true }: Props) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <p className="text-xs font-medium uppercase tracking-wide text-gray-400">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-gray-800">{value}</p>
+    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
+      <p className="text-xs font-medium uppercase tracking-wide text-wf-muted">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-wf-heading">{value}</p>
       {variation && (
         <span
-          className={cn(
-            'mt-1.5 inline-block rounded px-1.5 py-0.5 text-xs font-medium',
-            variationPositive
-              ? 'bg-green-50 text-green-700'
-              : 'bg-red-50 text-red-700',
-          )}
+          className="mt-1.5 inline-block rounded px-1.5 py-0.5 text-xs font-medium"
+          style={{
+            backgroundColor: variationPositive
+              ? 'color-mix(in srgb, var(--wf-positive) 10%, transparent)'
+              : 'color-mix(in srgb, var(--wf-negative) 10%, transparent)',
+            color: variationPositive ? 'var(--wf-positive)' : 'var(--wf-negative)',
+          }}
         >
           {variation}
         </span>
       )}
       {description && (
-        <p className="mt-1.5 text-xs text-gray-400">{description}</p>
+        <p className="mt-1.5 text-xs text-wf-muted">{description}</p>
       )}
     </div>
   )

@@ -87,7 +87,7 @@ function ClickableTableRenderer({ section, compareMode, brandPrimary }: { sectio
         onClose={() => setModal(false)}
         footer={section.modalFooter}
       >
-        <p className="text-xs text-gray-400">Detalhamento em desenvolvimento.</p>
+        <p className="text-xs text-wf-muted">Detalhamento em desenvolvimento.</p>
       </WireframeModal>
     </>
   )
