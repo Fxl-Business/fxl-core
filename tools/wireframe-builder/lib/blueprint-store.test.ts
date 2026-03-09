@@ -6,12 +6,15 @@ import type { BlueprintConfig } from '../types/blueprint'
 // ---------------------------------------------------------------------------
 
 const mockMaybeSingle = vi.fn()
+const mockSingle = vi.fn()
 const mockSelect = vi.fn(() => ({ eq: mockEq }))
-const mockEq = vi.fn(() => ({ maybeSingle: mockMaybeSingle }))
+const mockEq = vi.fn(() => ({ maybeSingle: mockMaybeSingle, eq: mockEq, select: mockSelect }))
 const mockUpsert = vi.fn(() => ({ error: null }))
+const mockUpdate = vi.fn(() => ({ eq: mockEq }))
 const mockFrom = vi.fn((_table: string) => ({
   select: mockSelect,
   upsert: mockUpsert,
+  update: mockUpdate,
 }))
 
 vi.mock('@/lib/supabase', () => ({
@@ -21,7 +24,7 @@ vi.mock('@/lib/supabase', () => ({
 }))
 
 // Import after mock setup
-import { loadBlueprint, saveBlueprint, seedFromFile } from './blueprint-store'
+import { loadBlueprint, saveBlueprint, seedFromFile, checkForUpdates } from './blueprint-store'
 import { CURRENT_SCHEMA_VERSION } from './blueprint-migrations'
 
 // ---------------------------------------------------------------------------
@@ -143,17 +146,28 @@ describe('loadBlueprint', () => {
 })
 
 describe('saveBlueprint', () => {
+  const NEW_UPDATED_AT = '2026-03-09T14:00:00.000Z'
+
   beforeEach(() => {
     vi.clearAllMocks()
     mockFrom.mockReturnValue({
       select: mockSelect,
       upsert: mockUpsert,
+      update: mockUpdate,
     })
     mockUpsert.mockReturnValue({ error: null })
+    mockUpdate.mockReturnValue({ eq: mockEq })
+    mockSelect.mockReturnValue({ eq: mockEq })
+    mockEq.mockReturnValue({ eq: mockEq, maybeSingle: mockMaybeSingle, select: mockSelect })
+    mockMaybeSingle.mockResolvedValue({
+      data: { updated_at: NEW_UPDATED_AT },
+      error: null,
+    })
   })
 
   it('validates config via Zod parse before writing', async () => {
-    await saveBlueprint('test-client', validConfigV1, 'user-1')
+    // null lastKnownUpdatedAt triggers upsert path
+    const result = await saveBlueprint('test-client', validConfigV1, 'user-1', null)
 
     // Verify upsert was called (i.e., validation passed and write happened)
     expect(mockUpsert).toHaveBeenCalledTimes(1)
@@ -161,6 +175,8 @@ describe('saveBlueprint', () => {
     const upsertArg = upsertArgs[0] as Record<string, unknown>
     expect(upsertArg.client_slug).toBe('test-client')
     expect((upsertArg.config as Record<string, unknown>).slug).toBe('test-client')
+    expect(result.success).toBe(true)
+    expect(result.conflict).toBe(false)
   })
 
   it('throws on invalid config (Zod rejection)', async () => {
@@ -170,8 +186,86 @@ describe('saveBlueprint', () => {
     }
 
     await expect(
-      saveBlueprint('test-client', invalidConfig as unknown as BlueprintConfig, 'user-1')
+      saveBlueprint('test-client', invalidConfig as unknown as BlueprintConfig, 'user-1', null)
     ).rejects.toThrow()
+  })
+
+  it('with matching lastKnownUpdatedAt returns success with new updatedAt', async () => {
+    // Simulate successful conditional update
+    mockMaybeSingle.mockResolvedValue({
+      data: { updated_at: NEW_UPDATED_AT },
+      error: null,
+    })
+
+    const result = await saveBlueprint(
+      'test-client',
+      validConfigV1,
+      'user-1',
+      FAKE_UPDATED_AT,
+    )
+
+    expect(result.success).toBe(true)
+    expect(result.conflict).toBe(false)
+    expect(result.updatedAt).toBe(NEW_UPDATED_AT)
+  })
+
+  it('with mismatched lastKnownUpdatedAt returns conflict', async () => {
+    // Simulate no row matched (updated_at changed in DB)
+    mockMaybeSingle.mockResolvedValue({
+      data: null,
+      error: null,
+    })
+
+    const result = await saveBlueprint(
+      'test-client',
+      validConfigV1,
+      'user-1',
+      FAKE_UPDATED_AT,
+    )
+
+    expect(result.success).toBe(false)
+    expect(result.conflict).toBe(true)
+    expect(result.updatedAt).toBeUndefined()
+  })
+
+  it('with null lastKnownUpdatedAt uses upsert without locking', async () => {
+    const result = await saveBlueprint('test-client', validConfigV1, 'user-1', null)
+
+    // Should use upsert (not update)
+    expect(mockUpsert).toHaveBeenCalledTimes(1)
+    expect(result.success).toBe(true)
+    expect(result.conflict).toBe(false)
+  })
+})
+
+describe('checkForUpdates', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockFrom.mockReturnValue({
+      select: mockSelect,
+    })
+    mockSelect.mockReturnValue({ eq: mockEq })
+    mockEq.mockReturnValue({ single: mockSingle })
+  })
+
+  it('returns updated_at when row exists', async () => {
+    mockSingle.mockResolvedValue({
+      data: { updated_at: FAKE_UPDATED_AT },
+      error: null,
+    })
+
+    const result = await checkForUpdates('test-client')
+    expect(result).toBe(FAKE_UPDATED_AT)
+  })
+
+  it('returns null when no row exists', async () => {
+    mockSingle.mockResolvedValue({
+      data: null,
+      error: null,
+    })
+
+    const result = await checkForUpdates('test-client')
+    expect(result).toBeNull()
   })
 })
 
@@ -182,10 +276,12 @@ describe('seedFromFile', () => {
     mockFrom.mockReturnValue({
       select: mockSelect,
       upsert: mockUpsert,
+      update: mockUpdate,
     })
     mockSelect.mockReturnValue({ eq: mockEq })
-    mockEq.mockReturnValue({ maybeSingle: mockMaybeSingle })
+    mockEq.mockReturnValue({ maybeSingle: mockMaybeSingle, eq: mockEq, select: mockSelect })
     mockUpsert.mockReturnValue({ error: null })
+    mockUpdate.mockReturnValue({ eq: mockEq })
   })
 
   it('does not seed if data already exists', async () => {
