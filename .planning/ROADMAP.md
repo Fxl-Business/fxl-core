@@ -43,7 +43,12 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
   2. Operator can save blueprint edits and the stored JSON includes a schemaVersion field that persists across reads
   3. Operator sees a validation error toast when blueprint data from DB has structural problems (zod parse catches malformed data instead of silent cast)
   4. When two browser tabs edit the same blueprint, the second save warns the operator of a conflict instead of silently overwriting
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 07-01-PLAN.md -- Zod schema, migration framework, and store refactor (TDD)
+- [ ] 07-02-PLAN.md -- Migrate viewers to DB-only loading, add sonner, delete .ts config
+- [ ] 07-03-PLAN.md -- Optimistic locking, conflict modal, stale data polling
 
 ### Phase 8: Wireframe Design System
 **Goal**: Wireframes render with their own visual identity (neutral palette + gold accent) independent of the app theme, with dark/light toggle and client branding layered on top
@@ -104,7 +109,7 @@ Phase 7 -> 8 -> 9 (and 10 in parallel) -> 11
 | 4. Branding Process | v1.0 | 3/3 | Complete | 2026-03-09 |
 | 5. Technical Configuration | v1.0 | 2/2 | Complete | 2026-03-09 |
 | 6. System Generation | v1.0 | 3/3 | Complete | 2026-03-09 |
-| 7. Blueprint Infrastructure | v1.1 | 0/? | Not started | - |
+| 7. Blueprint Infrastructure | v1.1 | 0/3 | Planning | - |
 | 8. Wireframe Design System | v1.1 | 0/? | Not started | - |
 | 9. Component Library Expansion | v1.1 | 0/? | Not started | - |
 | 10. Briefing & Blueprint Views | v1.1 | 0/? | Not started | - |
