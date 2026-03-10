@@ -1,4 +1,4 @@
-import { MessageSquare, Moon, Pencil, Save, Sun, X } from 'lucide-react'
+import { MessageSquare, Moon, Pencil, Save, Share2, Sun, X } from 'lucide-react'
 import { useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
 
 type Props = {
@@ -9,6 +9,7 @@ type Props = {
   onToggleEdit: () => void
   onSave: () => void
   onOpenComments: () => void
+  onOpenShare: () => void
 }
 
 export default function AdminToolbar({
@@ -19,6 +20,7 @@ export default function AdminToolbar({
   onToggleEdit,
   onSave,
   onOpenComments,
+  onOpenShare,
 }: Props) {
   const { theme, toggle } = useWireframeTheme()
 
@@ -38,6 +40,18 @@ export default function AdminToolbar({
       </span>
 
       <div className="ml-auto flex items-center gap-1">
+        <button
+          type="button"
+          onClick={onOpenShare}
+          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+          style={{ color: 'var(--wf-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)'; e.currentTarget.style.background = 'var(--wf-accent-muted)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-muted)'; e.currentTarget.style.background = 'transparent' }}
+        >
+          <Share2 className="h-3.5 w-3.5" />
+          Compartilhar
+        </button>
+
         <button
           type="button"
           onClick={onOpenComments}

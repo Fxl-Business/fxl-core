@@ -8,6 +8,7 @@ import CommentManager from '@tools/wireframe-builder/components/CommentManager'
 import WireframeHeader from '@tools/wireframe-builder/components/WireframeHeader'
 import BlueprintRenderer from '@tools/wireframe-builder/components/BlueprintRenderer'
 import AdminToolbar from '@tools/wireframe-builder/components/editor/AdminToolbar'
+import ShareModal from '@tools/wireframe-builder/components/editor/ShareModal'
 import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPanel'
 import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
 import { toast } from 'sonner'
@@ -88,6 +89,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
   // Screen navigation
   const [activeIndex, setActiveIndex] = useState(0)
+
+  // Share modal
+  const [shareOpen, setShareOpen] = useState(false)
 
   // Comments
   const [comments, setComments] = useState<Comment[]>([])
@@ -778,6 +782,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 onToggleEdit={handleToggleEdit}
                 onSave={handleSave}
                 onOpenComments={handleOpenScreenComments}
+                onOpenShare={() => setShareOpen(true)}
               />
             )}
             {staleWarning && (
@@ -898,6 +903,13 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
           </div>
         </div>
       )}
+
+      <ShareModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        clientSlug={clientSlug}
+        userId={user?.id ?? ''}
+      />
 
       {drawerTarget && (
         <CommentOverlay

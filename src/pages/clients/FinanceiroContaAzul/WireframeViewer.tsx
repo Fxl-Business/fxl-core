@@ -7,6 +7,7 @@ import CommentManager from '@tools/wireframe-builder/components/CommentManager'
 import WireframeHeader from '@tools/wireframe-builder/components/WireframeHeader'
 import BlueprintRenderer from '@tools/wireframe-builder/components/BlueprintRenderer'
 import AdminToolbar from '@tools/wireframe-builder/components/editor/AdminToolbar'
+import ShareModal from '@tools/wireframe-builder/components/editor/ShareModal'
 import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPanel'
 import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
 import { toast } from 'sonner'
@@ -65,6 +66,9 @@ export default function FinanceiroWireframeViewer() {
 
   // Screen navigation
   const [activeIndex, setActiveIndex] = useState(0)
+
+  // Share modal
+  const [shareOpen, setShareOpen] = useState(false)
 
   // Comments
   const [comments, setComments] = useState<Comment[]>([])
@@ -718,6 +722,7 @@ export default function FinanceiroWireframeViewer() {
                 onToggleEdit={handleToggleEdit}
                 onSave={handleSave}
                 onOpenComments={handleOpenScreenComments}
+                onOpenShare={() => setShareOpen(true)}
               />
             )}
             {staleWarning && (
@@ -838,6 +843,13 @@ export default function FinanceiroWireframeViewer() {
           </div>
         </div>
       )}
+
+      <ShareModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        clientSlug={CLIENT_SLUG}
+        userId={user?.id ?? ''}
+      />
 
       {drawerTarget && (
         <CommentOverlay
