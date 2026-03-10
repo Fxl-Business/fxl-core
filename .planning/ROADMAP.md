@@ -120,7 +120,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md -- Restyle Home page and shared components (Callout, PromptBlock, InfoBlock) to new palette
+- [x] 16-01-PLAN.md -- Restyle Home page and shared components (Callout, PromptBlock, InfoBlock) to new palette
 - [ ] 16-02-PLAN.md -- Restyle client pages with breadcrumb nav and auth pages with slate-50 backgrounds
 
 ## Progress
@@ -148,4 +148,4 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16
 | 13. Layout Shell | v1.2 | Complete    | 2026-03-10 | 2026-03-10 |
 | 14. Sidebar Navigation | v1.2 | Complete    | 2026-03-10 | 2026-03-10 |
 | 15. Doc Rendering and TOC | 2/2 | Complete    | 2026-03-10 | - |
-| 16. Consistency Pass | v1.2 | 0/2 | Not started | - |
+| 16. Consistency Pass | 1/2 | In Progress|  | - |

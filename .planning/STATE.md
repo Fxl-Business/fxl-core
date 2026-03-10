@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Visual Redesign
-status: verifying
-stopped_at: Completed 15-02-PLAN.md (Phase 15 Doc Rendering -- 2/2 plans done)
-last_updated: "2026-03-10T21:40:17.881Z"
-last_activity: 2026-03-10 -- Plan 15-02 complete (TOC border-l rail, visual checkpoint approved)
+status: executing
+stopped_at: Completed 16-01-PLAN.md
+last_updated: "2026-03-10T23:56:20.159Z"
+last_activity: 2026-03-10 -- Plan 16-01 complete (Home page + shared components restyled to indigo palette)
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
-  percent: 80
+  completed_phases: 5
+  total_plans: 7
+  completed_plans: 7
+  percent: 86
 ---
 
 # Project State
@@ -21,21 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.2 Visual Redesign -- Phase 15 Doc Rendering all plans complete, verifying
+**Current focus:** v1.2 Visual Redesign -- Phase 16 Consistency Pass, 1/2 plans complete
 
 ## Current Position
 
-Phase: 15 of 16 (Doc Rendering & TOC) -- fourth of 5 phases in v1.2
-Plan: 2/2 complete
-Status: All plans complete, running phase verification
-Last activity: 2026-03-10 -- Plan 15-02 complete (TOC border-l rail, visual checkpoint approved)
+Phase: 16 of 16 (Consistency Pass) -- fifth of 5 phases in v1.2
+Plan: 1/2 complete
+Status: Executing plan 16-02
+Last activity: 2026-03-10 -- Plan 16-01 complete (Home page + shared components restyled to indigo palette)
 
-Progress: [████████..] 80%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 47 (v1.0: 27, v1.1: 15, v1.2: 5)
+- Total plans completed: 48 (v1.0: 27, v1.1: 15, v1.2: 6)
 - Average duration: ~15 min
 - Total execution time: ~10.5 hours
 
@@ -61,6 +61,7 @@ v1.2 research decisions:
 - [Phase 13]: Viewport-level scrolling: removed overflow-hidden/overflow-y-auto from Layout containers
 - [Phase 14]: CSS-only sidebar restyle with zero logic changes -- container-level indentation, -ml-px border-l overlap trick for active indicator
 - [Phase 14]: Explicit color tokens (text-indigo-600, border-indigo-600) instead of semantic tokens for active states
+- [Phase 16]: CSS-class-only consistency pass -- no component structure changes, only Tailwind class replacements
 
 ### Pending Todos
 
@@ -98,6 +99,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-10
-Stopped at: Completed 15-02-PLAN.md (Phase 15 Doc Rendering -- 2/2 plans done)
-Next: Phase verification
+Last session: 2026-03-10T23:56:01.406Z
+Stopped at: Completed 16-01-PLAN.md
+Next: Execute 16-02-PLAN.md (client pages and auth pages restyle)
