@@ -151,6 +151,11 @@ h2[id], h3[id] {
   scroll-margin-top: 5rem;
 }
 
+/* Override highlight.js theme background -- wrapper div provides bg */
+.hljs {
+  background: transparent;
+}
+
 /* Prose styles -- semantic tokens for light/dark mode */
 
 .prose h1 {
@@ -158,33 +163,31 @@ h2[id], h3[id] {
 }
 
 .prose h2 {
-  @apply mb-3 mt-6 border-b border-border pb-2 text-xl font-semibold text-foreground;
+  @apply mb-3 mt-8 border-b border-border pb-2 text-2xl font-bold text-foreground;
 }
 
 .prose h3 {
-  @apply mb-2 mt-4 text-base font-semibold text-foreground;
+  @apply mb-2 mt-6 text-xl font-semibold text-foreground;
 }
 
 .prose p {
-  @apply mb-3 text-sm leading-relaxed text-muted-foreground;
+  @apply mb-4 text-base leading-relaxed text-slate-600 dark:text-slate-400;
 }
 
 .prose ul {
-  @apply mb-3 list-inside list-disc space-y-1 text-sm text-muted-foreground;
+  @apply mb-3 list-inside list-disc space-y-1 text-base text-slate-600 dark:text-slate-400;
 }
 
 .prose ol {
-  @apply mb-3 list-inside list-decimal space-y-1 text-sm text-muted-foreground;
+  @apply mb-3 list-inside list-decimal space-y-1 text-base text-slate-600 dark:text-slate-400;
 }
 
-.prose code {
-  @apply rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-primary;
+.prose :not(pre) > code {
+  @apply rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.85em] font-medium text-indigo-600 dark:bg-slate-800 dark:text-indigo-400;
 }
 
 .prose pre {
-  @apply mb-4 overflow-x-auto rounded-lg p-4 font-mono text-xs;
-  background-color: hsl(var(--code-bg));
-  color: hsl(var(--code-fg));
+  @apply mb-4 overflow-x-auto font-mono text-sm;
 }
 
 .prose table {

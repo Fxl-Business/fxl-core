@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
 import type { Components } from 'react-markdown'
 import { cn } from '@/lib/utils'
 
@@ -33,16 +34,23 @@ const components: Components = {
   },
   pre({ children }) {
     return (
-      <pre className="my-4 overflow-x-auto rounded-lg bg-[hsl(var(--code-bg))] p-4 text-[hsl(var(--code-fg))]">
-        {children}
-      </pre>
+      <div className="group relative my-6 overflow-hidden rounded-xl bg-slate-900 shadow-lg dark:bg-[hsl(var(--code-bg))]">
+        <div className="flex items-center gap-1.5 border-b border-slate-700/50 px-4 py-3">
+          <div className="h-3 w-3 rounded-full bg-red-500/80" />
+          <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
+          <div className="h-3 w-3 rounded-full bg-green-500/80" />
+        </div>
+        <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
+          {children}
+        </pre>
+      </div>
     )
   },
   code({ children, className }) {
     const isInline = !className
     if (isInline) {
       return (
-        <code className="rounded bg-muted px-1.5 py-0.5 text-[0.85em] text-primary">
+        <code className="rounded bg-slate-100 px-1.5 py-0.5 text-[0.85em] font-medium text-indigo-600 dark:bg-slate-800 dark:text-indigo-400">
           {children}
         </code>
       )
@@ -58,7 +66,7 @@ const components: Components = {
 export default function MarkdownRenderer({ content }: { content: string }) {
   return (
     <div className="prose max-w-none">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]} components={components}>
         {content}
       </ReactMarkdown>
     </div>
