@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wireframe Evolution
 status: executing
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-03-10T13:50:44.000Z"
-last_activity: 2026-03-10 -- Completed 11-01 (screen recipes & vertical templates)
+stopped_at: Completed 11-02-PLAN.md (Phase 11 complete, v1.1 complete)
+last_updated: "2026-03-10T13:57:00.000Z"
+last_activity: 2026-03-10 -- Completed 11-02 (AI generation engine + CLI bridge)
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
-  completed_plans: 14
-  percent: 93
+  completed_plans: 15
+  percent: 100
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 11 executing -- screen recipes & vertical templates complete (plan 1 of 2)
+**Current focus:** v1.1 Wireframe Evolution complete -- all 5 phases (15 plans) executed
 
 ## Current Position
 
 Phase: 11 of 11 (AI-Assisted Generation)
-Plan: 1 of 2 -- 11-01 completed
-Status: Executing Phase 11
-Last activity: 2026-03-10 -- Completed 11-01 (screen recipes & vertical templates)
+Plan: 2 of 2 -- 11-02 completed
+Status: v1.1 Milestone Complete
+Last activity: 2026-03-10 -- Completed 11-02 (AI generation engine + CLI bridge)
 
-Progress: [█████████░] 93%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 27 (v1.0)
-- v1.1 plans completed: 9
-- Average duration: 7.0min
-- Total execution time: 48min
+- v1.1 plans completed: 10
+- Average duration: 6.6min
+- Total execution time: 51min
 
 **By Phase:**
 
@@ -48,7 +48,7 @@ Progress: [█████████░] 93%
 | 8. Wireframe Design System | 3/3 | 27min | 9.0min |
 | 9. Component Library Expansion | 4/4 | 23min | 5.8min |
 | 10. Briefing & Blueprint Views | 1/3 | 3min | 3.0min |
-| 11. AI-Assisted Generation | 1/2 | 5min | 5.0min |
+| 11. AI-Assisted Generation | 2/2 | 8min | 4.0min |
 
 *Updated after each plan completion*
 | Phase 09 P02 | 5min | 2 tasks | 13 files |
@@ -58,6 +58,7 @@ Progress: [█████████░] 93%
 | Phase 10 P02 | 3 | 2 tasks | 4 files |
 | Phase 10 P01 | 4 | 2 tasks | 6 files |
 | Phase 11 P01 | 5min | 2 tasks | 4 files |
+| Phase 11 P02 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,11 @@ v1.1 decisions:
 - [11-01] findBestRecipe uses keyword scoring (5 pts partial, 10 pts exact) + category bonus (2 pts)
 - [11-01] Vertical templates use inline section data (not recipe composition) for guaranteed Zod compliance
 - [11-01] financeiro template is reference-grade (10 screens), varejo/servicos are medium (5 screens each)
+- [11-02] Pure function design: generateBlueprint has zero side effects, no Supabase dependency
+- [11-02] CLI script uses standalone createClient(process.env) to avoid Vite import.meta.env
+- [11-02] Vertical template merging uses screen-by-id overlay (match -> overlay, no match -> append)
+- [11-02] KPI items replaced from briefing module KPIs with R$ 0 placeholder values
+- [11-02] Overwrite protection with --force flag for existing blueprints
 
 ### Pending Todos
 
@@ -147,7 +153,7 @@ v1.1:
 
 ## Session Continuity
 
-Last session: 2026-03-10T13:50:44.000Z
-Stopped at: Completed 11-01-PLAN.md
-Resume file: .planning/phases/11-ai-assisted-generation/11-01-SUMMARY.md
-Next: Phase 11 Plan 02 (AI generation engine) -- /gsd:execute-phase 11
+Last session: 2026-03-10T13:57:00.000Z
+Stopped at: Completed 11-02-PLAN.md (Phase 11 complete, v1.1 complete)
+Resume file: .planning/phases/11-ai-assisted-generation/11-02-SUMMARY.md
+Next: v1.1 Wireframe Evolution milestone complete. All 15 plans across 5 phases executed.

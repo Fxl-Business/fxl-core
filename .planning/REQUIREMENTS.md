@@ -42,7 +42,7 @@ Requirements for Wireframe Evolution milestone. Each maps to roadmap phases.
 
 ### AI Generation
 
-- [ ] **AIGE-01**: Claude Code pode gerar blueprint a partir de briefing no Supabase + analise de blueprints existentes
+- [x] **AIGE-01**: Claude Code pode gerar blueprint a partir de briefing no Supabase + analise de blueprints existentes
 - [x] **AIGE-02**: Screen recipes tipadas disponveis como contexto para geracao (ex: tela de faturamento, estoque)
 - [x] **AIGE-03**: Templates de blueprint pre-definidos para verticais FXL (financeiro, varejo, servicos)
 
@@ -111,7 +111,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRFG-02 | Phase 10 | Complete |
 | BRFG-03 | Phase 10 | Complete |
 | BRFG-04 | Phase 10 | Complete |
-| AIGE-01 | Phase 11 | Pending |
+| AIGE-01 | Phase 11 | Complete |
 | AIGE-02 | Phase 11 | Complete |
 | AIGE-03 | Phase 11 | Complete |
 
