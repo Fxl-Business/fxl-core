@@ -60,32 +60,32 @@ export default function Home() {
     <div className="mx-auto max-w-5xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">Nucleo FXL</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-foreground">Nucleo FXL</h1>
+        <p className="mt-3 text-lg text-slate-600 dark:text-slate-400">
           Processo, knowledge e ferramentas — o nucleo operacional da FXL.
         </p>
       </div>
 
       {/* Quick actions */}
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-foreground">
         O que vai fazer hoje?
       </h2>
       <div className="mb-8 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-3">
         {quickActions.map((action) => {
           const Icon = action.icon
           const inner = (
-            <div className="flex h-full min-h-[120px] flex-col justify-between rounded-xl border border-border bg-card p-5 transition-all hover:border-primary hover:shadow-md">
+            <div className="flex h-full min-h-[120px] flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 transition-all hover:border-indigo-200 hover:shadow-sm dark:border-slate-700 dark:bg-card dark:hover:border-indigo-800">
               <div className="flex flex-1 items-start gap-4">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-foreground">{action.title}</h3>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{action.description}</p>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-foreground">{action.title}</h3>
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{action.description}</p>
                 </div>
               </div>
               <div className="flex justify-end">
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                <ArrowRight className="h-4 w-4 text-slate-400 dark:text-slate-500" />
               </div>
             </div>
           )
@@ -107,7 +107,7 @@ export default function Home() {
       </div>
 
       {/* Documentacao */}
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-foreground">
         Documentacao
       </h2>
       <div className="mb-8 grid gap-4 md:grid-cols-3">
@@ -115,19 +115,19 @@ export default function Home() {
           <Link
             key={s.href}
             to={s.href}
-            className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary"
+            className="rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-indigo-200 hover:shadow-sm dark:border-slate-700 dark:bg-card dark:hover:border-indigo-800"
           >
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
               {s.badge}
             </p>
-            <h3 className="mb-1 text-sm font-semibold text-foreground">{s.title}</h3>
-            <p className="text-xs text-muted-foreground">{s.description}</p>
+            <h3 className="mb-1 text-sm font-semibold text-slate-900 dark:text-foreground">{s.title}</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{s.description}</p>
           </Link>
         ))}
       </div>
 
       {/* Clientes */}
-      <h2 id="clientes" className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <h2 id="clientes" className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-foreground">
         Clientes
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -135,20 +135,20 @@ export default function Home() {
           <Link
             key={c.slug}
             to={c.href}
-            className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
+            className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-card"
           >
             <div className="mb-3 flex items-start justify-between">
-              <span className="rounded bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-400">
                 {c.badge}
               </span>
               <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-700">
                 {c.status}
               </span>
             </div>
-            <h3 className="text-sm font-semibold text-foreground group-hover:text-primary">
+            <h3 className="text-sm font-semibold text-slate-900 group-hover:text-indigo-600 dark:text-foreground dark:group-hover:text-indigo-400">
               {c.name}
             </h3>
-            <p className="mt-1 text-xs text-muted-foreground">{c.description}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{c.description}</p>
           </Link>
         ))}
       </div>
