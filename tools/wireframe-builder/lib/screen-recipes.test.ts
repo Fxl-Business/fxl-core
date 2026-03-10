@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import { SCREEN_RECIPES, findBestRecipe } from './screen-recipes'
-import type { ScreenRecipe } from './screen-recipes'
 import { SECTION_REGISTRY } from './section-registry'
 import { BlueprintSectionSchema } from './blueprint-schema'
 
