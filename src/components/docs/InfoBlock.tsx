@@ -11,21 +11,21 @@ type InfoBlockProps = {
 const config = {
   info: {
     icon: Info,
-    bg: 'bg-blue-50 border-blue-200',
-    text: 'text-blue-800',
-    iconColor: 'text-blue-500',
+    bg: 'bg-indigo-50 border-indigo-200 dark:bg-indigo-950/50 dark:border-indigo-800',
+    text: 'text-indigo-800 dark:text-indigo-200',
+    iconColor: 'text-indigo-500 dark:text-indigo-400',
   },
   warning: {
     icon: AlertCircle,
-    bg: 'bg-amber-50 border-amber-200',
-    text: 'text-amber-800',
-    iconColor: 'text-amber-500',
+    bg: 'bg-amber-50 border-amber-200 dark:bg-amber-950/50 dark:border-amber-800',
+    text: 'text-amber-800 dark:text-amber-200',
+    iconColor: 'text-amber-500 dark:text-amber-400',
   },
   success: {
     icon: CheckCircle2,
-    bg: 'bg-green-50 border-green-200',
-    text: 'text-green-800',
-    iconColor: 'text-green-500',
+    bg: 'bg-green-50 border-green-200 dark:bg-green-950/50 dark:border-green-800',
+    text: 'text-green-800 dark:text-green-200',
+    iconColor: 'text-green-500 dark:text-green-400',
   },
 }
 
