@@ -87,10 +87,10 @@ Plans:
   2. Section headers (Processo, Padroes, Ferramentas, Clientes) are uppercase, small, bold, and visually distinct from nav items
   3. Currently active nav item shows an indigo left border and indigo text, clearly distinguishable from inactive items
   4. Sections expand and collapse with a chevron toggle, and sub-items are indented under their parent
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 14-01: TBD
+- [ ] 14-01-PLAN.md -- Restyle sidebar: sticky positioning, border-l rail nav, indigo active states, section headers, sub-item indentation
 
 ### Phase 15: Doc Rendering and TOC
 **Goal**: Doc pages have production-quality typography, dark-themed code blocks with syntax highlighting, and a right-side table of contents that tracks scroll position
@@ -145,6 +145,6 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16
 | 11. AI-Assisted Generation | v1.1 | 2/2 | Complete | 2026-03-10 |
 | 12. Design Foundation | v1.2 | 1/1 | Complete | 2026-03-10 |
 | 13. Layout Shell | v1.2 | Complete    | 2026-03-10 | 2026-03-10 |
-| 14. Sidebar Navigation | v1.2 | 0/? | Not started | - |
+| 14. Sidebar Navigation | v1.2 | 0/1 | Not started | - |
 | 15. Doc Rendering and TOC | v1.2 | 0/? | Not started | - |
 | 16. Consistency Pass | v1.2 | 0/? | Not started | - |
