@@ -57,6 +57,7 @@ fxl/
 ├── CLAUDE.md                ← este arquivo — regras operacionais
 ├── README.md
 ├── package.json
+├── Makefile                 ← dev, build, lint, migrate
 │
 ├── docs/                    ← Conteudo renderizado (fonte unica de verdade)
 │   │                           Cada .md = uma pagina via parser proprio
@@ -76,20 +77,85 @@ fxl/
 ├── tools/                   ← Ferramentas — codigo executavel das tools
 │   └── wireframe-builder/
 │       ├── SKILL.md         ← instrucoes para o Claude Code
-│       └── components/      ← componentes React reutilizaveis
+│       ├── components/      ← componentes React reutilizaveis
+│       ├── lib/             ← utilidades do builder
+│       ├── scripts/         ← scripts auxiliares
+│       ├── styles/          ← estilos do builder
+│       └── types/           ← tipos TypeScript do builder
 │
 ├── src/                     ← Plataforma — app shell React
 │   ├── components/
-│   │   ├── layout/          ← Layout, Sidebar
-│   │   ├── docs/            ← Callout, Operational, PageHeader, PhaseCard, PromptBlock
-│   │   └── ui/              ← shadcn/ui
-│   ├── pages/               ← SO paginas interativas (Home, clients)
-│   ├── lib/                 ← docs-parser, utils
+│   │   ├── layout/          ← Layout, Sidebar, SearchCommand, TopNav, ThemeToggle
+│   │   ├── docs/            ← Callout, Operational, PageHeader, PhaseCard, PromptBlock,
+│   │   │                       DocBreadcrumb, DocTableOfContents, InfoBlock, MarkdownRenderer
+│   │   ├── ui/              ← shadcn/ui
+│   │   └── ProtectedRoute.tsx
+│   ├── pages/               ← Paginas interativas
+│   │   ├── Home.tsx
+│   │   ├── Login.tsx
+│   │   ├── Profile.tsx
+│   │   ├── DocRenderer.tsx
+│   │   ├── SharedWireframeView.tsx
+│   │   ├── clients/         ← BriefingForm, BlueprintTextView, WireframeViewer
+│   │   ├── docs/            ← ProcessDocsViewer
+│   │   └── tools/           ← ComponentGallery
+│   ├── lib/                 ← docs-parser, search-index, supabase, utils
 │   └── App.tsx
 │
-├── .claude/                 ← Plataforma — AI runtime (GSD, commands, hooks)
-└── .agents/                 ← Plataforma — skills de terceiros (Clerk)
+├── supabase/                ← Supabase CLI (migrations)
+│   └── migrations/          ← SQL migrations (001_ a 004_)
+│
+├── .planning/               ← Planejamento e estado do projeto (GSD workflow)
+│   ├── STATE.md             ← Estado atual (milestone, progresso, decisoes)
+│   ├── ROADMAP.md           ← Roadmap de fases do milestone atual
+│   ├── PROJECT.md           ← Contexto do projeto (stack, arquitetura, decisoes-chave)
+│   ├── RETROSPECTIVE.md     ← Retrospectivas por milestone
+│   ├── config.json          ← Configuracao do GSD (mode, granularity, models)
+│   ├── phases/              ← Planos e sumarios por fase
+│   ├── quick/               ← Quick tasks (tarefas atomicas fora de milestone)
+│   ├── milestones/          ← Roadmaps e fases arquivadas de milestones anteriores
+│   ├── codebase/            ← Mapa automatico do codebase (ARCHITECTURE.md, STACK.md)
+│   └── research/            ← Pesquisa tecnica (stack, features, pitfalls)
+│
+├── .claude/                 ← Plataforma — AI runtime
+│   ├── commands/gsd/        ← Slash commands (/gsd:*) — planning, execution, verification
+│   ├── get-shit-done/       ← GSD workflow engine (workflows, templates, bin, references)
+│   ├── hooks/               ← Session hooks (context monitor, status line, update checker)
+│   ├── agents/              ← Agent definitions (planner, executor, verifier, etc.)
+│   ├── skills/              ← Symlinks para skills globais e .agents/skills/
+│   └── settings.json        ← Permissions, hooks config, status line
+│
+└── .agents/                 ← Skills de terceiros
+    └── skills/              ← Vendor skills
+        ├── clerk/           ← Core Clerk auth skill
+        ├── clerk-backend-api/
+        ├── clerk-custom-ui/
+        ├── clerk-setup/
+        ├── clerk-webhooks/
+        ├── clerk-testing/
+        ├── clerk-orgs/
+        ├── clerk-swift/
+        └── clerk-nextjs-patterns/
 ```
+
+---
+
+## Planejamento e estado — .planning/
+
+O diretorio `.planning/` contem todo o estado de planejamento e execucao do projeto.
+
+- **`.planning/STATE.md`** e a fonte de verdade para a posicao atual do projeto:
+  milestone ativo, progresso (fases/planos completos), decisoes acumuladas, blockers.
+- **`.planning/ROADMAP.md`** contem o breakdown de fases do milestone atual.
+- **`.planning/PROJECT.md`** consolida contexto do projeto: stack, arquitetura, decisoes-chave.
+- **Quick tasks** vivem em `.planning/quick/N-slug/` — tarefas atomicas fora do ciclo de milestone.
+- **Milestones anteriores** ficam arquivados em `.planning/milestones/` (ex: v1.0, v1.1).
+- **`.planning/codebase/`** contem mapa automatico do codebase (ARCHITECTURE.md, STACK.md).
+- **`.planning/research/`** contem pesquisa tecnica feita durante planejamento.
+
+O sistema GSD (Get Shit Done), localizado em `.claude/get-shit-done/`, usa esses arquivos
+para planejamento estruturado e execucao via agentes. Os slash commands `/gsd:*`
+(em `.claude/commands/gsd/`) sao a interface principal para interagir com o workflow.
 
 ---
 
@@ -136,6 +202,26 @@ clients/*/wireframe/), invocar as seguintes skills para guiar a implementacao:
 
 ---
 
+## Skills — localizacao
+
+As skills referenciadas acima vivem em diferentes niveis:
+
+**Skills locais do projeto (`.claude/skills/`):**
+- composition-patterns, frontend-design, react-best-practices, ui-ux-pro-max, web-design-guidelines — diretorios locais com regras de frontend
+- clerk, clerk-backend-api, clerk-custom-ui, clerk-setup, clerk-webhooks, clerk-testing, clerk-orgs, clerk-swift, clerk-nextjs-patterns — symlinks para `.agents/skills/`
+
+**Skills de terceiros (`.agents/skills/`):**
+- clerk, clerk-backend-api, clerk-custom-ui, clerk-setup, clerk-webhooks, clerk-testing — auth Clerk
+- clerk-orgs, clerk-swift, clerk-nextjs-patterns — extensoes Clerk
+
+**Skills de tools (`tools/*/SKILL.md`):**
+- wireframe-builder — instrucoes de uso do Wireframe Builder
+
+Cada skill contem um `SKILL.md` como indice leve (~130 linhas) e um diretorio `rules/`
+com regras detalhadas. Carregar `SKILL.md` primeiro, depois `rules/*.md` conforme necessario.
+
+---
+
 ## Formato dos docs
 
 Todo `.md` em `docs/` deve ter frontmatter YAML:
@@ -162,6 +248,7 @@ Tags customizadas disponiveis (parseadas pelo docs-parser):
 - Alteracoes de cliente: `[client-slug]: [o que mudou]`
 - Alteracoes de tool: `tool([nome]): [o que mudou]`
 - Alteracoes em src/ (app shell): `app: [o que mudou]`
+- Alteracoes em .planning/: `docs: [o que mudou]` (ou `infra:` se for config)
 - Alteracoes estruturais: `infra: [o que mudou]`
 
 ---
@@ -194,6 +281,15 @@ npx tsc --noEmit
 
 Zero erros TypeScript e condicao de aceite.
 Nunca usar `any` como solucao para erros de tipo.
+
+### Makefile targets
+
+- `make dev` — inicia servidor de desenvolvimento (npm run dev)
+- `make build` — build de producao (npm run build)
+- `make lint` — verifica tipos TypeScript (npx tsc --noEmit)
+- `make preview` — preview do build (npm run preview)
+- `make install` — instala dependencias (npm install)
+- `make migrate` — aplica migrations no Supabase (le credenciais de .env.local)
 
 ---
 
