@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { SignUp } from '@clerk/react'
 import Layout from '@/components/layout/Layout'
 import ProtectedRoute from '@/components/ProtectedRoute'
@@ -8,7 +8,7 @@ import DocRenderer from '@/pages/DocRenderer'
 import FinanceiroIndex from '@/pages/clients/FinanceiroContaAzul/Index'
 import FinanceiroDocViewer from '@/pages/clients/FinanceiroContaAzul/DocViewer'
 import FinanceiroWireframe from '@/pages/clients/FinanceiroContaAzul/Wireframe'
-import FinanceiroWireframeViewer from '@/pages/clients/FinanceiroContaAzul/WireframeViewer'
+import WireframeViewer from '@/pages/clients/WireframeViewer'
 import ComponentGallery from '@/pages/tools/ComponentGallery'
 import Login from '@/pages/Login'
 import Profile from '@/pages/Profile'
@@ -55,10 +55,16 @@ export default function App() {
           element={<ProtectedRoute><Profile /></ProtectedRoute>}
         />
 
-        {/* Wireframe viewer — protected, full screen */}
+        {/* Wireframe viewer — protected, full screen, parametric by client slug */}
+        <Route
+          path="/clients/:clientSlug/wireframe"
+          element={<ProtectedRoute><WireframeViewer /></ProtectedRoute>}
+        />
+
+        {/* Redirect old wireframe-view route to new parametric route */}
         <Route
           path="/clients/financeiro-conta-azul/wireframe-view"
-          element={<ProtectedRoute><FinanceiroWireframeViewer /></ProtectedRoute>}
+          element={<Navigate to="/clients/financeiro-conta-azul/wireframe" replace />}
         />
 
         {/* Shared wireframe viewer for external clients (token-gated, public) */}
