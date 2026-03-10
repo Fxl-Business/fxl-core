@@ -51,6 +51,8 @@ Specs completas: `docs/ferramentas/blocos/` ([ver no app](/ferramentas/blocos/in
 | `GlobalFilters` | Filtros de periodo, segmento, etc. |
 | `CommentOverlay` | Overlay flutuante de comentarios por tela/bloco |
 
+> **Geracao automatica:** O generation engine (`lib/generation-engine.ts`) pode gerar um BlueprintConfig completo a partir de um BriefingConfig, mapeando modulos do briefing a screen recipes tipadas. Ver secao "Geracao de Blueprint via AI" abaixo.
+
 ---
 
 ## Padroes de construcao
@@ -169,6 +171,51 @@ Quando Claude Code for invocado para tarefas de wireframe:
 3. Ler `clients/[slug]/docs/branding.md` para identidade visual
 4. Alterar `blueprint.config.ts` para modificar telas (nunca criar screens .tsx avulsos)
 5. Componentes: importar de `@tools/wireframe-builder/components/`
+
+---
+
+## Geracao de Blueprint via AI
+
+### Pre-requisitos
+- Briefing do cliente preenchido no Supabase (via formulario em /clients/[slug]/briefing)
+- Variaveis de ambiente em `.env.local` (VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY)
+
+### Comando
+```bash
+npx tsx --env-file .env.local tools/wireframe-builder/scripts/generate-blueprint.ts <client-slug> [vertical] [--force]
+```
+
+**Parametros:**
+- `client-slug` (obrigatorio): slug do cliente (ex: `minha-empresa`)
+- `vertical` (opcional): template inicial -- `financeiro`, `varejo` ou `servicos`
+- `--force` (opcional): sobrescreve blueprint existente sem confirmacao
+
+### Exemplos
+```bash
+# Gerar blueprint para novo cliente financeiro
+npx tsx --env-file .env.local tools/wireframe-builder/scripts/generate-blueprint.ts acme-corp financeiro
+
+# Gerar sem template (analise pura do briefing)
+npx tsx --env-file .env.local tools/wireframe-builder/scripts/generate-blueprint.ts acme-corp
+
+# Sobrescrever blueprint existente
+npx tsx --env-file .env.local tools/wireframe-builder/scripts/generate-blueprint.ts acme-corp financeiro --force
+```
+
+### Verificacao pos-geracao
+1. Abrir o wireframe viewer: `http://localhost:5173/clients/<slug>/wireframe`
+2. Verificar que todas as telas renderizam sem erros
+3. Editar via editor visual conforme necessario
+
+### Screen recipes disponiveis
+O gerador usa receitas tipadas para mapear modulos do briefing a estruturas de tela:
+- DRE/Resultado, Receita, Despesas, Centro de Custo, Margens
+- Fluxo Mensal, Fluxo Anual, Indicadores, Upload, Configuracoes
+
+### Templates de vertical
+- **financeiro**: 10 telas completas (padrao ouro baseado em financeiro-conta-azul)
+- **varejo**: 5 telas (faturamento, vendas, estoque, indicadores, config)
+- **servicos**: 5 telas (visao geral, projetos, financeiro, indicadores, config)
 
 ---
 
