@@ -36,8 +36,8 @@ Requirements for Wireframe Evolution milestone. Each maps to roadmap phases.
 ### Briefing
 
 - [ ] **BRFG-01**: Operador pode inserir briefing de cliente via formulario estruturado persistido no Supabase
-- [ ] **BRFG-02**: Operador pode visualizar blueprint como texto estruturado/explicativo (view read-only)
-- [ ] **BRFG-03**: Blueprint exportavel como Markdown para acesso do Claude Code
+- [x] **BRFG-02**: Operador pode visualizar blueprint como texto estruturado/explicativo (view read-only)
+- [x] **BRFG-03**: Blueprint exportavel como Markdown para acesso do Claude Code
 - [ ] **BRFG-04**: Operador pode gerar share link para cliente (botao restaurado)
 
 ### AI Generation
@@ -108,8 +108,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMP-08 | Phase 9 | Complete |
 | COMP-09 | Phase 9 | Complete |
 | BRFG-01 | Phase 10 | Pending |
-| BRFG-02 | Phase 10 | Pending |
-| BRFG-03 | Phase 10 | Pending |
+| BRFG-02 | Phase 10 | Complete |
+| BRFG-03 | Phase 10 | Complete |
 | BRFG-04 | Phase 10 | Pending |
 | AIGE-01 | Phase 11 | Pending |
 | AIGE-02 | Phase 11 | Pending |
