@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Visual Redesign
-status: completed
-stopped_at: Completed 14-01-PLAN.md (Phase 14 Sidebar Navigation -- 1/1 plans done)
-last_updated: "2026-03-10T17:57:38.547Z"
-last_activity: 2026-03-10 -- Phase 14 Sidebar Navigation complete
+status: executing
+stopped_at: Completed 15-01-PLAN.md (Phase 15 Doc Rendering -- 1/2 plans done)
+last_updated: "2026-03-10T20:00:00.000Z"
+last_activity: 2026-03-10 -- Phase 15 plan 01 complete, plan 02 next
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
-  percent: 60
+  total_plans: 4
+  completed_plans: 4
+  percent: 70
 ---
 
 # Project State
@@ -21,21 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.2 Visual Redesign -- Phase 14 Sidebar Navigation complete, Phase 15 next
+**Current focus:** v1.2 Visual Redesign -- Phase 15 Doc Rendering plan 01 complete, plan 02 (TOC) next
 
 ## Current Position
 
-Phase: 14 of 16 (Sidebar Navigation) -- third of 5 phases in v1.2
-Plan: 1/1 complete
-Status: Phase complete
-Last activity: 2026-03-10 -- Phase 14 Sidebar Navigation complete
+Phase: 15 of 16 (Doc Rendering & TOC) -- fourth of 5 phases in v1.2
+Plan: 1/2 complete
+Status: Executing plan 02 (TOC redesign)
+Last activity: 2026-03-10 -- Plan 15-01 complete (syntax highlighting, typography, header restyle)
 
-Progress: [██████....] 60%
+Progress: [███████...] 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 45 (v1.0: 27, v1.1: 15, v1.2: 3)
+- Total plans completed: 46 (v1.0: 27, v1.1: 15, v1.2: 4)
 - Average duration: ~15 min
 - Total execution time: ~10.5 hours
 
@@ -99,5 +99,5 @@ v1.2:
 ## Session Continuity
 
 Last session: 2026-03-10
-Stopped at: Completed 14-01-PLAN.md (Phase 14 Sidebar Navigation -- 1/1 plans done)
-Next: /gsd:plan-phase 15
+Stopped at: Completed 15-01-PLAN.md (Phase 15 Doc Rendering -- 1/2 plans done)
+Next: Execute 15-02 (TOC redesign)

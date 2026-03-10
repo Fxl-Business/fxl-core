@@ -146,5 +146,5 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16
 | 12. Design Foundation | v1.2 | 1/1 | Complete | 2026-03-10 |
 | 13. Layout Shell | v1.2 | Complete    | 2026-03-10 | 2026-03-10 |
 | 14. Sidebar Navigation | v1.2 | Complete    | 2026-03-10 | 2026-03-10 |
-| 15. Doc Rendering and TOC | v1.2 | 0/2 | Not started | - |
+| 15. Doc Rendering and TOC | 1/2 | In Progress|  | - |
 | 16. Consistency Pass | v1.2 | 0/? | Not started | - |
