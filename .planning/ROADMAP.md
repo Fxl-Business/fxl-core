@@ -143,7 +143,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16
 | 9. Component Library Expansion | v1.1 | 4/4 | Complete | 2026-03-10 |
 | 10. Briefing & Blueprint Views | v1.1 | 3/3 | Complete | 2026-03-10 |
 | 11. AI-Assisted Generation | v1.1 | 2/2 | Complete | 2026-03-10 |
-| 12. Design Foundation | 1/1 | Complete   | 2026-03-10 | - |
+| 12. Design Foundation | 1/1 | Complete    | 2026-03-10 | - |
 | 13. Layout Shell | v1.2 | 0/? | Not started | - |
 | 14. Sidebar Navigation | v1.2 | 0/? | Not started | - |
 | 15. Doc Rendering and TOC | v1.2 | 0/? | Not started | - |
