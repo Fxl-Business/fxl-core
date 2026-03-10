@@ -23,14 +23,14 @@ Requirements for Wireframe Evolution milestone. Each maps to roadmap phases.
 
 ### Components
 
-- [ ] **COMP-01**: Section types registrados via registry pattern (substituindo switch statements dispersos)
-- [ ] **COMP-02**: Operador pode adicionar bloco settings-page com input groups e toggles
-- [ ] **COMP-03**: Operador pode adicionar bloco form-section com inputs variaveis (text, number, date, select)
-- [ ] **COMP-04**: Operador pode adicionar bloco filter-config para filtros de periodo/tipo no topo da tela
-- [ ] **COMP-05**: Operador pode adicionar bloco stat-card para metricas standalone
-- [ ] **COMP-06**: Operador pode adicionar bloco progress-bar para indicadores de progresso
-- [ ] **COMP-07**: Operador pode adicionar bloco divider para separacao visual de secoes
-- [ ] **COMP-08**: Operador pode usar 5 tipos de chart adicionais (Radar, Treemap, Funnel, Scatter, Area)
+- [x] **COMP-01**: Section types registrados via registry pattern (substituindo switch statements dispersos)
+- [x] **COMP-02**: Operador pode adicionar bloco settings-page com input groups e toggles
+- [x] **COMP-03**: Operador pode adicionar bloco form-section com inputs variaveis (text, number, date, select)
+- [x] **COMP-04**: Operador pode adicionar bloco filter-config para filtros de periodo/tipo no topo da tela
+- [x] **COMP-05**: Operador pode adicionar bloco stat-card para metricas standalone
+- [x] **COMP-06**: Operador pode adicionar bloco progress-bar para indicadores de progresso
+- [x] **COMP-07**: Operador pode adicionar bloco divider para separacao visual de secoes
+- [x] **COMP-08**: Operador pode usar 5 tipos de chart adicionais (Radar, Treemap, Funnel, Scatter, Area)
 - [ ] **COMP-09**: Wireframe viewer generico parametrizado por :clientSlug (substituindo paginas hardcoded por cliente)
 
 ### Briefing
@@ -98,14 +98,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DSGN-02 | Phase 8 | Complete |
 | DSGN-03 | Phase 8 | Pending |
 | DSGN-04 | Phase 8 | Complete |
-| COMP-01 | Phase 9 | Pending |
-| COMP-02 | Phase 9 | Pending |
-| COMP-03 | Phase 9 | Pending |
-| COMP-04 | Phase 9 | Pending |
-| COMP-05 | Phase 9 | Pending |
-| COMP-06 | Phase 9 | Pending |
-| COMP-07 | Phase 9 | Pending |
-| COMP-08 | Phase 9 | Pending |
+| COMP-01 | Phase 9 | Complete |
+| COMP-02 | Phase 9 | Complete |
+| COMP-03 | Phase 9 | Complete |
+| COMP-04 | Phase 9 | Complete |
+| COMP-05 | Phase 9 | Complete |
+| COMP-06 | Phase 9 | Complete |
+| COMP-07 | Phase 9 | Complete |
+| COMP-08 | Phase 9 | Complete |
 | COMP-09 | Phase 9 | Pending |
 | BRFG-01 | Phase 10 | Pending |
 | BRFG-02 | Phase 10 | Pending |

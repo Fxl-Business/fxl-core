@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wireframe Evolution
 status: in-progress
-stopped_at: Phase 8 complete — all 3 plans done, pending verification
-last_updated: "2026-03-10T00:10:00Z"
-last_activity: 2026-03-10 -- Completed 08-03 (theme provider wiring, visual fix iteration)
+stopped_at: Completed 09-01 (section registry + new types)
+last_updated: "2026-03-10T00:56:07Z"
+last_activity: 2026-03-10 -- Completed 09-01 (section registry, 6 new types, 5 chart variants, dispatcher migration)
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 7
+  completed_plans: 7
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 8 complete -- Wireframe Design System (3/3 plans done, pending verification)
+**Current focus:** Phase 9 in progress -- Component Library Expansion (1/? plans done)
 
 ## Current Position
 
-Phase: 8 of 11 (Wireframe Design System) -- COMPLETE (pending verification)
-Plan: 3 of 3
-Status: All plans complete -- tokens, migration, theme provider + visual fix iteration
-Last activity: 2026-03-10 -- Completed 08-03 (theme wiring + visual fix)
+Phase: 9 of 11 (Component Library Expansion)
+Plan: 1 of ? (09-01 complete)
+Status: Registry foundation complete, ready for next plan
+Last activity: 2026-03-10 -- Completed 09-01 (section registry + 6 new types + 5 chart variants)
 
 Progress: [██████████] 100%
 
@@ -36,9 +36,9 @@ Progress: [██████████] 100%
 
 **Velocity:**
 - Total plans completed: 27 (v1.0)
-- v1.1 plans completed: 5
-- Average duration: 6.8min
-- Total execution time: 34min
+- v1.1 plans completed: 7
+- Average duration: 7.2min
+- Total execution time: 43min
 
 **By Phase:**
 
@@ -46,7 +46,7 @@ Progress: [██████████] 100%
 |-------|-------|-------|----------|
 | 7. Blueprint Infrastructure | 3/3 | 19min | 6.3min |
 | 8. Wireframe Design System | 3/3 | 27min | 9.0min |
-| 9. Component Library Expansion | 0/? | - | - |
+| 9. Component Library Expansion | 1/? | 9min | 9.0min |
 | 10. Briefing & Blueprint Views | 0/? | - | - |
 | 11. AI-Assisted Generation | 0/? | - | - |
 
@@ -84,6 +84,10 @@ v1.1 decisions:
 - [08-03] AdminToolbar is wireframe chrome -- uses --wf-* inline styles, not app tokens
 - [08-03] brandPrimary prop removed from entire renderer chain (15 files)
 - [08-03] Table headers lightened: neutral-100 bg, neutral-500 text, uppercase tracking
+- [09-01] Registry uses type casts for existing renderers with narrower section prop types (safe subset)
+- [09-01] ChartGrid schema entry uses BlueprintSectionSchema (recursive union) directly
+- [09-01] getCatalog() preserves registry insertion order for predictable category display
+- [09-01] ChartRenderer narrows chartType at call site for legacy bar/line/bar-line compat
 
 ### Pending Todos
 
@@ -113,6 +117,6 @@ v1.1:
 
 ## Session Continuity
 
-Last session: 2026-03-10T00:10:00Z
-Stopped at: Phase 8 complete — ready for Phase 9
-Resume file: .planning/phases/08-wireframe-design-system/08-03-SUMMARY.md
+Last session: 2026-03-10T00:56:07Z
+Stopped at: Completed 09-01-PLAN.md
+Resume file: .planning/phases/09-component-library-expansion/09-01-SUMMARY.md
