@@ -30,11 +30,15 @@ export default function ChartRenderer({ section, compareMode, comparePeriod, cha
     : undefined
 
   switch (section.type) {
-    case 'bar-line-chart':
+    case 'bar-line-chart': {
+      // New chart types (radar, treemap, funnel, scatter, area) will be
+      // dispatched by dedicated renderers via the registry (Plan 02).
+      // BarLineChart only handles the original 3 types.
+      const legacyType = section.chartType as 'bar' | 'line' | 'bar-line'
       return (
         <BarLineChart
           title={section.title}
-          type={section.chartType}
+          type={legacyType}
           height={section.height}
           categories={section.categories}
           xLabel={section.xLabel}
@@ -42,6 +46,7 @@ export default function ChartRenderer({ section, compareMode, comparePeriod, cha
           chartColors={chartColors}
         />
       )
+    }
     case 'donut-chart':
       return (
         <DonutChart

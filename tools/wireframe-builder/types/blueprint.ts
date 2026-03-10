@@ -62,6 +62,10 @@ export type BankEntry = {
   value: string
 }
 
+// --- Chart type union ---
+
+export type ChartType = 'bar' | 'line' | 'bar-line' | 'radar' | 'treemap' | 'funnel' | 'scatter' | 'area'
+
 // --- Section types (discriminated union) ---
 
 export type KpiGridSection = {
@@ -74,7 +78,7 @@ export type KpiGridSection = {
 export type BarLineChartSection = {
   type: 'bar-line-chart'
   title: string
-  chartType: 'bar' | 'line' | 'bar-line'
+  chartType: ChartType
   height?: number
   compareOnly?: boolean
   categories?: string[] // Custom X axis labels (default: Jan-Dez)
@@ -184,6 +188,73 @@ export type ChartGridSection = {
   items: BlueprintSection[]
 }
 
+export type SettingsPageSection = {
+  type: 'settings-page'
+  title: string
+  groups: {
+    label: string
+    settings: {
+      label: string
+      description?: string
+      inputType: 'toggle' | 'select' | 'text'
+      options?: string[]
+      value?: string
+    }[]
+  }[]
+}
+
+export type FormSectionSection = {
+  type: 'form-section'
+  title: string
+  fields: {
+    label: string
+    inputType: 'text' | 'number' | 'date' | 'select'
+    placeholder?: string
+    options?: string[]
+    required?: boolean
+  }[]
+  columns?: number
+}
+
+export type FilterConfigSection = {
+  type: 'filter-config'
+  filters: {
+    label: string
+    filterType: 'period' | 'select' | 'date-range'
+    options?: string[]
+    defaultValue?: string
+  }[]
+}
+
+export type StatCardSection = {
+  type: 'stat-card'
+  title: string
+  value: string
+  subtitle?: string
+  icon?: string
+  trend?: {
+    value: string
+    positive: boolean
+  }
+}
+
+export type ProgressBarSection = {
+  type: 'progress-bar'
+  title: string
+  items: {
+    label: string
+    value: number
+    max?: number
+    color?: string
+  }[]
+}
+
+export type DividerSection = {
+  type: 'divider'
+  label?: string
+  variant?: 'solid' | 'dashed' | 'labeled'
+}
+
 export type BlueprintSection =
   | KpiGridSection
   | BarLineChartSection
@@ -200,6 +271,12 @@ export type BlueprintSection =
   | ConfigTableSection
   | InfoBlockSection
   | ChartGridSection
+  | SettingsPageSection
+  | FormSectionSection
+  | FilterConfigSection
+  | StatCardSection
+  | ProgressBarSection
+  | DividerSection
 
 export type BlueprintScreen = {
   id: string

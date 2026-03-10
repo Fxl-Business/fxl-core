@@ -92,5 +92,38 @@ export function getDefaultSection(type: BlueprintSection['type']): BlueprintSect
         columns: 2,
         items: [],
       }
+    case 'settings-page':
+      return {
+        type: 'settings-page',
+        title: 'Configuracoes',
+        groups: [{ label: 'Geral', settings: [{ label: 'Opcao', inputType: 'toggle' as const }] }],
+      }
+    case 'form-section':
+      return {
+        type: 'form-section',
+        title: 'Novo Formulario',
+        fields: [{ label: 'Campo', inputType: 'text' as const }],
+      }
+    case 'filter-config':
+      return {
+        type: 'filter-config',
+        filters: [{ label: 'Filtro', filterType: 'select' as const }],
+      }
+    case 'stat-card':
+      return {
+        type: 'stat-card',
+        title: 'Metrica',
+        value: 'R$ 0',
+      }
+    case 'progress-bar':
+      return {
+        type: 'progress-bar',
+        title: 'Progresso',
+        items: [{ label: 'Item', value: 50 }],
+      }
+    case 'divider':
+      return {
+        type: 'divider',
+      }
   }
 }

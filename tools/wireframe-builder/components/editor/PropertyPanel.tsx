@@ -46,6 +46,12 @@ function getSectionLabel(type: BlueprintSection['type']): string {
     'config-table': 'Tabela de Configuracao',
     'info-block': 'Bloco de Informacao',
     'chart-grid': 'Grade de Graficos',
+    'settings-page': 'Pagina de Configuracoes',
+    'form-section': 'Formulario',
+    'filter-config': 'Configuracao de Filtros',
+    'stat-card': 'Card de Metrica',
+    'progress-bar': 'Barra de Progresso',
+    'divider': 'Divisor',
   }
   return labels[type]
 }
@@ -160,6 +166,13 @@ function renderForm(
           onChange={onChange}
         />
       )
+    case 'settings-page':
+    case 'form-section':
+    case 'filter-config':
+    case 'stat-card':
+    case 'progress-bar':
+    case 'divider':
+      return <div className="text-sm text-muted-foreground p-4">Formulario em desenvolvimento</div>
   }
 }
 

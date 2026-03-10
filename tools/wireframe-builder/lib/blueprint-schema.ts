@@ -119,7 +119,7 @@ const ConfigColumnSchema = z.object({
 const ConfigRowSchema = z.record(z.string(), z.string())
 
 // ---------------------------------------------------------------------------
-// Section type schemas (15 types, discriminated union on 'type')
+// Section type schemas (21 types, discriminated union on 'type')
 // ---------------------------------------------------------------------------
 
 const KpiGridSectionSchema = z.object({
@@ -132,7 +132,7 @@ const KpiGridSectionSchema = z.object({
 const BarLineChartSectionSchema = z.object({
   type: z.literal('bar-line-chart'),
   title: z.string(),
-  chartType: z.enum(['bar', 'line', 'bar-line']),
+  chartType: z.enum(['bar', 'line', 'bar-line', 'radar', 'treemap', 'funnel', 'scatter', 'area']),
   height: z.number().optional(),
   compareOnly: z.boolean().optional(),
   categories: z.array(z.string()).optional(),
@@ -243,14 +243,93 @@ const InfoBlockSectionSchema = z.object({
   variant: z.enum(['info', 'warning']).optional(),
 })
 
+const SettingsPageSectionSchema = z.object({
+  type: z.literal('settings-page'),
+  title: z.string(),
+  groups: z.array(
+    z.object({
+      label: z.string(),
+      settings: z.array(
+        z.object({
+          label: z.string(),
+          description: z.string().optional(),
+          inputType: z.enum(['toggle', 'select', 'text']),
+          options: z.array(z.string()).optional(),
+          value: z.string().optional(),
+        })
+      ),
+    })
+  ),
+})
+
+const FormSectionSchema = z.object({
+  type: z.literal('form-section'),
+  title: z.string(),
+  fields: z.array(
+    z.object({
+      label: z.string(),
+      inputType: z.enum(['text', 'number', 'date', 'select']),
+      placeholder: z.string().optional(),
+      options: z.array(z.string()).optional(),
+      required: z.boolean().optional(),
+    })
+  ),
+  columns: z.number().optional(),
+})
+
+const FilterConfigSectionSchema = z.object({
+  type: z.literal('filter-config'),
+  filters: z.array(
+    z.object({
+      label: z.string(),
+      filterType: z.enum(['period', 'select', 'date-range']),
+      options: z.array(z.string()).optional(),
+      defaultValue: z.string().optional(),
+    })
+  ),
+})
+
+const StatCardSectionSchema = z.object({
+  type: z.literal('stat-card'),
+  title: z.string(),
+  value: z.string(),
+  subtitle: z.string().optional(),
+  icon: z.string().optional(),
+  trend: z
+    .object({
+      value: z.string(),
+      positive: z.boolean(),
+    })
+    .optional(),
+})
+
+const ProgressBarSectionSchema = z.object({
+  type: z.literal('progress-bar'),
+  title: z.string(),
+  items: z.array(
+    z.object({
+      label: z.string(),
+      value: z.number(),
+      max: z.number().optional(),
+      color: z.string().optional(),
+    })
+  ),
+})
+
+const DividerSectionSchema = z.object({
+  type: z.literal('divider'),
+  label: z.string().optional(),
+  variant: z.enum(['solid', 'dashed', 'labeled']).optional(),
+})
+
 // ---------------------------------------------------------------------------
-// Discriminated union of all 15 section types
+// Discriminated union of all 21 section types (15 existing + 6 new)
 // Note: ChartGridSection has recursive items: BlueprintSection[]
-// We define the non-recursive schemas first, then build the union
-// with ChartGrid inline using z.lazy() for the recursive reference.
+// We define the non-recursive schemas first (20 types), then build
+// the union with ChartGrid inline using z.lazy() for the recursive reference.
 // ---------------------------------------------------------------------------
 
-// Non-recursive section schemas (14 types)
+// Non-recursive section schemas (20 types: 14 existing + 6 new)
 const nonRecursiveSections = [
   KpiGridSectionSchema,
   BarLineChartSectionSchema,
@@ -266,6 +345,12 @@ const nonRecursiveSections = [
   UploadSectionSchema,
   ConfigTableSectionSchema,
   InfoBlockSectionSchema,
+  SettingsPageSectionSchema,
+  FormSectionSchema,
+  FilterConfigSectionSchema,
+  StatCardSectionSchema,
+  ProgressBarSectionSchema,
+  DividerSectionSchema,
 ] as const
 
 // ChartGridSection is defined inline to avoid circular const reference.
@@ -318,3 +403,30 @@ export const BlueprintConfigSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export type ValidatedBlueprintConfig = z.infer<typeof BlueprintConfigSchema>
+
+// ---------------------------------------------------------------------------
+// Named exports of individual section schemas (consumed by section-registry)
+// ---------------------------------------------------------------------------
+
+export {
+  KpiGridSectionSchema,
+  BarLineChartSectionSchema,
+  DonutChartSectionSchema,
+  WaterfallChartSectionSchema,
+  ParetoChartSectionSchema,
+  CalculoCardSectionSchema,
+  DataTableSectionSchema,
+  DrillDownTableSectionSchema,
+  ClickableTableSectionSchema,
+  SaldoBancoSectionSchema,
+  ManualInputSectionSchema,
+  UploadSectionSchema,
+  ConfigTableSectionSchema,
+  InfoBlockSectionSchema,
+  SettingsPageSectionSchema,
+  FormSectionSchema,
+  FilterConfigSectionSchema,
+  StatCardSectionSchema,
+  ProgressBarSectionSchema,
+  DividerSectionSchema,
+}
