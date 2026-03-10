@@ -31,7 +31,7 @@ Requirements for Wireframe Evolution milestone. Each maps to roadmap phases.
 - [x] **COMP-06**: Operador pode adicionar bloco progress-bar para indicadores de progresso
 - [x] **COMP-07**: Operador pode adicionar bloco divider para separacao visual de secoes
 - [x] **COMP-08**: Operador pode usar 5 tipos de chart adicionais (Radar, Treemap, Funnel, Scatter, Area)
-- [ ] **COMP-09**: Wireframe viewer generico parametrizado por :clientSlug (substituindo paginas hardcoded por cliente)
+- [x] **COMP-09**: Wireframe viewer generico parametrizado por :clientSlug (substituindo paginas hardcoded por cliente)
 
 ### Briefing
 
@@ -106,7 +106,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMP-06 | Phase 9 | Complete |
 | COMP-07 | Phase 9 | Complete |
 | COMP-08 | Phase 9 | Complete |
-| COMP-09 | Phase 9 | Pending |
+| COMP-09 | Phase 9 | Complete |
 | BRFG-01 | Phase 10 | Pending |
 | BRFG-02 | Phase 10 | Pending |
 | BRFG-03 | Phase 10 | Pending |
