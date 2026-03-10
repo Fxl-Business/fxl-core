@@ -222,13 +222,32 @@ describe('BlueprintConfigSchema', () => {
         {
           ...validScreen,
           sections: [
-            { type: 'bar-line-chart', title: 'Bad Chart', chartType: 'scatter' },
+            { type: 'bar-line-chart', title: 'Bad Chart', chartType: 'unknown-type' },
           ],
         },
       ],
     }
     const result = BlueprintConfigSchema.safeParse(invalid)
     expect(result.success).toBe(false)
+  })
+
+  it('accepts BarLineChartSection with extended chartType values', () => {
+    const extendedTypes = ['radar', 'treemap', 'funnel', 'scatter', 'area'] as const
+    for (const chartType of extendedTypes) {
+      const config = {
+        ...validConfig,
+        screens: [
+          {
+            ...validScreen,
+            sections: [
+              { type: 'bar-line-chart', title: 'Extended Chart', chartType },
+            ],
+          },
+        ],
+      }
+      const result = BlueprintConfigSchema.safeParse(config)
+      expect(result.success, `chartType "${chartType}" should be valid`).toBe(true)
+    }
   })
 
   it('rejects BlueprintScreen with missing periodType', () => {
