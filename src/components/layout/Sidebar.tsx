@@ -155,14 +155,10 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
         to={item.href}
         className={({ isActive }) =>
           cn(
-            'flex w-full items-center rounded-md px-3 py-1.5 text-xs transition-colors',
-            depth === 1 && 'pl-5',
-            depth === 2 && 'pl-8',
-            depth === 3 && 'pl-11',
-            depth >= 4 && 'pl-14',
+            'block text-sm transition-colors',
             isActive
-              ? 'bg-primary/10 text-primary font-medium'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              ? '-ml-px border-l-2 border-indigo-600 pl-[15px] font-medium text-indigo-600 dark:border-sidebar-accent dark:text-sidebar-accent'
+              : 'text-slate-500 hover:text-indigo-600 dark:text-sidebar-muted-foreground dark:hover:text-sidebar-accent',
           )
         }
       >
@@ -176,26 +172,23 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
     return (
       <div>
         <div className={cn(
-          'flex items-center justify-between rounded-md transition-colors',
+          'flex items-center justify-between',
           depth === 0
-            ? 'text-left text-xs font-semibold uppercase tracking-[0.18em] text-foreground'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-          depth === 1 && 'pl-2',
-          depth === 2 && 'pl-5',
-          depth === 3 && 'pl-8',
-          childIsActive && depth > 0 && 'text-foreground',
+            ? 'mb-4 text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-sidebar-foreground'
+            : 'text-sm',
         )}>
           <NavLink
             to={item.href}
             className={({ isActive }) =>
               cn(
-                'flex-1 truncate px-3 py-1.5 text-xs',
+                'flex-1 truncate text-sm transition-colors',
                 depth === 0
-                  ? 'font-semibold uppercase tracking-[0.18em]'
+                  ? 'text-xs font-bold uppercase tracking-wider'
                   : '',
-                isActive && depth > 0
-                  ? 'font-medium text-primary'
-                  : '',
+                isActive
+                  ? 'font-medium text-indigo-600 dark:text-sidebar-accent'
+                  : 'text-slate-500 hover:text-indigo-600 dark:text-sidebar-muted-foreground dark:hover:text-sidebar-accent',
+                childIsActive && !isActive && 'text-slate-700 dark:text-sidebar-foreground',
               )
             }
           >
@@ -205,14 +198,18 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
             <button
               type="button"
               onClick={() => setOpen((c) => !c)}
-              className="px-2 py-1.5 text-muted-foreground hover:text-foreground"
+              className="p-1 text-slate-400 hover:text-slate-600 dark:text-sidebar-muted-foreground dark:hover:text-sidebar-foreground"
             >
               {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             </button>
           )}
         </div>
         {(open || depth === 0) && item.children && (
-          <div className={cn('mt-0.5 space-y-0.5', depth === 0 && 'mb-4')}>
+          <div className={cn(
+            depth === 0
+              ? 'mt-2 space-y-3 border-l border-slate-200 ml-1 pl-4 text-sm dark:border-sidebar-border'
+              : 'mt-2 space-y-2 border-l border-slate-200 ml-1 pl-4 dark:border-sidebar-border',
+          )}>
             {item.children.map((child) => (
               <NavSection key={child.label} item={child} depth={depth + 1} />
             ))}
@@ -229,14 +226,10 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
         type="button"
         onClick={() => setOpen((current) => !current)}
         className={cn(
-          'flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs transition-colors',
           depth === 0
-            ? 'text-left text-xs font-semibold uppercase tracking-[0.18em] text-foreground'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-          depth === 1 && 'pl-5',
-          depth === 2 && 'pl-8',
-          depth === 3 && 'pl-11',
-          childIsActive && depth > 0 && 'text-foreground',
+            ? 'flex w-full items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-sidebar-foreground'
+            : 'flex w-full items-center justify-between text-sm text-slate-500 hover:text-indigo-600 dark:text-sidebar-muted-foreground dark:hover:text-sidebar-accent',
+          childIsActive && depth > 0 && 'text-slate-700 dark:text-sidebar-foreground',
         )}
       >
         {item.label}
@@ -244,7 +237,11 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
           (open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />)}
       </button>
       {(open || depth === 0) && item.children && (
-        <div className={cn('mt-0.5 space-y-0.5', depth === 0 && 'mb-4')}>
+        <div className={cn(
+          depth === 0
+            ? 'mt-2 space-y-3 border-l border-slate-200 ml-1 pl-4 text-sm dark:border-sidebar-border'
+            : 'mt-2 space-y-2 border-l border-slate-200 ml-1 pl-4 dark:border-sidebar-border',
+        )}>
           {item.children.map((child) => (
             <NavSection key={child.label} item={child} depth={depth + 1} />
           ))}
@@ -259,25 +256,25 @@ export default function Sidebar() {
   const rest = navigation.slice(1)
 
   return (
-    <aside className="w-full flex-shrink-0 border-b border-sidebar-border bg-sidebar/80 backdrop-blur md:w-64 md:border-b-0 md:border-r">
-      <nav className="max-h-72 overflow-y-auto p-4 md:max-h-none md:space-y-1">
+    <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50/50 p-6 md:block dark:border-sidebar-border dark:bg-sidebar">
+      <nav className="space-y-8">
         {/* Home link with icon */}
         <NavLink
           to={homeItem.href!}
           className={({ isActive }) =>
             cn(
-              'flex w-full items-center rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+              'flex items-center gap-2 text-sm font-medium transition-colors',
               isActive
-                ? 'bg-primary/10 text-primary font-medium'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                ? 'text-indigo-600 dark:text-sidebar-accent'
+                : 'text-slate-600 hover:text-indigo-600 dark:text-sidebar-muted-foreground dark:hover:text-sidebar-accent',
             )
           }
         >
-          <Home className="mr-2 h-3.5 w-3.5 flex-shrink-0" />
+          <Home className="h-4 w-4" />
           {homeItem.label}
         </NavLink>
 
-        <Separator className="my-3" />
+        <Separator className="my-4" />
 
         {/* Remaining groups */}
         {rest.map((item) => (
