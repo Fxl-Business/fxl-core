@@ -8,6 +8,11 @@ import BarLineChart from '../BarLineChart'
 import DonutChart from '../DonutChart'
 import WaterfallChart from '../WaterfallChart'
 import ParetoChart from '../ParetoChart'
+import RadarChartComponent from '../RadarChartComponent'
+import TreemapComponent from '../TreemapComponent'
+import FunnelChartComponent from '../FunnelChartComponent'
+import ScatterChartComponent from '../ScatterChartComponent'
+import AreaChartComponent from '../AreaChartComponent'
 
 type ChartSection =
   | BarLineChartSection
@@ -31,21 +36,68 @@ export default function ChartRenderer({ section, compareMode, comparePeriod, cha
 
   switch (section.type) {
     case 'bar-line-chart': {
-      // New chart types (radar, treemap, funnel, scatter, area) will be
-      // dispatched by dedicated renderers via the registry (Plan 02).
-      // BarLineChart only handles the original 3 types.
-      const legacyType = section.chartType as 'bar' | 'line' | 'bar-line'
-      return (
-        <BarLineChart
-          title={section.title}
-          type={legacyType}
-          height={section.height}
-          categories={section.categories}
-          xLabel={section.xLabel}
-          yLabel={section.yLabel}
-          chartColors={chartColors}
-        />
-      )
+      // Dispatch new chart sub-variants to dedicated components
+      switch (section.chartType) {
+        case 'radar':
+          return (
+            <RadarChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'treemap':
+          return (
+            <TreemapComponent
+              title={section.title}
+              height={section.height}
+              chartColors={chartColors}
+            />
+          )
+        case 'funnel':
+          return (
+            <FunnelChartComponent
+              title={section.title}
+              height={section.height}
+              chartColors={chartColors}
+            />
+          )
+        case 'scatter':
+          return (
+            <ScatterChartComponent
+              title={section.title}
+              height={section.height}
+              xLabel={section.xLabel}
+              yLabel={section.yLabel}
+              chartColors={chartColors}
+            />
+          )
+        case 'area':
+          return (
+            <AreaChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        default: {
+          // Legacy bar/line/bar-line types
+          const legacyType = section.chartType as 'bar' | 'line' | 'bar-line'
+          return (
+            <BarLineChart
+              title={section.title}
+              type={legacyType}
+              height={section.height}
+              categories={section.categories}
+              xLabel={section.xLabel}
+              yLabel={section.yLabel}
+              chartColors={chartColors}
+            />
+          )
+        }
+      }
     }
     case 'donut-chart':
       return (

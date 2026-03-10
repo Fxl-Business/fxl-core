@@ -179,8 +179,8 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     propertyForm: BarLineChartForm as unknown as ComponentType<PropertyFormProps>,
     catalogEntry: {
       type: 'bar-line-chart',
-      label: 'Barras / Linhas',
-      description: 'Grafico de barras, linhas ou combinado',
+      label: 'Grafico',
+      description: 'Barra, linha, area, radar, dispersao, funil ou treemap',
       icon: BarChart3,
       category: 'Graficos',
     },
@@ -190,7 +190,7 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
       chartType: 'bar' as const,
     }),
     schema: BarLineChartSectionSchema,
-    label: 'Grafico de Barras/Linhas',
+    label: 'Grafico',
   },
 
   'donut-chart': {

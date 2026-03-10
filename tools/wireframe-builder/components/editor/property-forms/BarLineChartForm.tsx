@@ -47,6 +47,11 @@ export default function BarLineChartForm({ section, onChange }: Props) {
             <SelectItem value="bar">Barra</SelectItem>
             <SelectItem value="line">Linha</SelectItem>
             <SelectItem value="bar-line">Barra + Linha</SelectItem>
+            <SelectItem value="area">Area</SelectItem>
+            <SelectItem value="radar">Radar</SelectItem>
+            <SelectItem value="scatter">Dispersao</SelectItem>
+            <SelectItem value="funnel">Funil</SelectItem>
+            <SelectItem value="treemap">Treemap</SelectItem>
           </SelectContent>
         </Select>
       </div>
