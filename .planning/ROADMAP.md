@@ -28,7 +28,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 - [x] **Phase 7: Blueprint Infrastructure** - DB as sole source of truth with schema versioning, runtime validation, and optimistic locking
 - [x] **Phase 8: Wireframe Design System** - Semantic token layer for wireframes with dark/light mode and branding integration
-- [ ] **Phase 9: Component Library Expansion** - Registry pattern + 6 new section types + 5 chart types + generic wireframe viewer
+- [x] **Phase 9: Component Library Expansion** - Registry pattern + 6 new section types + 5 chart types + generic wireframe viewer
 - [ ] **Phase 10: Briefing & Blueprint Views** - Structured briefing input, blueprint text view, MD export, and share link fix
 - [ ] **Phase 11: AI-Assisted Generation** - Blueprint generation from briefing with screen recipes and vertical templates
 
@@ -78,10 +78,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 09-01-PLAN.md -- Section registry pattern, types/schemas for 6 new blocks + 5 chart variants, dispatcher migration
-- [ ] 09-02-PLAN.md -- 6 new block renderers and property forms (settings-page, form-section, filter-config, stat-card, progress-bar, divider)
-- [ ] 09-03-PLAN.md -- 5 new Recharts chart variants (Radar, Treemap, Funnel, Scatter, Area) + ChartRenderer extension
-- [ ] 09-04-PLAN.md -- Generic parametric wireframe viewer replacing hardcoded client pages
+- [x] 09-01-PLAN.md -- Section registry pattern, types/schemas for 6 new blocks + 5 chart variants, dispatcher migration
+- [x] 09-02-PLAN.md -- 6 new block renderers and property forms (settings-page, form-section, filter-config, stat-card, progress-bar, divider)
+- [x] 09-03-PLAN.md -- 5 new Recharts chart variants (Radar, Treemap, Funnel, Scatter, Area) + ChartRenderer extension
+- [x] 09-04-PLAN.md -- Generic parametric wireframe viewer replacing hardcoded client pages
 
 ### Phase 10: Briefing & Blueprint Views
 **Goal**: Operators can input client briefings through the UI, view blueprints as structured text, export blueprints for Claude Code, and share wireframes with clients
@@ -122,6 +122,6 @@ Phase 7 -> 8 -> 9 (and 10 in parallel) -> 11
 | 6. System Generation | v1.0 | 3/3 | Complete | 2026-03-09 |
 | 7. Blueprint Infrastructure | v1.1 | 3/3 | Complete | 2026-03-09 |
 | 8. Wireframe Design System | v1.1 | 3/3 | Complete | 2026-03-10 |
-| 9. Component Library Expansion | 1/4 | In Progress|  | - |
+| 9. Component Library Expansion | v1.1 | 4/4 | Complete | 2026-03-10 |
 | 10. Briefing & Blueprint Views | v1.1 | 0/? | Not started | - |
 | 11. AI-Assisted Generation | v1.1 | 0/? | Not started | - |

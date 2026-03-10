@@ -18,7 +18,7 @@ Requirements for Wireframe Evolution milestone. Each maps to roadmap phases.
 
 - [x] **DSGN-01**: Wireframe renderizado com tokens semanticos --wf-* (paleta neutra 10 tons + dourado accent)
 - [x] **DSGN-02**: WireframeThemeProvider gerencia tema do wireframe via data-wf-theme attribute
-- [ ] **DSGN-03**: Operador pode alternar dark/light mode no wireframe viewer
+- [x] **DSGN-03**: Operador pode alternar dark/light mode no wireframe viewer
 - [x] **DSGN-04**: Branding do cliente aplicado como override sobre tokens wireframe sem colisao com tema do app
 
 ### Components
@@ -96,7 +96,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-04 | Phase 7 | Complete |
 | DSGN-01 | Phase 8 | Complete |
 | DSGN-02 | Phase 8 | Complete |
-| DSGN-03 | Phase 8 | Pending |
+| DSGN-03 | Phase 8 | Complete |
 | DSGN-04 | Phase 8 | Complete |
 | COMP-01 | Phase 9 | Complete |
 | COMP-02 | Phase 9 | Complete |
