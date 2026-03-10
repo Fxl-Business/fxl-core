@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Premissas Gerais - Nucleo FXL</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Font Configuration -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .file-tree {
+      font-family: 'Courier New', Courier, monospace;
+    }
+  </style>
+<style data-purpose="scrollbar-styling">
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #cbd5e1;
+    }
+  </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+<!-- BEGIN: TopHeader -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
+<div class="flex h-16 items-center justify-between px-6">
+<div class="flex items-center gap-4">
+<!-- Logo and Brand -->
+<div class="flex flex-col">
+<span class="text-sm font-bold tracking-tight text-slate-900">Nucleo FXL</span>
+<span class="text-[10px] font-medium uppercase tracking-widest text-slate-400">FXL-CORE</span>
+</div>
+</div>
+<div class="flex flex-1 items-center justify-end gap-4 px-8">
+<!-- Search Bar -->
+<div class="relative w-full max-w-sm">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<input class="block w-full rounded-md border-slate-200 bg-slate-50 py-1.5 pl-10 pr-12 text-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Pesquisar docs..." type="text"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-2">
+<kbd class="hidden rounded border border-slate-300 bg-white px-1.5 font-sans text-[10px] font-medium text-slate-400 sm:inline-block">⌘K</kbd>
+</div>
+</div>
+<!-- Theme Toggle -->
+<button aria-label="Toggle dark mode" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: TopHeader -->
+<div class="flex">
+<!-- BEGIN: LeftSidebar -->
+<aside class="sticky top-16 h-[calc(100vh-64px)] w-64 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50/50 p-6 lg:block">
+<nav class="space-y-8">
+<!-- Home Link -->
+<div class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-indigo-600 cursor-pointer">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          Home
+        </div>
+<!-- Section: PROCESSO -->
+<div>
+<h5 class="mb-4 text-xs font-bold uppercase tracking-wider text-slate-900">PROCESSO</h5>
+<ul class="space-y-3 border-l border-slate-200 ml-1 pl-4 text-sm">
+<li><a class="block text-slate-500 hover:text-indigo-600" href="#">Visao Geral</a></li>
+<li><a class="block text-slate-500 hover:text-indigo-600" href="#">Prompts</a></li>
+<li><a class="block text-slate-500 hover:text-indigo-600" href="#">Cliente vs Produto</a></li>
+<li><a class="block text-slate-500 hover:text-indigo-600" href="#">Identidade FXL</a></li>
+<li>
+<button class="flex w-full items-center justify-between text-indigo-600 font-medium">
+                Fases
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<ul class="mt-3 space-y-2 pl-4 text-slate-500">
+<li class="hover:text-indigo-600 cursor-pointer">Fase 1 — Diagnostico</li>
+<li class="hover:text-indigo-600 cursor-pointer">Fase 2 — Wireframe</li>
+<li class="hover:text-indigo-600 cursor-pointer">Fase 3 — Desenvolvimento</li>
+<li class="hover:text-indigo-600 cursor-pointer">Fase 4 — Auditoria</li>
+<li class="hover:text-indigo-600 cursor-pointer">Fase 5 — Entrega</li>
+<li class="hover:text-indigo-600 cursor-pointer text-indigo-600 font-medium">Fase 6 — Tutorial</li>
+</ul>
+</li>
+<li><a class="block text-slate-500 hover:text-indigo-600" href="#">Onboarding</a></li>
+</ul>
+</div>
+<!-- Section: PADROES -->
+<div>
+<h5 class="mb-4 text-xs font-bold uppercase tracking-wider text-slate-900">PADROES</h5>
+<ul class="space-y-3 border-l border-slate-200 ml-1 pl-4 text-sm text-slate-500">
+<li class="flex items-center justify-between text-indigo-600 font-medium">
+              Tech Radar
+              <svg class="h-3 w-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</li>
+<li class="pl-4 hover:text-indigo-600 cursor-pointer">Vite + React + TS</li>
+<li class="pl-4 hover:text-indigo-600 cursor-pointer">Tailwind + shadcn/ui</li>
+<li class="pl-4 hover:text-indigo-600 cursor-pointer">Next.js</li>
+<li class="pl-4 hover:text-indigo-600 cursor-pointer">Supabase</li>
+<li class="pl-4 hover:text-indigo-600 cursor-pointer">Vercel</li>
+<li class="pl-4 hover:text-indigo-600 cursor-pointer">GitHub</li>
+<li class="pl-4 hover:text-indigo-600 cursor-pointer">GitHub Actions</li>
+<li class="pl-4 hover:text-indigo-600 cursor-pointer">Backend — Node.js</li>
+</ul>
+</div>
+</nav>
+</aside>
+<!-- END: LeftSidebar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 px-8 py-10 lg:px-12">
+<div class="mx-auto max-w-4xl">
+<!-- Breadcrumbs -->
+<nav aria-label="Breadcrumb" class="mb-4 flex text-sm text-slate-500">
+<ol class="flex items-center space-x-2">
+<li><a class="hover:text-slate-800" href="#">Padroes</a></li>
+<li><svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></li>
+<li class="text-slate-800 font-medium">Premissas Gerais</li>
+</ol>
+</nav>
+<!-- Page Header -->
+<header class="mb-12">
+<div class="mb-3">
+<span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-indigo-600 ring-1 ring-inset ring-indigo-600/20">
+              PADROES
+            </span>
+</div>
+<h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">Premissas Gerais</h1>
+<p class="mt-4 text-lg text-slate-600">Stack padrao, estrutura de pastas e convençoes de código para excelência técnica.</p>
+<button class="mt-8 flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+            Exibir Markdown
+          </button>
+</header>
+<div class="h-px w-full bg-slate-200 my-10"></div>
+<!-- Section: Stack Padrao -->
+<section class="mb-16">
+<h2 class="text-2xl font-bold tracking-tight text-slate-900 mb-6" id="stack-padrao">Premissas Gerais — Projetos FXL</h2>
+<h3 class="text-xl font-semibold text-slate-800 mt-8 mb-4">Stack padrao</h3>
+<p class="text-slate-600 mb-4 leading-relaxed">
+            A stack padrao FXL esta documentada e atualizada no <a class="font-semibold text-indigo-600 underline underline-offset-4 decoration-indigo-200" href="#">Tech Radar</a>.
+          </p>
+<p class="text-slate-600 leading-relaxed">
+            Consulte cada pagina de tech para versoes minimas, regras obrigatorias e quando usar.
+          </p>
+</section>
+<!-- Section: Folder Structure -->
+<section>
+<h2 class="text-2xl font-bold tracking-tight text-slate-900 mb-6" id="estrutura-pastas">Estrutura de Pastas Padrão (React + Vite)</h2>
+<div class="relative rounded-xl bg-slate-900 p-6 shadow-2xl overflow-hidden" data-purpose="code-block-container">
+<!-- Code Block Header/Decor -->
+<div class="flex gap-1.5 mb-6">
+<div class="h-3 w-3 rounded-full bg-red-500/50"></div>
+<div class="h-3 w-3 rounded-full bg-amber-500/50"></div>
+<div class="h-3 w-3 rounded-full bg-emerald-500/50"></div>
+</div>
+<!-- The File Tree -->
+<pre class="file-tree text-sm leading-6 text-slate-300 overflow-x-auto">projeto-fxl/
+├── <span class="text-indigo-400">CLAUDE.md</span>
+├── README.md
+├── .env.example
+├── .gitignore
+├── package.json
+├── <span class="text-emerald-400">tsconfig.json</span>          <span class="text-slate-500">← strict: true</span>
+├── vite.config.ts
+├── index.html
+├── public/
+│   └── favicon.ico
+└── <span class="text-indigo-400">src/</span>
+    ├── main.tsx
+    ├── App.tsx
+    ├── <span class="text-emerald-400">components/</span>
+    │   ├── ui/                <span class="text-slate-500">← shadcn/ui</span>
+    │   ├── layout/            <span class="text-slate-500">← Header, Sidebar, Footer</span>
+    │   └── shared/
+    ├── pages/
+    ├── lib/
+    ├── hooks/
+    ├── services/
+    └── utils/</pre>
+</div>
+</section>
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: RightTableOfContents -->
+<aside class="sticky top-16 hidden h-[calc(100vh-64px)] w-64 shrink-0 overflow-y-auto px-6 py-10 xl:block">
+<h5 class="mb-4 text-xs font-bold uppercase tracking-wider text-slate-900">NESTA PAGINA</h5>
+<nav class="space-y-3 text-sm">
+<a class="block font-medium text-indigo-600" href="#stack-padrao">Stack padrao</a>
+<a class="block text-slate-500 hover:text-slate-900" href="#estrutura-pastas">Estrutura de Pastas Padrão (React + Vite)</a>
+<a class="block text-slate-500 hover:text-slate-900" href="#">Convenções de Código</a>
+<ul class="ml-4 space-y-2 border-l border-slate-200 pl-4 text-slate-400">
+<li><a class="hover:text-slate-900" href="#">Naming</a></li>
+<li><a class="hover:text-slate-900" href="#">Imports</a></li>
+<li><a class="font-medium text-slate-600" href="#">TypeScript</a></li>
+<li><a class="hover:text-slate-900 pl-4" href="#">Componentes</a></li>
+</ul>
+<a class="block text-slate-500 hover:text-slate-900" href="#">Dependências</a>
+<ul class="ml-4 space-y-2 border-l border-slate-200 pl-4 text-slate-400">
+<li><a class="hover:text-slate-900" href="#">Permitidas sem justificar</a></li>
+<li><a class="hover:text-slate-900" href="#">Proibidas</a></li>
+<li><a class="hover:text-slate-900" href="#">Precisam justificativa no README</a></li>
+</ul>
+</nav>
+</aside>
+<!-- END: RightTableOfContents -->
+</div>
+</body></html>

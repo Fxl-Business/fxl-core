@@ -1,68 +1,149 @@
-# Stack Research: v1.1 Wireframe Evolution
+# Stack Research: v1.2 Visual Redesign
 
-**Domain:** Internal BI platform -- wireframe editor expansion, dynamic blueprints, briefing input
-**Researched:** 2026-03-09
-**Confidence:** HIGH (all recommendations verified against official docs/npm)
+**Domain:** Visual redesign of internal documentation platform (React + Tailwind + Vite)
+**Researched:** 2026-03-10
+**Confidence:** HIGH (all recommendations verified against npm registry and existing codebase)
 
 ## Scope
 
-This research covers ONLY additions/changes needed for v1.1 features. The existing stack (React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, shadcn/ui, recharts 2.x, dnd-kit, lucide-react) is validated and unchanged.
+This research covers ONLY additions/changes needed for the v1.2 visual redesign. The existing stack (React 18, TypeScript strict, Tailwind CSS 3.4, Vite 5, shadcn/ui, react-markdown 9 + remark-gfm 4, lucide-react) is validated and unchanged.
 
-Five target areas:
-1. Expanded component library (charts, inputs, form builders)
-2. Blueprint data in Supabase (already stored, needs typed client + text rendering)
-3. Wireframe design system (white/black/gray/gold palette, dark+light mode)
-4. Claude Code access to Supabase data (MCP or MD export)
-5. Briefing input UI (forms, validation, persistence)
+Four target areas:
+1. Font loading (Inter variable font for body, JetBrains Mono for code)
+2. Color system refinement (slate + indigo palette via CSS variables)
+3. Code block syntax highlighting (dark themed, language-aware)
+4. Layout changes (backdrop-blur header, sticky sidebar, right-side TOC) -- pure CSS/Tailwind, no new dependencies
+
+**Critical constraint from PROJECT.md:** "React 18 + TypeScript strict + Tailwind + Vite + Vercel -- nao muda." Also: Tailwind v4 and React 19 are explicitly out of scope.
 
 ---
 
 ## Recommended Stack Additions
 
-### 1. Form Infrastructure (Briefing Input UI)
+### 1. Font Loading: Self-Hosted Variable Fonts
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| react-hook-form | ^7.71.2 | Form state management | De facto React form library. Uncontrolled by default = minimal re-renders. shadcn/ui Form component is built on it. Zero-config TypeScript support. 85M+ weekly npm downloads. |
-| zod | ^3.24.0 (v3 line) | Schema validation + type inference | TypeScript-first validation. Infers TS types from schemas = single source of truth for briefing data shapes. Stable with @hookform/resolvers. |
-| @hookform/resolvers | ^5.2.2 | Connects zod to react-hook-form | Official bridge. zodResolver plugs zod schemas into react-hook-form validation pipeline. |
+| @fontsource-variable/inter | 5.2.8 | Self-hosted Inter variable font (100-900 weight range) | Eliminates external Google Fonts dependency. Single file covers all weights via variable font axes. ~150KB woff2. No FOUT/FOUC from network-loaded fonts. Vite bundles it with the app. Already referenced in tailwind.config.ts as fontFamily.sans but currently NOT loaded -- this fixes it. |
+| @fontsource-variable/jetbrains-mono | 5.2.8 | Self-hosted JetBrains Mono variable font for code blocks | Already referenced in tailwind.config.ts as fontFamily.mono but currently NOT loaded. Used in .prose code/pre styles. Variable font = one file covers all weights. ~100KB woff2. |
 
-**Why zod v3, NOT v4:** Zod v4 (4.3.x) has known type incompatibilities with @hookform/resolvers as of March 2026. GitHub issues #12829 and #799 document ZodError thrown instead of captured by zodResolver, and input/output type mismatches in TypeScript. The v3 line (3.24.x) is stable and battle-tested with the react-hook-form ecosystem. Upgrade to v4 when @hookform/resolvers ships native v4 support without workarounds.
+**Current state (problem):** The `tailwind.config.ts` already declares `fontFamily.sans: ['Inter Variable', 'Inter', ...]` and `fontFamily.mono: ['JetBrains Mono', ...]` but neither font is actually loaded anywhere. There is no `@import` in CSS, no `<link>` in index.html, no fontsource package installed. The fonts fall back to system-ui silently.
 
-### 2. Toast Notifications (Save/Sync Feedback)
+**Why self-hosted (fontsource), NOT Google Fonts CDN:**
+- The reference HTML uses `https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700` -- this loads static weight files (one per weight = 5 HTTP requests + FOUT)
+- `@fontsource-variable/inter` loads ONE variable font file that covers the entire 100-900 weight range
+- No external network dependency, no GDPR/privacy concerns, no flash of unstyled text on slow connections
+- Vite includes it in the build output, served from same CDN as the app (Vercel)
+- This is the standard approach for Vite + React apps in 2026
+
+**Integration (two lines of CSS):**
+```css
+/* In src/styles/globals.css, at the very top before @tailwind directives */
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+```
+
+No changes needed in `tailwind.config.ts` -- the fontFamily declarations already match. No changes in `index.html`.
+
+### 2. Code Block Syntax Highlighting
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| sonner | ^2.0.0 | Toast notifications | shadcn/ui's recommended toast library. Simpler API than Radix Toast primitive. Supports stacking, promise-based toasts (ideal for Supabase save operations), custom JSX. Integrated via `npx shadcn@latest add sonner`. |
+| rehype-highlight | 7.0.2 | Syntax highlighting for code blocks in react-markdown | Plugs directly into react-markdown as rehypePlugin. Uses lowlight (highlight.js) under the hood. 37 common languages bundled by default (JS, TS, Python, SQL, bash, JSON, CSS, HTML -- covers all doc content). Adds CSS classes to tokens for theming. Compatible with react-markdown 9.x (both use @types/hast ^3.0.0 and vfile ^6.0.0). |
 
-### 3. Additional shadcn/ui Primitives
+**Why rehype-highlight, NOT shiki/rehype-pretty-code:**
+- rehype-highlight is a rehype plugin designed for the react-markdown pipeline the project already uses
+- It adds semantic CSS classes (`hljs-keyword`, `hljs-string`, etc.) that can be styled with the existing CSS variable system
+- shiki uses inline styles (harder to theme dynamically with light/dark mode toggle)
+- rehype-pretty-code is designed for build-time MDX processing, not runtime react-markdown rendering
+- react-shiki is a standalone component, not a rehype plugin -- would require replacing the MarkdownRenderer architecture
+- rehype-highlight is ~15KB + lowlight bundles only 37 languages by default (not the full 5.4MB highlight.js)
 
-These are NOT npm packages -- generated via `npx shadcn@latest add [name]`. Each auto-installs the correct Radix primitive version.
+**Why NOT react-syntax-highlighter:**
+- Legacy library (based on Prism/highlight.js but with heavier wrappers)
+- Requires replacing the `<pre>` and `<code>` components in the MarkdownRenderer with custom rendering logic
+- rehype-highlight works at the AST level before rendering -- cleaner integration
 
-**Already installed:** button, badge, dialog, separator, scroll-area, command, sheet, select, input, label, popover, textarea.
+**Integration:**
+```typescript
+// In MarkdownRenderer.tsx
+import rehypeHighlight from 'rehype-highlight'
 
-| Component | Needed For | New Radix Dependency |
-|-----------|-----------|---------------------|
-| `form` | Briefing input with error states, field validation | react-hook-form (via npm install above) |
-| `checkbox` | Multi-select in briefing (data sources, features needed) | @radix-ui/react-checkbox |
-| `switch` | Toggle dark/light mode, boolean briefing options | @radix-ui/react-switch |
-| `tabs` | Briefing section navigation, blueprint text/visual toggle | @radix-ui/react-tabs |
-| `radio-group` | Single-select in briefing (project type, frequency) | @radix-ui/react-radio-group |
-| `accordion` | Collapsible briefing sections, settings panels | @radix-ui/react-accordion |
-| `card` | Form section containers, settings cards | None (pure Tailwind) |
-| `dropdown-menu` | Editor toolbar actions, export options | @radix-ui/react-dropdown-menu |
-| `sonner` | Toast wrapper component for shadcn styling | sonner (via npm install above) |
-| `slider` | Numeric config values (column count, chart height) | @radix-ui/react-slider |
+// Add to ReactMarkdown
+<ReactMarkdown
+  remarkPlugins={[remarkGfm]}
+  rehypePlugins={[rehypeHighlight]}  // <-- add this
+  components={components}
+>
+```
 
-**Installation approach:** Run `npx shadcn@latest add [component]` one at a time. The CLI auto-manages Radix package versions. Do NOT manually add @radix-ui/* packages to avoid version conflicts.
+**Theming approach:** Create a custom highlight.js theme using the existing `--code-bg` and `--code-fg` CSS variables plus new token-specific variables. This keeps light/dark mode working automatically via the existing `.dark` class toggle.
 
-### 4. Supabase MCP Server (Claude Code Access)
+```css
+/* Custom highlight.js theme using CSS variables (add to globals.css) */
+:root {
+  --code-keyword: 199 89% 48%;    /* cyan-ish */
+  --code-string: 142 71% 45%;     /* green */
+  --code-comment: 215 14% 50%;    /* muted gray */
+  --code-number: 27 96% 61%;      /* orange */
+  --code-function: 226 70% 65%;   /* indigo-blue */
+  --code-type: 45 93% 47%;        /* amber */
+}
 
-| Technology | Setup | Purpose | Why Recommended |
-|------------|-------|---------|-----------------|
-| Supabase MCP (hosted) | Claude Code config | Claude Code reads/queries blueprint data from Supabase | Official Supabase MCP server. OAuth auth (no PAT needed). `execute_sql` tool lets Claude query blueprint_configs directly. Project-scoped + read-only for safety. |
+.hljs { background: hsl(var(--code-bg)); color: hsl(var(--code-fg)); }
+.hljs-keyword { color: hsl(var(--code-keyword)); }
+.hljs-string { color: hsl(var(--code-string)); }
+.hljs-comment { color: hsl(var(--code-comment)); font-style: italic; }
+.hljs-number { color: hsl(var(--code-number)); }
+.hljs-function .hljs-title { color: hsl(var(--code-function)); }
+.hljs-type, .hljs-built_in { color: hsl(var(--code-type)); }
+```
 
-**This is NOT an npm dependency.** It is a Claude Code MCP server configuration added via CLI or settings file.
+---
+
+## Tailwind Config Changes (No New Packages)
+
+### Color System: Slate + Indigo via CSS Variables
+
+**No Tailwind config changes needed for slate/indigo.** Both `slate-*` and `indigo-*` are built-in Tailwind CSS 3 color palettes, available as utility classes (`bg-slate-50`, `text-indigo-600`, `border-slate-200`, etc.) without any configuration.
+
+**The change is in CSS variables (globals.css), not tailwind.config.ts.** The current color system uses HSL variables (`--primary`, `--accent`, etc.) mapped to a blue-gray + gold palette. The redesign shifts these variables to align with slate (neutral grays) and indigo (accent):
+
+```css
+/* BEFORE (current): blue-gray + gold */
+--primary: 220 16% 22%;           /* dark blue-gray */
+--accent: 43 96% 56%;             /* gold */
+--sidebar: 220 16% 98%;           /* blue-tinted white */
+
+/* AFTER (redesign): slate + indigo */
+--primary: 226 70% 55%;           /* indigo-600 equivalent */
+--accent: 226 70% 55%;            /* indigo-600 (replaces gold) */
+--sidebar: 210 40% 98%;           /* slate-50/50 equivalent */
+```
+
+**Why CSS variables, NOT direct Tailwind colors?** The existing architecture (shadcn/ui) maps component colors to CSS variables (`hsl(var(--primary))`). Changing the variable values changes every shadcn component automatically. Using `bg-indigo-600` directly would bypass this system and create inconsistency.
+
+**The reference HTML mixes direct Tailwind colors (`text-indigo-600`, `bg-slate-50/50`) with the CSS variable system.** The implementation should map the reference design's indigo/slate values INTO the existing CSS variable system, not replace it. This preserves shadcn/ui compatibility.
+
+### Prose Typography Scale
+
+The reference HTML uses `text-4xl font-extrabold tracking-tight sm:text-5xl` for page titles. The current `.prose h1` uses `text-2xl font-bold`. This is a CSS change in globals.css, not a Tailwind config change:
+
+```css
+/* Adjust prose scale to match reference design */
+.prose h1 { @apply text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl; }
+.prose h2 { @apply text-2xl font-bold tracking-tight text-foreground; }
+.prose h3 { @apply text-xl font-semibold text-foreground; }
+.prose p  { @apply text-base leading-relaxed text-muted-foreground; }  /* was text-sm */
+```
+
+### Backdrop-Blur, Sticky Positioning, Scrollbar Styling
+
+All are built-in Tailwind CSS 3 utilities. No config changes:
+- `backdrop-blur-md` -- already used in TopNav (`bg-background/90 backdrop-blur`)
+- `sticky top-0` / `sticky top-16` -- native CSS, already used in TopNav
+- `h-[calc(100vh-64px)]` -- arbitrary value for sidebar height below header
+- Scrollbar styling uses `::-webkit-scrollbar` pseudo-elements (pure CSS, add to globals.css)
 
 ---
 
@@ -70,260 +151,198 @@ These are NOT npm packages -- generated via `npx shadcn@latest add [name]`. Each
 
 | Technology | Current Version | Why No Change |
 |------------|----------------|---------------|
-| react | ^18.3.1 | Stable. React 19 migration not needed and would break Clerk/shadcn. |
-| typescript | ^5.6.3 | Strict mode with zero `any`. Current. |
-| tailwindcss | ^3.4.15 | v4 migration is breaking (CSS-first config). shadcn/ui compatibility uncertain. |
-| vite | ^5.4.10 | Stable build tooling. No benefit from Vite 6 for this scope. |
-| @supabase/supabase-js | ^2.98.0 | Already used for blueprint_configs + comments. No API changes needed. |
-| @clerk/react | ^6.0.1 | Auth unchanged for v1.1. |
-| recharts | ^2.13.3 | All needed chart types available. See detailed analysis below. |
-| @dnd-kit/core + sortable | ^6.3.1 / ^10.0.0 | Drag-reorder works. No changes. |
-| lucide-react | ^0.460.0 | Icon library. Sufficient. |
-| react-markdown + remark-gfm | ^9.0.1 / ^4.0.0 | Used for blueprint text rendering. May also render briefing previews. |
-| yaml | ^2.4.0 | Frontmatter parsing. Unchanged. |
+| react | ^18.3.1 | Visual redesign is CSS/component-level. No React API changes needed. |
+| typescript | ^5.6.3 | Strict mode unchanged. Type changes are minimal (TOC heading types already exist). |
+| tailwindcss | ^3.4.15 | All needed utilities (backdrop-blur, sticky, slate/indigo colors) are built-in. |
+| vite | ^5.4.10 | No build config changes. Fontsource imports just work with Vite's CSS pipeline. |
+| react-markdown | ^9.0.1 | rehype-highlight plugs in via rehypePlugins prop. No version change. |
+| remark-gfm | ^4.0.0 | GFM parsing unchanged. |
+| shadcn/ui components | all current | Badge, Button, Separator, ScrollArea already installed. May need minor style overrides. |
+| lucide-react | ^0.460.0 | Icons unchanged. Home, ChevronDown, ChevronRight already used in sidebar. |
+| tailwindcss-animate | ^1.0.7 | Animation plugin unchanged. |
+| cmdk | ^1.1.1 | Search command unchanged (already in header). |
 
 ---
 
 ## What NOT to Add
 
-### Recharts Upgrade (2.x to 3.x): DEFER
+### @tailwindcss/typography Plugin: NOT NEEDED
 
-Recharts 3.8.0 is current but introduces breaking changes:
-- `CategoricalChartState` removed from event handlers and Customized components
-- Z-index now determined by SVG render order (JSX ordering matters)
-- `accessibilityLayer` defaults to true
-- `recharts-scale` and `react-smooth` internalized
+The `@tailwindcss/typography` plugin provides a `prose` class with opinionated styles. This project already has a custom `.prose` class in `globals.css` with styles tuned for the design system. Adding the plugin would:
+- Conflict with existing `.prose` styles
+- Add ~7KB of CSS for styles that would be overridden anyway
+- Create confusion about which prose styles are active
 
-The current codebase uses standard recharts components (BarChart, LineChart, ComposedChart, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid) without CategoricalChartState or Customized. Migration would likely succeed, BUT:
-- v1.1 scope is already large (5 feature areas)
-- Recharts 2.x already has ALL needed chart types
-- Risk of subtle rendering regressions in existing 10-screen pilot wireframe
+The existing hand-rolled `.prose` class is correct. Just update the font sizes and spacing to match the reference design.
 
-**Recommendation:** Stay on recharts ^2.13.3 for v1.1. Migrate to 3.x in a dedicated maintenance phase later.
+### Tailwind v4 / CSS-First Config: EXPLICITLY OUT OF SCOPE
 
-### New Chart Libraries (nivo, visx, chart.js, echarts): NOT NEEDED
+Per PROJECT.md: "Tailwind v4 -- estabilidade da stack, upgrade futuro". Tailwind v4 changes the configuration model entirely (CSS-based config instead of JS/TS). Mixing this with the visual redesign would be two migrations in one. The visual redesign works perfectly with Tailwind 3.4.
 
-Recharts 2.x already provides every chart type needed for expanded component library:
-- `RadarChart` + `Radar` + `PolarGrid` + `PolarAngleAxis` -- multi-axis comparisons
-- `Treemap` -- hierarchical data visualization
-- `FunnelChart` + `Funnel` -- conversion/pipeline funnels
-- `ScatterChart` + `Scatter` + `ZAxis` -- correlation analysis
-- `AreaChart` + `Area` -- cumulative/trend data
-- `Sankey` -- flow diagrams
+### Custom Scrollbar Libraries (simplebar, overlay-scrollbar): NOT NEEDED
 
-All available via standard `import { ... } from 'recharts'`. No new package needed. Just new renderer components following the existing pattern (section type + renderer + property form + ComponentPicker entry).
+The reference HTML uses `::-webkit-scrollbar` pseudo-elements for thin scrollbar styling. This is 8 lines of CSS. No library needed. Works in all Chromium browsers and Safari. Firefox uses `scrollbar-width: thin` and `scrollbar-color` properties as fallback.
 
-### State Management (Redux, Zustand, Jotai): NOT NEEDED
+### MDX / mdx-js: NOT NEEDED
 
-Current architecture uses:
-- Local state (`useState`) for UI state
-- Props for the BlueprintRenderer component tree
-- Supabase as persistent state (blueprint_configs, comments)
-- react-hook-form (new) will handle form state
+The docs are .md files parsed by a custom parser with tag extensions (`{% callout %}`, `{% operational %}`, etc.). There is no need for JSX-in-markdown. The parser + react-markdown + custom components handle everything. MDX would require replacing the entire docs pipeline.
 
-This is correct for a declarative rendering pipeline. Global state adds complexity without solving a real problem here.
+### Headless UI / Floating UI: NOT NEEDED
 
-### tanstack-query / SWR: DEFERRED
+The sidebar, TOC, and header are standard positioned elements (sticky, fixed). No floating/anchored UI needed. Radix primitives (already installed for shadcn/ui) cover popover/tooltip needs.
 
-Explicitly out of scope per PROJECT.md: "React Query hooks with loading/error states -- v2 (AGEN-02)". Current direct Supabase calls are fine for v1.1.
+### CSS Modules / CSS-in-JS: NOT NEEDED
 
-### CSS-in-JS / Styled Components: NOT NEEDED
+The project uses Tailwind utilities + CSS variables + globals.css. This is the correct architecture for shadcn/ui. Adding a different styling paradigm would fragment the approach.
 
-The design system already uses CSS custom properties with Tailwind utility classes. The wireframe palette (white/black/gray/gold) is achievable by adding scoped CSS variables -- no new styling paradigm needed.
+### react-scroll / react-scrollspy: NOT NEEDED
 
-### Form Builder Libraries (formik, react-jsonschema-form, survey.js): NOT NEEDED
+The DocTableOfContents component already implements scroll-spy using IntersectionObserver (see `src/components/docs/DocTableOfContents.tsx`). The existing implementation:
+- Observes heading elements by ID
+- Updates `activeId` state on intersection
+- Highlights the active heading in the TOC
 
-react-hook-form + zod + shadcn Form component covers all briefing input needs. The briefing form structure is known at build time (not dynamically generated from JSON schema), so a generic form builder adds unnecessary abstraction.
+This works. The redesign just needs visual style updates (indigo accent, border-l indicator, nested h3 indentation), not a library replacement.
 
-### Separate Rich Text Editor (tiptap, slate, lexical): NOT NEEDED
+### highlight.js Full Package: NOT NEEDED
 
-Briefing input is structured Q&A (text fields, selects, checkboxes), not free-form rich text. react-markdown handles display of briefing previews. If rich text is ever needed, re-evaluate then.
+`rehype-highlight` uses `lowlight` which bundles 37 common languages by default. The docs contain JavaScript, TypeScript, bash, JSON, YAML, CSS, HTML, and SQL code blocks -- all covered by the default bundle. Importing highlight.js directly or registering additional languages is unnecessary.
 
 ---
 
 ## Installation Plan
 
 ```bash
-# New runtime dependencies
-npm install react-hook-form@^7.71.2 zod@^3.24.0 @hookform/resolvers@^5.2.2 sonner@^2.0.0
+# Font packages (runtime dependencies -- Vite bundles the font files)
+npm install @fontsource-variable/inter@^5.2.8 @fontsource-variable/jetbrains-mono@^5.2.8
 
-# New shadcn/ui components (run sequentially, each auto-installs Radix deps)
-npx shadcn@latest add form
-npx shadcn@latest add checkbox
-npx shadcn@latest add switch
-npx shadcn@latest add tabs
-npx shadcn@latest add radio-group
-npx shadcn@latest add accordion
-npx shadcn@latest add card
-npx shadcn@latest add dropdown-menu
-npx shadcn@latest add sonner
-npx shadcn@latest add slider
+# Syntax highlighting (runtime dependency -- rehype plugin for react-markdown)
+npm install rehype-highlight@^7.0.2
 ```
 
-No new dev dependencies. The project already has vitest, typescript, and vite configured.
+**Total: 3 npm packages.** No dev dependencies. No shadcn/ui components to add. No Tailwind plugins.
+
+**Bundle size impact:**
+- @fontsource-variable/inter: ~150KB woff2 (variable font, all weights)
+- @fontsource-variable/jetbrains-mono: ~100KB woff2 (variable font, all weights)
+- rehype-highlight: ~15KB JS + lowlight with 37 default languages
+
+These are acceptable for a documentation platform where font quality and code readability directly affect user experience.
 
 ---
 
 ## Integration Details
 
-### A. Briefing Forms Integration
+### A. Font Loading Integration
 
-react-hook-form + zod + shadcn Form compose into a type-safe form pipeline:
+**Step 1:** Install packages (see Installation Plan above).
 
-```typescript
-// 1. Define schema (single source of truth for validation + types)
-import { z } from 'zod'
-
-const briefingSchema = z.object({
-  companyName: z.string().min(1, 'Required'),
-  industry: z.string().min(1, 'Required'),
-  dataSources: z.array(z.string()).min(1, 'Select at least one'),
-  frequency: z.enum(['daily', 'weekly', 'monthly']),
-  goals: z.string().optional(),
-})
-
-type BriefingFormData = z.infer<typeof briefingSchema>
-
-// 2. Wire into form (shadcn Form wraps react-hook-form)
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-
-const form = useForm<BriefingFormData>({
-  resolver: zodResolver(briefingSchema),
-})
-```
-
-The zod schema also validates data before Supabase persistence, and can be shared with Claude Code for blueprint generation context.
-
-### B. Supabase MCP Configuration
-
-Add to project-level MCP settings. Two options:
-
-**Option 1 -- Claude Code CLI (recommended):**
-```bash
-claude mcp add supabase --type http \
-  "https://mcp.supabase.com/mcp?project_ref=YOUR_PROJECT_REF&read_only=true"
-```
-
-**Option 2 -- Manual config file (.mcp.json at project root):**
-```json
-{
-  "mcpServers": {
-    "supabase": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_PROJECT_REF&read_only=true"
-    }
-  }
-}
-```
-
-This gives Claude Code:
-- `execute_sql` -- query blueprint_configs, briefings, comments
-- `list_tables` -- discover/verify schema
-- `generate_typescript_types` -- keep Database types in sync
-
-Project-scoped (`project_ref`) + read-only = safe for development. Claude Code can read blueprints to generate improved versions from briefing context.
-
-**Fallback if MCP is unreliable:** Write a Makefile target that exports blueprint data as markdown:
-```bash
-# In Makefile
-blueprint-export:
-    supabase db dump --data-only -t blueprint_configs | \
-    node scripts/blueprint-to-md.js > .planning/blueprint-export.md
-```
-But MCP is strongly preferred because it provides live, queryable access without file sync overhead.
-
-### C. Blueprint Typed Client
-
-The blueprint_configs table already exists (migration 003). For v1.1, add type-safe queries:
-
-```bash
-# Generate types from existing schema
-npx supabase gen types typescript --project-id "$SUPABASE_PROJECT_REF" > src/lib/database.types.ts
-```
-
-Then use in the Supabase client:
-
-```typescript
-import { createClient } from '@supabase/supabase-js'
-import type { Database } from './database.types'
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey)
-
-// Now typed: supabase.from('blueprint_configs').select('*')
-// Returns: { id: string, client_slug: string, config: Json, ... }
-```
-
-No schema migration needed for blueprint storage. The existing `config jsonb` column holds the full BlueprintConfig. Add a `briefings` table for the new briefing data:
-
-```sql
-CREATE TABLE public.briefings (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  client_slug text NOT NULL,
-  version integer NOT NULL DEFAULT 1,
-  answers jsonb NOT NULL,
-  status text NOT NULL DEFAULT 'draft'
-    CHECK (status IN ('draft', 'complete', 'archived')),
-  created_by text,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-
-ALTER TABLE public.briefings ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "anon_all_briefings" ON briefings FOR ALL TO anon USING (true);
-CREATE INDEX idx_briefings_client_slug ON briefings(client_slug);
-```
-
-### D. Wireframe Design System (No New Libraries)
-
-The white/black/gray/gold palette uses the EXISTING CSS custom property system. Add a `.wireframe` scope class in globals.css:
+**Step 2:** Add imports to globals.css (before @tailwind directives):
 
 ```css
-/* Wireframe-specific palette -- neutral + gold accent */
-.wireframe {
-  --background: 0 0% 100%;       /* Pure white */
-  --foreground: 0 0% 7%;         /* Near black */
-  --muted: 0 0% 96%;             /* Light gray */
-  --muted-foreground: 0 0% 45%;  /* Medium gray */
-  --border: 0 0% 90%;            /* Subtle gray */
-  --accent: 43 96% 56%;          /* Gold */
-  --card: 0 0% 100%;             /* White cards */
-  --card-foreground: 0 0% 7%;    /* Near black text */
-}
+/* src/styles/globals.css -- add at very top */
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+@import '@clerk/ui/themes/shadcn.css';
+@import '../../tools/wireframe-builder/styles/wireframe-tokens.css';
 
-.wireframe.dark {
-  --background: 0 0% 7%;         /* Near black */
-  --foreground: 0 0% 96%;        /* Near white */
-  --muted: 0 0% 12%;             /* Dark gray */
-  --muted-foreground: 0 0% 65%;  /* Medium gray */
-  --border: 0 0% 17%;            /* Subtle dark border */
-  --accent: 43 85% 50%;          /* Gold (desaturated) */
-  --card: 0 0% 9%;               /* Dark card */
-  --card-foreground: 0 0% 96%;   /* Near white text */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+**Step 3:** No changes to tailwind.config.ts. The fontFamily is already correct:
+```typescript
+fontFamily: {
+  sans: ['Inter Variable', 'Inter', 'system-ui', 'sans-serif'],
+  mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
 }
 ```
 
-This scoping means wireframe components automatically use the neutral palette while the FXL Core app shell keeps its blue-gray theme. Client branding (--brand-*) overrides work unchanged because they target chart colors and specific brand elements, not the base palette.
+**Step 4:** No changes to index.html. No `<link>` tags needed.
 
-### E. New Recharts Components (No New Imports Needed)
+**Step 5:** Add `antialiased` to body if not already present (the reference HTML uses it):
+```css
+body {
+  @apply bg-background text-foreground antialiased;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+```
 
-For expanded chart types, use existing recharts 2.x:
+### B. Color System Migration
+
+**The CSS variables in globals.css need to shift from blue-gray + gold to slate + indigo.** This is the core visual change. Here is the mapping from the reference HTML to CSS variables:
+
+| Reference HTML Class | Current CSS Variable | New Value (HSL) | Tailwind Equivalent |
+|---------------------|---------------------|-----------------|-------------------|
+| `text-slate-900` | `--foreground` | `222 47% 11%` | slate-900 (keep) |
+| `bg-white` | `--background` | `0 0% 100%` | white |
+| `bg-slate-50/50` | `--sidebar` | `210 40% 98.5%` | ~slate-50 at 50% opacity |
+| `text-indigo-600` | `--primary` | `239 84% 67%` | indigo-600 |
+| `bg-indigo-50` | `--accent` | `226 100% 97%` | indigo-50 (light accent bg) |
+| `text-slate-400` | `--muted-foreground` | `215 16% 47%` | ~slate-400 (keep) |
+| `border-slate-200` | `--border` | `214 32% 91%` | ~slate-200 (keep) |
+| `bg-slate-900` (code) | `--code-bg` | `222 47% 11%` | ~slate-900 |
+
+**Key insight:** Most current values already align with slate. The main change is `--primary` and `--accent` shifting from dark blue-gray / gold to indigo. The sidebar background adds the semi-transparent effect (bg-slate-50/50 in the reference).
+
+### C. Syntax Highlighting Integration
+
+**Step 1:** Add rehype-highlight to MarkdownRenderer:
 
 ```typescript
-// All available in recharts ^2.13.3 -- no new packages
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts'
-import { Treemap } from 'recharts'
-import { FunnelChart, Funnel, LabelList } from 'recharts'
-import { ScatterChart, Scatter, ZAxis } from 'recharts'
-import { AreaChart, Area } from 'recharts'
+// src/components/docs/MarkdownRenderer.tsx
+import rehypeHighlight from 'rehype-highlight'
+
+// In the ReactMarkdown component
+<ReactMarkdown
+  remarkPlugins={[remarkGfm]}
+  rehypePlugins={[rehypeHighlight]}
+  components={components}
+>
 ```
 
-Each new chart type follows the established pattern:
-1. New type in `BlueprintSection` union (`tools/wireframe-builder/types/blueprint.ts`)
-2. New component (`tools/wireframe-builder/components/RadarChartComponent.tsx`, etc.)
-3. New renderer or case in SectionRenderer switch
-4. New property form (`tools/wireframe-builder/components/editor/property-forms/`)
-5. Entry in ComponentPicker for editor add-section flow
+**Step 2:** Remove the manual code/pre component overrides from the `components` object (rehype-highlight handles code block class assignment). Keep the inline code styling.
+
+**Step 3:** Add highlight.js theme CSS variables to globals.css (see color system section above). The theme uses HSL CSS variables so it automatically adapts to light/dark mode via the `.dark` class.
+
+### D. Layout Restructuring (Pure CSS)
+
+The Layout.tsx changes are structural, not dependency-related:
+
+**Current layout:**
+```
+[TopNav (sticky)]
+[Sidebar | Main]
+```
+
+**Target layout (from reference):**
+```
+[Header (sticky top-0, backdrop-blur-md, bg-white/80)]
+[Sidebar (sticky top-16, h-[calc(100vh-64px)]) | Main (max-w-4xl) | TOC (sticky top-16, hidden xl:block)]
+```
+
+The `DocTableOfContents` component already exists with IntersectionObserver scroll-spy. It needs:
+1. Move from inside main content area to a sibling of main (in Layout or doc page)
+2. Style updates: `sticky top-16`, `h-[calc(100vh-64px)]`, `w-64`, indigo active link color
+3. Nested h3 items with `border-l border-slate-200 pl-4` for visual hierarchy
+
+All achievable with existing Tailwind utilities. No new components or libraries.
+
+### E. Scrollbar Styling (Pure CSS)
+
+Add to globals.css:
+
+```css
+/* Thin scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+
+/* Firefox fallback */
+* { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
+```
 
 ---
 
@@ -331,15 +350,14 @@ Each new chart type follows the established pattern:
 
 | Recommended | Alternative | Why Not |
 |-------------|-------------|---------|
-| react-hook-form + zod | formik + yup | Formik re-renders on every keystroke (controlled). Yup has weaker TypeScript type inference. shadcn/ui Form component is built specifically on RHF. |
-| zod v3 (3.24.x) | zod v4 (4.3.x) | Type incompatibilities with @hookform/resolvers documented in multiple GitHub issues. Upgrade when resolver ecosystem stabilizes. |
-| sonner for toasts | @radix-ui/react-toast (shadcn toast) | Sonner has simpler API, better stacking behavior, promise-based toasts for async operations. shadcn recommends sonner. |
-| Supabase MCP (hosted) | Custom Edge Function exporting MD | MCP provides live SQL access + type generation. Edge Function needs deploy + maintenance. |
-| Supabase MCP (hosted) | Local Supabase MCP (localhost:54321) | Hosted works without running local Supabase. Production data accessible directly. |
-| CSS variable scoping | CSS Modules / styled-components | Already using CSS vars for theming. New pattern creates inconsistency. |
-| recharts 2.x (keep) | recharts 3.x (upgrade) | Breaking changes + large v1.1 scope = unnecessary risk. Upgrade separately later. |
-| recharts 2.x (keep) | nivo / visx / echarts | Recharts already has all needed chart types. Switching = rewrite 4+ chart components + all property forms. |
-| react-hook-form | tanstack-form | TanStack Form is newer with less ecosystem adoption. shadcn/ui Form is built on RHF. |
+| @fontsource-variable/inter (self-hosted) | Google Fonts CDN link in index.html | External dependency, FOUT on slow connections, GDPR concerns, loads 5 static weight files instead of 1 variable font |
+| @fontsource-variable (variable) | @fontsource/inter (static weights) | Variable font = 1 file for all weights (~150KB). Static = 1 file per weight (5 x ~25KB = ~125KB but 5 HTTP requests). Variable also enables arbitrary font-weight values. |
+| rehype-highlight (CSS class-based) | shiki / rehype-pretty-code (inline styles) | Shiki generates inline styles that cannot be themed with CSS variables. rehype-highlight adds CSS classes that work with the existing light/dark mode toggle. |
+| rehype-highlight (CSS class-based) | react-syntax-highlighter | Legacy wrapper library with heavier bundle. Does not integrate as rehype plugin -- requires replacing MarkdownRenderer component structure. |
+| CSS variable palette shift | Direct Tailwind color classes (bg-indigo-600) | Would bypass the shadcn/ui CSS variable system. Components like Badge, Button use hsl(var(--primary)). Changing the variable value changes everything consistently. |
+| Custom .prose styles (keep) | @tailwindcss/typography plugin | Would conflict with existing .prose rules. Plugin provides opinionated styles we would override anyway. |
+| IntersectionObserver scroll-spy (keep) | react-scroll / react-scrollspy library | Already implemented and working in DocTableOfContents. No reason to add a dependency for existing functionality. |
+| ::-webkit-scrollbar CSS | simplebar / perfect-scrollbar library | 8 lines of CSS vs a JavaScript library. Thin scrollbars are a visual polish detail, not a complex interaction. |
 
 ---
 
@@ -347,53 +365,51 @@ Each new chart type follows the established pattern:
 
 | Package | Compatible With | Notes |
 |---------|-----------------|-------|
-| react-hook-form@^7.71.2 | react@^18.3.1 | Requires React 16.8+. Fully tested with React 18. |
-| zod@^3.24.0 | @hookform/resolvers@^5.2.2 | v3 line stable. Resolvers@5.2.x has native v3 support. |
-| @hookform/resolvers@^5.2.2 | react-hook-form@^7.x, zod@>=3.22.0 | Requires zod >=3.22.0 for proper module resolution. |
-| sonner@^2.0.0 | react@^18.3.1 | Standalone. No Radix dependency. |
-| recharts@^2.13.3 | react@^18.3.1 | All chart types (Radar, Treemap, Funnel, Scatter, Area) available. |
-| shadcn/ui components | @radix-ui/* (auto-managed by CLI) | CLI pins correct Radix versions per component. |
-| Supabase MCP (hosted) | @supabase/supabase-js@^2.x | MCP reads same DB. No version coupling with app client. |
+| @fontsource-variable/inter@5.2.8 | Vite 5.x, any CSS bundler | Pure CSS + woff2 files. No JS runtime. Imported via CSS @import. |
+| @fontsource-variable/jetbrains-mono@5.2.8 | Vite 5.x, any CSS bundler | Same as above. |
+| rehype-highlight@7.0.2 | react-markdown@^9.0.1 | Both use @types/hast ^3.0.0, vfile ^6.0.0. Direct compatibility confirmed via npm dependency trees. |
+| rehype-highlight@7.0.2 (via lowlight@3.3.0) | highlight.js ~11.11.0 | lowlight pins highlight.js. 37 common languages bundled. |
+| Tailwind CSS 3.4.19 | All new features | backdrop-blur-md, slate-*, indigo-*, arbitrary values [calc(100vh-64px)] all built-in. |
 
 ---
 
 ## Summary of Changes
 
-**4 npm packages to install:**
-- `react-hook-form` -- form state for briefing UI
-- `zod` -- validation schemas for briefing + blueprint data
-- `@hookform/resolvers` -- zod-to-RHF bridge
-- `sonner` -- toast notifications
+**3 npm packages to install:**
+- `@fontsource-variable/inter` -- self-hosted Inter variable font (body text)
+- `@fontsource-variable/jetbrains-mono` -- self-hosted JetBrains Mono variable font (code blocks)
+- `rehype-highlight` -- syntax highlighting for react-markdown code blocks
 
-**10 shadcn/ui components to add** (via CLI, auto-install Radix deps):
-- form, checkbox, switch, tabs, radio-group, accordion, card, dropdown-menu, sonner, slider
+**0 npm packages changed.** Everything else stays at current versions.
 
-**1 MCP server to configure** (not a code dependency):
-- Supabase MCP for Claude Code access to blueprint data
+**0 Tailwind config changes.** fontFamily already declares Inter and JetBrains Mono. Colors use CSS variables, not Tailwind config.
 
-**1 SQL migration** (new table):
-- `briefings` table for briefing input persistence
+**0 new shadcn/ui components.** Badge, Button, Separator, ScrollArea already installed. Style overrides only.
 
-**0 existing packages changed.** Everything else stays at current versions.
+**Files to modify (CSS/components, not dependencies):**
+- `src/styles/globals.css` -- font imports, CSS variable palette shift, prose scale, code theme, scrollbar styling
+- `src/components/docs/MarkdownRenderer.tsx` -- add rehypeHighlight plugin
+- `src/components/layout/Layout.tsx` -- three-column layout structure
+- `src/components/layout/TopNav.tsx` -- backdrop-blur + brand styling
+- `src/components/layout/Sidebar.tsx` -- visual style (bg-slate-50/50, border-l nav, indigo accent)
+- `src/components/docs/DocTableOfContents.tsx` -- visual style + position to right column
+- `src/components/docs/DocPageHeader.tsx` -- larger title (4xl/5xl), indigo badge
+- `src/components/docs/DocBreadcrumb.tsx` -- minor style updates
 
 ---
 
 ## Sources
 
-- [react-hook-form npm](https://www.npmjs.com/package/react-hook-form) -- v7.71.2 verified current
-- [zod npm](https://www.npmjs.com/package/zod) -- v3.24.x and v4.3.6 both maintained
-- [Zod v4 + hookform resolvers issues](https://github.com/react-hook-form/react-hook-form/issues/12829) -- type incompatibilities documented
-- [@hookform/resolvers npm](https://www.npmjs.com/package/@hookform/resolvers) -- v5.2.2 verified current
-- [shadcn/ui forms docs](https://ui.shadcn.com/docs/forms/react-hook-form) -- RHF + zod integration guide
-- [shadcn/ui component list](https://ui.shadcn.com/docs/components) -- available primitives
-- [recharts npm](https://www.npmjs.com/package/recharts) -- v3.8.0 current, v2.x still works
-- [recharts 3.0 migration guide](https://github.com/recharts/recharts/wiki/3.0-migration-guide) -- breaking changes documented
-- [recharts specialized charts](https://deepwiki.com/recharts/recharts/3.3-specialized-charts) -- Treemap, Funnel, Radar confirmed available in 2.x
-- [Supabase MCP docs](https://supabase.com/docs/guides/getting-started/mcp) -- hosted setup, project scoping
-- [Supabase MCP GitHub](https://github.com/supabase-community/supabase-mcp) -- configuration, auth, tools list
-- [Supabase type generation](https://supabase.com/docs/guides/api/rest/generating-types) -- CLI command for Database types
-- [sonner npm](https://www.npmjs.com/package/sonner) -- v2.x, recommended by shadcn/ui
+- [npm: @fontsource-variable/inter](https://www.npmjs.com/package/@fontsource-variable/inter) -- v5.2.8, 221K weekly downloads, verified via `npm view`
+- [npm: @fontsource-variable/jetbrains-mono](https://www.npmjs.com/package/@fontsource-variable/jetbrains-mono) -- v5.2.8, verified via `npm view`
+- [Fontsource variable fonts docs](https://fontsource.org/docs/getting-started/variable) -- import method, axis support
+- [npm: rehype-highlight](https://www.npmjs.com/package/rehype-highlight) -- v7.0.2, verified compatible with react-markdown 9.x via shared hast/vfile versions
+- [rehype-highlight GitHub](https://github.com/rehypejs/rehype-highlight) -- usage, language detection, CSS class output
+- [Tailwind CSS v3 colors](https://v3.tailwindcss.com/docs/customizing-colors) -- slate and indigo palettes built-in
+- [shadcn/ui colors](https://ui.shadcn.com/colors) -- CSS variable approach for theming
+- Existing codebase: `tailwind.config.ts`, `globals.css`, `MarkdownRenderer.tsx`, `DocTableOfContents.tsx`, `Layout.tsx`, `TopNav.tsx`, `Sidebar.tsx` -- analyzed for current state and integration points
+- `.planning/research/visual-redesign-reference.html` -- target design reference
 
 ---
-*Stack research for: FXL Core v1.1 Wireframe Evolution*
-*Researched: 2026-03-09*
+*Stack research for: FXL Core v1.2 Visual Redesign*
+*Researched: 2026-03-10*
