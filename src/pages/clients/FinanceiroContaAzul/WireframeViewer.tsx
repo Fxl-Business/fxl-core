@@ -18,7 +18,6 @@ import {
 } from '@tools/wireframe-builder/lib/blueprint-store'
 import {
   resolveBranding,
-  brandingToWfOverrides,
   getChartPalette,
   getFontLinks,
 } from '@tools/wireframe-builder/lib/branding'
@@ -38,7 +37,6 @@ const CLIENT_SLUG = 'financeiro-conta-azul'
 
 // Resolve branding once at module level (static import, no async needed)
 const branding = resolveBranding(brandingConfigSeed)
-const wfBrandOverrides = brandingToWfOverrides(branding)
 const chartPalette = getChartPalette(branding)
 
 export default function FinanceiroWireframeViewer() {
@@ -615,7 +613,6 @@ export default function FinanceiroWireframeViewer() {
             height: '100vh',
             fontFamily: `${branding.bodyFont}, Inter, sans-serif`,
             background: 'var(--wf-canvas)',
-            ...wfBrandOverrides,
           }}
         >
           {/* Sidebar -- uses --wf-sidebar-* tokens with branding overrides */}
@@ -758,7 +755,6 @@ export default function FinanceiroWireframeViewer() {
                 comments={comments}
                 onOpenComments={handleOpenComments}
                 chartColors={chartPalette}
-                brandPrimary={branding.primaryColor}
                 editMode={editMode.active}
                 selectedSection={editMode.selectedSection}
                 onSelectSection={handleSelectSection}
@@ -866,9 +862,10 @@ export default function FinanceiroWireframeViewer() {
       <button
         type="button"
         onClick={handleOpenScreenComments}
-        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105"
+        style={{ background: 'var(--wf-accent)', color: 'var(--wf-accent-fg)' }}
       >
-        <MessageSquare className="h-5 w-5 text-white" />
+        <MessageSquare className="h-5 w-5" />
       </button>
     </>
   )

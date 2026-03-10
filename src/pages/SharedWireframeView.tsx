@@ -6,7 +6,6 @@ import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { loadBlueprint as loadBlueprintFromDb } from '@tools/wireframe-builder/lib/blueprint-store'
 import {
   resolveBranding,
-  brandingToWfOverrides,
   getChartPalette,
   getFontLinks,
 } from '@tools/wireframe-builder/lib/branding'
@@ -350,7 +349,6 @@ export default function SharedWireframeView() {
 
   // Resolve branding for rendering
   const resolvedBranding = resolveBranding(brandConfig)
-  const wfOverrides = brandingToWfOverrides(resolvedBranding)
   const sharedChartPalette = getChartPalette(resolvedBranding)
 
   function handleOpenScreenComments() {
@@ -366,7 +364,6 @@ export default function SharedWireframeView() {
       <WireframeThemeProvider>
         <SharedWireframeShell
           branding={resolvedBranding}
-          wfOverrides={wfOverrides}
         >
           {/* Sidebar -- uses --wf-sidebar-* tokens with branding overrides */}
           <aside
@@ -466,7 +463,6 @@ export default function SharedWireframeView() {
                 comments={comments}
                 onOpenComments={handleOpenComments}
                 chartColors={sharedChartPalette}
-                brandPrimary={resolvedBranding.primaryColor}
               />
             </div>
           </main>
@@ -477,9 +473,10 @@ export default function SharedWireframeView() {
       <button
         type="button"
         onClick={handleOpenScreenComments}
-        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105"
+        style={{ background: 'var(--wf-accent)', color: 'var(--wf-accent-fg)' }}
       >
-        <MessageSquare className="h-5 w-5 text-white" />
+        <MessageSquare className="h-5 w-5" />
       </button>
 
       {drawerTarget && (
@@ -505,11 +502,9 @@ export default function SharedWireframeView() {
 
 function SharedWireframeShell({
   branding: brandingProp,
-  wfOverrides,
   children,
 }: {
   branding: BrandingConfig
-  wfOverrides: React.CSSProperties
   children: React.ReactNode
 }) {
   // Font loading + favicon
@@ -544,7 +539,6 @@ function SharedWireframeShell({
         height: '100vh',
         fontFamily: `${brandingProp.bodyFont}, Inter, sans-serif`,
         background: 'var(--wf-canvas)',
-        ...wfOverrides,
       }}
     >
       {children}

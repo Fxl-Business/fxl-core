@@ -50,10 +50,10 @@
   --wf-header-bg: var(--wf-card);
   --wf-header-border: var(--wf-card-border);
 
-  /* Table */
-  --wf-table-header-bg: var(--wf-neutral-800);
-  --wf-table-header-fg: var(--wf-neutral-50);
-  --wf-table-row-alt: var(--wf-neutral-100);
+  /* Table — clean, light headers (matches modern SaaS reference) */
+  --wf-table-header-bg: var(--wf-neutral-100);
+  --wf-table-header-fg: var(--wf-neutral-500);
+  --wf-table-row-alt: var(--wf-neutral-50);
   --wf-table-border: var(--wf-neutral-200);
 
   /* Chart palette */
@@ -106,9 +106,9 @@
   --wf-header-bg: var(--wf-card);
   --wf-header-border: var(--wf-card-border);
 
-  /* Table */
-  --wf-table-header-bg: var(--wf-neutral-900);
-  --wf-table-header-fg: var(--wf-neutral-200);
+  /* Table — subtle dark headers */
+  --wf-table-header-bg: var(--wf-neutral-800);
+  --wf-table-header-fg: var(--wf-neutral-400);
   --wf-table-row-alt: var(--wf-neutral-800);
   --wf-table-border: var(--wf-neutral-700);
 

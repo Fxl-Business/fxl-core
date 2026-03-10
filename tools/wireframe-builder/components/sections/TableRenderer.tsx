@@ -17,8 +17,6 @@ type TableSection = DataTableSection | DrillDownTableSection | ClickableTableSec
 type Props = {
   section: TableSection
   compareMode: boolean
-  /** Brand primary color (resolved hex). Passed through to table components for header bg. */
-  brandPrimary?: string
 }
 
 function filterColumns(columns: ColumnConfig[], compareMode: boolean) {
@@ -27,12 +25,12 @@ function filterColumns(columns: ColumnConfig[], compareMode: boolean) {
     .map(({ key, label, align }) => ({ key, label, align }))
 }
 
-function DataTableRenderer({ section, compareMode, brandPrimary }: { section: DataTableSection; compareMode: boolean; brandPrimary?: string }) {
+function DataTableRenderer({ section, compareMode }: { section: DataTableSection; compareMode: boolean }) {
   const columns = filterColumns(section.columns, compareMode)
-  return <DataTable title={section.title} columns={columns} rowCount={section.rowCount} brandPrimary={brandPrimary} />
+  return <DataTable title={section.title} columns={columns} rowCount={section.rowCount} />
 }
 
-function DrillDownTableRenderer({ section, compareMode, brandPrimary }: { section: DrillDownTableSection; compareMode: boolean; brandPrimary?: string }) {
+function DrillDownTableRenderer({ section, compareMode }: { section: DrillDownTableSection; compareMode: boolean }) {
   const columns = filterColumns(section.columns, compareMode)
   const [activeView, setActiveView] = useState(section.viewSwitcher?.default ?? '')
   const rows = section.viewSwitcher
@@ -53,13 +51,12 @@ function DrillDownTableRenderer({ section, compareMode, brandPrimary }: { sectio
         subtitle={section.subtitle}
         columns={columns}
         rows={rows}
-        brandPrimary={brandPrimary}
       />
     </div>
   )
 }
 
-function ClickableTableRenderer({ section, compareMode, brandPrimary }: { section: ClickableTableSection; compareMode: boolean; brandPrimary?: string }) {
+function ClickableTableRenderer({ section, compareMode }: { section: ClickableTableSection; compareMode: boolean }) {
   const columns = filterColumns(section.columns, compareMode)
   const [modal, setModal] = useState(false)
   const [modalTitle, setModalTitle] = useState('')
@@ -79,7 +76,6 @@ function ClickableTableRenderer({ section, compareMode, brandPrimary }: { sectio
         columns={columns}
         rows={section.rows}
         onRowClick={handleRowClick}
-        brandPrimary={brandPrimary}
       />
       <WireframeModal
         title={modalTitle}
@@ -93,13 +89,13 @@ function ClickableTableRenderer({ section, compareMode, brandPrimary }: { sectio
   )
 }
 
-export default function TableRenderer({ section, compareMode, brandPrimary }: Props) {
+export default function TableRenderer({ section, compareMode }: Props) {
   switch (section.type) {
     case 'data-table':
-      return <DataTableRenderer section={section} compareMode={compareMode} brandPrimary={brandPrimary} />
+      return <DataTableRenderer section={section} compareMode={compareMode} />
     case 'drill-down-table':
-      return <DrillDownTableRenderer section={section} compareMode={compareMode} brandPrimary={brandPrimary} />
+      return <DrillDownTableRenderer section={section} compareMode={compareMode} />
     case 'clickable-table':
-      return <ClickableTableRenderer section={section} compareMode={compareMode} brandPrimary={brandPrimary} />
+      return <ClickableTableRenderer section={section} compareMode={compareMode} />
   }
 }

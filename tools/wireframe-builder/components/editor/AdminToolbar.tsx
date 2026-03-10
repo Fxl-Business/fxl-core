@@ -1,5 +1,4 @@
-import { MessageSquare, Moon, Pencil, Sun, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { MessageSquare, Moon, Pencil, Save, Sun, X } from 'lucide-react'
 import { useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
 
 type Props = {
@@ -24,43 +23,85 @@ export default function AdminToolbar({
   const { theme, toggle } = useWireframeTheme()
 
   return (
-    <div className="flex items-center gap-3 border-b bg-background px-6 py-2 shrink-0">
-      <span className="text-sm font-medium text-foreground">{screenTitle}</span>
+    <div
+      className="flex items-center gap-3 px-6 py-2 shrink-0"
+      style={{
+        background: 'var(--wf-header-bg)',
+        borderBottom: '1px solid var(--wf-header-border)',
+      }}
+    >
+      <span
+        className="text-sm font-medium"
+        style={{ color: 'var(--wf-heading)' }}
+      >
+        {screenTitle}
+      </span>
 
-      <div className="ml-auto flex gap-2">
-        <Button variant="ghost" size="sm" onClick={onOpenComments}>
-          <MessageSquare className="h-4 w-4" />
+      <div className="ml-auto flex items-center gap-1">
+        <button
+          type="button"
+          onClick={onOpenComments}
+          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+          style={{ color: 'var(--wf-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)'; e.currentTarget.style.background = 'var(--wf-accent-muted)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-muted)'; e.currentTarget.style.background = 'transparent' }}
+        >
+          <MessageSquare className="h-3.5 w-3.5" />
           Comentarios
-        </Button>
+        </button>
 
-        <Button variant="ghost" size="sm" onClick={toggle}>
-          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-        </Button>
+        <button
+          type="button"
+          onClick={toggle}
+          className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors"
+          style={{ color: 'var(--wf-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)'; e.currentTarget.style.background = 'var(--wf-accent-muted)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-muted)'; e.currentTarget.style.background = 'transparent' }}
+        >
+          {theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+        </button>
 
         {editMode && dirty && (
-          <Button size="sm" onClick={onSave} disabled={saving}>
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={saving}
+            className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
+            style={{
+              background: 'var(--wf-accent)',
+              color: 'var(--wf-accent-fg)',
+            }}
+          >
+            <Save className="h-3.5 w-3.5" />
             {saving ? 'Salvando...' : 'Salvar'}
-          </Button>
+          </button>
         )}
 
-        <Button
-          variant={editMode ? 'outline' : 'default'}
-          size="sm"
+        <button
+          type="button"
           onClick={onToggleEdit}
-          className={editMode ? 'border-destructive text-destructive hover:bg-destructive/10' : ''}
+          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+          style={editMode ? {
+            color: 'var(--wf-negative)',
+            border: '1px solid var(--wf-negative)',
+            background: 'transparent',
+          } : {
+            color: 'var(--wf-accent-fg)',
+            background: 'var(--wf-accent)',
+          }}
         >
           {editMode ? (
             <>
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
               Sair da Edicao
             </>
           ) : (
             <>
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-3.5 w-3.5" />
               Editar
             </>
           )}
-        </Button>
+        </button>
       </div>
     </div>
   )

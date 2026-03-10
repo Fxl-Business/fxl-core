@@ -4,11 +4,9 @@ import KpiCardFull from '../KpiCardFull'
 type Props = {
   section: KpiGridSection
   compareMode: boolean
-  /** Brand primary color (resolved hex). Passed through to KpiCardFull for value emphasis. */
-  brandPrimary?: string
 }
 
-export default function KpiGridRenderer({ section, compareMode, brandPrimary }: Props) {
+export default function KpiGridRenderer({ section, compareMode }: Props) {
   return (
     <div>
       {section.groupLabel && (
@@ -33,7 +31,6 @@ export default function KpiGridRenderer({ section, compareMode, brandPrimary }: 
             semaforoLabel={item.semaforoLabel}
             wide={item.wide}
             compareMode={compareMode}
-            brandPrimary={brandPrimary}
           />
         ))}
       </div>

@@ -20,8 +20,6 @@ type Props = {
   subtitle?: string
   columns: DrilColumn[]
   rows: DrilRow[]
-  /** Brand primary color (resolved hex). Used for header background with white text. */
-  brandPrimary?: string
 }
 
 function Row({ row, columns, depth }: { row: DrilRow; columns: DrilColumn[]; depth: number }) {
@@ -73,7 +71,7 @@ function Row({ row, columns, depth }: { row: DrilRow; columns: DrilColumn[]; dep
   )
 }
 
-export default function DrillDownTable({ title, subtitle, columns, rows, brandPrimary }: Props) {
+export default function DrillDownTable({ title, subtitle, columns, rows }: Props) {
   return (
     <div className="rounded-lg border border-wf-card-border bg-wf-card overflow-hidden">
       {title && (
@@ -85,16 +83,12 @@ export default function DrillDownTable({ title, subtitle, columns, rows, brandPr
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr
-              className={brandPrimary ? undefined : 'bg-wf-table-header'}
-              style={brandPrimary ? { backgroundColor: brandPrimary } : undefined}
-            >
+            <tr className="bg-wf-table-header">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   className={cn(
-                    'px-4 py-2.5 font-medium whitespace-nowrap',
-                    brandPrimary ? 'text-wf-table-header-fg' : 'text-wf-table-header-fg',
+                    'px-4 py-2.5 text-[11px] font-medium uppercase tracking-wide text-wf-table-header-fg whitespace-nowrap',
                     col.align === 'right' && 'text-right',
                     col.align === 'center' && 'text-center',
                     (!col.align || col.align === 'left') && 'text-left',

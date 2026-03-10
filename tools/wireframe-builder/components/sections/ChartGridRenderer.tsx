@@ -7,11 +7,9 @@ type Props = {
   comparePeriod: string
   /** Brand chart palette (resolved hex strings). Passed to nested SectionRenderer instances. */
   chartColors?: string[]
-  /** Brand primary color (resolved hex). Passed to nested SectionRenderer instances. */
-  brandPrimary?: string
 }
 
-export default function ChartGridRenderer({ section, compareMode, comparePeriod, chartColors, brandPrimary }: Props) {
+export default function ChartGridRenderer({ section, compareMode, comparePeriod, chartColors }: Props) {
   return (
     <div
       className="grid gap-4"
@@ -24,7 +22,6 @@ export default function ChartGridRenderer({ section, compareMode, comparePeriod,
           compareMode={compareMode}
           comparePeriod={comparePeriod}
           chartColors={chartColors}
-          brandPrimary={brandPrimary}
         />
       ))}
     </div>

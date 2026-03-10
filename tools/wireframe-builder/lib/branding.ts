@@ -202,36 +202,14 @@ export function getFontLinks(branding: BrandingConfig): string[] {
 /**
  * Compute wireframe token overrides from client branding.
  *
- * Overrides --wf-accent and --wf-sidebar-* tokens so the wireframe
- * adopts the client's brand identity. Apply the returned style object
- * on the wireframe container to cascade overrides into all children.
+ * The wireframe design system keeps its own visual identity (warm gray + gold).
+ * Branding is expressed through fonts (headingFont, bodyFont) and logo only.
+ * The --wf-accent (gold) and sidebar colors are NOT overridden — they are
+ * part of the wireframe chrome identity.
  *
- * Sidebar fg is computed for contrast: light text on dark backgrounds,
- * dark text on light backgrounds (threshold: L > 50).
- *
- * Usage:
- * ```tsx
- * <div style={brandingToWfOverrides(branding)}>
- *   {wireframe content}
- * </div>
- * ```
+ * Returns an empty style object — branding is applied via fonts and logo,
+ * not via CSS variable overrides.
  */
-export function brandingToWfOverrides(branding: BrandingConfig): React.CSSProperties {
-  const sidebarBg = darken(branding.primaryColor, 20)
-
-  // Contrast computation: dark bg -> light text, light bg -> dark text
-  const [, , sidebarL] = hexToHsl(sidebarBg)
-  const sidebarFg = sidebarL > 50 ? '#1c1917' : '#fafaf9' // wf-neutral-900 : wf-neutral-50
-
-  const [, , accentL] = hexToHsl(branding.primaryColor)
-  const accentFg = accentL > 50 ? '#1c1917' : '#fafaf9'
-
-  return {
-    '--wf-accent': branding.primaryColor,
-    '--wf-accent-fg': accentFg,
-    '--wf-sidebar-bg': sidebarBg,
-    '--wf-sidebar-fg': sidebarFg,
-    '--wf-sidebar-active': branding.primaryColor,
-    '--wf-sidebar-border': branding.primaryColor,
-  } as React.CSSProperties
+export function brandingToWfOverrides(_branding: BrandingConfig): React.CSSProperties {
+  return {} as React.CSSProperties
 }

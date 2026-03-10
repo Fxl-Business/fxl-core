@@ -14,20 +14,18 @@ type Props = {
   comparePeriod: string
   /** Brand chart palette (resolved hex strings). Routed to chart and chart-grid renderers. */
   chartColors?: string[]
-  /** Brand primary color (resolved hex). Routed to KPI grid, table, and chart-grid renderers. */
-  brandPrimary?: string
 }
 
 function hasCompareOnly(section: BlueprintSection): boolean {
   return 'compareOnly' in section && section.compareOnly === true
 }
 
-export default function SectionRenderer({ section, compareMode, comparePeriod, chartColors, brandPrimary }: Props) {
+export default function SectionRenderer({ section, compareMode, comparePeriod, chartColors }: Props) {
   if (hasCompareOnly(section) && !compareMode) return null
 
   switch (section.type) {
     case 'kpi-grid':
-      return <KpiGridRenderer section={section} compareMode={compareMode} brandPrimary={brandPrimary} />
+      return <KpiGridRenderer section={section} compareMode={compareMode} />
     case 'bar-line-chart':
     case 'donut-chart':
     case 'waterfall-chart':
@@ -38,7 +36,7 @@ export default function SectionRenderer({ section, compareMode, comparePeriod, c
     case 'data-table':
     case 'drill-down-table':
     case 'clickable-table':
-      return <TableRenderer section={section} compareMode={compareMode} brandPrimary={brandPrimary} />
+      return <TableRenderer section={section} compareMode={compareMode} />
     case 'saldo-banco':
     case 'manual-input':
     case 'upload-section':
@@ -46,7 +44,7 @@ export default function SectionRenderer({ section, compareMode, comparePeriod, c
     case 'config-table':
       return <ConfigTableRenderer section={section} />
     case 'chart-grid':
-      return <ChartGridRenderer section={section} compareMode={compareMode} comparePeriod={comparePeriod} chartColors={chartColors} brandPrimary={brandPrimary} />
+      return <ChartGridRenderer section={section} compareMode={compareMode} comparePeriod={comparePeriod} chartColors={chartColors} />
     case 'info-block':
       return <InfoBlockRenderer section={section} />
   }
