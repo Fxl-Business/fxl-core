@@ -44,7 +44,7 @@ Full details: [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md)
 - [x] **Phase 13: Layout Shell** - Frosted glass header, three-column layout, viewport scroll context, search bar restyle (completed 2026-03-10)
 - [x] **Phase 14: Sidebar Navigation** - Border-l rail nav, uppercase section headers, indigo active state, collapsible sections (completed 2026-03-10)
 - [x] **Phase 15: Doc Rendering and TOC** - Page headers, breadcrumbs, dark code blocks, syntax highlighting, right-side TOC with scroll tracking (completed 2026-03-10)
-- [ ] **Phase 16: Consistency Pass** - Home, client pages, login/profile, PromptBlock, and Callout aligned to new visual language
+- [x] **Phase 16: Consistency Pass** - Home, client pages, login/profile, PromptBlock, and Callout aligned to new visual language (completed 2026-03-10)
 
 ## Phase Details
 
@@ -148,4 +148,4 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16
 | 13. Layout Shell | v1.2 | Complete    | 2026-03-10 | 2026-03-10 |
 | 14. Sidebar Navigation | v1.2 | Complete    | 2026-03-10 | 2026-03-10 |
 | 15. Doc Rendering and TOC | 2/2 | Complete    | 2026-03-10 | - |
-| 16. Consistency Pass | 1/2 | In Progress|  | - |
+| 16. Consistency Pass | 2/2 | Complete   | 2026-03-10 | - |

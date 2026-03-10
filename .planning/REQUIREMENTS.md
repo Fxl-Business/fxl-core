@@ -51,8 +51,8 @@ Requirements for visual redesign milestone. Each maps to roadmap phases.
 ### Consistency Pass
 
 - [x] **CONSIST-01**: Home page uses new typography and color system
-- [ ] **CONSIST-02**: Client pages (Index, DocViewer) use new visual language
-- [ ] **CONSIST-03**: Login/Profile pages use slate + indigo palette
+- [x] **CONSIST-02**: Client pages (Index, DocViewer) use new visual language
+- [x] **CONSIST-03**: Login/Profile pages use slate + indigo palette
 - [x] **CONSIST-04**: PromptBlock and Callout components updated to new palette
 
 ## Future Requirements
@@ -107,8 +107,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TOC-03 | Phase 15 | Pending |
 | TOC-04 | Phase 15 | Pending |
 | CONSIST-01 | Phase 16 | Complete |
-| CONSIST-02 | Phase 16 | Pending |
-| CONSIST-03 | Phase 16 | Pending |
+| CONSIST-02 | Phase 16 | Complete |
+| CONSIST-03 | Phase 16 | Complete |
 | CONSIST-04 | Phase 16 | Complete |
 
 **Coverage:**
