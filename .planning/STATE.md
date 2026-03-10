@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wireframe Evolution
 status: in-progress
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-03-09T23:32:36Z"
-last_activity: 2026-03-09 -- Completed 08-02 (component token migration, 26 files migrated)
+stopped_at: Phase 8 complete — all 3 plans done, pending verification
+last_updated: "2026-03-10T00:10:00Z"
+last_activity: 2026-03-10 -- Completed 08-03 (theme provider wiring, visual fix iteration)
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
-  percent: 83
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 8 in-progress -- Wireframe Design System (Plan 2 of 3 complete)
+**Current focus:** Phase 8 complete -- Wireframe Design System (3/3 plans done, pending verification)
 
 ## Current Position
 
-Phase: 8 of 11 (Wireframe Design System) -- IN PROGRESS
-Plan: 2 of 3
-Status: Plan 2 complete -- all 26 wireframe components migrated to --wf-* tokens
-Last activity: 2026-03-09 -- Completed 08-02 (component token migration)
+Phase: 8 of 11 (Wireframe Design System) -- COMPLETE (pending verification)
+Plan: 3 of 3
+Status: All plans complete -- tokens, migration, theme provider + visual fix iteration
+Last activity: 2026-03-10 -- Completed 08-03 (theme wiring + visual fix)
 
-Progress: [████████░░] 83%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -45,7 +45,7 @@ Progress: [████████░░] 83%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 7. Blueprint Infrastructure | 3/3 | 19min | 6.3min |
-| 8. Wireframe Design System | 2/3 | 15min | 7.5min |
+| 8. Wireframe Design System | 3/3 | 27min | 9.0min |
 | 9. Component Library Expansion | 0/? | - | - |
 | 10. Briefing & Blueprint Views | 0/? | - | - |
 | 11. AI-Assisted Generation | 0/? | - | - |
@@ -80,6 +80,10 @@ v1.1 decisions:
 - [08-02] WaterfallChart DEFAULT_FILL migrated to var(--wf-*) with color-mix compare fills
 - [08-02] EditableSectionWrapper keeps app tokens (bg-background, shadow-sm) -- editor chrome, not wireframe content
 - [08-02] WireframeFilterBar boxShadow removed per user decision
+- [08-03] brandingToWfOverrides returns {} -- wireframe keeps gold identity, branding via fonts/logo/charts only
+- [08-03] AdminToolbar is wireframe chrome -- uses --wf-* inline styles, not app tokens
+- [08-03] brandPrimary prop removed from entire renderer chain (15 files)
+- [08-03] Table headers lightened: neutral-100 bg, neutral-500 text, uppercase tracking
 
 ### Pending Todos
 
@@ -109,6 +113,6 @@ v1.1:
 
 ## Session Continuity
 
-Last session: 2026-03-09T23:32:36Z
-Stopped at: Completed 08-02-PLAN.md
-Resume file: .planning/phases/08-wireframe-design-system/08-02-SUMMARY.md
+Last session: 2026-03-10T00:10:00Z
+Stopped at: Phase 8 complete — ready for Phase 9
+Resume file: .planning/phases/08-wireframe-design-system/08-03-SUMMARY.md

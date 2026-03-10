@@ -27,7 +27,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 ### v1.1 Wireframe Evolution
 
 - [x] **Phase 7: Blueprint Infrastructure** - DB as sole source of truth with schema versioning, runtime validation, and optimistic locking
-- [ ] **Phase 8: Wireframe Design System** - Semantic token layer for wireframes with dark/light mode and branding integration
+- [x] **Phase 8: Wireframe Design System** - Semantic token layer for wireframes with dark/light mode and branding integration
 - [ ] **Phase 9: Component Library Expansion** - Registry pattern + 6 new section types + 5 chart types + generic wireframe viewer
 - [ ] **Phase 10: Briefing & Blueprint Views** - Structured briefing input, blueprint text view, MD export, and share link fix
 - [ ] **Phase 11: AI-Assisted Generation** - Blueprint generation from briefing with screen recipes and vertical templates
@@ -63,8 +63,8 @@ Plans:
 
 Plans:
 - [x] 08-01-PLAN.md -- Token CSS layer, WireframeThemeProvider, Tailwind extension, branding override helper
-- [ ] 08-02-PLAN.md -- Migrate 26 wireframe components from hardcoded colors to --wf-* tokens
-- [ ] 08-03-PLAN.md -- Wire theme provider into viewers, add dark/light toggle, apply branding overrides
+- [x] 08-02-PLAN.md -- Migrate 26 wireframe components from hardcoded colors to --wf-* tokens
+- [x] 08-03-PLAN.md -- Wire theme provider into viewers, add dark/light toggle, apply branding overrides
 
 ### Phase 9: Component Library Expansion
 **Goal**: Operators can build richer wireframes with 6 new block types, 5 additional chart types, and a single generic viewer that works for any client
@@ -115,7 +115,7 @@ Phase 7 -> 8 -> 9 (and 10 in parallel) -> 11
 | 5. Technical Configuration | v1.0 | 2/2 | Complete | 2026-03-09 |
 | 6. System Generation | v1.0 | 3/3 | Complete | 2026-03-09 |
 | 7. Blueprint Infrastructure | v1.1 | 3/3 | Complete | 2026-03-09 |
-| 8. Wireframe Design System | v1.1 | 1/3 | In Progress | - |
+| 8. Wireframe Design System | v1.1 | 3/3 | Complete | 2026-03-10 |
 | 9. Component Library Expansion | v1.1 | 0/? | Not started | - |
 | 10. Briefing & Blueprint Views | v1.1 | 0/? | Not started | - |
 | 11. AI-Assisted Generation | v1.1 | 0/? | Not started | - |
