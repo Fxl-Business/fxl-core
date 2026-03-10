@@ -58,10 +58,10 @@ Full details: [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md)
   3. Primary color throughout the app is indigo instead of the previous dark charcoal (buttons, links, active states all indigo)
   4. Scrollbar is slim (6px) and uses slate-200 color on pages with overflow
   5. Wireframe viewer for financeiro-conta-azul shows identical colors as before the palette change (stone gray + gold accent preserved)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md -- Install fonts, swap palette to slate + indigo, add scrollbar styling, verify wireframe isolation
 
 ### Phase 13: Layout Shell
 **Goal**: The app has a frosted glass sticky header with brand identity and search, and the page uses viewport-level scrolling that enables proper sticky positioning for sidebar and TOC
@@ -143,7 +143,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16
 | 9. Component Library Expansion | v1.1 | 4/4 | Complete | 2026-03-10 |
 | 10. Briefing & Blueprint Views | v1.1 | 3/3 | Complete | 2026-03-10 |
 | 11. AI-Assisted Generation | v1.1 | 2/2 | Complete | 2026-03-10 |
-| 12. Design Foundation | v1.2 | 0/? | Not started | - |
+| 12. Design Foundation | v1.2 | 0/1 | Not started | - |
 | 13. Layout Shell | v1.2 | 0/? | Not started | - |
 | 14. Sidebar Navigation | v1.2 | 0/? | Not started | - |
 | 15. Doc Rendering and TOC | v1.2 | 0/? | Not started | - |
