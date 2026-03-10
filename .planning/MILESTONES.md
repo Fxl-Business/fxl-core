@@ -1,5 +1,25 @@
 # Milestones
 
+## v1.1 Wireframe Evolution (Shipped: 2026-03-10)
+
+**Phases:** 5 (7, 8, 9, 10, 11) | **Plans:** 15 | **Tasks:** ~30
+**Timeline:** 2 days (2026-03-09 → 2026-03-10) | **Commits:** 90 | **LOC delta:** +10,716 / -2,192
+**Git range:** 443e9e4 → HEAD
+
+**Delivered:** Wireframe system evolved from static config files into a full DB-backed pipeline with semantic design tokens, 21 section types, structured briefing input, and AI-assisted blueprint generation from business context.
+
+**Key accomplishments:**
+1. Blueprint infrastructure: DB-only storage with Zod validation (21 section types), schema migration framework, and optimistic locking with conflict resolution
+2. Wireframe design system: --wf-* semantic tokens (warm stone grays + gold accent), dark/light mode toggle, client branding overrides without app theme collision
+3. Section registry pattern: single source of truth for 21 types replacing 5+ switch statements, with 6 new blocks and 5 new chart variants
+4. Generic parametric wireframe viewer (/clients/:clientSlug/wireframe) replacing hardcoded per-client pages
+5. Structured briefing form with Supabase persistence, blueprint text view with collapsible screens, and Markdown export for Claude Code
+6. AI generation engine: pure function mapping BriefingConfig modules to screens via 10 typed recipes + 3 vertical templates, with CLI bridge for operator invocation
+
+**Archive:** [v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md) | [v1.1-REQUIREMENTS.md](milestones/v1.1-REQUIREMENTS.md)
+
+---
+
 ## v1.0 MVP (Shipped: 2026-03-09)
 
 **Phases:** 9 (1, 2, 02.1, 02.2, 02.3, 3, 4, 5, 6) | **Plans:** 27 | **Tasks:** ~58

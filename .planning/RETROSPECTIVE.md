@@ -53,21 +53,80 @@
 
 ---
 
+## Milestone: v1.1 — Wireframe Evolution
+
+**Shipped:** 2026-03-10
+**Phases:** 5 | **Plans:** 15 | **Timeline:** 2 days
+
+### What Was Built
+- Blueprint infrastructure: DB-only storage with Zod validation (21 section discriminated union), schema migration framework, optimistic locking with conflict modal
+- Wireframe design system: --wf-* semantic tokens (warm stone grays + gold accent), dark/light mode toggle, client branding overrides isolated from app theme
+- Component library expansion: section registry pattern as single source of truth, 6 new block types (settings-page, form-section, filter-config, stat-card, progress-bar, divider), 5 new chart variants (Radar, Treemap, Funnel, Scatter, Area)
+- Generic parametric wireframe viewer replacing hardcoded per-client pages
+- Structured briefing form with Supabase persistence, blueprint text view with collapsible screens, Markdown export for Claude Code
+- AI generation engine: 10 typed screen recipes, 3 vertical templates (financeiro/varejo/servicos), pure function BriefingConfig → BlueprintConfig with CLI bridge
+
+### What Worked
+- **Pure function pattern reuse:** generateBlueprint() with zero side effects enabled unit testing without Supabase — same pattern as Config Resolver from v1.0
+- **Registry pattern:** Single source of truth for 21 section types replaced 5+ scattered switch statements, making new type addition a 1-file change
+- **Wave-based execution:** Phases 9 and 10 ran in parallel (independent dependencies), Phase 11 followed cleanly
+- **TDD for generation engine:** Failing tests first → implement → green cycle worked well for screen recipes and generation engine
+- **Quick tasks post-milestone:** BriefingConfig evolution and view/edit mode toggle fit naturally as /gsd:quick tasks after phase 11 completed
+- **Design system isolation:** --wf-* tokens for wireframes, --brand-* for clients, app tokens for shell — zero collision across 3 layers
+
+### What Was Inefficient
+- **No milestone audit:** Skipped /gsd:audit-milestone for v1.1, relying on phase-level verification only
+- **Quick task scope:** Quick task 4 (BriefingConfig evolution) was borderline too large for /gsd:quick — 5 new types across 3 files + seed script
+- **ROADMAP.md Phase 11 plan checkboxes:** Plans showed as [ ] unchecked in roadmap even though they were complete (cosmetic only)
+
+### Patterns Established
+- `color-mix(in srgb)` for semi-transparent backgrounds when Tailwind opacity modifiers don't work with CSS var hex values
+- Section registry: type → { renderer, form, defaults, schema, label, category } mapping
+- CLI scripts use `process.env` + `npx tsx --env-file .env.local` to avoid Vite `import.meta.env` incompatibility
+- `findBestRecipe()` keyword scoring: 5 pts partial, 10 pts exact, 2 pts category bonus
+- Vertical templates use inline section data (not recipe composition) for guaranteed Zod compliance
+- Briefing view/edit mode: `isEditing` state with ViewField/ViewList helper components for read-only rendering
+
+### Key Lessons
+1. **Pure functions are the right default** — every data transformation (generation engine, config resolver, blueprint text extraction) worked well as pure function
+2. **Registry pattern scales** — 21 types through one registry is maintainable; should be the pattern for any future discriminated union extensibility
+3. **CLI bridge pattern for local AI tools** — standalone Supabase client with process.env is the way to connect CLI scripts to the same DB
+4. **Milestone audit recommended even at 100%** — v1.0 audit caught gaps; v1.1 skipped it, which means no independent cross-phase integration check
+5. **Quick tasks work well for post-milestone polish** — small improvements that don't warrant a full phase cycle
+
+### Cost Observations
+- Model mix: ~80% opus, ~20% sonnet (quality profile)
+- Sessions: 1 main session (phases 7-11 + quick tasks + milestone completion)
+- Notable: 15 plans in 2 calendar days (~51 min total execution, 3.4 min avg per plan)
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
 
-| Milestone | Timeline | Phases | Key Change |
-|-----------|----------|--------|------------|
-| v1.0 | 4 days | 9 | First milestone — established GSD workflow, decimal phases, audit process |
+| Milestone | Timeline | Phases | Plans | Key Change |
+|-----------|----------|--------|-------|------------|
+| v1.0 | 4 days | 9 | 27 | First milestone — established GSD workflow, decimal phases, audit process |
+| v1.1 | 2 days | 5 | 15 | Parallel phase execution, TDD for engine, quick tasks for post-phase polish |
 
 ### Cumulative Quality
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
 | v1.0 | Vitest (Phase 06) | spec-generator only | 3 (recharts, @supabase/supabase-js, @clerk/react) |
+| v1.1 | 237 tests | generation engine + schemas + recipes | 1 (zod v4) |
+
+### Velocity
+
+| Milestone | Plans | Total Execution | Avg/Plan |
+|-----------|-------|-----------------|----------|
+| v1.0 | 27 | ~95 min | ~3.5 min |
+| v1.1 | 15 | ~51 min | ~3.4 min |
 
 ### Top Lessons (Verified Across Milestones)
 
 1. Run `/gsd:audit-milestone` before completing — catches gaps that session-level verification misses
 2. Traceability maintenance is as important as code execution
+3. Pure functions are the right default for data transformations — validated in both Config Resolver (v1.0) and generation engine (v1.1)
+4. Registry/single-source-of-truth patterns scale well — semantic tokens (v1.0), section registry (v1.1)

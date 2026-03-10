@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Plataforma operacional interna da FXL (BI para PMEs). Combina documentacao de processo, knowledge de clientes, ferramentas AI-first (wireframe-builder com editor visual, sistema de comentarios, branding automatico) e pipeline de geracao de specs para dashboards BI. O objetivo e ter um processo capaz de entender qualquer negocio e, a partir de perguntas e respostas estruturadas, gerar qualquer produto digital de forma progressivamente automatizada.
+Plataforma operacional interna da FXL (BI para PMEs). Combina documentacao de processo, knowledge de clientes, ferramentas AI-first (wireframe-builder com editor visual, design system semantico, 21 tipos de secao, briefing estruturado) e pipeline completo Briefing → Blueprint → Wireframe → Spec Generation. O objetivo e ter um processo capaz de entender qualquer negocio e, a partir de perguntas e respostas estruturadas, gerar qualquer produto digital de forma progressivamente automatizada.
 
 ## Core Value
 
@@ -47,23 +47,26 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ Upload rules com normalizacao BR (1.234,56 / dd/mm/yyyy) — v1.0
 - ✓ Auth spec com 3 roles (admin, editor, viewer) — v1.0
 - ✓ Branding spec com CSS vars --brand-* e Google Fonts — v1.0
+- ✓ Blueprint como dado dinamico no Supabase com Zod validation e schema migration — v1.1
+- ✓ Optimistic locking para edicao concorrente de blueprint — v1.1
+- ✓ Design system wireframe com --wf-* tokens (paleta neutra + dourado accent) — v1.1
+- ✓ Dark/light mode toggle no wireframe viewer — v1.1
+- ✓ Client branding overrides sobre wireframe tokens sem colisao com app theme — v1.1
+- ✓ Section registry com 21 tipos (substituindo switch statements dispersos) — v1.1
+- ✓ 6 novos block types (settings-page, form-section, filter-config, stat-card, progress-bar, divider) — v1.1
+- ✓ 5 novos chart types (Radar, Treemap, Funnel, Scatter, Area) — v1.1
+- ✓ Wireframe viewer generico parametrizado por :clientSlug — v1.1
+- ✓ Briefing estruturado via formulario UI com Supabase persistence — v1.1
+- ✓ Blueprint text view com collapsible screens e type badges — v1.1
+- ✓ Blueprint exportavel como Markdown para Claude Code — v1.1
+- ✓ Share link management via dialog (gerar/copiar/revogar) — v1.1
+- ✓ AI generation: screen recipes tipadas para 10 contextos de negocio — v1.1
+- ✓ AI generation: vertical templates (financeiro/varejo/servicos) — v1.1
+- ✓ AI generation: engine pura BriefingConfig → BlueprintConfig + CLI bridge — v1.1
 
 ### Active
 
-## Current Milestone: v1.1 Wireframe Evolution
-
-**Goal:** Evoluir o sistema de wireframe para pipeline completo Briefing → Blueprint → Wireframe com dados dinamicos no Supabase, biblioteca de componentes expandida e design system moderno.
-
-**Target features:**
-- Redesign visual dos wireframes (paleta branco/preto/cinza/dourado, dark+light mode)
-- Expansao da biblioteca de componentes (settings pages, inputs, filtros, novos blocos)
-- Blueprint como dado dinamico no Supabase com renderizacao textual na UI
-- Sync bidirecional blueprint ↔ wireframe mantido com blueprint no DB
-- Blueprint acessivel ao Claude Code (MD export ou MCP Supabase)
-- Geracao de blueprint via Claude Code a partir de briefing + historico
-- Input de briefing diretamente pela UI
-- Componentes dinamicos (page types, filtros configuráveis, input blocks)
-- Bug fixes (share link, regra de no-removal)
+(No active requirements — next milestone not yet defined)
 
 ### Out of Scope
 
@@ -81,21 +84,33 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - Real-time streaming de dados — v2 (ADV-02)
 - Row Level Security em todas as tabelas Supabase — v2 (SEC-01)
 - Multi-tenant no Supabase — v2 (SEC-02)
+- Recharts 3.x upgrade — breaking changes, 2.x tem todos os charts necessarios
+- React 19 / Tailwind v4 — estabilidade da stack, upgrade futuro
+- Blueprint diff/merge visual — v2 (ADVW-01)
+- Edicao colaborativa em tempo real (CRDT) — v2 (ADVW-03)
+- Drag-and-drop visual estilo Figma — v2 (ADVW-04)
+- Edicao por linguagem natural — v2 (ADVW-05)
 
 ## Context
 
-Shipped v1.0 MVP with 16,808 LOC TypeScript across 136 files.
+Shipped v1.1 Wireframe Evolution with ~27,500 LOC TypeScript across ~230 files.
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
+237 tests passing (vitest).
 
-The platform now covers the full operator workflow:
+The platform covers the full operator workflow:
 1. **Documentation** — 4-section taxonomy, onboarding, Claude Code + GSD workflow
 2. **Wireframe feedback** — persistent comments, client share links, comment management
 3. **Visual editing** — drag-reorder sections, property panels, screen management, Supabase sync
 4. **Branding** — structured collection, automatic application via CSS vars and chart colors
 5. **Config pipeline** — TechnicalConfig + Config Resolver → GenerationManifest
 6. **System generation** — 6-file product spec ready for Claude Code to generate in separate repo
+7. **Blueprint infrastructure** — DB-only storage, Zod validation (21 section types), schema migration, optimistic locking
+8. **Design system** — Wireframe-specific --wf-* semantic tokens with dark/light mode and client branding overrides
+9. **Component library** — Section registry with 21 types, 9 chart variants, generic parametric viewer
+10. **Briefing & views** — Structured briefing form, blueprint text view, MD export, share link management
+11. **AI generation** — Screen recipes + vertical templates + pure generation engine with CLI bridge
 
-Pilot client: financeiro-conta-azul (10 screens, complete blueprint + branding + TechnicalConfig).
+Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint + branding + TechnicalConfig).
 
 ## Key Decisions
 
@@ -113,14 +128,25 @@ Pilot client: financeiro-conta-azul (10 screens, complete blueprint + branding +
 | Semantic design tokens with dark mode | Production-grade visual quality, theme flexibility | ✓ Good — clean light/dark switching |
 | Config Resolver as pure function | Deterministic, testable, no I/O side effects | ✓ Good — easy to test |
 | Product spec as 6 self-contained files | Each file standalone, no cross-file dependencies | ✓ Good — Claude Code can process independently |
+| Zod v4 with z.ZodType for recursive types | Type inference for discriminated union of 21 section types | ✓ Good — runtime validation catches malformed data |
+| DB as sole source of truth (delete .ts config) | Clean cutover, no dual-source confusion | ✓ Good — simplified data flow |
+| Optimistic locking via updated_at conditional update | Conflict protection without server-side locking | ✓ Good — conflict modal works well |
+| --wf-* tokens separate from app tokens | Wireframe identity independent of app theme | ✓ Good — no visual collision |
+| color-mix(in srgb) for semi-transparent fills | Tailwind opacity modifiers don't work with CSS var hex | ✓ Good — consistent badge/chart fills |
+| Section registry single source of truth | Replace 5+ switch statements with one registry | ✓ Good — adding types is now 1-file change |
+| Generic parametric viewer (/clients/:clientSlug/wireframe) | Eliminate per-client hardcoded pages | ✓ Good — scales to any client |
+| Pure function generateBlueprint() | Zero side effects, testable without Supabase | ✓ Good — 10 unit tests cover engine |
+| CLI bridge with process.env (not import.meta.env) | Vite env vars incompatible with Node.js scripts | ✓ Good — npx tsx --env-file .env.local |
+| Screen recipes with keyword scoring | Flexible matching: briefing module names → screen templates | ✓ Good — 10 recipes cover common BI contexts |
 
 ## Constraints
 
 - **Stack FXL Core**: React 18 + TypeScript strict + Tailwind + Vite + Vercel — nao muda
 - **Zero `any`**: TypeScript strict com `tsc --noEmit` como gate de aceite
-- **Sem backend pesado no Core**: Supabase apenas para features interativas (comentarios, blueprints)
+- **Sem backend pesado no Core**: Supabase apenas para features interativas (comentarios, blueprints, briefings)
 - **Blueprint prevalece**: Se blueprint e wireframe divergirem, blueprint e a fonte da verdade
 - **Componentes compartilhados**: Nunca criar componentes locais em clients/ — tudo em tools/
+- **Section registry**: All new section types must go through the registry (no direct switch statements)
 
 ---
-*Last updated: 2026-03-09 after v1.1 milestone started*
+*Last updated: 2026-03-10 after v1.1 milestone*
