@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText } from 'lucide-react'
+import { FileText, Search } from 'lucide-react'
 import {
   CommandDialog,
   CommandEmpty,
@@ -47,14 +47,12 @@ export default function SearchCommand() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted transition-colors w-48 justify-between"
+        className="relative flex w-full max-w-sm items-center rounded-md border border-slate-200 bg-slate-50 py-1.5 pl-10 pr-12 text-sm text-slate-400 transition-colors hover:bg-slate-100 dark:border-border dark:bg-muted/50 dark:text-muted-foreground"
       >
-        <span className="flex items-center gap-1.5">
-          <FileText className="h-3 w-3" />
-          Pesquisar docs...
-        </span>
-        <kbd className="rounded bg-background border px-1 py-0.5 text-[10px] font-mono">
-          ⌘K
+        <Search className="pointer-events-none absolute left-3 h-4 w-4 text-slate-400 dark:text-muted-foreground" />
+        <span>Pesquisar docs...</span>
+        <kbd className="absolute right-2 hidden rounded border border-slate-300 bg-white px-1.5 font-sans text-[10px] font-medium text-slate-400 sm:inline-block dark:border-border dark:bg-muted dark:text-muted-foreground">
+          Cmd+K
         </kbd>
       </button>
 

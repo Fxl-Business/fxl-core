@@ -118,6 +118,10 @@
     min-height: 100vh;
   }
 
+  html {
+    scrollbar-gutter: stable;
+  }
+
   /* Slim scrollbar styling */
   * {
     scrollbar-width: thin;
@@ -141,6 +145,10 @@
   ::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground));
   }
+}
+
+h2[id], h3[id] {
+  scroll-margin-top: 5rem;
 }
 
 /* Prose styles -- semantic tokens for light/dark mode */
