@@ -40,7 +40,7 @@ export default function DocRenderer() {
 
   if (!doc) {
     return (
-      <div className="py-12 text-center">
+      <div className="mx-auto max-w-5xl py-12 text-center">
         <h1 className="text-lg font-semibold text-foreground">Pagina nao encontrada</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Nao foi possivel encontrar um documento para: {location.pathname}
@@ -52,31 +52,33 @@ export default function DocRenderer() {
   const { frontmatter, sections, headings, rawBody } = doc
 
   return (
-    <div className="flex gap-10">
-      {/* Main content */}
-      <div className="min-w-0 flex-1">
-        <DocBreadcrumb section={frontmatter.badge} title={frontmatter.title} />
+    <div className="mx-auto max-w-5xl">
+      <div className="flex gap-10">
+        {/* Main content */}
+        <div className="min-w-0 flex-1">
+          <DocBreadcrumb section={frontmatter.badge} title={frontmatter.title} />
 
-        <DocPageHeader
-          badge={frontmatter.badge}
-          title={frontmatter.title}
-          description={frontmatter.description}
-          rawContent={rawBody}
-        />
+          <DocPageHeader
+            badge={frontmatter.badge}
+            title={frontmatter.title}
+            description={frontmatter.description}
+            rawContent={rawBody}
+          />
 
-        <Separator className="my-6" />
+          <Separator className="my-6" />
 
-        <div className="space-y-4">
-          {sections.map((section, i) => (
-            <SectionRenderer key={i} section={section} />
-          ))}
+          <div className="space-y-4">
+            {sections.map((section, i) => (
+              <SectionRenderer key={i} section={section} />
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Right TOC */}
-      {headings.length > 1 && (
-        <DocTableOfContents headings={headings} />
-      )}
+        {/* Right TOC */}
+        {headings.length > 1 && (
+          <DocTableOfContents headings={headings} />
+        )}
+      </div>
     </div>
   )
 }

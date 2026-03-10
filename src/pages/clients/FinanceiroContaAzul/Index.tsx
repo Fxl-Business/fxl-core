@@ -40,7 +40,7 @@ Meu objetivo nesta conversa é: [descrever a tarefa]`
 
 export default function FinanceiroIndex() {
   return (
-    <div>
+    <div className="mx-auto max-w-4xl">
       <div className="mb-1">
         <span className="text-xs font-semibold uppercase tracking-widest text-primary">
           financeiro-conta-azul

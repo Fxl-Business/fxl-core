@@ -21,14 +21,14 @@ export default function DocViewer() {
 
   if (!entry) {
     return (
-      <div className="text-sm text-muted-foreground">
+      <div className="mx-auto max-w-4xl text-sm text-muted-foreground">
         Documento não encontrado: <code>{doc}</code>
       </div>
     )
   }
 
   return (
-    <div>
+    <div className="mx-auto max-w-4xl">
       <div className="mb-6">
         <span className="text-xs font-semibold uppercase tracking-widest text-primary">
           Financeiro Conta Azul

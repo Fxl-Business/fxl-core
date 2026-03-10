@@ -100,7 +100,7 @@ export default function ProcessDocsViewer() {
 
   if (!entry) {
     return (
-      <div className="text-sm text-muted-foreground">
+      <div className="mx-auto max-w-4xl text-sm text-muted-foreground">
         Documento não encontrado: <code>{slug}</code>
       </div>
     )
@@ -110,7 +110,7 @@ export default function ProcessDocsViewer() {
     entry.promptBlock ? splitPromptBlock(entry.content, entry.promptBlock.sectionHeading) : null
 
   return (
-    <div>
+    <div className="mx-auto max-w-4xl">
       <div className="mb-6">
         <span className="text-xs font-semibold uppercase tracking-widest text-primary">
           {entry.section}

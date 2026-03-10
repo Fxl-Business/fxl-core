@@ -57,7 +57,7 @@ const clients = [
 
 export default function Home() {
   return (
-    <div>
+    <div className="mx-auto max-w-5xl">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-foreground">Nucleo FXL</h1>
