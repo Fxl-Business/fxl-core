@@ -29,6 +29,11 @@ import type {
   BriefingConfig,
   DataSource,
   BriefingModule,
+  ProductContext,
+  FieldMapping,
+  KpiCategory,
+  StatusRule,
+  BusinessRule,
 } from '@tools/wireframe-builder/types/briefing'
 
 // ---------------------------------------------------------------------------
@@ -43,6 +48,26 @@ function emptyModule(): BriefingModule {
   return { name: '', kpis: [], businessRules: '' }
 }
 
+function emptyProductContext(): ProductContext {
+  return { productType: '', sourceSystem: '', objective: '', approval: '', corePremise: '' }
+}
+
+function emptyFieldMapping(): FieldMapping {
+  return { field: '', usage: '' }
+}
+
+function emptyKpiCategory(): KpiCategory {
+  return { category: '', confirmed: [], suggested: [], blocked: [] }
+}
+
+function emptyStatusRule(): StatusRule {
+  return { condition: '', status: '' }
+}
+
+function emptyBusinessRule(): BusinessRule {
+  return { rule: '' }
+}
+
 function emptyBriefing(): BriefingConfig {
   return {
     companyInfo: { name: '', segment: '', size: 'PME', description: '' },
@@ -50,6 +75,10 @@ function emptyBriefing(): BriefingConfig {
     modules: [emptyModule()],
     targetAudience: '',
     freeFormNotes: '',
+    productContext: undefined,
+    kpiCategories: undefined,
+    statusRules: undefined,
+    businessRules: undefined,
   }
 }
 
@@ -126,6 +155,15 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
     }))
   }
 
+  // --- Product Context updaters ---
+
+  function updateProductContext(field: keyof ProductContext, value: string) {
+    setConfig((prev) => ({
+      ...prev,
+      productContext: { ...(prev.productContext ?? emptyProductContext()), [field]: value },
+    }))
+  }
+
   // --- Data Sources updaters ---
 
   function updateDataSource(index: number, field: keyof DataSource, value: string | string[]) {
@@ -150,6 +188,34 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
     }))
   }
 
+  function updateFieldMapping(sourceIndex: number, mappingIndex: number, field: keyof FieldMapping, value: string) {
+    setConfig((prev) => {
+      const sources = [...prev.dataSources]
+      const mappings = [...(sources[sourceIndex].fieldMappings ?? [])]
+      mappings[mappingIndex] = { ...mappings[mappingIndex], [field]: value }
+      sources[sourceIndex] = { ...sources[sourceIndex], fieldMappings: mappings }
+      return { ...prev, dataSources: sources }
+    })
+  }
+
+  function addFieldMapping(sourceIndex: number) {
+    setConfig((prev) => {
+      const sources = [...prev.dataSources]
+      const mappings = [...(sources[sourceIndex].fieldMappings ?? []), emptyFieldMapping()]
+      sources[sourceIndex] = { ...sources[sourceIndex], fieldMappings: mappings }
+      return { ...prev, dataSources: sources }
+    })
+  }
+
+  function removeFieldMapping(sourceIndex: number, mappingIndex: number) {
+    setConfig((prev) => {
+      const sources = [...prev.dataSources]
+      const mappings = (sources[sourceIndex].fieldMappings ?? []).filter((_, i) => i !== mappingIndex)
+      sources[sourceIndex] = { ...sources[sourceIndex], fieldMappings: mappings.length > 0 ? mappings : undefined }
+      return { ...prev, dataSources: sources }
+    })
+  }
+
   // --- Modules updaters ---
 
   function updateModule(index: number, field: keyof BriefingModule, value: string | string[]) {
@@ -172,6 +238,78 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
       ...prev,
       modules: prev.modules.filter((_, i) => i !== index),
     }))
+  }
+
+  // --- KPI Categories updaters ---
+
+  function updateKpiCategory(index: number, field: keyof KpiCategory, value: string | string[]) {
+    setConfig((prev) => {
+      const cats = [...(prev.kpiCategories ?? [])]
+      cats[index] = { ...cats[index], [field]: value }
+      return { ...prev, kpiCategories: cats }
+    })
+  }
+
+  function addKpiCategory() {
+    setConfig((prev) => ({
+      ...prev,
+      kpiCategories: [...(prev.kpiCategories ?? []), emptyKpiCategory()],
+    }))
+  }
+
+  function removeKpiCategory(index: number) {
+    setConfig((prev) => {
+      const cats = (prev.kpiCategories ?? []).filter((_, i) => i !== index)
+      return { ...prev, kpiCategories: cats.length > 0 ? cats : undefined }
+    })
+  }
+
+  // --- Status Rules updaters ---
+
+  function updateStatusRule(index: number, field: keyof StatusRule, value: string) {
+    setConfig((prev) => {
+      const rules = [...(prev.statusRules ?? [])]
+      rules[index] = { ...rules[index], [field]: value }
+      return { ...prev, statusRules: rules }
+    })
+  }
+
+  function addStatusRule() {
+    setConfig((prev) => ({
+      ...prev,
+      statusRules: [...(prev.statusRules ?? []), emptyStatusRule()],
+    }))
+  }
+
+  function removeStatusRule(index: number) {
+    setConfig((prev) => {
+      const rules = (prev.statusRules ?? []).filter((_, i) => i !== index)
+      return { ...prev, statusRules: rules.length > 0 ? rules : undefined }
+    })
+  }
+
+  // --- Business Rules updaters ---
+
+  function updateBusinessRule(index: number, value: string) {
+    setConfig((prev) => {
+      const rules = [...(prev.businessRules ?? [])]
+      rules[index] = { rule: value }
+      return { ...prev, businessRules: rules }
+    })
+  }
+
+  function addBusinessRule() {
+    setConfig((prev) => ({
+      ...prev,
+      businessRules: [...(prev.businessRules ?? []), emptyBusinessRule()],
+    }))
+  }
+
+  function removeBusinessRule(index: number) {
+    setConfig((prev) => {
+      const rules = (prev.businessRules ?? []).filter((_, i) => i !== index)
+      return { ...prev, businessRules: rules.length > 0 ? rules : undefined }
+    })
   }
 
   // --- Render: loading state ---
@@ -263,7 +401,66 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
         </CardContent>
       </Card>
 
-      {/* Section 2: Fontes de Dados */}
+      {/* Section 2: Contexto do Produto */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Contexto do Produto</CardTitle>
+          <CardDescription>Tipo de produto, sistema de origem e premissas de design.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="product-type">Tipo de Produto</Label>
+              <Input
+                id="product-type"
+                placeholder="Ex: BI de Plataforma, Dashboard Customizado"
+                value={config.productContext?.productType ?? ''}
+                onChange={(e) => updateProductContext('productType', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="source-system">Sistema de Origem</Label>
+              <Input
+                id="source-system"
+                placeholder="Ex: Conta Azul, Omie"
+                value={config.productContext?.sourceSystem ?? ''}
+                onChange={(e) => updateProductContext('sourceSystem', e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="product-objective">Objetivo do Produto</Label>
+            <Textarea
+              id="product-objective"
+              placeholder="Descricao do objetivo principal do produto"
+              value={config.productContext?.objective ?? ''}
+              onChange={(e) => updateProductContext('objective', e.target.value)}
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="product-approval">Aprovacao</Label>
+            <Input
+              id="product-approval"
+              placeholder="Ex: Interna FXL, Cliente externo"
+              value={config.productContext?.approval ?? ''}
+              onChange={(e) => updateProductContext('approval', e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="core-premise">Premissa Principal</Label>
+            <Textarea
+              id="core-premise"
+              placeholder="Premissa de design principal do produto"
+              value={config.productContext?.corePremise ?? ''}
+              onChange={(e) => updateProductContext('corePremise', e.target.value)}
+              rows={2}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Section 3: Fontes de Dados */}
       <Card>
         <CardHeader>
           <CardTitle>Fontes de Dados</CardTitle>
@@ -340,6 +537,52 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
                   Separe os campos por virgula.
                 </p>
               </div>
+
+              {/* Field Mappings sub-section */}
+              <div className="space-y-3 border-t border-border pt-3">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Mapeamento de Campos (opcional)
+                </Label>
+                {(source.fieldMappings ?? []).map((mapping, mIdx) => (
+                  <div key={mIdx} className="flex items-start gap-2">
+                    <div className="flex-1 space-y-1">
+                      <Input
+                        placeholder="Campo"
+                        value={mapping.field}
+                        onChange={(e) =>
+                          updateFieldMapping(index, mIdx, 'field', e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <Input
+                        placeholder="Uso"
+                        value={mapping.usage}
+                        onChange={(e) =>
+                          updateFieldMapping(index, mIdx, 'usage', e.target.value)
+                        }
+                      />
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFieldMapping(index, mIdx)}
+                      className="mt-0.5 h-8 px-2 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addFieldMapping(index)}
+                  className="w-full"
+                >
+                  <Plus className="mr-2 h-3.5 w-3.5" />
+                  Adicionar Mapeamento
+                </Button>
+              </div>
             </div>
           ))}
           <Button
@@ -354,7 +597,7 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
         </CardContent>
       </Card>
 
-      {/* Section 3: Modulos e KPIs */}
+      {/* Section 4: Modulos e KPIs */}
       <Card>
         <CardHeader>
           <CardTitle>Modulos e KPIs</CardTitle>
@@ -436,7 +679,194 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
         </CardContent>
       </Card>
 
-      {/* Section 4: Publico-alvo */}
+      {/* Section 5: Categorias de KPIs */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Categorias de KPIs</CardTitle>
+          <CardDescription>Classificacao dos KPIs por categoria com status de confirmacao.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(config.kpiCategories ?? []).map((cat, index) => (
+            <div
+              key={index}
+              className="space-y-3 rounded-lg border border-border p-4"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Categoria {index + 1}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeKpiCategory(index)}
+                  className="h-7 px-2 text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <Label>Nome da Categoria</Label>
+                <Input
+                  placeholder="Ex: Receita, Despesa, DRE / Margens"
+                  value={cat.category}
+                  onChange={(e) =>
+                    updateKpiCategory(index, 'category', e.target.value)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>KPIs Confirmados</Label>
+                <Input
+                  placeholder="KPIs confirmados (separados por virgula)"
+                  value={cat.confirmed.join(', ')}
+                  onChange={(e) =>
+                    updateKpiCategory(
+                      index,
+                      'confirmed',
+                      e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+                    )
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>KPIs Sugeridos (opcional)</Label>
+                <Input
+                  placeholder="KPIs sugeridos aguardando validacao (separados por virgula)"
+                  value={(cat.suggested ?? []).join(', ')}
+                  onChange={(e) =>
+                    updateKpiCategory(
+                      index,
+                      'suggested',
+                      e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+                    )
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>KPIs Bloqueados (opcional)</Label>
+                <Input
+                  placeholder="KPIs desejados mas sem fonte de dados (separados por virgula)"
+                  value={(cat.blocked ?? []).join(', ')}
+                  onChange={(e) =>
+                    updateKpiCategory(
+                      index,
+                      'blocked',
+                      e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+                    )
+                  }
+                />
+              </div>
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={addKpiCategory}
+            className="w-full"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Adicionar Categoria de KPI
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Section 6: Regras de Classificacao de Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Regras de Classificacao de Status</CardTitle>
+          <CardDescription>Condicoes para classificar lancamentos por status.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(config.statusRules ?? []).map((rule, index) => (
+            <div
+              key={index}
+              className="flex items-start gap-2"
+            >
+              <div className="flex-1 space-y-1">
+                <Label className="text-xs">Condicao</Label>
+                <Input
+                  placeholder="Ex: Valor pago / recebido preenchido"
+                  value={rule.condition}
+                  onChange={(e) =>
+                    updateStatusRule(index, 'condition', e.target.value)
+                  }
+                />
+              </div>
+              <div className="flex-1 space-y-1">
+                <Label className="text-xs">Status</Label>
+                <Input
+                  placeholder="Ex: Pago / Recebido"
+                  value={rule.status}
+                  onChange={(e) =>
+                    updateStatusRule(index, 'status', e.target.value)
+                  }
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => removeStatusRule(index)}
+                className="mt-5 h-8 px-2 text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={addStatusRule}
+            className="w-full"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Adicionar Regra de Status
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Section 7: Regras de Negocio */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Regras de Negocio</CardTitle>
+          <CardDescription>Regras gerais que se aplicam ao produto como um todo.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(config.businessRules ?? []).map((br, index) => (
+            <div
+              key={index}
+              className="flex items-start gap-2"
+            >
+              <div className="flex-1">
+                <Textarea
+                  placeholder="Regra de negocio"
+                  value={br.rule}
+                  onChange={(e) => updateBusinessRule(index, e.target.value)}
+                  rows={2}
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => removeBusinessRule(index)}
+                className="mt-0.5 h-8 px-2 text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={addBusinessRule}
+            className="w-full"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Adicionar Regra de Negocio
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Section 8: Publico-alvo */}
       <Card>
         <CardHeader>
           <CardTitle>Publico-alvo</CardTitle>
@@ -457,7 +887,7 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
         </CardContent>
       </Card>
 
-      {/* Section 5: Notas Adicionais */}
+      {/* Section 9: Notas Adicionais */}
       <Card>
         <CardHeader>
           <CardTitle>Notas Adicionais</CardTitle>
