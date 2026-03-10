@@ -25,11 +25,11 @@ Requirements for visual redesign milestone. Each maps to roadmap phases.
 
 ### Sidebar Navigation
 
-- [ ] **NAV-01**: Sidebar uses bg-slate-50/50 with border-r and sticky positioning
-- [ ] **NAV-02**: Section headers are uppercase, xs, bold, tracking-wider, text-slate-900
-- [ ] **NAV-03**: Nav items have border-l left border with indigo-600 active state
-- [ ] **NAV-04**: Collapsible sections show chevron icon with expand/collapse
-- [ ] **NAV-05**: Sub-items indent with pl-4 under parent with consistent spacing
+- [x] **NAV-01**: Sidebar uses bg-slate-50/50 with border-r and sticky positioning
+- [x] **NAV-02**: Section headers are uppercase, xs, bold, tracking-wider, text-slate-900
+- [x] **NAV-03**: Nav items have border-l left border with indigo-600 active state
+- [x] **NAV-04**: Collapsible sections show chevron icon with expand/collapse
+- [x] **NAV-05**: Sub-items indent with pl-4 under parent with consistent spacing
 
 ### Doc Rendering
 
@@ -90,11 +90,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LAYOUT-03 | Phase 13 | Complete |
 | LAYOUT-04 | Phase 13 | Complete |
 | LAYOUT-05 | Phase 13 | Complete |
-| NAV-01 | Phase 14 | Pending |
-| NAV-02 | Phase 14 | Pending |
-| NAV-03 | Phase 14 | Pending |
-| NAV-04 | Phase 14 | Pending |
-| NAV-05 | Phase 14 | Pending |
+| NAV-01 | Phase 14 | Complete |
+| NAV-02 | Phase 14 | Complete |
+| NAV-03 | Phase 14 | Complete |
+| NAV-04 | Phase 14 | Complete |
+| NAV-05 | Phase 14 | Complete |
 | DOC-01 | Phase 15 | Pending |
 | DOC-02 | Phase 15 | Pending |
 | DOC-03 | Phase 15 | Pending |

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Visual Redesign
-status: completed
-stopped_at: Completed 13-01-PLAN.md (Phase 13 Layout Shell -- 1/1 plans done)
-last_updated: "2026-03-10T17:29:56.333Z"
-last_activity: 2026-03-10 -- Phase 13 Layout Shell complete
+status: in-progress
+stopped_at: Completed 14-01-PLAN.md (Phase 14 Sidebar Navigation -- 1/1 plans done)
+last_updated: "2026-03-10T17:52:55.169Z"
+last_activity: 2026-03-10 -- Phase 14 Sidebar Navigation complete
 progress:
   total_phases: 5
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
-  percent: 40
+  completed_phases: 3
+  total_plans: 3
+  completed_plans: 3
+  percent: 60
 ---
 
 # Project State
@@ -21,21 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.2 Visual Redesign -- Phase 13 Layout Shell complete, Phase 14 next
+**Current focus:** v1.2 Visual Redesign -- Phase 14 Sidebar Navigation complete, Phase 15 next
 
 ## Current Position
 
-Phase: 13 of 16 (Layout Shell) -- second of 5 phases in v1.2
+Phase: 14 of 16 (Sidebar Navigation) -- third of 5 phases in v1.2
 Plan: 1/1 complete
 Status: Phase complete
-Last activity: 2026-03-10 -- Phase 13 Layout Shell complete
+Last activity: 2026-03-10 -- Phase 14 Sidebar Navigation complete
 
-Progress: [████......] 40%
+Progress: [██████....] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 44 (v1.0: 27, v1.1: 15, v1.2: 2)
+- Total plans completed: 45 (v1.0: 27, v1.1: 15, v1.2: 3)
 - Average duration: ~15 min
 - Total execution time: ~10.5 hours
 
@@ -59,6 +59,8 @@ v1.2 research decisions:
 - DOC + TOC merged into single phase (co-dependent: TOC reads heading IDs from doc rendering)
 - [Phase 13]: Page-owns-width pattern: Layout.tsx no longer wraps content in max-w -- each page sets its own
 - [Phase 13]: Viewport-level scrolling: removed overflow-hidden/overflow-y-auto from Layout containers
+- [Phase 14]: CSS-only sidebar restyle with zero logic changes -- container-level indentation, -ml-px border-l overlap trick for active indicator
+- [Phase 14]: Explicit color tokens (text-indigo-600, border-indigo-600) instead of semantic tokens for active states
 
 ### Pending Todos
 
@@ -97,5 +99,5 @@ v1.2:
 ## Session Continuity
 
 Last session: 2026-03-10
-Stopped at: Completed 13-01-PLAN.md (Phase 13 Layout Shell -- 1/1 plans done)
-Next: /gsd:plan-phase 14
+Stopped at: Completed 14-01-PLAN.md (Phase 14 Sidebar Navigation -- 1/1 plans done)
+Next: /gsd:plan-phase 15
