@@ -95,9 +95,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 10-01-PLAN.md -- Briefing infrastructure (migration, types, schema, store) + BriefingForm page
-- [ ] 10-02-PLAN.md -- Blueprint text extraction, BlueprintTextView page, Markdown export
-- [ ] 10-03-PLAN.md -- Share link modal + AdminToolbar integration
+- [x] 10-01-PLAN.md -- Briefing infrastructure (migration, types, schema, store) + BriefingForm page
+- [x] 10-02-PLAN.md -- Blueprint text extraction, BlueprintTextView page, Markdown export
+- [x] 10-03-PLAN.md -- Share link modal + AdminToolbar integration
 
 ### Phase 11: AI-Assisted Generation
 **Goal**: Claude Code can generate a complete blueprint from a client briefing, guided by screen recipes and vertical templates, with operator review before acceptance
@@ -107,7 +107,11 @@ Plans:
   1. Claude Code can read a briefing from Supabase and generate a valid BlueprintConfig that passes zod validation and renders without errors in the wireframe viewer
   2. Screen recipes exist as typed objects (not just markdown) that map business contexts (e.g., faturamento, estoque) to recommended screen structures with section types and layouts
   3. Operator can select a vertical template (financeiro, varejo, servicos) as a starting point for blueprint generation instead of starting from scratch
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 11-01-PLAN.md -- Screen recipes (10 typed business context mappings) + vertical templates (financeiro/varejo/servicos)
+- [ ] 11-02-PLAN.md -- Generation engine (BriefingConfig -> BlueprintConfig) + CLI bridge script + SKILL.md update
 
 ## Progress
 
@@ -128,5 +132,5 @@ Phase 7 -> 8 -> 9 (and 10 in parallel) -> 11
 | 7. Blueprint Infrastructure | v1.1 | 3/3 | Complete | 2026-03-09 |
 | 8. Wireframe Design System | v1.1 | 3/3 | Complete | 2026-03-10 |
 | 9. Component Library Expansion | v1.1 | 4/4 | Complete | 2026-03-10 |
-| 10. Briefing & Blueprint Views | 3/3 | Complete    | 2026-03-10 | - |
-| 11. AI-Assisted Generation | v1.1 | 0/? | Not started | - |
+| 10. Briefing & Blueprint Views | v1.1 | 3/3 | Complete | 2026-03-10 |
+| 11. AI-Assisted Generation | v1.1 | 0/2 | Not started | - |
