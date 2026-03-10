@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import { useUser } from '@clerk/react'
-import { Loader2, Plus, Trash2, Save } from 'lucide-react'
+import { Loader2, Plus, Trash2, Save, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -97,6 +97,30 @@ export default function BriefingForm() {
 }
 
 // ---------------------------------------------------------------------------
+// View mode helpers — render read-only values
+// ---------------------------------------------------------------------------
+
+function ViewField({ label, value }: { label: string; value: string | undefined }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="text-sm text-foreground">{value || 'Nao informado.'}</p>
+    </div>
+  )
+}
+
+function ViewList({ label, items }: { label: string; items: string[] }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="text-sm text-foreground">
+        {items.length > 0 ? items.join(', ') : 'Nenhum item cadastrado.'}
+      </p>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Inner component — receives guaranteed clientSlug
 // ---------------------------------------------------------------------------
 
@@ -105,6 +129,7 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
   const [config, setConfig] = useState<BriefingConfig>(emptyBriefing())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   // --- Load existing briefing on mount ---
 
@@ -325,7 +350,7 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8">
-      {/* Page header + save button */}
+      {/* Page header + mode toggle */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
@@ -335,14 +360,26 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
             Dados estruturados do cliente para geracao do blueprint.
           </p>
         </div>
-        <Button onClick={handleSave} disabled={saving} size="sm">
-          {saving ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="mr-2 h-4 w-4" />
-          )}
-          {saving ? 'Salvando...' : 'Salvar'}
-        </Button>
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} disabled={saving} size="sm">
+              {saving ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              {saving ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </div>
+        ) : (
+          <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Editar
+          </Button>
+        )}
       </div>
 
       {/* Section 1: Informacoes da Empresa */}
@@ -352,52 +389,63 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
           <CardDescription>Dados basicos sobre a empresa do cliente.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="company-name">Nome da Empresa</Label>
-              <Input
-                id="company-name"
-                placeholder="Ex: Conta Azul"
-                value={config.companyInfo.name}
-                onChange={(e) => updateCompanyInfo('name', e.target.value)}
-              />
+          {isEditing ? (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="company-name">Nome da Empresa</Label>
+                  <Input
+                    id="company-name"
+                    placeholder="Ex: Conta Azul"
+                    value={config.companyInfo.name}
+                    onChange={(e) => updateCompanyInfo('name', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company-segment">Segmento</Label>
+                  <Input
+                    id="company-segment"
+                    placeholder="Ex: Financeiro, Varejo"
+                    value={config.companyInfo.segment}
+                    onChange={(e) => updateCompanyInfo('segment', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="company-size">Porte</Label>
+                <Select
+                  value={config.companyInfo.size}
+                  onValueChange={(value) => updateCompanyInfo('size', value)}
+                >
+                  <SelectTrigger id="company-size">
+                    <SelectValue placeholder="Selecione o porte" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PME">PME</SelectItem>
+                    <SelectItem value="Medio">Medio</SelectItem>
+                    <SelectItem value="Grande">Grande</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="company-description">Descricao (opcional)</Label>
+                <Textarea
+                  id="company-description"
+                  placeholder="Breve descricao da empresa e seu contexto de negocio"
+                  value={config.companyInfo.description ?? ''}
+                  onChange={(e) => updateCompanyInfo('description', e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <ViewField label="Nome da Empresa" value={config.companyInfo.name} />
+              <ViewField label="Segmento" value={config.companyInfo.segment} />
+              <ViewField label="Porte" value={config.companyInfo.size} />
+              <ViewField label="Descricao" value={config.companyInfo.description} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="company-segment">Segmento</Label>
-              <Input
-                id="company-segment"
-                placeholder="Ex: Financeiro, Varejo"
-                value={config.companyInfo.segment}
-                onChange={(e) => updateCompanyInfo('segment', e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="company-size">Porte</Label>
-            <Select
-              value={config.companyInfo.size}
-              onValueChange={(value) => updateCompanyInfo('size', value)}
-            >
-              <SelectTrigger id="company-size">
-                <SelectValue placeholder="Selecione o porte" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PME">PME</SelectItem>
-                <SelectItem value="Medio">Medio</SelectItem>
-                <SelectItem value="Grande">Grande</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="company-description">Descricao (opcional)</Label>
-            <Textarea
-              id="company-description"
-              placeholder="Breve descricao da empresa e seu contexto de negocio"
-              value={config.companyInfo.description ?? ''}
-              onChange={(e) => updateCompanyInfo('description', e.target.value)}
-              rows={3}
-            />
-          </div>
+          )}
         </CardContent>
       </Card>
 
@@ -408,55 +456,69 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
           <CardDescription>Tipo de produto, sistema de origem e premissas de design.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="product-type">Tipo de Produto</Label>
-              <Input
-                id="product-type"
-                placeholder="Ex: BI de Plataforma, Dashboard Customizado"
-                value={config.productContext?.productType ?? ''}
-                onChange={(e) => updateProductContext('productType', e.target.value)}
-              />
+          {isEditing ? (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="product-type">Tipo de Produto</Label>
+                  <Input
+                    id="product-type"
+                    placeholder="Ex: BI de Plataforma, Dashboard Customizado"
+                    value={config.productContext?.productType ?? ''}
+                    onChange={(e) => updateProductContext('productType', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="source-system">Sistema de Origem</Label>
+                  <Input
+                    id="source-system"
+                    placeholder="Ex: Conta Azul, Omie"
+                    value={config.productContext?.sourceSystem ?? ''}
+                    onChange={(e) => updateProductContext('sourceSystem', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="product-objective">Objetivo do Produto</Label>
+                <Textarea
+                  id="product-objective"
+                  placeholder="Descricao do objetivo principal do produto"
+                  value={config.productContext?.objective ?? ''}
+                  onChange={(e) => updateProductContext('objective', e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="product-approval">Aprovacao</Label>
+                <Input
+                  id="product-approval"
+                  placeholder="Ex: Interna FXL, Cliente externo"
+                  value={config.productContext?.approval ?? ''}
+                  onChange={(e) => updateProductContext('approval', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="core-premise">Premissa Principal</Label>
+                <Textarea
+                  id="core-premise"
+                  placeholder="Premissa de design principal do produto"
+                  value={config.productContext?.corePremise ?? ''}
+                  onChange={(e) => updateProductContext('corePremise', e.target.value)}
+                  rows={2}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ViewField label="Tipo de Produto" value={config.productContext?.productType} />
+                <ViewField label="Sistema de Origem" value={config.productContext?.sourceSystem} />
+              </div>
+              <ViewField label="Objetivo do Produto" value={config.productContext?.objective} />
+              <ViewField label="Aprovacao" value={config.productContext?.approval} />
+              <ViewField label="Premissa Principal" value={config.productContext?.corePremise} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="source-system">Sistema de Origem</Label>
-              <Input
-                id="source-system"
-                placeholder="Ex: Conta Azul, Omie"
-                value={config.productContext?.sourceSystem ?? ''}
-                onChange={(e) => updateProductContext('sourceSystem', e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="product-objective">Objetivo do Produto</Label>
-            <Textarea
-              id="product-objective"
-              placeholder="Descricao do objetivo principal do produto"
-              value={config.productContext?.objective ?? ''}
-              onChange={(e) => updateProductContext('objective', e.target.value)}
-              rows={3}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="product-approval">Aprovacao</Label>
-            <Input
-              id="product-approval"
-              placeholder="Ex: Interna FXL, Cliente externo"
-              value={config.productContext?.approval ?? ''}
-              onChange={(e) => updateProductContext('approval', e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="core-premise">Premissa Principal</Label>
-            <Textarea
-              id="core-premise"
-              placeholder="Premissa de design principal do produto"
-              value={config.productContext?.corePremise ?? ''}
-              onChange={(e) => updateProductContext('corePremise', e.target.value)}
-              rows={2}
-            />
-          </div>
+          )}
         </CardContent>
       </Card>
 
@@ -467,133 +529,167 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
           <CardDescription>Sistemas e formatos de exportacao do cliente.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {config.dataSources.map((source, index) => (
-            <div
-              key={index}
-              className="space-y-3 rounded-lg border border-border p-4"
-            >
-              <div className="flex items-center justify-between">
+          {isEditing ? (
+            <>
+              {config.dataSources.map((source, index) => (
+                <div
+                  key={index}
+                  className="space-y-3 rounded-lg border border-border p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Fonte {index + 1}
+                    </span>
+                    {config.dataSources.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeDataSource(index)}
+                        className="h-7 px-2 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Sistema</Label>
+                      <Input
+                        placeholder="Ex: Conta Azul, Excel"
+                        value={source.system}
+                        onChange={(e) =>
+                          updateDataSource(index, 'system', e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Formato de Exportacao</Label>
+                      <Select
+                        value={source.exportType}
+                        onValueChange={(value) =>
+                          updateDataSource(index, 'exportType', value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o formato" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CSV">CSV</SelectItem>
+                          <SelectItem value="XLSX">XLSX</SelectItem>
+                          <SelectItem value="API">API</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Campos Disponiveis</Label>
+                    <Input
+                      placeholder="Ex: receita, despesa, data (separados por virgula)"
+                      value={source.fields.join(', ')}
+                      onChange={(e) =>
+                        updateDataSource(
+                          index,
+                          'fields',
+                          e.target.value
+                            .split(',')
+                            .map((f) => f.trim())
+                            .filter(Boolean)
+                        )
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Separe os campos por virgula.
+                    </p>
+                  </div>
+
+                  {/* Field Mappings sub-section */}
+                  <div className="space-y-3 border-t border-border pt-3">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                      Mapeamento de Campos (opcional)
+                    </Label>
+                    {(source.fieldMappings ?? []).map((mapping, mIdx) => (
+                      <div key={mIdx} className="flex items-start gap-2">
+                        <div className="flex-1 space-y-1">
+                          <Input
+                            placeholder="Campo"
+                            value={mapping.field}
+                            onChange={(e) =>
+                              updateFieldMapping(index, mIdx, 'field', e.target.value)
+                            }
+                          />
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <Input
+                            placeholder="Uso"
+                            value={mapping.usage}
+                            onChange={(e) =>
+                              updateFieldMapping(index, mIdx, 'usage', e.target.value)
+                            }
+                          />
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFieldMapping(index, mIdx)}
+                          className="mt-0.5 h-8 px-2 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addFieldMapping(index)}
+                      className="w-full"
+                    >
+                      <Plus className="mr-2 h-3.5 w-3.5" />
+                      Adicionar Mapeamento
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addDataSource}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar Fonte de Dados
+              </Button>
+            </>
+          ) : config.dataSources.length === 0 || (config.dataSources.length === 1 && !config.dataSources[0].system) ? (
+            <p className="text-sm text-muted-foreground">Nenhuma fonte cadastrada.</p>
+          ) : (
+            config.dataSources.filter((s) => s.system).map((source, index) => (
+              <div
+                key={index}
+                className="space-y-3 rounded-lg border border-border p-4"
+              >
                 <span className="text-xs font-medium text-muted-foreground">
                   Fonte {index + 1}
                 </span>
-                {config.dataSources.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeDataSource(index)}
-                    className="h-7 px-2 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ViewField label="Sistema" value={source.system} />
+                  <ViewField label="Formato de Exportacao" value={source.exportType} />
+                </div>
+                <ViewList label="Campos Disponiveis" items={source.fields} />
+                {(source.fieldMappings ?? []).length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Mapeamento de Campos</p>
+                    <div className="space-y-1">
+                      {(source.fieldMappings ?? []).map((m, mIdx) => (
+                        <p key={mIdx} className="text-sm text-foreground">
+                          {m.field} &rarr; {m.usage}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Sistema</Label>
-                  <Input
-                    placeholder="Ex: Conta Azul, Excel"
-                    value={source.system}
-                    onChange={(e) =>
-                      updateDataSource(index, 'system', e.target.value)
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Formato de Exportacao</Label>
-                  <Select
-                    value={source.exportType}
-                    onValueChange={(value) =>
-                      updateDataSource(index, 'exportType', value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o formato" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CSV">CSV</SelectItem>
-                      <SelectItem value="XLSX">XLSX</SelectItem>
-                      <SelectItem value="API">API</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Campos Disponiveis</Label>
-                <Input
-                  placeholder="Ex: receita, despesa, data (separados por virgula)"
-                  value={source.fields.join(', ')}
-                  onChange={(e) =>
-                    updateDataSource(
-                      index,
-                      'fields',
-                      e.target.value
-                        .split(',')
-                        .map((f) => f.trim())
-                        .filter(Boolean)
-                    )
-                  }
-                />
-                <p className="text-xs text-muted-foreground">
-                  Separe os campos por virgula.
-                </p>
-              </div>
-
-              {/* Field Mappings sub-section */}
-              <div className="space-y-3 border-t border-border pt-3">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Mapeamento de Campos (opcional)
-                </Label>
-                {(source.fieldMappings ?? []).map((mapping, mIdx) => (
-                  <div key={mIdx} className="flex items-start gap-2">
-                    <div className="flex-1 space-y-1">
-                      <Input
-                        placeholder="Campo"
-                        value={mapping.field}
-                        onChange={(e) =>
-                          updateFieldMapping(index, mIdx, 'field', e.target.value)
-                        }
-                      />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <Input
-                        placeholder="Uso"
-                        value={mapping.usage}
-                        onChange={(e) =>
-                          updateFieldMapping(index, mIdx, 'usage', e.target.value)
-                        }
-                      />
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFieldMapping(index, mIdx)}
-                      className="mt-0.5 h-8 px-2 text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addFieldMapping(index)}
-                  className="w-full"
-                >
-                  <Plus className="mr-2 h-3.5 w-3.5" />
-                  Adicionar Mapeamento
-                </Button>
-              </div>
-            </div>
-          ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addDataSource}
-            className="w-full"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar Fonte de Dados
-          </Button>
+            ))
+          )}
         </CardContent>
       </Card>
 
@@ -604,78 +700,100 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
           <CardDescription>Modulos do dashboard e seus indicadores.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {config.modules.map((mod, index) => (
-            <div
-              key={index}
-              className="space-y-3 rounded-lg border border-border p-4"
-            >
-              <div className="flex items-center justify-between">
+          {isEditing ? (
+            <>
+              {config.modules.map((mod, index) => (
+                <div
+                  key={index}
+                  className="space-y-3 rounded-lg border border-border p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Modulo {index + 1}
+                    </span>
+                    {config.modules.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeModule(index)}
+                        className="h-7 px-2 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Nome do Modulo</Label>
+                    <Input
+                      placeholder="Ex: DRE Gerencial, Fluxo de Caixa"
+                      value={mod.name}
+                      onChange={(e) =>
+                        updateModule(index, 'name', e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>KPIs</Label>
+                    <Input
+                      placeholder="Ex: Receita Total, Margem Bruta (separados por virgula)"
+                      value={mod.kpis.join(', ')}
+                      onChange={(e) =>
+                        updateModule(
+                          index,
+                          'kpis',
+                          e.target.value
+                            .split(',')
+                            .map((k) => k.trim())
+                            .filter(Boolean)
+                        )
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Separe os KPIs por virgula.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Regras de Negocio (opcional)</Label>
+                    <Textarea
+                      placeholder="Regras especificas para este modulo"
+                      value={mod.businessRules ?? ''}
+                      onChange={(e) =>
+                        updateModule(index, 'businessRules', e.target.value)
+                      }
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addModule}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar Modulo
+              </Button>
+            </>
+          ) : config.modules.length === 0 || (config.modules.length === 1 && !config.modules[0].name) ? (
+            <p className="text-sm text-muted-foreground">Nenhum modulo cadastrado.</p>
+          ) : (
+            config.modules.filter((m) => m.name).map((mod, index) => (
+              <div
+                key={index}
+                className="space-y-3 rounded-lg border border-border p-4"
+              >
                 <span className="text-xs font-medium text-muted-foreground">
                   Modulo {index + 1}
                 </span>
-                {config.modules.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeModule(index)}
-                    className="h-7 px-2 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                <ViewField label="Nome" value={mod.name} />
+                <ViewList label="KPIs" items={mod.kpis} />
+                {mod.businessRules && (
+                  <ViewField label="Regras de Negocio" value={mod.businessRules} />
                 )}
               </div>
-              <div className="space-y-2">
-                <Label>Nome do Modulo</Label>
-                <Input
-                  placeholder="Ex: DRE Gerencial, Fluxo de Caixa"
-                  value={mod.name}
-                  onChange={(e) =>
-                    updateModule(index, 'name', e.target.value)
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>KPIs</Label>
-                <Input
-                  placeholder="Ex: Receita Total, Margem Bruta (separados por virgula)"
-                  value={mod.kpis.join(', ')}
-                  onChange={(e) =>
-                    updateModule(
-                      index,
-                      'kpis',
-                      e.target.value
-                        .split(',')
-                        .map((k) => k.trim())
-                        .filter(Boolean)
-                    )
-                  }
-                />
-                <p className="text-xs text-muted-foreground">
-                  Separe os KPIs por virgula.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label>Regras de Negocio (opcional)</Label>
-                <Textarea
-                  placeholder="Regras especificas para este modulo"
-                  value={mod.businessRules ?? ''}
-                  onChange={(e) =>
-                    updateModule(index, 'businessRules', e.target.value)
-                  }
-                  rows={2}
-                />
-              </div>
-            </div>
-          ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addModule}
-            className="w-full"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar Modulo
-          </Button>
+            ))
+          )}
         </CardContent>
       </Card>
 
@@ -686,87 +804,108 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
           <CardDescription>Classificacao dos KPIs por categoria com status de confirmacao.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {(config.kpiCategories ?? []).map((cat, index) => (
-            <div
-              key={index}
-              className="space-y-3 rounded-lg border border-border p-4"
-            >
-              <div className="flex items-center justify-between">
+          {isEditing ? (
+            <>
+              {(config.kpiCategories ?? []).map((cat, index) => (
+                <div
+                  key={index}
+                  className="space-y-3 rounded-lg border border-border p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Categoria {index + 1}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeKpiCategory(index)}
+                      className="h-7 px-2 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Nome da Categoria</Label>
+                    <Input
+                      placeholder="Ex: Receita, Despesa, DRE / Margens"
+                      value={cat.category}
+                      onChange={(e) =>
+                        updateKpiCategory(index, 'category', e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>KPIs Confirmados</Label>
+                    <Input
+                      placeholder="KPIs confirmados (separados por virgula)"
+                      value={cat.confirmed.join(', ')}
+                      onChange={(e) =>
+                        updateKpiCategory(
+                          index,
+                          'confirmed',
+                          e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>KPIs Sugeridos (opcional)</Label>
+                    <Input
+                      placeholder="KPIs sugeridos aguardando validacao (separados por virgula)"
+                      value={(cat.suggested ?? []).join(', ')}
+                      onChange={(e) =>
+                        updateKpiCategory(
+                          index,
+                          'suggested',
+                          e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>KPIs Bloqueados (opcional)</Label>
+                    <Input
+                      placeholder="KPIs desejados mas sem fonte de dados (separados por virgula)"
+                      value={(cat.blocked ?? []).join(', ')}
+                      onChange={(e) =>
+                        updateKpiCategory(
+                          index,
+                          'blocked',
+                          e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addKpiCategory}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar Categoria de KPI
+              </Button>
+            </>
+          ) : (config.kpiCategories ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma categoria cadastrada.</p>
+          ) : (
+            (config.kpiCategories ?? []).map((cat, index) => (
+              <div
+                key={index}
+                className="space-y-3 rounded-lg border border-border p-4"
+              >
                 <span className="text-xs font-medium text-muted-foreground">
                   Categoria {index + 1}
                 </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeKpiCategory(index)}
-                  className="h-7 px-2 text-muted-foreground hover:text-destructive"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                <ViewField label="Categoria" value={cat.category} />
+                <ViewList label="Confirmados" items={cat.confirmed} />
+                <ViewList label="Sugeridos" items={cat.suggested ?? []} />
+                <ViewList label="Bloqueados" items={cat.blocked ?? []} />
               </div>
-              <div className="space-y-2">
-                <Label>Nome da Categoria</Label>
-                <Input
-                  placeholder="Ex: Receita, Despesa, DRE / Margens"
-                  value={cat.category}
-                  onChange={(e) =>
-                    updateKpiCategory(index, 'category', e.target.value)
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>KPIs Confirmados</Label>
-                <Input
-                  placeholder="KPIs confirmados (separados por virgula)"
-                  value={cat.confirmed.join(', ')}
-                  onChange={(e) =>
-                    updateKpiCategory(
-                      index,
-                      'confirmed',
-                      e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
-                    )
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>KPIs Sugeridos (opcional)</Label>
-                <Input
-                  placeholder="KPIs sugeridos aguardando validacao (separados por virgula)"
-                  value={(cat.suggested ?? []).join(', ')}
-                  onChange={(e) =>
-                    updateKpiCategory(
-                      index,
-                      'suggested',
-                      e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
-                    )
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>KPIs Bloqueados (opcional)</Label>
-                <Input
-                  placeholder="KPIs desejados mas sem fonte de dados (separados por virgula)"
-                  value={(cat.blocked ?? []).join(', ')}
-                  onChange={(e) =>
-                    updateKpiCategory(
-                      index,
-                      'blocked',
-                      e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
-                    )
-                  }
-                />
-              </div>
-            </div>
-          ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addKpiCategory}
-            className="w-full"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar Categoria de KPI
-          </Button>
+            ))
+          )}
         </CardContent>
       </Card>
 
@@ -777,50 +916,64 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
           <CardDescription>Condicoes para classificar lancamentos por status.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {(config.statusRules ?? []).map((rule, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-2"
-            >
-              <div className="flex-1 space-y-1">
-                <Label className="text-xs">Condicao</Label>
-                <Input
-                  placeholder="Ex: Valor pago / recebido preenchido"
-                  value={rule.condition}
-                  onChange={(e) =>
-                    updateStatusRule(index, 'condition', e.target.value)
-                  }
-                />
-              </div>
-              <div className="flex-1 space-y-1">
-                <Label className="text-xs">Status</Label>
-                <Input
-                  placeholder="Ex: Pago / Recebido"
-                  value={rule.status}
-                  onChange={(e) =>
-                    updateStatusRule(index, 'status', e.target.value)
-                  }
-                />
-              </div>
+          {isEditing ? (
+            <>
+              {(config.statusRules ?? []).map((rule, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-2"
+                >
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-xs">Condicao</Label>
+                    <Input
+                      placeholder="Ex: Valor pago / recebido preenchido"
+                      value={rule.condition}
+                      onChange={(e) =>
+                        updateStatusRule(index, 'condition', e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-xs">Status</Label>
+                    <Input
+                      placeholder="Ex: Pago / Recebido"
+                      value={rule.status}
+                      onChange={(e) =>
+                        updateStatusRule(index, 'status', e.target.value)
+                      }
+                    />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeStatusRule(index)}
+                    className="mt-5 h-8 px-2 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ))}
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                onClick={() => removeStatusRule(index)}
-                className="mt-5 h-8 px-2 text-muted-foreground hover:text-destructive"
+                onClick={addStatusRule}
+                className="w-full"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar Regra de Status
               </Button>
+            </>
+          ) : (config.statusRules ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma regra de status cadastrada.</p>
+          ) : (
+            <div className="space-y-2">
+              {(config.statusRules ?? []).map((rule, index) => (
+                <p key={index} className="text-sm text-foreground">
+                  {rule.condition} &rarr; {rule.status}
+                </p>
+              ))}
             </div>
-          ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addStatusRule}
-            className="w-full"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar Regra de Status
-          </Button>
+          )}
         </CardContent>
       </Card>
 
@@ -831,38 +984,50 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
           <CardDescription>Regras gerais que se aplicam ao produto como um todo.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {(config.businessRules ?? []).map((br, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-2"
-            >
-              <div className="flex-1">
-                <Textarea
-                  placeholder="Regra de negocio"
-                  value={br.rule}
-                  onChange={(e) => updateBusinessRule(index, e.target.value)}
-                  rows={2}
-                />
-              </div>
+          {isEditing ? (
+            <>
+              {(config.businessRules ?? []).map((br, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-2"
+                >
+                  <div className="flex-1">
+                    <Textarea
+                      placeholder="Regra de negocio"
+                      value={br.rule}
+                      onChange={(e) => updateBusinessRule(index, e.target.value)}
+                      rows={2}
+                    />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeBusinessRule(index)}
+                    className="mt-0.5 h-8 px-2 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ))}
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                onClick={() => removeBusinessRule(index)}
-                className="mt-0.5 h-8 px-2 text-muted-foreground hover:text-destructive"
+                onClick={addBusinessRule}
+                className="w-full"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar Regra de Negocio
               </Button>
+            </>
+          ) : (config.businessRules ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma regra de negocio cadastrada.</p>
+          ) : (
+            <div className="space-y-2">
+              {(config.businessRules ?? []).map((br, index) => (
+                <p key={index} className="text-sm text-foreground">{br.rule}</p>
+              ))}
             </div>
-          ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addBusinessRule}
-            className="w-full"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar Regra de Negocio
-          </Button>
+          )}
         </CardContent>
       </Card>
 
@@ -873,17 +1038,23 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
           <CardDescription>Quem vai consumir o dashboard.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Textarea
-            placeholder="Ex: Diretores financeiros e controllers de PMEs que precisam de visao consolidada de receita vs despesa"
-            value={config.targetAudience}
-            onChange={(e) =>
-              setConfig((prev) => ({
-                ...prev,
-                targetAudience: e.target.value,
-              }))
-            }
-            rows={3}
-          />
+          {isEditing ? (
+            <Textarea
+              placeholder="Ex: Diretores financeiros e controllers de PMEs que precisam de visao consolidada de receita vs despesa"
+              value={config.targetAudience}
+              onChange={(e) =>
+                setConfig((prev) => ({
+                  ...prev,
+                  targetAudience: e.target.value,
+                }))
+              }
+              rows={3}
+            />
+          ) : (
+            <p className="text-sm text-foreground">
+              {config.targetAudience || 'Nao informado.'}
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -894,35 +1065,45 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
           <CardDescription>Contexto livre em formato Markdown.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Textarea
-            placeholder="Informacoes adicionais, edge cases, observacoes..."
-            value={config.freeFormNotes}
-            onChange={(e) =>
-              setConfig((prev) => ({
-                ...prev,
-                freeFormNotes: e.target.value,
-              }))
-            }
-            rows={6}
-            className="font-mono text-sm"
-          />
-          <p className="mt-2 text-xs text-muted-foreground">
-            Suporta Markdown. Use para capturar contexto que nao se encaixa nas secoes acima.
-          </p>
+          {isEditing ? (
+            <>
+              <Textarea
+                placeholder="Informacoes adicionais, edge cases, observacoes..."
+                value={config.freeFormNotes}
+                onChange={(e) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    freeFormNotes: e.target.value,
+                  }))
+                }
+                rows={6}
+                className="font-mono text-sm"
+              />
+              <p className="mt-2 text-xs text-muted-foreground">
+                Suporta Markdown. Use para capturar contexto que nao se encaixa nas secoes acima.
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-foreground" style={{ whiteSpace: 'pre-wrap' }}>
+              {config.freeFormNotes || 'Nao informado.'}
+            </p>
+          )}
         </CardContent>
       </Card>
 
-      {/* Bottom save button */}
-      <div className="flex justify-end pb-8">
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="mr-2 h-4 w-4" />
-          )}
-          {saving ? 'Salvando...' : 'Salvar Briefing'}
-        </Button>
-      </div>
+      {/* Bottom save button — only in edit mode */}
+      {isEditing && (
+        <div className="flex justify-end pb-8">
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            {saving ? 'Salvando...' : 'Salvar Briefing'}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
