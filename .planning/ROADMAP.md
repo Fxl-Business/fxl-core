@@ -102,11 +102,11 @@ Plans:
   3. Code blocks have dark slate-900 background with rounded corners, decorative terminal dots, and syntax-colored tokens (keywords, strings, comments visually distinct)
   4. Right sidebar shows "NESTA PAGINA" heading with clickable headings that scroll to the correct position (accounting for sticky header offset)
   5. Active heading in TOC updates as user scrolls through the page, with nested h3 items indented under h2
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 15-01: TBD
-- [ ] 15-02: TBD
+- [ ] 15-01-PLAN.md -- Install rehype-highlight, restyle breadcrumbs, page header, code blocks, and prose typography
+- [ ] 15-02-PLAN.md -- Restyle TOC with border-l rail, indigo active states, sticky positioning, visual checkpoint
 
 ### Phase 16: Consistency Pass
 **Goal**: Every page in the app uses the new visual language consistently -- no page looks like it belongs to the old design
@@ -146,5 +146,5 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16
 | 12. Design Foundation | v1.2 | 1/1 | Complete | 2026-03-10 |
 | 13. Layout Shell | v1.2 | Complete    | 2026-03-10 | 2026-03-10 |
 | 14. Sidebar Navigation | v1.2 | Complete    | 2026-03-10 | 2026-03-10 |
-| 15. Doc Rendering and TOC | v1.2 | 0/? | Not started | - |
+| 15. Doc Rendering and TOC | v1.2 | 0/2 | Not started | - |
 | 16. Consistency Pass | v1.2 | 0/? | Not started | - |
