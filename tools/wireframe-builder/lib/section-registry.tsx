@@ -35,6 +35,12 @@ import InputRenderer from '../components/sections/InputRenderer'
 import ConfigTableRenderer from '../components/sections/ConfigTableRenderer'
 import ChartGridRenderer from '../components/sections/ChartGridRenderer'
 import InfoBlockRenderer from '../components/sections/InfoBlockRenderer'
+import SettingsPageRenderer from '../components/sections/SettingsPageRenderer'
+import FormSectionRenderer from '../components/sections/FormSectionRenderer'
+import FilterConfigRenderer from '../components/sections/FilterConfigRenderer'
+import StatCardRenderer from '../components/sections/StatCardRenderer'
+import ProgressBarRenderer from '../components/sections/ProgressBarRenderer'
+import DividerRenderer from '../components/sections/DividerRenderer'
 
 // ---------------------------------------------------------------------------
 // Property forms (existing)
@@ -55,6 +61,12 @@ import UploadSectionForm from '../components/editor/property-forms/UploadSection
 import ConfigTableForm from '../components/editor/property-forms/ConfigTableForm'
 import InfoBlockForm from '../components/editor/property-forms/InfoBlockForm'
 import ChartGridForm from '../components/editor/property-forms/ChartGridForm'
+import SettingsPageForm from '../components/editor/property-forms/SettingsPageForm'
+import FormSectionForm from '../components/editor/property-forms/FormSectionForm'
+import FilterConfigForm from '../components/editor/property-forms/FilterConfigForm'
+import StatCardForm from '../components/editor/property-forms/StatCardForm'
+import ProgressBarForm from '../components/editor/property-forms/ProgressBarForm'
+import DividerForm from '../components/editor/property-forms/DividerForm'
 
 // ---------------------------------------------------------------------------
 // Zod schemas (individual)
@@ -117,35 +129,6 @@ export type SectionRegistration = {
   defaultProps: () => BlueprintSection
   schema: z.ZodType
   label: string
-}
-
-// ---------------------------------------------------------------------------
-// Placeholder components for new section types (replaced by real ones in Plan 02)
-// ---------------------------------------------------------------------------
-
-function PlaceholderRenderer({ section }: SectionRendererProps) {
-  return (
-    <div
-      style={{
-        padding: 16,
-        color: 'var(--wf-muted)',
-        border: '1px dashed var(--wf-border)',
-        borderRadius: 8,
-        textAlign: 'center',
-        fontSize: 14,
-      }}
-    >
-      {section.type}
-    </div>
-  )
-}
-
-function PlaceholderForm({ section }: PropertyFormProps) {
-  return (
-    <div className="text-sm text-muted-foreground p-4">
-      Formulario para {section.type} em desenvolvimento
-    </div>
-  )
 }
 
 // ---------------------------------------------------------------------------
@@ -444,8 +427,8 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
   },
 
   'divider': {
-    renderer: PlaceholderRenderer,
-    propertyForm: PlaceholderForm,
+    renderer: DividerRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: DividerForm as unknown as ComponentType<PropertyFormProps>,
     catalogEntry: {
       type: 'divider',
       label: 'Divisor',
@@ -462,8 +445,8 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
 
   // === Formularios (new) ===
   'settings-page': {
-    renderer: PlaceholderRenderer,
-    propertyForm: PlaceholderForm,
+    renderer: SettingsPageRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: SettingsPageForm as unknown as ComponentType<PropertyFormProps>,
     catalogEntry: {
       type: 'settings-page',
       label: 'Pagina de Config',
@@ -486,8 +469,8 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
   },
 
   'form-section': {
-    renderer: PlaceholderRenderer,
-    propertyForm: PlaceholderForm,
+    renderer: FormSectionRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: FormSectionForm as unknown as ComponentType<PropertyFormProps>,
     catalogEntry: {
       type: 'form-section',
       label: 'Formulario',
@@ -506,8 +489,8 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
 
   // === Filtros (new category) ===
   'filter-config': {
-    renderer: PlaceholderRenderer,
-    propertyForm: PlaceholderForm,
+    renderer: FilterConfigRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: FilterConfigForm as unknown as ComponentType<PropertyFormProps>,
     catalogEntry: {
       type: 'filter-config',
       label: 'Config de Filtros',
@@ -525,8 +508,8 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
 
   // === Metricas (new) ===
   'stat-card': {
-    renderer: PlaceholderRenderer,
-    propertyForm: PlaceholderForm,
+    renderer: StatCardRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: StatCardForm as unknown as ComponentType<PropertyFormProps>,
     catalogEntry: {
       type: 'stat-card',
       label: 'Card de Metrica',
@@ -544,8 +527,8 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
   },
 
   'progress-bar': {
-    renderer: PlaceholderRenderer,
-    propertyForm: PlaceholderForm,
+    renderer: ProgressBarRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: ProgressBarForm as unknown as ComponentType<PropertyFormProps>,
     catalogEntry: {
       type: 'progress-bar',
       label: 'Barra de Progresso',
