@@ -57,7 +57,13 @@ export default function App() {
           element={<ProtectedRoute><Profile /></ProtectedRoute>}
         />
 
-        {/* Wireframe viewer — protected, full screen, parametric by client slug */}
+        {/* Wireframe viewer — protected, full screen */}
+        {/* Static route (score [3,3,3]) beats /clients/financeiro-conta-azul/:doc (score [3,3,2]) */}
+        <Route
+          path="/clients/financeiro-conta-azul/wireframe"
+          element={<ProtectedRoute><WireframeViewer clientSlug="financeiro-conta-azul" /></ProtectedRoute>}
+        />
+        {/* Parametric fallback for other clients */}
         <Route
           path="/clients/:clientSlug/wireframe"
           element={<ProtectedRoute><WireframeViewer /></ProtectedRoute>}

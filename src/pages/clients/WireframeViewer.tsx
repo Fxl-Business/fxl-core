@@ -45,8 +45,9 @@ const brandingMap: Record<string, () => Promise<{ default: BrandingConfig }>> = 
  * Generic parametric wireframe viewer.
  * Resolves blueprint + branding from Supabase by :clientSlug route param.
  */
-export default function WireframeViewer() {
-  const { clientSlug } = useParams<{ clientSlug: string }>()
+export default function WireframeViewer({ clientSlug: clientSlugProp }: { clientSlug?: string }) {
+  const params = useParams<{ clientSlug: string }>()
+  const clientSlug = clientSlugProp ?? params.clientSlug
 
   if (!clientSlug) {
     return <Navigate to="/" replace />
