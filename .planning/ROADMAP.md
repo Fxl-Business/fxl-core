@@ -92,7 +92,12 @@ Plans:
   2. Operator can open a blueprint text view that shows screens, sections, and properties as readable structured text (not raw JSON)
   3. Operator can export a blueprint as Markdown file that Claude Code can read for context during generation tasks
   4. Operator can generate a share link for any client wireframe and the client can view it without authentication
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 10-01-PLAN.md -- Briefing infrastructure (migration, types, schema, store) + BriefingForm page
+- [ ] 10-02-PLAN.md -- Blueprint text extraction, BlueprintTextView page, Markdown export
+- [ ] 10-03-PLAN.md -- Share link modal + AdminToolbar integration
 
 ### Phase 11: AI-Assisted Generation
 **Goal**: Claude Code can generate a complete blueprint from a client briefing, guided by screen recipes and vertical templates, with operator review before acceptance
@@ -123,5 +128,5 @@ Phase 7 -> 8 -> 9 (and 10 in parallel) -> 11
 | 7. Blueprint Infrastructure | v1.1 | 3/3 | Complete | 2026-03-09 |
 | 8. Wireframe Design System | v1.1 | 3/3 | Complete | 2026-03-10 |
 | 9. Component Library Expansion | v1.1 | 4/4 | Complete | 2026-03-10 |
-| 10. Briefing & Blueprint Views | v1.1 | 0/? | Not started | - |
+| 10. Briefing & Blueprint Views | v1.1 | 0/3 | Not started | - |
 | 11. AI-Assisted Generation | v1.1 | 0/? | Not started | - |
