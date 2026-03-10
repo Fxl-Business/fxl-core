@@ -66,7 +66,16 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
-(No active requirements — next milestone not yet defined)
+## Current Milestone: v1.2 Visual Redesign
+
+**Goal:** Redesign visual completo da aplicacao baseado em HTML de referencia externo, estabelecendo paleta slate + indigo, tipografia Inter com hierarquia clara, e componentes visuais consistentes (code blocks, sidebars, headers, doc rendering).
+
+**Target features:**
+- Layout shell redesign (Header com backdrop-blur, brand subtitle, search integrado)
+- Sidebar redesign (bg-slate-50/50, uppercase section headers, border-l nav, indigo accent)
+- Doc rendering redesign (breadcrumbs, badge, tipografia 4xl/5xl, code blocks dark theme)
+- Table of Contents sidebar (right-side "NESTA PAGINA")
+- Consistency pass em paginas especiais (Home, Client pages, Login/Profile)
 
 ### Out of Scope
 
@@ -149,4 +158,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Section registry**: All new section types must go through the registry (no direct switch statements)
 
 ---
-*Last updated: 2026-03-10 after v1.1 milestone*
+*Last updated: 2026-03-10 after v1.2 milestone start*

@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Wireframe Evolution
-status: shipped
-stopped_at: v1.1 milestone archived
-last_updated: "2026-03-10T15:00:00.000Z"
-last_activity: 2026-03-10 -- Completed quick task 6: Audit CLAUDE.md completeness as codebase orchestrator
+milestone: v1.2
+milestone_name: Visual Redesign
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-03-10T16:00:00.000Z"
+last_activity: 2026-03-10 -- Milestone v1.2 started
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 15
-  completed_plans: 15
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,12 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.1 shipped. Next milestone not yet defined.
+**Current focus:** v1.2 Visual Redesign — redesign visual completo baseado em HTML de referencia externo
 
 ## Current Position
 
-Status: v1.1 Wireframe Evolution SHIPPED
-Last activity: 2026-03-10 -- Completed quick task 6: Audit CLAUDE.md completeness as codebase orchestrator
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-10 — Milestone v1.2 started
 
 ## Accumulated Context
 
@@ -67,5 +69,5 @@ v1.1:
 ## Session Continuity
 
 Last session: 2026-03-10
-Stopped at: Completed quick-6 (CLAUDE.md audit)
-Next: `/gsd:new-milestone` to start next milestone cycle
+Stopped at: v1.2 milestone initialized, defining requirements
+Next: Define requirements → create roadmap

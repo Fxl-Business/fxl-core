@@ -7,7 +7,6 @@ import Home from '@/pages/Home'
 import DocRenderer from '@/pages/DocRenderer'
 import FinanceiroIndex from '@/pages/clients/FinanceiroContaAzul/Index'
 import FinanceiroDocViewer from '@/pages/clients/FinanceiroContaAzul/DocViewer'
-import FinanceiroWireframe from '@/pages/clients/FinanceiroContaAzul/Wireframe'
 import BlueprintTextView from '@/pages/clients/BlueprintTextView'
 import BriefingForm from '@/pages/clients/BriefingForm'
 import WireframeViewer from '@/pages/clients/WireframeViewer'
@@ -36,7 +35,6 @@ export default function App() {
 
           {/* Paginas interativas de clientes */}
           <Route path="/clients/financeiro-conta-azul" element={<FinanceiroIndex />} />
-          <Route path="/clients/financeiro-conta-azul/wireframe" element={<FinanceiroWireframe />} />
           <Route path="/clients/:clientSlug/briefing" element={<BriefingForm />} />
           <Route path="/clients/:clientSlug/blueprint" element={<BlueprintTextView />} />
           <Route path="/clients/financeiro-conta-azul/:doc" element={<FinanceiroDocViewer />} />

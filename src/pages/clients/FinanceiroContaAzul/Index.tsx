@@ -72,12 +72,23 @@ export default function FinanceiroIndex() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <Link
-                      to={item.href}
-                      className="text-primary underline-offset-2 hover:underline"
-                    >
-                      Abrir
-                    </Link>
+                    {item.doc === 'wireframe' ? (
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline-offset-2 hover:underline"
+                      >
+                        Abrir
+                      </a>
+                    ) : (
+                      <Link
+                        to={item.href}
+                        className="text-primary underline-offset-2 hover:underline"
+                      >
+                        Abrir
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))}
