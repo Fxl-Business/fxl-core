@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Visual Redesign
-status: planning
-stopped_at: Roadmap created for v1.2 Visual Redesign (5 phases, 30 requirements mapped)
-last_updated: "2026-03-10T16:27:30.094Z"
-last_activity: 2026-03-10 -- Roadmap created for v1.2
+status: executing
+stopped_at: Completed 13-01-PLAN.md
+last_updated: "2026-03-10T17:25:42.990Z"
+last_activity: 2026-03-10 -- Phase 13 Layout Shell complete
 progress:
   total_phases: 5
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
-  percent: 0
+  completed_phases: 2
+  total_plans: 2
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State
@@ -21,21 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.2 Visual Redesign -- Phase 12 Design Foundation (ready to plan)
+**Current focus:** v1.2 Visual Redesign -- Phase 13 Layout Shell complete, Phase 14 next
 
 ## Current Position
 
-Phase: 12 of 16 (Design Foundation) -- first of 5 phases in v1.2
-Plan: --
-Status: Ready to plan
-Last activity: 2026-03-10 -- Roadmap created for v1.2
+Phase: 13 of 16 (Layout Shell) -- second of 5 phases in v1.2
+Plan: 1/1 complete
+Status: Phase complete
+Last activity: 2026-03-10 -- Phase 13 Layout Shell complete
 
-Progress: [..........] 0%
+Progress: [████......] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 42 (v1.0: 27, v1.1: 15)
+- Total plans completed: 44 (v1.0: 27, v1.1: 15, v1.2: 2)
 - Average duration: ~15 min
 - Total execution time: ~10.5 hours
 
@@ -57,6 +57,8 @@ v1.2 research decisions:
 - 3 new packages only (@fontsource-variable/inter, @fontsource-variable/jetbrains-mono, rehype-highlight)
 - No Tailwind plugins, no shiki, no @tailwindcss/typography
 - DOC + TOC merged into single phase (co-dependent: TOC reads heading IDs from doc rendering)
+- [Phase 13]: Page-owns-width pattern: Layout.tsx no longer wraps content in max-w -- each page sets its own
+- [Phase 13]: Viewport-level scrolling: removed overflow-hidden/overflow-y-auto from Layout containers
 
 ### Pending Todos
 
@@ -65,7 +67,7 @@ None.
 ### Blockers/Concerns
 
 - Pitfall: HSL channel format for Tailwind 3 opacity modifiers -- must NOT wrap in hsl()
-- Pitfall: Removing overflow-hidden from Layout.tsx changes scroll context for IntersectionObserver
+- (Resolved in Phase 13) Pitfall: Removing overflow-hidden from Layout.tsx changes scroll context for IntersectionObserver
 - Pitfall: Wireframe --wf-* token isolation must be verified after palette change
 
 ### Quick Tasks Completed
@@ -95,5 +97,5 @@ v1.2:
 ## Session Continuity
 
 Last session: 2026-03-10
-Stopped at: Roadmap created for v1.2 Visual Redesign (5 phases, 30 requirements mapped)
-Next: /gsd:plan-phase 12
+Stopped at: Completed 13-01-PLAN.md (Phase 13 Layout Shell -- 1/1 plans done)
+Next: /gsd:plan-phase 14

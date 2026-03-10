@@ -17,11 +17,11 @@ Requirements for visual redesign milestone. Each maps to roadmap phases.
 
 ### Layout Shell
 
-- [ ] **LAYOUT-01**: Header uses sticky top-0 with backdrop-blur-md and bg-white/80
-- [ ] **LAYOUT-02**: Header shows brand "Nucleo FXL" with "FXL-CORE" subtitle
-- [ ] **LAYOUT-03**: Search bar integrated in header with Cmd+K shortcut badge
-- [ ] **LAYOUT-04**: Three-column layout enabled (sidebar + content + TOC)
-- [ ] **LAYOUT-05**: Scroll context uses document body (remove nested overflow-y-auto)
+- [x] **LAYOUT-01**: Header uses sticky top-0 with backdrop-blur-md and bg-white/80
+- [x] **LAYOUT-02**: Header shows brand "Nucleo FXL" with "FXL-CORE" subtitle
+- [x] **LAYOUT-03**: Search bar integrated in header with Cmd+K shortcut badge
+- [x] **LAYOUT-04**: Three-column layout enabled (sidebar + content + TOC)
+- [x] **LAYOUT-05**: Scroll context uses document body (remove nested overflow-y-auto)
 
 ### Sidebar Navigation
 
@@ -85,11 +85,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-03 | Phase 12 | Pending |
 | FOUND-04 | Phase 12 | Pending |
 | FOUND-05 | Phase 12 | Pending |
-| LAYOUT-01 | Phase 13 | Pending |
-| LAYOUT-02 | Phase 13 | Pending |
-| LAYOUT-03 | Phase 13 | Pending |
-| LAYOUT-04 | Phase 13 | Pending |
-| LAYOUT-05 | Phase 13 | Pending |
+| LAYOUT-01 | Phase 13 | Complete |
+| LAYOUT-02 | Phase 13 | Complete |
+| LAYOUT-03 | Phase 13 | Complete |
+| LAYOUT-04 | Phase 13 | Complete |
+| LAYOUT-05 | Phase 13 | Complete |
 | NAV-01 | Phase 14 | Pending |
 | NAV-02 | Phase 14 | Pending |
 | NAV-03 | Phase 14 | Pending |

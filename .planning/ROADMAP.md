@@ -41,7 +41,7 @@ Full details: [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md)
 ### v1.2 Visual Redesign
 
 - [x] **Phase 12: Design Foundation** - Slate + indigo palette, Inter/JetBrains Mono fonts, scrollbar styling, wireframe token isolation (completed 2026-03-10)
-- [ ] **Phase 13: Layout Shell** - Frosted glass header, three-column layout, viewport scroll context, search bar restyle
+- [x] **Phase 13: Layout Shell** - Frosted glass header, three-column layout, viewport scroll context, search bar restyle (completed 2026-03-10)
 - [ ] **Phase 14: Sidebar Navigation** - Border-l rail nav, uppercase section headers, indigo active state, collapsible sections
 - [ ] **Phase 15: Doc Rendering and TOC** - Page headers, breadcrumbs, dark code blocks, syntax highlighting, right-side TOC with scroll tracking
 - [ ] **Phase 16: Consistency Pass** - Home, client pages, login/profile, PromptBlock, and Callout aligned to new visual language
@@ -76,7 +76,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 13-01-PLAN.md -- Frosted glass header, viewport scroll context, search bar restyle, page width delegation
+- [x] 13-01-PLAN.md -- Frosted glass header, viewport scroll context, search bar restyle, page width delegation
 
 ### Phase 14: Sidebar Navigation
 **Goal**: The sidebar is the most polished navigation element in the app, with clear visual hierarchy and indigo active states
@@ -143,8 +143,8 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16
 | 9. Component Library Expansion | v1.1 | 4/4 | Complete | 2026-03-10 |
 | 10. Briefing & Blueprint Views | v1.1 | 3/3 | Complete | 2026-03-10 |
 | 11. AI-Assisted Generation | v1.1 | 2/2 | Complete | 2026-03-10 |
-| 12. Design Foundation | 1/1 | Complete    | 2026-03-10 | - |
-| 13. Layout Shell | v1.2 | 0/1 | Not started | - |
+| 12. Design Foundation | v1.2 | 1/1 | Complete | 2026-03-10 |
+| 13. Layout Shell | v1.2 | 1/1 | Complete | 2026-03-10 |
 | 14. Sidebar Navigation | v1.2 | 0/? | Not started | - |
 | 15. Doc Rendering and TOC | v1.2 | 0/? | Not started | - |
 | 16. Consistency Pass | v1.2 | 0/? | Not started | - |
