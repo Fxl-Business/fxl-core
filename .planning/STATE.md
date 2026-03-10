@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wireframe Evolution
 status: executing
-stopped_at: Phase 11 context gathered
-last_updated: "2026-03-10T13:20:37.032Z"
-last_activity: 2026-03-10 -- Completed 10-03 (share link management)
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-03-10T13:50:44.000Z"
+last_activity: 2026-03-10 -- Completed 11-01 (screen recipes & vertical templates)
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 13
-  completed_plans: 13
-  percent: 92
+  total_plans: 15
+  completed_plans: 14
+  percent: 93
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Phase 10 executing -- share link management complete (plan 3 of 3)
+**Current focus:** Phase 11 executing -- screen recipes & vertical templates complete (plan 1 of 2)
 
 ## Current Position
 
-Phase: 10 of 11 (Briefing & Blueprint Views)
-Plan: 3 of 3 -- 10-03 completed
-Status: Executing Phase 10
-Last activity: 2026-03-10 -- Completed 10-03 (share link management)
+Phase: 11 of 11 (AI-Assisted Generation)
+Plan: 1 of 2 -- 11-01 completed
+Status: Executing Phase 11
+Last activity: 2026-03-10 -- Completed 11-01 (screen recipes & vertical templates)
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 27 (v1.0)
-- v1.1 plans completed: 8
-- Average duration: 7.2min
-- Total execution time: 43min
+- v1.1 plans completed: 9
+- Average duration: 7.0min
+- Total execution time: 48min
 
 **By Phase:**
 
@@ -48,7 +48,7 @@ Progress: [█████████░] 92%
 | 8. Wireframe Design System | 3/3 | 27min | 9.0min |
 | 9. Component Library Expansion | 4/4 | 23min | 5.8min |
 | 10. Briefing & Blueprint Views | 1/3 | 3min | 3.0min |
-| 11. AI-Assisted Generation | 0/? | - | - |
+| 11. AI-Assisted Generation | 1/2 | 5min | 5.0min |
 
 *Updated after each plan completion*
 | Phase 09 P02 | 5min | 2 tasks | 13 files |
@@ -57,6 +57,7 @@ Progress: [█████████░] 92%
 | Phase 10 P03 | 3min | 2 tasks | 4 files |
 | Phase 10 P02 | 3 | 2 tasks | 4 files |
 | Phase 10 P01 | 4 | 2 tasks | 6 files |
+| Phase 11 P01 | 5min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,10 @@ v1.1 decisions:
 - [Phase 10]: [10-03] Token list loaded on dialog open via useEffect, refreshes on each open
 - [Phase 10]: [10-03] FinanceiroContaAzul WireframeViewer updated alongside parametric viewer for AdminToolbar prop compat
 - [Phase 10-01]: Comma-separated Input fields for arrays (fields, KPIs) parsed to string[] -- simpler than tag input component
+- [11-01] RecipeSection.defaults uses Partial<BlueprintSection> overlay on getDefaultSection() for Zod-safe merging
+- [11-01] findBestRecipe uses keyword scoring (5 pts partial, 10 pts exact) + category bonus (2 pts)
+- [11-01] Vertical templates use inline section data (not recipe composition) for guaranteed Zod compliance
+- [11-01] financeiro template is reference-grade (10 screens), varejo/servicos are medium (5 screens each)
 
 ### Pending Todos
 
@@ -142,7 +147,7 @@ v1.1:
 
 ## Session Continuity
 
-Last session: 2026-03-10T13:20:37.022Z
-Stopped at: Phase 11 context gathered
-Resume file: .planning/phases/11-ai-assisted-generation/11-CONTEXT.md
-Next: Phase 10 (Briefing & Blueprint Views) -- /gsd:discuss-phase 10
+Last session: 2026-03-10T13:50:44.000Z
+Stopped at: Completed 11-01-PLAN.md
+Resume file: .planning/phases/11-ai-assisted-generation/11-01-SUMMARY.md
+Next: Phase 11 Plan 02 (AI generation engine) -- /gsd:execute-phase 11
