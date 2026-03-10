@@ -1,7 +1,7 @@
 # Requirements: FXL Core v1.2 Visual Redesign
 
 **Defined:** 2026-03-10
-**Core Value:** FXL Core e o cerebro operacional da empresa — documentacao, processo e tooling juntos
+**Core Value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
 
 ## v1.2 Requirements
 
@@ -80,42 +80,42 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | TBD | Pending |
-| FOUND-02 | TBD | Pending |
-| FOUND-03 | TBD | Pending |
-| FOUND-04 | TBD | Pending |
-| FOUND-05 | TBD | Pending |
-| LAYOUT-01 | TBD | Pending |
-| LAYOUT-02 | TBD | Pending |
-| LAYOUT-03 | TBD | Pending |
-| LAYOUT-04 | TBD | Pending |
-| LAYOUT-05 | TBD | Pending |
-| NAV-01 | TBD | Pending |
-| NAV-02 | TBD | Pending |
-| NAV-03 | TBD | Pending |
-| NAV-04 | TBD | Pending |
-| NAV-05 | TBD | Pending |
-| DOC-01 | TBD | Pending |
-| DOC-02 | TBD | Pending |
-| DOC-03 | TBD | Pending |
-| DOC-04 | TBD | Pending |
-| DOC-05 | TBD | Pending |
-| DOC-06 | TBD | Pending |
-| DOC-07 | TBD | Pending |
-| TOC-01 | TBD | Pending |
-| TOC-02 | TBD | Pending |
-| TOC-03 | TBD | Pending |
-| TOC-04 | TBD | Pending |
-| CONSIST-01 | TBD | Pending |
-| CONSIST-02 | TBD | Pending |
-| CONSIST-03 | TBD | Pending |
-| CONSIST-04 | TBD | Pending |
+| FOUND-01 | Phase 12 | Pending |
+| FOUND-02 | Phase 12 | Pending |
+| FOUND-03 | Phase 12 | Pending |
+| FOUND-04 | Phase 12 | Pending |
+| FOUND-05 | Phase 12 | Pending |
+| LAYOUT-01 | Phase 13 | Pending |
+| LAYOUT-02 | Phase 13 | Pending |
+| LAYOUT-03 | Phase 13 | Pending |
+| LAYOUT-04 | Phase 13 | Pending |
+| LAYOUT-05 | Phase 13 | Pending |
+| NAV-01 | Phase 14 | Pending |
+| NAV-02 | Phase 14 | Pending |
+| NAV-03 | Phase 14 | Pending |
+| NAV-04 | Phase 14 | Pending |
+| NAV-05 | Phase 14 | Pending |
+| DOC-01 | Phase 15 | Pending |
+| DOC-02 | Phase 15 | Pending |
+| DOC-03 | Phase 15 | Pending |
+| DOC-04 | Phase 15 | Pending |
+| DOC-05 | Phase 15 | Pending |
+| DOC-06 | Phase 15 | Pending |
+| DOC-07 | Phase 15 | Pending |
+| TOC-01 | Phase 15 | Pending |
+| TOC-02 | Phase 15 | Pending |
+| TOC-03 | Phase 15 | Pending |
+| TOC-04 | Phase 15 | Pending |
+| CONSIST-01 | Phase 16 | Pending |
+| CONSIST-02 | Phase 16 | Pending |
+| CONSIST-03 | Phase 16 | Pending |
+| CONSIST-04 | Phase 16 | Pending |
 
 **Coverage:**
-- v1.2 requirements: 24 total
-- Mapped to phases: 0
-- Unmapped: 24
+- v1.2 requirements: 30 total
+- Mapped to phases: 30
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-10*
-*Last updated: 2026-03-10 after initial definition*
+*Last updated: 2026-03-10 after roadmap creation*

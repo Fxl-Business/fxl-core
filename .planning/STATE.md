@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Visual Redesign
-status: defining_requirements
+status: ready_to_plan
 stopped_at: null
-last_updated: "2026-03-10T16:00:00.000Z"
-last_activity: 2026-03-10 -- Milestone v1.2 started
+last_updated: "2026-03-10T18:00:00.000Z"
+last_activity: 2026-03-10 -- Roadmap created for v1.2 (5 phases, 30 requirements)
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,29 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.2 Visual Redesign — redesign visual completo baseado em HTML de referencia externo
+**Current focus:** v1.2 Visual Redesign -- Phase 12 Design Foundation (ready to plan)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-10 — Milestone v1.2 started
+Phase: 12 of 16 (Design Foundation) -- first of 5 phases in v1.2
+Plan: --
+Status: Ready to plan
+Last activity: 2026-03-10 -- Roadmap created for v1.2
+
+Progress: [..........] 0%
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 42 (v1.0: 27, v1.1: 15)
+- Average duration: ~15 min
+- Total execution time: ~10.5 hours
+
+**Recent Trend (v1.1):**
+- 15 plans across 5 phases in ~1 day
+- Trend: Stable
+
+*Updated after each plan completion*
 
 ## Accumulated Context
 
@@ -37,13 +52,21 @@ Last activity: 2026-03-10 — Milestone v1.2 started
 All v1.0 + v1.1 decisions logged in PROJECT.md Key Decisions table (23 decisions, all good).
 Full v1.1 decision log archived in milestones/v1.1-ROADMAP.md.
 
+v1.2 research decisions:
+- Slate + indigo palette (not blue-gray + gold) -- matches reference HTML
+- 3 new packages only (@fontsource-variable/inter, @fontsource-variable/jetbrains-mono, rehype-highlight)
+- No Tailwind plugins, no shiki, no @tailwindcss/typography
+- DOC + TOC merged into single phase (co-dependent: TOC reads heading IDs from doc rendering)
+
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-None.
+- Pitfall: HSL channel format for Tailwind 3 opacity modifiers -- must NOT wrap in hsl()
+- Pitfall: Removing overflow-hidden from Layout.tsx changes scroll context for IntersectionObserver
+- Pitfall: Wireframe --wf-* token isolation must be verified after palette change
 
 ### Quick Tasks Completed
 
@@ -66,8 +89,11 @@ v1.0:
 v1.1:
 - No insertions
 
+v1.2:
+- No insertions
+
 ## Session Continuity
 
 Last session: 2026-03-10
-Stopped at: v1.2 milestone initialized, defining requirements
-Next: Define requirements → create roadmap
+Stopped at: Roadmap created for v1.2 Visual Redesign (5 phases, 30 requirements mapped)
+Next: /gsd:plan-phase 12
