@@ -141,6 +141,7 @@ None.
 | 2 | Align Blocos Disponiveis padding with Galeria de Componentes | 2026-03-08 | 436b011 | -- |
 | 3 | Add depth-1 sidebar padding for clearer visual hierarchy | 2026-03-08 | 8104f10 | -- |
 | 4 | Evolve BriefingConfig + seed financeiro-conta-azul briefing | 2026-03-10 | 311e258 | [4-evolve-briefingconfig](./quick/4-evolve-briefingconfig-populate-conta-azul/) |
+| 5 | Add view/edit mode toggle to BriefingForm page | 2026-03-10 | 28d563a | [5-briefing-view-edit-mode](./quick/5-briefing-view-edit-mode/) |
 
 ### Roadmap Evolution
 
@@ -154,7 +155,7 @@ v1.1:
 
 ## Session Continuity
 
-Last session: 2026-03-10T14:20:56Z
-Stopped at: Completed quick task 4 (evolve BriefingConfig + seed conta-azul)
-Resume file: .planning/quick/4-evolve-briefingconfig-populate-conta-azul/4-SUMMARY.md
+Last session: 2026-03-10T14:32:10Z
+Stopped at: Completed quick task 5 (briefing view/edit mode toggle)
+Resume file: .planning/quick/5-briefing-view-edit-mode/5-SUMMARY.md
 Next: v1.1 Wireframe Evolution milestone complete. Quick tasks ongoing.
