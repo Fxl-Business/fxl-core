@@ -75,7 +75,13 @@ Plans:
   2. Operator can add each of the 6 new block types (settings-page, form-section, filter-config, stat-card, progress-bar, divider) from the component picker and see them render in the wireframe
   3. Operator can select RadarChart, Treemap, FunnelChart, ScatterChart, or AreaChart as chart variants and see them render with sample data
   4. Navigating to /clients/:clientSlug/wireframe loads the correct blueprint and branding for any client without a dedicated page per client
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 09-01-PLAN.md -- Section registry pattern, types/schemas for 6 new blocks + 5 chart variants, dispatcher migration
+- [ ] 09-02-PLAN.md -- 6 new block renderers and property forms (settings-page, form-section, filter-config, stat-card, progress-bar, divider)
+- [ ] 09-03-PLAN.md -- 5 new Recharts chart variants (Radar, Treemap, Funnel, Scatter, Area) + ChartRenderer extension
+- [ ] 09-04-PLAN.md -- Generic parametric wireframe viewer replacing hardcoded client pages
 
 ### Phase 10: Briefing & Blueprint Views
 **Goal**: Operators can input client briefings through the UI, view blueprints as structured text, export blueprints for Claude Code, and share wireframes with clients
@@ -116,6 +122,6 @@ Phase 7 -> 8 -> 9 (and 10 in parallel) -> 11
 | 6. System Generation | v1.0 | 3/3 | Complete | 2026-03-09 |
 | 7. Blueprint Infrastructure | v1.1 | 3/3 | Complete | 2026-03-09 |
 | 8. Wireframe Design System | v1.1 | 3/3 | Complete | 2026-03-10 |
-| 9. Component Library Expansion | v1.1 | 0/? | Not started | - |
+| 9. Component Library Expansion | v1.1 | 0/4 | Not started | - |
 | 10. Briefing & Blueprint Views | v1.1 | 0/? | Not started | - |
 | 11. AI-Assisted Generation | v1.1 | 0/? | Not started | - |
