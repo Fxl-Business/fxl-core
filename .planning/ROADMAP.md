@@ -61,7 +61,7 @@ Full details: [milestones/v1.1-ROADMAP.md](milestones/v1.1-ROADMAP.md)
 **Plans**: 1 plan
 
 Plans:
-- [ ] 12-01-PLAN.md -- Install fonts, swap palette to slate + indigo, add scrollbar styling, verify wireframe isolation
+- [x] 12-01-PLAN.md -- Install fonts, swap palette to slate + indigo, add scrollbar styling, verify wireframe isolation
 
 ### Phase 13: Layout Shell
 **Goal**: The app has a frosted glass sticky header with brand identity and search, and the page uses viewport-level scrolling that enables proper sticky positioning for sidebar and TOC
@@ -73,10 +73,10 @@ Plans:
   3. The page layout supports three columns (sidebar + content + right area) without nested scroll containers
   4. Opening Cmd+K search dialog does not cause the header to shift horizontally (no scrollbar-gutter jump)
   5. Long doc pages scroll the entire viewport (not an inner container), and scroll position resets on navigation
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 13-01: TBD
+- [ ] 13-01-PLAN.md -- Frosted glass header, viewport scroll context, search bar restyle, page width delegation
 
 ### Phase 14: Sidebar Navigation
 **Goal**: The sidebar is the most polished navigation element in the app, with clear visual hierarchy and indigo active states
@@ -144,7 +144,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16
 | 10. Briefing & Blueprint Views | v1.1 | 3/3 | Complete | 2026-03-10 |
 | 11. AI-Assisted Generation | v1.1 | 2/2 | Complete | 2026-03-10 |
 | 12. Design Foundation | 1/1 | Complete    | 2026-03-10 | - |
-| 13. Layout Shell | v1.2 | 0/? | Not started | - |
+| 13. Layout Shell | v1.2 | 0/1 | Not started | - |
 | 14. Sidebar Navigation | v1.2 | 0/? | Not started | - |
 | 15. Doc Rendering and TOC | v1.2 | 0/? | Not started | - |
 | 16. Consistency Pass | v1.2 | 0/? | Not started | - |
