@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/react'
 import { shadcn } from '@clerk/ui/themes'
 import '@fontsource-variable/inter'
 import '@fontsource-variable/jetbrains-mono'
+import 'highlight.js/styles/github-dark-dimmed.css'
 import './styles/globals.css'
 import App from './App'
 

@@ -8,7 +8,6 @@ import PhaseCard from '@/components/docs/PhaseCard'
 import DocBreadcrumb from '@/components/docs/DocBreadcrumb'
 import DocPageHeader from '@/components/docs/DocPageHeader'
 import DocTableOfContents from '@/components/docs/DocTableOfContents'
-import { Separator } from '@/components/ui/separator'
 
 function SectionRenderer({ section }: { section: DocSection }) {
   switch (section.type) {
@@ -49,7 +48,7 @@ export default function DocRenderer() {
     )
   }
 
-  const { frontmatter, sections, headings, rawBody } = doc
+  const { frontmatter, sections, headings } = doc
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -62,15 +61,14 @@ export default function DocRenderer() {
             badge={frontmatter.badge}
             title={frontmatter.title}
             description={frontmatter.description}
-            rawContent={rawBody}
           />
 
-          <Separator className="my-6" />
-
-          <div className="space-y-4">
-            {sections.map((section, i) => (
-              <SectionRenderer key={i} section={section} />
-            ))}
+          <div className="mt-8">
+            <div className="space-y-4">
+              {sections.map((section, i) => (
+                <SectionRenderer key={i} section={section} />
+              ))}
+            </div>
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
 
 type Props = {
   section?: string
@@ -24,20 +25,20 @@ export default function DocBreadcrumb({ section, title }: Props) {
   const isSameName = section ? normalize(section) === normalize(title) : false
 
   return (
-    <nav className="mb-4 flex items-center gap-1 text-xs text-muted-foreground">
+    <nav className="mb-4 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
       {section && (
         <>
           {sectionHref ? (
-            <Link to={sectionHref} className="hover:text-foreground transition-colors">
+            <Link to={sectionHref} className="transition-colors hover:text-slate-900 dark:hover:text-slate-200">
               {section}
             </Link>
           ) : (
             <span>{section}</span>
           )}
-          {!isSameName && <span>/</span>}
+          {!isSameName && <ChevronRight className="h-3.5 w-3.5 text-slate-400" />}
         </>
       )}
-      {!isSameName && <span className="text-foreground">{title}</span>}
+      {!isSameName && <span className="font-medium text-slate-900 dark:text-foreground">{title}</span>}
     </nav>
   )
 }
