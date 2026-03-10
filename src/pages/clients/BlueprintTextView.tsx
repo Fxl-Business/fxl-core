@@ -83,8 +83,8 @@ function BlueprintTextViewInner({ clientSlug }: { clientSlug: string }) {
   if (loading) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Carregando blueprint...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400 dark:text-slate-500" />
+        <p className="text-sm text-slate-500 dark:text-slate-400">Carregando blueprint...</p>
       </div>
     )
   }
@@ -93,7 +93,7 @@ function BlueprintTextViewInner({ clientSlug }: { clientSlug: string }) {
   if (error) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center py-24">
-        <p className="text-sm text-muted-foreground">{error}</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{error}</p>
       </div>
     )
   }
@@ -102,7 +102,7 @@ function BlueprintTextViewInner({ clientSlug }: { clientSlug: string }) {
   if (!summary || !config) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center py-24">
-        <p className="text-sm text-muted-foreground">Nenhum blueprint encontrado.</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum blueprint encontrado.</p>
       </div>
     )
   }
@@ -111,7 +111,7 @@ function BlueprintTextViewInner({ clientSlug }: { clientSlug: string }) {
     <div className="mx-auto w-full max-w-4xl px-6 py-8">
       {/* Page header */}
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-foreground">
           {summary.clientName} - Blueprint
         </h1>
         <Button variant="outline" size="sm" onClick={handleExport}>

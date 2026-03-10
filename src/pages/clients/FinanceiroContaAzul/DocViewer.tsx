@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
 import MarkdownRenderer from '@/components/docs/MarkdownRenderer'
 
 import briefingRaw from '../../../../clients/financeiro-conta-azul/docs/briefing.md?raw'
@@ -21,7 +22,7 @@ export default function DocViewer() {
 
   if (!entry) {
     return (
-      <div className="mx-auto max-w-4xl text-sm text-muted-foreground">
+      <div className="mx-auto max-w-4xl text-sm text-slate-500 dark:text-slate-400">
         Documento não encontrado: <code>{doc}</code>
       </div>
     )
@@ -30,11 +31,15 @@ export default function DocViewer() {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="mb-6">
-        <span className="text-xs font-semibold uppercase tracking-widest text-primary">
-          Financeiro Conta Azul
-        </span>
-        <h1 className="mt-1 text-2xl font-bold text-foreground">{entry.title}</h1>
-        <span className="mt-2 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
+        <nav className="mb-4 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <span>Clientes</span>
+          <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+          <span>Financeiro Conta Azul</span>
+          <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+          <span className="font-medium text-slate-900 dark:text-foreground">{entry.title}</span>
+        </nav>
+        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-foreground">{entry.title}</h1>
+        <span className="mt-2 inline-block rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
           {entry.filename}
         </span>
       </div>

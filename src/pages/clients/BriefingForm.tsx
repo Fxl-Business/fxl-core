@@ -342,8 +342,8 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
   if (loading) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Carregando briefing...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400 dark:text-slate-500" />
+        <p className="text-sm text-slate-500 dark:text-slate-400">Carregando briefing...</p>
       </div>
     )
   }
@@ -353,10 +353,10 @@ function BriefingFormInner({ clientSlug }: { clientSlug: string }) {
       {/* Page header + mode toggle */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-foreground">
             Briefing
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-lg text-slate-600 dark:text-slate-400">
             Dados estruturados do cliente para geracao do blueprint.
           </p>
         </div>

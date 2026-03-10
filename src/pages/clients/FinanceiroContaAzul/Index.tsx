@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
 import PromptBlock from '@/components/ui/PromptBlock'
 
 type DocStatus = {
@@ -41,31 +42,36 @@ Meu objetivo nesta conversa é: [descrever a tarefa]`
 export default function FinanceiroIndex() {
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="mb-1">
-        <span className="text-xs font-semibold uppercase tracking-widest text-primary">
-          financeiro-conta-azul
-        </span>
-      </div>
-      <h1 className="text-2xl font-bold text-foreground">Financeiro Conta Azul</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Dashboard financeiro focado em análise de dados exportados do Conta Azul.
+      <nav className="mb-4 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <span>Clientes</span>
+        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+        <span className="font-medium text-slate-900 dark:text-foreground">Financeiro Conta Azul</span>
+      </nav>
+      <span className="mb-3 inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600 ring-1 ring-inset ring-indigo-600/20 dark:bg-indigo-950/50 dark:text-indigo-400 dark:ring-indigo-400/30">
+        Clientes
+      </span>
+      <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-foreground">
+        Financeiro Conta Azul
+      </h1>
+      <p className="mt-3 text-lg text-slate-600 dark:text-slate-400">
+        Dashboard financeiro focado em analise de dados exportados do Conta Azul.
       </p>
 
       <div className="mt-8">
-        <h2 className="mb-3 text-sm font-semibold text-foreground">Documentos</h2>
-        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+        <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-foreground">Documentos</h2>
+        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-card">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-border bg-muted">
-                <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Documento</th>
-                <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Ação</th>
+              <tr className="border-b border-slate-200 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-800/50">
+                <th className="px-4 py-2.5 text-left font-medium text-slate-600 dark:text-slate-400">Documento</th>
+                <th className="px-4 py-2.5 text-left font-medium text-slate-600 dark:text-slate-400">Status</th>
+                <th className="px-4 py-2.5 text-left font-medium text-slate-600 dark:text-slate-400">Acao</th>
               </tr>
             </thead>
             <tbody>
               {docs.map((item) => (
-                <tr key={item.doc} className="border-t border-border">
-                  <td className="px-4 py-3 font-medium text-foreground">{item.label}</td>
+                <tr key={item.doc} className="border-t border-slate-200 dark:border-slate-700">
+                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-foreground">{item.label}</td>
                   <td className="px-4 py-3">
                     <span className={`rounded px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[item.status] ?? 'bg-muted text-muted-foreground'}`}>
                       {item.status}
@@ -77,14 +83,14 @@ export default function FinanceiroIndex() {
                         href={item.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary underline-offset-2 hover:underline"
+                        className="text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline dark:text-indigo-400"
                       >
                         Abrir
                       </a>
                     ) : (
                       <Link
                         to={item.href}
-                        className="text-primary underline-offset-2 hover:underline"
+                        className="text-indigo-600 underline-offset-2 hover:text-indigo-700 hover:underline dark:text-indigo-400"
                       >
                         Abrir
                       </Link>
@@ -98,8 +104,8 @@ export default function FinanceiroIndex() {
       </div>
 
       <div className="mt-8">
-        <h2 className="mb-1 text-sm font-semibold text-foreground">Prompt Master — Claude Project</h2>
-        <p className="mb-3 text-xs text-muted-foreground">
+        <h2 className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-foreground">Prompt Master — Claude Project</h2>
+        <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
           Abra o Claude Project do cliente e cole este prompt como primeira mensagem.
         </p>
         <PromptBlock
