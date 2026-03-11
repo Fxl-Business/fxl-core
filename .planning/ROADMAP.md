@@ -105,7 +105,10 @@ Plans:
   3. Sidebar footer shows a status indicator (colored dot + label) inside a bordered card at the bottom of the panel
   4. Header renders with white/slate-900 background, bottom border, and a rounded-lg search input with slate-100/800 background
   5. Header right side displays notification icon, dark mode toggle, and a user chip with avatar showing name and role
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
+- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
 
 ### Phase 24: KPI Cards
 **Goal**: KPI cards deliver the premium hover-responsive feel that defines a professional financial dashboard first impression
@@ -117,7 +120,10 @@ Plans:
   3. Trend badges display as rounded-full pills with emerald background for positive values and rose background for negative values
   4. Card values use text-2xl font-extrabold and labels use text-sm font-medium slate-500
   5. Comparison text appears below the value at text-[10px] text-slate-400
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
+- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
 
 ### Phase 25: Table Components
 **Goal**: All four table variants share a consistent professional header treatment and the primary analytical table gains a dark footer totals row
@@ -129,7 +135,10 @@ Plans:
   3. Highlight and total rows use primary-colored text with font-extrabold uppercase styling
   4. DataTable and DrillDownTable render a dark footer row (bg-slate-900 text-white font-black) with aggregate totals when footer data is provided
   5. Trend indicator cells show color-coded icons that scale to scale-110 on hover
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
+- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
 
 ### Phase 26: Filter Bar Enhancement
 **Goal**: The sticky filter bar reads as a premium control surface with blur depth and typographic clarity that matches the dashboard chrome
@@ -141,7 +150,10 @@ Plans:
   3. Filter labels appear at 10px uppercase bold slate-500 above their controls
   4. Action buttons (date picker, share, export) render with distinct hierarchy: outline style for secondary actions and filled for primary actions, all with rounded-lg shape
   5. Compare toggle uses a primary-colored switch with 11px bold label
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
+- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
 
 ### Phase 27: Chart Palette & Composition
 **Goal**: All charts use the new blue-slate palette and the gallery gains a new CompositionBar component for horizontal stacked breakdown visualization
@@ -153,7 +165,10 @@ Plans:
   3. Chart headers show font-bold title with colored rounded-full legend dots replacing Recharts default legend
   4. Bar chart variants transition individual bars from muted to full opacity on group hover
   5. A new CompositionBar component renders a horizontal stacked bar with hover:brightness-90 segments and a color legend grid below
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
+- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
 
 ### Phase 28: Editor Sync & Gallery Validation
 **Goal**: The editor UI matches the new wireframe aesthetic and all 86 wireframe components are confirmed working in both light and dark mode
@@ -164,7 +179,10 @@ Plans:
   2. All gallery component previews render with the new visual design in both light and dark mode
   3. Client branding (financeiro-conta-azul #1B6B93) applied in the gallery passes the branding-override visual check
   4. npx tsc --noEmit reports zero errors after all phases
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
+- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
 
 ## Progress
 
