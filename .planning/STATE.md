@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: completed
-stopped_at: Completed 25-table-components-01-PLAN.md
-last_updated: "2026-03-11T19:39:04Z"
+stopped_at: Completed 25-table-components-02-PLAN.md
+last_updated: "2026-03-11T19:44:58.650Z"
 last_activity: 2026-03-11 -- Phase 25-01 complete (table header typography upgrade, row hover tokens, total/highlight row accent styling)
 progress:
   total_phases: 7
-  completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
+  completed_phases: 4
+  total_plans: 7
+  completed_plans: 7
   percent: 100
 ---
 
@@ -72,6 +72,8 @@ v1.4 architectural decisions (from research):
 - [Phase 25-table-components]: ClickableTable always has cursor-pointer regardless of onRowClick prop — always interactive by design
 - [Phase 25-table-components]: Use hover:bg-wf-table-header (token-aware) not dark: Tailwind variant to avoid mis-resolution inside data-wf-theme context
 - [Phase 25-table-components]: uppercase on numeric td cells is harmless (numbers have no case) — no conditional logic needed
+- [Phase 25-table-components]: [Phase 25-02]: tfoot placed as sibling of tbody after closing tag — standard HTML table structure
+- [Phase 25-table-components]: [Phase 25-02]: TBL-05 trend cells require no structural change — ReactNode cell type already supports inline JSX; JSDoc documentation sufficient
 
 ### Pending Todos
 
@@ -83,6 +85,6 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-11T19:39:04Z
-Stopped at: Completed 25-table-components-01-PLAN.md
+Last session: 2026-03-11T19:44:58.648Z
+Stopped at: Completed 25-table-components-02-PLAN.md
 Next: Phase 25-02 (Dark footer row + trend indicator cells)

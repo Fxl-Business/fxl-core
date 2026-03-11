@@ -73,7 +73,7 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 - [x] **Phase 22: Token Foundation** - Update wireframe-tokens.css and tailwind.config.ts; new palette propagates to ~55 components automatically (completed 2026-03-11)
 - [x] **Phase 23: Sidebar & Header Chrome** - Dark slate sidebar with nav groups and footer; white header with search, notifications, and user chip (completed 2026-03-11)
 - [x] **Phase 24: KPI Cards** - Icon slot, group-hover transitions, rounded-full trend badges, extrabold values, optional sparkline (completed 2026-03-11)
-- [ ] **Phase 25: Table Components** - Tracking-widest font-black headers, dark tfoot row, hover transitions, trend icons across all 4 table variants
+- [x] **Phase 25: Table Components** - Tracking-widest font-black headers, dark tfoot row, hover transitions, trend icons across all 4 table variants (completed 2026-03-11)
 - [ ] **Phase 26: Filter Bar Enhancement** - backdrop-blur sticky bar, 10px uppercase labels, action button hierarchy, compare toggle
 - [ ] **Phase 27: Chart Palette & Composition** - Primary blue + slate chart palette, custom header legend, CompositionBar new component
 - [ ] **Phase 28: Editor Sync & Gallery Validation** - ScreenManager visual sync with sidebar, gallery smoke test, final TypeScript verification
@@ -134,7 +134,7 @@ Plans:
   3. Highlight and total rows use primary-colored text with font-extrabold uppercase styling
   4. DataTable and DrillDownTable render a dark footer row (bg-slate-900 text-white font-black) with aggregate totals when footer data is provided
   5. Trend indicator cells show color-coded icons that scale to scale-110 on hover
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 25-01-PLAN.md — Header typography, row hover, total/highlight row restyle across all 4 tables (completed 2026-03-11)
 - [ ] 25-02-PLAN.md — Dark footer row (type + render) and trend indicator cell pattern
@@ -217,7 +217,7 @@ Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other 
 | 22. Token Foundation | 2/2 | Complete    | 2026-03-11 | - |
 | 23. Sidebar & Header Chrome | v1.4 | Complete    | 2026-03-11 | 2026-03-11 |
 | 24. KPI Cards | 1/1 | Complete    | 2026-03-11 | - |
-| 25. Table Components | v1.4 | 1/2 | In progress | - |
+| 25. Table Components | 2/2 | Complete   | 2026-03-11 | - |
 | 26. Filter Bar Enhancement | v1.4 | TBD | Not started | - |
 | 27. Chart Palette & Composition | v1.4 | TBD | Not started | - |
 | 28. Editor Sync & Gallery Validation | v1.4 | TBD | Not started | - |
