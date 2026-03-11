@@ -45,12 +45,12 @@ Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
 
 ### Charts
 
-- [ ] **CHART-01**: Stacked bar chart variant (chartType: 'stacked-bar')
-- [ ] **CHART-02**: Stacked area chart variant (chartType: 'stacked-area')
-- [ ] **CHART-03**: Horizontal bar chart variant (chartType: 'horizontal-bar')
-- [ ] **CHART-04**: Bubble chart variant (chartType: 'bubble')
-- [ ] **CHART-05**: Gauge chart como novo section type (gauge-chart)
-- [ ] **CHART-06**: Composed chart com multi-series configuravel (chartType: 'composed')
+- [x] **CHART-01**: Stacked bar chart variant (chartType: 'stacked-bar')
+- [x] **CHART-02**: Stacked area chart variant (chartType: 'stacked-area')
+- [x] **CHART-03**: Horizontal bar chart variant (chartType: 'horizontal-bar')
+- [x] **CHART-04**: Bubble chart variant (chartType: 'bubble')
+- [x] **CHART-05**: Gauge chart como novo section type (gauge-chart)
+- [x] **CHART-06**: Composed chart com multi-series configuravel (chartType: 'composed')
 
 ### Gallery
 
@@ -116,12 +116,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILT-04 | Phase 19 | Complete |
 | FILT-05 | Phase 19 | Complete |
 | FILT-06 | Phase 19 | Complete |
-| CHART-01 | Phase 20 | Pending |
-| CHART-02 | Phase 20 | Pending |
-| CHART-03 | Phase 20 | Pending |
-| CHART-04 | Phase 20 | Pending |
-| CHART-05 | Phase 20 | Pending |
-| CHART-06 | Phase 20 | Pending |
+| CHART-01 | Phase 20 | Complete |
+| CHART-02 | Phase 20 | Complete |
+| CHART-03 | Phase 20 | Complete |
+| CHART-04 | Phase 20 | Complete |
+| CHART-05 | Phase 20 | Complete |
+| CHART-06 | Phase 20 | Complete |
 | GAL-01 | Phase 21 | Pending |
 | GAL-02 | Phase 21 | Pending |
 
