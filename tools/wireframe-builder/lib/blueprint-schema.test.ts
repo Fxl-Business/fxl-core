@@ -5,6 +5,8 @@ import {
   BlueprintSectionSchema,
   FilterOptionSchema,
   SidebarConfigSchema,
+  BarLineChartSectionSchema,
+  GaugeChartSectionSchema,
 } from './blueprint-schema'
 
 // ---------------------------------------------------------------------------
@@ -422,5 +424,52 @@ describe('Phase 19 — FilterOption all filterType values covered', () => {
   it('backward compat: accepts FilterOption with no filterType (undefined)', () => {
     const result = FilterOptionSchema.safeParse({ key: 'f', label: 'F' })
     expect(result.success).toBe(true)
+  })
+})
+
+describe('Phase 20 — new chartType values and gauge-chart section', () => {
+  it.each([
+    'stacked-bar',
+    'stacked-area',
+    'horizontal-bar',
+    'bubble',
+    'composed',
+  ] as const)('BarLineChartSectionSchema accepts chartType "%s"', (chartType) => {
+    const result = BarLineChartSectionSchema.safeParse({
+      type: 'bar-line-chart',
+      title: 'Test Chart',
+      chartType,
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('GaugeChartSectionSchema accepts minimal gauge-chart section', () => {
+    const result = GaugeChartSectionSchema.safeParse({
+      type: 'gauge-chart',
+      title: 'KPI Gauge',
+      value: 72,
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('GaugeChartSectionSchema accepts full gauge-chart section with zones', () => {
+    const result = GaugeChartSectionSchema.safeParse({
+      type: 'gauge-chart',
+      title: 'Full Gauge',
+      value: 72,
+      min: 0,
+      max: 100,
+      zones: [{ label: 'danger', value: 40 }, { value: 70 }, { value: 100, color: 'green' }],
+      height: 200,
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('GaugeChartSectionSchema rejects gauge-chart missing required value field', () => {
+    const result = GaugeChartSectionSchema.safeParse({
+      type: 'gauge-chart',
+      title: 'No Value',
+    })
+    expect(result.success).toBe(false)
   })
 })
