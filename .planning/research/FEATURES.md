@@ -1,422 +1,492 @@
-# Feature Landscape: v1.2 Visual Redesign
+# Feature Research: v1.3 Builder & Components
 
-**Domain:** Documentation platform visual redesign -- Layout, Typography, Navigation, Code Rendering, Content Hierarchy
+**Domain:** BI Dashboard Wireframe Builder -- Configurable Layout + Chart Expansion
 **Researched:** 2026-03-10
-**Milestone:** v1.2 Visual Redesign
-**Confidence:** HIGH (grounded in HTML reference design + analysis of Stripe/Tailwind/shadcn/Vercel docs patterns + existing codebase audit)
+**Confidence:** HIGH
 
-## Reference Design Analysis
+## Scope
 
-The HTML reference file (`visual-redesign-reference.html`) defines the target. Key patterns extracted:
+This research covers the NEW features for v1.3 only. The existing 21 section types, visual editor, blueprint pipeline, branding system, and component gallery are treated as baseline. Research focuses on:
 
-| Element | Reference Pattern | Current State | Delta |
-|---------|-------------------|---------------|-------|
-| Header | `sticky top-0 z-50`, `bg-white/80 backdrop-blur-md`, h-16, brand + subtitle + search + theme toggle | `sticky top-0 z-20`, `bg-background/90 backdrop-blur`, h-14, same elements but smaller | Height increase, stronger blur, higher z-index |
-| Sidebar | `bg-slate-50/50`, uppercase section headers, `border-l` nav items, indigo active color, collapsible groups | `bg-sidebar/80 backdrop-blur`, no border-l, primary active color, flat list | Complete restyle: bg, nav indicator, colors |
-| Page Header | Breadcrumbs above, indigo badge pill, `text-4xl/5xl font-extrabold`, description `text-lg`, "Exibir Markdown" button | `text-2xl font-bold`, badge as shadcn Badge, description `text-sm`, "Exibir Markdown" button | Major typography scale-up, badge restyle |
-| Code Blocks | `rounded-xl bg-slate-900 shadow-2xl`, traffic light dots, syntax-highlighted text, `text-sm leading-6` | `rounded-lg bg-[hsl(var(--code-bg))]`, no decoration, no syntax highlighting, `text-xs` | Visual upgrade + potential syntax highlighting |
-| Table of Contents | Right sidebar `w-64`, `sticky top-16`, uppercase "NESTA PAGINA" header, border-l on nested items, indigo active | Right aside `w-52`, `sticky top-8`, lowercase label, no border-l, primary active | Width increase, sticky offset fix, visual upgrade |
-| Breadcrumbs | `text-sm text-slate-500`, chevron separators, section link + current page bold | `text-xs text-muted-foreground`, slash separator, section link + current page | Size increase, separator change |
-| Content Typography | `text-slate-600 leading-relaxed`, links with `underline-offset-4 decoration-indigo-200` | `text-muted-foreground leading-relaxed`, basic underline on hover | Richer link styling, consistent text colors |
-| Layout | Three columns (sidebar 64 + content + TOC 64), `max-w-4xl` content, `px-8 py-10 lg:px-12` | Two columns + optional TOC, `max-w-4xl`, `px-5 py-8 md:px-8 md:py-10` | Proper three-column, more horizontal padding |
+1. Configurable sidebar/header/filter bar in the blueprint schema
+2. Chart type expansion (target: 20+ types)
+3. Sidebar/header/filter bar component patterns standard in BI
+4. Gallery reorganization
 
-## Table Stakes
+---
 
-Features users expect from a polished documentation platform. These are patterns found across Stripe, Tailwind, shadcn/ui, and Vercel docs. Missing any of these makes the platform feel unfinished.
+## Feature Landscape
 
-### TS-1: Frosted Glass Sticky Header
+### Table Stakes (Users Expect These)
 
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | Stripe, Vercel, and shadcn/ui all use `backdrop-blur` + semi-transparent background on sticky headers. It is the standard for 2025+ documentation sites. Content scrolling beneath the header without a frosted effect feels dated. |
-| **Complexity** | LOW |
-| **Current Gap** | Current header has `bg-background/90 backdrop-blur` and h-14. Reference uses `bg-white/80 backdrop-blur-md` and h-16. Gap is small -- CSS-only change. |
-| **Existing Component** | `TopNav.tsx` -- modify in place |
-| **Implementation** | Change to `h-16`, `bg-white/80 backdrop-blur-md` (light) / `bg-slate-900/80 backdrop-blur-md` (dark). Increase `z-50`. Add `border-b border-slate-200`. |
-| **Notes** | Must update sidebar sticky offset from `top-0` to `top-16` to match new header height. |
+Features that any BI dashboard wireframe builder must support. Missing these makes the product feel incomplete for PME BI dashboards.
 
-### TS-2: Brand Identity in Header (Dual-line Logo)
+#### Chart Types -- Must Have
 
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | Vercel uses "Vercel" + product name. Stripe uses logo + "Docs". A brand mark with product subtitle establishes identity instantly. Reference shows "Nucleo FXL" + "FXL-CORE" subtitle. |
-| **Complexity** | LOW |
-| **Current Gap** | Current header already has this pattern (brand name + `fxl-core` subtitle). Needs minor visual refinement: bolder tracking, `text-[10px] font-medium uppercase tracking-widest`. |
-| **Existing Component** | `TopNav.tsx` -- adjust classes |
-| **Implementation** | Match reference: `text-sm font-bold tracking-tight` for name, `text-[10px] font-medium uppercase tracking-widest text-slate-400` for subtitle. |
-| **Notes** | Current FXL logo square can be kept or removed. Reference omits it -- evaluate during implementation. |
+| Feature | Why Expected | Complexity | Depends On |
+|---------|--------------|------------|------------|
+| Stacked bar chart | Every BI tool has it. Composition over time (revenue by product line) | LOW | Existing `bar-line-chart` section -- add `stacked-bar` variant to `chartType` |
+| Stacked area chart | Proportional trends over time. Power BI, Metabase, Looker all include it | LOW | Existing `AreaChartComponent` -- add `stacked` prop via `stacked-area` chartType |
+| Combo/composed chart (bar + line overlay) | Already exists as `bar-line` chartType but needs explicit multi-series stacking | LOW | Existing `BarLineChart` -- already works, verify visual fidelity |
+| Gauge/radial meter | KPI vs target visualization. Metabase has gauge, Power BI has KPI visual. Essential for goal-tracking dashboards | MEDIUM | Recharts `RadialBarChart` -- new component `GaugeChartComponent`, new section type `gauge-chart` |
+| Horizontal bar chart | Category rankings (top clients, expense categories). Standard in all BI tools. Metabase calls it "Row chart" | LOW | Existing `BarLineChart` -- add `horizontal-bar` chartType, set `layout="vertical"` on Recharts |
+| Bubble chart | Scatter with size dimension. Power BI and Metabase include it | LOW | Existing `ScatterChartComponent` -- add `ZAxis` for size via `bubble` chartType |
 
-### TS-3: Inline Search Bar with Keyboard Shortcut Badge
+#### Sidebar -- Must Have
 
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | Stripe, Tailwind, shadcn, and Vercel all show a visible search input in the header (not just a button). The input displays a `Cmd+K` keyboard shortcut badge. Clicking opens the full search dialog. |
-| **Complexity** | LOW |
-| **Current Gap** | Current `SearchCommand.tsx` renders a button-like element with text and kbd. Reference shows a proper `<input>` with search icon, placeholder, and kbd badge. Visual-only change -- the cmdk dialog stays as-is. |
-| **Existing Component** | `SearchCommand.tsx` -- restyle the trigger element |
-| **Implementation** | Restyle trigger to look like an input field: `rounded-md border-slate-200 bg-slate-50 py-1.5 pl-10 pr-12 text-sm`. Add search icon on left, kbd badge on right. Keep cmdk dialog unchanged. |
-| **Notes** | The trigger is not a real input -- it is a button that opens the CommandDialog. Visual only. |
+| Feature | Why Expected | Complexity | Depends On |
+|---------|--------------|------------|------------|
+| Configurable sidebar via blueprint schema | v1.3 goal. Currently `WireframeSidebar` receives a flat list of screen labels. Sidebar items, icons, and groups must be declarative in the blueprint, not hardcoded | MEDIUM | New `SidebarConfig` type on `BlueprintConfig` |
+| Icons per menu item | Every BI dashboard sidebar uses icons per nav item. `BlueprintScreen` already has an `icon?: string` field but `WireframeSidebar` ignores it completely | LOW | Render existing `icon` field in sidebar using lucide-react dynamic import |
+| Active state highlighting | Current screen must be visually distinct. Already works in `WireframeSidebar` but must remain intact with new schema-driven approach | LOW | Already exists -- preserve behavior |
+| Collapsible sidebar (icon-only mode) | Standard pattern in all BI tools (Power BI, Metabase, Databricks). Sidebar collapses to an icon rail on user toggle or narrow viewports | MEDIUM | New collapse state in wireframe viewer layout |
+| Sidebar groups/sections | Screens grouped by category (e.g., "Financeiro", "Operacional", "Configuracoes"). Standard in any BI tool with 5+ screens. Power BI uses bookmarks/pages, Metabase uses collections | MEDIUM | New `groups` array in `SidebarConfig` referencing `BlueprintScreen.id` |
 
-### TS-4: Sidebar with Left Border Navigation and Section Headers
+#### Header -- Must Have
 
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | shadcn/ui docs, Tailwind docs, and the reference all use `border-l` on sidebar nav lists to create a visual hierarchy rail. Active items get a colored left border (indigo in reference). Section headers are uppercase, bold, small text. This is the dominant sidebar pattern for doc sites. |
-| **Complexity** | MEDIUM |
-| **Current Gap** | Current sidebar uses `bg-primary/10` highlight for active items and indented padding for depth. No border-l rail. Section headers exist but lack the uppercase/tracking styling of the reference. |
-| **Existing Component** | `Sidebar.tsx` -- significant restyle of `NavSection` and wrapper |
-| **Implementation** | (1) Sidebar wrapper: `bg-slate-50/50` (light) / `bg-slate-900/50` (dark), remove backdrop-blur. (2) Section headers: `text-xs font-bold uppercase tracking-wider text-slate-900`. (3) Nav lists: add `border-l border-slate-200 ml-1 pl-4`. (4) Active item: `text-indigo-600 font-medium` (replacing `bg-primary/10 text-primary`). (5) Hover: `hover:text-indigo-600`. (6) Collapsible groups: chevron icon for expand/collapse (already exists). |
-| **Dependencies** | Requires new `--indigo-*` accent tokens or direct Tailwind slate/indigo classes (reference uses direct Tailwind colors, not CSS vars). Decision: use direct Tailwind classes for sidebar since it is app chrome, not doc content. |
-| **Notes** | This is the highest-impact visual change. The border-l rail immediately signals "premium documentation platform" to users. |
+| Feature | Why Expected | Complexity | Depends On |
+|---------|--------------|------------|------------|
+| Configurable header via blueprint schema | v1.3 goal. Currently `WireframeHeader` is hardcoded with title + period selector. Header layout (title, period, actions) must be declarative | MEDIUM | New `HeaderConfig` type on `BlueprintConfig` |
+| Header above sidebar (full-width, highest z-order) | v1.3 goal. The header must span the entire viewport width, with the sidebar starting below it. Current layout has sidebar and header at the same level | LOW | CSS layout restructure in wireframe viewer -- change from `flex` row to column-first |
+| "Gerenciar" as header button | v1.3 goal. Move from current location into the header action area | LOW | Relocate existing button into `HeaderConfig.actions` |
+| Logo/brand display in header | Client branding logo in dashboard header. Every production BI dashboard has client branding. Data already available from branding config | LOW | Read from existing `branding.md` / CSS vars |
+| User/role indicator in header | Show current context ("Admin", client company name). Standard in multi-user BI tools | LOW | Static text from config |
 
-### TS-5: Breadcrumbs with Chevron Separators
+#### Filter Bar -- Must Have
 
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | Stripe, Vercel, and shadcn/ui docs all use chevron `>` or `/` separators in breadcrumbs. The reference uses chevron SVG separators with `text-sm` sizing. Every documentation site has breadcrumbs. |
-| **Complexity** | LOW |
-| **Current Gap** | Current `DocBreadcrumb.tsx` uses slash `/` separator and `text-xs`. Reference uses chevron SVG and `text-sm`. |
-| **Existing Component** | `DocBreadcrumb.tsx` -- modify in place |
-| **Implementation** | (1) Increase to `text-sm text-slate-500`. (2) Replace `/` with ChevronRight icon (lucide). (3) Current page: `text-slate-800 font-medium`. (4) Parent link: `hover:text-slate-800`. |
-| **Notes** | Simple swap. No structural changes. |
+| Feature | Why Expected | Complexity | Depends On |
+|---------|--------------|------------|------------|
+| Filter bar as configurable blueprint item | v1.3 goal. Currently `WireframeFilterBar` is rendered inside `BlueprintRenderer`. Filter bar should be a first-class configurable element per screen | MEDIUM | Enhance existing `FilterOption` type with a `filterType` discriminator |
+| Date range picker filter | The single most important interactive filter in BI. Metabase has 6 date filter sub-types. Power BI has date slicers. Databricks has date-range-picker widget | MEDIUM | New `filterType: 'date-range'` in `FilterOption` |
+| Multi-select dropdown filter | Select multiple values from a list (e.g., multiple cost centers, multiple products). Every BI tool supports multi-select. Metabase calls it "Multiple values filter" | MEDIUM | New `filterType: 'multi-select'` in `FilterOption` |
+| Search/text filter | Free-text search within data. Existing `showSearch` prop on `WireframeFilterBar` but not driven by blueprint config | LOW | Promote `showSearch` into `FilterOption` array as `filterType: 'search'` |
+| Period quick-select presets | "Last 30 days", "This month", "YTD" -- predefined date ranges. Standard in Metabase (Quick Filters), Databricks, GoodData | LOW | Add `presets` array to date-range filter config |
 
-### TS-6: Page Header with Large Typography and Badge Pill
+#### Gallery -- Must Have
 
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | Stripe uses `text-4xl font-bold` for page titles. Tailwind uses `text-3xl`. shadcn/ui uses `text-4xl font-bold`. Vercel uses large, bold headings. Small page titles (current `text-2xl`) make content feel like a secondary page, not a primary doc entry. |
-| **Complexity** | LOW |
-| **Current Gap** | Current `DocPageHeader.tsx` uses `text-2xl font-bold`. Reference uses `text-4xl font-extrabold tracking-tight sm:text-5xl`. Badge is a generic shadcn Badge vs reference's indigo pill with ring. |
-| **Existing Component** | `DocPageHeader.tsx` -- modify in place |
-| **Implementation** | (1) Title: `text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl`. (2) Badge: `inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-indigo-600 ring-1 ring-inset ring-indigo-600/20`. (3) Description: `mt-4 text-lg text-slate-600`. (4) "Exibir Markdown" button below description with top margin. |
-| **Notes** | The `PageHeader.tsx` (non-doc version) also needs alignment but is used on Home and client pages. Handle separately in the consistency pass. |
+| Feature | Why Expected | Complexity | Depends On |
+|---------|--------------|------------|------------|
+| Gallery organized by thematic sections | v1.3 goal. Current gallery is a flat list. Must group by function (Charts, KPIs, Tables, Layout, Inputs, Filters, Metricas) | LOW | Use existing `category` field from section registry `catalogEntry` |
+| All new chart types visible in gallery | Each new chart must have a gallery entry with mock data and description | LOW per chart | Depends on each new chart component existing |
 
-### TS-7: Content Typography Hierarchy (Prose Upgrade)
+### Differentiators (Competitive Advantage)
 
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | Stripe, Tailwind, and Vercel docs all have clear typographic hierarchy: generous heading sizes, relaxed line heights, visible distinction between H2 and H3. Reference shows `text-2xl font-bold` for H2, `text-xl font-semibold` for H3, `text-slate-600 leading-relaxed` for body. |
-| **Complexity** | LOW |
-| **Current Gap** | Current prose styles in `globals.css` use `text-2xl` H1, `text-xl` H2, `text-base` H3, `text-sm` body. Reference elevates everything one step. Body text at `text-sm` feels cramped compared to `text-base` reference body. |
-| **Existing Component** | `globals.css` prose rules -- modify in place |
-| **Implementation** | (1) `.prose h2`: `text-2xl font-bold tracking-tight text-slate-900 mb-6` (remove border-b -- reference has no underline on H2). (2) `.prose h3`: `text-xl font-semibold text-slate-800 mt-8 mb-4`. (3) `.prose p`: `text-slate-600 mb-4 leading-relaxed` (upgrade from `text-sm` to base size). (4) `.prose a`: `font-semibold text-indigo-600 underline underline-offset-4 decoration-indigo-200`. (5) Add `mb-16` between major sections. |
-| **Dependencies** | Larger body text increases page height. Table of Contents becomes more important with more content below the fold. |
-| **Notes** | This change affects all rendered docs. Must test with multiple doc pages to ensure nothing breaks (tables, lists, code blocks). |
+Features that set FXL apart from generic BI wireframe tools. Not expected, but highly valuable for the PME BI consulting workflow.
 
-### TS-8: Dark-Themed Code Blocks with Visual Chrome
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Blueprint-driven layout hierarchy | Sidebar/header/filter bar as first-class blueprint config objects -- not just content sections. The entire dashboard layout (chrome + content) is declarative. No other wireframe tool treats dashboard structure as a typed schema | MEDIUM | This is the core v1.3 innovation. Unlocks AI generation of complete dashboard layouts, not just content sections |
+| Gauge chart with colored target zones | Show KPI value vs target with zones (green/yellow/red). Integrates with existing `semaforo` system. PME clients love "are we on track?" visuals | MEDIUM | Recharts `RadialBarChart` + custom colored zone overlay. Reuse existing semaforo color semantics |
+| Composed chart with configurable series | Define multiple data series (bar + line + area) in a single chart via blueprint config. Most wireframe tools show one chart type per widget | HIGH | New `series` array in chart section config. Recharts `ComposedChart` supports natively but config schema is complex |
+| Sidebar badge/notification count | Show count badges on sidebar items (e.g., "3 pending uploads", "5 alerts"). Useful for operational dashboards common in PME | LOW | Add optional `badge?: string` to sidebar item config |
+| Boolean toggle filter | On/off toggles for boolean flags (e.g., "Show inactive", "Include estimates"). Metabase has this, most wireframe tools do not | LOW | Add `filterType: 'boolean'` to `FilterOption` |
+| Sidebar footer with version/environment | Show "v1.0 - Producao" or environment indicator. Distinguishes staging from production for PME clients | LOW | Add optional `footer?: { text: string }` to `SidebarConfig` |
 
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | Stripe, Tailwind, Vercel, and shadcn/ui all use dark-themed code blocks with rounded corners and shadow. The reference adds traffic light dots (red/amber/green circles) as a header decoration. Every premium doc site has visually distinct code blocks that feel like a terminal window. |
-| **Complexity** | MEDIUM |
-| **Current Gap** | Current code blocks use `rounded-lg bg-[hsl(var(--code-bg))] p-4`. Reference uses `rounded-xl bg-slate-900 p-6 shadow-2xl` with traffic light dots and `text-sm leading-6`. No syntax highlighting in either current or reference. |
-| **Existing Component** | `MarkdownRenderer.tsx` (pre/code components) + `globals.css` (.prose pre) |
-| **Implementation** | (1) Code block wrapper: `rounded-xl bg-slate-900 p-6 shadow-2xl overflow-hidden`. (2) Add traffic light dots div above code content: three small circles (red-500/50, amber-500/50, emerald-500/50). (3) Code text: `text-sm leading-6 text-slate-300`. (4) Syntax highlighting: Add language label top-right (optional). (5) Inline code stays as-is (rounded bg-muted pill). |
-| **Dependencies** | Traffic light dots require wrapping `<pre>` in a container div in the MarkdownRenderer custom components. This is a structural change to the component override. |
-| **Notes** | Syntax highlighting via shiki/rehype-pretty-code is a separate differentiator (see below). The code block chrome (dots, shadow, rounded corners) is the table stakes visual. |
+### Anti-Features (Commonly Requested, Often Problematic)
 
-### TS-9: Right-Side Table of Contents ("NESTA PAGINA")
+Features that seem good but create complexity, confusion, or scope bloat for v1.3.
 
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | Stripe, shadcn/ui, and Vercel all have a right-side TOC on documentation pages. Tailwind uses it on all pages. It is the standard three-column layout for documentation: left nav, center content, right TOC. |
-| **Complexity** | LOW |
-| **Current Gap** | Current `DocTableOfContents.tsx` exists and works. Visual differences: w-52 vs w-64, `top-8` vs `top-16`, lowercase label vs uppercase, no border-l on nested items, primary color vs indigo. |
-| **Existing Component** | `DocTableOfContents.tsx` -- modify in place |
-| **Implementation** | (1) Width: `w-64`. (2) Sticky: `sticky top-16` (match header height). (3) Header: `text-xs font-bold uppercase tracking-wider text-slate-900` + "NESTA PAGINA". (4) Links: `text-sm` (up from `text-xs`). (5) Nested items: `ml-4 border-l border-slate-200 pl-4 text-slate-400`. (6) Active link: `font-medium text-indigo-600`. (7) Hover: `hover:text-slate-900`. |
-| **Dependencies** | Three-column layout requires Layout.tsx to accommodate the TOC as a peer element, not nested inside the content max-width container. See TS-10. |
-| **Notes** | Scroll-spy via IntersectionObserver already works. Only visual changes needed. |
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Map/geographic chart | "We need a map for regional sales" | Requires geo data, tile servers, new dependency (leaflet/mapbox). Very heavy for wireframes with mock data. Few PME clients need it | Use a table with region column + horizontal bar chart by region. Defer maps to v2+ |
+| Pivot table / matrix | "We need Excel-like pivot in the dashboard" | Extremely complex interaction (drag columns/rows, subtotals, expand/collapse). Recharts does not support it. Would need separate library (e.g., react-pivottable) | Use existing `drill-down-table` with `viewSwitcher` for different groupings. Covers 90% of the use case |
+| Cross-chart filtering | "Clicking a bar should filter the whole page" | Requires global state management across all sections. Breaks section isolation principle. Meaningless with mock data | Document as a v2 generated-system feature. Wireframes show the filter bar, not cross-filtering |
+| Nested sidebar 3+ levels | "We need sub-sub-menus for complex dashboards" | Creates confusion, breaks scanning patterns, terrible on mobile. PME dashboards rarely exceed 15 screens | Two levels max: groups + items. More screens = more groups, not deeper nesting |
+| Custom color picker per individual chart | "Each chart should have its own color scheme" | Breaks visual consistency. Branding system already handles palette globally via `chartColors` | Use existing branding system. The palette applies to all charts consistently |
+| Histogram / box plot | "We need statistical distributions" | PME BI clients almost never need statistical charts. These are data-science/analytics tools, not business dashboards | Defer to v2+. Focus on business charts (bar, line, gauge, waterfall) |
+| Sankey / sunburst chart | "We need flow diagrams and multi-ring donuts" | Niche use cases. Sankey requires complex data relationships. Sunburst is a multi-dimensional donut few users understand | Defer to v2+. Donut covers proportional display. Waterfall covers flow |
+| Drag-and-drop sidebar reordering | "Let users reorder sidebar items by dragging" | Already have drag-reorder for sections. Sidebar order should match blueprint screen order -- reordering sidebar means reordering screens, which is a different UX | Sidebar order follows `groups[].screenIds` order in blueprint. Edit via blueprint config |
+| Real-time filter updates / live preview | "Filters should show real-time data changes" | Wireframes use mock data. There is no backend to filter against. This is a generated-system concern | Filter widgets show the UI pattern. Data does not change because it is mock data |
 
-### TS-10: Three-Column Layout Shell
-
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | The "holy grail" documentation layout (left sidebar + center content + right TOC) is standard across Stripe, Tailwind, shadcn/ui, and Vercel. Reference uses `<div class="flex">` with sidebar (w-64), main (flex-1), and TOC aside (w-64). |
-| **Complexity** | MEDIUM |
-| **Current Gap** | Current `Layout.tsx` wraps content in `max-w-4xl px-5 py-8` inside `<main>`. The TOC is rendered inside `DocRenderer.tsx` as a flex sibling of content. This means the TOC is constrained by the max-w-4xl container. Reference has the TOC OUTSIDE the main content padding, as a direct sibling of `<main>`. |
-| **Existing Component** | `Layout.tsx` + `DocRenderer.tsx` |
-| **Implementation** | (1) `Layout.tsx`: Remove the `max-w-4xl` wrapper from main. Let the Outlet render its own width constraints. (2) `DocRenderer.tsx`: Render as `flex` with content area (`flex-1 px-8 py-10 lg:px-12 max-w-4xl mx-auto`) and TOC aside (`sticky top-16 w-64 hidden xl:block`). (3) Other pages (Home, client pages) add their own padding/max-width. |
-| **Dependencies** | Every page rendered via Layout.tsx must handle its own max-width. This affects: `Home.tsx`, `DocRenderer.tsx`, client pages, `ComponentGallery.tsx`. Each needs a wrapper. |
-| **Notes** | This is a structural change. Must verify all pages still render correctly. The main content area padding moves from Layout to individual page components. |
-
-### TS-11: Horizontal Dividers Between Sections
-
-| Aspect | Detail |
-|--------|--------|
-| **Why Expected** | Stripe and the reference use full-width `<hr>` dividers between the page header and content body. It visually separates the "hero" area from the scrollable content. shadcn/ui and Vercel do this subtly with spacing alone. |
-| **Complexity** | LOW |
-| **Current Gap** | Current uses shadcn `Separator` component between header and content. Reference uses `h-px w-full bg-slate-200 my-10`. Functionally equivalent but reference has more vertical spacing. |
-| **Existing Component** | `DocRenderer.tsx` -- adjust Separator styling |
-| **Implementation** | Replace `<Separator className="my-6" />` with `<div className="h-px w-full bg-slate-200 dark:bg-slate-700 my-10" />` or adjust Separator margin. Increase spacing between header and content body. |
-| **Notes** | Minor visual tweak. |
-
-## Differentiators
-
-Features that elevate FXL Core above a typical documentation site. Not expected, but create a noticeable quality impression.
-
-### D-1: Syntax Highlighting in Code Blocks (via shiki or rehype-highlight)
-
-| Aspect | Detail |
-|--------|--------|
-| **Value Proposition** | Stripe, Tailwind, and shadcn/ui all have syntax-highlighted code. Without it, code blocks are monochrome text on dark background. Highlighting makes code scannable and professional. Docusaurus, MkDocs Material, and every modern doc framework include this. |
-| **Complexity** | MEDIUM |
-| **Current Gap** | No syntax highlighting. `MarkdownRenderer.tsx` renders `<code>` with a static className. react-markdown supports rehype plugins for highlighting. |
-| **Implementation Options** | (A) `rehype-highlight` (highlight.js-based) -- lighter, well-supported, 2KB core. (B) `rehype-pretty-code` (shiki-based) -- more themes, VS Code grammar precision, but heavier. (C) `react-shiki` -- client-side component approach. Recommendation: **rehype-highlight** because it integrates directly with react-markdown's rehype plugin chain, is lightweight, and FXL docs use mostly TypeScript/bash/JSON -- no exotic languages needed. |
-| **Dependencies** | Requires `rehype-highlight` + `highlight.js` CSS theme. Code block chrome (TS-8) should land first so highlighting layers on top of the visual container. |
-| **Notes** | This adds a new dependency. Must document in CLAUDE.md stack section per project rules. |
-
-### D-2: Code Block Copy Button
-
-| Aspect | Detail |
-|--------|--------|
-| **Value Proposition** | Stripe, Tailwind, shadcn/ui, and Docusaurus all have copy buttons on code blocks. The reference does not explicitly show one, but it is universally expected on doc sites with code. FXL already has copy on PromptBlocks -- extending to code blocks creates consistency. |
-| **Complexity** | MEDIUM |
-| **Current Gap** | `PromptBlock.tsx` has copy functionality. Regular code blocks in `MarkdownRenderer.tsx` do not. |
-| **Implementation** | Add a copy button (absolute positioned top-right) to the code block wrapper in MarkdownRenderer. Extract the text content from children and use `navigator.clipboard.writeText()`. Show copied/check feedback (same pattern as PromptBlock). |
-| **Dependencies** | Code block chrome (TS-8) -- the copy button sits inside the code block container. |
-| **Notes** | Must extract text from React children recursively (utility already exists in `childrenToString` in MarkdownRenderer). |
-
-### D-3: Code Block Language Label
-
-| Aspect | Detail |
-|--------|--------|
-| **Value Proposition** | Stripe and Docusaurus show the language name (typescript, bash, json) in a label on code blocks. Helps users quickly identify what they are looking at, especially when a page has multiple code blocks in different languages. |
-| **Complexity** | LOW |
-| **Current Gap** | Language info is available in the className of `<code>` elements (e.g., `language-typescript`). Currently not displayed. |
-| **Implementation** | Extract language from className in the custom `pre` component. Render as a small label (text-xs, top-right or top-left of code block). |
-| **Dependencies** | Code block chrome (TS-8). |
-| **Notes** | Simple extraction from existing data. No new deps needed. |
-
-### D-4: Collapsible Sidebar Groups with Smooth Transitions
-
-| Aspect | Detail |
-|--------|--------|
-| **Value Proposition** | shadcn/ui docs and Vercel docs have smooth expand/collapse animations on sidebar groups. Current sidebar toggles instantly. Smooth animation adds polish. |
-| **Complexity** | LOW |
-| **Current Gap** | Current sidebar toggles visibility with conditional rendering (open && children). No animation. |
-| **Implementation** | Use CSS transitions with `grid-template-rows: 0fr` -> `1fr` pattern, or use shadcn Collapsible component (already in ui library). |
-| **Dependencies** | Sidebar restyle (TS-4) should land first. |
-| **Notes** | Pure enhancement. If time-constrained, skip this. Instant toggle is acceptable. |
-
-### D-5: Callout Components with Icon and Color Theming
-
-| Aspect | Detail |
-|--------|--------|
-| **Value Proposition** | Stripe uses info/warning/error callouts with icons. Tailwind uses note/warning callouts. shadcn/ui docs have colored callouts. Current Callout component uses hardcoded light-mode colors (`border-blue-200 bg-blue-50`). Upgrading to themed callouts with icons matches premium doc sites. |
-| **Complexity** | LOW |
-| **Current Gap** | Current `Callout.tsx` has `info` and `warning` types with hardcoded light-mode colors. No icons. No dark mode support. |
-| **Implementation** | (1) Add lucide icons (Info, AlertTriangle). (2) Use semantic tokens or slate/indigo classes that work in both light and dark mode. (3) Optional: add `success` and `error` variants. |
-| **Dependencies** | None (standalone component). |
-| **Notes** | Small change with disproportionate visual impact. |
-
-### D-6: Scroll-to-Top on Navigation
-
-| Aspect | Detail |
-|--------|--------|
-| **Value Proposition** | Stripe, Vercel, and shadcn/ui docs scroll to top when navigating between pages. If users click a sidebar link while scrolled halfway down a page, the new page starts at the top. |
-| **Complexity** | LOW |
-| **Current Gap** | Unknown. React Router v6 does not scroll to top by default. May already be an issue. |
-| **Implementation** | Add a `ScrollToTop` component that uses `useEffect` + `window.scrollTo(0, 0)` on location changes. Place in Layout.tsx. |
-| **Dependencies** | None. |
-| **Notes** | One-time setup. Universal benefit. |
-
-## Anti-Features
-
-Features to explicitly NOT build in v1.2.
-
-| Anti-Feature | Why Requested | Why Problematic | Alternative |
-|--------------|---------------|-----------------|-------------|
-| Full syntax highlighting with multiple themes | Developers love choosing themes (Dracula, One Dark, etc.) | Adds configuration complexity, increases bundle size, distracts from content. One good theme is enough. | Single dark theme matching `bg-slate-900` code blocks. No theme picker. |
-| Mobile hamburger sidebar redesign | Mobile users need navigation | v1.2 scope is desktop visual polish. The existing mobile sidebar (collapsible top bar) works. Mobile redesign is a separate effort. | Keep current mobile behavior. Focus desktop three-column layout. |
-| Search results page / full-text search | Searching within doc content, not just titles | Current cmdk search by title/description is sufficient. Full-text search requires indexing infrastructure. | Keep cmdk with title/description search. Improve later. |
-| Animated page transitions | Framer Motion-style page transitions look polished | Adds dependency, complexity, and can feel sluggish. React Router transitions are notoriously tricky. | Instant page loads with scroll-to-top. Fast is better than animated. |
-| Custom scrollbar styling | Reference HTML has custom `::-webkit-scrollbar` styles | Scrollbar styling is Webkit-only. Firefox ignores it. Creates inconsistency across browsers. | Use default browser scrollbars. If needed, `scrollbar-thin scrollbar-thumb-slate-300` via Tailwind plugin later. |
-| Dark mode redesign (new color palette) | Reference is light-only, might need dark rethinking | v1.2 reference targets light mode. Dark mode should work (using semantic tokens), but a full dark mode visual pass is scope creep. | Ensure dark mode does not break with new styles. Do not redesign the dark palette. |
-| Version selector in header | Large doc sites (Stripe, Tailwind) show version selectors | FXL Core has one version. No historical versions to switch between. Adding a selector adds visual noise for zero utility. | Omit. Add if FXL Core ever ships external documentation. |
+---
 
 ## Feature Dependencies
 
 ```
-LAYOUT SHELL (must be first -- everything else builds on this):
-  TS-10: Three-column layout
-    -> TS-1: Frosted glass header (sets sticky height for sidebar/TOC offsets)
-    -> TS-4: Sidebar restyle (border-l, indigo, uppercase headers)
-    -> TS-9: TOC restyle (width, sticky offset, visual upgrade)
-    -> TS-11: Section dividers (spacing depends on layout padding)
+BlueprintConfig Schema Changes (foundational -- must be first)
+    |
+    |-- SidebarConfig type
+    |       |-- icon rendering (uses existing BlueprintScreen.icon)
+    |       |-- sidebar groups/sections
+    |       |-- collapsible sidebar (icon-only rail)
+    |       |-- sidebar badge counts (differentiator)
+    |       |-- sidebar footer (differentiator)
+    |
+    |-- HeaderConfig type
+    |       |-- header-above-sidebar (CSS layout restructure)
+    |       |-- "Gerenciar" button relocation
+    |       |-- logo/brand display
+    |       |-- period selector (existing, becomes config-driven)
+    |
+    |-- FilterOption type extension
+            |-- filterType discriminator ('select' | 'multi-select' | 'date-range' | 'search' | 'boolean')
+            |-- date-range filter widget
+            |-- multi-select filter widget
+            |-- period quick-select presets
 
-PAGE HEADER + BREADCRUMBS (independent of layout, but renders inside it):
-  TS-5: Breadcrumbs with chevrons
-    -> TS-6: Page header with large typography and badge pill
-      -> TS-11: Divider between header and content
+ChartType Expansion (independent of layout changes)
+    |-- stacked-bar (extends BarLineChart, adds stackId)
+    |-- stacked-area (extends AreaChartComponent, adds stackId)
+    |-- horizontal-bar (extends BarLineChart, layout="vertical")
+    |-- bubble (extends ScatterChartComponent, adds ZAxis)
+    |-- gauge-chart (NEW section type in registry)
+    |-- composed (extends/replaces bar-line-chart, uses ComposedChart)
 
-CONTENT TYPOGRAPHY (independent, but affects content height):
-  TS-7: Prose upgrade (H2, H3, body, links, tables)
-    -> Increases page height, makes TS-9 TOC more important
-
-CODE BLOCKS (independent track):
-  TS-8: Code block chrome (dark bg, rounded-xl, traffic light dots)
-    -> D-1: Syntax highlighting (layers on top of chrome)
-    -> D-2: Copy button (sits inside chrome container)
-    -> D-3: Language label (sits inside chrome container)
-
-POLISH (after core features):
-  D-4: Sidebar collapse animation
-  D-5: Callout theming upgrade
-  D-6: Scroll-to-top on navigation
-
-BRAND IDENTITY (minimal effort, land with header):
-  TS-2: Brand identity in header
-  TS-3: Search bar restyle
+Gallery Reorganization (LAST -- requires all components to exist)
+    |-- uses category field from section registry
+    |-- must include all new chart types
 ```
 
 ### Dependency Notes
 
-- **TS-10 (Layout) is the foundation:** The three-column layout change affects how every page renders. It must land first and be verified before other visual changes layer on top.
-- **TS-1 (Header) sets the geometric anchor:** The header height (h-16) determines `sticky top-16` for both sidebar and TOC. Must be finalized before sidebar/TOC styling.
-- **TS-8 (Code blocks) is independent:** Code block chrome can be developed in parallel with layout changes since it only affects the MarkdownRenderer component.
-- **D-1 (Syntax highlighting) requires TS-8:** The highlighting applies inside the code block container. Without the chrome, there is no visual container to hold the highlighted code.
-- **TS-7 (Typography) affects all docs:** This is a global change. Must be tested across multiple doc pages. Should land after layout is stable.
+- **Blueprint schema changes are foundational:** `SidebarConfig`, `HeaderConfig`, and `FilterOption` extension must be designed and implemented before the corresponding UI components are built. These are new top-level fields on `BlueprintConfig`.
+- **Sidebar/header are config-level, not screen-level:** Sidebar and header are shared across all screens in a dashboard. They belong on `BlueprintConfig`, not `BlueprintScreen`. Filter bar remains screen-level because different screens have different filter needs. This matches how Power BI, Metabase, and Looker all work: navigation is global, filters are per-page.
+- **Chart extensions are low-risk and parallelizable:** Most new chart types are sub-variants of existing Recharts components with additional props. They extend `ChartType` union and dispatch through existing `ChartRenderer`.
+- **Gauge chart is the only truly new section type:** All other chart additions are new values in the `ChartType` union, dispatched in `ChartRenderer`. Only `gauge-chart` needs a new entry in `SECTION_REGISTRY` (component, form, schema, catalog entry).
+- **Gallery reorganization must be last:** It depends on all new components and section types being registered in the section registry.
+- **Header-above-sidebar is a CSS-only change** but affects the entire wireframe viewer layout container. Must be done early because sidebar/header components reference the layout.
+- **Zod schema and DB migration:** Adding `SidebarConfig` and `HeaderConfig` to `BlueprintConfig` requires updating the Zod schema in `blueprint-schema.ts` AND bumping `schemaVersion` to 3. Existing blueprints without these fields must still validate (optional fields).
 
-## MVP Recommendation
+---
 
-### Phase 1: Layout Shell + Header (structural)
+## MVP Definition (v1.3 Scope)
 
-Critical path. Everything else builds on this.
+### Must Ship
 
-- [ ] **TS-10: Three-column layout** -- Restructure Layout.tsx and DocRenderer.tsx
-- [ ] **TS-1: Frosted glass header** -- Height, blur, z-index, border
-- [ ] **TS-2: Brand identity** -- Minor header text adjustments
-- [ ] **TS-3: Search bar restyle** -- Visual-only change to trigger
-- [ ] **D-6: Scroll-to-top** -- Quick global fix, prevents bugs during testing
+- [ ] `SidebarConfig` in blueprint schema -- groups, items referencing screen IDs, collapsible flag
+- [ ] `HeaderConfig` in blueprint schema -- title source, period selector toggle, action buttons
+- [ ] `FilterOption` type extension -- `filterType` discriminator with `select`, `multi-select`, `date-range`, `search`
+- [ ] Header above sidebar (CSS layout hierarchy fix)
+- [ ] "Gerenciar" as header action button
+- [ ] Sidebar icons rendered from `BlueprintScreen.icon` field
+- [ ] Sidebar groups/sections with labeled headings
+- [ ] Collapsible sidebar (icon-only rail mode)
+- [ ] Gauge chart -- new section type `gauge-chart` with target zones
+- [ ] Stacked bar chart variant (`chartType: 'stacked-bar'`)
+- [ ] Stacked area chart variant (`chartType: 'stacked-area'`)
+- [ ] Horizontal bar chart variant (`chartType: 'horizontal-bar'`)
+- [ ] Bubble chart variant (`chartType: 'bubble'`)
+- [ ] Gallery reorganized by thematic sections
+- [ ] Softer wireframe palette (less harsh black)
 
-### Phase 2: Sidebar + Navigation (visual identity)
+### Should Ship (if time permits)
 
-Highest visual impact. The sidebar is the most visible element on every page.
+- [ ] Composed chart with configurable multi-series (`chartType: 'composed'`)
+- [ ] Sidebar badge/notification counts
+- [ ] Period quick-select presets in date-range filter
+- [ ] Boolean toggle filter type
+- [ ] Sidebar footer (version/environment text)
+- [ ] Logo/brand display in header
+- [ ] Date-range picker visual calendar widget (vs text input)
+- [ ] User/role indicator text in header
 
-- [ ] **TS-4: Sidebar with border-l and indigo accent** -- The signature visual change
-- [ ] **TS-5: Breadcrumbs with chevrons** -- Quick win
-- [ ] **D-4: Sidebar collapse animation** -- Polish (optional)
+### Defer to v2+
 
-### Phase 3: Content Area (typography + page header)
+- [ ] Map/geographic charts
+- [ ] Pivot table / matrix
+- [ ] Cross-chart filtering
+- [ ] Histogram / box plot
+- [ ] Sankey diagram
+- [ ] Sunburst chart (multi-ring donut)
+- [ ] Nested sidebar (3+ levels)
+- [ ] Custom color per individual chart
+- [ ] Drag-and-drop sidebar reordering
 
-Content rendering quality.
-
-- [ ] **TS-6: Page header scale-up** -- Large title, badge pill, description
-- [ ] **TS-7: Prose typography upgrade** -- Global prose rules
-- [ ] **TS-9: TOC restyle** -- Width, offset, visual upgrade
-- [ ] **TS-11: Section dividers** -- Spacing refinement
-
-### Phase 4: Code Blocks (technical quality)
-
-Code rendering polish.
-
-- [ ] **TS-8: Code block chrome** -- Dark bg, dots, shadow
-- [ ] **D-2: Copy button on code blocks** -- Functional addition
-- [ ] **D-3: Language label** -- Quick extraction
-- [ ] **D-1: Syntax highlighting** -- New dependency, test carefully
-
-### Phase 5: Consistency Pass (global polish)
-
-Apply the new visual language to non-doc pages.
-
-- [ ] **D-5: Callout theming** -- Icons, dark mode colors
-- [ ] **Home.tsx** -- Align cards, typography, and spacing with new system
-- [ ] **Client pages** -- BriefingForm, BlueprintTextView, WireframeViewer alignment
-- [ ] **Login/Profile** -- Clerk pages visual alignment
-
-### Defer to v1.3+
-
-- **D-1 Syntax highlighting**: If time-constrained, this can ship later. Monochrome code blocks with chrome are acceptable for v1.2.
-- **Mobile sidebar redesign**: Not in scope. Current mobile behavior is functional.
-- **Dark mode visual pass**: Ensure nothing breaks, but do not redesign dark palette.
+---
 
 ## Feature Prioritization Matrix
 
-| Feature | User Value | Implementation Cost | Priority | Phase |
-|---------|------------|---------------------|----------|-------|
-| TS-10: Three-column layout | HIGH | MEDIUM | P1 | 1 |
-| TS-4: Sidebar border-l + indigo | HIGH | MEDIUM | P1 | 2 |
-| TS-6: Page header scale-up | HIGH | LOW | P1 | 3 |
-| TS-7: Prose typography upgrade | HIGH | LOW | P1 | 3 |
-| TS-8: Code block chrome | HIGH | MEDIUM | P1 | 4 |
-| TS-1: Frosted glass header | MEDIUM | LOW | P1 | 1 |
-| TS-9: TOC restyle | MEDIUM | LOW | P1 | 3 |
-| TS-5: Breadcrumbs with chevrons | MEDIUM | LOW | P1 | 2 |
-| TS-3: Search bar restyle | MEDIUM | LOW | P2 | 1 |
-| TS-2: Brand identity | LOW | LOW | P2 | 1 |
-| TS-11: Section dividers | LOW | LOW | P2 | 3 |
-| D-2: Code block copy button | MEDIUM | MEDIUM | P2 | 4 |
-| D-1: Syntax highlighting | MEDIUM | MEDIUM | P2 | 4 |
-| D-3: Language label | LOW | LOW | P2 | 4 |
-| D-5: Callout theming | LOW | LOW | P3 | 5 |
-| D-4: Sidebar animation | LOW | LOW | P3 | 2 |
-| D-6: Scroll-to-top | MEDIUM | LOW | P1 | 1 |
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| Header above sidebar (z-order fix) | HIGH | LOW | P1 |
+| SidebarConfig in blueprint schema | HIGH | MEDIUM | P1 |
+| HeaderConfig in blueprint schema | HIGH | MEDIUM | P1 |
+| Sidebar icons rendering | HIGH | LOW | P1 |
+| Sidebar groups/sections | HIGH | MEDIUM | P1 |
+| "Gerenciar" as header button | MEDIUM | LOW | P1 |
+| Gauge chart (new section type) | HIGH | MEDIUM | P1 |
+| Stacked bar variant | HIGH | LOW | P1 |
+| Stacked area variant | HIGH | LOW | P1 |
+| Horizontal bar variant | HIGH | LOW | P1 |
+| FilterOption type extension | HIGH | MEDIUM | P1 |
+| Gallery reorganization | MEDIUM | LOW | P1 |
+| Collapsible sidebar (icon rail) | MEDIUM | MEDIUM | P1 |
+| Softer wireframe palette | MEDIUM | LOW | P1 |
+| Bubble chart variant | MEDIUM | LOW | P1 |
+| Date-range filter type | MEDIUM | MEDIUM | P2 |
+| Multi-select dropdown filter | MEDIUM | MEDIUM | P2 |
+| Composed chart (multi-series) | MEDIUM | HIGH | P2 |
+| Sidebar badges | LOW | LOW | P2 |
+| Boolean toggle filter | LOW | LOW | P2 |
+| Logo in header | LOW | LOW | P2 |
+| Period quick-select presets | LOW | LOW | P2 |
+| Sidebar footer | LOW | LOW | P3 |
+| Map charts | LOW | HIGH | P3 (v2+) |
+| Pivot table | LOW | HIGH | P3 (v2+) |
+| Sankey diagram | LOW | HIGH | P3 (v2+) |
 
 **Priority key:**
-- P1: Must have for v1.2 launch -- defines the visual identity
-- P2: Should have -- adds polish, include if time allows
-- P3: Nice to have -- defer if behind schedule
+- P1: Must have for v1.3 launch
+- P2: Should have, add if time permits within v1.3
+- P3: Defer to future milestone
+
+---
 
 ## Competitor Feature Analysis
 
-| Feature | Stripe Docs | Tailwind Docs | shadcn/ui Docs | Vercel Docs | FXL Reference Target |
-|---------|-------------|---------------|----------------|-------------|---------------------|
-| Sticky frosted header | Yes (bg/blur) | Yes (bg/blur) | Yes (bg/blur) | Yes (bg/blur) | Yes (bg-white/80 backdrop-blur-md) |
-| Left sidebar w/ border-l | No (uses bg highlight) | Yes (border-l indicator) | Yes (border-l indicator) | No (uses bg highlight) | Yes (border-l border-slate-200) |
-| Right TOC | Yes (on API pages) | Yes (all pages) | Yes (all pages) | Yes (all pages) | Yes (w-64, "NESTA PAGINA") |
-| Breadcrumbs | Yes (chevron) | No | Yes (chevron) | Yes (slash) | Yes (chevron SVG) |
-| Large page title | text-4xl bold | text-3xl bold | text-4xl bold | text-3xl bold | text-4xl/5xl extrabold |
-| Syntax highlighting | Yes (Prism) | Yes (built-in) | Yes (shiki) | Yes (shiki) | No (monochrome) |
-| Code copy button | Yes | Yes | Yes | Yes | No (only on PromptBlocks) |
-| Code block chrome | Dark bg, minimal | Dark bg, filename tab | Dark bg, copy icon | Dark bg, filename tab | Dark bg, traffic light dots |
-| Badge on page header | No | No | Yes (label) | No | Yes (indigo pill) |
-| Dark mode | Yes | Yes | Yes | Yes | Light-only in reference |
+### Chart Type Coverage
 
-## Color Palette Decision
+| Chart Type | Power BI | Metabase | Looker | FXL Current (21 types) | FXL v1.3 Target |
+|------------|----------|----------|--------|------------------------|-----------------|
+| Bar (vertical) | Yes | Yes | Yes | Yes (`chartType: 'bar'`) | Yes |
+| Bar (horizontal/row) | Yes | Yes (Row) | Yes | No | **Add** (`chartType: 'horizontal-bar'`) |
+| Stacked bar | Yes | Yes | Yes | No | **Add** (`chartType: 'stacked-bar'`) |
+| Line | Yes | Yes | Yes | Yes (`chartType: 'line'`) | Yes |
+| Area | Yes | Yes | Yes | Yes (`chartType: 'area'`) | Yes |
+| Stacked area | Yes | Yes | Yes | No | **Add** (`chartType: 'stacked-area'`) |
+| Pie/Donut | Yes | Yes | Yes | Yes (`donut-chart`) | Yes |
+| Waterfall | Yes | Yes | No | Yes (`waterfall-chart`) | Yes |
+| Funnel | Yes | Yes | No | Yes (`chartType: 'funnel'`) | Yes |
+| Scatter | Yes | Yes | Yes | Yes (`chartType: 'scatter'`) | Yes |
+| Bubble | Yes | Yes | Yes | No | **Add** (`chartType: 'bubble'`) |
+| Radar | Yes | No | No | Yes (`chartType: 'radar'`) | Yes |
+| Treemap | Yes | No | No | Yes (`chartType: 'treemap'`) | Yes |
+| Gauge/Radial | Yes | Yes | No | No | **Add** (new `gauge-chart` section) |
+| Combo/Composed | Yes | Yes (Combo) | Yes | Partial (`bar-line`) | **Extend** |
+| Pareto | Custom | No | No | Yes (`pareto-chart`) | Yes |
+| KPI Card | Yes | Yes (Numbers) | Yes | Yes (`kpi-grid`, `stat-card`) | Yes |
+| Progress bar | No | Yes | No | Yes (`progress-bar`) | Yes |
+| Sankey | No | Yes | No | No | Defer |
+| Map | Yes | Yes | Yes | No | Defer |
+| Box plot | No | Yes | No | No | Defer |
+| Histogram | No | Yes | No | No | Defer |
+| Sunburst | No | Yes | No | No | Defer |
 
-The reference HTML uses a **slate + indigo** palette, which is a significant shift from the current **dark gray-blue + gold** palette.
+**After v1.3, FXL will cover 17 distinct chart types** (vs 12 currently). The 5 deferred types (Sankey, Map, Box plot, Histogram, Sunburst) are either statistically-oriented, geographically-dependent, or require heavy additional dependencies -- none are essential for PME BI dashboards.
 
-| Token | Current Value | Reference Value | Decision |
-|-------|---------------|-----------------|----------|
-| Primary (accent) | `220 16% 22%` (dark gray-blue) | indigo-600 (`#4f46e5`) | **Shift to indigo for app chrome** (sidebar, links, badges) |
-| Accent | `43 96% 56%` (gold) | No gold in reference | **Keep gold for wireframe accent only** (`--wf-accent`). Remove gold from app chrome. |
-| Background | `210 20% 98%` | white (`#ffffff`) | **Shift to pure white** (matches reference `bg-white`) |
-| Sidebar bg | `220 16% 98%` | `slate-50/50` | **Shift to slate-50/50** |
-| Code bg | `220 13% 10%` | `slate-900` | **Align to slate-900** |
-| Text primary | `222 47% 11%` | `slate-900` | **Keep** (very similar) |
-| Text secondary | `215 16% 47%` | `slate-600` | **Align to slate-600** |
+### Sidebar/Header/Filter Patterns
 
-This palette shift means updating the CSS custom properties in `globals.css`. The semantic token system stays, but the values change to match the slate + indigo reference.
+| Feature | Power BI | Metabase | Looker | FXL Current | FXL v1.3 Target |
+|---------|----------|----------|--------|-------------|-----------------|
+| Configurable sidebar | Yes (pages) | Yes (collections) | Yes (explores) | Flat list, no config | **Add to blueprint schema** |
+| Sidebar with icons | Yes | Yes | Yes | Icon field exists, not rendered | **Render icons** |
+| Sidebar groups | Yes | Yes | Yes | No groups | **Add groups** |
+| Collapsible sidebar | Yes | Yes | No | No | **Add** |
+| Configurable header | Yes | Yes | Yes | Hardcoded title + period | **Add to blueprint schema** |
+| Period selector in header | Yes | No (uses filter) | Yes | Already exists | **Make config-driven** |
+| Filter bar per screen | Yes (slicers) | Yes (dashboard filters) | Yes | Exists, select-only | **Extend with more types** |
+| Date range filter | Yes | Yes (6 sub-types) | Yes | No | **Add** |
+| Multi-select filter | Yes | Yes | Yes | No | **Add** |
+| Search filter | Yes | Yes | Yes | Exists as prop, not in blueprint | **Promote to blueprint** |
+| Boolean filter | No | Yes | No | No | **Add** |
+
+---
+
+## Blueprint Schema Design Implications
+
+### Current Schema (what exists today)
+
+```typescript
+type BlueprintConfig = {
+  slug: string
+  label: string
+  schemaVersion?: number      // currently 1 or 2
+  screens: BlueprintScreen[]
+  // NO sidebar config
+  // NO header config
+}
+
+type BlueprintScreen = {
+  id: string
+  title: string
+  icon?: string                // exists but ignored by sidebar
+  periodType: PeriodType
+  filters: FilterOption[]      // select-only filters
+  hasCompareSwitch: boolean
+  sections: BlueprintSection[]
+}
+
+type FilterOption = {
+  key: string
+  label: string
+  options?: string[]           // no filterType discriminator
+}
+
+type ChartType = 'bar' | 'line' | 'bar-line' | 'radar' | 'treemap' | 'funnel' | 'scatter' | 'area'
+```
+
+### Proposed Schema Additions for v1.3
+
+```typescript
+// Top-level layout config additions
+type BlueprintConfig = {
+  slug: string
+  label: string
+  schemaVersion: number          // bump to 3
+  sidebar?: SidebarConfig        // NEW -- dashboard-level
+  header?: HeaderConfig          // NEW -- dashboard-level
+  screens: BlueprintScreen[]
+}
+
+// NEW: Sidebar configuration (dashboard-level, shared across screens)
+type SidebarConfig = {
+  collapsible?: boolean           // allow icon-only mode toggle
+  defaultCollapsed?: boolean      // start in collapsed state
+  logo?: { src: string; alt: string }
+  groups: SidebarGroup[]
+  footer?: { text: string }       // e.g., "v1.0 - Producao"
+}
+
+type SidebarGroup = {
+  label: string                   // group heading (e.g., "Financeiro")
+  screenIds: string[]             // references to BlueprintScreen.id
+}
+
+// NEW: Header configuration (dashboard-level, shared across screens)
+type HeaderConfig = {
+  showPeriodSelector?: boolean    // default true (inherits from screen.periodType)
+  showLogo?: boolean              // default false
+  actions?: HeaderAction[]        // buttons in header right area
+}
+
+type HeaderAction = {
+  label: string
+  icon?: string                   // lucide icon name
+  variant: 'primary' | 'ghost'
+  action: 'manage' | 'share' | 'export' | 'custom'
+}
+
+// EXTENDED: Filter types with discriminator
+type FilterOption = {
+  key: string
+  label: string
+  filterType?: 'select' | 'multi-select' | 'date-range' | 'search' | 'boolean'
+  // filterType optional for backward compat (defaults to 'select')
+  options?: string[]              // for select/multi-select
+  defaultValue?: string
+  presets?: string[]              // for date-range: "Ultimos 30 dias", "Este mes", "YTD"
+}
+
+// EXTENDED: Chart type union with new variants
+type ChartType =
+  | 'bar' | 'line' | 'bar-line' | 'radar' | 'treemap' | 'funnel' | 'scatter' | 'area'
+  | 'stacked-bar' | 'stacked-area' | 'horizontal-bar' | 'bubble' | 'composed'
+
+// NEW: Gauge chart section type (the only new section type needed)
+type GaugeChartSection = {
+  type: 'gauge-chart'
+  title: string
+  value: number
+  max?: number                    // default 100
+  label?: string                  // e.g., "% da Meta"
+  zones?: {
+    min: number
+    max: number
+    color: 'verde' | 'amarelo' | 'vermelho'
+  }[]
+}
+```
+
+### Key Design Decision: Config Level vs Screen Level
+
+Sidebar and header are dashboard-level (shared across all screens). They belong on `BlueprintConfig`, not on `BlueprintScreen`. This matches the universal BI tool pattern:
+- **Power BI:** Navigation pane is report-level. Slicers are page-level.
+- **Metabase:** Collection nav is dashboard-level. Filters are per-question or per-dashboard.
+- **Looker:** Explore sidebar is global. Filters are per-look.
+
+Filter bar stays on `BlueprintScreen` because different screens genuinely need different filter configurations (a "DRE" screen needs period filters; a "Configuracoes" screen needs no filters).
+
+---
+
+## Implementation Notes
+
+### Chart Expansion Strategy
+
+Most new chart types are NOT new section types. They are sub-variants of existing `bar-line-chart` via the `chartType` discriminator, dispatched in `ChartRenderer.tsx`:
+
+| New Chart | Approach | Section Type | Changes Needed |
+|-----------|----------|-------------|----------------|
+| Stacked bar | `chartType: 'stacked-bar'` | `bar-line-chart` | `BarLineChart`: add `stackId="stack"` to all `<Bar>` components |
+| Stacked area | `chartType: 'stacked-area'` | `bar-line-chart` | `AreaChartComponent`: add `stackId="stack"` to all `<Area>` components |
+| Horizontal bar | `chartType: 'horizontal-bar'` | `bar-line-chart` | `BarLineChart`: set `layout="vertical"` on `<BarChart>` container |
+| Bubble | `chartType: 'bubble'` | `bar-line-chart` | `ScatterChartComponent`: add `<ZAxis>` for bubble size dimension |
+| Composed | `chartType: 'composed'` | `bar-line-chart` | New `ComposedChartComponent` using Recharts `<ComposedChart>` |
+| Gauge | NEW section type | `gauge-chart` | New `GaugeChartComponent` using `<RadialBarChart>`, new registry entry |
+
+This means only **1 new section type** in the registry (`gauge-chart`), keeping the schema clean. The `ChartRenderer` switch statement handles dispatch for all bar-line-chart sub-types.
+
+### Recharts Capabilities (verified via official docs)
+
+All proposed chart types are natively supported by Recharts 2.x (already installed):
+- `BarChart` with `stackId` prop for stacked bars -- [StackedBarChart example](https://recharts.github.io/en-US/examples/StackedBarChart/)
+- `BarChart` with `layout="vertical"` for horizontal bars -- native Recharts prop
+- `AreaChart` with `stackId` for stacked areas -- [StackedAreaChart example](https://recharts.github.io/en-US/examples/StackedAreaChart/)
+- `ScatterChart` with `ZAxis` for bubble charts -- [ScatterChart examples](https://recharts.github.io/en-US/examples/)
+- `ComposedChart` for bar + line + area combos -- [LineBarAreaComposedChart](https://recharts.github.io/en-US/examples/LineBarAreaComposedChart/)
+- `RadialBarChart` for gauge/meter visualization -- [SimpleRadialBarChart](https://recharts.github.io/en-US/examples/SimpleRadialBarChart/)
+- **No additional npm dependencies needed** for any chart type
+
+### Wireframe Viewer Layout Restructure
+
+Current layout (simplified):
+```
+<div class="flex h-screen">
+  <WireframeSidebar />        <!-- left, full height -->
+  <div class="flex-1 flex flex-col">
+    <WireframeHeader />       <!-- top of content area only -->
+    <main>...</main>
+  </div>
+</div>
+```
+
+Target layout for v1.3:
+```
+<div class="flex flex-col h-screen">
+  <WireframeHeader />          <!-- TOP, full width, highest z-order -->
+  <div class="flex flex-1 overflow-hidden">
+    <WireframeSidebar />       <!-- left, below header -->
+    <main>
+      <WireframeFilterBar />   <!-- per-screen, inside content area -->
+      <sections />
+    </main>
+  </div>
+</div>
+```
+
+This is a structural CSS change in the wireframe viewer page (likely `WireframeViewer.tsx` or `SharedWireframeView.tsx`). It does not affect the BlueprintRenderer internals.
+
+### Component Count Impact
+
+Current state: 21 section types in registry, ~70 component files total.
+
+After v1.3:
+- 22 section types (add `gauge-chart`)
+- 5 new `chartType` values (stacked-bar, stacked-area, horizontal-bar, bubble, composed)
+- ~5 new component files (GaugeChartComponent, ComposedChartComponent, updated sidebar/header/filter bar)
+- ~3 new property form files (GaugeChartForm, and potentially forms for new filter types)
+- Zod schema additions for new types
+- Updated mock data for gallery
+
+Estimated: 8-12 new files, 15-20 modified files.
+
+---
 
 ## Sources
 
-**Documentation site design patterns:**
-- [Stripe Documentation](https://docs.stripe.com/) -- Three-column layout, API reference patterns, code blocks
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs) -- Typography plugin, border-l sidebar, dark mode prose
-- [shadcn/ui Documentation](https://ui.shadcn.com/) -- Sidebar component, breadcrumbs, layout blocks
-- [Vercel Geist Design System](https://vercel.com/geist/introduction) -- Typography scale, font system, component guidelines
-- [Vercel Geist Typography](https://vercel.com/geist/typography) -- Tailwind class consumption, font-size/line-height/letter-spacing combinations
-
-**Implementation references:**
-- [Rehype Pretty Code](https://rehype-pretty.pages.dev/) -- Shiki-based syntax highlighting for react-markdown
-- [rehype-highlight on GitHub](https://github.com/rehypejs/rehype-highlight) -- highlight.js-based alternative, lighter
-- [react-shiki on GitHub](https://github.com/AVGVSTVS96/react-shiki) -- Client-side Shiki component for React
-- [Docusaurus Code Blocks](https://docusaurus.io/docs/markdown-features/code-blocks) -- Code block features (tabs, highlighting, copy)
-- [Material for MkDocs Code Blocks](https://squidfunk.github.io/mkdocs-material/reference/code-blocks/) -- Copy button, line highlighting patterns
-
-**Layout and header patterns:**
-- [Josh W. Comeau - Frosted Glass](https://www.joshwcomeau.com/css/backdrop-filter/) -- backdrop-filter implementation details
-- [Build a Glassmorphic Navbar with TailwindCSS](https://www.braydoncoyer.dev/blog/build-a-glassmorphic-navbar-with-tailwindcss-backdrop-filter-and-backdrop-blur) -- Tailwind-specific implementation
-- [CSS-Tricks - Sticky TOC](https://css-tricks.com/sticky-table-of-contents-with-scrolling-active-states/) -- IntersectionObserver scroll-spy pattern
-- [Holy Grail Layout](https://matthewjamestaylor.com/holy-grail-layout) -- Three-column responsive layout with CSS Grid/Flexbox
-
-**FXL internal reference:**
-- `.planning/research/visual-redesign-reference.html` -- The HTML target design (authoritative)
-- `src/components/layout/Layout.tsx` -- Current layout shell
-- `src/components/layout/Sidebar.tsx` -- Current sidebar implementation
-- `src/components/docs/MarkdownRenderer.tsx` -- Current markdown rendering with custom components
-- `src/styles/globals.css` -- Current design tokens and prose styles
+- [Recharts Official Examples](https://recharts.github.io/en-US/examples/) -- verified chart type availability and API
+- [Metabase Visualization Overview](https://www.metabase.com/docs/latest/questions/visualizations/visualizing-results) -- complete chart type taxonomy
+- [Metabase Dashboard Filters](https://www.metabase.com/docs/latest/dashboards/filters) -- filter type patterns and widget options
+- [Power BI Charts & Visualizations](https://www.catchr.io/post/power-bi-charts-visualizations) -- complete Power BI chart taxonomy
+- [Databricks Dashboard Filter Types](https://learn.microsoft.com/en-us/azure/databricks/dashboards/filter-types) -- filter widget patterns
+- [shadcn/ui Sidebar](https://ui.shadcn.com/docs/components/radix/sidebar) -- sidebar architecture patterns
+- [shadcn/ui Radial Charts](https://ui.shadcn.com/charts/radial) -- gauge/radial chart patterns with Recharts
+- [Dashboard Design Best Practices - DataCamp](https://www.datacamp.com/tutorial/dashboard-design-tutorial) -- layout patterns and sidebar design
+- [Yellowfin BI Dashboard Components](https://www.yellowfinbi.com/blog/critical-elements-of-effective-bi-dashboards) -- essential BI dashboard components
+- [Metabase BI Dashboard Best Practices](https://www.metabase.com/learn/metabase-basics/querying-and-dashboards/dashboards/bi-dashboard-best-practices) -- dashboard design principles
+- [Top 5 Data Visualization Tools 2025](https://valiotti.com/blog/top-5-data-visualization-tools/) -- comparative analysis of BI tools
+- [Sidebar Navigation Patterns 2025](https://www.navbar.gallery/blog/best-side-bar-navigation-menu-design-examples) -- sidebar design examples
+- [Dashboard Design - Justinmind](https://www.justinmind.com/ui-design/dashboard-design-best-practices-ux) -- header layout patterns
 
 ---
-*Feature landscape for: v1.2 Visual Redesign*
+*Feature research for: v1.3 Builder & Components (BI Dashboard Wireframe Builder)*
 *Researched: 2026-03-10*

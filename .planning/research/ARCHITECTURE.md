@@ -1,529 +1,585 @@
-# Architecture Research: Visual Redesign Integration
+# Architecture Research: v1.3 Builder & Components Integration
 
-**Domain:** Documentation platform visual redesign (FXL Core v1.2)
+**Domain:** Wireframe builder expansion (sidebar/header/filter as blueprint items, 20+ chart types, gallery reorganization)
 **Researched:** 2026-03-10
-**Confidence:** HIGH (based on full codebase analysis of existing components + HTML reference target)
+**Confidence:** HIGH (based on complete codebase analysis of existing section registry, BlueprintConfig schema, renderer pipeline, and component gallery)
 
-## System Overview: Current vs Target
-
-### Current Architecture
+## System Overview: Current Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│  App.tsx (BrowserRouter)                                     │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │  Layout.tsx (flex column)                              │  │
-│  │  ┌──────────────────────────────────────────────────┐  │  │
-│  │  │  TopNav.tsx (sticky top-0 z-20, h-14)            │  │  │
-│  │  │  bg-background/90 backdrop-blur                  │  │  │
-│  │  │  [FXL logo+subtitle] [SearchBtn] [ThemeToggle]   │  │  │
-│  │  └──────────────────────────────────────────────────┘  │  │
-│  │  ┌────────┬─────────────────────────────────────────┐  │  │
-│  │  │Sidebar │  <main> overflow-y-auto                 │  │  │
-│  │  │ w-64   │  ┌───────────────────────────────────┐  │  │  │
-│  │  │ not    │  │  max-w-4xl (HARDCODED in Layout)  │  │  │  │
-│  │  │ sticky │  │  <Outlet />                       │  │  │  │
-│  │  │ bg-    │  │   ├─ Home.tsx                     │  │  │  │
-│  │  │sidebar │  │   ├─ DocRenderer.tsx               │  │  │  │
-│  │  │/80     │  │   │   ├─ content (min-w-0 flex-1) │  │  │  │
-│  │  │bg-pri/ │  │   │   └─ TOC (w-52, sticky top-8) │  │  │  │
-│  │  │10 actv │  │   └─ Client pages                  │  │  │  │
-│  │  └────────┴──└───────────────────────────────────┘──┘  │  │
-│  └────────────────────────────────────────────────────────┘  │
-│  Full-screen routes outside Layout: Login, Profile, Wireframe│
-└──────────────────────────────────────────────────────────────┘
-```
-
-### Target Architecture (from HTML reference)
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│  App.tsx (BrowserRouter) -- routing unchanged                │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │  Layout.tsx (flex column)                              │  │
-│  │  ┌──────────────────────────────────────────────────┐  │  │
-│  │  │  TopNav.tsx (sticky top-0 z-50, h-16)            │  │  │
-│  │  │  bg-white/80 backdrop-blur-md, border-slate-200  │  │  │
-│  │  │  [Logo+subtitle] [...SearchInput...] [ThemeBtn]  │  │  │
-│  │  └──────────────────────────────────────────────────┘  │  │
-│  │  ┌────────┬────────────────────────────┬───────────┐  │  │
-│  │  │Sidebar │  <main> (NO max-w in Lay.) │ TOC aside │  │  │
-│  │  │ sticky │  ┌──────────────────────┐  │ sticky    │  │  │
-│  │  │ top-16 │  │ max-w-4xl (per-page) │  │ top-16    │  │  │
-│  │  │ h-calc │  │ Breadcrumbs (chevron)│  │ w-64      │  │  │
-│  │  │ bg-    │  │ Badge (indigo ring)  │  │ "NESTA    │  │  │
-│  │  │ slate- │  │ Title (4xl/5xl)      │  │  PAGINA"  │  │  │
-│  │  │ 50/50  │  │ Description (lg)     │  │ border-l  │  │  │
-│  │  │ border │  │ [Exibir MD]          │  │ indigo    │  │  │
-│  │  │ -l nav │  │ ── separator ──      │  │ active    │  │  │
-│  │  │ indigo │  │ Content sections     │  │           │  │  │
-│  │  │ accent │  │ (dark code blocks)   │  │           │  │  │
-│  │  └────────┴──└──────────────────────┘──┴───────────┘  │  │
-│  └────────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────┘
-```
-
-### Key Structural Differences
-
-1. **Header height:** h-14 (56px) -> h-16 (64px). Cascades to all sticky offsets.
-2. **Sidebar positioning:** Implicitly static in flex -> explicitly `sticky top-16 h-[calc(100vh-4rem)]`.
-3. **Width constraint:** `max-w-4xl` lives in Layout -> moves to individual page components.
-4. **Scroll context:** `<main>` scrolls independently (overflow-y-auto) -> document body scrolls (needed for sticky to work).
-5. **Search trigger:** Small button that opens modal -> visible input field that opens modal on click.
-6. **Color palette:** Dark gray primary + gold accent -> slate + indigo primary.
-
-## Component Audit: Modify vs Create
-
-### Components to MODIFY (9 files)
-
-| # | File | Current State | Target Changes | Scope |
-|---|------|---------------|----------------|-------|
-| 1 | `src/styles/globals.css` | HSL tokens: dark gray primary (220 16% 22%), gold accent (43 96% 56%), .prose styles with text-2xl headings | Slate + indigo palette, .prose typography scale upgrade (4xl headings, lg descriptions), dark code block vars | LARGE |
-| 2 | `src/components/layout/Layout.tsx` | `flex-1 flex-col overflow-hidden md:flex-row`, `max-w-4xl` wrapper on Outlet | Remove overflow-hidden, remove max-w-4xl (move to pages), adjust padding to px-8 py-10 lg:px-12 | SMALL |
-| 3 | `src/components/layout/TopNav.tsx` | h-14, bg-background/90 backdrop-blur, z-20, FXL logo block + SearchCommand button + ThemeToggle | h-16, bg-white/80 backdrop-blur-md, z-50, brand subtitle styling, wider search integration area | MEDIUM |
-| 4 | `src/components/layout/SearchCommand.tsx` | Small 48-char button trigger: `[icon] Pesquisar docs... [Cmd+K]` opens CommandDialog | Visible input-styled trigger: `bg-slate-50 border-slate-200 rounded-md py-1.5 pl-10 pr-12 max-w-sm` with search icon + kbd. Click opens same CommandDialog | MEDIUM |
-| 5 | `src/components/layout/Sidebar.tsx` | bg-sidebar/80 backdrop-blur, bg-primary/10 active, text-xs items, no border-l indicator, separator between Home and sections | bg-slate-50/50, border-l border-slate-200 nav line, uppercase bold section headers (PROCESSO, PADROES...), text-slate-500 items, text-indigo-600 font-medium active, space-y-8 between sections, sticky top-16 | LARGE |
-| 6 | `src/components/docs/DocBreadcrumb.tsx` | text-xs text-muted-foreground, "/" separator, simple spans | text-sm text-slate-500, chevron SVG separator, hover:text-slate-800, font-medium on current page | SMALL |
-| 7 | `src/components/docs/DocPageHeader.tsx` | text-2xl font-bold, Badge variant="secondary", text-sm description, Separator + button below | text-4xl font-extrabold tracking-tight sm:text-5xl, indigo ring badge (bg-indigo-50 ring-1 ring-inset ring-indigo-600/20), text-lg text-slate-600 description, mt-8 on button | MEDIUM |
-| 8 | `src/components/docs/DocTableOfContents.tsx` | w-52, sticky top-8, text-[10px] "Nesta pagina", simple link list, text-primary active | w-64, sticky top-16, text-xs font-bold uppercase "NESTA PAGINA", nested border-l border-slate-200 for h3 sub-items, text-indigo-600 font-medium active | MEDIUM |
-| 9 | `src/components/docs/MarkdownRenderer.tsx` | prose class, bg-[hsl(var(--code-bg))] code blocks, text-primary inline code, basic pre | Dark code blocks: bg-slate-900 rounded-xl shadow-2xl + traffic light dots decoration, colored spans (indigo filenames, emerald annotations, slate-500 comments), indigo link styling | MEDIUM |
-
-### Components to CREATE (0 new structural components)
-
-The HTML reference introduces zero new structural components. Every visual element in the target design maps to an existing component. The changes are purely styling.
-
-**Optional extraction (recommended but not required):**
-
-| Potential File | Purpose | Decision |
-|----------------|---------|----------|
-| `src/components/docs/CodeBlock.tsx` | Dark code block with traffic light dots, optional filename label | EXTRACT from MarkdownRenderer's `pre` component override. Cleaner if reused in PromptBlock too. |
-
-### Components needing NO structural changes (token propagation handles it)
-
-| Component | Why Unchanged |
-|-----------|---------------|
-| `src/App.tsx` | Routing structure identical |
-| `src/lib/docs-parser.ts` | Parse logic and heading extraction unchanged |
-| `src/components/docs/Operational.tsx` | Adopts new tokens via bg-muted, border-border, text-muted-foreground |
-| `src/components/docs/PhaseCard.tsx` | Adopts new tokens via bg-card, border-border, text-primary |
-| `src/components/layout/ThemeToggle.tsx` | Just an icon button, tokens propagate automatically |
-| `src/pages/Login.tsx` | Full-screen outside Layout, bg-background token propagation |
-| `src/pages/Profile.tsx` | Full-screen outside Layout, bg-background token propagation |
-
-### Pages needing consistency pass (style-only, no structural changes)
-
-| Page | What Changes |
-|------|-------------|
-| `src/pages/Home.tsx` | Typography: text-2xl -> text-4xl headings, card hover indigo accent, section header sizing |
-| `src/pages/clients/FinanceiroContaAzul/Index.tsx` | Badge, table, heading typography alignment |
-| `src/components/docs/Callout.tsx` | Replace hardcoded `border-blue-200 bg-blue-50` with token-aware classes |
-| `src/components/docs/PromptBlock.tsx` | Align code block styling with new dark theme pattern |
-| `src/pages/clients/BriefingForm.tsx` | Token alignment verification |
-| `src/pages/clients/BlueprintTextView.tsx` | Token alignment verification |
-
-## Data Flow
-
-### Heading Data Flow (UNCHANGED -- already working)
-
-```
-docs-parser.ts
-  extractHeadings(body) -> DocHeading[] { id, text, level: 2|3 }
+BlueprintConfig (Supabase DB)
     |
     v
-DocRenderer.tsx
-  getDoc(pathname) -> { headings, sections, frontmatter, rawBody }
+BlueprintScreen[] -----> WireframeViewer (page-level)
+    |                         |
+    |                    +----|----+----------+
+    |                    |         |          |
+    |               AdminToolbar  WireframeHeader  Sidebar (hardcoded aside)
+    |                              (hardcoded)      (ScreenManager)
     |
-    +------> DocTableOfContents (headings prop)
-    |          IntersectionObserver -> activeId state
-    |          rootMargin: "-80px 0px -70% 0px"
+    v
+ScreenRow[] (id + GridLayout + sections[])
     |
-    +------> MarkdownRenderer (content prop)
-               h2/h3 components generate matching id attributes via slugify()
+    v
+BlueprintRenderer -----> DndContext + SortableContext
+    |                         |
+    |                    WireframeFilterBar (conditional, from screen.filters)
+    |
+    v
+SectionRenderer -----> SECTION_REGISTRY[type].renderer
+    |                         |
+    |                    ChartRenderer (dispatches chartType sub-variants)
+    |                    TableRenderer
+    |                    InputRenderer
+    |                    ...14 other renderers
+    v
+PropertyPanel -----> SECTION_REGISTRY[type].propertyForm
 ```
 
-No data flow changes needed. Heading IDs, scroll-spy, and active tracking are fully implemented.
+### Current Component Responsibilities
 
-### Search Data Flow (visual change only)
+| Component | Responsibility | Current Implementation |
+|-----------|----------------|------------------------|
+| `WireframeViewer` | Page-level orchestrator | Hardcodes sidebar `<aside>`, `WireframeHeader`, `AdminToolbar` layout |
+| `BlueprintRenderer` | Renders ScreenRow grid + sections | Receives `screen` prop, shows `WireframeFilterBar` inline if filters exist |
+| `SectionRenderer` | Dispatches to correct renderer via registry | Lookup `SECTION_REGISTRY[type].renderer`, passes through props |
+| `ChartRenderer` | Routes chart section to correct chart component | Switch on `section.type` then `section.chartType` for bar-line variants |
+| `SECTION_REGISTRY` | Single source of truth for all 21 section types | Maps type -> renderer, propertyForm, catalogEntry, defaultProps, schema |
+| `ComponentPicker` | Add-section dialog in editor | Uses `getCatalog()` from registry, groups by `catalogEntry.category` |
+| `ComponentGallery` | Standalone page showing all components | Hardcoded `categories[]` array with manual imports and mock data |
+| `WireframeHeader` | Period navigation (month/year arrows) | Hardcoded in WireframeViewer layout, not a blueprint item |
+| `WireframeSidebar` | Gallery-only preview component | NOT used in WireframeViewer (sidebar is hardcoded there) |
+| `WireframeFilterBar` | Filter dropdowns + compare switch | Rendered conditionally inside BlueprintRenderer from `screen.filters` |
+| `AdminToolbar` | Edit/save/share/comments/theme toggle | Fixed bar above WireframeHeader in WireframeViewer |
+
+## Integration Analysis: Three Key Changes
+
+### 1. Sidebar/Header/Filter Bar as Configurable Blueprint Items
+
+**Current state:** The WireframeViewer (line 672-837) hardcodes the layout shell:
+- Sidebar `<aside>` at fixed 240px with ScreenManager + branding logo
+- WireframeHeader with period navigation
+- WireframeFilterBar rendered conditionally inside BlueprintRenderer
+
+**Target state:** These become configurable at the BlueprintConfig level, allowing each blueprint to define its own sidebar style, header behavior, and filter bar configuration.
+
+**Recommended approach: Layout config at BlueprintConfig level, NOT as section types.**
+
+Sidebar, header, and filter bar are fundamentally different from content sections. They are **shell/chrome elements** that wrap all screens, not content that lives inside a screen's sections array. Treating them as section types would be architecturally wrong because:
+
+1. They do not belong in `screen.sections[]` -- a sidebar wraps all screens, not one screen
+2. They have different rendering contexts (fixed position, outside the scroll area)
+3. They need different property forms (screen list is a sidebar concern, not a section concern)
+
+**Recommended schema change -- add `layout` config to `BlueprintConfig`:**
+
+```typescript
+// NEW: Layout configuration at blueprint level
+export type SidebarConfig = {
+  variant: 'standard' | 'compact' | 'icon-only' | 'none'
+  position: 'left' | 'right'
+  width?: number           // default: 240
+  showLogo?: boolean       // default: true
+  showFooter?: boolean     // default: true
+  sections?: SidebarSection[]  // optional custom grouping of screens
+}
+
+export type SidebarSection = {
+  label: string
+  screenIds: string[]  // references to screen.id values
+}
+
+export type HeaderConfig = {
+  variant: 'standard' | 'compact' | 'minimal' | 'none'
+  showPeriodNav?: boolean  // default: true (respects screen.periodType)
+  showBreadcrumb?: boolean
+  position: 'above-sidebar' | 'beside-sidebar'  // controls z-layer
+}
+
+export type FilterBarConfig = {
+  variant: 'inline' | 'sticky' | 'drawer' | 'none'
+  position: 'below-header' | 'in-content'
+}
+
+// MODIFIED: BlueprintConfig gets layout field
+export type BlueprintConfig = {
+  slug: string
+  label: string
+  schemaVersion?: number
+  layout?: {
+    sidebar?: SidebarConfig
+    header?: HeaderConfig
+    filterBar?: FilterBarConfig
+  }
+  screens: BlueprintScreen[]
+}
+```
+
+**Why this approach:**
+- Layout config is a blueprint-level concern, not a per-screen concern
+- Each field has sensible defaults, so existing blueprints with no `layout` field continue working unchanged (backward compatible)
+- The WireframeViewer reads `config.layout?.sidebar`, `config.layout?.header`, etc. and passes to configurable components
+- Schema migration `v1 -> v2` adds `layout: undefined` (no-op, defaults kick in)
+- Zod schema extension is additive (`.optional()` fields)
+
+**Files that need modification:**
+
+| File | Change | Type |
+|------|--------|------|
+| `types/blueprint.ts` | Add `SidebarConfig`, `HeaderConfig`, `FilterBarConfig`, `LayoutConfig` types; add `layout?` to `BlueprintConfig` | Modified |
+| `lib/blueprint-schema.ts` | Add Zod schemas for layout config types; extend `BlueprintConfigSchema` | Modified |
+| `lib/blueprint-migrations.ts` | Add v1->v2 migrator (set schemaVersion: 2, layout: undefined) | Modified |
+| `WireframeViewer.tsx` | Extract hardcoded sidebar/header into configurable components; read `config.layout` | Modified |
+| `WireframeHeader.tsx` | Accept `HeaderConfig` props for variant/position control | Modified |
+| `WireframeSidebar.tsx` | Rewrite to accept `SidebarConfig` + screens + branding, replace hardcoded aside | Modified |
+| `components/editor/LayoutConfigPanel.tsx` | New property panel for editing layout config | **New** |
+| `AdminToolbar.tsx` | Add "Layout" button to open LayoutConfigPanel | Modified |
+
+### 2. Expanding Chart Types via the Section Registry
+
+**Current state:** 9 chart variants exist across 5 section types:
+- `bar-line-chart` section with `chartType: 'bar' | 'line' | 'bar-line' | 'radar' | 'treemap' | 'funnel' | 'scatter' | 'area'` (8 sub-variants)
+- `donut-chart` section (1 type)
+- `waterfall-chart` section (1 type)
+- `pareto-chart` section (1 type)
+- Total: 5 section types, but `bar-line-chart` is overloaded with 8 chartType sub-variants
+
+**Available Recharts 2.15.4 chart primitives:**
+- `BarChart`, `LineChart`, `AreaChart` -- cartesian, composable
+- `ComposedChart` -- mixed bar+line+area
+- `PieChart` -- pie/donut
+- `RadarChart` -- polar/spider
+- `ScatterChart` -- x/y scatter
+- `FunnelChart` -- funnel
+- `Treemap` -- hierarchical
+- `RadialBarChart` -- circular bars (gauges)
+- `SunburstChart` -- hierarchical pie
+- `Sankey` -- flow diagrams
+
+**Problem with current design:** The `bar-line-chart` section type is a "god section" that overloads 8 different chart types into one discriminated type. Adding more chart types (radial bar, sunburst, sankey, composed, stacked, grouped, horizontal) into this same type makes the overloading worse. The ChartRenderer switch statement grows unbounded.
+
+**Recommended approach: Keep the existing `bar-line-chart` overloaded pattern, but introduce new top-level section types only for charts with fundamentally different data shapes.**
+
+Rationale: Charts that share the same data model (x-axis categories, y-axis values) should stay in the `bar-line-chart` family. Charts with unique data shapes deserve their own section type.
+
+**Chart type taxonomy for v1.3:**
+
+| Chart | Data Shape | Section Type | Status | Implementation |
+|-------|-----------|--------------|--------|----------------|
+| Bar | categories + values | `bar-line-chart` (chartType: 'bar') | Exists | BarLineChart component |
+| Line | categories + values | `bar-line-chart` (chartType: 'line') | Exists | BarLineChart component |
+| Bar+Line | categories + dual values | `bar-line-chart` (chartType: 'bar-line') | Exists | BarLineChart component |
+| Area | categories + values | `bar-line-chart` (chartType: 'area') | Exists | AreaChartComponent |
+| Stacked Bar | categories + multi-series | `bar-line-chart` (chartType: 'stacked-bar') | **New sub-type** | New component |
+| Grouped Bar | categories + multi-series | `bar-line-chart` (chartType: 'grouped-bar') | **New sub-type** | New component |
+| Horizontal Bar | categories + values | `bar-line-chart` (chartType: 'horizontal-bar') | **New sub-type** | New component |
+| Stacked Area | categories + multi-series | `bar-line-chart` (chartType: 'stacked-area') | **New sub-type** | New component |
+| Multi-Line | categories + multi-series | `bar-line-chart` (chartType: 'multi-line') | **New sub-type** | New component |
+| Radar | categories + values (polar) | `bar-line-chart` (chartType: 'radar') | Exists | RadarChartComponent |
+| Treemap | hierarchical blocks | `bar-line-chart` (chartType: 'treemap') | Exists | TreemapComponent |
+| Funnel | ordered stages | `bar-line-chart` (chartType: 'funnel') | Exists | FunnelChartComponent |
+| Scatter | x/y pairs | `bar-line-chart` (chartType: 'scatter') | Exists | ScatterChartComponent |
+| Donut | label/value slices | `donut-chart` | Exists | DonutChart component |
+| Pie | label/value slices | `donut-chart` (variant prop) | **New variant** | DonutChart with innerRadius=0 |
+| Waterfall | labeled bars +/- | `waterfall-chart` | Exists | WaterfallChart component |
+| Pareto | bars + cumulative line | `pareto-chart` | Exists | ParetoChart component |
+| Radial Bar | circular progress bars | `radial-bar-chart` | **New section type** | **New** component + registry entry |
+| Gauge | single-value semicircle | `gauge-chart` | **New section type** | **New** component + registry entry |
+| Sankey | flow/node links | `sankey-chart` | **New section type** | **New** component + registry entry |
+| Sunburst | hierarchical pie | `sunburst-chart` | **New section type** | **New** component + registry entry |
+| Bullet | target vs actual bar | `bullet-chart` | **New section type** | **New** component (custom, not native Recharts) |
+| Sparkline (inline) | mini trend line | (embedded in KpiCard) | Exists | sparkline prop on KpiCard |
+
+**New chartType values for `bar-line-chart`:** `'stacked-bar' | 'grouped-bar' | 'horizontal-bar' | 'stacked-area' | 'multi-line'`
+
+**New section types (unique data shapes, 5 total):**
+
+```typescript
+// Radial bar -- circular progress indicators
+export type RadialBarSection = {
+  type: 'radial-bar-chart'
+  title: string
+  items: { label: string; value: number; fill?: string }[]
+  height?: number
+}
+
+// Gauge -- single value on semicircle
+export type GaugeSection = {
+  type: 'gauge-chart'
+  title: string
+  value: number
+  min?: number
+  max?: number
+  thresholds?: { value: number; color: string }[]
+  height?: number
+}
+
+// Sankey -- flow diagram
+export type SankeySection = {
+  type: 'sankey-chart'
+  title: string
+  nodes: { name: string }[]
+  links: { source: number; target: number; value: number }[]
+  height?: number
+}
+
+// Sunburst -- hierarchical pie
+export type SunburstSection = {
+  type: 'sunburst-chart'
+  title: string
+  data: SunburstNode
+  height?: number
+}
+type SunburstNode = {
+  name: string
+  value?: number
+  children?: SunburstNode[]
+}
+
+// Bullet -- target vs actual
+export type BulletSection = {
+  type: 'bullet-chart'
+  title: string
+  items: { label: string; actual: number; target: number; ranges?: number[] }[]
+  height?: number
+}
+```
+
+**Files that need modification:**
+
+| File | Change | Type |
+|------|--------|------|
+| `types/blueprint.ts` | Add 5 new section types to union; extend `ChartType` with 5 new sub-types | Modified |
+| `lib/blueprint-schema.ts` | Add 5 new Zod section schemas; extend `ChartType` enum; add to discriminated union | Modified |
+| `lib/section-registry.tsx` | Add 5+5 new entries (5 new section types + chart sub-types don't need registry entries) | Modified |
+| `sections/ChartRenderer.tsx` | Add 5 new cases to `chartType` switch for bar-line sub-variants | Modified |
+| `components/StackedBarChart.tsx` | New component | **New** |
+| `components/GroupedBarChart.tsx` | New component | **New** |
+| `components/HorizontalBarChart.tsx` | New component | **New** |
+| `components/StackedAreaChart.tsx` | New component | **New** |
+| `components/MultiLineChart.tsx` | New component | **New** |
+| `components/RadialBarChartComponent.tsx` | New component + renderer | **New** |
+| `components/GaugeChart.tsx` | New component + renderer | **New** |
+| `components/SankeyChart.tsx` | New component + renderer | **New** |
+| `components/SunburstChart.tsx` | New component + renderer | **New** |
+| `components/BulletChart.tsx` | New component + renderer | **New** |
+| `sections/RadialBarRenderer.tsx` | New renderer | **New** |
+| `sections/GaugeRenderer.tsx` | New renderer | **New** |
+| `sections/SankeyRenderer.tsx` | New renderer | **New** |
+| `sections/SunburstRenderer.tsx` | New renderer | **New** |
+| `sections/BulletRenderer.tsx` | New renderer | **New** |
+| `editor/property-forms/RadialBarForm.tsx` | New property form | **New** |
+| `editor/property-forms/GaugeForm.tsx` | New property form | **New** |
+| `editor/property-forms/SankeyForm.tsx` | New property form | **New** |
+| `editor/property-forms/SunburstForm.tsx` | New property form | **New** |
+| `editor/property-forms/BulletForm.tsx` | New property form | **New** |
+
+### 3. Component Gallery Reorganization
+
+**Current state:** The `ComponentGallery.tsx` has 5 hardcoded categories:
+- Cards (3): KpiCard, KpiCardFull, CalculoCard
+- Graficos (4): BarLineChart, WaterfallChart, DonutChart, ParetoChart
+- Tabelas (4): DataTable, DrillDownTable, ClickableTable, ConfigTable
+- Layout (7): WireframeSidebar, WireframeHeader, WireframeFilterBar, GlobalFilters, CommentOverlay, WireframeModal, DetailViewSwitcher
+- Inputs (4): InputsScreen, UploadSection, ManualInputSection, SaldoBancoInput
+
+**Problem:** The gallery does NOT use the section registry. It's a completely independent hardcoded list of components with its own mock data, its own category scheme, and its own imports. This means:
+1. Adding a new section type requires changes in both the registry AND the gallery
+2. The gallery's categories don't match the registry's categories
+3. Components in the gallery (WireframeSidebar, WireframeModal, etc.) are not section types at all
+
+**Recommended approach: Hybrid gallery with registry-driven sections + curated non-section components.**
+
+The gallery should have two tiers:
+1. **Registry-driven sections** -- auto-generated from `SECTION_REGISTRY`, grouped by `catalogEntry.category`
+2. **Shell components** -- manually curated (WireframeSidebar, WireframeHeader, WireframeFilterBar, WireframeModal, etc.)
 
 ```
-Current:
-  TopNav -> SearchCommand (button trigger) -> CommandDialog (modal)
+Gallery Structure:
+  [Tab: Secoes]        <-- auto from SECTION_REGISTRY grouped by category
+    KPIs               <-- from catalogEntry.category
+    Graficos
+    Tabelas
+    Inputs
+    Layout
+    Formularios
+    Filtros
+    Metricas
+  [Tab: Layout/Shell]  <-- manually curated
+    Sidebar
+    Header
+    Filter Bar
+    Modal
+    Detail Switcher
+  [Tab: Compostos]     <-- optional, for compound patterns
+    Screen com sidebar + header + filter + content
+```
 
-Target:
-  TopNav -> SearchCommand (input-styled trigger) -> CommandDialog (modal)
+**Recommended category reorganization for the registry (v1.3):**
 
-  The trigger changes from:
-    <button className="...">Pesquisar docs... [Cmd+K]</button>
-  To:
-    <div className="relative w-full max-w-sm">
-      <input placeholder="Pesquisar docs..." onClick={openDialog} readOnly />
-      <kbd>Cmd+K</kbd>
-    </div>
+| Category | Current Types | New Types (v1.3) |
+|----------|--------------|-------------------|
+| KPIs | kpi-grid | (unchanged) |
+| Metricas | stat-card, progress-bar | radial-bar-chart, gauge-chart, bullet-chart |
+| Graficos | bar-line-chart, donut-chart, waterfall-chart, pareto-chart | sankey-chart, sunburst-chart |
+| Tabelas | data-table, drill-down-table, clickable-table, config-table | (unchanged) |
+| Inputs | saldo-banco, manual-input, upload-section | (unchanged) |
+| Layout | calculo-card, chart-grid, info-block, divider | (unchanged) |
+| Formularios | settings-page, form-section | (unchanged) |
+| Filtros | filter-config | (unchanged) |
 
-  CommandDialog logic, search index, grouped results: ALL UNCHANGED.
+**Files that need modification:**
+
+| File | Change | Type |
+|------|--------|------|
+| `src/pages/tools/ComponentGallery.tsx` | Rewrite to use registry-driven tier + shell tier | Modified |
+| `src/pages/tools/galleryMockData.ts` | Add mock data for new chart types | Modified |
+| `lib/section-registry.tsx` | Update `catalogEntry.category` for new types | Modified |
+
+## Data Flow Changes
+
+### Current Data Flow (Unchanged for Content Sections)
+
+```
+BlueprintConfig.screens[i].rows[j].sections[k]
+    |
+    v
+BlueprintRenderer
+    |
+    v
+SectionRenderer(section) ---lookup---> SECTION_REGISTRY[section.type]
+    |                                        |
+    |                                   .renderer component
+    v
+<RendererComponent section={section} compareMode={...} />
+```
+
+### New Data Flow: Layout Config
+
+```
+BlueprintConfig.layout?.sidebar
+BlueprintConfig.layout?.header
+BlueprintConfig.layout?.filterBar
+    |
+    v
+WireframeViewer reads layout config
+    |
+    +---> <ConfigurableSidebar config={sidebarConfig} screens={screens} branding={branding} />
+    |         |
+    |         v
+    |     Renders sidebar variant based on config.variant
+    |     Renders screen groups based on config.sections[]
+    |
+    +---> <ConfigurableHeader config={headerConfig} screen={activeScreen} />
+    |         |
+    |         v
+    |     Renders header variant based on config.variant
+    |     Position determines z-index stacking
+    |
+    +---> BlueprintRenderer receives filterBarConfig
+              |
+              v
+          Renders filter bar based on config.variant
+```
+
+### Schema Migration Flow
+
+```
+DB raw JSON (schemaVersion: 1)
+    |
+    v
+migrateBlueprint()
+    |
+    v
+migrators[1](config)  --> adds layout: undefined, sets schemaVersion: 2
+    |
+    v
+BlueprintConfigSchema.safeParse() --> validates, defaults kick in
+    |
+    v
+ValidatedBlueprintConfig (schemaVersion: 2)
 ```
 
 ## Architectural Patterns
 
-### Pattern 1: Token-Driven Redesign (change once, propagate everywhere)
+### Pattern 1: Section Registry Extension (Proven, HIGH confidence)
 
-**What:** Modify CSS custom properties in `globals.css` and let Tailwind semantic classes (`text-primary`, `bg-muted`, `border-border`) propagate changes automatically to all components.
+**What:** Add new section types by following the established registry pattern -- type definition, Zod schema, renderer, property form, catalog entry, all registered in `SECTION_REGISTRY`.
 
-**When to use:** For the color palette shift. Most components already use semantic tokens, not hardcoded Tailwind colors.
+**When to use:** Every new content section that lives inside `screen.rows[].sections[]`.
 
-**Token migration map:**
+**Trade-offs:** Each new section type requires 5-6 files (type, schema, renderer, form, component, registry entry). This is intentional -- it ensures type safety and completeness. The registry guarantees no dead code paths.
 
-```css
-/* ---- CURRENT :root ---- */
---primary: 220 16% 22%;           /* dark gray-blue */
---accent: 43 96% 56%;             /* gold */
---sidebar-accent: 43 96% 56%;    /* gold */
-
-/* ---- TARGET :root ---- */
---primary: 234 89% 63%;           /* indigo-500 */
---accent: 234 89% 63%;            /* indigo (align with primary) */
---sidebar-accent: 234 89% 63%;   /* indigo */
+**Checklist for adding one section type:**
+```
+1. types/blueprint.ts       -- add SectionType to union
+2. lib/blueprint-schema.ts  -- add Zod schema, add to discriminated union
+3. components/MyChart.tsx    -- presentational component
+4. sections/MyRenderer.tsx   -- registry-compatible renderer
+5. editor/property-forms/MyForm.tsx -- property editor
+6. lib/section-registry.tsx  -- register all pieces
 ```
 
-**Components that bypass tokens (need manual fixes):**
-- `Callout.tsx`: hardcoded `border-blue-200 bg-blue-50 text-blue-900` (info) and `border-amber-200 bg-amber-50 text-amber-900` (warning)
-- `FinanceiroIndex.tsx`: hardcoded `bg-green-50 text-green-700` status badges
-- `Home.tsx`: no hardcoded colors (all semantic tokens)
+### Pattern 2: Config-Level Layout (New, for v1.3)
 
-**Trade-offs:**
-- Pro: One-file change propagates to 30+ component files automatically
-- Pro: Dark mode tokens updated in the same file
-- Con: Components with hardcoded Tailwind colors (Callout) need manual attention
-- Con: Must verify both light AND dark mode after token changes
+**What:** Blueprint-level configuration for shell elements (sidebar, header, filter bar) that sit outside the per-screen content area.
 
-### Pattern 2: Sticky Positioning Stack
+**When to use:** Elements that wrap or sit alongside all screens, not elements within a screen's content flow.
 
-**What:** Three sticky elements coordinated by z-index and top offsets.
+**Trade-offs:** Introduces a new configuration surface (layout config panel) and new components. However, it cleanly separates shell concerns from content concerns and avoids the anti-pattern of putting layout chrome into the sections array.
 
+### Pattern 3: ChartType Sub-Dispatch (Existing, Extended)
+
+**What:** The `bar-line-chart` section type has a `chartType` discriminator that selects the specific chart component. ChartRenderer contains the dispatch switch.
+
+**When to use:** Charts sharing the same core data model (categories-based cartesian charts: bar, line, area, stacked, grouped, horizontal).
+
+**Trade-offs:** The switch statement in ChartRenderer grows, but all these charts share the same `BarLineChartSection` type definition (title, chartType, height, categories, xLabel, yLabel). This is correct because they genuinely share a data shape. The alternative (separate section types for each) would create 13 near-identical types.
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Sidebar/Header as Section Types
+
+**What people do:** Add sidebar and header as entries in `SECTION_REGISTRY` and put them in `screen.sections[]`.
+
+**Why it's wrong:** Sidebar wraps ALL screens, not one screen. Header has fixed positioning outside the content scroll area. Putting them in sections would mean they appear in the drag-reorder list, can be deleted by users, and render inside the scrollable content area. It fundamentally breaks the layout model.
+
+**Do this instead:** Add `layout` config at `BlueprintConfig` level (see Pattern 2 above).
+
+### Anti-Pattern 2: God ChartRenderer
+
+**What people do:** Put every possible chart type through the same ChartRenderer switch, even those with entirely different data shapes (sankey nodes/links vs bar categories).
+
+**Why it's wrong:** Forces unrelated data shapes into the same section type schema. The `BarLineChartSection` type would need optional fields for nodes, links, sunburst children, etc., making it impossible to validate properly.
+
+**Do this instead:** Create new section types for charts with fundamentally different data shapes. Keep `bar-line-chart` for charts that genuinely share the categories/values data model.
+
+### Anti-Pattern 3: Gallery as Independent Data Source
+
+**What people do:** Maintain the gallery as a completely separate hardcoded component list (current state).
+
+**Why it's wrong:** Double maintenance burden -- every new section type needs changes in both the registry and the gallery. Categories drift out of sync. Components exist in gallery but not in registry, or vice versa.
+
+**Do this instead:** Drive the gallery from `SECTION_REGISTRY` for content sections. Manually curate only shell components (sidebar, header, modal) that are not section types.
+
+### Anti-Pattern 4: Schema Version Skip
+
+**What people do:** Change the schema shape without bumping `schemaVersion` and adding a migrator.
+
+**Why it's wrong:** Existing blueprints in Supabase will fail Zod validation. The `migrateBlueprint()` pipeline exists specifically to handle this.
+
+**Do this instead:** Always bump `CURRENT_SCHEMA_VERSION`, add a migrator function for the previous version, and handle defaults for new optional fields.
+
+## Integration Points
+
+### Internal Boundaries
+
+| Boundary | Communication | Impact of v1.3 |
+|----------|---------------|-----------------|
+| `BlueprintConfig` <-> `WireframeViewer` | Direct prop passing from DB load | Add `layout` field reading |
+| `SECTION_REGISTRY` <-> `SectionRenderer` | Lookup by `section.type` key | Add 5 new keys |
+| `SECTION_REGISTRY` <-> `ComponentPicker` | `getCatalog()` function | Auto-picks up new entries |
+| `SECTION_REGISTRY` <-> `ComponentGallery` | Currently NONE (independent) | Must connect via registry |
+| `ChartRenderer` <-> chart components | Switch dispatch on `chartType` | Add 5 new cases |
+| `blueprint-schema.ts` <-> `blueprint-migrations.ts` | Schema version + migrators | Bump to v2, add migrator |
+| `WireframeViewer` <-> `WireframeHeader` | Direct rendering, hardcoded | Extract to configurable component |
+| `WireframeViewer` <-> sidebar `<aside>` | Hardcoded HTML in viewer | Extract to `ConfigurableSidebar` component |
+
+### Supabase Impact
+
+| Table | Change | Migration Needed |
+|-------|--------|-----------------|
+| `blueprints` | JSON column gains `layout` field | No SQL migration -- JSON is schemaless. Handled by app-level `migrateBlueprint()` |
+
+### Zod Schema Impact
+
+The discriminated union in `BlueprintSectionSchema` currently has 21 members. Adding 5 new section types brings it to 26. This is within Zod's comfortable handling range. The `ChartType` enum extends from 8 to 13 values.
+
+```typescript
+// Extended ChartType
+export type ChartType =
+  | 'bar' | 'line' | 'bar-line' | 'area'       // existing
+  | 'radar' | 'treemap' | 'funnel' | 'scatter'  // existing
+  | 'stacked-bar' | 'grouped-bar' | 'horizontal-bar'  // new
+  | 'stacked-area' | 'multi-line'                      // new
 ```
-z-50  TopNav     sticky top-0     h-16 (64px)
----   Sidebar    sticky top-16    h-[calc(100vh-4rem)]  overflow-y-auto
----   TOC        sticky top-16    h-[calc(100vh-4rem)]  overflow-y-auto
-```
-
-**Critical requirement:** For `sticky` to work on Sidebar and TOC, the nearest scrolling ancestor must be the viewport (document body), NOT a parent with `overflow: hidden/auto`.
-
-**Current problem:** Layout.tsx has:
-```tsx
-<div className="flex flex-1 flex-col overflow-hidden md:flex-row">
-  <Sidebar />
-  <main className="flex-1 overflow-y-auto">
-```
-
-The `overflow-hidden` on the flex parent and `overflow-y-auto` on main create an isolated scroll context. Sidebar "sticks" because it is in a non-scrolling flex column -- but it is not truly `position: sticky`. TOC uses `sticky top-8` inside DocRenderer which works because the DocRenderer content is inside the scrolling main.
-
-**Target change:**
-```tsx
-<div className="flex flex-1">                            {/* removed overflow-hidden */}
-  <Sidebar />                                             {/* sticky top-16 */}
-  <main className="flex-1 px-8 py-10 lg:px-12">          {/* removed overflow-y-auto */}
-    <Outlet />
-  </main>
-</div>
-```
-
-Now the document body scrolls. Both Sidebar and TOC sticky relative to viewport. The header stays fixed at top. Sidebar and TOC both offset by header height.
-
-**Trade-offs:**
-- Pro: Matches reference HTML behavior exactly
-- Pro: Simpler mental model (one scroll context)
-- Con: Loss of independent main scroll means the entire page scrolls (header always visible via its own sticky)
-- Con: Must test that no other component depends on the current isolated scroll context
-
-### Pattern 3: Width Constraint Delegation
-
-**What:** Remove `max-w-4xl` from Layout and let each page component define its own width constraint.
-
-**Why:** DocRenderer needs content at `max-w-4xl` (prose readability) PLUS a `w-64` TOC sidebar. That requires `max-w-4xl + gap + 256px = ~1200px` of available width. The Layout's `max-w-4xl` (896px) is too narrow. Home page might want `max-w-5xl`. Client pages might want `max-w-4xl`.
-
-**Implementation:**
-
-```tsx
-// Layout.tsx -- BEFORE
-<main className="flex-1 overflow-y-auto">
-  <div className="mx-auto max-w-4xl px-5 py-8 md:px-8 md:py-10">
-    <Outlet />
-  </div>
-</main>
-
-// Layout.tsx -- AFTER
-<main className="flex-1 px-8 py-10 lg:px-12">
-  <Outlet />     {/* each page owns its max-width */}
-</main>
-
-// DocRenderer.tsx -- adds its own constraint
-<div className="flex gap-10">
-  <div className="mx-auto min-w-0 max-w-4xl flex-1">
-    {/* content */}
-  </div>
-  <DocTableOfContents headings={headings} />
-</div>
-
-// Home.tsx -- adds its own constraint
-<div className="mx-auto max-w-5xl">
-  {/* content */}
-</div>
-```
-
-**Trade-offs:**
-- Pro: Each page controls its own layout width
-- Pro: DocRenderer can accommodate TOC without Layout interference
-- Con: Every existing page must add `mx-auto max-w-4xl` wrapper (small effort, many files)
-
-### Pattern 4: Decorative Search Trigger (fake input, real modal)
-
-**What:** The search bar in the header looks like a text input but is actually a button/div that opens the existing CommandDialog.
-
-**Why not a real inline search:** The cmdk CommandDialog already provides grouped results, keyboard navigation, fuzzy matching, and badge categorization. Rebuilding this as an inline dropdown is significant effort for zero UX gain.
-
-**Implementation:**
-
-```tsx
-// SearchCommand.tsx -- trigger change only
-<button
-  onClick={() => setOpen(true)}
-  className="relative flex w-full max-w-sm items-center rounded-md border border-slate-200 bg-slate-50 py-1.5 pl-10 pr-12 text-sm text-slate-400"
->
-  <SearchIcon className="pointer-events-none absolute left-3 h-4 w-4 text-slate-400" />
-  Pesquisar docs...
-  <kbd className="absolute right-2 hidden rounded border border-slate-300 bg-white px-1.5 text-[10px] font-medium text-slate-400 sm:inline-block">
-    Cmd+K
-  </kbd>
-</button>
-{/* CommandDialog unchanged */}
-```
-
-## Detailed Integration Points
-
-### Integration 1: Header Height Change (h-14 -> h-16)
-
-**Impact radius:**
-
-| File | Current | Target | Change |
-|------|---------|--------|--------|
-| `TopNav.tsx` | `h-14` (56px) | `h-16` (64px) | Direct |
-| `Sidebar.tsx` | No sticky offset | `sticky top-16 h-[calc(100vh-4rem)]` | New |
-| `DocTableOfContents.tsx` | `sticky top-8` | `sticky top-16` | Update |
-| `DocTableOfContents.tsx` | IntersectionObserver rootMargin `-80px` | Adjust to `-96px` (64px header + 32px buffer) | Update |
-
-**Recommendation:** Define a CSS custom property `--header-h: 4rem` in globals.css and reference `top-[var(--header-h)]` / `h-[calc(100vh-var(--header-h))]`. This protects against future header height changes. However, Tailwind arbitrary values with CSS vars work fine: `top-[var(--header-h)]`.
-
-### Integration 2: Scroll Context Change (overflow-hidden removal)
-
-**Current Layout.tsx line 9:**
-```tsx
-<div className="flex flex-1 flex-col overflow-hidden md:flex-row">
-```
-
-**The `overflow-hidden` exists because:** Without it, the sidebar on mobile (full-width) would create layout overflow. But the reference design hides sidebar on mobile entirely (uses `lg:block`).
-
-**Migration plan:**
-1. Remove `overflow-hidden` from the flex container
-2. Add `hidden lg:block` to Sidebar (hidden on mobile)
-3. Add a mobile menu trigger (hamburger button in TopNav, opens sidebar as a drawer/sheet)
-4. Or: keep sidebar visible on mobile as a horizontal scroll area (simpler but less polished)
-
-**Recommendation:** For v1.2, use `hidden md:block` on Sidebar (matching current `md:w-64 md:border-r` breakpoint). Add mobile sidebar support as a follow-up if needed. The current mobile experience (sidebar as full-width bar at top) is functional. Removing `overflow-hidden` and hiding sidebar on mobile is sufficient.
-
-### Integration 3: Color Palette Migration
-
-**Critical decision: What happens to the gold accent?**
-
-The current design uses gold (`43 96% 56%`) as `--accent`, `--sidebar-accent`, and in blockquote borders. The reference HTML uses indigo exclusively.
-
-**Recommendation:** Shift `--primary` to indigo. Map `--accent` to indigo as well. The gold is not a core brand element of FXL -- it was an aesthetic choice for the dark gray-blue palette. With the slate + indigo palette, indigo serves as both primary interactive color and accent.
-
-**Token mapping:**
-
-| Token | Current (light) | Target (light) | Notes |
-|-------|-----------------|----------------|-------|
-| `--primary` | `220 16% 22%` | `234 89% 63%` | Interactive: links, active nav, badges |
-| `--primary-foreground` | `210 40% 98%` | `0 0% 100%` | White text on indigo |
-| `--accent` | `43 96% 56%` (gold) | `234 89% 63%` (indigo) | Align with primary |
-| `--accent-foreground` | `43 50% 10%` | `0 0% 100%` | White on indigo |
-| `--background` | `210 20% 98%` | `0 0% 100%` (white) | Reference uses pure white |
-| `--foreground` | `222 47% 11%` | `215 28% 9%` (slate-900) | Near-black |
-| `--muted` | `210 40% 96%` | `210 40% 96%` (slate-100) | Nearly same |
-| `--muted-foreground` | `215 16% 47%` | `215 16% 47%` (slate-500) | Nearly same |
-| `--border` | `214 32% 91%` | `214 32% 91%` (slate-200) | Nearly same |
-| `--sidebar` | `220 16% 98%` | `210 40% 98%` | slate-50 equivalent |
-| `--sidebar-accent` | `43 96% 56%` (gold) | `234 89% 63%` (indigo) | Active nav color |
-| `--ring` | `220 16% 22%` | `234 89% 63%` | Focus ring -> indigo |
-| `--code-bg` | `220 13% 10%` | `217 33% 12%` | slate-900 for code blocks |
-
-**Wireframe isolation:** The `--wf-*` tokens in `wireframe-tokens.css` are completely separate. They will NOT be affected by this palette change. This is verified: wireframe tokens use their own CSS file imported in globals.css and scoped to `[data-wf-theme]` containers.
-
-### Integration 4: Sidebar Navigation Data Structure
-
-**No changes to data.** The `navigation: NavItem[]` array in Sidebar.tsx stays identical. The navigation tree structure, href mapping, and collapse/expand logic are all correct. Only the **rendering classes** change:
-
-| Element | Current Class | Target Class |
-|---------|---------------|--------------|
-| Section header (depth 0) | `text-xs font-semibold uppercase tracking-[0.18em] text-foreground` | `text-xs font-bold uppercase tracking-wider text-slate-900` |
-| Item list | `mt-0.5 space-y-0.5` | `space-y-3 border-l border-slate-200 ml-1 pl-4` |
-| Leaf item | `text-xs text-muted-foreground` | `text-sm text-slate-500 hover:text-indigo-600` |
-| Active item | `bg-primary/10 text-primary font-medium` | `text-indigo-600 font-medium` (no background) |
-| Sidebar container | `bg-sidebar/80 backdrop-blur md:w-64 md:border-r` | `bg-slate-50/50 w-64 border-r border-slate-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto p-6` |
-| Section spacing | `space-y-1` | `space-y-8` |
 
 ## Recommended Build Order
 
-Build order follows dependency chains: each phase requires stable outputs from prior phases.
+Build order follows dependency chains. Each phase can be independently tested.
 
-```
-Phase 1: globals.css tokens        Phase 2: Layout + TopNav       Phase 3: Sidebar
-   |                                    |                              |
-   | (tokens ready)                     | (header height locked)       | (sidebar positioned)
-   v                                    v                              v
-Phase 4: Search integration        Phase 5: Doc rendering         Phase 6: Consistency pass
-   (depends on TopNav)                (depends on all prior)          (depends on all prior)
-```
+### Phase 1: Schema & Infrastructure (Foundation)
+1. Extend `ChartType` enum in `types/blueprint.ts` (add 5 sub-types)
+2. Add 5 new section types to `BlueprintSection` union in `types/blueprint.ts`
+3. Add `LayoutConfig` types (`SidebarConfig`, `HeaderConfig`, `FilterBarConfig`) to `types/blueprint.ts`
+4. Add `layout?` to `BlueprintConfig` type
+5. Extend `lib/blueprint-schema.ts` with all new Zod schemas
+6. Bump `CURRENT_SCHEMA_VERSION` to 2 in `lib/blueprint-migrations.ts`
+7. Add v1->v2 migrator
+8. Update tests
 
-### Phase 1: Design Tokens (globals.css + tailwind.config.ts)
+**Rationale:** Everything downstream depends on types and schemas being correct first.
 
-**Files:** `src/styles/globals.css`, `tailwind.config.ts` (font-family verification only)
+### Phase 2: New Chart Components (Independent, Parallelizable)
+For each new chart type, create the component + renderer + property form + registry entry. These are independent of each other.
 
-**Changes:**
-1. Replace `:root` and `.dark` HSL values with slate + indigo palette (see Integration 3 table)
-2. Update `.prose` styles: `h1` to `text-3xl font-extrabold tracking-tight`, `h2` to `text-2xl font-bold tracking-tight`, `p` to `text-base leading-relaxed text-slate-600`
-3. Add `--header-h: 4rem` CSS property for sticky offset coordination
-4. Verify `font-family: 'Inter'` is already configured (it is, in tailwind.config.ts)
+**Bar-line sub-variants (5 components, use existing `bar-line-chart` section type):**
+1. `StackedBarChart.tsx` + update ChartRenderer switch
+2. `GroupedBarChart.tsx` + update ChartRenderer switch
+3. `HorizontalBarChart.tsx` + update ChartRenderer switch
+4. `StackedAreaChart.tsx` + update ChartRenderer switch
+5. `MultiLineChart.tsx` + update ChartRenderer switch
+6. Update `BarLineChartForm` to show new chartType options
 
-**Why first:** Every subsequent phase depends on the correct palette. Changing tokens first lets you immediately see which components need manual attention (those that bypass tokens with hardcoded colors). Components like PhaseCard, Operational, Home cards will look 70-80% correct from token changes alone.
+**New section types (5 complete sets: component + renderer + form + registry):**
+1. `RadialBarChartComponent` + `RadialBarRenderer` + `RadialBarForm` + registry entry
+2. `GaugeChart` + `GaugeRenderer` + `GaugeForm` + registry entry
+3. `SankeyChart` + `SankeyRenderer` + `SankeyForm` + registry entry
+4. `SunburstChart` + `SunburstRenderer` + `SunburstForm` + registry entry
+5. `BulletChart` + `BulletRenderer` + `BulletForm` + registry entry
 
-**Risk:** LOW. Isolated to one CSS file. Wireframe tokens (`--wf-*`) are in a separate file.
+**Rationale:** Each chart is self-contained. The registry pattern means adding one chart never affects another.
 
-**Dependencies:** None.
+### Phase 3: Layout Config (Sidebar/Header/Filter)
+1. Extract sidebar from hardcoded `<aside>` in WireframeViewer into `ConfigurableSidebar` component
+2. Update `WireframeSidebar.tsx` to accept `SidebarConfig` props
+3. Update `WireframeHeader.tsx` to accept `HeaderConfig` props
+4. Create `LayoutConfigPanel.tsx` (editor panel for layout settings)
+5. Wire `AdminToolbar` to open layout config panel
+6. Update WireframeViewer to read `config.layout` and pass to components
+7. Ensure header z-index stacking respects `header.position` setting
 
-### Phase 2: Layout Shell (Layout.tsx + TopNav.tsx)
+**Rationale:** Depends on schema (Phase 1). Most complex change. Requires careful refactoring of WireframeViewer without breaking existing functionality.
 
-**Files:** `src/components/layout/Layout.tsx`, `src/components/layout/TopNav.tsx`
+### Phase 4: Gallery Reorganization
+1. Refactor `ComponentGallery.tsx` to use registry-driven tier for section types
+2. Create mock data rendering for new section types
+3. Add shell/chrome tier for non-section components
+4. Add tab or section navigation for the expanded gallery
 
-**Changes:**
-1. **Layout.tsx:**
-   - Remove `overflow-hidden` from flex container
-   - Remove `max-w-4xl` wrapper around `<Outlet />`
-   - Change main padding: `px-5 py-8 md:px-8 md:py-10` -> `px-8 py-10 lg:px-12`
-   - Remove `overflow-y-auto` from main (document body scrolls now)
-2. **TopNav.tsx:**
-   - Height: `h-14` -> `h-16`
-   - Background: `bg-background/90 backdrop-blur` -> `bg-white/80 backdrop-blur-md dark:bg-slate-900/80`
-   - z-index: `z-20` -> `z-50`
-   - Border: `border-border/80` -> `border-slate-200`
-   - Wider area for search integration
+**Rationale:** Depends on all new section types existing in the registry (Phase 2). Low risk, mostly UI reorganization.
 
-**Why second:** The header height (64px) determines the `top-16` offset for sidebar (Phase 3) and TOC (Phase 5). Layout width constraint removal is needed before pages can control their own width.
+## Scaling Considerations
 
-**Dependencies:** Phase 1 (tokens for border and background colors).
+| Concern | Current (21 types) | After v1.3 (26 types) | At 40+ types |
+|---------|---------------------|------------------------|--------------|
+| Registry object size | Trivial | Trivial | Still trivial (JS objects, not arrays) |
+| Bundle size | ~150KB for chart components | ~200KB estimated | Consider lazy loading per chart type |
+| ComponentPicker dialog | 7 categories, fits in dialog | 8 categories, still fits | May need search/filter in picker |
+| Schema validation | Fast (<5ms) | Fast | Still fast (discriminated union is O(1) lookup) |
+| ChartRenderer switch | 8 cases | 13 cases | Consider dynamic dispatch map instead of switch |
 
-### Phase 3: Sidebar Redesign
+**First bottleneck:** Bundle size as chart components grow. Mitigation: React.lazy() for chart components that are rarely used (sankey, sunburst, bullet). The registry can store lazy component references.
 
-**Files:** `src/components/layout/Sidebar.tsx`
-
-**Changes:**
-1. Container: add `sticky top-[var(--header-h)] h-[calc(100vh-var(--header-h))] overflow-y-auto`
-2. Background: `bg-sidebar/80 backdrop-blur` -> `bg-slate-50/50`
-3. Border: existing `border-r` -> `border-r border-slate-200`
-4. Section headers: ensure `text-xs font-bold uppercase tracking-wider text-slate-900`
-5. Navigation items: add `border-l border-slate-200 ml-1 pl-4` to item lists
-6. Active state: `bg-primary/10 text-primary` -> `text-indigo-600 font-medium` (no background highlight)
-7. Hover state: add `hover:text-indigo-600`
-8. Section spacing: `space-y-1` -> `space-y-8`
-9. Home link icon: keep existing Lucide Home icon, adjust to `text-slate-600 hover:text-indigo-600`
-10. Mobile: add `hidden md:block` for now; mobile sidebar can be addressed in a follow-up
-
-**Why third:** Largest visual change. Depends on tokens (Phase 1) and header height (Phase 2). The `navigation` data array is unchanged; only CSS classes change.
-
-**Dependencies:** Phase 1 (tokens), Phase 2 (header height for sticky offset).
-
-### Phase 4: Search Integration
-
-**Files:** `src/components/layout/SearchCommand.tsx`, `src/components/layout/TopNav.tsx` (search area)
-
-**Changes:**
-1. Replace button trigger with input-styled `<div>` or `<button>` matching reference: `relative w-full max-w-sm`, `bg-slate-50 border-slate-200 rounded-md`, search icon left, kbd badge right
-2. Keep `onClick={() => setOpen(true)}` behavior
-3. CommandDialog, search index, grouped results: UNCHANGED
-4. Position search centrally in TopNav's flex layout
-
-**Why fourth:** Depends on TopNav being finalized (Phase 2). Pure visual trigger change, zero logic changes.
-
-**Dependencies:** Phase 2 (TopNav layout complete).
-
-### Phase 5: Doc Rendering Redesign
-
-**Files:** `DocBreadcrumb.tsx`, `DocPageHeader.tsx`, `DocTableOfContents.tsx`, `MarkdownRenderer.tsx`, `DocRenderer.tsx`
-
-**Changes:**
-1. **DocBreadcrumb:** Chevron SVG separator (replace "/"), `text-sm text-slate-500`, `hover:text-slate-800` on section link, `font-medium text-slate-800` on current page
-2. **DocPageHeader:** `text-4xl font-extrabold tracking-tight sm:text-5xl`, badge with `bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-600/20 text-xs font-bold uppercase tracking-wide`, description `text-lg text-slate-600`, button `mt-8` spacing
-3. **DocTableOfContents:** `w-64`, `sticky top-[var(--header-h)]`, "NESTA PAGINA" header `text-xs font-bold uppercase tracking-wider text-slate-900`, h3 items nested with `ml-4 border-l border-slate-200 pl-4`, active `font-medium text-indigo-600`
-4. **MarkdownRenderer:** Code blocks with `bg-slate-900 rounded-xl shadow-2xl p-6` + traffic light dots (3 colored circles as decoration before code), link styling `text-indigo-600 underline underline-offset-4 decoration-indigo-200`
-5. **DocRenderer:** Add `mx-auto max-w-4xl` to the content column. Adjust flex gap for wider TOC (gap-10 -> gap-12 if needed)
-
-**Why fifth:** Largest single phase. Depends on all prior phases being stable to evaluate the full page composition.
-
-**Dependencies:** Phase 1 (tokens), Phase 2 (Layout width delegation), Phase 3 (sidebar context), Phase 4 (search visual).
-
-### Phase 6: Consistency Pass
-
-**Files:** `Home.tsx`, `FinanceiroIndex.tsx`, `Callout.tsx`, `PromptBlock.tsx`, `BriefingForm.tsx`, `BlueprintTextView.tsx`
-
-**Changes:**
-1. **Home.tsx:** Add `mx-auto max-w-5xl` wrapper, upgrade heading typography, card hover accent to indigo
-2. **FinanceiroIndex.tsx:** Align badge/table/heading styles, add page width wrapper
-3. **Callout.tsx:** Replace hardcoded `border-blue-200 bg-blue-50` with token-aware alternatives or keep as-is (blue callouts are semantically correct)
-4. **PromptBlock.tsx:** Align code block background with new dark theme pattern (`bg-slate-900` instead of `bg-muted`)
-5. **Client form pages:** Verify token alignment, add width wrappers
-
-**Why last:** These benefit from automatic token propagation (Phase 1). Remaining work is aligning a few hardcoded colors and adding width wrappers. Low risk, no structural changes.
-
-**Dependencies:** Phases 1-5 (full visual context established).
-
-## Anti-Patterns to Avoid
-
-### Anti-Pattern 1: Hardcoded Color Values Instead of Tokens
-
-**What people do:** Write `text-indigo-600` or `bg-slate-50` directly in component files, matching the reference HTML literally.
-**Why it's wrong:** Breaks dark mode. The reference HTML has no dark mode. Every `text-slate-X` value would need a `dark:text-slate-Y` counterpart. Multiplies maintenance surface.
-**Do this instead:** Map indigo and slate to CSS custom properties. Use `text-primary`, `bg-sidebar`, `border-border`. Exception: the badge ring `ring-indigo-600/20` is acceptable as an explicit class since it is a decorative detail, not a semantic token.
-
-### Anti-Pattern 2: Moving TOC Into Layout
-
-**What people do:** Create a three-column Layout (sidebar / content / TOC) to match the reference HTML's visual structure.
-**Why it's wrong:** Only doc pages have a TOC. Home, client pages, briefing forms, etc. do not. Adding TOC awareness to Layout couples it to doc rendering and requires conditionals (`showToc` prop or route-based detection).
-**Do this instead:** Keep TOC inside DocRenderer (it already is). Remove Layout's width constraint so DocRenderer has room for content + TOC side by side.
-
-### Anti-Pattern 3: Rebuilding Search Infrastructure
-
-**What people do:** Replace CommandDialog with an inline search dropdown to match the reference's visible search bar aesthetic.
-**Why it's wrong:** The existing cmdk-based CommandDialog provides grouped results by badge, keyboard navigation, fuzzy matching. Rebuilding costs days for a visual change.
-**Do this instead:** Make the trigger look like a search input (styled div/button) but keep CommandDialog as the actual search UI. Visual match achieved, logic untouched.
-
-### Anti-Pattern 4: Removing the Gold Accent Without Checking Wireframe Impact
-
-**What people do:** Replace all gold references with indigo, including the wireframe tokens file.
-**Why it's wrong:** The wireframe design system (`wireframe-tokens.css`) uses gold (`--wf-accent`) independently. The wireframe viewer is a separate context with its own theme. Changing `--accent` in globals.css does NOT change `--wf-accent`.
-**Do this instead:** Change only `globals.css` tokens. Leave `wireframe-tokens.css` untouched. Verify separation by checking that wireframe viewer still renders gold accent after the app palette shift.
-
-### Anti-Pattern 5: Forgetting to Update IntersectionObserver rootMargin
-
-**What people do:** Change header height from h-14 to h-16 but forget to adjust the IntersectionObserver rootMargin in DocTableOfContents.tsx.
-**Why it's wrong:** The current rootMargin is `-80px 0px -70% 0px`. The -80px accounts for the 56px header + 24px buffer. With a 64px header, this should be `-96px` (64px + 32px). If not updated, the "active" heading in the TOC will be offset by ~8px -- the wrong heading will highlight.
-**Do this instead:** When changing header height, grep for rootMargin and update all IntersectionObserver configurations. Better yet, use the `--header-h` CSS property value read from `getComputedStyle()` to compute rootMargin dynamically.
+**Second bottleneck:** ComponentPicker UX with 26+ types in the dialog. Mitigation: Add search/filter to the picker dialog (keyboard-driven, like the existing Cmd+K search).
 
 ## Sources
 
-- Full codebase analysis (HIGH confidence): Layout.tsx, TopNav.tsx, Sidebar.tsx, DocRenderer.tsx, DocBreadcrumb.tsx, DocPageHeader.tsx, DocTableOfContents.tsx, MarkdownRenderer.tsx, globals.css, tailwind.config.ts, App.tsx, Home.tsx, SearchCommand.tsx, ThemeToggle.tsx, Callout.tsx, PromptBlock.tsx, Operational.tsx, PhaseCard.tsx, docs-parser.ts, Login.tsx, Profile.tsx, FinanceiroIndex.tsx
-- HTML reference file (HIGH confidence): `.planning/research/visual-redesign-reference.html`
-- CSS sticky positioning behavior: MDN and Tailwind docs (verified pattern, HIGH confidence)
-- IntersectionObserver API rootMargin behavior: MDN documentation (HIGH confidence)
+- Complete codebase analysis of all files listed above (HIGH confidence)
+- Recharts 2.15.4 installed package -- verified available chart primitives via `es6/index.js` exports
+- Existing section registry pattern established in v1.1 (proven in production)
+- Blueprint schema migration system established in v1.1 (proven with v0->v1 migration)
 
 ---
-*Architecture research for: FXL Core v1.2 Visual Redesign -- integration with existing system*
+*Architecture research for: v1.3 Builder & Components*
 *Researched: 2026-03-10*
