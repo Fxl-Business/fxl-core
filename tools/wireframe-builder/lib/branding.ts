@@ -202,14 +202,14 @@ export function getFontLinks(branding: BrandingConfig): string[] {
 /**
  * Compute wireframe token overrides from client branding.
  *
- * The wireframe design system keeps its own visual identity (warm gray + gold).
- * Branding is expressed through fonts (headingFont, bodyFont) and logo only.
- * The --wf-accent (gold) and sidebar colors are NOT overridden — they are
- * part of the wireframe chrome identity.
+ * v1.4: branding overrides --wf-primary so client primary color propagates
+ * through the wireframe token cascade. Applied via WireframeThemeProvider's
+ * wfOverrides prop on the data-wf-theme container element.
  *
- * Returns an empty style object — branding is applied via fonts and logo,
- * not via CSS variable overrides.
+ * Only --wf-primary is overridden — the wireframe chrome identity (warm gray,
+ * sidebar colors) is preserved. --wf-accent remains the gold alias per the
+ * design system.
  */
-export function brandingToWfOverrides(_branding: BrandingConfig): React.CSSProperties {
-  return {} as React.CSSProperties
+export function brandingToWfOverrides(branding: BrandingConfig): React.CSSProperties {
+  return { '--wf-primary': branding.primaryColor } as React.CSSProperties
 }

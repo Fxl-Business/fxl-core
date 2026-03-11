@@ -3,9 +3,19 @@ import { brandingToWfOverrides, hexToHsl, darken } from './branding'
 import { DEFAULT_BRANDING } from '../types/branding'
 
 describe('brandingToWfOverrides', () => {
-  it('returns empty style object (wireframe keeps gold identity)', () => {
+  it('returns --wf-primary from branding.primaryColor', () => {
     const overrides = brandingToWfOverrides(DEFAULT_BRANDING)
-    expect(Object.keys(overrides)).toHaveLength(0)
+    expect((overrides as Record<string, string>)['--wf-primary']).toBe(DEFAULT_BRANDING.primaryColor)
+  })
+
+  it('returns exactly one override key', () => {
+    const overrides = brandingToWfOverrides(DEFAULT_BRANDING)
+    expect(Object.keys(overrides)).toHaveLength(1)
+  })
+
+  it('uses custom primaryColor when provided', () => {
+    const overrides = brandingToWfOverrides({ ...DEFAULT_BRANDING, primaryColor: '#1B6B93' })
+    expect((overrides as Record<string, string>)['--wf-primary']).toBe('#1B6B93')
   })
 })
 

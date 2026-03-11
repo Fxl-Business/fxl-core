@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import type React from 'react'
 
 export type WireframeTheme = 'light' | 'dark'
 
@@ -25,9 +26,11 @@ function readStoredTheme(fallback: WireframeTheme): WireframeTheme {
 export function WireframeThemeProvider({
   children,
   defaultTheme = 'light',
+  wfOverrides,
 }: {
   children: ReactNode
   defaultTheme?: WireframeTheme
+  wfOverrides?: React.CSSProperties
 }) {
   const [theme, setThemeState] = useState<WireframeTheme>(() =>
     readStoredTheme(defaultTheme),
@@ -47,7 +50,7 @@ export function WireframeThemeProvider({
 
   return (
     <WireframeThemeContext.Provider value={{ theme, toggle, setTheme }}>
-      <div data-wf-theme={theme}>
+      <div data-wf-theme={theme} style={wfOverrides}>
         {children}
       </div>
     </WireframeThemeContext.Provider>
