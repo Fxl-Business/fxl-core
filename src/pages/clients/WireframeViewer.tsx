@@ -675,11 +675,18 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
         <div
           style={{
             display: 'flex',
+            flexDirection: 'column',
             height: '100vh',
             fontFamily: `${branding.bodyFont}, Inter, sans-serif`,
             background: 'var(--wf-canvas)',
           }}
         >
+          <WireframeHeader
+            title={activeScreen.title}
+            periodType={activeScreen.periodType}
+            onGerenciar={handleOpenManager}
+          />
+          <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
           {/* Sidebar -- uses --wf-sidebar-* tokens with branding overrides */}
           <aside
             style={{
@@ -689,10 +696,10 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               color: 'var(--wf-sidebar-fg)',
               display: 'flex',
               flexDirection: 'column',
-              height: '100vh',
+              height: 'calc(100vh - 56px)',
               position: 'fixed',
               left: 0,
-              top: 0,
+              top: 56,
             }}
           >
             <div
@@ -735,29 +742,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 borderTop: '1px solid var(--wf-sidebar-border)',
               }}
             >
-              <button
-                type="button"
-                onClick={handleOpenManager}
-                style={{
-                  display: 'block',
-                  background: 'transparent',
-                  border: 'none',
-                  padding: 0,
-                  marginBottom: 8,
-                  fontSize: 11,
-                  color: 'var(--wf-sidebar-muted)',
-                  cursor: 'pointer',
-                  fontFamily: 'Inter, sans-serif',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--wf-sidebar-fg)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
-                }}
-              >
-                Gerenciar
-              </button>
               <span style={{ fontSize: 11, color: 'var(--wf-sidebar-muted)' }}>
                 Desenvolvido por FXL
               </span>
@@ -771,7 +755,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               marginLeft: 240,
               display: 'flex',
               flexDirection: 'column',
-              height: '100vh',
             }}
           >
             {user && (
@@ -808,10 +791,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 </button>
               </div>
             )}
-            <WireframeHeader
-              title={activeScreen.title}
-              periodType={activeScreen.periodType}
-            />
             <div
               style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}
             >
@@ -833,6 +812,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               />
             </div>
           </main>
+          </div>
         </div>
       </WireframeThemeProvider>
 
