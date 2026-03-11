@@ -136,8 +136,8 @@ Plans:
   5. Trend indicator cells show color-coded icons that scale to scale-110 on hover
 **Plans:** 2 plans
 Plans:
-- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
-- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
+- [ ] 25-01-PLAN.md — Header typography, row hover, total/highlight row restyle across all 4 tables
+- [ ] 25-02-PLAN.md — Dark footer row (type + render) and trend indicator cell pattern
 
 ### Phase 26: Filter Bar Enhancement
 **Goal**: The sticky filter bar reads as a premium control surface with blur depth and typographic clarity that matches the dashboard chrome
