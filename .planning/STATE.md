@@ -5,7 +5,7 @@ milestone_name: Visual Redesign
 status: completed
 stopped_at: Milestone v1.2 archived
 last_updated: "2026-03-11"
-last_activity: 2026-03-11 -- Milestone v1.2 Visual Redesign archived
+last_activity: 2026-03-11 - Completed quick task 7: Fix client sidebar order and open wireframe links in new tab
 progress:
   total_phases: 5
   completed_phases: 5
