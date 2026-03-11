@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Builder & Components
 status: planning
-stopped_at: Completed 20-01-PLAN.md (Phase 20 Plan 01 — type contracts for chart expansion)
-last_updated: "2026-03-11T04:50:54.180Z"
+stopped_at: Completed 20-02-PLAN.md (Phase 20 Plan 02 — chart sub-variant components)
+last_updated: "2026-03-11T04:55:00.977Z"
 last_activity: 2026-03-11 -- Phase 19 Plan 02 complete (visual verification checkpoint auto-approved)
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 12
-  completed_plans: 9
+  completed_plans: 10
   percent: 0
 ---
 
@@ -71,6 +71,8 @@ v1.3 architectural decisions (from research):
 - [Phase 19-filter-bar-expansion]: DateRangeFilter trigger is NOT disabled (opens panel), only date input fields inside panel are disabled
 - [Phase 20-chart-type-expansion]: GaugeChartSectionSchema exported at declaration (export const) to avoid TS2323 duplicate export conflict with block export
 - [Phase 20-chart-type-expansion]: gauge-chart stub entry added to SECTION_REGISTRY in Plan 01 to satisfy TypeScript Record exhaustiveness — Plan 03 replaces with real GaugeChartRenderer and GaugeChartForm
+- [Phase 20-chart-type-expansion]: Unique gradient IDs (areaFill0/1/2) in StackedAreaChartComponent to prevent all stacked area series sharing same SVG gradient color
+- [Phase 20-chart-type-expansion]: ComposedChartComponent render order: Bar > Area > Line ensures Line appears on top of all series visually
 
 ### Pending Todos
 
@@ -100,6 +102,7 @@ None active.
 | Phase 19-filter-bar-expansion P01 | 2 | 2 tasks | 2 files |
 | Phase 19-filter-bar-expansion P02 | 1 | 1 task (checkpoint) | 0 files |
 | Phase 20-chart-type-expansion P01 | 4 | 2 tasks | 5 files |
+| Phase 20-chart-type-expansion P02 | 7 | 2 tasks | 7 files |
 
 ### Roadmap Evolution
 
@@ -116,6 +119,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-11T04:50:54.178Z
-Stopped at: Completed 20-01-PLAN.md (Phase 20 Plan 01 — type contracts for chart expansion)
+Last session: 2026-03-11T04:55:00.974Z
+Stopped at: Completed 20-02-PLAN.md (Phase 20 Plan 02 — chart sub-variant components)
 Next: `/gsd:plan-phase 20` (Chart Variants)
