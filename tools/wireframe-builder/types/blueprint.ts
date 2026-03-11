@@ -64,7 +64,20 @@ export type BankEntry = {
 
 // --- Chart type union ---
 
-export type ChartType = 'bar' | 'line' | 'bar-line' | 'radar' | 'treemap' | 'funnel' | 'scatter' | 'area'
+export type ChartType =
+  | 'bar'
+  | 'line'
+  | 'bar-line'
+  | 'radar'
+  | 'treemap'
+  | 'funnel'
+  | 'scatter'
+  | 'area'
+  | 'stacked-bar'
+  | 'stacked-area'
+  | 'horizontal-bar'
+  | 'bubble'
+  | 'composed'
 
 // --- Section types (discriminated union) ---
 
@@ -255,6 +268,20 @@ export type DividerSection = {
   variant?: 'solid' | 'dashed' | 'labeled'
 }
 
+export type GaugeChartSection = {
+  type: 'gauge-chart'
+  title: string
+  value: number
+  min?: number
+  max?: number
+  zones?: {
+    label?: string
+    value: number
+    color?: string
+  }[]
+  height?: number
+}
+
 export type BlueprintSection =
   | KpiGridSection
   | BarLineChartSection
@@ -277,6 +304,7 @@ export type BlueprintSection =
   | StatCardSection
   | ProgressBarSection
   | DividerSection
+  | GaugeChartSection
 
 export type BlueprintScreen = {
   id: string

@@ -93,6 +93,7 @@ import {
   StatCardSectionSchema,
   ProgressBarSectionSchema,
   DividerSectionSchema,
+  GaugeChartSectionSchema,
   BlueprintSectionSchema,
 } from './blueprint-schema'
 
@@ -543,6 +544,26 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     }),
     schema: ProgressBarSectionSchema,
     label: 'Barra de Progresso',
+  },
+
+  // === Gauge (Plan 03 will replace placeholder renderer/form) ===
+  'gauge-chart': {
+    renderer: ChartRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: BarLineChartForm as unknown as ComponentType<PropertyFormProps>,
+    catalogEntry: {
+      type: 'gauge-chart',
+      label: 'Gauge',
+      description: 'Indicador circular com zonas de alerta',
+      icon: Activity,
+      category: 'Graficos',
+    },
+    defaultProps: () => ({
+      type: 'gauge-chart' as const,
+      title: 'Novo Gauge',
+      value: 72,
+    }),
+    schema: GaugeChartSectionSchema,
+    label: 'Gauge Chart',
   },
 }
 

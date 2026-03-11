@@ -154,7 +154,10 @@ const KpiGridSectionSchema = z.object({
 const BarLineChartSectionSchema = z.object({
   type: z.literal('bar-line-chart'),
   title: z.string(),
-  chartType: z.enum(['bar', 'line', 'bar-line', 'radar', 'treemap', 'funnel', 'scatter', 'area']),
+  chartType: z.enum([
+    'bar', 'line', 'bar-line', 'radar', 'treemap', 'funnel', 'scatter', 'area',
+    'stacked-bar', 'stacked-area', 'horizontal-bar', 'bubble', 'composed',
+  ]),
   height: z.number().optional(),
   compareOnly: z.boolean().optional(),
   categories: z.array(z.string()).optional(),
@@ -344,14 +347,28 @@ const DividerSectionSchema = z.object({
   variant: z.enum(['solid', 'dashed', 'labeled']).optional(),
 })
 
+export const GaugeChartSectionSchema = z.object({
+  type: z.literal('gauge-chart'),
+  title: z.string(),
+  value: z.number(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+  zones: z.array(z.object({
+    label: z.string().optional(),
+    value: z.number(),
+    color: z.string().optional(),
+  })).optional(),
+  height: z.number().optional(),
+})
+
 // ---------------------------------------------------------------------------
-// Discriminated union of all 21 section types (15 existing + 6 new)
+// Discriminated union of all 22 section types (15 existing + 7 new)
 // Note: ChartGridSection has recursive items: BlueprintSection[]
-// We define the non-recursive schemas first (20 types), then build
+// We define the non-recursive schemas first (21 types), then build
 // the union with ChartGrid inline using z.lazy() for the recursive reference.
 // ---------------------------------------------------------------------------
 
-// Non-recursive section schemas (20 types: 14 existing + 6 new)
+// Non-recursive section schemas (21 types: 14 existing + 7 new)
 const nonRecursiveSections = [
   KpiGridSectionSchema,
   BarLineChartSectionSchema,
@@ -373,6 +390,7 @@ const nonRecursiveSections = [
   StatCardSectionSchema,
   ProgressBarSectionSchema,
   DividerSectionSchema,
+  GaugeChartSectionSchema,
 ] as const
 
 // ChartGridSection is defined inline to avoid circular const reference.
@@ -454,4 +472,5 @@ export {
   StatCardSectionSchema,
   ProgressBarSectionSchema,
   DividerSectionSchema,
+  // GaugeChartSectionSchema is exported at declaration (export const)
 }
