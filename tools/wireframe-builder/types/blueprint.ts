@@ -282,6 +282,7 @@ export type BlueprintScreen = {
   id: string
   title: string
   icon?: string
+  badge?: number | string // optional badge count or label shown on sidebar nav item
   periodType: PeriodType
   filters: FilterOption[]
   hasCompareSwitch: boolean
@@ -289,14 +290,26 @@ export type BlueprintScreen = {
   rows?: ScreenRow[] // source of truth when present; sections kept for backward compat
 }
 
-export type SidebarConfig = {
-  footer?: string  // version/environment text (Phase 18 extends further)
+export type SidebarGroup = {
+  label: string       // heading text ("Financeiro", "Operacional", etc.)
+  screenIds: string[] // screen IDs belonging to this group (matched by BlueprintScreen.id)
 }
 
-// HeaderConfig is intentionally open — Phase 18 fills in logo, period, etc.
-// Use Record<string, unknown> (not Record<string, never>) so downstream phases
-// can add fields without a breaking change to this type.
-export type HeaderConfig = Record<string, unknown>
+export type SidebarConfig = {
+  footer?: string          // version/environment text
+  groups?: SidebarGroup[]  // optional grouping of screens with labeled headings
+}
+
+export type HeaderConfig = {
+  showLogo?: boolean              // defaults true — shows branding.logoUrl in header left
+  showPeriodSelector?: boolean    // defaults true — shows period navigation in center
+  showUserIndicator?: boolean     // defaults true — shows user name/role chip on right
+  actions?: {
+    manage?: boolean   // defaults true — shows Gerenciar button
+    share?: boolean    // defaults true — shows Share button
+    export?: boolean   // defaults false — shows Export button
+  }
+}
 
 export type BlueprintConfig = {
   slug: string
