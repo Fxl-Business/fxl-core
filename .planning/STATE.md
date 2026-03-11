@@ -1,35 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Visual Redesign
-status: completed
-stopped_at: Milestone v1.2 archived
-last_updated: "2026-03-11"
-last_activity: 2026-03-11 - Completed quick task 7: Fix client sidebar order and open wireframe links in new tab
+milestone: v1.3
+milestone_name: Builder & Components
+status: active
+stopped_at: Defining requirements
+last_updated: "2026-03-10"
+last_activity: 2026-03-10 - Milestone v1.3 started
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-11)
+See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.2 complete -- planning next milestone
+**Current focus:** v1.3 Builder & Components
 
 ## Current Position
 
-Milestone v1.2 Visual Redesign: SHIPPED
-All 3 milestones complete (v1.0 MVP, v1.1 Wireframe Evolution, v1.2 Visual Redesign)
-Next: /gsd:new-milestone
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-10 — Milestone v1.3 started
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -38,10 +39,6 @@ Progress: [██████████] 100%
 - Average duration: ~15 min
 - Total execution time: ~10.5 hours
 
-**v1.2 Trend:**
-- 7 plans across 5 phases in ~4 days
-- Trend: Stable
-
 *Updated after each plan completion*
 
 ## Accumulated Context
@@ -49,7 +46,6 @@ Progress: [██████████] 100%
 ### Decisions
 
 All v1.0 + v1.1 + v1.2 decisions logged in PROJECT.md Key Decisions table (28 decisions, all good).
-Full v1.2 decision log archived in milestones/v1.2-ROADMAP.md.
 
 ### Pending Todos
 
@@ -86,6 +82,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-11
-Stopped at: Milestone v1.2 archived
-Next: /gsd:new-milestone
+Last session: 2026-03-10
+Stopped at: Defining requirements
+Next: Complete requirements and roadmap for v1.3

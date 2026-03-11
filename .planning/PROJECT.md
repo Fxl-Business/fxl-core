@@ -73,7 +73,16 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
-(No active milestone — planning next)
+## Current Milestone: v1.3 Builder & Components
+
+**Goal:** Expandir o wireframe builder com layout hierarchy correto, blueprint schema para sidebar/header/filter bar, e repertório massivo de componentes (20+ charts, tabelas, KPIs).
+
+**Target features:**
+- Suavizar paleta de cores dos componentes wireframe (preto menos bruto)
+- Header do wireframe acima de tudo (inclusive sidebar), "Gerenciar" vira botão no header
+- Sidebar, header e filter bar como itens configuráveis no blueprint
+- Expansão massiva do repertório: 20+ tipos de gráfico, tabelas, KPIs, componentes de sidebar/header/filtro
+- Galeria de componentes reorganizada em seções temáticas
 
 ### Out of Scope
 
@@ -170,4 +179,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Visual language**: Slate + indigo palette, Inter body / JetBrains Mono code, border-l rail nav pattern
 
 ---
-*Last updated: 2026-03-11 after v1.2 milestone*
+*Last updated: 2026-03-10 after v1.3 milestone start*
