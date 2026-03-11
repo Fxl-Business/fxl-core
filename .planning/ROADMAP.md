@@ -108,7 +108,11 @@ Plans:
   3. Filter bar renders a text search input when filterType is 'search'
   4. Date range filter offers quick-select period presets (last 7 days, last month, YTD, etc.)
   5. Filter bar renders a boolean toggle switch when filterType is 'toggle'
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 19-01-PLAN.md -- filterType dispatch + all 5 sub-components in WireframeFilterBar + Phase 19 schema test block (FILT-02, FILT-03, FILT-04, FILT-05, FILT-06)
+- [ ] 19-02-PLAN.md -- Visual checkpoint: verify all filter type renderers in browser (FILT-02, FILT-03, FILT-04, FILT-05, FILT-06)
 
 ### Phase 20: Chart Type Expansion
 **Goal**: The chart library covers the standard BI dashboard repertoire so wireframes can represent any common data visualization
@@ -160,6 +164,6 @@ Phases 18, 19, 20 can execute in parallel after Phase 17. Phase 21 requires 18+1
 | 16. Consistency Pass | v1.2 | 2/2 | Complete | 2026-03-10 |
 | 17. Schema Foundation & Layout Restructure | 3/3 | Complete    | 2026-03-11 | - |
 | 18. Configurable Sidebar & Header | 3/3 | Complete    | 2026-03-11 | - |
-| 19. Filter Bar Expansion | v1.3 | 0/0 | Not started | - |
+| 19. Filter Bar Expansion | v1.3 | 0/2 | Not started | - |
 | 20. Chart Type Expansion | v1.3 | 0/0 | Not started | - |
 | 21. Gallery Reorganization | v1.3 | 0/0 | Not started | - |
