@@ -153,7 +153,7 @@ Phases 18, 19, 20 can execute in parallel after Phase 17. Phase 21 requires 18+1
 | 14. Sidebar Navigation | v1.2 | 1/1 | Complete | 2026-03-10 |
 | 15. Doc Rendering and TOC | v1.2 | 2/2 | Complete | 2026-03-10 |
 | 16. Consistency Pass | v1.2 | 2/2 | Complete | 2026-03-10 |
-| 17. Schema Foundation & Layout Restructure | 1/3 | In Progress|  | - |
+| 17. Schema Foundation & Layout Restructure | 2/3 | In Progress|  | - |
 | 18. Configurable Sidebar & Header | v1.3 | 0/0 | Not started | - |
 | 19. Filter Bar Expansion | v1.3 | 0/0 | Not started | - |
 | 20. Chart Type Expansion | v1.3 | 0/0 | Not started | - |

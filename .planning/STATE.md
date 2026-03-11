@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Builder & Components
 status: planning
-stopped_at: Completed 17-01-PLAN.md (--wf-border CSS token alias)
-last_updated: "2026-03-11T03:07:04.722Z"
+stopped_at: "Completed 17-03-PLAN.md (schema extensions: FilterOption filterType, SidebarConfig, HeaderConfig)"
+last_updated: "2026-03-11T03:10:56.676Z"
 last_activity: 2026-03-10 -- Roadmap created for v1.3 (5 phases, 26 requirements mapped)
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -54,6 +54,9 @@ v1.3 architectural decisions (from research):
 - Zero new npm packages -- Recharts 2.x covers everything
 - Layout components are NOT section types -- they live at BlueprintConfig.layout level
 - [Phase 17-01]: Add --wf-border as alias to --wf-card-border in CSS token file rather than updating six component files
+- [Phase 17-schema-foundation-layout-restructure]: FilterOptionSchema exported (was unexported) to enable direct unit testing
+- [Phase 17-schema-foundation-layout-restructure]: HeaderConfigSchema uses z.object({}).passthrough() for forward-compat — Phase 18 can add fields without this schema becoming a breaking-change boundary
+- [Phase 17-schema-foundation-layout-restructure]: HeaderConfig TS type is Record<string, unknown> (not Record<string, never>) for same forward-compat reason as passthrough()
 
 ### Pending Todos
 
@@ -75,6 +78,7 @@ None active.
 | 6 | Audit CLAUDE.md completeness as codebase orchestrator | 2026-03-10 | c0dbbad | [6-audit-claude-md](./quick/6-audit-claude-md-completeness-as-codebase/) |
 | 7 | Fix client sidebar order and open Wireframe in new tab | 2026-03-10 | 454dad7 | [7-fix-client-sidebar-order-and-open-wirefr](./quick/7-fix-client-sidebar-order-and-open-wirefr/) |
 | Phase 17-schema-foundation-layout-restructure P01 | 3 | 1 tasks | 2 files |
+| Phase 17-schema-foundation-layout-restructure P03 | 2 | 2 tasks | 4 files |
 
 ### Roadmap Evolution
 
@@ -91,6 +95,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-11T03:07:04.719Z
-Stopped at: Completed 17-01-PLAN.md (--wf-border CSS token alias)
+Last session: 2026-03-11T03:10:56.672Z
+Stopped at: Completed 17-03-PLAN.md (schema extensions: FilterOption filterType, SidebarConfig, HeaderConfig)
 Next: `/gsd:plan-phase 17` (Schema Foundation & Layout Restructure)

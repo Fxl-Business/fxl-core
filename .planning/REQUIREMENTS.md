@@ -18,7 +18,7 @@ Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
 
 ### Sidebar
 
-- [ ] **SIDE-01**: SidebarConfig adicionado ao BlueprintConfig schema (dashboard-level)
+- [x] **SIDE-01**: SidebarConfig adicionado ao BlueprintConfig schema (dashboard-level)
 - [ ] **SIDE-02**: Sidebar renderiza icones por item de menu via BlueprintScreen.icon
 - [ ] **SIDE-03**: Sidebar suporta groups/secoes com headings rotulados
 - [ ] **SIDE-04**: Sidebar colapsa para icon-only rail mode
@@ -28,7 +28,7 @@ Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
 
 ### Header
 
-- [ ] **HEAD-01**: HeaderConfig adicionado ao BlueprintConfig schema (dashboard-level)
+- [x] **HEAD-01**: HeaderConfig adicionado ao BlueprintConfig schema (dashboard-level)
 - [ ] **HEAD-02**: Header exibe logo/brand do cliente
 - [ ] **HEAD-03**: Header mostra period selector (config-driven)
 - [ ] **HEAD-04**: Header mostra user/role indicator
@@ -36,7 +36,7 @@ Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
 
 ### Filter Bar
 
-- [ ] **FILT-01**: FilterOption type extendido com filterType discriminator
+- [x] **FILT-01**: FilterOption type extendido com filterType discriminator
 - [ ] **FILT-02**: Date range picker filter type
 - [ ] **FILT-03**: Multi-select dropdown filter type
 - [ ] **FILT-04**: Search/text filter type
@@ -98,19 +98,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VIS-01 | Phase 17 | Complete |
 | LAYOUT-01 | Phase 17 | Pending |
 | LAYOUT-02 | Phase 17 | Pending |
-| SIDE-01 | Phase 17 | Pending |
+| SIDE-01 | Phase 17 | Complete |
 | SIDE-02 | Phase 18 | Pending |
 | SIDE-03 | Phase 18 | Pending |
 | SIDE-04 | Phase 18 | Pending |
 | SIDE-05 | Phase 18 | Pending |
 | SIDE-06 | Phase 18 | Pending |
 | SIDE-07 | Phase 18 | Pending |
-| HEAD-01 | Phase 17 | Pending |
+| HEAD-01 | Phase 17 | Complete |
 | HEAD-02 | Phase 18 | Pending |
 | HEAD-03 | Phase 18 | Pending |
 | HEAD-04 | Phase 18 | Pending |
 | HEAD-05 | Phase 18 | Pending |
-| FILT-01 | Phase 17 | Pending |
+| FILT-01 | Phase 17 | Complete |
 | FILT-02 | Phase 19 | Pending |
 | FILT-03 | Phase 19 | Pending |
 | FILT-04 | Phase 19 | Pending |
