@@ -124,7 +124,13 @@ Plans:
   3. A gauge-chart section type renders a radial gauge with target zones and current value indicator
   4. ChartRenderer renders a composed chart with configurable multi-series (mixed bar + line + area in one chart)
   5. All new chart types respect --wf-* design tokens and client branding chartColors
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 20-01-PLAN.md -- Extend ChartType union, BarLineChartSectionSchema enum, add GaugeChartSection type + GaugeChartSectionSchema, update tests (CHART-01, CHART-02, CHART-03, CHART-04, CHART-05, CHART-06)
+- [ ] 20-02-PLAN.md -- Create 5 chart sub-variant components (stacked-bar, stacked-area, horizontal-bar, bubble, composed) + wire into ChartRenderer + BarLineChartForm (CHART-01, CHART-02, CHART-03, CHART-04, CHART-06)
+- [ ] 20-03-PLAN.md -- Create GaugeChartComponent + GaugeChartRenderer + GaugeChartForm + section-registry entry (CHART-05)
+- [ ] 20-04-PLAN.md -- Visual checkpoint: verify all 6 new chart types in browser (CHART-01, CHART-02, CHART-03, CHART-04, CHART-05, CHART-06)
 
 ### Phase 21: Gallery Reorganization
 **Goal**: The component gallery is organized by thematic sections and auto-populated from the registry so new components appear without manual gallery updates
@@ -165,5 +171,5 @@ Phases 18, 19, 20 can execute in parallel after Phase 17. Phase 21 requires 18+1
 | 17. Schema Foundation & Layout Restructure | 3/3 | Complete    | 2026-03-11 | - |
 | 18. Configurable Sidebar & Header | 3/3 | Complete    | 2026-03-11 | - |
 | 19. Filter Bar Expansion | v1.3 | Complete    | 2026-03-11 | 2026-03-11 |
-| 20. Chart Type Expansion | v1.3 | 0/0 | Not started | - |
+| 20. Chart Type Expansion | v1.3 | 0/4 | Not started | - |
 | 21. Gallery Reorganization | v1.3 | 0/0 | Not started | - |
