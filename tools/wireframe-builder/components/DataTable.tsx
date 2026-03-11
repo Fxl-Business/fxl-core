@@ -26,7 +26,7 @@ export default function DataTable({ title, columns, rowCount = 5 }: Props) {
                 <th
                   key={col.key}
                   className={cn(
-                    'px-4 py-2.5 text-[11px] font-medium uppercase tracking-wide text-wf-table-header-fg',
+                    'px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-wf-table-header-fg',
                     col.align === 'right' && 'text-right',
                     col.align === 'center' && 'text-center',
                     (!col.align || col.align === 'left') && 'text-left',
@@ -39,7 +39,7 @@ export default function DataTable({ title, columns, rowCount = 5 }: Props) {
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row} className="border-t border-wf-table-border">
+              <tr key={row} className="border-t border-wf-table-border hover:bg-wf-table-header transition-colors">
                 {columns.map((col) => (
                   <td
                     key={col.key}

@@ -42,11 +42,11 @@ export default function ConfigTable({ title, addLabel, columns, rows }: Props) {
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-wf-canvas">
+            <tr className="bg-wf-table-header">
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className="px-4 py-2.5 text-left font-medium text-wf-muted whitespace-nowrap"
+                  className="px-4 py-2.5 text-left text-[10px] font-black uppercase tracking-widest text-wf-table-header-fg whitespace-nowrap"
                   style={col.width ? { width: col.width } : undefined}
                 >
                   {col.label}

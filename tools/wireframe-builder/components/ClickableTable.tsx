@@ -37,7 +37,7 @@ export default function ClickableTable({ title, subtitle, columns, rows, onRowCl
                 <th
                   key={col.key}
                   className={cn(
-                    'px-4 py-2.5 text-[11px] font-medium uppercase tracking-wide text-wf-table-header-fg whitespace-nowrap',
+                    'px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-wf-table-header-fg whitespace-nowrap',
                     col.align === 'right' && 'text-right',
                     col.align === 'center' && 'text-center',
                     (!col.align || col.align === 'left') && 'text-left',
@@ -55,7 +55,7 @@ export default function ClickableTable({ title, subtitle, columns, rows, onRowCl
                 onClick={() => onRowClick?.(row)}
                 className={cn(
                   'border-t border-wf-card-border transition-colors',
-                  onRowClick && 'cursor-pointer hover:bg-wf-accent-muted',
+                  'cursor-pointer hover:bg-wf-table-header',
                   row.variant === 'total' && 'bg-wf-canvas font-semibold',
                   row.variant === 'highlight' && 'bg-red-50/60',
                 )}

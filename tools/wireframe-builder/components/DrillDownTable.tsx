@@ -31,7 +31,7 @@ function Row({ row, columns, depth }: { row: DrilRow; columns: DrilColumn[]; dep
         onClick={() => hasKids && setOpen((v) => !v)}
         className={cn(
           'border-t border-wf-card-border transition-colors',
-          hasKids && 'cursor-pointer hover:bg-wf-canvas',
+          hasKids && 'cursor-pointer hover:bg-wf-table-header',
           row.isTotal && 'bg-wf-canvas',
           row.className,
         )}
@@ -88,7 +88,7 @@ export default function DrillDownTable({ title, subtitle, columns, rows }: Props
                 <th
                   key={col.key}
                   className={cn(
-                    'px-4 py-2.5 text-[11px] font-medium uppercase tracking-wide text-wf-table-header-fg whitespace-nowrap',
+                    'px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-wf-table-header-fg whitespace-nowrap',
                     col.align === 'right' && 'text-right',
                     col.align === 'center' && 'text-center',
                     (!col.align || col.align === 'left') && 'text-left',
