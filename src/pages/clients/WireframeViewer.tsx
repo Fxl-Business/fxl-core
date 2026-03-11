@@ -802,8 +802,8 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                   transition: 'background 150ms ease, color 150ms ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--wf-sidebar-active)'
-                  e.currentTarget.style.color = 'var(--wf-sidebar-fg)'
+                  e.currentTarget.style.background = '#1e293b'
+                  e.currentTarget.style.color = '#fff'
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent'
@@ -847,15 +847,15 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                           height: 36,
                           borderRadius: 6,
                           border: 'none',
-                          background: isActive ? 'var(--wf-sidebar-active)' : 'transparent',
-                          color: isActive ? 'var(--wf-sidebar-fg)' : 'var(--wf-sidebar-muted)',
+                          background: isActive ? 'var(--wf-accent-muted)' : 'transparent',
+                          color: isActive ? 'var(--wf-accent)' : 'var(--wf-sidebar-muted)',
                           cursor: 'pointer',
                           transition: 'background 150ms ease, color 150ms ease',
                         }}
                         onMouseEnter={(e) => {
                           if (!isActive) {
-                            e.currentTarget.style.background = 'var(--wf-sidebar-active)'
-                            e.currentTarget.style.color = 'var(--wf-sidebar-fg)'
+                            e.currentTarget.style.background = '#1e293b'
+                            e.currentTarget.style.color = '#fff'
                           }
                         }}
                         onMouseLeave={(e) => {
@@ -880,7 +880,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                         fontSize: 10,
                         fontWeight: 600,
                         textTransform: 'uppercase' as const,
-                        letterSpacing: '0.06em',
+                        letterSpacing: '0.08em',
                         color: 'var(--wf-sidebar-muted)',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
@@ -906,16 +906,18 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
             {/* Footer */}
             {!effectiveSidebarCollapsed && (
-              <div
-                style={{
-                  padding: '12px 16px',
-                  borderTop: '1px solid var(--wf-sidebar-border)',
-                  flexShrink: 0,
-                }}
-              >
-                <span style={{ fontSize: 10, color: 'var(--wf-sidebar-muted)' }}>
-                  {activeConfig?.sidebar?.footer ?? 'Desenvolvido por FXL'}
-                </span>
+              <div style={{ padding: 12, margin: '0 12px 12px', borderRadius: 8, border: '1px solid var(--wf-sidebar-border)', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ height: 8, width: 8, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--wf-sidebar-fg)', lineHeight: 1.3, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Sistema Ativo
+                    </p>
+                    <p style={{ fontSize: 10, color: 'var(--wf-sidebar-muted)', lineHeight: 1.3, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {activeConfig?.sidebar?.footer ?? 'Desenvolvido por FXL'}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </aside>

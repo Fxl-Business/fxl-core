@@ -404,38 +404,53 @@ export default function SharedWireframeView() {
               )}
             </div>
             <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
-              {screens.map((screen, i) => (
-                <button
-                  key={screen.id}
-                  type="button"
-                  onClick={() => setActiveIndex(i)}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '10px 24px',
-                    fontSize: 13,
-                    fontWeight: activeIndex === i ? 500 : 400,
-                    color: activeIndex === i ? 'var(--wf-sidebar-fg)' : 'var(--wf-sidebar-muted)',
-                    background: activeIndex === i ? 'var(--wf-sidebar-active)' : 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontFamily: `${resolvedBranding.bodyFont}, Inter, sans-serif`,
-                  }}
-                >
-                  {screen.title}
-                </button>
-              ))}
+              {screens.map((screen, i) => {
+                const isActive = activeIndex === i
+                return (
+                  <button
+                    key={screen.id}
+                    type="button"
+                    onClick={() => setActiveIndex(i)}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '10px 24px',
+                      fontSize: 13,
+                      fontWeight: isActive ? 500 : 400,
+                      color: isActive ? 'var(--wf-accent)' : 'var(--wf-sidebar-muted)',
+                      background: isActive ? 'var(--wf-accent-muted)' : 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontFamily: `${resolvedBranding.bodyFont}, Inter, sans-serif`,
+                      transition: 'background 150ms ease, color 150ms ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.background = '#1e293b'
+                        e.currentTarget.style.color = '#fff'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.background = 'transparent'
+                        e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
+                      }
+                    }}
+                  >
+                    {screen.title}
+                  </button>
+                )
+              })}
             </nav>
-            <div
-              style={{
-                padding: '16px 24px',
-                borderTop: '1px solid var(--wf-sidebar-border)',
-                fontSize: 11,
-                color: 'var(--wf-sidebar-muted)',
-              }}
-            >
-              Desenvolvido por FXL
+            <div style={{ padding: 12, margin: '0 12px 12px', borderRadius: 8, border: '1px solid var(--wf-sidebar-border)', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ height: 8, width: 8, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--wf-sidebar-fg)', lineHeight: 1.3, margin: 0 }}>Sistema Ativo</p>
+                  <p style={{ fontSize: 10, color: 'var(--wf-sidebar-muted)', lineHeight: 1.3, margin: 0 }}>Desenvolvido por FXL</p>
+                </div>
+              </div>
             </div>
           </aside>
 
