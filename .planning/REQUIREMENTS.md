@@ -9,7 +9,7 @@ Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
 
 ### Visual
 
-- [ ] **VIS-01**: Wireframe component palette usa grays mais suaves (preto menos bruto)
+- [x] **VIS-01**: Wireframe component palette usa grays mais suaves (preto menos bruto)
 
 ### Layout
 
@@ -95,7 +95,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VIS-01 | Phase 17 | Pending |
+| VIS-01 | Phase 17 | Complete |
 | LAYOUT-01 | Phase 17 | Pending |
 | LAYOUT-02 | Phase 17 | Pending |
 | SIDE-01 | Phase 17 | Pending |
