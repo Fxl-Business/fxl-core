@@ -1,4 +1,5 @@
-import { MessageSquare, Moon, Pencil, Save, Share2, Sun, X } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronDown, ChevronUp, MessageSquare, Moon, Pencil, Save, Share2, Sun, X } from 'lucide-react'
 import { useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
 
 type Props = {
@@ -15,7 +16,7 @@ type Props = {
 }
 
 export default function AdminToolbar({
-  screenTitle,
+  screenTitle: _screenTitle,
   editMode,
   dirty,
   saving,
@@ -27,6 +28,29 @@ export default function AdminToolbar({
   userRole,
 }: Props) {
   const { theme, toggle } = useWireframeTheme()
+  const [collapsed, setCollapsed] = useState(false)
+
+  if (collapsed) {
+    return (
+      <div className="relative shrink-0" style={{ height: 0 }}>
+        <button
+          type="button"
+          onClick={() => setCollapsed(false)}
+          className="absolute left-1/2 top-0 z-30 -translate-x-1/2 rounded-b-md px-4 py-0.5 transition-colors"
+          style={{
+            background: 'var(--wf-header-bg)',
+            border: '1px solid var(--wf-header-border)',
+            borderTop: 'none',
+            color: 'var(--wf-muted)',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-muted)' }}
+        >
+          <ChevronDown className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -41,8 +65,20 @@ export default function AdminToolbar({
         className="text-sm font-medium"
         style={{ color: 'var(--wf-heading)' }}
       >
-        {screenTitle}
+        Wireframe Builder
       </span>
+
+      <button
+        type="button"
+        onClick={() => setCollapsed(true)}
+        className="inline-flex items-center justify-center rounded-md p-1 transition-colors"
+        style={{ color: 'var(--wf-muted)' }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)' }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-muted)' }}
+        title="Retrair toolbar"
+      >
+        <ChevronUp className="h-3.5 w-3.5" />
+      </button>
 
       <div className="ml-auto flex items-center gap-2">
         {userDisplayName && (
