@@ -1,5 +1,7 @@
-import { ChevronDown, ChevronUp, MessageSquare, Moon, Pencil, Save, Share2, Sun, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, MessageSquare, Moon, Palette, Pencil, Save, Share2, Sun, X } from 'lucide-react'
+import { useState } from 'react'
 import { useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
+import BrandingPopover from './BrandingPopover'
 
 type Props = {
   screenTitle: string
@@ -31,6 +33,7 @@ export default function AdminToolbar({
   userRole,
 }: Props) {
   const { theme, toggle } = useWireframeTheme()
+  const [brandingOpen, setBrandingOpen] = useState(false)
 
   if (collapsed) {
     return (
@@ -94,6 +97,28 @@ export default function AdminToolbar({
           >
             <span className="font-semibold" style={{ color: 'var(--wf-heading)' }}>{userDisplayName}</span>
             <span style={{ color: 'var(--wf-muted)' }}>{userRole ?? 'Operador'}</span>
+          </div>
+        )}
+
+        {editMode && (
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setBrandingOpen((prev) => !prev)}
+              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+              style={{ color: brandingOpen ? 'var(--wf-heading)' : 'var(--wf-muted)', background: brandingOpen ? 'var(--wf-accent-muted)' : 'transparent' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)'; e.currentTarget.style.background = 'var(--wf-accent-muted)' }}
+              onMouseLeave={(e) => {
+                if (!brandingOpen) {
+                  e.currentTarget.style.color = 'var(--wf-muted)'
+                  e.currentTarget.style.background = 'transparent'
+                }
+              }}
+            >
+              <Palette className="h-3.5 w-3.5" />
+              Cores
+            </button>
+            <BrandingPopover open={brandingOpen} onClose={() => setBrandingOpen(false)} />
           </div>
         )}
 
