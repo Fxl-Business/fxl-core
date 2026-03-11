@@ -90,7 +90,10 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
   3. --wf-accent-muted uses color-mix() derived from --wf-accent (no hardcoded rgba values remain)
   4. Three new tokens exist and resolve correctly: --wf-header-search-bg, --wf-table-footer-bg, --wf-table-footer-fg
   5. Client branding for financeiro-conta-azul (#1B6B93) still overrides --wf-primary correctly in the wireframe viewer
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 22-01-PLAN.md -- Slate + blue token overhaul, GaugeChart hardcode fix, Tailwind config update
+- [ ] 22-02-PLAN.md -- Branding override pipeline (brandingToWfOverrides + WireframeThemeProvider) and chart palette hook
 
 ### Phase 23: Sidebar & Header Chrome
 **Goal**: Every wireframe screen shows a professional dark sidebar and clean white header that immediately communicate financial dashboard quality
@@ -194,7 +197,7 @@ Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other 
 | 19. Filter Bar Expansion | v1.3 | 2/2 | Complete | 2026-03-11 |
 | 20. Chart Type Expansion | v1.3 | 4/4 | Complete | 2026-03-11 |
 | 21. Gallery Reorganization | v1.3 | 2/2 | Complete | 2026-03-11 |
-| 22. Token Foundation | v1.4 | TBD | Not started | - |
+| 22. Token Foundation | v1.4 | 0/2 | In Progress | - |
 | 23. Sidebar & Header Chrome | v1.4 | TBD | Not started | - |
 | 24. KPI Cards | v1.4 | TBD | Not started | - |
 | 25. Table Components | v1.4 | TBD | Not started | - |
