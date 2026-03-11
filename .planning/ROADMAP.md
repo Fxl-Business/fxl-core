@@ -71,7 +71,7 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 **Milestone Goal:** Reformular o visual de todos os componentes de wireframe com novo design system (primary blue #1152d4, slate palette, Inter extrabold typography, dark sidebar, group-hover effects, professional financial dashboard aesthetic).
 
 - [x] **Phase 22: Token Foundation** - Update wireframe-tokens.css and tailwind.config.ts; new palette propagates to ~55 components automatically (completed 2026-03-11)
-- [ ] **Phase 23: Sidebar & Header Chrome** - Dark slate sidebar with nav groups and footer; white header with search, notifications, and user chip
+- [x] **Phase 23: Sidebar & Header Chrome** - Dark slate sidebar with nav groups and footer; white header with search, notifications, and user chip (completed 2026-03-11)
 - [ ] **Phase 24: KPI Cards** - Icon slot, group-hover transitions, rounded-full trend badges, extrabold values, optional sparkline
 - [ ] **Phase 25: Table Components** - Tracking-widest font-black headers, dark tfoot row, hover transitions, trend icons across all 4 table variants
 - [ ] **Phase 26: Filter Bar Enhancement** - backdrop-blur sticky bar, 10px uppercase labels, action button hierarchy, compare toggle
@@ -105,10 +105,10 @@ Plans:
   3. Sidebar footer shows a status indicator (colored dot + label) inside a bordered card at the bottom of the panel
   4. Header renders with white/slate-900 background, bottom border, and a rounded-lg search input with slate-100/800 background
   5. Header right side displays notification icon, dark mode toggle, and a user chip with avatar showing name and role
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
-- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
+- [x] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
+- [x] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
 
 ### Phase 24: KPI Cards
 **Goal**: KPI cards deliver the premium hover-responsive feel that defines a professional financial dashboard first impression
@@ -216,7 +216,7 @@ Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other 
 | 20. Chart Type Expansion | v1.3 | 4/4 | Complete | 2026-03-11 |
 | 21. Gallery Reorganization | v1.3 | 2/2 | Complete | 2026-03-11 |
 | 22. Token Foundation | 2/2 | Complete    | 2026-03-11 | - |
-| 23. Sidebar & Header Chrome | 1/2 | In Progress|  | - |
+| 23. Sidebar & Header Chrome | v1.4 | 2/2 | Complete | 2026-03-11 |
 | 24. KPI Cards | v1.4 | TBD | Not started | - |
 | 25. Table Components | v1.4 | TBD | Not started | - |
 | 26. Filter Bar Enhancement | v1.4 | TBD | Not started | - |

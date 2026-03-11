@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: planning
-stopped_at: Completed 23-sidebar-header-chrome-01-PLAN.md
-last_updated: "2026-03-11T18:46:26.107Z"
-last_activity: 2026-03-11 -- v1.4 roadmap created (7 phases, 39 requirements, 100% coverage)
+stopped_at: Completed 23-sidebar-header-chrome-02-PLAN.md
+last_updated: "2026-03-11T19:12:00Z"
+last_activity: 2026-03-11 -- Phase 23 Plan 02 complete (header chrome rebuild)
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 0
+  completed_plans: 4
+  percent: 10
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.4 Wireframe Visual Redesign -- Phase 22: Token Foundation
+**Current focus:** v1.4 Wireframe Visual Redesign -- Phase 23: Sidebar & Header Chrome
 
 ## Current Position
 
-Phase: 22 of 28 (Token Foundation)
-Plan: -- (not yet planned)
-Status: Ready to plan
-Last activity: 2026-03-11 -- v1.4 roadmap created (7 phases, 39 requirements, 100% coverage)
+Phase: 23 of 28 (Sidebar & Header Chrome)
+Plan: 02 complete
+Status: Phase 23 done — ready for Phase 24
+Last activity: 2026-03-11 -- Phase 23-02 complete (header 3-col layout, user chip, dark mode toggle in header)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 10%
 
 ## Performance Metrics
 
@@ -64,6 +64,9 @@ v1.4 architectural decisions (from research):
 - [Phase 23-sidebar-header-chrome]: Active nav uses bg-wf-accent-muted (12% tint) + text-wf-accent instead of solid sidebar-active for premium SaaS look
 - [Phase 23-sidebar-header-chrome]: Hover hardcoded to #1e293b / #fff literals because sidebar is always dark regardless of wireframe theme
 - [Phase 23-sidebar-header-chrome]: Footer upgraded from plain text to bordered card with green status dot across all sidebar render sites
+- [Phase 23-sidebar-header-chrome]: periodType removed from WireframeHeader Props — period selector deferred to Phase 26 filter bar
+- [Phase 23-sidebar-header-chrome]: SharedThemeToggle floating button removed — dark mode toggle consolidated into header chrome
+- [Phase 23-sidebar-header-chrome]: User chip uses static mock data (Operador FXL / Analista / OF) per wireframe-as-mock principle
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-11T18:46:26.105Z
-Stopped at: Completed 23-sidebar-header-chrome-01-PLAN.md
-Next: `/gsd:plan-phase 22`
+Last session: 2026-03-11T19:12:00Z
+Stopped at: Completed 23-sidebar-header-chrome-02-PLAN.md
+Next: Phase 24 (KPI Cards)
