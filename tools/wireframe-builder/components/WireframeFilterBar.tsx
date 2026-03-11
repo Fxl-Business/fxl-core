@@ -34,14 +34,14 @@ const ANOS_MOCK = ['2025', '2024', '2023']
 
 function SelectFilter({ filter }: { filter: FilterOption }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
-        {filter.label}:
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.05em', color: 'var(--wf-neutral-500)', whiteSpace: 'nowrap' }}>
+        {filter.label}
       </span>
       <select disabled style={{
-        fontSize: 12, color: 'var(--wf-body)', border: 'none',
+        fontSize: 12, color: 'var(--wf-accent)', border: 'none',
         background: 'transparent', cursor: 'default',
-        fontFamily: 'Inter, sans-serif', fontWeight: 500, padding: '2px 4px',
+        fontFamily: 'Inter, sans-serif', fontWeight: 700, padding: '2px 4px',
       }}>
         <option>{filter.options?.[0] ?? 'Todos'}</option>
       </select>
@@ -53,17 +53,17 @@ function DateRangeFilter({ filter }: { filter: FilterOption }) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, position: 'relative' }}>
-      <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
-        {filter.label}:
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
+      <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.05em', color: 'var(--wf-neutral-500)', whiteSpace: 'nowrap' }}>
+        {filter.label}
       </span>
       <button
         onClick={() => setOpen(o => !o)}
         style={{
           display: 'flex', alignItems: 'center', gap: 4,
           fontSize: 12, color: 'var(--wf-body)', fontWeight: 500,
-          border: '1px solid var(--wf-card-border)', borderRadius: 6,
-          background: 'var(--wf-card)', padding: '2px 8px',
+          border: '1px solid var(--wf-card-border)', borderRadius: 8,
+          background: 'transparent', padding: '2px 8px',
           cursor: 'pointer', fontFamily: 'Inter, sans-serif',
         }}
       >
@@ -117,9 +117,9 @@ function MultiSelectFilter({ filter }: { filter: FilterOption }) {
   const selected = filter.options?.slice(0, 2) ?? ['Todos']
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, position: 'relative' }}>
-      <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
-        {filter.label}:
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
+      <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.05em', color: 'var(--wf-neutral-500)', whiteSpace: 'nowrap' }}>
+        {filter.label}
       </span>
       <button
         onClick={() => setOpen(o => !o)}
@@ -172,9 +172,9 @@ function MultiSelectFilter({ filter }: { filter: FilterOption }) {
 
 function SearchFilter({ filter }: { filter: FilterOption }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
-        {filter.label}:
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.05em', color: 'var(--wf-neutral-500)', whiteSpace: 'nowrap' }}>
+        {filter.label}
       </span>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 4,
@@ -200,7 +200,7 @@ function ToggleFilter({ filter }: { filter: FilterOption }) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.05em', color: 'var(--wf-neutral-500)', whiteSpace: 'nowrap' }}>
         {filter.label}
       </span>
       <button
@@ -278,7 +278,9 @@ export default function WireframeFilterBar({
         display: 'flex',
         alignItems: 'center',
         gap: 8,
-        background: 'var(--wf-card)',
+        background: 'color-mix(in srgb, var(--wf-canvas) 85%, transparent)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         border: '1px solid var(--wf-card-border)',
         borderRadius: 12,
         padding: '8px 16px',
@@ -344,7 +346,7 @@ export default function WireframeFilterBar({
 
             <div style={{ width: 1, height: 20, background: 'var(--wf-card-border)' }} />
 
-            <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>
               Comparar
             </span>
 
