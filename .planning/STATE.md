@@ -99,6 +99,7 @@ None active.
 | 5 | Add view/edit mode toggle to BriefingForm page | 2026-03-10 | 28d563a | [5-briefing-view-edit-mode](./quick/5-briefing-view-edit-mode/) |
 | 6 | Audit CLAUDE.md completeness as codebase orchestrator | 2026-03-10 | c0dbbad | [6-audit-claude-md](./quick/6-audit-claude-md-completeness-as-codebase/) |
 | 7 | Fix client sidebar order and open Wireframe in new tab | 2026-03-10 | 454dad7 | [7-fix-client-sidebar-order-and-open-wirefr](./quick/7-fix-client-sidebar-order-and-open-wirefr/) |
+| 8 | Unify gallery and wireframe components via WireframeThemeProvider | 2026-03-11 | c973aa2 | [8-unify-gallery-and-wireframe-components-f](./quick/8-unify-gallery-and-wireframe-components-f/) |
 | Phase 17-schema-foundation-layout-restructure P01 | 3 | 1 tasks | 2 files |
 | Phase 17-schema-foundation-layout-restructure P03 | 2 | 2 tasks | 4 files |
 | Phase 17-schema-foundation-layout-restructure P02 | 2 | 3 tasks | 2 files |
