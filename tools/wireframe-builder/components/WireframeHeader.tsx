@@ -5,6 +5,7 @@ type PeriodType = 'mensal' | 'anual' | 'none'
 type Props = {
   title: string
   periodType?: PeriodType
+  onGerenciar?: () => void
 }
 
 const MESES = [
@@ -27,7 +28,7 @@ const arrowButtonStyle: React.CSSProperties = {
   outline: 'none',
 }
 
-export default function WireframeHeader({ title, periodType = 'mensal' }: Props) {
+export default function WireframeHeader({ title, periodType = 'mensal', onGerenciar }: Props) {
   const [mensal, setMensal] = useState({ monthIndex: 0, year: 2026 })
   const [anualYear, setAnualYear] = useState(2025)
 
@@ -84,7 +85,28 @@ export default function WireframeHeader({ title, periodType = 'mensal' }: Props)
         )}
       </div>
 
-      <div style={{ flex: 1 }} />
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
+        {onGerenciar && (
+          <button
+            type="button"
+            onClick={onGerenciar}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--wf-card-border)',
+              borderRadius: 4,
+              padding: '4px 12px',
+              fontSize: 12,
+              color: 'var(--wf-body)',
+              cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-body)' }}
+          >
+            Gerenciar
+          </button>
+        )}
+      </div>
     </header>
   )
 }
