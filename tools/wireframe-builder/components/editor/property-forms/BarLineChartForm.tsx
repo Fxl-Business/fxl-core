@@ -52,6 +52,11 @@ export default function BarLineChartForm({ section, onChange }: Props) {
             <SelectItem value="scatter">Dispersao</SelectItem>
             <SelectItem value="funnel">Funil</SelectItem>
             <SelectItem value="treemap">Treemap</SelectItem>
+            <SelectItem value="stacked-bar">Barra Empilhada</SelectItem>
+            <SelectItem value="stacked-area">Area Empilhada</SelectItem>
+            <SelectItem value="horizontal-bar">Barra Horizontal</SelectItem>
+            <SelectItem value="bubble">Bolhas</SelectItem>
+            <SelectItem value="composed">Composto (Barra + Linha + Area)</SelectItem>
           </SelectContent>
         </Select>
       </div>

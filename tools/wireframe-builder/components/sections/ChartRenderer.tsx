@@ -13,6 +13,11 @@ import TreemapComponent from '../TreemapComponent'
 import FunnelChartComponent from '../FunnelChartComponent'
 import ScatterChartComponent from '../ScatterChartComponent'
 import AreaChartComponent from '../AreaChartComponent'
+import StackedBarChartComponent from '../StackedBarChartComponent'
+import StackedAreaChartComponent from '../StackedAreaChartComponent'
+import HorizontalBarChartComponent from '../HorizontalBarChartComponent'
+import BubbleChartComponent from '../BubbleChartComponent'
+import ComposedChartComponent from '../ComposedChartComponent'
 
 type ChartSection =
   | BarLineChartSection
@@ -76,6 +81,54 @@ export default function ChartRenderer({ section, compareMode, comparePeriod, cha
         case 'area':
           return (
             <AreaChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'stacked-bar':
+          return (
+            <StackedBarChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'stacked-area':
+          return (
+            <StackedAreaChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'horizontal-bar':
+          return (
+            <HorizontalBarChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              xLabel={section.xLabel}
+              yLabel={section.yLabel}
+              chartColors={chartColors}
+            />
+          )
+        case 'bubble':
+          return (
+            <BubbleChartComponent
+              title={section.title}
+              height={section.height}
+              xLabel={section.xLabel}
+              yLabel={section.yLabel}
+              chartColors={chartColors}
+            />
+          )
+        case 'composed':
+          return (
+            <ComposedChartComponent
               title={section.title}
               height={section.height}
               categories={section.categories}
