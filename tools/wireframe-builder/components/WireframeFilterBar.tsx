@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Calendar, ChevronDown } from 'lucide-react'
+import { Search, Calendar, ChevronDown, Share2, Download } from 'lucide-react'
 
 export type FilterOption = {
   key: string
@@ -317,6 +317,38 @@ export default function WireframeFilterBar({
       {showCompareSwitch && (
         <>
           <div style={{ flex: 1 }} />
+
+          {/* Action buttons: date picker (outline) + share (outline) + export (filled) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <button type="button" style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              border: '1px solid var(--wf-card-border)', background: 'transparent',
+              borderRadius: 8, fontSize: 12, fontWeight: 500, color: 'var(--wf-body)',
+              padding: '4px 10px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            }}>
+              <Calendar size={12} color="var(--wf-muted)" />
+              Jan — Mar 2026
+            </button>
+            <button type="button" style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              border: '1px solid var(--wf-card-border)', background: 'transparent',
+              borderRadius: 8, fontSize: 12, fontWeight: 500, color: 'var(--wf-body)',
+              padding: '4px 10px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            }}>
+              <Share2 size={12} color="var(--wf-muted)" />
+              Compartilhar
+            </button>
+            <button type="button" style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              background: 'var(--wf-accent)', color: 'var(--wf-accent-fg)',
+              border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600,
+              padding: '4px 10px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            }}>
+              <Download size={12} />
+              Exportar
+            </button>
+          </div>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 
             {/* Period selector — visible only when compare is ON, sits LEFT of the label */}
