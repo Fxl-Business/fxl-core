@@ -58,10 +58,10 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 
 ### Charts
 
-- [ ] **CHRT-01**: Chart palette uses primary blue + indigo + blue-400 + slate scale (replacing gold/amber)
-- [ ] **CHRT-02**: Chart containers use white/slate-900 background with rounded-xl border and shadow-sm
-- [ ] **CHRT-03**: Chart headers have font-bold title with legend dots (rounded-full colored indicators)
-- [ ] **CHRT-04**: Bar charts support group-hover transitions from muted to full opacity
+- [x] **CHRT-01**: Chart palette uses primary blue + indigo + blue-400 + slate scale (replacing gold/amber)
+- [x] **CHRT-02**: Chart containers use white/slate-900 background with rounded-xl border and shadow-sm
+- [x] **CHRT-03**: Chart headers have font-bold title with legend dots (rounded-full colored indicators)
+- [x] **CHRT-04**: Bar charts support group-hover transitions from muted to full opacity
 - [x] **CHRT-05**: CompositionBar component (new): horizontal stacked bar with hover:brightness-90 and legend grid
 
 ### Editor Sync
@@ -126,10 +126,10 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 | TBL-03 | Phase 25 | Complete |
 | TBL-04 | Phase 25 | Complete |
 | TBL-05 | Phase 25 | Complete |
-| CHRT-01 | Phase 27 | Pending |
-| CHRT-02 | Phase 27 | Pending |
-| CHRT-03 | Phase 27 | Pending |
-| CHRT-04 | Phase 27 | Pending |
+| CHRT-01 | Phase 27 | Complete |
+| CHRT-02 | Phase 27 | Complete |
+| CHRT-03 | Phase 27 | Complete |
+| CHRT-04 | Phase 27 | Complete |
 | CHRT-05 | Phase 27 | Complete |
 | EDIT-01 | Phase 28 | Pending |
 | GAL-01 | Phase 28 | Pending |
