@@ -140,7 +140,11 @@ Plans:
   1. Gallery displays components grouped into thematic sections (charts, layout/shell, data display, inputs/filters, etc.)
   2. All new chart types from Phase 20 appear in the gallery with representative mock data
   3. Sidebar, header, and filter bar previews appear in a dedicated shell/layout section of the gallery
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 21-01-PLAN.md -- Restructure gallery to 6 sections + add 6 Phase 20 chart Preview wrappers + update header/filter mocks (GAL-01, GAL-02)
+- [ ] 21-02-PLAN.md -- Visual checkpoint: verify all sections and new chart previews in browser (GAL-01, GAL-02)
 
 ## Progress
 
@@ -172,4 +176,4 @@ Phases 18, 19, 20 can execute in parallel after Phase 17. Phase 21 requires 18+1
 | 18. Configurable Sidebar & Header | 3/3 | Complete    | 2026-03-11 | - |
 | 19. Filter Bar Expansion | v1.3 | Complete    | 2026-03-11 | 2026-03-11 |
 | 20. Chart Type Expansion | 4/4 | Complete    | 2026-03-11 | - |
-| 21. Gallery Reorganization | v1.3 | 0/0 | Not started | - |
+| 21. Gallery Reorganization | v1.3 | 0/2 | In progress | - |
