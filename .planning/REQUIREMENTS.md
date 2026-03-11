@@ -1,135 +1,145 @@
-# Requirements: FXL Core v1.3
+# Requirements: FXL Core v1.4
 
-**Defined:** 2026-03-10
-**Core Value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
+**Defined:** 2026-03-11
+**Core Value:** FXL Core e o cerebro operacional da empresa — documentacao, processo e tooling juntos
 
-## v1.3 Requirements
+## v1.4 Requirements
 
-Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
+Requirements for wireframe visual redesign. Each maps to roadmap phases.
 
-### Visual
+### Token Foundation
 
-- [x] **VIS-01**: Wireframe component palette usa grays mais suaves (preto menos bruto)
-
-### Layout
-
-- [x] **LAYOUT-01**: Header renderiza acima da sidebar (full-width, highest z-order)
-- [x] **LAYOUT-02**: "Gerenciar" move da sidebar para header como action button
+- [ ] **TOK-01**: Wireframe palette uses slate color scale (replacing warm stone grays) with primary blue #1152d4 (replacing gold #d4a017)
+- [ ] **TOK-02**: Both light and dark theme blocks in wireframe-tokens.css update simultaneously with new values
+- [ ] **TOK-03**: --wf-accent-muted uses color-mix() derived from --wf-accent (replacing hardcoded rgba)
+- [ ] **TOK-04**: Three new tokens added: --wf-header-search-bg, --wf-table-footer-bg, --wf-table-footer-fg
+- [ ] **TOK-05**: Background tokens update to #f6f6f8 (light) and #101622 (dark)
+- [ ] **TOK-06**: All hardcoded colors in components (e.g., GaugeChart #f59e0b) replaced with token references
+- [ ] **TOK-07**: Client branding generateBrandCssVars() updated for any new overridable tokens
 
 ### Sidebar
 
-- [x] **SIDE-01**: SidebarConfig adicionado ao BlueprintConfig schema (dashboard-level)
-- [x] **SIDE-02**: Sidebar renderiza icones por item de menu via BlueprintScreen.icon
-- [x] **SIDE-03**: Sidebar suporta groups/secoes com headings rotulados
-- [x] **SIDE-04**: Sidebar colapsa para icon-only rail mode
-- [x] **SIDE-05**: Sidebar items mostram badge/notification counts
-- [x] **SIDE-06**: Sidebar renderiza footer text (versao/ambiente)
-- [x] **SIDE-07**: Active screen highlighted na sidebar (preservado do existente)
+- [ ] **SIDE-01**: Sidebar uses dark slate-900/950 background with slate-300/400 text
+- [ ] **SIDE-02**: Active nav item uses primary/10 background with primary text color
+- [ ] **SIDE-03**: Nav items have hover:bg-slate-800 hover:text-white transitions
+- [ ] **SIDE-04**: Section group labels use 10px uppercase tracking-wider slate-500 style
+- [ ] **SIDE-05**: Sidebar footer shows status indicator (dot + label) in bordered card
 
 ### Header
 
-- [x] **HEAD-01**: HeaderConfig adicionado ao BlueprintConfig schema (dashboard-level)
-- [x] **HEAD-02**: Header exibe logo/brand do cliente
-- [x] **HEAD-03**: Header mostra period selector (config-driven)
-- [x] **HEAD-04**: Header mostra user/role indicator
-- [x] **HEAD-05**: Header renderiza action buttons (manage, share, export)
+- [ ] **HEAD-01**: Header uses white/slate-900 background with bottom border, 14-unit height
+- [ ] **HEAD-02**: Header contains search input with icon, styled as rounded-lg with slate-100/800 background
+- [ ] **HEAD-03**: Header right side has notification icon, dark mode toggle, and user chip with avatar
+- [ ] **HEAD-04**: User chip displays name and role with right-aligned text and rounded-lg avatar
 
 ### Filter Bar
 
-- [x] **FILT-01**: FilterOption type extendido com filterType discriminator
-- [x] **FILT-02**: Date range picker filter type
-- [x] **FILT-03**: Multi-select dropdown filter type
-- [x] **FILT-04**: Search/text filter type
-- [x] **FILT-05**: Period quick-select presets para date-range filter
-- [x] **FILT-06**: Boolean toggle filter type
+- [ ] **FILT-01**: Filter bar is sticky with backdrop-blur and semi-transparent background
+- [ ] **FILT-02**: Filter selects use transparent background with bold primary text and no border
+- [ ] **FILT-03**: Filter labels use 10px uppercase bold slate-500 style
+- [ ] **FILT-04**: Action buttons (date picker, share, export) use rounded-lg with specific button hierarchy (outline vs filled)
+- [ ] **FILT-05**: Compare toggle uses primary-colored switch with 11px bold label
+
+### Cards
+
+- [ ] **CARD-01**: KPI cards use white/slate-900 background with rounded-xl border and shadow-sm
+- [ ] **CARD-02**: KPI cards have group-hover effect: icon container transitions from primary/10 to solid primary
+- [ ] **CARD-03**: Trend badges use rounded-full pill with color-coded background (emerald for positive, rose for negative)
+- [ ] **CARD-04**: Card values use text-2xl font-extrabold, labels use text-sm font-medium slate-500
+- [ ] **CARD-05**: Comparison text uses text-[10px] text-slate-400 below value
+
+### Tables
+
+- [ ] **TBL-01**: Table headers use text-[10px] font-black uppercase tracking-widest slate-500 on slate-50/800 background
+- [ ] **TBL-02**: Table rows have hover:bg-slate-100 dark:hover:bg-slate-800 transitions with cursor-pointer
+- [ ] **TBL-03**: Highlight/total rows use primary-colored text with font-extrabold uppercase styling
+- [ ] **TBL-04**: Dark footer row (bg-slate-900 text-white) with font-black totals for analytical tables
+- [ ] **TBL-05**: Trend indicators in table cells use color-coded icons with scale-110 hover
 
 ### Charts
 
-- [x] **CHART-01**: Stacked bar chart variant (chartType: 'stacked-bar')
-- [x] **CHART-02**: Stacked area chart variant (chartType: 'stacked-area')
-- [x] **CHART-03**: Horizontal bar chart variant (chartType: 'horizontal-bar')
-- [x] **CHART-04**: Bubble chart variant (chartType: 'bubble')
-- [x] **CHART-05**: Gauge chart como novo section type (gauge-chart)
-- [x] **CHART-06**: Composed chart com multi-series configuravel (chartType: 'composed')
+- [ ] **CHRT-01**: Chart palette uses primary blue + indigo + blue-400 + slate scale (replacing gold/amber)
+- [ ] **CHRT-02**: Chart containers use white/slate-900 background with rounded-xl border and shadow-sm
+- [ ] **CHRT-03**: Chart headers have font-bold title with legend dots (rounded-full colored indicators)
+- [ ] **CHRT-04**: Bar charts support group-hover transitions from muted to full opacity
+- [ ] **CHRT-05**: CompositionBar component (new): horizontal stacked bar with hover:brightness-90 and legend grid
+
+### Editor Sync
+
+- [ ] **EDIT-01**: ScreenManager sidebar styling matches the new wireframe sidebar visual
 
 ### Gallery
 
-- [x] **GAL-01**: Component gallery reorganizada por secoes tematicas
-- [x] **GAL-02**: Todos os novos chart types visiveis na gallery com mock data
+- [ ] **GAL-01**: All gallery component previews reflect the new visual design
+- [ ] **GAL-02**: Gallery validation checklist: dark mode toggle pass, branding-applied check, all 6 sections verified
 
 ## Future Requirements
 
-Deferred to future milestone. Tracked but not in current roadmap.
+### Advanced Visual Polish
 
-### Advanced Charts
-
-- **ACHART-01**: Map/geographic chart (requer geo data + tile server dependency)
-- **ACHART-02**: Sankey diagram (dados relacionais complexos)
-- **ACHART-03**: Sunburst chart (donut multi-ring)
-- **ACHART-04**: Histogram / box plot (charts estatisticos)
-
-### Advanced Layout
-
-- **ALAYOUT-01**: Nested sidebar 3+ levels
-- **ALAYOUT-02**: Drag-and-drop sidebar reordering
-- **ALAYOUT-03**: Cross-chart filtering (interacao entre graficos)
+- **ADVPOL-01**: Animated transitions on KPI card value changes
+- **ADVPOL-02**: CSS-only chart tooltips with hover data display
+- **ADVPOL-03**: Container query responsive cards (@container)
 
 ## Out of Scope
 
-Explicitly excluded. Documented to prevent scope creep.
-
 | Feature | Reason |
 |---------|--------|
-| Map/geographic charts | Requer geo data, tile servers, nova dependencia (leaflet/mapbox). Muito pesado para wireframes com mock data |
-| Pivot table / matrix | Extremamente complexo (drag columns/rows, subtotals). Recharts nao suporta. Drill-down table existente cobre 90% do caso |
-| Cross-chart filtering | Requer state management global entre secoes. Quebra principio de isolamento. Sem sentido com mock data |
-| Nested sidebar 3+ levels | Cria confusao, quebra scanning patterns. PME dashboards raramente excedem 15 telas |
-| Custom color picker per chart | Quebra consistencia visual. Sistema de branding ja trata paleta globalmente |
-| Histogram / box plot | PME BI clients quase nunca precisam de charts estatisticos |
-| Sankey / sunburst | Casos de uso nicho. Sankey requer dados relacionais complexos |
-| Real-time filter updates | Wireframes usam mock data. Nao ha backend para filtrar |
+| Material Symbols icon migration | lucide-react already in 86 files, tree-shaken, sufficient vocabulary |
+| Tailwind v4 upgrade | Breaking config/plugin API changes far beyond v1.4 scope |
+| New component types | v1.4 is visual redesign only. CompositionBar is the sole exception. |
+| Mobile responsive wireframe | v2 concern. Desktop-first dashboard aesthetic. |
+| Dark mode fine-tuning beyond token parity | Tokens update both modes simultaneously. Per-component dark adjustments are v2. |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VIS-01 | Phase 17 | Complete |
-| LAYOUT-01 | Phase 17 | Complete |
-| LAYOUT-02 | Phase 17 | Complete |
-| SIDE-01 | Phase 17 | Complete |
-| SIDE-02 | Phase 18 | Complete |
-| SIDE-03 | Phase 18 | Complete |
-| SIDE-04 | Phase 18 | Complete |
-| SIDE-05 | Phase 18 | Complete |
-| SIDE-06 | Phase 18 | Complete |
-| SIDE-07 | Phase 18 | Complete |
-| HEAD-01 | Phase 17 | Complete |
-| HEAD-02 | Phase 18 | Complete |
-| HEAD-03 | Phase 18 | Complete |
-| HEAD-04 | Phase 18 | Complete |
-| HEAD-05 | Phase 18 | Complete |
-| FILT-01 | Phase 17 | Complete |
-| FILT-02 | Phase 19 | Complete |
-| FILT-03 | Phase 19 | Complete |
-| FILT-04 | Phase 19 | Complete |
-| FILT-05 | Phase 19 | Complete |
-| FILT-06 | Phase 19 | Complete |
-| CHART-01 | Phase 20 | Complete |
-| CHART-02 | Phase 20 | Complete |
-| CHART-03 | Phase 20 | Complete |
-| CHART-04 | Phase 20 | Complete |
-| CHART-05 | Phase 20 | Complete |
-| CHART-06 | Phase 20 | Complete |
-| GAL-01 | Phase 21 | Complete |
-| GAL-02 | Phase 21 | Complete |
+| TOK-01 | TBD | Pending |
+| TOK-02 | TBD | Pending |
+| TOK-03 | TBD | Pending |
+| TOK-04 | TBD | Pending |
+| TOK-05 | TBD | Pending |
+| TOK-06 | TBD | Pending |
+| TOK-07 | TBD | Pending |
+| SIDE-01 | TBD | Pending |
+| SIDE-02 | TBD | Pending |
+| SIDE-03 | TBD | Pending |
+| SIDE-04 | TBD | Pending |
+| SIDE-05 | TBD | Pending |
+| HEAD-01 | TBD | Pending |
+| HEAD-02 | TBD | Pending |
+| HEAD-03 | TBD | Pending |
+| HEAD-04 | TBD | Pending |
+| FILT-01 | TBD | Pending |
+| FILT-02 | TBD | Pending |
+| FILT-03 | TBD | Pending |
+| FILT-04 | TBD | Pending |
+| FILT-05 | TBD | Pending |
+| CARD-01 | TBD | Pending |
+| CARD-02 | TBD | Pending |
+| CARD-03 | TBD | Pending |
+| CARD-04 | TBD | Pending |
+| CARD-05 | TBD | Pending |
+| TBL-01 | TBD | Pending |
+| TBL-02 | TBD | Pending |
+| TBL-03 | TBD | Pending |
+| TBL-04 | TBD | Pending |
+| TBL-05 | TBD | Pending |
+| CHRT-01 | TBD | Pending |
+| CHRT-02 | TBD | Pending |
+| CHRT-03 | TBD | Pending |
+| CHRT-04 | TBD | Pending |
+| CHRT-05 | TBD | Pending |
+| EDIT-01 | TBD | Pending |
+| GAL-01 | TBD | Pending |
+| GAL-02 | TBD | Pending |
 
 **Coverage:**
-- v1.3 requirements: 26 total
-- Mapped to phases: 26
-- Unmapped: 0
+- v1.4 requirements: 39 total
+- Mapped to phases: 0
+- Unmapped: 39 (pending roadmap creation)
 
 ---
-*Requirements defined: 2026-03-10*
-*Last updated: 2026-03-10 after roadmap creation (all 26 requirements mapped)*
+*Requirements defined: 2026-03-11*
+*Last updated: 2026-03-11 after initial definition*
