@@ -6,9 +6,10 @@ type Props = {
   title?: string
   columns: Column[]
   rowCount?: number
+  footer?: Record<string, string>
 }
 
-export default function DataTable({ title, columns, rowCount = 5 }: Props) {
+export default function DataTable({ title, columns, rowCount = 5, footer }: Props) {
   const rows = Array.from({ length: rowCount }, (_, i) => i)
 
   return (
@@ -55,6 +56,24 @@ export default function DataTable({ title, columns, rowCount = 5 }: Props) {
               </tr>
             ))}
           </tbody>
+          {footer && (
+            <tfoot>
+              <tr className="bg-wf-table-footer">
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className={cn(
+                      'px-4 py-2.5 text-xs font-black text-wf-table-footer-fg',
+                      col.align === 'right' && 'text-right tabular-nums',
+                      col.align === 'center' && 'text-center',
+                    )}
+                  >
+                    {footer[col.key] ?? ''}
+                  </td>
+                ))}
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </div>

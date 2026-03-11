@@ -134,6 +134,7 @@ export type DataTableSection = {
   title: string
   columns: ColumnConfig[]
   rowCount?: number
+  footer?: Record<string, string>
 }
 
 export type DrillDownTableSection = {
@@ -142,6 +143,7 @@ export type DrillDownTableSection = {
   subtitle?: string
   columns: ColumnConfig[]
   rows: DrilRow[]
+  footer?: Record<string, string>
   viewSwitcher?: {
     options: string[]
     default: string

@@ -27,7 +27,7 @@ function filterColumns(columns: ColumnConfig[], compareMode: boolean) {
 
 function DataTableRenderer({ section, compareMode }: { section: DataTableSection; compareMode: boolean }) {
   const columns = filterColumns(section.columns, compareMode)
-  return <DataTable title={section.title} columns={columns} rowCount={section.rowCount} />
+  return <DataTable title={section.title} columns={columns} rowCount={section.rowCount} footer={section.footer} />
 }
 
 function DrillDownTableRenderer({ section, compareMode }: { section: DrillDownTableSection; compareMode: boolean }) {
@@ -51,6 +51,7 @@ function DrillDownTableRenderer({ section, compareMode }: { section: DrillDownTa
         subtitle={section.subtitle}
         columns={columns}
         rows={rows}
+        footer={section.footer}
       />
     </div>
   )

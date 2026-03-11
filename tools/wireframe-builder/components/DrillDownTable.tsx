@@ -20,6 +20,7 @@ type Props = {
   subtitle?: string
   columns: DrilColumn[]
   rows: DrilRow[]
+  footer?: Record<string, string>
 }
 
 function Row({ row, columns, depth }: { row: DrilRow; columns: DrilColumn[]; depth: number }) {
@@ -71,7 +72,7 @@ function Row({ row, columns, depth }: { row: DrilRow; columns: DrilColumn[]; dep
   )
 }
 
-export default function DrillDownTable({ title, subtitle, columns, rows }: Props) {
+export default function DrillDownTable({ title, subtitle, columns, rows, footer }: Props) {
   return (
     <div className="rounded-lg border border-wf-card-border bg-wf-card overflow-hidden">
       {title && (
@@ -104,6 +105,24 @@ export default function DrillDownTable({ title, subtitle, columns, rows }: Props
               <Row key={row.id} row={row} columns={columns} depth={0} />
             ))}
           </tbody>
+          {footer && (
+            <tfoot>
+              <tr className="bg-wf-table-footer">
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className={cn(
+                      'px-4 py-2.5 text-xs font-black text-wf-table-footer-fg',
+                      col.align === 'right' && 'text-right tabular-nums',
+                      col.align === 'center' && 'text-center',
+                    )}
+                  >
+                    {footer[col.key] ?? ''}
+                  </td>
+                ))}
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </div>
