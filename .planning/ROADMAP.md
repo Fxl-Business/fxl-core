@@ -5,7 +5,8 @@
 - v1.0 MVP -- Phases 1-6 (shipped 2026-03-09)
 - v1.1 Wireframe Evolution -- Phases 7-11 (shipped 2026-03-10)
 - v1.2 Visual Redesign -- Phases 12-16 (shipped 2026-03-11)
-- v1.3 Builder & Components -- Phases 17-21 (in progress)
+- v1.3 Builder & Components -- Phases 17-21 (shipped 2026-03-11)
+- v1.4 Wireframe Visual Redesign -- Phases 22-28 (in progress)
 
 ## Phases
 
@@ -52,104 +53,120 @@ Full details: [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md)
 
 </details>
 
-### v1.3 Builder & Components (In Progress)
+<details>
+<summary>v1.3 Builder & Components (Phases 17-21) -- SHIPPED 2026-03-11</summary>
 
-**Milestone Goal:** Expand the wireframe builder with correct layout hierarchy, blueprint-driven sidebar/header/filter bar, massive chart repertoire, and reorganized component gallery.
+- [x] Phase 17: Schema Foundation & Layout Restructure (3/3 plans) -- completed 2026-03-11
+- [x] Phase 18: Configurable Sidebar & Header (3/3 plans) -- completed 2026-03-11
+- [x] Phase 19: Filter Bar Expansion (2/2 plans) -- completed 2026-03-11
+- [x] Phase 20: Chart Type Expansion (4/4 plans) -- completed 2026-03-11
+- [x] Phase 21: Gallery Reorganization (2/2 plans) -- completed 2026-03-11
 
-- [x] **Phase 17: Schema Foundation & Layout Restructure** - Types, Zod schemas, layout hierarchy (header above sidebar), softer wireframe palette (completed 2026-03-11)
-- [x] **Phase 18: Configurable Sidebar & Header** - Blueprint-driven sidebar and header renderers with all visual features (completed 2026-03-11)
-- [x] **Phase 19: Filter Bar Expansion** - Five new filter type renderers (date-range, multi-select, search, period presets, boolean toggle) (completed 2026-03-11)
-- [x] **Phase 20: Chart Type Expansion** - Six new chart types/variants (stacked-bar, stacked-area, horizontal-bar, bubble, gauge, composed) (completed 2026-03-11)
-- [x] **Phase 21: Gallery Reorganization** - Registry-driven gallery with thematic sections and all new components visible (completed 2026-03-11)
+Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
+
+</details>
+
+### v1.4 Wireframe Visual Redesign (In Progress)
+
+**Milestone Goal:** Reformular o visual de todos os componentes de wireframe com novo design system (primary blue #1152d4, slate palette, Inter extrabold typography, dark sidebar, group-hover effects, professional financial dashboard aesthetic).
+
+- [ ] **Phase 22: Token Foundation** - Update wireframe-tokens.css and tailwind.config.ts; new palette propagates to ~55 components automatically
+- [ ] **Phase 23: Sidebar & Header Chrome** - Dark slate sidebar with nav groups and footer; white header with search, notifications, and user chip
+- [ ] **Phase 24: KPI Cards** - Icon slot, group-hover transitions, rounded-full trend badges, extrabold values, optional sparkline
+- [ ] **Phase 25: Table Components** - Tracking-widest font-black headers, dark tfoot row, hover transitions, trend icons across all 4 table variants
+- [ ] **Phase 26: Filter Bar Enhancement** - backdrop-blur sticky bar, 10px uppercase labels, action button hierarchy, compare toggle
+- [ ] **Phase 27: Chart Palette & Composition** - Primary blue + slate chart palette, custom header legend, CompositionBar new component
+- [ ] **Phase 28: Editor Sync & Gallery Validation** - ScreenManager visual sync with sidebar, gallery smoke test, final TypeScript verification
 
 ## Phase Details
 
-### Phase 17: Schema Foundation & Layout Restructure
-**Goal**: The type system, Zod schemas, and layout hierarchy are correct and stable so all downstream phases build on solid ground
-**Depends on**: Phase 16 (v1.2 complete)
-**Requirements**: VIS-01, LAYOUT-01, LAYOUT-02, SIDE-01, HEAD-01, FILT-01
+### Phase 22: Token Foundation
+**Goal**: The wireframe token system reflects the new financial dashboard palette so all downstream component changes build on correct base values
+**Depends on**: Phase 21 (v1.3 complete)
+**Requirements**: TOK-01, TOK-02, TOK-03, TOK-04, TOK-05, TOK-06, TOK-07
 **Success Criteria** (what must be TRUE):
-  1. Wireframe viewer renders with header full-width above sidebar (not beside it)
-  2. "Gerenciar" action lives in the header area, not in the sidebar
-  3. Wireframe components use softer gray palette (no harsh blacks in cards, tables, section borders)
-  4. BlueprintConfig schema accepts optional SidebarConfig and HeaderConfig at dashboard level (not screen level)
-  5. FilterOption type supports a filterType discriminator field that defaults to 'select' for backward compatibility
-**Plans**: 3 plans
+  1. Wireframe components render with primary blue #1152d4 replacing gold #d4a017 as accent color
+  2. Background tokens show #f6f6f8 in light mode and #101622 in dark mode
+  3. --wf-accent-muted uses color-mix() derived from --wf-accent (no hardcoded rgba values remain)
+  4. Three new tokens exist and resolve correctly: --wf-header-search-bg, --wf-table-footer-bg, --wf-table-footer-fg
+  5. Client branding for financeiro-conta-azul (#1B6B93) still overrides --wf-primary correctly in the wireframe viewer
+**Plans**: TBD
 
-Plans:
-- [ ] 17-01-PLAN.md -- Fix --wf-border CSS token alias (VIS-01)
-- [ ] 17-02-PLAN.md -- Restructure layout: full-width header above sidebar, move Gerenciar (LAYOUT-01, LAYOUT-02)
-- [ ] 17-03-PLAN.md -- Extend TypeScript types and Zod schemas with SidebarConfig, HeaderConfig, filterType (SIDE-01, HEAD-01, FILT-01)
-
-### Phase 18: Configurable Sidebar & Header
-**Goal**: Operators see a fully configurable dashboard shell (sidebar + header) driven entirely by blueprint config
-**Depends on**: Phase 17
-**Requirements**: SIDE-02, SIDE-03, SIDE-04, SIDE-05, SIDE-06, SIDE-07, HEAD-02, HEAD-03, HEAD-04, HEAD-05
+### Phase 23: Sidebar & Header Chrome
+**Goal**: Every wireframe screen shows a professional dark sidebar and clean white header that immediately communicate financial dashboard quality
+**Depends on**: Phase 22
+**Requirements**: SIDE-01, SIDE-02, SIDE-03, SIDE-04, SIDE-05, HEAD-01, HEAD-02, HEAD-03, HEAD-04
 **Success Criteria** (what must be TRUE):
-  1. Sidebar renders icons next to each menu item from BlueprintScreen.icon field
-  2. Sidebar displays grouped sections with labeled headings and collapses to an icon-only rail
-  3. Sidebar shows badge/notification counts on items and footer text (version/environment) at the bottom
-  4. Header displays the client logo/brand and a period selector driven by config
-  5. Header renders user/role indicator and action buttons (manage, share, export)
-**Plans**: 3 plans
+  1. Sidebar displays with slate-900/950 dark background, slate-300/400 text, and primary/10 background on the active nav item
+  2. Sidebar nav items show hover:bg-slate-800 hover:text-white transitions and section group labels in 10px uppercase tracking-wider style
+  3. Sidebar footer shows a status indicator (colored dot + label) inside a bordered card at the bottom of the panel
+  4. Header renders with white/slate-900 background, bottom border, and a rounded-lg search input with slate-100/800 background
+  5. Header right side displays notification icon, dark mode toggle, and a user chip with avatar showing name and role
+**Plans**: TBD
 
-Plans:
-- [ ] 18-01-PLAN.md -- Extend SidebarConfig, HeaderConfig, BlueprintScreen types and Zod schemas + 7 test cases (SIDE-03, SIDE-05, HEAD-02/03/04/05)
-- [ ] 18-02-PLAN.md -- Sidebar collapse rail, groups rendering, badge pill, footer from config (SIDE-02, SIDE-03, SIDE-04, SIDE-05, SIDE-06, SIDE-07)
-- [ ] 18-03-PLAN.md -- WireframeHeader logo, user chip, action buttons, wire in WireframeViewer (HEAD-02, HEAD-03, HEAD-04, HEAD-05)
-
-### Phase 19: Filter Bar Expansion
-**Goal**: The filter bar supports all common BI filter patterns so blueprint authors can configure rich filtering without custom code
-**Depends on**: Phase 17
-**Requirements**: FILT-02, FILT-03, FILT-04, FILT-05, FILT-06
+### Phase 24: KPI Cards
+**Goal**: KPI cards deliver the premium hover-responsive feel that defines a professional financial dashboard first impression
+**Depends on**: Phase 22
+**Requirements**: CARD-01, CARD-02, CARD-03, CARD-04, CARD-05
 **Success Criteria** (what must be TRUE):
-  1. Filter bar renders a date range picker with calendar widget when filterType is 'date-range'
-  2. Filter bar renders a multi-select dropdown when filterType is 'multi-select'
-  3. Filter bar renders a text search input when filterType is 'search'
-  4. Date range filter offers quick-select period presets (last 7 days, last month, YTD, etc.)
-  5. Filter bar renders a boolean toggle switch when filterType is 'toggle'
-**Plans**: 2 plans
+  1. KPI cards render on white/slate-900 background with rounded-xl border and shadow-sm
+  2. Hovering a KPI card transitions the icon container from primary/10 background with primary text to solid primary background with white text
+  3. Trend badges display as rounded-full pills with emerald background for positive values and rose background for negative values
+  4. Card values use text-2xl font-extrabold and labels use text-sm font-medium slate-500
+  5. Comparison text appears below the value at text-[10px] text-slate-400
+**Plans**: TBD
 
-Plans:
-- [x] 19-01-PLAN.md -- filterType dispatch + all 5 sub-components in WireframeFilterBar + Phase 19 schema test block (FILT-02, FILT-03, FILT-04, FILT-05, FILT-06) (completed 2026-03-11)
-- [ ] 19-02-PLAN.md -- Visual checkpoint: verify all filter type renderers in browser (FILT-02, FILT-03, FILT-04, FILT-05, FILT-06)
-
-### Phase 20: Chart Type Expansion
-**Goal**: The chart library covers the standard BI dashboard repertoire so wireframes can represent any common data visualization
-**Depends on**: Phase 17
-**Requirements**: CHART-01, CHART-02, CHART-03, CHART-04, CHART-05, CHART-06
+### Phase 25: Table Components
+**Goal**: All four table variants share a consistent professional header treatment and the primary analytical table gains a dark footer totals row
+**Depends on**: Phase 22
+**Requirements**: TBL-01, TBL-02, TBL-03, TBL-04, TBL-05
 **Success Criteria** (what must be TRUE):
-  1. ChartRenderer renders stacked-bar, stacked-area, and horizontal-bar variants with correct axis orientation and stacking
-  2. ChartRenderer renders a bubble chart variant (scatter with size dimension) with properly scaled circles
-  3. A gauge-chart section type renders a radial gauge with target zones and current value indicator
-  4. ChartRenderer renders a composed chart with configurable multi-series (mixed bar + line + area in one chart)
-  5. All new chart types respect --wf-* design tokens and client branding chartColors
-**Plans**: 4 plans
+  1. All four table components (DataTable, ClickableTable, DrillDownTable, ConfigTable) show headers with text-[10px] font-black uppercase tracking-widest slate-500 on slate-50/800 background
+  2. Table rows highlight with hover:bg-slate-100 dark:hover:bg-slate-800 and cursor-pointer on interactive tables
+  3. Highlight and total rows use primary-colored text with font-extrabold uppercase styling
+  4. DataTable and DrillDownTable render a dark footer row (bg-slate-900 text-white font-black) with aggregate totals when footer data is provided
+  5. Trend indicator cells show color-coded icons that scale to scale-110 on hover
+**Plans**: TBD
 
-Plans:
-- [ ] 20-01-PLAN.md -- Extend ChartType union, BarLineChartSectionSchema enum, add GaugeChartSection type + GaugeChartSectionSchema, update tests (CHART-01, CHART-02, CHART-03, CHART-04, CHART-05, CHART-06)
-- [ ] 20-02-PLAN.md -- Create 5 chart sub-variant components (stacked-bar, stacked-area, horizontal-bar, bubble, composed) + wire into ChartRenderer + BarLineChartForm (CHART-01, CHART-02, CHART-03, CHART-04, CHART-06)
-- [ ] 20-03-PLAN.md -- Create GaugeChartComponent + GaugeChartRenderer + GaugeChartForm + section-registry entry (CHART-05)
-- [ ] 20-04-PLAN.md -- Visual checkpoint: verify all 6 new chart types in browser (CHART-01, CHART-02, CHART-03, CHART-04, CHART-05, CHART-06)
-
-### Phase 21: Gallery Reorganization
-**Goal**: The component gallery is organized by thematic sections and auto-populated from the registry so new components appear without manual gallery updates
-**Depends on**: Phase 18, Phase 19, Phase 20
-**Requirements**: GAL-01, GAL-02
+### Phase 26: Filter Bar Enhancement
+**Goal**: The sticky filter bar reads as a premium control surface with blur depth and typographic clarity that matches the dashboard chrome
+**Depends on**: Phase 22
+**Requirements**: FILT-01, FILT-02, FILT-03, FILT-04, FILT-05
 **Success Criteria** (what must be TRUE):
-  1. Gallery displays components grouped into thematic sections (charts, layout/shell, data display, inputs/filters, etc.)
-  2. All new chart types from Phase 20 appear in the gallery with representative mock data
-  3. Sidebar, header, and filter bar previews appear in a dedicated shell/layout section of the gallery
-**Plans**: 2 plans
+  1. Filter bar sticks at the top of the content area with backdrop-blur-sm and semi-transparent background visible behind scrolled content
+  2. Filter select controls display transparent background with bold primary text and no visible border
+  3. Filter labels appear at 10px uppercase bold slate-500 above their controls
+  4. Action buttons (date picker, share, export) render with distinct hierarchy: outline style for secondary actions and filled for primary actions, all with rounded-lg shape
+  5. Compare toggle uses a primary-colored switch with 11px bold label
+**Plans**: TBD
 
-Plans:
-- [ ] 21-01-PLAN.md -- Restructure gallery to 6 sections + add 6 Phase 20 chart Preview wrappers + update header/filter mocks (GAL-01, GAL-02)
-- [ ] 21-02-PLAN.md -- Visual checkpoint: verify all sections and new chart previews in browser (GAL-01, GAL-02)
+### Phase 27: Chart Palette & Composition
+**Goal**: All charts use the new blue-slate palette and the gallery gains a new CompositionBar component for horizontal stacked breakdown visualization
+**Depends on**: Phase 22
+**Requirements**: CHRT-01, CHRT-02, CHRT-03, CHRT-04, CHRT-05
+**Success Criteria** (what must be TRUE):
+  1. Chart palette tokens --wf-chart-1 through --wf-chart-5 render primary blue, indigo, blue-400, and slate tones (no gold or amber)
+  2. Chart containers use white/slate-900 background with rounded-xl border and shadow-sm matching card aesthetic
+  3. Chart headers show font-bold title with colored rounded-full legend dots replacing Recharts default legend
+  4. Bar chart variants transition individual bars from muted to full opacity on group hover
+  5. A new CompositionBar component renders a horizontal stacked bar with hover:brightness-90 segments and a color legend grid below
+**Plans**: TBD
+
+### Phase 28: Editor Sync & Gallery Validation
+**Goal**: The editor UI matches the new wireframe aesthetic and all 86 wireframe components are confirmed working in both light and dark mode
+**Depends on**: Phase 23, Phase 24, Phase 25, Phase 26, Phase 27
+**Requirements**: EDIT-01, GAL-01, GAL-02
+**Success Criteria** (what must be TRUE):
+  1. ScreenManager sidebar displays the same dark slate background, typography, and spacing as the redesigned WireframeSidebar
+  2. All gallery component previews render with the new visual design in both light and dark mode
+  3. Client branding (financeiro-conta-azul #1B6B93) applied in the gallery passes the branding-override visual check
+  4. npx tsc --noEmit reports zero errors after all phases
+**Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases 18, 19, 20 can execute in parallel after Phase 17. Phase 21 requires 18+19+20 complete.
+Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other and can execute in any order after Phase 22. Phase 28 requires all prior phases complete.
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -172,8 +189,15 @@ Phases 18, 19, 20 can execute in parallel after Phase 17. Phase 21 requires 18+1
 | 14. Sidebar Navigation | v1.2 | 1/1 | Complete | 2026-03-10 |
 | 15. Doc Rendering and TOC | v1.2 | 2/2 | Complete | 2026-03-10 |
 | 16. Consistency Pass | v1.2 | 2/2 | Complete | 2026-03-10 |
-| 17. Schema Foundation & Layout Restructure | 3/3 | Complete    | 2026-03-11 | - |
-| 18. Configurable Sidebar & Header | 3/3 | Complete    | 2026-03-11 | - |
-| 19. Filter Bar Expansion | v1.3 | Complete    | 2026-03-11 | 2026-03-11 |
-| 20. Chart Type Expansion | 4/4 | Complete    | 2026-03-11 | - |
-| 21. Gallery Reorganization | 2/2 | Complete    | 2026-03-11 | - |
+| 17. Schema Foundation & Layout Restructure | v1.3 | 3/3 | Complete | 2026-03-11 |
+| 18. Configurable Sidebar & Header | v1.3 | 3/3 | Complete | 2026-03-11 |
+| 19. Filter Bar Expansion | v1.3 | 2/2 | Complete | 2026-03-11 |
+| 20. Chart Type Expansion | v1.3 | 4/4 | Complete | 2026-03-11 |
+| 21. Gallery Reorganization | v1.3 | 2/2 | Complete | 2026-03-11 |
+| 22. Token Foundation | v1.4 | TBD | Not started | - |
+| 23. Sidebar & Header Chrome | v1.4 | TBD | Not started | - |
+| 24. KPI Cards | v1.4 | TBD | Not started | - |
+| 25. Table Components | v1.4 | TBD | Not started | - |
+| 26. Filter Bar Enhancement | v1.4 | TBD | Not started | - |
+| 27. Chart Palette & Composition | v1.4 | TBD | Not started | - |
+| 28. Editor Sync & Gallery Validation | v1.4 | TBD | Not started | - |

@@ -95,51 +95,51 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TOK-01 | TBD | Pending |
-| TOK-02 | TBD | Pending |
-| TOK-03 | TBD | Pending |
-| TOK-04 | TBD | Pending |
-| TOK-05 | TBD | Pending |
-| TOK-06 | TBD | Pending |
-| TOK-07 | TBD | Pending |
-| SIDE-01 | TBD | Pending |
-| SIDE-02 | TBD | Pending |
-| SIDE-03 | TBD | Pending |
-| SIDE-04 | TBD | Pending |
-| SIDE-05 | TBD | Pending |
-| HEAD-01 | TBD | Pending |
-| HEAD-02 | TBD | Pending |
-| HEAD-03 | TBD | Pending |
-| HEAD-04 | TBD | Pending |
-| FILT-01 | TBD | Pending |
-| FILT-02 | TBD | Pending |
-| FILT-03 | TBD | Pending |
-| FILT-04 | TBD | Pending |
-| FILT-05 | TBD | Pending |
-| CARD-01 | TBD | Pending |
-| CARD-02 | TBD | Pending |
-| CARD-03 | TBD | Pending |
-| CARD-04 | TBD | Pending |
-| CARD-05 | TBD | Pending |
-| TBL-01 | TBD | Pending |
-| TBL-02 | TBD | Pending |
-| TBL-03 | TBD | Pending |
-| TBL-04 | TBD | Pending |
-| TBL-05 | TBD | Pending |
-| CHRT-01 | TBD | Pending |
-| CHRT-02 | TBD | Pending |
-| CHRT-03 | TBD | Pending |
-| CHRT-04 | TBD | Pending |
-| CHRT-05 | TBD | Pending |
-| EDIT-01 | TBD | Pending |
-| GAL-01 | TBD | Pending |
-| GAL-02 | TBD | Pending |
+| TOK-01 | Phase 22 | Pending |
+| TOK-02 | Phase 22 | Pending |
+| TOK-03 | Phase 22 | Pending |
+| TOK-04 | Phase 22 | Pending |
+| TOK-05 | Phase 22 | Pending |
+| TOK-06 | Phase 22 | Pending |
+| TOK-07 | Phase 22 | Pending |
+| SIDE-01 | Phase 23 | Pending |
+| SIDE-02 | Phase 23 | Pending |
+| SIDE-03 | Phase 23 | Pending |
+| SIDE-04 | Phase 23 | Pending |
+| SIDE-05 | Phase 23 | Pending |
+| HEAD-01 | Phase 23 | Pending |
+| HEAD-02 | Phase 23 | Pending |
+| HEAD-03 | Phase 23 | Pending |
+| HEAD-04 | Phase 23 | Pending |
+| FILT-01 | Phase 26 | Pending |
+| FILT-02 | Phase 26 | Pending |
+| FILT-03 | Phase 26 | Pending |
+| FILT-04 | Phase 26 | Pending |
+| FILT-05 | Phase 26 | Pending |
+| CARD-01 | Phase 24 | Pending |
+| CARD-02 | Phase 24 | Pending |
+| CARD-03 | Phase 24 | Pending |
+| CARD-04 | Phase 24 | Pending |
+| CARD-05 | Phase 24 | Pending |
+| TBL-01 | Phase 25 | Pending |
+| TBL-02 | Phase 25 | Pending |
+| TBL-03 | Phase 25 | Pending |
+| TBL-04 | Phase 25 | Pending |
+| TBL-05 | Phase 25 | Pending |
+| CHRT-01 | Phase 27 | Pending |
+| CHRT-02 | Phase 27 | Pending |
+| CHRT-03 | Phase 27 | Pending |
+| CHRT-04 | Phase 27 | Pending |
+| CHRT-05 | Phase 27 | Pending |
+| EDIT-01 | Phase 28 | Pending |
+| GAL-01 | Phase 28 | Pending |
+| GAL-02 | Phase 28 | Pending |
 
 **Coverage:**
 - v1.4 requirements: 39 total
-- Mapped to phases: 0
-- Unmapped: 39 (pending roadmap creation)
+- Mapped to phases: 39
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-11*
-*Last updated: 2026-03-11 after initial definition*
+*Last updated: 2026-03-11 after roadmap creation (v1.4 phases 22-28)*
