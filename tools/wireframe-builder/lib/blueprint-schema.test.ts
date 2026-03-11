@@ -4,6 +4,7 @@ import {
   BlueprintScreenSchema,
   BlueprintSectionSchema,
   FilterOptionSchema,
+  SidebarConfigSchema,
 } from './blueprint-schema'
 
 // ---------------------------------------------------------------------------
@@ -350,5 +351,61 @@ describe('Phase 17 schema extensions', () => {
     if (result.success) {
       expect(result.data.slug).toBe('test-client')
     }
+  })
+})
+
+describe('Phase 18 schema extensions', () => {
+  // --- SIDE-03: SidebarConfig accepts groups array ---
+
+  it('SidebarConfigSchema accepts { footer: "v1.0", groups: [{ label: "Financeiro", screenIds: ["screen-1"] }] }', () => {
+    const sidebar = {
+      footer: 'v1.0',
+      groups: [{ label: 'Financeiro', screenIds: ['screen-1'] }],
+    }
+    const result = SidebarConfigSchema.safeParse(sidebar)
+    expect(result.success).toBe(true)
+  })
+
+  it('SidebarConfigSchema accepts { groups: [] } (backward compat — empty groups array)', () => {
+    const result = SidebarConfigSchema.safeParse({ groups: [] })
+    expect(result.success).toBe(true)
+  })
+
+  // --- SIDE-05: BlueprintScreen accepts optional badge field ---
+
+  it('BlueprintScreenSchema accepts validScreen with badge: 3 (number badge)', () => {
+    const screenWithBadge = { ...validScreen, badge: 3 }
+    const result = BlueprintScreenSchema.safeParse(screenWithBadge)
+    expect(result.success).toBe(true)
+  })
+
+  it('BlueprintScreenSchema accepts validScreen with badge: "NEW" (string badge)', () => {
+    const screenWithBadge = { ...validScreen, badge: 'NEW' }
+    const result = BlueprintScreenSchema.safeParse(screenWithBadge)
+    expect(result.success).toBe(true)
+  })
+
+  it('BlueprintScreenSchema accepts validScreen without badge (regression guard — badge is optional)', () => {
+    // validScreen has no badge field — must still parse successfully
+    const result = BlueprintScreenSchema.safeParse(validScreen)
+    expect(result.success).toBe(true)
+  })
+
+  // --- HEAD-02/05: HeaderConfigSchema accepts typed optional fields ---
+
+  it('accepts header: { showLogo: true, actions: { manage: true, share: false } } (HEAD-02/05)', () => {
+    const config = {
+      ...validConfig,
+      header: { showLogo: true, actions: { manage: true, share: false } },
+    }
+    const result = BlueprintConfigSchema.safeParse(config)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts header: { anyFutureField: "x" } still passes (forward-compat passthrough guard)', () => {
+    // HeaderConfigSchema must keep .passthrough() — Phase 19/20 may add fields
+    const config = { ...validConfig, header: { anyFutureField: 'x' } }
+    const result = BlueprintConfigSchema.safeParse(config)
+    expect(result.success).toBe(true)
   })
 })
