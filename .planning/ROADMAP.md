@@ -60,7 +60,7 @@ Full details: [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md)
 - [x] **Phase 18: Configurable Sidebar & Header** - Blueprint-driven sidebar and header renderers with all visual features (completed 2026-03-11)
 - [x] **Phase 19: Filter Bar Expansion** - Five new filter type renderers (date-range, multi-select, search, period presets, boolean toggle) (completed 2026-03-11)
 - [x] **Phase 20: Chart Type Expansion** - Six new chart types/variants (stacked-bar, stacked-area, horizontal-bar, bubble, gauge, composed) (completed 2026-03-11)
-- [ ] **Phase 21: Gallery Reorganization** - Registry-driven gallery with thematic sections and all new components visible
+- [x] **Phase 21: Gallery Reorganization** - Registry-driven gallery with thematic sections and all new components visible (completed 2026-03-11)
 
 ## Phase Details
 
@@ -176,4 +176,4 @@ Phases 18, 19, 20 can execute in parallel after Phase 17. Phase 21 requires 18+1
 | 18. Configurable Sidebar & Header | 3/3 | Complete    | 2026-03-11 | - |
 | 19. Filter Bar Expansion | v1.3 | Complete    | 2026-03-11 | 2026-03-11 |
 | 20. Chart Type Expansion | 4/4 | Complete    | 2026-03-11 | - |
-| 21. Gallery Reorganization | 1/2 | In Progress|  | - |
+| 21. Gallery Reorganization | 2/2 | Complete   | 2026-03-11 | - |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Builder & Components
 status: planning
-stopped_at: Completed 21-01-PLAN.md (Phase 21 Plan 01 — gallery reorganization)
-last_updated: "2026-03-11T05:26:22.674Z"
+stopped_at: Completed 21-02-PLAN.md (Phase 21 Plan 02 — gallery visual verification checkpoint auto-approved)
+last_updated: "2026-03-11T05:28:07.767Z"
 last_activity: 2026-03-11 -- Phase 19 Plan 02 complete (visual verification checkpoint auto-approved)
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 14
-  completed_plans: 13
+  completed_plans: 14
   percent: 0
 ---
 
@@ -78,6 +78,7 @@ v1.3 architectural decisions (from research):
 - [Phase 20-chart-type-expansion]: Visual checkpoint auto-approved (--auto mode): 270 tests green + zero TS errors serve as automated proxy for correct schema contracts and registry wiring
 - [Phase 21-gallery-reorganization]: Phase 20 chart previews use no toolbar — simple wrapper functions following DonutChart/ParetoChart pattern
 - [Phase 21-gallery-reorganization]: Gallery restructured from 5 to 6 sections: CommentOverlay/Modal moved to Modais & Overlays section for thematic clarity
+- [Phase 21-gallery-reorganization]: Visual checkpoint auto-approved in --auto mode — gallery correctness proxied by 270 passing vitest tests and zero TypeScript errors from Plan 01
 
 ### Pending Todos
 
@@ -111,6 +112,7 @@ None active.
 | Phase 20-chart-type-expansion P03 | 12 | 4 tasks | 6 files |
 | Phase 20-chart-type-expansion P04 | 1 | 2 tasks | 0 files |
 | Phase 21-gallery-reorganization P01 | 2 | 2 tasks | 2 files |
+| Phase 21-gallery-reorganization P02 | 1 | 1 tasks | 0 files |
 
 ### Roadmap Evolution
 
@@ -127,6 +129,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-11T05:26:22.672Z
-Stopped at: Completed 21-01-PLAN.md (Phase 21 Plan 01 — gallery reorganization)
+Last session: 2026-03-11T05:28:07.764Z
+Stopped at: Completed 21-02-PLAN.md (Phase 21 Plan 02 — gallery visual verification checkpoint auto-approved)
 Next: `/gsd:plan-phase 20` (Chart Variants)
