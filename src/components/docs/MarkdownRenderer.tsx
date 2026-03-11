@@ -34,7 +34,7 @@ const components: Components = {
   },
   pre({ children }) {
     return (
-      <div className="group relative my-6 overflow-hidden rounded-xl bg-slate-900 shadow-lg dark:bg-[hsl(var(--code-bg))]">
+      <div className="group relative my-6 overflow-hidden rounded-xl bg-slate-900 shadow-lg dark:bg-[hsl(var(--code-bg))] [&_code]:bg-transparent [&_code]:p-0 [&_code]:text-sm [&_code]:font-normal [&_code]:text-slate-200 [&_code]:rounded-none">
         <div className="flex items-center gap-1.5 border-b border-slate-700/50 px-4 py-3">
           <div className="h-3 w-3 rounded-full bg-red-500/80" />
           <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
