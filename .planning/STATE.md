@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Builder & Components
 status: planning
-stopped_at: "Completed 17-02-PLAN.md (layout restructure: full-width header above sidebar, Gerenciar moved to header)"
-last_updated: "2026-03-11T03:20:00.516Z"
+stopped_at: "Completed 18-01-PLAN.md (schema extensions: SidebarGroup, typed HeaderConfig, badge on BlueprintScreen, 7 new tests)"
+last_updated: "2026-03-11T03:38:45.330Z"
 last_activity: 2026-03-10 -- Roadmap created for v1.3 (5 phases, 26 requirements mapped)
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
   percent: 0
 ---
 
@@ -59,6 +59,9 @@ v1.3 architectural decisions (from research):
 - [Phase 17-schema-foundation-layout-restructure]: HeaderConfig TS type is Record<string, unknown> (not Record<string, never>) for same forward-compat reason as passthrough()
 - [Phase 17-schema-foundation-layout-restructure]: WireframeHeader height constant 56px used as sidebar top offset — keeps both in sync via shared mental model (no CSS variable needed)
 - [Phase 17-schema-foundation-layout-restructure]: Gerenciar button moved to WireframeHeader via optional onGerenciar prop — cleaner separation of concerns, sidebar footer now only shows branding text
+- [Phase 18-01]: SidebarConfigSchema exported from blueprint-schema.ts so test file can import and test it directly
+- [Phase 18-01]: HeaderConfigSchema keeps .passthrough() even after gaining explicit typed fields — Phase 19/20 may add more fields without breaking this schema boundary
+- [Phase 18-01]: badge field added after icon in BlueprintScreen — both are optional display hints for sidebar nav items
 
 ### Pending Todos
 
@@ -82,6 +85,7 @@ None active.
 | Phase 17-schema-foundation-layout-restructure P01 | 3 | 1 tasks | 2 files |
 | Phase 17-schema-foundation-layout-restructure P03 | 2 | 2 tasks | 4 files |
 | Phase 17-schema-foundation-layout-restructure P02 | 2 | 3 tasks | 2 files |
+| Phase 18-configurable-sidebar-header P01 | 5 | 2 tasks | 3 files |
 
 ### Roadmap Evolution
 
@@ -98,6 +102,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-11T03:15:22.260Z
-Stopped at: Completed 17-02-PLAN.md (layout restructure: full-width header above sidebar, Gerenciar moved to header)
+Last session: 2026-03-11T03:38:45.327Z
+Stopped at: Completed 18-01-PLAN.md (schema extensions: SidebarGroup, typed HeaderConfig, badge on BlueprintScreen, 7 new tests)
 Next: `/gsd:plan-phase 17` (Schema Foundation & Layout Restructure)

@@ -20,19 +20,19 @@ Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
 
 - [x] **SIDE-01**: SidebarConfig adicionado ao BlueprintConfig schema (dashboard-level)
 - [ ] **SIDE-02**: Sidebar renderiza icones por item de menu via BlueprintScreen.icon
-- [ ] **SIDE-03**: Sidebar suporta groups/secoes com headings rotulados
+- [x] **SIDE-03**: Sidebar suporta groups/secoes com headings rotulados
 - [ ] **SIDE-04**: Sidebar colapsa para icon-only rail mode
-- [ ] **SIDE-05**: Sidebar items mostram badge/notification counts
+- [x] **SIDE-05**: Sidebar items mostram badge/notification counts
 - [ ] **SIDE-06**: Sidebar renderiza footer text (versao/ambiente)
 - [ ] **SIDE-07**: Active screen highlighted na sidebar (preservado do existente)
 
 ### Header
 
 - [x] **HEAD-01**: HeaderConfig adicionado ao BlueprintConfig schema (dashboard-level)
-- [ ] **HEAD-02**: Header exibe logo/brand do cliente
-- [ ] **HEAD-03**: Header mostra period selector (config-driven)
-- [ ] **HEAD-04**: Header mostra user/role indicator
-- [ ] **HEAD-05**: Header renderiza action buttons (manage, share, export)
+- [x] **HEAD-02**: Header exibe logo/brand do cliente
+- [x] **HEAD-03**: Header mostra period selector (config-driven)
+- [x] **HEAD-04**: Header mostra user/role indicator
+- [x] **HEAD-05**: Header renderiza action buttons (manage, share, export)
 
 ### Filter Bar
 
@@ -100,16 +100,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LAYOUT-02 | Phase 17 | Complete |
 | SIDE-01 | Phase 17 | Complete |
 | SIDE-02 | Phase 18 | Pending |
-| SIDE-03 | Phase 18 | Pending |
+| SIDE-03 | Phase 18 | Complete |
 | SIDE-04 | Phase 18 | Pending |
-| SIDE-05 | Phase 18 | Pending |
+| SIDE-05 | Phase 18 | Complete |
 | SIDE-06 | Phase 18 | Pending |
 | SIDE-07 | Phase 18 | Pending |
 | HEAD-01 | Phase 17 | Complete |
-| HEAD-02 | Phase 18 | Pending |
-| HEAD-03 | Phase 18 | Pending |
-| HEAD-04 | Phase 18 | Pending |
-| HEAD-05 | Phase 18 | Pending |
+| HEAD-02 | Phase 18 | Complete |
+| HEAD-03 | Phase 18 | Complete |
+| HEAD-04 | Phase 18 | Complete |
+| HEAD-05 | Phase 18 | Complete |
 | FILT-01 | Phase 17 | Complete |
 | FILT-02 | Phase 19 | Pending |
 | FILT-03 | Phase 19 | Pending |
