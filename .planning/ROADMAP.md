@@ -75,7 +75,7 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 - [x] **Phase 24: KPI Cards** - Icon slot, group-hover transitions, rounded-full trend badges, extrabold values, optional sparkline (completed 2026-03-11)
 - [x] **Phase 25: Table Components** - Tracking-widest font-black headers, dark tfoot row, hover transitions, trend icons across all 4 table variants (completed 2026-03-11)
 - [x] **Phase 26: Filter Bar Enhancement** - backdrop-blur sticky bar, 10px uppercase labels, action button hierarchy, compare toggle (completed 2026-03-11)
-- [ ] **Phase 27: Chart Palette & Composition** - Primary blue + slate chart palette, custom header legend, CompositionBar new component
+- [x] **Phase 27: Chart Palette & Composition** - Primary blue + slate chart palette, custom header legend, CompositionBar new component (completed 2026-03-11)
 - [ ] **Phase 28: Editor Sync & Gallery Validation** - ScreenManager visual sync with sidebar, gallery smoke test, final TypeScript verification
 
 ## Phase Details
@@ -163,7 +163,7 @@ Plans:
   3. Chart headers show font-bold title with colored rounded-full legend dots replacing Recharts default legend
   4. Bar chart variants transition individual bars from muted to full opacity on group hover
   5. A new CompositionBar component renders a horizontal stacked bar with hover:brightness-90 segments and a color legend grid below
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 27-01-PLAN.md — Chart container/title/legend restyle across all 15 chart components + activeBar hover
 - [ ] 27-02-PLAN.md — CompositionBar new component + gallery entry
@@ -218,5 +218,5 @@ Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other 
 | 24. KPI Cards | 1/1 | Complete    | 2026-03-11 | - |
 | 25. Table Components | 2/2 | Complete    | 2026-03-11 | - |
 | 26. Filter Bar Enhancement | 1/1 | Complete    | 2026-03-11 | - |
-| 27. Chart Palette & Composition | 1/2 | In Progress|  | - |
+| 27. Chart Palette & Composition | 2/2 | Complete   | 2026-03-11 | - |
 | 28. Editor Sync & Gallery Validation | v1.4 | TBD | Not started | - |

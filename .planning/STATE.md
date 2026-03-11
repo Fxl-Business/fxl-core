@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: completed
-stopped_at: Completed 27-chart-palette-composition-02-PLAN.md
-last_updated: "2026-03-11T20:31:09.088Z"
-last_activity: "2026-03-11 -- Phase 26-01 complete (WireframeFilterBar restyled: backdrop-blur container, stacked labels, accent selects, action buttons)"
+stopped_at: Completed 27-chart-palette-composition-01-PLAN.md
+last_updated: "2026-03-11T20:33:30.711Z"
+last_activity: "2026-03-11 -- Phase 27-01 complete (15 chart components restyled: rounded-xl containers, font-bold titles, custom dot legends, activeBar opacity)"
 progress:
   total_phases: 7
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
   percent: 100
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-11)
 
 ## Current Position
 
-Phase: 26 of 28 (Filter Bar Enhancement)
-Plan: 01 complete
-Status: Phase 26-01 done — all FILT requirements satisfied
-Last activity: 2026-03-11 -- Phase 26-01 complete (WireframeFilterBar restyled: backdrop-blur container, stacked labels, accent selects, action buttons)
+Phase: 27 of 28 (Chart Palette Composition)
+Plan: 01 + 02 complete
+Status: Phase 27-01 done — CHRT-01/02/03/04 satisfied; Phase 27-02 done — CHRT-05 satisfied
+Last activity: 2026-03-11 -- Phase 27-01 complete (15 chart components restyled: rounded-xl containers, font-bold titles, custom dot legends, activeBar opacity)
 
 Progress: [██████████] 100%
 
@@ -79,6 +79,7 @@ v1.4 architectural decisions (from research):
 - [Phase 26-filter-bar-enhancement]: [Phase 26-filter-bar]: DateRangeFilter trigger button updated to outline secondary style (transparent bg, borderRadius 8) matching the action button hierarchy
 - [Phase 27-chart-palette-composition]: CompositionBar uses style={{ backgroundColor }} with var(--wf-chart-N) values — bg-wf-chart-N Tailwind classes do not exist
 - [Phase 27-chart-palette-composition]: Default formatValue shows percentage relative to total; fully overridable via prop
+- [Phase 27-chart-palette-composition]: [Phase 27-01]: WaterfallChart hidden Legend (display: none) preserved — required for Recharts internal tooltip pairing in compareMode
 
 ### Pending Todos
 
@@ -90,6 +91,6 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-11T20:31:03.328Z
-Stopped at: Completed 27-chart-palette-composition-02-PLAN.md
+Last session: 2026-03-11T20:33:30.708Z
+Stopped at: Completed 27-chart-palette-composition-01-PLAN.md
 Next: Phase 27 (if planned) or milestone complete
