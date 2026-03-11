@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { CheckCircle2, Clock, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
 
 import KpiCard from '@tools/wireframe-builder/components/KpiCard'
 import KpiCardFull from '@tools/wireframe-builder/components/KpiCardFull'
@@ -204,7 +205,7 @@ function KpiCardPreview() {
       <PropsToolbar>
         <PropToggle label="variationPositive" value={positive} onChange={setPositive} />
       </PropsToolbar>
-      <div className="rounded-b-lg border border-border bg-muted/50 p-4">
+      <div className="rounded-b-lg border border-border bg-wf-canvas p-4">
         <div className="max-w-xs">
           <KpiCard {...kpiCardMock} variationPositive={positive} />
         </div>
@@ -220,7 +221,7 @@ function KpiCardFullPreview() {
       <PropsToolbar>
         <PropToggle label="compareMode" value={compareMode} onChange={setCompareMode} />
       </PropsToolbar>
-      <div className="rounded-b-lg border border-border bg-muted/50 p-4">
+      <div className="rounded-b-lg border border-border bg-wf-canvas p-4">
         <div className="max-w-xs">
           <KpiCardFull {...kpiCardFullMock} compareMode={compareMode} />
         </div>
@@ -236,7 +237,7 @@ function BarLineChartPreview() {
       <PropsToolbar>
         <PropPills label="type" options={['bar', 'line', 'bar-line']} value={type} onChange={setType} />
       </PropsToolbar>
-      <div className="rounded-b-lg border border-border bg-muted/50 p-4">
+      <div className="rounded-b-lg border border-border bg-wf-canvas p-4">
         <BarLineChart title={barLineChartMock.title} type={type} />
       </div>
     </div>
@@ -250,7 +251,7 @@ function WaterfallChartPreview() {
       <PropsToolbar>
         <PropToggle label="compareMode" value={compareMode} onChange={setCompareMode} />
       </PropsToolbar>
-      <div className="rounded-b-lg border border-border bg-muted/50 p-4">
+      <div className="rounded-b-lg border border-border bg-wf-canvas p-4">
         <WaterfallChart
           {...waterfallChartMock}
           compareMode={compareMode}
@@ -269,7 +270,7 @@ function CalculoCardPreview() {
       <PropsToolbar>
         <PropToggle label="compareMode" value={compareMode} onChange={setCompareMode} />
       </PropsToolbar>
-      <div className="rounded-b-lg border border-border bg-muted/50 p-4">
+      <div className="rounded-b-lg border border-border bg-wf-canvas p-4">
         <CalculoCard
           title={calculoCardMock.title}
           rows={compareMode ? calculoCardCompareRows : calculoCardMock.rows}
@@ -301,7 +302,7 @@ function WireframeHeaderPreview() {
 
 function StackedBarChartPreview() {
   return (
-    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+    <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
       <StackedBarChartComponent title={stackedBarChartMock.title} />
     </div>
   )
@@ -309,7 +310,7 @@ function StackedBarChartPreview() {
 
 function StackedAreaChartPreview() {
   return (
-    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+    <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
       <StackedAreaChartComponent title={stackedAreaChartMock.title} />
     </div>
   )
@@ -317,7 +318,7 @@ function StackedAreaChartPreview() {
 
 function HorizontalBarChartPreview() {
   return (
-    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+    <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
       <HorizontalBarChartComponent title={horizontalBarChartMock.title} xLabel={horizontalBarChartMock.xLabel} yLabel={horizontalBarChartMock.yLabel} />
     </div>
   )
@@ -325,7 +326,7 @@ function HorizontalBarChartPreview() {
 
 function BubbleChartPreview() {
   return (
-    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+    <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
       <BubbleChartComponent title={bubbleChartMock.title} xLabel={bubbleChartMock.xLabel} yLabel={bubbleChartMock.yLabel} />
     </div>
   )
@@ -333,7 +334,7 @@ function BubbleChartPreview() {
 
 function ComposedChartPreview() {
   return (
-    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+    <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
       <ComposedChartComponent title={composedChartMock.title} />
     </div>
   )
@@ -341,7 +342,7 @@ function ComposedChartPreview() {
 
 function GaugeChartPreview() {
   return (
-    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+    <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
       <GaugeChartComponent
         title={gaugeChartMock.title}
         value={gaugeChartMock.value}
@@ -637,11 +638,13 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
         <div className="border-t border-border px-5 py-4 space-y-3">
           {isAvailable && entry.render ? (
             entry.hasToolbar ? (
-              entry.render()
+              <WireframeThemeProvider>{entry.render()}</WireframeThemeProvider>
             ) : (
-            <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
-              {entry.render()}
-            </div>
+            <WireframeThemeProvider>
+              <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+                {entry.render()}
+              </div>
+            </WireframeThemeProvider>
             )
           ) : (
             <div className="flex items-center justify-center rounded-lg border border-dashed border-border bg-muted px-6 py-10">
