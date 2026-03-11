@@ -21,6 +21,7 @@ import {
   Activity,
   BarChart2,
   Minus,
+  Gauge,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -41,6 +42,7 @@ import FilterConfigRenderer from '../components/sections/FilterConfigRenderer'
 import StatCardRenderer from '../components/sections/StatCardRenderer'
 import ProgressBarRenderer from '../components/sections/ProgressBarRenderer'
 import DividerRenderer from '../components/sections/DividerRenderer'
+import GaugeChartRenderer from '../components/sections/GaugeChartRenderer'
 
 // ---------------------------------------------------------------------------
 // Property forms (existing)
@@ -67,6 +69,7 @@ import FilterConfigForm from '../components/editor/property-forms/FilterConfigFo
 import StatCardForm from '../components/editor/property-forms/StatCardForm'
 import ProgressBarForm from '../components/editor/property-forms/ProgressBarForm'
 import DividerForm from '../components/editor/property-forms/DividerForm'
+import GaugeChartForm from '../components/editor/property-forms/GaugeChartForm'
 
 // ---------------------------------------------------------------------------
 // Zod schemas (individual)
@@ -133,7 +136,7 @@ export type SectionRegistration = {
 }
 
 // ---------------------------------------------------------------------------
-// Registry: single source of truth for all 21 section types
+// Registry: single source of truth for all 22 section types
 // ---------------------------------------------------------------------------
 
 export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistration> = {
@@ -546,24 +549,26 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     label: 'Barra de Progresso',
   },
 
-  // === Gauge (Plan 03 will replace placeholder renderer/form) ===
+  // === Gauge ===
   'gauge-chart': {
-    renderer: ChartRenderer as unknown as ComponentType<SectionRendererProps>,
-    propertyForm: BarLineChartForm as unknown as ComponentType<PropertyFormProps>,
+    renderer: GaugeChartRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: GaugeChartForm as unknown as ComponentType<PropertyFormProps>,
     catalogEntry: {
       type: 'gauge-chart',
       label: 'Gauge',
-      description: 'Indicador circular com zonas de alerta',
-      icon: Activity,
+      description: 'Medidor radial com zonas e valor atual',
+      icon: Gauge,
       category: 'Graficos',
     },
     defaultProps: () => ({
       type: 'gauge-chart' as const,
       title: 'Novo Gauge',
-      value: 72,
+      value: 65,
+      min: 0,
+      max: 100,
     }),
     schema: GaugeChartSectionSchema,
-    label: 'Gauge Chart',
+    label: 'Gauge',
   },
 }
 
