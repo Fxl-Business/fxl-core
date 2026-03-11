@@ -69,6 +69,7 @@ const config: Config = {
   				heading: 'var(--wf-heading)',
   				body: 'var(--wf-body)',
   				muted: 'var(--wf-muted)',
+  				primary: 'var(--wf-primary)',
   				accent: 'var(--wf-accent)',
   				'accent-muted': 'var(--wf-accent-muted)',
   				'accent-fg': 'var(--wf-accent-fg)',
@@ -81,9 +82,14 @@ const config: Config = {
   					muted: 'var(--wf-sidebar-muted)',
   					border: 'var(--wf-sidebar-border)',
   				},
+  				'header-search-bg': 'var(--wf-header-search-bg)',
   				'table-header': {
   					DEFAULT: 'var(--wf-table-header-bg)',
   					fg: 'var(--wf-table-header-fg)',
+  				},
+  				'table-footer': {
+  					DEFAULT: 'var(--wf-table-footer-bg)',
+  					fg: 'var(--wf-table-footer-fg)',
   				},
   				'table-row-alt': 'var(--wf-table-row-alt)',
   				'table-border': 'var(--wf-table-border)',
