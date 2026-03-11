@@ -8,12 +8,12 @@ type Props = {
 
 export default function KpiCard({ label, value, variation, description, variationPositive = true }: Props) {
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-wf-muted">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-wf-heading">{value}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="text-sm font-medium text-wf-muted">{label}</p>
+      <p className="mt-1 text-2xl font-extrabold text-wf-heading">{value}</p>
       {variation && (
         <span
-          className="mt-1.5 inline-block rounded px-1.5 py-0.5 text-xs font-medium"
+          className="mt-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
           style={{
             backgroundColor: variationPositive
               ? 'color-mix(in srgb, var(--wf-positive) 10%, transparent)'
@@ -25,7 +25,7 @@ export default function KpiCard({ label, value, variation, description, variatio
         </span>
       )}
       {description && (
-        <p className="mt-1.5 text-xs text-wf-muted">{description}</p>
+        <p className="mt-1.5 text-[10px] text-wf-muted">{description}</p>
       )}
     </div>
   )
