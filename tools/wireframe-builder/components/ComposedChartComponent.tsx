@@ -7,7 +7,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts'
 
@@ -38,9 +37,26 @@ export default function ComposedChartComponent({ title, height = 300, categories
     area: Math.round(2000 + Math.abs(Math.sin(i * 1.4 + 1)) * 1500),
   }))
 
+  const legendItems = [
+    { label: 'Barra', color: palette[0] },
+    { label: 'Linha', color: palette[1] },
+    { label: 'Area', color: palette[2] },
+  ]
+
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-3 text-sm font-bold text-wf-heading">{title}</p>
+      <div className="mb-3 flex flex-wrap gap-3">
+        {legendItems.map((item) => (
+          <div key={item.label} className="flex items-center gap-1.5">
+            <span
+              className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-xs text-wf-muted">{item.label}</span>
+          </div>
+        ))}
+      </div>
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--wf-card-border)" />
@@ -56,7 +72,6 @@ export default function ComposedChartComponent({ title, height = 300, categories
             axisLine={false}
           />
           <Tooltip formatter={(v: number) => v.toLocaleString('pt-BR')} />
-          <Legend />
           {/* Render order: Bar first, Area second, Line on top */}
           <Bar dataKey="bar" name="Barra" fill={palette[0]} radius={[3, 3, 0, 0]} />
           <Area

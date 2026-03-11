@@ -201,9 +201,9 @@ export default function WaterfallChart({
     const groupedData = buildGroupedData(bars, compareBars, fill, fillCompare)
 
     return (
-      <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
+      <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-sm font-semibold text-wf-heading">{title}</p>
+          <p className="text-sm font-bold text-wf-heading">{title}</p>
           <div className="flex items-center gap-3 text-xs text-wf-muted">
             <span className="flex items-center gap-1">
               <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
@@ -252,8 +252,8 @@ export default function WaterfallChart({
   const data = processData(bars, fill)
 
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-3 text-sm font-bold text-wf-heading">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} margin={{ top: 24, right: 8, left: 8, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--wf-card-border)" vertical={false} />

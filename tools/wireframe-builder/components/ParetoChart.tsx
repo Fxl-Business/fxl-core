@@ -24,8 +24,8 @@ export default function ParetoChart({ title, data, height = 250, valueLabel = 'V
   })
 
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-3 text-sm font-bold text-wf-heading">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={enriched} margin={{ top: 4, right: 32, bottom: 4, left: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--wf-card-border)" />

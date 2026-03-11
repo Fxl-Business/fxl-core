@@ -5,7 +5,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts'
 
@@ -36,9 +35,26 @@ export default function StackedBarChartComponent({ title, height = 300, categori
     serieC: Math.round(1000 + Math.abs(Math.sin(i * 1.6 + 2)) * 1000),
   }))
 
+  const legendItems = [
+    { label: 'Serie A', color: palette[0] },
+    { label: 'Serie B', color: palette[1] },
+    { label: 'Serie C', color: palette[2] },
+  ]
+
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-3 text-sm font-bold text-wf-heading">{title}</p>
+      <div className="mb-3 flex flex-wrap gap-3">
+        {legendItems.map((item) => (
+          <div key={item.label} className="flex items-center gap-1.5">
+            <span
+              className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-xs text-wf-muted">{item.label}</span>
+          </div>
+        ))}
+      </div>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--wf-card-border)" />
@@ -54,10 +70,9 @@ export default function StackedBarChartComponent({ title, height = 300, categori
             axisLine={false}
           />
           <Tooltip formatter={(v: number) => v.toLocaleString('pt-BR')} />
-          <Legend />
-          <Bar dataKey="serieA" name="Serie A" stackId="stack" fill={palette[0]} radius={[0, 0, 0, 0]} />
-          <Bar dataKey="serieB" name="Serie B" stackId="stack" fill={palette[1]} radius={[0, 0, 0, 0]} />
-          <Bar dataKey="serieC" name="Serie C" stackId="stack" fill={palette[2]} radius={[3, 3, 0, 0]} />
+          <Bar dataKey="serieA" name="Serie A" stackId="stack" fill={palette[0]} radius={[0, 0, 0, 0]} opacity={0.7} activeBar={{ opacity: 1 }} />
+          <Bar dataKey="serieB" name="Serie B" stackId="stack" fill={palette[1]} radius={[0, 0, 0, 0]} opacity={0.7} activeBar={{ opacity: 1 }} />
+          <Bar dataKey="serieC" name="Serie C" stackId="stack" fill={palette[2]} radius={[3, 3, 0, 0]} opacity={0.7} activeBar={{ opacity: 1 }} />
         </BarChart>
       </ResponsiveContainer>
     </div>

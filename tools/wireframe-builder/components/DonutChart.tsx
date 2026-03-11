@@ -23,8 +23,8 @@ const COLORS = [
 export default function DonutChart({ title, data, centerValue, centerLabel, height = 200, chartColors }: Props) {
   const palette = chartColors ?? COLORS
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-3 text-sm font-bold text-wf-heading">{title}</p>
       <div className="flex items-center gap-4">
         <div className="relative flex-shrink-0" style={{ width: height, height }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -57,7 +57,7 @@ export default function DonutChart({ title, data, centerValue, centerLabel, heig
           {data.map((d, i) => (
             <div key={d.label} className="flex items-center gap-2">
               <span
-                className="h-3 w-3 flex-shrink-0 rounded-sm"
+                className="h-3 w-3 flex-shrink-0 rounded-full"
                 style={{ background: d.color ?? palette[i % palette.length] }}
               />
               <span className="flex-1 truncate text-xs text-wf-body">{d.label}</span>

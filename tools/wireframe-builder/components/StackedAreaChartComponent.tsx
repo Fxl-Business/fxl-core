@@ -5,7 +5,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts'
 
@@ -36,9 +35,26 @@ export default function StackedAreaChartComponent({ title, height = 300, categor
     serieC: Math.round(1000 + Math.abs(Math.sin(i * 1.6 + 2)) * 1000),
   }))
 
+  const legendItems = [
+    { label: 'Serie A', color: palette[0] },
+    { label: 'Serie B', color: palette[1] },
+    { label: 'Serie C', color: palette[2] },
+  ]
+
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-3 text-sm font-bold text-wf-heading">{title}</p>
+      <div className="mb-3 flex flex-wrap gap-3">
+        {legendItems.map((item) => (
+          <div key={item.label} className="flex items-center gap-1.5">
+            <span
+              className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-xs text-wf-muted">{item.label}</span>
+          </div>
+        ))}
+      </div>
       <ResponsiveContainer width="100%" height={height}>
         <AreaChart data={data}>
           <defs>
@@ -68,7 +84,6 @@ export default function StackedAreaChartComponent({ title, height = 300, categor
             axisLine={false}
           />
           <Tooltip formatter={(v: number) => v.toLocaleString('pt-BR')} />
-          <Legend />
           <Area
             type="monotone"
             dataKey="serieA"

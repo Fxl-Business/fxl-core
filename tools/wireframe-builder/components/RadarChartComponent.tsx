@@ -33,8 +33,8 @@ export default function RadarChartComponent({ title, height = 300, categories, c
   const fillColor = chartColors?.[0] ?? 'var(--wf-chart-1)'
 
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-3 text-sm font-bold text-wf-heading">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         <RadarChart data={data} cx="50%" cy="50%" outerRadius="75%">
           <PolarGrid stroke="var(--wf-card-border)" />

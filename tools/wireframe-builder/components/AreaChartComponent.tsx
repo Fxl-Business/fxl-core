@@ -30,8 +30,8 @@ export default function AreaChartComponent({ title, height = 300, categories, ch
   const strokeColor = chartColors?.[0] ?? 'var(--wf-chart-1)'
 
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-3 text-sm font-bold text-wf-heading">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         <AreaChart data={data}>
           <defs>

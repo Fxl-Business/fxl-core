@@ -36,8 +36,8 @@ export default function BarLineChart({ title, type, height = 250, categories, xL
   const data = buildMockData(categories ?? DEFAULT_CATEGORIES)
 
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-3 text-sm font-bold text-wf-heading">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         {type === 'bar' ? (
           <BarChart data={data}>

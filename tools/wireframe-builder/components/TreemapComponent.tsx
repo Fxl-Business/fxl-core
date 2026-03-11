@@ -69,8 +69,8 @@ export default function TreemapComponent({ title, height = 300, chartColors }: P
   const palette = chartColors ?? DEFAULT_COLORS
 
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-3 text-sm font-bold text-wf-heading">{title}</p>
       <ResponsiveContainer width="100%" height={height}>
         <Treemap
           data={DEFAULT_DATA}

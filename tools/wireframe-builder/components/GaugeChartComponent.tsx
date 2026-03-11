@@ -63,8 +63,8 @@ export default function GaugeChartComponent({
   const needleTipY = 99 - 70 * Math.sin(angleRad) // SVG Y is inverted
 
   return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-2 text-sm font-semibold text-wf-heading">{title}</p>
+    <div className="rounded-xl border border-wf-card-border bg-wf-card p-4 shadow-sm">
+      <p className="mb-2 text-sm font-bold text-wf-heading">{title}</p>
       <p className="mb-1 text-center text-2xl font-bold text-wf-heading">{value}</p>
       <div className="relative" style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
