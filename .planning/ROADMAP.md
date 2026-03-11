@@ -72,7 +72,7 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 
 - [x] **Phase 22: Token Foundation** - Update wireframe-tokens.css and tailwind.config.ts; new palette propagates to ~55 components automatically (completed 2026-03-11)
 - [x] **Phase 23: Sidebar & Header Chrome** - Dark slate sidebar with nav groups and footer; white header with search, notifications, and user chip (completed 2026-03-11)
-- [ ] **Phase 24: KPI Cards** - Icon slot, group-hover transitions, rounded-full trend badges, extrabold values, optional sparkline
+- [x] **Phase 24: KPI Cards** - Icon slot, group-hover transitions, rounded-full trend badges, extrabold values, optional sparkline (completed 2026-03-11)
 - [ ] **Phase 25: Table Components** - Tracking-widest font-black headers, dark tfoot row, hover transitions, trend icons across all 4 table variants
 - [ ] **Phase 26: Filter Bar Enhancement** - backdrop-blur sticky bar, 10px uppercase labels, action button hierarchy, compare toggle
 - [ ] **Phase 27: Chart Palette & Composition** - Primary blue + slate chart palette, custom header legend, CompositionBar new component
@@ -120,7 +120,7 @@ Plans:
   3. Trend badges display as rounded-full pills with emerald background for positive values and rose background for negative values
   4. Card values use text-2xl font-extrabold and labels use text-sm font-medium slate-500
   5. Comparison text appears below the value at text-[10px] text-slate-400
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 24-01-PLAN.md — KpiCardFull + KpiCard restyle (icon slot, group-hover, rounded-full badges, extrabold values, type update)
 
@@ -216,7 +216,7 @@ Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other 
 | 21. Gallery Reorganization | v1.3 | 2/2 | Complete | 2026-03-11 |
 | 22. Token Foundation | 2/2 | Complete    | 2026-03-11 | - |
 | 23. Sidebar & Header Chrome | v1.4 | Complete    | 2026-03-11 | 2026-03-11 |
-| 24. KPI Cards | v1.4 | 0/1 | Not started | - |
+| 24. KPI Cards | 1/1 | Complete   | 2026-03-11 | - |
 | 25. Table Components | v1.4 | TBD | Not started | - |
 | 26. Filter Bar Enhancement | v1.4 | TBD | Not started | - |
 | 27. Chart Palette & Composition | v1.4 | TBD | Not started | - |

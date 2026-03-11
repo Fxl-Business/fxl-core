@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
-status: planning
-stopped_at: Completed 23-sidebar-header-chrome-02-PLAN.md
-last_updated: "2026-03-11T19:12:00Z"
-last_activity: 2026-03-11 -- Phase 23 Plan 02 complete (header chrome rebuild)
+status: completed
+stopped_at: Completed 24-kpi-cards-01-PLAN.md
+last_updated: "2026-03-11T19:19:12.687Z"
+last_activity: 2026-03-11 -- Phase 23-02 complete (header 3-col layout, user chip, dark mode toggle in header)
 progress:
   total_phases: 7
-  completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  completed_phases: 3
+  total_plans: 5
+  completed_plans: 5
   percent: 10
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.4 Wireframe Visual Redesign -- Phase 23: Sidebar & Header Chrome
+**Current focus:** v1.4 Wireframe Visual Redesign -- Phase 24: KPI Cards
 
 ## Current Position
 
-Phase: 23 of 28 (Sidebar & Header Chrome)
-Plan: 02 complete
-Status: Phase 23 done — ready for Phase 24
-Last activity: 2026-03-11 -- Phase 23-02 complete (header 3-col layout, user chip, dark mode toggle in header)
+Phase: 24 of 28 (KPI Cards)
+Plan: 01 complete
+Status: Phase 24 done — ready for Phase 25
+Last activity: 2026-03-11 -- Phase 24-01 complete (KpiCardFull + KpiCard restyle, KpiConfig icon field, KpiGridRenderer passthrough)
 
-Progress: [█░░░░░░░░░] 10%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -67,6 +67,8 @@ v1.4 architectural decisions (from research):
 - [Phase 23-sidebar-header-chrome]: periodType removed from WireframeHeader Props — period selector deferred to Phase 26 filter bar
 - [Phase 23-sidebar-header-chrome]: SharedThemeToggle floating button removed — dark mode toggle consolidated into header chrome
 - [Phase 23-sidebar-header-chrome]: User chip uses static mock data (Operador FXL / Analista / OF) per wireframe-as-mock principle
+- [Phase 24-kpi-cards]: transition-colors on icon container div only (not card root) prevents unwanted animation of borders/text on hover
+- [Phase 24-kpi-cards]: variation badge shows without compareMode gate in KpiCardFull — trend data always relevant regardless of compare mode
 
 ### Pending Todos
 
@@ -78,6 +80,6 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-11T19:12:00Z
-Stopped at: Completed 23-sidebar-header-chrome-02-PLAN.md
-Next: Phase 24 (KPI Cards)
+Last session: 2026-03-11T19:19:12.685Z
+Stopped at: Completed 24-kpi-cards-01-PLAN.md
+Next: Phase 25 (CompositionBar)
