@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: completed
-stopped_at: Completed 24-kpi-cards-01-PLAN.md
-last_updated: "2026-03-11T19:21:58.083Z"
-last_activity: 2026-03-11 -- Phase 24-01 complete (KpiCardFull + KpiCard restyle, KpiConfig icon field, KpiGridRenderer passthrough)
+stopped_at: Completed 25-table-components-01-PLAN.md
+last_updated: "2026-03-11T19:39:04Z"
+last_activity: 2026-03-11 -- Phase 25-01 complete (table header typography upgrade, row hover tokens, total/highlight row accent styling)
 progress:
   total_phases: 7
   completed_phases: 3
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-11)
 
 ## Current Position
 
-Phase: 24 of 28 (KPI Cards)
+Phase: 25 of 28 (Table Components)
 Plan: 01 complete
-Status: Phase 24 done — ready for Phase 25
-Last activity: 2026-03-11 -- Phase 24-01 complete (KpiCardFull + KpiCard restyle, KpiConfig icon field, KpiGridRenderer passthrough)
+Status: Phase 25-01 done — ready for Phase 25-02
+Last activity: 2026-03-11 -- Phase 25-01 complete (table header typography upgrade, row hover tokens, total/highlight row accent styling)
 
 Progress: [██████████] 100%
 
@@ -69,6 +69,9 @@ v1.4 architectural decisions (from research):
 - [Phase 23-sidebar-header-chrome]: User chip uses static mock data (Operador FXL / Analista / OF) per wireframe-as-mock principle
 - [Phase 24-kpi-cards]: transition-colors on icon container div only (not card root) prevents unwanted animation of borders/text on hover
 - [Phase 24-kpi-cards]: variation badge shows without compareMode gate in KpiCardFull — trend data always relevant regardless of compare mode
+- [Phase 25-table-components]: ClickableTable always has cursor-pointer regardless of onRowClick prop — always interactive by design
+- [Phase 25-table-components]: Use hover:bg-wf-table-header (token-aware) not dark: Tailwind variant to avoid mis-resolution inside data-wf-theme context
+- [Phase 25-table-components]: uppercase on numeric td cells is harmless (numbers have no case) — no conditional logic needed
 
 ### Pending Todos
 
@@ -80,6 +83,6 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-11T19:19:12.685Z
-Stopped at: Completed 24-kpi-cards-01-PLAN.md
-Next: Phase 25 (CompositionBar)
+Last session: 2026-03-11T19:39:04Z
+Stopped at: Completed 25-table-components-01-PLAN.md
+Next: Phase 25-02 (Dark footer row + trend indicator cells)

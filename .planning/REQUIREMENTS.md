@@ -50,9 +50,9 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 
 ### Tables
 
-- [ ] **TBL-01**: Table headers use text-[10px] font-black uppercase tracking-widest slate-500 on slate-50/800 background
-- [ ] **TBL-02**: Table rows have hover:bg-slate-100 dark:hover:bg-slate-800 transitions with cursor-pointer
-- [ ] **TBL-03**: Highlight/total rows use primary-colored text with font-extrabold uppercase styling
+- [x] **TBL-01**: Table headers use text-[10px] font-black uppercase tracking-widest slate-500 on slate-50/800 background
+- [x] **TBL-02**: Table rows have hover:bg-slate-100 dark:hover:bg-slate-800 transitions with cursor-pointer
+- [x] **TBL-03**: Highlight/total rows use primary-colored text with font-extrabold uppercase styling
 - [ ] **TBL-04**: Dark footer row (bg-slate-900 text-white) with font-black totals for analytical tables
 - [ ] **TBL-05**: Trend indicators in table cells use color-coded icons with scale-110 hover
 
@@ -121,9 +121,9 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 | CARD-03 | Phase 24 | Complete |
 | CARD-04 | Phase 24 | Complete |
 | CARD-05 | Phase 24 | Complete |
-| TBL-01 | Phase 25 | Pending |
-| TBL-02 | Phase 25 | Pending |
-| TBL-03 | Phase 25 | Pending |
+| TBL-01 | Phase 25 | Complete |
+| TBL-02 | Phase 25 | Complete |
+| TBL-03 | Phase 25 | Complete |
 | TBL-04 | Phase 25 | Pending |
 | TBL-05 | Phase 25 | Pending |
 | CHRT-01 | Phase 27 | Pending |

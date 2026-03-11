@@ -136,7 +136,7 @@ Plans:
   5. Trend indicator cells show color-coded icons that scale to scale-110 on hover
 **Plans:** 2 plans
 Plans:
-- [ ] 25-01-PLAN.md — Header typography, row hover, total/highlight row restyle across all 4 tables
+- [x] 25-01-PLAN.md — Header typography, row hover, total/highlight row restyle across all 4 tables (completed 2026-03-11)
 - [ ] 25-02-PLAN.md — Dark footer row (type + render) and trend indicator cell pattern
 
 ### Phase 26: Filter Bar Enhancement
@@ -217,7 +217,7 @@ Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other 
 | 22. Token Foundation | 2/2 | Complete    | 2026-03-11 | - |
 | 23. Sidebar & Header Chrome | v1.4 | Complete    | 2026-03-11 | 2026-03-11 |
 | 24. KPI Cards | 1/1 | Complete    | 2026-03-11 | - |
-| 25. Table Components | v1.4 | TBD | Not started | - |
+| 25. Table Components | v1.4 | 1/2 | In progress | - |
 | 26. Filter Bar Enhancement | v1.4 | TBD | Not started | - |
 | 27. Chart Palette & Composition | v1.4 | TBD | Not started | - |
 | 28. Editor Sync & Gallery Validation | v1.4 | TBD | Not started | - |
