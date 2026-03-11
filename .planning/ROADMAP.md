@@ -120,10 +120,9 @@ Plans:
   3. Trend badges display as rounded-full pills with emerald background for positive values and rose background for negative values
   4. Card values use text-2xl font-extrabold and labels use text-sm font-medium slate-500
   5. Comparison text appears below the value at text-[10px] text-slate-400
-**Plans:** 2 plans
+**Plans:** 1 plan
 Plans:
-- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
-- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
+- [ ] 24-01-PLAN.md — KpiCardFull + KpiCard restyle (icon slot, group-hover, rounded-full badges, extrabold values, type update)
 
 ### Phase 25: Table Components
 **Goal**: All four table variants share a consistent professional header treatment and the primary analytical table gains a dark footer totals row
@@ -216,8 +215,8 @@ Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other 
 | 20. Chart Type Expansion | v1.3 | 4/4 | Complete | 2026-03-11 |
 | 21. Gallery Reorganization | v1.3 | 2/2 | Complete | 2026-03-11 |
 | 22. Token Foundation | 2/2 | Complete    | 2026-03-11 | - |
-| 23. Sidebar & Header Chrome | v1.4 | 2/2 | Complete | 2026-03-11 |
-| 24. KPI Cards | v1.4 | TBD | Not started | - |
+| 23. Sidebar & Header Chrome | v1.4 | Complete    | 2026-03-11 | 2026-03-11 |
+| 24. KPI Cards | v1.4 | 0/1 | Not started | - |
 | 25. Table Components | v1.4 | TBD | Not started | - |
 | 26. Filter Bar Enhancement | v1.4 | TBD | Not started | - |
 | 27. Chart Palette & Composition | v1.4 | TBD | Not started | - |
