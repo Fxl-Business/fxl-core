@@ -304,6 +304,18 @@ export const gaugeChartMock = {
   max: 100,
 }
 
+// CompositionBar
+export const compositionBarMock = {
+  title: 'Composicao de Receita por Canal',
+  segments: [
+    { label: 'Direto', value: 48 },
+    { label: 'Parceiros', value: 27 },
+    { label: 'Online', value: 15 },
+    { label: 'Outros', value: 10 },
+  ],
+  formatValue: (v: number) => `${v}%`,
+}
+
 // WaterfallChart — compareBars (periodo anterior)
 export const waterfallCompareBars: WaterfallBar[] = [
   { label: 'Receita', value: 135000, type: 'positive' },

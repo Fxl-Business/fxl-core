@@ -15,6 +15,7 @@ import HorizontalBarChartComponent from '@tools/wireframe-builder/components/Hor
 import BubbleChartComponent from '@tools/wireframe-builder/components/BubbleChartComponent'
 import ComposedChartComponent from '@tools/wireframe-builder/components/ComposedChartComponent'
 import GaugeChartComponent from '@tools/wireframe-builder/components/GaugeChartComponent'
+import CompositionBar from '@tools/wireframe-builder/components/CompositionBar'
 import DataTable from '@tools/wireframe-builder/components/DataTable'
 import DrillDownTable from '@tools/wireframe-builder/components/DrillDownTable'
 import ClickableTable from '@tools/wireframe-builder/components/ClickableTable'
@@ -63,6 +64,7 @@ import {
   bubbleChartMock,
   composedChartMock,
   gaugeChartMock,
+  compositionBarMock,
 } from './galleryMockData'
 
 type ComponentStatus = 'available' | 'pending'
@@ -468,6 +470,16 @@ const categories: Category[] = [
         status: 'available',
         props: ['title', 'value', 'min?', 'max?', 'zones?', 'height?'],
         render: () => <GaugeChartPreview />,
+      },
+      {
+        name: 'CompositionBar',
+        status: 'available',
+        props: ['title', 'segments: Segment[]', 'height?', 'showLegend?', 'formatValue?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <CompositionBar {...compositionBarMock} />
+          </div>
+        ),
       },
     ],
   },
