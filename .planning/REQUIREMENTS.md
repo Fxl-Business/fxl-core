@@ -1,7 +1,7 @@
 # Requirements: FXL Core v1.3
 
 **Defined:** 2026-03-10
-**Core Value:** FXL Core e o cerebro operacional da empresa — documentacao, processo e tooling juntos
+**Core Value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
 
 ## v1.3 Requirements
 
@@ -95,41 +95,41 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VIS-01 | — | Pending |
-| LAYOUT-01 | — | Pending |
-| LAYOUT-02 | — | Pending |
-| SIDE-01 | — | Pending |
-| SIDE-02 | — | Pending |
-| SIDE-03 | — | Pending |
-| SIDE-04 | — | Pending |
-| SIDE-05 | — | Pending |
-| SIDE-06 | — | Pending |
-| SIDE-07 | — | Pending |
-| HEAD-01 | — | Pending |
-| HEAD-02 | — | Pending |
-| HEAD-03 | — | Pending |
-| HEAD-04 | — | Pending |
-| HEAD-05 | — | Pending |
-| FILT-01 | — | Pending |
-| FILT-02 | — | Pending |
-| FILT-03 | — | Pending |
-| FILT-04 | — | Pending |
-| FILT-05 | — | Pending |
-| FILT-06 | — | Pending |
-| CHART-01 | — | Pending |
-| CHART-02 | — | Pending |
-| CHART-03 | — | Pending |
-| CHART-04 | — | Pending |
-| CHART-05 | — | Pending |
-| CHART-06 | — | Pending |
-| GAL-01 | — | Pending |
-| GAL-02 | — | Pending |
+| VIS-01 | Phase 17 | Pending |
+| LAYOUT-01 | Phase 17 | Pending |
+| LAYOUT-02 | Phase 17 | Pending |
+| SIDE-01 | Phase 17 | Pending |
+| SIDE-02 | Phase 18 | Pending |
+| SIDE-03 | Phase 18 | Pending |
+| SIDE-04 | Phase 18 | Pending |
+| SIDE-05 | Phase 18 | Pending |
+| SIDE-06 | Phase 18 | Pending |
+| SIDE-07 | Phase 18 | Pending |
+| HEAD-01 | Phase 17 | Pending |
+| HEAD-02 | Phase 18 | Pending |
+| HEAD-03 | Phase 18 | Pending |
+| HEAD-04 | Phase 18 | Pending |
+| HEAD-05 | Phase 18 | Pending |
+| FILT-01 | Phase 17 | Pending |
+| FILT-02 | Phase 19 | Pending |
+| FILT-03 | Phase 19 | Pending |
+| FILT-04 | Phase 19 | Pending |
+| FILT-05 | Phase 19 | Pending |
+| FILT-06 | Phase 19 | Pending |
+| CHART-01 | Phase 20 | Pending |
+| CHART-02 | Phase 20 | Pending |
+| CHART-03 | Phase 20 | Pending |
+| CHART-04 | Phase 20 | Pending |
+| CHART-05 | Phase 20 | Pending |
+| CHART-06 | Phase 20 | Pending |
+| GAL-01 | Phase 21 | Pending |
+| GAL-02 | Phase 21 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 26 total
-- Mapped to phases: 0
-- Unmapped: 26 ⚠️
+- Mapped to phases: 26
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-10*
-*Last updated: 2026-03-10 after initial definition*
+*Last updated: 2026-03-10 after roadmap creation (all 26 requirements mapped)*

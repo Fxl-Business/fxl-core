@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Builder & Components
 status: active
-stopped_at: Defining requirements
+stopped_at: Roadmap created, ready to plan Phase 17
 last_updated: "2026-03-10"
-last_activity: 2026-03-10 - Milestone v1.3 started
+last_activity: 2026-03-10 - Roadmap created for v1.3 (5 phases, 26 requirements)
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.3 Builder & Components
+**Current focus:** v1.3 Builder & Components -- Phase 17 (Schema Foundation & Layout Restructure)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-10 — Milestone v1.3 started
+Phase: 17 of 21 (Schema Foundation & Layout Restructure)
+Plan: --
+Status: Ready to plan
+Last activity: 2026-03-10 -- Roadmap created for v1.3 (5 phases, 26 requirements mapped)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -46,6 +46,13 @@ Progress: [░░░░░░░░░░] 0%
 ### Decisions
 
 All v1.0 + v1.1 + v1.2 decisions logged in PROJECT.md Key Decisions table (28 decisions, all good).
+
+v1.3 architectural decisions (from research):
+- SidebarConfig and HeaderConfig are dashboard-level (on BlueprintConfig, not per-screen)
+- FilterOption gets filterType discriminator (backward-compatible, defaults to 'select')
+- Only 1 new section type in registry (gauge-chart), rest are chartType sub-variants
+- Zero new npm packages -- Recharts 2.x covers everything
+- Layout components are NOT section types -- they live at BlueprintConfig.layout level
 
 ### Pending Todos
 
@@ -83,5 +90,5 @@ v1.2:
 ## Session Continuity
 
 Last session: 2026-03-10
-Stopped at: Defining requirements
-Next: Complete requirements and roadmap for v1.3
+Stopped at: Roadmap created for v1.3
+Next: `/gsd:plan-phase 17` (Schema Foundation & Layout Restructure)
