@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: planning
-stopped_at: Completed 22-token-foundation-02-PLAN.md
-last_updated: "2026-03-11T18:29:11.727Z"
+stopped_at: Completed 23-sidebar-header-chrome-01-PLAN.md
+last_updated: "2026-03-11T18:46:26.107Z"
 last_activity: 2026-03-11 -- v1.4 roadmap created (7 phases, 39 requirements, 100% coverage)
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
   percent: 0
 ---
 
@@ -61,6 +61,9 @@ v1.4 architectural decisions (from research):
 - [Phase 22-token-foundation]: Used color-mix() for --wf-accent-muted in both themes (12% light, 15% dark) to avoid hardcoded rgba values
 - [Phase 22-token-foundation]: --wf-canvas hardcoded (#f6f6f8 light, #101622 dark) not aliased to neutral token for exact visual control
 - [Phase 22-token-foundation]: brandingToWfOverrides() returns --wf-primary override injected via style prop on data-wf-theme div
+- [Phase 23-sidebar-header-chrome]: Active nav uses bg-wf-accent-muted (12% tint) + text-wf-accent instead of solid sidebar-active for premium SaaS look
+- [Phase 23-sidebar-header-chrome]: Hover hardcoded to #1e293b / #fff literals because sidebar is always dark regardless of wireframe theme
+- [Phase 23-sidebar-header-chrome]: Footer upgraded from plain text to bordered card with green status dot across all sidebar render sites
 
 ### Pending Todos
 
@@ -72,6 +75,6 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-11T18:25:32.748Z
-Stopped at: Completed 22-token-foundation-02-PLAN.md
+Last session: 2026-03-11T18:46:26.105Z
+Stopped at: Completed 23-sidebar-header-chrome-01-PLAN.md
 Next: `/gsd:plan-phase 22`

@@ -19,11 +19,11 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 
 ### Sidebar
 
-- [ ] **SIDE-01**: Sidebar uses dark slate-900/950 background with slate-300/400 text
-- [ ] **SIDE-02**: Active nav item uses primary/10 background with primary text color
-- [ ] **SIDE-03**: Nav items have hover:bg-slate-800 hover:text-white transitions
-- [ ] **SIDE-04**: Section group labels use 10px uppercase tracking-wider slate-500 style
-- [ ] **SIDE-05**: Sidebar footer shows status indicator (dot + label) in bordered card
+- [x] **SIDE-01**: Sidebar uses dark slate-900/950 background with slate-300/400 text
+- [x] **SIDE-02**: Active nav item uses primary/10 background with primary text color
+- [x] **SIDE-03**: Nav items have hover:bg-slate-800 hover:text-white transitions
+- [x] **SIDE-04**: Section group labels use 10px uppercase tracking-wider slate-500 style
+- [x] **SIDE-05**: Sidebar footer shows status indicator (dot + label) in bordered card
 
 ### Header
 
@@ -102,11 +102,11 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 | TOK-05 | Phase 22 | Complete |
 | TOK-06 | Phase 22 | Complete |
 | TOK-07 | Phase 22 | Complete |
-| SIDE-01 | Phase 23 | Pending |
-| SIDE-02 | Phase 23 | Pending |
-| SIDE-03 | Phase 23 | Pending |
-| SIDE-04 | Phase 23 | Pending |
-| SIDE-05 | Phase 23 | Pending |
+| SIDE-01 | Phase 23 | Complete |
+| SIDE-02 | Phase 23 | Complete |
+| SIDE-03 | Phase 23 | Complete |
+| SIDE-04 | Phase 23 | Complete |
+| SIDE-05 | Phase 23 | Complete |
 | HEAD-01 | Phase 23 | Pending |
 | HEAD-02 | Phase 23 | Pending |
 | HEAD-03 | Phase 23 | Pending |
