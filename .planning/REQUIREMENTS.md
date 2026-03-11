@@ -15,7 +15,7 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 - [ ] **TOK-04**: Three new tokens added: --wf-header-search-bg, --wf-table-footer-bg, --wf-table-footer-fg
 - [ ] **TOK-05**: Background tokens update to #f6f6f8 (light) and #101622 (dark)
 - [ ] **TOK-06**: All hardcoded colors in components (e.g., GaugeChart #f59e0b) replaced with token references
-- [ ] **TOK-07**: Client branding generateBrandCssVars() updated for any new overridable tokens
+- [ ] **TOK-07**: Client branding brandingToWfOverrides() updated to emit --wf-primary from primaryColor, wired into WireframeThemeProvider callers
 
 ### Sidebar
 
