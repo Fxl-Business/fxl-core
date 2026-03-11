@@ -41,7 +41,7 @@ function Row({ row, columns, depth }: { row: DrilRow; columns: DrilColumn[]; dep
             key={col.key}
             className={cn(
               'px-4 py-2.5 text-xs',
-              row.isTotal ? 'font-semibold text-wf-heading' : 'text-wf-body',
+              row.isTotal ? 'text-wf-accent font-extrabold uppercase' : 'text-wf-body',
               col.align === 'right' && 'text-right',
               col.align === 'center' && 'text-center',
             )}

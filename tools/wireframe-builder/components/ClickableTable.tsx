@@ -56,8 +56,8 @@ export default function ClickableTable({ title, subtitle, columns, rows, onRowCl
                 className={cn(
                   'border-t border-wf-card-border transition-colors',
                   'cursor-pointer hover:bg-wf-table-header',
-                  row.variant === 'total' && 'bg-wf-canvas font-semibold',
-                  row.variant === 'highlight' && 'bg-red-50/60',
+                  row.variant === 'total' && 'bg-wf-canvas',
+                  row.variant === 'highlight' && 'bg-wf-accent-muted',
                 )}
               >
                 {columns.map((col) => (
@@ -67,7 +67,7 @@ export default function ClickableTable({ title, subtitle, columns, rows, onRowCl
                       'px-4 py-2.5 text-xs text-wf-body',
                       col.align === 'right' && 'text-right tabular-nums',
                       col.align === 'center' && 'text-center',
-                      row.variant === 'total' && 'font-semibold text-wf-heading',
+                      (row.variant === 'total' || row.variant === 'highlight') && 'text-wf-accent font-extrabold uppercase',
                     )}
                   >
                     {row.data[col.key] ?? '—'}
