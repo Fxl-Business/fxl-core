@@ -37,6 +37,7 @@ Specs completas: `docs/ferramentas/blocos/` ([ver no app](/ferramentas/blocos/in
 | `ConfigTable` | Tabela de configuracao editavel |
 | `DonutChart` | Grafico de rosca |
 | `ParetoChart` | Grafico de Pareto |
+| `GaugeChartComponent` | Medidor radial com zonas e ponteiro (secao `gauge-chart`) |
 | `WaterfallChart` | Grafico de cascata |
 | `CalculoCard` | Card com calculo/formula |
 | `DetailViewSwitcher` | Alternador entre visoes de detalhe |
@@ -153,7 +154,7 @@ hasCompareSwitch e um array de `sections` (discriminated union).
 
 Tipos de secao disponiveis:
 `kpi-grid`, `bar-line-chart`, `donut-chart`, `waterfall-chart`, `pareto-chart`,
-`calculo-card`, `data-table`, `drill-down-table`, `clickable-table`,
+`gauge-chart`, `calculo-card`, `data-table`, `drill-down-table`, `clickable-table`,
 `saldo-banco`, `manual-input`, `upload-section`, `config-table`,
 `chart-grid`, `info-block`.
 
