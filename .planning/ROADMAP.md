@@ -57,7 +57,7 @@ Full details: [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md)
 **Milestone Goal:** Expand the wireframe builder with correct layout hierarchy, blueprint-driven sidebar/header/filter bar, massive chart repertoire, and reorganized component gallery.
 
 - [x] **Phase 17: Schema Foundation & Layout Restructure** - Types, Zod schemas, layout hierarchy (header above sidebar), softer wireframe palette (completed 2026-03-11)
-- [ ] **Phase 18: Configurable Sidebar & Header** - Blueprint-driven sidebar and header renderers with all visual features
+- [x] **Phase 18: Configurable Sidebar & Header** - Blueprint-driven sidebar and header renderers with all visual features (completed 2026-03-11)
 - [ ] **Phase 19: Filter Bar Expansion** - Five new filter type renderers (date-range, multi-select, search, period presets, boolean toggle)
 - [ ] **Phase 20: Chart Type Expansion** - Six new chart types/variants (stacked-bar, stacked-area, horizontal-bar, bubble, gauge, composed)
 - [ ] **Phase 21: Gallery Reorganization** - Registry-driven gallery with thematic sections and all new components visible
@@ -159,7 +159,7 @@ Phases 18, 19, 20 can execute in parallel after Phase 17. Phase 21 requires 18+1
 | 15. Doc Rendering and TOC | v1.2 | 2/2 | Complete | 2026-03-10 |
 | 16. Consistency Pass | v1.2 | 2/2 | Complete | 2026-03-10 |
 | 17. Schema Foundation & Layout Restructure | 3/3 | Complete    | 2026-03-11 | - |
-| 18. Configurable Sidebar & Header | 2/3 | In Progress|  | - |
+| 18. Configurable Sidebar & Header | 3/3 | Complete   | 2026-03-11 | - |
 | 19. Filter Bar Expansion | v1.3 | 0/0 | Not started | - |
 | 20. Chart Type Expansion | v1.3 | 0/0 | Not started | - |
 | 21. Gallery Reorganization | v1.3 | 0/0 | Not started | - |

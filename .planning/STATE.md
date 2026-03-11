@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Builder & Components
 status: planning
-stopped_at: Completed 18-02-PLAN.md (sidebar collapse rail, groups rendering, badge pill, footer from config)
-last_updated: "2026-03-11T03:44:56.477Z"
+stopped_at: Completed 18-03-PLAN.md (header logo, user chip, share/export/gerenciar buttons, simplified sidebar branding)
+last_updated: "2026-03-11T03:48:36.212Z"
 last_activity: 2026-03-10 -- Roadmap created for v1.3 (5 phases, 26 requirements mapped)
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -64,6 +64,8 @@ v1.3 architectural decisions (from research):
 - [Phase 18-01]: badge field added after icon in BlueprintScreen — both are optional display hints for sidebar nav items
 - [Phase 18-configurable-sidebar-header]: effectiveSidebarCollapsed derived from sidebarCollapsed && !editMode.active — single state, no separate forceExpanded flag
 - [Phase 18-configurable-sidebar-header]: Badge pill in collapsed sidebar rail clipped by overflow:hidden on aside — intentional, collapsed rail is for navigation not notification counts
+- [Phase 18-03]: Props for action visibility default to shown when undefined (showManage !== false, showUserIndicator !== false) — consistent with opt-out pattern from HeaderConfig design
+- [Phase 18-03]: Sidebar branding slot reduced to 40px label-only strip after logo moves to header — avoids dead space, uppercase muted label provides visual separation
 
 ### Pending Todos
 
@@ -89,6 +91,7 @@ None active.
 | Phase 17-schema-foundation-layout-restructure P02 | 2 | 3 tasks | 2 files |
 | Phase 18-configurable-sidebar-header P01 | 5 | 2 tasks | 3 files |
 | Phase 18-configurable-sidebar-header P02 | 8 | 3 tasks | 2 files |
+| Phase 18-configurable-sidebar-header P03 | 93 | 3 tasks | 2 files |
 
 ### Roadmap Evolution
 
@@ -105,6 +108,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-11T03:44:56.475Z
-Stopped at: Completed 18-02-PLAN.md (sidebar collapse rail, groups rendering, badge pill, footer from config)
+Last session: 2026-03-11T03:48:36.210Z
+Stopped at: Completed 18-03-PLAN.md (header logo, user chip, share/export/gerenciar buttons, simplified sidebar branding)
 Next: `/gsd:plan-phase 17` (Schema Foundation & Layout Restructure)
