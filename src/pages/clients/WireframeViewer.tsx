@@ -22,6 +22,7 @@ import {
   resolveBranding,
   getChartPalette,
   getFontLinks,
+  brandingToWfOverrides,
 } from '@tools/wireframe-builder/lib/branding'
 import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'
 import type { BrandingConfig } from '@tools/wireframe-builder/types/branding'
@@ -712,7 +713,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
   return (
     <>
-      <WireframeThemeProvider>
+      <WireframeThemeProvider wfOverrides={branding ? brandingToWfOverrides(branding) : undefined}>
         <div
           style={{
             display: 'flex',

@@ -21,6 +21,7 @@ import {
   resolveBranding,
   getChartPalette,
   getFontLinks,
+  brandingToWfOverrides,
 } from '@tools/wireframe-builder/lib/branding'
 import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
 import { sectionsToRows, getCellCount } from '@tools/wireframe-builder/lib/grid-layouts'
@@ -610,7 +611,7 @@ export default function FinanceiroWireframeViewer() {
 
   return (
     <>
-      <WireframeThemeProvider>
+      <WireframeThemeProvider wfOverrides={brandingToWfOverrides(branding)}>
         <div
           style={{
             display: 'flex',

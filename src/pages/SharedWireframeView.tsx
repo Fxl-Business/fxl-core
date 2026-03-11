@@ -8,6 +8,7 @@ import {
   resolveBranding,
   getChartPalette,
   getFontLinks,
+  brandingToWfOverrides,
 } from '@tools/wireframe-builder/lib/branding'
 import { WireframeThemeProvider, useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
 import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'
@@ -361,7 +362,7 @@ export default function SharedWireframeView() {
 
   return (
     <>
-      <WireframeThemeProvider>
+      <WireframeThemeProvider wfOverrides={brandingToWfOverrides(resolvedBranding)}>
         <SharedWireframeShell
           branding={resolvedBranding}
         >
