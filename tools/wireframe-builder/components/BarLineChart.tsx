@@ -45,7 +45,7 @@ export default function BarLineChart({ title, type, height = 250, categories, xL
             <XAxis dataKey="category" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={xLabel ? { value: xLabel, position: 'insideBottom', offset: -5, fontSize: 10 } : undefined} />
             <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <Tooltip />
-            <Bar dataKey="bar" fill={chartColors?.[0] ?? 'var(--wf-chart-1)'} radius={[3, 3, 0, 0]} />
+            <Bar dataKey="bar" fill={chartColors?.[0] ?? 'var(--wf-chart-1)'} radius={[3, 3, 0, 0]} opacity={0.7} activeBar={{ opacity: 1, fill: chartColors?.[0] ?? 'var(--wf-chart-1)' }} />
           </BarChart>
         ) : type === 'line' ? (
           <LineChart data={data}>
@@ -62,7 +62,7 @@ export default function BarLineChart({ title, type, height = 250, categories, xL
             <YAxis yAxisId="left" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft', fontSize: 10 } : undefined} />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
             <Tooltip />
-            <Bar yAxisId="left" dataKey="bar" fill={chartColors?.[0] ?? 'var(--wf-chart-1)'} radius={[3, 3, 0, 0]} />
+            <Bar yAxisId="left" dataKey="bar" fill={chartColors?.[0] ?? 'var(--wf-chart-1)'} radius={[3, 3, 0, 0]} opacity={0.7} activeBar={{ opacity: 1, fill: chartColors?.[0] ?? 'var(--wf-chart-1)' }} />
             <Line yAxisId="right" type="monotone" dataKey="line" stroke={chartColors?.[1] ?? 'var(--wf-chart-2)'} strokeWidth={2} dot={false} />
           </ComposedChart>
         )}
