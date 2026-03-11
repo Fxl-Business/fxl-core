@@ -181,16 +181,22 @@ export const wireframeSidebarMock = {
 export const wireframeHeaderMock = {
   title: 'Dashboard Financeiro',
   periodType: 'mensal' as const,
+  brandLabel: 'FXL Financeiro',
+  userDisplayName: 'Caué FXL',
+  userRole: 'Operador' as const,
+  showUserIndicator: true,
 }
 
 // WireframeFilterBar
 export const wireframeFilterBarMock = {
   filters: [
-    { key: 'unidade', label: 'Unidade', options: ['Todas'] },
-    { key: 'centro', label: 'Centro de Custo', options: ['Todos'] },
+    { key: 'periodo', label: 'Período', filterType: 'date-range' as const },
+    { key: 'unidade', label: 'Unidade', filterType: 'multi-select' as const, options: ['Matriz', 'Filial SP', 'Filial RJ'] },
+    { key: 'busca', label: 'Buscar', filterType: 'search' as const },
+    { key: 'centro', label: 'Centro de Custo', filterType: 'select' as const, options: ['Todos'] },
+    { key: 'ativo', label: 'Apenas ativos', filterType: 'toggle' as const },
   ] as FilterOption[],
-  showSearch: true,
-  searchPlaceholder: 'Buscar categoria...',
+  showSearch: false,
   showCompareSwitch: true,
 }
 
@@ -262,6 +268,43 @@ export const saldoBancoInputMock = {
 export const wireframeModalMock = {
   title: 'Detalhes — 01/03/2026',
   size: 'lg' as const,
+}
+
+// StackedBarChart
+export const stackedBarChartMock = {
+  title: 'Receita por Canal — Acumulado',
+}
+
+// StackedAreaChart
+export const stackedAreaChartMock = {
+  title: 'Evolução de Despesas por Categoria',
+}
+
+// HorizontalBarChart
+export const horizontalBarChartMock = {
+  title: 'Ranking de Produtos por Receita',
+  xLabel: 'Receita (R$)',
+  yLabel: 'Produto',
+}
+
+// BubbleChart
+export const bubbleChartMock = {
+  title: 'Dispersão: Volume x Margem x Ticket',
+  xLabel: 'Volume',
+  yLabel: 'Margem (%)',
+}
+
+// ComposedChart
+export const composedChartMock = {
+  title: 'DRE Gerencial — Resultado + Tendência',
+}
+
+// GaugeChart
+export const gaugeChartMock = {
+  title: 'Margem Operacional',
+  value: 68,
+  min: 0,
+  max: 100,
 }
 
 // WaterfallChart — compareBars (periodo anterior)
