@@ -10,6 +10,8 @@ type Props = {
   onSave: () => void
   onOpenComments: () => void
   onOpenShare: () => void
+  userDisplayName?: string
+  userRole?: string
 }
 
 export default function AdminToolbar({
@@ -21,13 +23,16 @@ export default function AdminToolbar({
   onSave,
   onOpenComments,
   onOpenShare,
+  userDisplayName,
+  userRole,
 }: Props) {
   const { theme, toggle } = useWireframeTheme()
 
   return (
     <div
-      className="flex items-center gap-3 px-6 py-2 shrink-0"
+      className="flex items-center gap-3 px-6 shrink-0"
       style={{
+        height: 40,
         background: 'var(--wf-header-bg)',
         borderBottom: '1px solid var(--wf-header-border)',
       }}
@@ -39,7 +44,21 @@ export default function AdminToolbar({
         {screenTitle}
       </span>
 
-      <div className="ml-auto flex items-center gap-1">
+      <div className="ml-auto flex items-center gap-2">
+        {userDisplayName && (
+          <div
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs"
+            style={{
+              background: 'var(--wf-card-bg)',
+              border: '1px solid var(--wf-card-border)',
+              color: 'var(--wf-body)',
+            }}
+          >
+            <span className="font-semibold" style={{ color: 'var(--wf-heading)' }}>{userDisplayName}</span>
+            <span style={{ color: 'var(--wf-muted)' }}>{userRole ?? 'Operador'}</span>
+          </div>
+        )}
+
         <button
           type="button"
           onClick={onOpenShare}

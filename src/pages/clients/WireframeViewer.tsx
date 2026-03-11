@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
-import { MessageSquare, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { MessageSquare, Loader2, PanelLeft } from 'lucide-react'
 import { useUser } from '@clerk/react'
 import { arrayMove } from '@dnd-kit/sortable'
 import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
@@ -11,6 +11,7 @@ import AdminToolbar from '@tools/wireframe-builder/components/editor/AdminToolba
 import ShareModal from '@tools/wireframe-builder/components/editor/ShareModal'
 import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPanel'
 import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
+import { getIconComponent } from '@tools/wireframe-builder/components/editor/IconPicker'
 import { toast } from 'sonner'
 import {
   loadBlueprint as loadBlueprintFromDb,
@@ -131,7 +132,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
   // Sidebar collapse
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const SIDEBAR_EXPANDED = 240
-  const SIDEBAR_COLLAPSED = 56
+  const SIDEBAR_COLLAPSED = 52
   // Auto-expand when edit mode is active (DnD handles require visible items)
   const effectiveSidebarCollapsed = sidebarCollapsed && !editMode.active
   const sidebarWidth = effectiveSidebarCollapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED
@@ -304,11 +305,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
   function handleCloseDrawer() {
     setDrawerOpen(false)
     fetchComments()
-  }
-
-  function handleOpenManager() {
-    setDrawerOpen(false)
-    setManagerOpen(true)
   }
 
   function handleCloseManager() {
@@ -711,6 +707,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     )
   }
 
+  // Layout height constants — only app header is above sidebar
+  const appHeaderH = user ? 40 : 0
+
   return (
     <>
       <WireframeThemeProvider>
@@ -723,23 +722,23 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
             background: 'var(--wf-canvas)',
           }}
         >
-          <WireframeHeader
-            title={activeScreen.title}
-            periodType={activeScreen.periodType}
-            logoUrl={branding.logoUrl}
-            brandLabel={activeConfig?.label}
-            showLogo={activeConfig?.header?.showLogo}
-            showPeriodSelector={activeConfig?.header?.showPeriodSelector}
-            showUserIndicator={activeConfig?.header?.showUserIndicator}
-            userDisplayName={user?.fullName ?? user?.firstName ?? undefined}
-            userRole="Operador"
-            onGerenciar={handleOpenManager}
-            showManage={activeConfig?.header?.actions?.manage}
-            onShare={activeConfig?.header?.actions?.share !== false ? () => setShareOpen(true) : undefined}
-            onExport={activeConfig?.header?.actions?.export ? () => { /* future */ } : undefined}
-          />
+          {/* App chrome header — edit, comments, share, theme toggle, user */}
+          {user && (
+            <AdminToolbar
+              screenTitle={activeScreen.title}
+              editMode={editMode.active}
+              dirty={editMode.dirty}
+              saving={editMode.saving}
+              onToggleEdit={handleToggleEdit}
+              onSave={handleSave}
+              onOpenComments={handleOpenScreenComments}
+              onOpenShare={() => setShareOpen(true)}
+              userDisplayName={user.fullName ?? user.firstName ?? undefined}
+              userRole="Operador"
+            />
+          )}
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          {/* Sidebar -- uses --wf-sidebar-* tokens with branding overrides */}
+          {/* Sidebar */}
           <aside
             style={{
               width: sidebarWidth,
@@ -750,51 +749,73 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               color: 'var(--wf-sidebar-fg)',
               display: 'flex',
               flexDirection: 'column',
-              height: 'calc(100vh - 56px)',
+              height: `calc(100vh - ${appHeaderH}px)`,
               position: 'fixed',
               left: 0,
-              top: 56,
+              top: appHeaderH,
+              borderRight: '1px solid var(--wf-sidebar-border)',
             }}
           >
+            {/* Sidebar header: label + toggle */}
             <div
               style={{
-                height: 40,
+                height: 44,
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0 16px',
+                padding: effectiveSidebarCollapsed ? '0 8px' : '0 16px',
+                justifyContent: effectiveSidebarCollapsed ? 'center' : 'space-between',
                 borderBottom: '1px solid var(--wf-sidebar-border)',
                 flexShrink: 0,
               }}
             >
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--wf-sidebar-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' as const }}>
-                {activeConfig?.label ?? 'Dashboard'}
-              </span>
+              {!effectiveSidebarCollapsed && (
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: 'var(--wf-sidebar-muted)',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase' as const,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {activeConfig?.label ?? 'Dashboard'}
+                </span>
+              )}
+              <button
+                type="button"
+                aria-label={effectiveSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
+                onClick={() => setSidebarCollapsed((c) => !c)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 28,
+                  height: 28,
+                  borderRadius: 6,
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--wf-sidebar-muted)',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  transition: 'background 150ms ease, color 150ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--wf-sidebar-active)'
+                  e.currentTarget.style.color = 'var(--wf-sidebar-fg)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
+                }}
+              >
+                <PanelLeft style={{ width: 16, height: 16 }} />
+              </button>
             </div>
-            <button
-              type="button"
-              aria-label={effectiveSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
-              onClick={() => setSidebarCollapsed((c) => !c)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: effectiveSidebarCollapsed ? 'center' : 'flex-end',
-                padding: '6px 12px',
-                width: '100%',
-                background: 'transparent',
-                border: 'none',
-                borderBottom: '1px solid var(--wf-sidebar-border)',
-                color: 'var(--wf-sidebar-muted)',
-                cursor: 'pointer',
-                flexShrink: 0,
-              }}
-            >
-              {effectiveSidebarCollapsed
-                ? <ChevronRight style={{ width: 14, height: 14 }} />
-                : <ChevronLeft style={{ width: 14, height: 14 }} />}
-            </button>
-            <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
+
+            {/* Navigation items */}
+            <nav style={{ flex: 1, padding: effectiveSidebarCollapsed ? '8px 4px' : '8px', overflowY: 'auto' }}>
               {editMode.active ? (
-                // Edit mode: flat ScreenManager with full DnD
                 <ScreenManager
                   screens={screens}
                   activeIndex={safeActiveIndex}
@@ -805,19 +826,64 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                   onRenameScreen={handleRenameScreen}
                   onReorderScreens={handleReorderScreens}
                 />
+              ) : effectiveSidebarCollapsed ? (
+                // Collapsed: icon-only centered buttons
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                  {screens.map((screen, index) => {
+                    const Icon = getIconComponent(screen.icon ?? 'layout-dashboard')
+                    const isActive = index === safeActiveIndex
+                    return (
+                      <button
+                        key={screen.id}
+                        type="button"
+                        title={screen.title}
+                        onClick={() => handleScreenSelect(index)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 36,
+                          height: 36,
+                          borderRadius: 6,
+                          border: 'none',
+                          background: isActive ? 'var(--wf-sidebar-active)' : 'transparent',
+                          color: isActive ? 'var(--wf-sidebar-fg)' : 'var(--wf-sidebar-muted)',
+                          cursor: 'pointer',
+                          transition: 'background 150ms ease, color 150ms ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = 'var(--wf-sidebar-active)'
+                            e.currentTarget.style.color = 'var(--wf-sidebar-fg)'
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = 'transparent'
+                            e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
+                          }
+                        }}
+                      >
+                        {Icon && <Icon style={{ width: 18, height: 18 }} />}
+                      </button>
+                    )
+                  })}
+                </div>
               ) : (
-                // View mode: grouped rendering with headings
+                // Expanded: grouped rendering with headings
                 partitionScreensByGroups(screens, activeConfig?.sidebar?.groups).map((group, gi) => (
-                  <div key={gi}>
-                    {group.label && !effectiveSidebarCollapsed && (
+                  <div key={gi} style={{ marginBottom: gi < partitionScreensByGroups(screens, activeConfig?.sidebar?.groups).length - 1 ? 8 : 0 }}>
+                    {group.label && (
                       <div style={{
-                        padding: '8px 24px 4px',
+                        padding: '8px 12px 4px',
                         fontSize: 10,
                         fontWeight: 600,
                         textTransform: 'uppercase' as const,
-                        letterSpacing: '0.08em',
+                        letterSpacing: '0.06em',
                         color: 'var(--wf-sidebar-muted)',
                         whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
                       }}>
                         {group.label}
                       </div>
@@ -836,16 +902,21 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 ))
               )}
             </nav>
-            <div
-              style={{
-                padding: '16px 24px',
-                borderTop: '1px solid var(--wf-sidebar-border)',
-              }}
-            >
-              <span style={{ fontSize: 11, color: 'var(--wf-sidebar-muted)', whiteSpace: 'nowrap' }}>
-                {activeConfig?.sidebar?.footer ?? 'Desenvolvido por FXL'}
-              </span>
-            </div>
+
+            {/* Footer */}
+            {!effectiveSidebarCollapsed && (
+              <div
+                style={{
+                  padding: '12px 16px',
+                  borderTop: '1px solid var(--wf-sidebar-border)',
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ fontSize: 10, color: 'var(--wf-sidebar-muted)' }}>
+                  {activeConfig?.sidebar?.footer ?? 'Desenvolvido por FXL'}
+                </span>
+              </div>
+            )}
           </aside>
 
           {/* Area principal */}
@@ -857,18 +928,15 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               flexDirection: 'column',
             }}
           >
-            {user && (
-              <AdminToolbar
-                screenTitle={activeScreen.title}
-                editMode={editMode.active}
-                dirty={editMode.dirty}
-                saving={editMode.saving}
-                onToggleEdit={handleToggleEdit}
-                onSave={handleSave}
-                onOpenComments={handleOpenScreenComments}
-                onOpenShare={() => setShareOpen(true)}
-              />
-            )}
+            {/* Wireframe chrome header — logo, period selector */}
+            <WireframeHeader
+              title={activeScreen.title}
+              periodType={activeScreen.periodType}
+              logoUrl={branding.logoUrl}
+              brandLabel={activeConfig?.label}
+              showLogo={activeConfig?.header?.showLogo}
+              showPeriodSelector={activeConfig?.header?.showPeriodSelector}
+            />
             {staleWarning && (
               <div className="mx-4 mt-2 flex items-center justify-between rounded-md border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm text-yellow-800">
                 <span>Este blueprint foi atualizado externamente. Suas edicoes podem causar conflito ao salvar.</span>

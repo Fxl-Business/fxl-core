@@ -11,15 +11,6 @@ type Props = {
   showLogo?: boolean        // from config.header?.showLogo — defaults true
   // Period selector
   showPeriodSelector?: boolean  // from config.header?.showPeriodSelector — defaults true
-  // User indicator
-  showUserIndicator?: boolean   // from config.header?.showUserIndicator — defaults true
-  userDisplayName?: string      // from Clerk user.fullName or user.firstName
-  userRole?: string             // default 'Operador'
-  // Action buttons
-  onGerenciar?: () => void
-  showManage?: boolean          // from config.header?.actions?.manage — defaults true (shows Gerenciar)
-  onShare?: () => void          // from config.header?.actions?.share — defaults true
-  onExport?: () => void         // from config.header?.actions?.export — defaults false
 }
 
 const MESES = [
@@ -42,16 +33,6 @@ const arrowButtonStyle: React.CSSProperties = {
   outline: 'none',
 }
 
-const buttonStyle: React.CSSProperties = {
-  background: 'transparent',
-  border: '1px solid var(--wf-card-border)',
-  borderRadius: 4,
-  padding: '4px 12px',
-  fontSize: 12,
-  color: 'var(--wf-body)',
-  cursor: 'pointer',
-  fontFamily: 'Inter, sans-serif',
-}
 
 export default function WireframeHeader({
   title,
@@ -60,13 +41,6 @@ export default function WireframeHeader({
   brandLabel,
   showLogo,
   showPeriodSelector,
-  showUserIndicator,
-  userDisplayName,
-  userRole,
-  onGerenciar,
-  showManage,
-  onShare,
-  onExport,
 }: Props) {
   const [mensal, setMensal] = useState({ monthIndex: 0, year: 2026 })
   const [anualYear, setAnualYear] = useState(2025)
@@ -143,65 +117,8 @@ export default function WireframeHeader({
         </div>
       )}
 
-      {/* Right: user chip + action buttons */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
-        {/* User indicator chip */}
-        {(showUserIndicator !== false) && userDisplayName && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '3px 10px',
-            background: 'var(--wf-card-bg)',
-            border: '1px solid var(--wf-card-border)',
-            borderRadius: 20,
-            fontSize: 11,
-            color: 'var(--wf-body)',
-          }}>
-            <span style={{ fontWeight: 600, color: 'var(--wf-heading)' }}>{userDisplayName}</span>
-            <span style={{ color: 'var(--wf-sidebar-muted)' }}>{userRole ?? 'Operador'}</span>
-          </div>
-        )}
-
-        {/* Export button (only when onExport provided) */}
-        {onExport && (
-          <button
-            type="button"
-            onClick={onExport}
-            style={buttonStyle}
-            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-body)' }}
-          >
-            Exportar
-          </button>
-        )}
-
-        {/* Share button */}
-        {onShare && (
-          <button
-            type="button"
-            onClick={onShare}
-            style={buttonStyle}
-            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-body)' }}
-          >
-            Compartilhar
-          </button>
-        )}
-
-        {/* Gerenciar button (conditionally shown) */}
-        {onGerenciar && (showManage !== false) && (
-          <button
-            type="button"
-            onClick={onGerenciar}
-            style={buttonStyle}
-            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-body)' }}
-          >
-            Gerenciar
-          </button>
-        )}
-      </div>
+      {/* Right: empty spacer for balance */}
+      <div style={{ flex: 1 }} />
     </header>
   )
 }

@@ -283,20 +283,16 @@ function CalculoCardPreview() {
 
 function WireframeHeaderPreview() {
   const [periodType, setPeriodType] = useState<'mensal' | 'anual' | 'none'>('mensal')
-  const [showUserIndicator, setShowUserIndicator] = useState(true)
   return (
     <div>
       <PropsToolbar>
         <PropPills label="periodType" options={['mensal', 'anual', 'none']} value={periodType} onChange={setPeriodType} />
-        <PropToggle label="showUserIndicator" value={showUserIndicator} onChange={setShowUserIndicator} />
       </PropsToolbar>
       <div className="overflow-hidden rounded-b-lg border border-border">
         <WireframeHeader
           title={wireframeHeaderMock.title}
           periodType={periodType}
           brandLabel={wireframeHeaderMock.brandLabel}
-          userDisplayName={wireframeHeaderMock.userDisplayName}
-          showUserIndicator={showUserIndicator}
         />
       </div>
     </div>
@@ -387,7 +383,7 @@ const categories: Category[] = [
         name: 'WireframeHeader',
         status: 'available',
         hasToolbar: true,
-        props: ['title', 'periodType?: mensal | anual | none', 'brandLabel?', 'showUserIndicator?', 'userDisplayName?', 'userRole?', 'showManage?'],
+        props: ['title', 'periodType?: mensal | anual | none', 'brandLabel?', 'logoUrl?', 'showLogo?', 'showPeriodSelector?'],
         render: () => <WireframeHeaderPreview />,
         specHref: '/ferramentas/blocos/wireframe-header',
       },

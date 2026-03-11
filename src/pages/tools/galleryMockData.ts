@@ -182,9 +182,6 @@ export const wireframeHeaderMock = {
   title: 'Dashboard Financeiro',
   periodType: 'mensal' as const,
   brandLabel: 'FXL Financeiro',
-  userDisplayName: 'Caué FXL',
-  userRole: 'Operador' as const,
-  showUserIndicator: true,
 }
 
 // WireframeFilterBar
