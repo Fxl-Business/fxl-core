@@ -42,13 +42,13 @@ export default function GaugeChartComponent({
             (i === 0
               ? 'var(--wf-negative)'
               : i === 1
-                ? '#f59e0b'
+                ? 'var(--wf-chart-warn)'
                 : 'var(--wf-positive)'),
         }
       })
     : [
         { value: total * 0.4, fill: 'var(--wf-negative)' },
-        { value: total * 0.3, fill: '#f59e0b' },
+        { value: total * 0.3, fill: 'var(--wf-chart-warn)' },
         { value: total * 0.3, fill: 'var(--wf-positive)' },
       ]
 
