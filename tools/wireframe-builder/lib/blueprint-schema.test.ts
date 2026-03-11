@@ -409,3 +409,18 @@ describe('Phase 18 schema extensions', () => {
     expect(result.success).toBe(true)
   })
 })
+
+describe('Phase 19 — FilterOption all filterType values covered', () => {
+  const allTypes = ['select', 'date-range', 'multi-select', 'search', 'toggle'] as const
+  for (const filterType of allTypes) {
+    it(`accepts filterType: "${filterType}"`, () => {
+      const result = FilterOptionSchema.safeParse({ key: 'f', label: 'F', filterType })
+      expect(result.success).toBe(true)
+    })
+  }
+
+  it('backward compat: accepts FilterOption with no filterType (undefined)', () => {
+    const result = FilterOptionSchema.safeParse({ key: 'f', label: 'F' })
+    expect(result.success).toBe(true)
+  })
+})
