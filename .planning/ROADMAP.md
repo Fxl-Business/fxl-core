@@ -70,7 +70,7 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 
 **Milestone Goal:** Reformular o visual de todos os componentes de wireframe com novo design system (primary blue #1152d4, slate palette, Inter extrabold typography, dark sidebar, group-hover effects, professional financial dashboard aesthetic).
 
-- [ ] **Phase 22: Token Foundation** - Update wireframe-tokens.css and tailwind.config.ts; new palette propagates to ~55 components automatically
+- [x] **Phase 22: Token Foundation** - Update wireframe-tokens.css and tailwind.config.ts; new palette propagates to ~55 components automatically (completed 2026-03-11)
 - [ ] **Phase 23: Sidebar & Header Chrome** - Dark slate sidebar with nav groups and footer; white header with search, notifications, and user chip
 - [ ] **Phase 24: KPI Cards** - Icon slot, group-hover transitions, rounded-full trend badges, extrabold values, optional sparkline
 - [ ] **Phase 25: Table Components** - Tracking-widest font-black headers, dark tfoot row, hover transitions, trend icons across all 4 table variants
@@ -90,7 +90,7 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
   3. --wf-accent-muted uses color-mix() derived from --wf-accent (no hardcoded rgba values remain)
   4. Three new tokens exist and resolve correctly: --wf-header-search-bg, --wf-table-footer-bg, --wf-table-footer-fg
   5. Client branding for financeiro-conta-azul (#1B6B93) still overrides --wf-primary correctly in the wireframe viewer
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 22-01-PLAN.md -- Slate + blue token overhaul, GaugeChart hardcode fix, Tailwind config update
 - [ ] 22-02-PLAN.md -- Branding override pipeline (brandingToWfOverrides + WireframeThemeProvider) and chart palette hook
@@ -197,7 +197,7 @@ Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other 
 | 19. Filter Bar Expansion | v1.3 | 2/2 | Complete | 2026-03-11 |
 | 20. Chart Type Expansion | v1.3 | 4/4 | Complete | 2026-03-11 |
 | 21. Gallery Reorganization | v1.3 | 2/2 | Complete | 2026-03-11 |
-| 22. Token Foundation | 1/2 | In Progress|  | - |
+| 22. Token Foundation | 2/2 | Complete   | 2026-03-11 | - |
 | 23. Sidebar & Header Chrome | v1.4 | TBD | Not started | - |
 | 24. KPI Cards | v1.4 | TBD | Not started | - |
 | 25. Table Components | v1.4 | TBD | Not started | - |
