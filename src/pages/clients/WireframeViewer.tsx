@@ -726,7 +726,17 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
           <WireframeHeader
             title={activeScreen.title}
             periodType={activeScreen.periodType}
+            logoUrl={branding.logoUrl}
+            brandLabel={activeConfig?.label}
+            showLogo={activeConfig?.header?.showLogo}
+            showPeriodSelector={activeConfig?.header?.showPeriodSelector}
+            showUserIndicator={activeConfig?.header?.showUserIndicator}
+            userDisplayName={user?.fullName ?? user?.firstName ?? undefined}
+            userRole="Operador"
             onGerenciar={handleOpenManager}
+            showManage={activeConfig?.header?.actions?.manage}
+            onShare={activeConfig?.header?.actions?.share !== false ? () => setShareOpen(true) : undefined}
+            onExport={activeConfig?.header?.actions?.export ? () => { /* future */ } : undefined}
           />
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
           {/* Sidebar -- uses --wf-sidebar-* tokens with branding overrides */}
@@ -748,25 +758,17 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
           >
             <div
               style={{
-                height: 56,
+                height: 40,
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0 24px',
+                padding: '0 16px',
                 borderBottom: '1px solid var(--wf-sidebar-border)',
                 flexShrink: 0,
               }}
             >
-              {branding.logoUrl ? (
-                <img
-                  src={branding.logoUrl}
-                  alt={config.label}
-                  style={{ maxHeight: 32, maxWidth: 120, objectFit: 'contain' as const }}
-                />
-              ) : (
-                <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
-                  FXL
-                </span>
-              )}
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--wf-sidebar-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' as const }}>
+                {activeConfig?.label ?? 'Dashboard'}
+              </span>
             </div>
             <button
               type="button"
