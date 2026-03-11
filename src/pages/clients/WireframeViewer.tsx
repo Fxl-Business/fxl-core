@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
-import { MessageSquare, Loader2 } from 'lucide-react'
+import { MessageSquare, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useUser } from '@clerk/react'
 import { arrayMove } from '@dnd-kit/sortable'
 import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
@@ -33,12 +33,46 @@ import type {
   BlueprintConfig,
   BlueprintScreen,
   BlueprintSection,
+  SidebarGroup,
 } from '@tools/wireframe-builder/types/blueprint'
 import type { EditModeState, GridLayout, ScreenRow } from '@tools/wireframe-builder/types/editor'
 
 // Dynamic branding import map (extend as clients are added)
 const brandingMap: Record<string, () => Promise<{ default: BrandingConfig }>> = {
   'financeiro-conta-azul': () => import('@clients/financeiro-conta-azul/wireframe/branding.config'),
+}
+
+// ---------------------------------------------------------------------------
+// partitionScreensByGroups -- module-level helper for group rendering
+// ---------------------------------------------------------------------------
+
+type ScreenGroup = {
+  label: string | null
+  screens: { screen: BlueprintScreen; originalIndex: number }[]
+}
+
+function partitionScreensByGroups(
+  screens: BlueprintScreen[],
+  groups?: SidebarGroup[],
+): ScreenGroup[] {
+  if (!groups || groups.length === 0) {
+    return [{ label: null, screens: screens.map((s, i) => ({ screen: s, originalIndex: i })) }]
+  }
+  const grouped: ScreenGroup[] = groups.map((g) => ({
+    label: g.label,
+    screens: g.screenIds
+      .map((id) => {
+        const idx = screens.findIndex((s) => s.id === id)
+        return idx !== -1 ? { screen: screens[idx], originalIndex: idx } : null
+      })
+      .filter((x): x is { screen: BlueprintScreen; originalIndex: number } => x !== null),
+  }))
+  const groupedIds = new Set(groups.flatMap((g) => g.screenIds))
+  const ungrouped = screens
+    .map((s, i) => ({ screen: s, originalIndex: i }))
+    .filter(({ screen }) => !groupedIds.has(screen.id))
+  if (ungrouped.length > 0) grouped.push({ label: null, screens: ungrouped })
+  return grouped.filter((g) => g.screens.length > 0)
 }
 
 /**
@@ -93,6 +127,14 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
   // Share modal
   const [shareOpen, setShareOpen] = useState(false)
+
+  // Sidebar collapse
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const SIDEBAR_EXPANDED = 240
+  const SIDEBAR_COLLAPSED = 56
+  // Auto-expand when edit mode is active (DnD handles require visible items)
+  const effectiveSidebarCollapsed = sidebarCollapsed && !editMode.active
+  const sidebarWidth = effectiveSidebarCollapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED
 
   // Comments
   const [comments, setComments] = useState<Comment[]>([])
@@ -690,8 +732,10 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
           {/* Sidebar -- uses --wf-sidebar-* tokens with branding overrides */}
           <aside
             style={{
-              width: 240,
-              minWidth: 240,
+              width: sidebarWidth,
+              minWidth: sidebarWidth,
+              transition: 'width 150ms ease',
+              overflow: 'hidden',
               background: 'var(--wf-sidebar-bg)',
               color: 'var(--wf-sidebar-fg)',
               display: 'flex',
@@ -724,17 +768,71 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 </span>
               )}
             </div>
+            <button
+              type="button"
+              aria-label={effectiveSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
+              onClick={() => setSidebarCollapsed((c) => !c)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: effectiveSidebarCollapsed ? 'center' : 'flex-end',
+                padding: '6px 12px',
+                width: '100%',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: '1px solid var(--wf-sidebar-border)',
+                color: 'var(--wf-sidebar-muted)',
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              {effectiveSidebarCollapsed
+                ? <ChevronRight style={{ width: 14, height: 14 }} />
+                : <ChevronLeft style={{ width: 14, height: 14 }} />}
+            </button>
             <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
-              <ScreenManager
-                screens={screens}
-                activeIndex={safeActiveIndex}
-                editMode={editMode.active}
-                onSelectScreen={handleScreenSelect}
-                onAddScreen={handleAddScreen}
-                onDeleteScreen={handleDeleteScreen}
-                onRenameScreen={handleRenameScreen}
-                onReorderScreens={handleReorderScreens}
-              />
+              {editMode.active ? (
+                // Edit mode: flat ScreenManager with full DnD
+                <ScreenManager
+                  screens={screens}
+                  activeIndex={safeActiveIndex}
+                  editMode={editMode.active}
+                  onSelectScreen={handleScreenSelect}
+                  onAddScreen={handleAddScreen}
+                  onDeleteScreen={handleDeleteScreen}
+                  onRenameScreen={handleRenameScreen}
+                  onReorderScreens={handleReorderScreens}
+                />
+              ) : (
+                // View mode: grouped rendering with headings
+                partitionScreensByGroups(screens, activeConfig?.sidebar?.groups).map((group, gi) => (
+                  <div key={gi}>
+                    {group.label && !effectiveSidebarCollapsed && (
+                      <div style={{
+                        padding: '8px 24px 4px',
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: 'uppercase' as const,
+                        letterSpacing: '0.08em',
+                        color: 'var(--wf-sidebar-muted)',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {group.label}
+                      </div>
+                    )}
+                    <ScreenManager
+                      screens={group.screens.map((s) => s.screen)}
+                      activeIndex={group.screens.findIndex((s) => s.originalIndex === safeActiveIndex)}
+                      editMode={false}
+                      onSelectScreen={(localIdx) => handleScreenSelect(group.screens[localIdx].originalIndex)}
+                      onAddScreen={handleAddScreen}
+                      onDeleteScreen={(localIdx) => handleDeleteScreen(group.screens[localIdx].originalIndex)}
+                      onRenameScreen={(localIdx, title) => handleRenameScreen(group.screens[localIdx].originalIndex, title)}
+                      onReorderScreens={handleReorderScreens}
+                    />
+                  </div>
+                ))
+              )}
             </nav>
             <div
               style={{
@@ -742,8 +840,8 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 borderTop: '1px solid var(--wf-sidebar-border)',
               }}
             >
-              <span style={{ fontSize: 11, color: 'var(--wf-sidebar-muted)' }}>
-                Desenvolvido por FXL
+              <span style={{ fontSize: 11, color: 'var(--wf-sidebar-muted)', whiteSpace: 'nowrap' }}>
+                {activeConfig?.sidebar?.footer ?? 'Desenvolvido por FXL'}
               </span>
             </div>
           </aside>
@@ -752,7 +850,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
           <main
             style={{
               flex: 1,
-              marginLeft: 240,
+              marginLeft: sidebarWidth,
               display: 'flex',
               flexDirection: 'column',
             }}
