@@ -283,16 +283,11 @@ function CalculoCardPreview() {
 }
 
 function WireframeHeaderPreview() {
-  const [periodType, setPeriodType] = useState<'mensal' | 'anual' | 'none'>('mensal')
   return (
     <div>
-      <PropsToolbar>
-        <PropPills label="periodType" options={['mensal', 'anual', 'none']} value={periodType} onChange={setPeriodType} />
-      </PropsToolbar>
       <div className="overflow-hidden rounded-b-lg border border-border">
         <WireframeHeader
           title={wireframeHeaderMock.title}
-          periodType={periodType}
           brandLabel={wireframeHeaderMock.brandLabel}
         />
       </div>

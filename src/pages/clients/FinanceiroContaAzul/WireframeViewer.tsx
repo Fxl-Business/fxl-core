@@ -750,7 +750,6 @@ export default function FinanceiroWireframeViewer() {
             )}
             <WireframeHeader
               title={activeScreen.title}
-              periodType={activeScreen.periodType}
             />
             <div
               style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}

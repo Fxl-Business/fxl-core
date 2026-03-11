@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { MessageSquare, Moon, Sun, Loader2 } from 'lucide-react'
+import { MessageSquare, Loader2 } from 'lucide-react'
 import { validateToken } from '@tools/wireframe-builder/lib/tokens'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { loadBlueprint as loadBlueprintFromDb } from '@tools/wireframe-builder/lib/blueprint-store'
@@ -10,7 +10,7 @@ import {
   getFontLinks,
   brandingToWfOverrides,
 } from '@tools/wireframe-builder/lib/branding'
-import { WireframeThemeProvider, useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
+import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
 import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'
 import type { BrandingConfig } from '@tools/wireframe-builder/types/branding'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
@@ -464,11 +464,8 @@ export default function SharedWireframeView() {
               height: '100vh',
             }}
           >
-            {/* Theme toggle for shared view */}
-            <SharedThemeToggle />
             <WireframeHeader
               title={activeScreen.title}
-              periodType={activeScreen.periodType}
             />
             <div
               style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}
@@ -562,36 +559,3 @@ function SharedWireframeShell({
   )
 }
 
-// ---------------------------------------------------------------------------
-// Theme toggle for shared/client view
-// ---------------------------------------------------------------------------
-
-function SharedThemeToggle() {
-  const { theme, toggle } = useWireframeTheme()
-
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      style={{
-        position: 'fixed',
-        top: 16,
-        right: 16,
-        zIndex: 40,
-        width: 36,
-        height: 36,
-        borderRadius: '50%',
-        border: '1px solid var(--wf-card-border)',
-        background: 'var(--wf-card)',
-        color: 'var(--wf-body)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        boxShadow: 'none',
-      }}
-    >
-      {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-    </button>
-  )
-}

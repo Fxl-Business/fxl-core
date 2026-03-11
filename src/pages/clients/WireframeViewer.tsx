@@ -931,14 +931,12 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               flexDirection: 'column',
             }}
           >
-            {/* Wireframe chrome header — logo, period selector */}
+            {/* Wireframe chrome header — logo, search, actions, user chip */}
             <WireframeHeader
               title={activeScreen.title}
-              periodType={activeScreen.periodType}
               logoUrl={branding.logoUrl}
               brandLabel={activeConfig?.label}
               showLogo={activeConfig?.header?.showLogo}
-              showPeriodSelector={activeConfig?.header?.showPeriodSelector}
             />
             {staleWarning && (
               <div className="mx-4 mt-2 flex items-center justify-between rounded-md border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm text-yellow-800">
