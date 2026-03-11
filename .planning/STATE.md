@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Builder & Components
 status: planning
-stopped_at: "Completed 17-03-PLAN.md (schema extensions: FilterOption filterType, SidebarConfig, HeaderConfig)"
-last_updated: "2026-03-11T03:10:56.676Z"
+stopped_at: "Completed 17-02-PLAN.md (layout restructure: full-width header above sidebar, Gerenciar moved to header)"
+last_updated: "2026-03-11T03:15:22.263Z"
 last_activity: 2026-03-10 -- Roadmap created for v1.3 (5 phases, 26 requirements mapped)
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -57,6 +57,8 @@ v1.3 architectural decisions (from research):
 - [Phase 17-schema-foundation-layout-restructure]: FilterOptionSchema exported (was unexported) to enable direct unit testing
 - [Phase 17-schema-foundation-layout-restructure]: HeaderConfigSchema uses z.object({}).passthrough() for forward-compat — Phase 18 can add fields without this schema becoming a breaking-change boundary
 - [Phase 17-schema-foundation-layout-restructure]: HeaderConfig TS type is Record<string, unknown> (not Record<string, never>) for same forward-compat reason as passthrough()
+- [Phase 17-schema-foundation-layout-restructure]: WireframeHeader height constant 56px used as sidebar top offset — keeps both in sync via shared mental model (no CSS variable needed)
+- [Phase 17-schema-foundation-layout-restructure]: Gerenciar button moved to WireframeHeader via optional onGerenciar prop — cleaner separation of concerns, sidebar footer now only shows branding text
 
 ### Pending Todos
 
@@ -79,6 +81,7 @@ None active.
 | 7 | Fix client sidebar order and open Wireframe in new tab | 2026-03-10 | 454dad7 | [7-fix-client-sidebar-order-and-open-wirefr](./quick/7-fix-client-sidebar-order-and-open-wirefr/) |
 | Phase 17-schema-foundation-layout-restructure P01 | 3 | 1 tasks | 2 files |
 | Phase 17-schema-foundation-layout-restructure P03 | 2 | 2 tasks | 4 files |
+| Phase 17-schema-foundation-layout-restructure P02 | 2 | 3 tasks | 2 files |
 
 ### Roadmap Evolution
 
@@ -95,6 +98,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-11T03:10:56.672Z
-Stopped at: Completed 17-03-PLAN.md (schema extensions: FilterOption filterType, SidebarConfig, HeaderConfig)
+Last session: 2026-03-11T03:15:22.260Z
+Stopped at: Completed 17-02-PLAN.md (layout restructure: full-width header above sidebar, Gerenciar moved to header)
 Next: `/gsd:plan-phase 17` (Schema Foundation & Layout Restructure)

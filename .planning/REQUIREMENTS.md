@@ -13,8 +13,8 @@ Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
 
 ### Layout
 
-- [ ] **LAYOUT-01**: Header renderiza acima da sidebar (full-width, highest z-order)
-- [ ] **LAYOUT-02**: "Gerenciar" move da sidebar para header como action button
+- [x] **LAYOUT-01**: Header renderiza acima da sidebar (full-width, highest z-order)
+- [x] **LAYOUT-02**: "Gerenciar" move da sidebar para header como action button
 
 ### Sidebar
 
@@ -96,8 +96,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | VIS-01 | Phase 17 | Complete |
-| LAYOUT-01 | Phase 17 | Pending |
-| LAYOUT-02 | Phase 17 | Pending |
+| LAYOUT-01 | Phase 17 | Complete |
+| LAYOUT-02 | Phase 17 | Complete |
 | SIDE-01 | Phase 17 | Complete |
 | SIDE-02 | Phase 18 | Pending |
 | SIDE-03 | Phase 18 | Pending |
