@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: completed
-stopped_at: Completed 27-chart-palette-composition-01-PLAN.md
-last_updated: "2026-03-11T20:37:25.468Z"
+stopped_at: Completed 28-editor-sync-gallery-validation-01-PLAN.md
+last_updated: "2026-03-11T22:23:56.633Z"
 last_activity: "2026-03-11 -- Phase 27-01 complete (15 chart components restyled: rounded-xl containers, font-bold titles, custom dot legends, activeBar opacity)"
 progress:
   total_phases: 7
   completed_phases: 6
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 12
+  completed_plans: 11
   percent: 100
 ---
 
@@ -80,6 +80,8 @@ v1.4 architectural decisions (from research):
 - [Phase 27-chart-palette-composition]: CompositionBar uses style={{ backgroundColor }} with var(--wf-chart-N) values — bg-wf-chart-N Tailwind classes do not exist
 - [Phase 27-chart-palette-composition]: Default formatValue shows percentage relative to total; fully overridable via prop
 - [Phase 27-chart-palette-composition]: [Phase 27-01]: WaterfallChart hidden Legend (display: none) preserved — required for Recharts internal tooltip pairing in compareMode
+- [Phase 28]: [Phase 28-01]: GalleryContent split into separate component to allow GalleryThemeToggle to use useWireframeTheme() inside single provider scope
+- [Phase 28]: [Phase 28-01]: Branding toggle shares localStorage key fxl_wf_theme — acceptable for dev validation tool
 
 ### Pending Todos
 
@@ -91,6 +93,6 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-11T20:33:30.708Z
-Stopped at: Completed 27-chart-palette-composition-01-PLAN.md
+Last session: 2026-03-11T22:23:56.630Z
+Stopped at: Completed 28-editor-sync-gallery-validation-01-PLAN.md
 Next: Phase 27 (if planned) or milestone complete

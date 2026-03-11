@@ -66,11 +66,11 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 
 ### Editor Sync
 
-- [ ] **EDIT-01**: ScreenManager sidebar styling matches the new wireframe sidebar visual
+- [x] **EDIT-01**: ScreenManager sidebar styling matches the new wireframe sidebar visual
 
 ### Gallery
 
-- [ ] **GAL-01**: All gallery component previews reflect the new visual design
+- [x] **GAL-01**: All gallery component previews reflect the new visual design
 - [ ] **GAL-02**: Gallery validation checklist: dark mode toggle pass, branding-applied check, all 6 sections verified
 
 ## Future Requirements
@@ -131,8 +131,8 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 | CHRT-03 | Phase 27 | Complete |
 | CHRT-04 | Phase 27 | Complete |
 | CHRT-05 | Phase 27 | Complete |
-| EDIT-01 | Phase 28 | Pending |
-| GAL-01 | Phase 28 | Pending |
+| EDIT-01 | Phase 28 | Complete |
+| GAL-01 | Phase 28 | Complete |
 | GAL-02 | Phase 28 | Pending |
 
 **Coverage:**
