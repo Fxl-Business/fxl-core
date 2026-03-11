@@ -34,11 +34,11 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 
 ### Filter Bar
 
-- [ ] **FILT-01**: Filter bar is sticky with backdrop-blur and semi-transparent background
-- [ ] **FILT-02**: Filter selects use transparent background with bold primary text and no border
-- [ ] **FILT-03**: Filter labels use 10px uppercase bold slate-500 style
-- [ ] **FILT-04**: Action buttons (date picker, share, export) use rounded-lg with specific button hierarchy (outline vs filled)
-- [ ] **FILT-05**: Compare toggle uses primary-colored switch with 11px bold label
+- [x] **FILT-01**: Filter bar is sticky with backdrop-blur and semi-transparent background
+- [x] **FILT-02**: Filter selects use transparent background with bold primary text and no border
+- [x] **FILT-03**: Filter labels use 10px uppercase bold slate-500 style
+- [x] **FILT-04**: Action buttons (date picker, share, export) use rounded-lg with specific button hierarchy (outline vs filled)
+- [x] **FILT-05**: Compare toggle uses primary-colored switch with 11px bold label
 
 ### Cards
 
@@ -111,11 +111,11 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 | HEAD-02 | Phase 23 | Complete |
 | HEAD-03 | Phase 23 | Complete |
 | HEAD-04 | Phase 23 | Complete |
-| FILT-01 | Phase 26 | Pending |
-| FILT-02 | Phase 26 | Pending |
-| FILT-03 | Phase 26 | Pending |
-| FILT-04 | Phase 26 | Pending |
-| FILT-05 | Phase 26 | Pending |
+| FILT-01 | Phase 26 | Complete |
+| FILT-02 | Phase 26 | Complete |
+| FILT-03 | Phase 26 | Complete |
+| FILT-04 | Phase 26 | Complete |
+| FILT-05 | Phase 26 | Complete |
 | CARD-01 | Phase 24 | Complete |
 | CARD-02 | Phase 24 | Complete |
 | CARD-03 | Phase 24 | Complete |
