@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { CheckCircle2, Clock, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
+import { WireframeThemeProvider, useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
+import { brandingToWfOverrides } from '@tools/wireframe-builder/lib/branding'
+import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'
 
 import KpiCard from '@tools/wireframe-builder/components/KpiCard'
 import KpiCardFull from '@tools/wireframe-builder/components/KpiCardFull'
@@ -645,13 +647,11 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
         <div className="border-t border-border px-5 py-4 space-y-3">
           {isAvailable && entry.render ? (
             entry.hasToolbar ? (
-              <WireframeThemeProvider>{entry.render()}</WireframeThemeProvider>
+              entry.render()
             ) : (
-            <WireframeThemeProvider>
               <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
                 {entry.render()}
               </div>
-            </WireframeThemeProvider>
             )
           ) : (
             <div className="flex items-center justify-center rounded-lg border border-dashed border-border bg-muted px-6 py-10">
@@ -695,7 +695,23 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
   )
 }
 
-export default function ComponentGallery() {
+function GalleryThemeToggle() {
+  const { theme, toggle } = useWireframeTheme()
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      className={cn(
+        'rounded-full px-4 py-1.5 text-xs font-medium transition-colors',
+        'bg-muted text-muted-foreground hover:bg-muted/80',
+      )}
+    >
+      {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+    </button>
+  )
+}
+
+function GalleryContent({ showBranding, setShowBranding }: { showBranding: boolean; setShowBranding: (v: boolean) => void }) {
   const [activeCategory, setActiveCategory] = useState('all')
 
   const filtered = activeCategory === 'all'
@@ -751,6 +767,22 @@ export default function ComponentGallery() {
             </span>
           </button>
         ))}
+
+        <div className="ml-auto flex items-center gap-2">
+          <GalleryThemeToggle />
+          <button
+            type="button"
+            onClick={() => setShowBranding(!showBranding)}
+            className={cn(
+              'rounded-full px-4 py-1.5 text-xs font-medium transition-colors',
+              showBranding
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80',
+            )}
+          >
+            {showBranding ? 'Branding: ON' : 'Branding: OFF'}
+          </button>
+        </div>
       </div>
 
       {filtered.map((category) => (
@@ -768,3 +800,17 @@ export default function ComponentGallery() {
     </div>
   )
 }
+
+export default function ComponentGallery() {
+  const [showBranding, setShowBranding] = useState(false)
+  const wfOverrides = showBranding
+    ? brandingToWfOverrides({ ...DEFAULT_BRANDING, primaryColor: '#1B6B93' })
+    : undefined
+
+  return (
+    <WireframeThemeProvider wfOverrides={wfOverrides}>
+      <GalleryContent showBranding={showBranding} setShowBranding={setShowBranding} />
+    </WireframeThemeProvider>
+  )
+}
+
