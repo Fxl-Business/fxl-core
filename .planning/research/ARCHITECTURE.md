@@ -1,585 +1,564 @@
-# Architecture Research: v1.3 Builder & Components Integration
+# Architecture Research: v1.4 Wireframe Visual Redesign
 
-**Domain:** Wireframe builder expansion (sidebar/header/filter as blueprint items, 20+ chart types, gallery reorganization)
-**Researched:** 2026-03-10
-**Confidence:** HIGH (based on complete codebase analysis of existing section registry, BlueprintConfig schema, renderer pipeline, and component gallery)
+**Domain:** CSS token system migration — warm stone + gold to slate + primary blue
+**Researched:** 2026-03-11
+**Confidence:** HIGH (based on direct codebase inspection, all findings code-verified)
 
-## System Overview: Current Architecture
+---
+
+## System Overview
 
 ```
-BlueprintConfig (Supabase DB)
-    |
-    v
-BlueprintScreen[] -----> WireframeViewer (page-level)
-    |                         |
-    |                    +----|----+----------+
-    |                    |         |          |
-    |               AdminToolbar  WireframeHeader  Sidebar (hardcoded aside)
-    |                              (hardcoded)      (ScreenManager)
-    |
-    v
-ScreenRow[] (id + GridLayout + sections[])
-    |
-    v
-BlueprintRenderer -----> DndContext + SortableContext
-    |                         |
-    |                    WireframeFilterBar (conditional, from screen.filters)
-    |
-    v
-SectionRenderer -----> SECTION_REGISTRY[type].renderer
-    |                         |
-    |                    ChartRenderer (dispatches chartType sub-variants)
-    |                    TableRenderer
-    |                    InputRenderer
-    |                    ...14 other renderers
-    v
-PropertyPanel -----> SECTION_REGISTRY[type].propertyForm
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Token Definition Layer                            │
+│  wireframe-tokens.css  -- [data-wf-theme="light|dark"]              │
+│  45 CSS variables: --wf-neutral-*, --wf-canvas, --wf-card,          │
+│  --wf-accent (gold), --wf-sidebar-*, --wf-chart-1..5                │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           | sets data-wf-theme attribute
+┌──────────────────────────v──────────────────────────────────────────┐
+│                    Theme Provider Layer                              │
+│  wireframe-theme.tsx  -- WireframeThemeProvider                     │
+│  Reads localStorage(fxl_wf_theme), wraps children in                │
+│  <div data-wf-theme={theme}>. Exposes toggle() + setTheme().        │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           | provides context
+┌──────────────────────────v──────────────────────────────────────────┐
+│                    Tailwind Alias Layer                              │
+│  tailwind.config.ts  -- wf.* color map                              │
+│  bg-wf-card, text-wf-heading, border-wf-card-border, etc.           │
+│  Maps Tailwind class names to CSS var() references                   │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           | consumed by
+┌──────────────────────────v──────────────────────────────────────────┐
+│                    Component Layer (85 files)                        │
+│  Pattern A: Tailwind classes  -- bg-wf-card, text-wf-heading        │
+│  Pattern B: inline style      -- style={{ color: 'var(--wf-body)' }}│
+│  Pattern C: color-mix()       -- for semi-transparent fills         │
+│  7 files use Pattern C (KpiCard, KpiCardFull, StatCard, Progress,   │
+│  ManualInput, CalculoCard, Waterfall)                                │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           | branding override injected here
+┌──────────────────────────v──────────────────────────────────────────┐
+│                    Branding Override Layer                           │
+│  branding.ts  -- brandingToCssVars() injects --brand-chart-1..5     │
+│  getChartPalette() returns hex[] for recharts Cell fill              │
+│  brandingToWfOverrides() currently returns {} (intentional no-op)   │
+│  --brand-* vars used by chart components via chartColors? prop       │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Current Component Responsibilities
+---
 
-| Component | Responsibility | Current Implementation |
-|-----------|----------------|------------------------|
-| `WireframeViewer` | Page-level orchestrator | Hardcodes sidebar `<aside>`, `WireframeHeader`, `AdminToolbar` layout |
-| `BlueprintRenderer` | Renders ScreenRow grid + sections | Receives `screen` prop, shows `WireframeFilterBar` inline if filters exist |
-| `SectionRenderer` | Dispatches to correct renderer via registry | Lookup `SECTION_REGISTRY[type].renderer`, passes through props |
-| `ChartRenderer` | Routes chart section to correct chart component | Switch on `section.type` then `section.chartType` for bar-line variants |
-| `SECTION_REGISTRY` | Single source of truth for all 21 section types | Maps type -> renderer, propertyForm, catalogEntry, defaultProps, schema |
-| `ComponentPicker` | Add-section dialog in editor | Uses `getCatalog()` from registry, groups by `catalogEntry.category` |
-| `ComponentGallery` | Standalone page showing all components | Hardcoded `categories[]` array with manual imports and mock data |
-| `WireframeHeader` | Period navigation (month/year arrows) | Hardcoded in WireframeViewer layout, not a blueprint item |
-| `WireframeSidebar` | Gallery-only preview component | NOT used in WireframeViewer (sidebar is hardcoded there) |
-| `WireframeFilterBar` | Filter dropdowns + compare switch | Rendered conditionally inside BlueprintRenderer from `screen.filters` |
-| `AdminToolbar` | Edit/save/share/comments/theme toggle | Fixed bar above WireframeHeader in WireframeViewer |
+## Token Inventory: Current vs Target
 
-## Integration Analysis: Three Key Changes
+### Neutral Scale — Full Value Replace (0 component files affected)
 
-### 1. Sidebar/Header/Filter Bar as Configurable Blueprint Items
+Current tokens use Tailwind Stone (warm grays). Target uses Slate (cool blue-grays).
+All 10 neutral vars need value updates. Names stay identical — zero component edits.
 
-**Current state:** The WireframeViewer (line 672-837) hardcodes the layout shell:
-- Sidebar `<aside>` at fixed 240px with ScreenManager + branding logo
-- WireframeHeader with period navigation
-- WireframeFilterBar rendered conditionally inside BlueprintRenderer
+| Token | Current (Stone) | Target (Slate) |
+|-------|-----------------|----------------|
+| `--wf-neutral-50` | `#fafaf9` | `#f8fafc` |
+| `--wf-neutral-100` | `#f5f5f4` | `#f1f5f9` |
+| `--wf-neutral-200` | `#e7e5e4` | `#e2e8f0` |
+| `--wf-neutral-300` | `#d6d3d1` | `#cbd5e1` |
+| `--wf-neutral-400` | `#a8a29e` | `#94a3b8` |
+| `--wf-neutral-500` | `#78716c` | `#64748b` |
+| `--wf-neutral-600` | `#57534e` | `#475569` |
+| `--wf-neutral-700` | `#44403c` | `#334155` |
+| `--wf-neutral-800` | `#292524` | `#1e293b` |
+| `--wf-neutral-900` | `#1c1917` | `#0f172a` |
 
-**Target state:** These become configurable at the BlueprintConfig level, allowing each blueprint to define its own sidebar style, header behavior, and filter bar configuration.
+Components reference semantic tokens (`--wf-card`, `--wf-heading`), not neutral scale directly.
+Updating 10 values automatically propagates to all semantic aliases.
 
-**Recommended approach: Layout config at BlueprintConfig level, NOT as section types.**
+### Semantic Tokens — Value Update Only (0 component files affected)
 
-Sidebar, header, and filter bar are fundamentally different from content sections. They are **shell/chrome elements** that wrap all screens, not content that lives inside a screen's sections array. Treating them as section types would be architecturally wrong because:
+| Token | Current Mapping | Target Value |
+|-------|-----------------|-------------|
+| `--wf-canvas` | `--wf-neutral-100` alias | `#f6f6f8` (light) / `#101622` (dark) — direct hex, not alias |
+| `--wf-card` | `--wf-neutral-50` alias | `#ffffff` (light) / `#1a2236` (dark) — direct hex |
+| `--wf-card-border` | `--wf-neutral-200` alias | inherits from updated neutral-200 |
+| `--wf-heading` | `--wf-neutral-700` alias | inherits from updated neutral-700 |
+| `--wf-body` | `--wf-neutral-600` alias | inherits from updated neutral-600 |
+| `--wf-muted` | `--wf-neutral-400` alias | inherits from updated neutral-400 |
+| `--wf-border` | alias of `--wf-card-border` | keep alias pattern |
+| `--wf-positive` | `#16a34a` | keep — green-600 is appropriate |
+| `--wf-negative` | `#dc2626` | keep — red-600 is appropriate |
 
-1. They do not belong in `screen.sections[]` -- a sidebar wraps all screens, not one screen
-2. They have different rendering contexts (fixed position, outside the scroll area)
-3. They need different property forms (screen list is a sidebar concern, not a section concern)
+Note: `--wf-canvas` and `--wf-card` should be set to direct hex values rather than neutral aliases.
+The HTML reference uses `#f6f6f8` and `#ffffff` specifically, which don't exactly match slate-100/50.
 
-**Recommended schema change -- add `layout` config to `BlueprintConfig`:**
+### Accent — Replace Gold with Primary Blue (values only, 0 component renames)
+
+This is the highest-impact single change. `--wf-accent` (gold `#d4a017`) is referenced in
+10 component files. They all consume it via Tailwind class or `var()` reference — changing
+the CSS value propagates to all automatically.
+
+| Token | Current | Target |
+|-------|---------|--------|
+| `--wf-accent` | `#d4a017` (gold) | `#1152d4` (primary blue) |
+| `--wf-accent-muted` | `rgba(212,160,23, 0.12)` static | `color-mix(in srgb, var(--wf-accent) 12%, transparent)` |
+| `--wf-accent-fg` | `#78590a` (dark gold) | `#0e3fa8` (dark blue, light mode) |
+| `--wf-accent-fg` dark | `#fef3c7` (amber-50) | `#93b4ff` (light blue, dark mode) |
+
+Converting `--wf-accent-muted` from a static `rgba()` to a `color-mix()` form ensures it
+automatically tracks future accent color changes. This is a pure CSS change affecting 0 components
+(the formula resolves identically at runtime).
+
+### Sidebar Tokens — Value Update Only (0 component renames)
+
+The sidebar shifts from warm dark stone to true slate-950. `--wf-sidebar-active` inherits
+the accent change automatically since it aliases `--wf-accent`.
+
+| Token | Current | Target |
+|-------|---------|--------|
+| `--wf-sidebar-bg` | `--wf-neutral-800` (warm `#292524`) | `#0f172a` (slate-950) |
+| `--wf-sidebar-fg` | `--wf-neutral-50` | `#f1f5f9` (slate-100) |
+| `--wf-sidebar-active` | `--wf-accent` (gold) | `--wf-accent` (now blue — inherits) |
+| `--wf-sidebar-muted` | `--wf-neutral-400` | `#64748b` (slate-500) — direct hex |
+| `--wf-sidebar-border` | `--wf-neutral-700` | `#1e293b` (slate-800) — direct hex |
+
+### Header Tokens — Keep Existing, Add 1 New Token
+
+| Token | Status | Target Value |
+|-------|--------|-------------|
+| `--wf-header-bg` | Keep | `#ffffff` (light) / `#1a2236` (dark) |
+| `--wf-header-border` | Keep | inherits `--wf-card-border` |
+| `--wf-header-search-bg` | **NEW** | `#f6f6f8` (light) / `#0f172a` (dark) |
+
+`--wf-header-search-bg` is the only structurally new token needed for the header redesign.
+The notification bell, user chip, and dark mode toggle use existing semantic tokens.
+
+### Table Tokens — Keep Existing, Add 2 New Tokens
+
+| Token | Status | Change |
+|-------|--------|--------|
+| `--wf-table-header-bg` | Keep | Value update (lighter in new design) |
+| `--wf-table-header-fg` | Keep | Value update (tracking-widest style is already in component) |
+| `--wf-table-row-alt` | Keep | Value update |
+| `--wf-table-border` | Keep | Value update |
+| `--wf-table-footer-bg` | **NEW** | `#1e293b` (slate-800 dark footer row) |
+| `--wf-table-footer-fg` | **NEW** | `#f1f5f9` (slate-100 text on dark footer) |
+
+### Chart Palette — Full Value Replace (0 component files affected)
+
+Current: gold/amber monochromatic. Target: primary blue + slate/indigo scale.
+
+| Token | Current | Target |
+|-------|---------|--------|
+| `--wf-chart-1` | `#d4a017` (gold) | `#1152d4` (primary blue) |
+| `--wf-chart-2` | `#b45309` (amber) | `#3b82f6` (blue-500) |
+| `--wf-chart-3` | `#92400e` (deep amber) | `#6366f1` (indigo-500) |
+| `--wf-chart-4` | `#78716c` (neutral-500) | `#0ea5e9` (sky-500) |
+| `--wf-chart-5` | `#57534e` (neutral-600) | `#64748b` (slate-500) |
+
+All 9 chart components reference `var(--wf-chart-*)` in their Recharts `<Cell fill>` or
+as a COLORS array. The value update propagates automatically.
+
+### New Tokens Summary
+
+Three new tokens must be added to `wireframe-tokens.css` AND registered in `tailwind.config.ts`:
+
+| Token | Light | Dark | Tailwind Key |
+|-------|-------|------|-------------|
+| `--wf-header-search-bg` | `#f6f6f8` | `#0f172a` | `wf.header-search-bg` |
+| `--wf-table-footer-bg` | `#1e293b` | `#0f172a` | `wf.table-footer` (DEFAULT) |
+| `--wf-table-footer-fg` | `#f1f5f9` | `#f1f5f9` | `wf.table-footer.fg` |
 
 ```typescript
-// NEW: Layout configuration at blueprint level
-export type SidebarConfig = {
-  variant: 'standard' | 'compact' | 'icon-only' | 'none'
-  position: 'left' | 'right'
-  width?: number           // default: 240
-  showLogo?: boolean       // default: true
-  showFooter?: boolean     // default: true
-  sections?: SidebarSection[]  // optional custom grouping of screens
-}
-
-export type SidebarSection = {
-  label: string
-  screenIds: string[]  // references to screen.id values
-}
-
-export type HeaderConfig = {
-  variant: 'standard' | 'compact' | 'minimal' | 'none'
-  showPeriodNav?: boolean  // default: true (respects screen.periodType)
-  showBreadcrumb?: boolean
-  position: 'above-sidebar' | 'beside-sidebar'  // controls z-layer
-}
-
-export type FilterBarConfig = {
-  variant: 'inline' | 'sticky' | 'drawer' | 'none'
-  position: 'below-header' | 'in-content'
-}
-
-// MODIFIED: BlueprintConfig gets layout field
-export type BlueprintConfig = {
-  slug: string
-  label: string
-  schemaVersion?: number
-  layout?: {
-    sidebar?: SidebarConfig
-    header?: HeaderConfig
-    filterBar?: FilterBarConfig
-  }
-  screens: BlueprintScreen[]
-}
+// tailwind.config.ts — additions to wf: block
+'header-search-bg': 'var(--wf-header-search-bg)',
+'table-footer': {
+  DEFAULT: 'var(--wf-table-footer-bg)',
+  fg: 'var(--wf-table-footer-fg)',
+},
 ```
 
-**Why this approach:**
-- Layout config is a blueprint-level concern, not a per-screen concern
-- Each field has sensible defaults, so existing blueprints with no `layout` field continue working unchanged (backward compatible)
-- The WireframeViewer reads `config.layout?.sidebar`, `config.layout?.header`, etc. and passes to configurable components
-- Schema migration `v1 -> v2` adds `layout: undefined` (no-op, defaults kick in)
-- Zod schema extension is additive (`.optional()` fields)
+---
 
-**Files that need modification:**
+## Styling Pattern Analysis
 
-| File | Change | Type |
-|------|--------|------|
-| `types/blueprint.ts` | Add `SidebarConfig`, `HeaderConfig`, `FilterBarConfig`, `LayoutConfig` types; add `layout?` to `BlueprintConfig` | Modified |
-| `lib/blueprint-schema.ts` | Add Zod schemas for layout config types; extend `BlueprintConfigSchema` | Modified |
-| `lib/blueprint-migrations.ts` | Add v1->v2 migrator (set schemaVersion: 2, layout: undefined) | Modified |
-| `WireframeViewer.tsx` | Extract hardcoded sidebar/header into configurable components; read `config.layout` | Modified |
-| `WireframeHeader.tsx` | Accept `HeaderConfig` props for variant/position control | Modified |
-| `WireframeSidebar.tsx` | Rewrite to accept `SidebarConfig` + screens + branding, replace hardcoded aside | Modified |
-| `components/editor/LayoutConfigPanel.tsx` | New property panel for editing layout config | **New** |
-| `AdminToolbar.tsx` | Add "Layout" button to open LayoutConfigPanel | Modified |
+Three distinct patterns exist across the 85 component files. Migration surface per pattern:
 
-### 2. Expanding Chart Types via the Section Registry
+### Pattern A: Tailwind wf-* Classes (majority — ~38 files)
 
-**Current state:** 9 chart variants exist across 5 section types:
-- `bar-line-chart` section with `chartType: 'bar' | 'line' | 'bar-line' | 'radar' | 'treemap' | 'funnel' | 'scatter' | 'area'` (8 sub-variants)
-- `donut-chart` section (1 type)
-- `waterfall-chart` section (1 type)
-- `pareto-chart` section (1 type)
-- Total: 5 section types, but `bar-line-chart` is overloaded with 8 chartType sub-variants
+```tsx
+// KpiCard.tsx, DataTable.tsx, DonutChart.tsx, KpiCardFull.tsx
+<div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
+  <p className="text-xs font-medium text-wf-muted">{label}</p>
+  <p className="text-2xl font-bold text-wf-heading">{value}</p>
+```
 
-**Available Recharts 2.15.4 chart primitives:**
-- `BarChart`, `LineChart`, `AreaChart` -- cartesian, composable
-- `ComposedChart` -- mixed bar+line+area
-- `PieChart` -- pie/donut
-- `RadarChart` -- polar/spider
-- `ScatterChart` -- x/y scatter
-- `FunnelChart` -- funnel
-- `Treemap` -- hierarchical
-- `RadialBarChart` -- circular bars (gauges)
-- `SunburstChart` -- hierarchical pie
-- `Sankey` -- flow diagrams
+**Migration impact for color changes: zero.** Token values update in CSS, Tailwind aliases
+stay identical. Classes like `bg-wf-card`, `text-wf-heading`, `border-wf-card-border`
+resolve to the updated token values automatically.
 
-**Problem with current design:** The `bar-line-chart` section type is a "god section" that overloads 8 different chart types into one discriminated type. Adding more chart types (radial bar, sunburst, sankey, composed, stacked, grouped, horizontal) into this same type makes the overloading worse. The ChartRenderer switch statement grows unbounded.
+### Pattern B: Inline style with var() (~18 files)
 
-**Recommended approach: Keep the existing `bar-line-chart` overloaded pattern, but introduce new top-level section types only for charts with fundamentally different data shapes.**
+```tsx
+// WireframeHeader.tsx, WireframeFilterBar.tsx, StatCardRenderer.tsx
+style={{
+  background: 'var(--wf-header-bg)',
+  borderBottom: '1px solid var(--wf-header-border)',
+  color: 'var(--wf-body)',
+}}
+```
 
-Rationale: Charts that share the same data model (x-axis categories, y-axis values) should stay in the `bar-line-chart` family. Charts with unique data shapes deserve their own section type.
+**Migration impact for color changes: zero.** Token values update in CSS. Inline
+`var()` references resolve to new values automatically. Impact only when the component
+needs JSX restructuring to implement new design patterns (new search input, bell icon, etc.).
 
-**Chart type taxonomy for v1.3:**
+### Pattern C: color-mix() for fills (7 files)
 
-| Chart | Data Shape | Section Type | Status | Implementation |
-|-------|-----------|--------------|--------|----------------|
-| Bar | categories + values | `bar-line-chart` (chartType: 'bar') | Exists | BarLineChart component |
-| Line | categories + values | `bar-line-chart` (chartType: 'line') | Exists | BarLineChart component |
-| Bar+Line | categories + dual values | `bar-line-chart` (chartType: 'bar-line') | Exists | BarLineChart component |
-| Area | categories + values | `bar-line-chart` (chartType: 'area') | Exists | AreaChartComponent |
-| Stacked Bar | categories + multi-series | `bar-line-chart` (chartType: 'stacked-bar') | **New sub-type** | New component |
-| Grouped Bar | categories + multi-series | `bar-line-chart` (chartType: 'grouped-bar') | **New sub-type** | New component |
-| Horizontal Bar | categories + values | `bar-line-chart` (chartType: 'horizontal-bar') | **New sub-type** | New component |
-| Stacked Area | categories + multi-series | `bar-line-chart` (chartType: 'stacked-area') | **New sub-type** | New component |
-| Multi-Line | categories + multi-series | `bar-line-chart` (chartType: 'multi-line') | **New sub-type** | New component |
-| Radar | categories + values (polar) | `bar-line-chart` (chartType: 'radar') | Exists | RadarChartComponent |
-| Treemap | hierarchical blocks | `bar-line-chart` (chartType: 'treemap') | Exists | TreemapComponent |
-| Funnel | ordered stages | `bar-line-chart` (chartType: 'funnel') | Exists | FunnelChartComponent |
-| Scatter | x/y pairs | `bar-line-chart` (chartType: 'scatter') | Exists | ScatterChartComponent |
-| Donut | label/value slices | `donut-chart` | Exists | DonutChart component |
-| Pie | label/value slices | `donut-chart` (variant prop) | **New variant** | DonutChart with innerRadius=0 |
-| Waterfall | labeled bars +/- | `waterfall-chart` | Exists | WaterfallChart component |
-| Pareto | bars + cumulative line | `pareto-chart` | Exists | ParetoChart component |
-| Radial Bar | circular progress bars | `radial-bar-chart` | **New section type** | **New** component + registry entry |
-| Gauge | single-value semicircle | `gauge-chart` | **New section type** | **New** component + registry entry |
-| Sankey | flow/node links | `sankey-chart` | **New section type** | **New** component + registry entry |
-| Sunburst | hierarchical pie | `sunburst-chart` | **New section type** | **New** component + registry entry |
-| Bullet | target vs actual bar | `bullet-chart` | **New section type** | **New** component (custom, not native Recharts) |
-| Sparkline (inline) | mini trend line | (embedded in KpiCard) | Exists | sparkline prop on KpiCard |
+```tsx
+// KpiCardFull.tsx, StatCardRenderer.tsx, ProgressBarRenderer.tsx
+backgroundColor: variationPositive
+  ? 'color-mix(in srgb, var(--wf-positive) 10%, transparent)'
+  : 'color-mix(in srgb, var(--wf-negative) 10%, transparent)',
+```
 
-**New chartType values for `bar-line-chart`:** `'stacked-bar' | 'grouped-bar' | 'horizontal-bar' | 'stacked-area' | 'multi-line'`
+**Migration impact: zero.** The `color-mix()` function resolves at runtime using the
+updated token values automatically. These 7 files require no edits for color changes.
 
-**New section types (unique data shapes, 5 total):**
+---
+
+## Component Migration Surface by Category
+
+### Category 1: Zero-edit components (token values update, components unchanged)
+
+All 9+ chart components (BarLineChart, DonutChart, AreaChart, StackedBar, StackedArea,
+HorizontalBar, Scatter, Bubble, Composed, Funnel, Radar, Treemap, Waterfall, Pareto, Gauge):
+use `var(--wf-chart-*)` in COLORS arrays or Cell fill — value change propagates automatically.
+
+All form/input components: ManualInputSection, SaldoBancoInput, InputsScreen, UploadSection.
+All section renderers without new behavior: DividerRenderer, InfoBlockRenderer, FilterConfigRenderer.
+All 17 property-form files: use app shadcn/ui tokens, not wf-* tokens at all.
+
+**Count: ~55 files require zero edits.**
+
+### Category 2: Layout restructure required (new JSX, same token names)
+
+Token names are preserved throughout. These components need structural JSX changes to
+implement the new design patterns from the HTML reference.
+
+| Component | Required Change | Tokens Involved |
+|-----------|-----------------|-----------------|
+| `WireframeSidebar.tsx` | Add grouped sections, icons, status footer | `wf-sidebar-*` (unchanged names) |
+| `WireframeHeader.tsx` | Add search input, bell icon, dark mode toggle, user chip | Existing + new `--wf-header-search-bg` |
+| `WireframeFilterBar.tsx` | Add backdrop-blur, sticky behavior, action buttons | `wf-card`, `wf-card-border`, `wf-accent` |
+| `KpiCard.tsx` | Add hover group effects, rounded-full trend badge | `wf-card`, `wf-positive`, `wf-negative` |
+| `KpiCardFull.tsx` | Add hover group, sparkline stroke with accent color | Same + `--wf-accent` (now blue) |
+| `DataTable.tsx` | Add dark footer row using new `--wf-table-footer-*` | New tokens from Phase 1 |
+| `DrillDownTable.tsx` | Same dark footer treatment | New tokens from Phase 1 |
+
+**Count: 7 files — JSX restructure, zero token renames.**
+
+### Category 3: Editor components (out of v1.4 scope, except one)
+
+25 files in `components/editor/` and `components/editor/property-forms/` use app shadcn/ui
+tokens. They are the administrative editing interface, not the wireframe preview.
+
+**Exception:** `ScreenManager.tsx` uses `wf-sidebar-*` Tailwind classes for its dark panel
+(13 references confirmed by grep). It should receive visual updates alongside WireframeSidebar
+to maintain consistency, but its behavior does not change.
+
+**Count: 24 files excluded from scope, ScreenManager receives cosmetic update only.**
+
+---
+
+## Migration Strategy: Incremental, Token-First
+
+The architectural separation of CSS tokens from component class names makes this uniquely
+safe to execute incrementally. No feature flags, no parallel implementations needed.
+
+**Big bang is riskier than token-first.** Restructuring 7 components simultaneously means
+a large, hard-to-review PR. Token-first yields immediately visible results after Phase 1
+that validate the direction, then component work proceeds at lower risk.
+
+### Phase 1 — Token Layer (1 CSS file + 1 config file, zero component edits)
+
+Update `wireframe-tokens.css`:
+1. Replace all 10 neutral values (stone → slate)
+2. Update semantic token values for `--wf-canvas` and `--wf-card` to direct hex values
+3. Replace accent gold → primary blue (`--wf-accent`, `--wf-accent-muted`, `--wf-accent-fg`)
+4. Convert `--wf-accent-muted` from `rgba()` to `color-mix()` form
+5. Replace chart palette (5 values per theme = 10 values total)
+6. Update sidebar token values (bg to slate-950, muted/border to direct slate hex)
+7. Add 3 new tokens in both light and dark blocks
+
+Update `tailwind.config.ts`:
+8. Register the 3 new tokens in the `wf:` color extension block
+
+**Result after Phase 1:** ~55 components render with the new slate + primary blue palette.
+Gallery previews, KPI cards, charts, tables (minus footer row), filter bar colors — all
+updated in a single commit. The wireframe visual shifts from warm stone + gold to
+cool slate + blue automatically.
+
+### Phase 2 — Chrome: WireframeSidebar + WireframeHeader
+
+Restructure with new JSX. Color environment is already correct from Phase 1.
+Only layout structure, new sub-components (search pill, bell, user chip), and
+typography changes remain.
+
+Build sidebar first: simpler structure, no internal state beyond screen selection.
+Build header second: has period selector state and multiple interactive elements.
+
+### Phase 3 — KPI Cards
+
+Update `KpiCard.tsx` and `KpiCardFull.tsx`:
+- Add `group` class to container, `group-hover:` modifiers to interactive elements
+- Change trend badge from `rounded` to `rounded-full`
+- Update Sparkline stroke from `var(--wf-muted)` to `var(--wf-accent)` (now blue from Phase 1)
+
+### Phase 4 — Table Dark Footer Row
+
+Add dark summary footer to `DataTable.tsx` and `DrillDownTable.tsx` using
+`--wf-table-footer-bg` and `--wf-table-footer-fg` tokens added in Phase 1.
+Low risk — additive change to existing components.
+
+### Phase 5 — Filter Bar Enhancement
+
+Update `WireframeFilterBar.tsx` with backdrop-blur sticky behavior and action buttons.
+Color environment is already correct from Phase 1. Only structural additions needed.
+
+### Phase 6 — ScreenManager Editor Sync
+
+Update `ScreenManager.tsx` to match the new sidebar visual from Phase 2.
+Cosmetic only — spacing, icon size, typography adjustments. Behavior unchanged.
+
+### Phase 7 — Gallery Validation
+
+Run through all gallery section previews. No development — smoke testing only.
+Verify every component renders correctly in both light and dark mode.
+
+---
+
+## Build Order Dependency Graph
+
+```
+Phase 1: wireframe-tokens.css + tailwind.config.ts
+    |  [single commit, zero component risk, unlocks automatic updates to ~55 files]
+    |
+    +---> Phase 2: WireframeSidebar  (sidebar color correct from Phase 1)
+    |         |
+    |         +---> Phase 6: ScreenManager  (syncs with sidebar Phase 2)
+    |
+    +---> Phase 2: WireframeHeader   (header color correct from Phase 1)
+    |
+    +---> Phase 3: KpiCard + KpiCardFull  (accent blue correct from Phase 1)
+    |
+    +---> Phase 4: DataTable + DrillDownTable  (footer tokens exist from Phase 1)
+    |
+    +---> Phase 5: WireframeFilterBar  (accent + card colors correct from Phase 1)
+    |
+    v
+Phase 7: Gallery Validation  (after all components updated)
+```
+
+**Phases 2-5 are independent of each other** — they can be committed in any order
+after Phase 1. Phase 6 should follow Phase 2 (sidebar). Phase 7 is always last.
+
+---
+
+## Component Counts by Phase
+
+| Phase | Files Changed | Risk | Prereqs |
+|-------|--------------|------|---------|
+| 1 — Token CSS + config | 2 | Low | None |
+| 2 — WireframeSidebar | 1 | Medium | Phase 1 |
+| 2 — WireframeHeader | 1 | Medium | Phase 1 |
+| 3 — KpiCard + KpiCardFull | 2 | Low | Phase 1 |
+| 4 — DataTable + DrillDownTable | 2 | Low | Phase 1 |
+| 5 — WireframeFilterBar | 1 | Medium | Phase 1 |
+| 6 — ScreenManager | 1 | Low | Phase 2 Sidebar |
+| 7 — Gallery Validation | 0 | Low | Phases 1-6 |
+
+**Total files requiring edits: 10 out of 85.**
+The other 75 update automatically via the CSS token changes in Phase 1.
+
+---
+
+## Icon System: Retain Lucide, No Migration
+
+**Recommendation: Keep lucide-react for all wireframe icons in v1.4.**
+
+Evidence for this decision:
+- 28 component files import from lucide-react (grep confirmed)
+- `IconPicker.tsx` has a typed `ICON_MAP` with 20 icons mapped to LucideIcon components
+- Icon names are string literals stored in Supabase BlueprintConfig (`sidebar.items[].icon`)
+- Replacing icon names requires a Supabase data migration for all existing blueprints
+
+The visual quality gap between Lucide and Material Symbols Rounded at 16-18px wireframe
+sidebar context is negligible. The design quality improvement in v1.4 comes from typography
+weight changes (extrabold headings, tracking-widest labels), the new palette, and hover
+group effects — not from the icon library.
+
+**If Material Symbols is desired later (v2 scope):**
+- Add `@material-symbols/font-variable` as a CSS variable font (no JS bundle cost)
+- Update IconPicker.tsx ICON_MAP with new name mappings
+- Write a Supabase migration to update `icon` string values in all blueprints
+- This is a clean, isolated change — worth deferring until the need is demonstrated
+
+---
+
+## Branding Integration Points
+
+Three integration points are affected by the token migration. All three continue working
+without changes to branding.ts.
+
+### Integration Point 1: chartColors prop chain (unchanged)
+
+```
+BrandingConfig
+    -> getChartPalette() -- returns hex[]
+    -> BlueprintRenderer -> SectionRenderer -> ChartRenderer
+    -> DonutChart / BarLineChart / etc. (chartColors?: string[] prop)
+```
+
+When `chartColors` is present, it overrides the default `var(--wf-chart-*)` CSS vars.
+This mechanism is independent of the token system. After Phase 1, the new blue
+chart palette becomes the default. Client branding still overrides it via the prop chain.
+
+### Integration Point 2: brandingToWfOverrides() (intentional no-op, unchanged)
+
+This function returns `{}` by design. The decision that client branding does NOT
+override wireframe chrome (sidebar color, header color) is preserved in v1.4.
+The new slate + blue aesthetic becomes the universal wireframe chrome identity.
+Client branding continues to express itself through charts, logo, and fonts only.
+
+No changes to `branding.ts` are needed for this migration.
+
+### Integration Point 3: tailwind.config.ts wf: extension (requires update)
+
+The 3 new tokens must be registered. This is a prerequisite for using them as
+Tailwind classes in DataTable and WireframeHeader:
 
 ```typescript
-// Radial bar -- circular progress indicators
-export type RadialBarSection = {
-  type: 'radial-bar-chart'
-  title: string
-  items: { label: string; value: number; fill?: string }[]
-  height?: number
-}
-
-// Gauge -- single value on semicircle
-export type GaugeSection = {
-  type: 'gauge-chart'
-  title: string
-  value: number
-  min?: number
-  max?: number
-  thresholds?: { value: number; color: string }[]
-  height?: number
-}
-
-// Sankey -- flow diagram
-export type SankeySection = {
-  type: 'sankey-chart'
-  title: string
-  nodes: { name: string }[]
-  links: { source: number; target: number; value: number }[]
-  height?: number
-}
-
-// Sunburst -- hierarchical pie
-export type SunburstSection = {
-  type: 'sunburst-chart'
-  title: string
-  data: SunburstNode
-  height?: number
-}
-type SunburstNode = {
-  name: string
-  value?: number
-  children?: SunburstNode[]
-}
-
-// Bullet -- target vs actual
-export type BulletSection = {
-  type: 'bullet-chart'
-  title: string
-  items: { label: string; actual: number; target: number; ranges?: number[] }[]
-  height?: number
-}
+// In tailwind.config.ts, wf: block additions
+'header-search-bg': 'var(--wf-header-search-bg)',
+'table-footer': {
+  DEFAULT: 'var(--wf-table-footer-bg)',
+  fg: 'var(--wf-table-footer-fg)',
+},
 ```
 
-**Files that need modification:**
+This change belongs in Phase 1 alongside the CSS token additions.
 
-| File | Change | Type |
-|------|--------|------|
-| `types/blueprint.ts` | Add 5 new section types to union; extend `ChartType` with 5 new sub-types | Modified |
-| `lib/blueprint-schema.ts` | Add 5 new Zod section schemas; extend `ChartType` enum; add to discriminated union | Modified |
-| `lib/section-registry.tsx` | Add 5+5 new entries (5 new section types + chart sub-types don't need registry entries) | Modified |
-| `sections/ChartRenderer.tsx` | Add 5 new cases to `chartType` switch for bar-line sub-variants | Modified |
-| `components/StackedBarChart.tsx` | New component | **New** |
-| `components/GroupedBarChart.tsx` | New component | **New** |
-| `components/HorizontalBarChart.tsx` | New component | **New** |
-| `components/StackedAreaChart.tsx` | New component | **New** |
-| `components/MultiLineChart.tsx` | New component | **New** |
-| `components/RadialBarChartComponent.tsx` | New component + renderer | **New** |
-| `components/GaugeChart.tsx` | New component + renderer | **New** |
-| `components/SankeyChart.tsx` | New component + renderer | **New** |
-| `components/SunburstChart.tsx` | New component + renderer | **New** |
-| `components/BulletChart.tsx` | New component + renderer | **New** |
-| `sections/RadialBarRenderer.tsx` | New renderer | **New** |
-| `sections/GaugeRenderer.tsx` | New renderer | **New** |
-| `sections/SankeyRenderer.tsx` | New renderer | **New** |
-| `sections/SunburstRenderer.tsx` | New renderer | **New** |
-| `sections/BulletRenderer.tsx` | New renderer | **New** |
-| `editor/property-forms/RadialBarForm.tsx` | New property form | **New** |
-| `editor/property-forms/GaugeForm.tsx` | New property form | **New** |
-| `editor/property-forms/SankeyForm.tsx` | New property form | **New** |
-| `editor/property-forms/SunburstForm.tsx` | New property form | **New** |
-| `editor/property-forms/BulletForm.tsx` | New property form | **New** |
-
-### 3. Component Gallery Reorganization
-
-**Current state:** The `ComponentGallery.tsx` has 5 hardcoded categories:
-- Cards (3): KpiCard, KpiCardFull, CalculoCard
-- Graficos (4): BarLineChart, WaterfallChart, DonutChart, ParetoChart
-- Tabelas (4): DataTable, DrillDownTable, ClickableTable, ConfigTable
-- Layout (7): WireframeSidebar, WireframeHeader, WireframeFilterBar, GlobalFilters, CommentOverlay, WireframeModal, DetailViewSwitcher
-- Inputs (4): InputsScreen, UploadSection, ManualInputSection, SaldoBancoInput
-
-**Problem:** The gallery does NOT use the section registry. It's a completely independent hardcoded list of components with its own mock data, its own category scheme, and its own imports. This means:
-1. Adding a new section type requires changes in both the registry AND the gallery
-2. The gallery's categories don't match the registry's categories
-3. Components in the gallery (WireframeSidebar, WireframeModal, etc.) are not section types at all
-
-**Recommended approach: Hybrid gallery with registry-driven sections + curated non-section components.**
-
-The gallery should have two tiers:
-1. **Registry-driven sections** -- auto-generated from `SECTION_REGISTRY`, grouped by `catalogEntry.category`
-2. **Shell components** -- manually curated (WireframeSidebar, WireframeHeader, WireframeFilterBar, WireframeModal, etc.)
-
-```
-Gallery Structure:
-  [Tab: Secoes]        <-- auto from SECTION_REGISTRY grouped by category
-    KPIs               <-- from catalogEntry.category
-    Graficos
-    Tabelas
-    Inputs
-    Layout
-    Formularios
-    Filtros
-    Metricas
-  [Tab: Layout/Shell]  <-- manually curated
-    Sidebar
-    Header
-    Filter Bar
-    Modal
-    Detail Switcher
-  [Tab: Compostos]     <-- optional, for compound patterns
-    Screen com sidebar + header + filter + content
-```
-
-**Recommended category reorganization for the registry (v1.3):**
-
-| Category | Current Types | New Types (v1.3) |
-|----------|--------------|-------------------|
-| KPIs | kpi-grid | (unchanged) |
-| Metricas | stat-card, progress-bar | radial-bar-chart, gauge-chart, bullet-chart |
-| Graficos | bar-line-chart, donut-chart, waterfall-chart, pareto-chart | sankey-chart, sunburst-chart |
-| Tabelas | data-table, drill-down-table, clickable-table, config-table | (unchanged) |
-| Inputs | saldo-banco, manual-input, upload-section | (unchanged) |
-| Layout | calculo-card, chart-grid, info-block, divider | (unchanged) |
-| Formularios | settings-page, form-section | (unchanged) |
-| Filtros | filter-config | (unchanged) |
-
-**Files that need modification:**
-
-| File | Change | Type |
-|------|--------|------|
-| `src/pages/tools/ComponentGallery.tsx` | Rewrite to use registry-driven tier + shell tier | Modified |
-| `src/pages/tools/galleryMockData.ts` | Add mock data for new chart types | Modified |
-| `lib/section-registry.tsx` | Update `catalogEntry.category` for new types | Modified |
-
-## Data Flow Changes
-
-### Current Data Flow (Unchanged for Content Sections)
-
-```
-BlueprintConfig.screens[i].rows[j].sections[k]
-    |
-    v
-BlueprintRenderer
-    |
-    v
-SectionRenderer(section) ---lookup---> SECTION_REGISTRY[section.type]
-    |                                        |
-    |                                   .renderer component
-    v
-<RendererComponent section={section} compareMode={...} />
-```
-
-### New Data Flow: Layout Config
-
-```
-BlueprintConfig.layout?.sidebar
-BlueprintConfig.layout?.header
-BlueprintConfig.layout?.filterBar
-    |
-    v
-WireframeViewer reads layout config
-    |
-    +---> <ConfigurableSidebar config={sidebarConfig} screens={screens} branding={branding} />
-    |         |
-    |         v
-    |     Renders sidebar variant based on config.variant
-    |     Renders screen groups based on config.sections[]
-    |
-    +---> <ConfigurableHeader config={headerConfig} screen={activeScreen} />
-    |         |
-    |         v
-    |     Renders header variant based on config.variant
-    |     Position determines z-index stacking
-    |
-    +---> BlueprintRenderer receives filterBarConfig
-              |
-              v
-          Renders filter bar based on config.variant
-```
-
-### Schema Migration Flow
-
-```
-DB raw JSON (schemaVersion: 1)
-    |
-    v
-migrateBlueprint()
-    |
-    v
-migrators[1](config)  --> adds layout: undefined, sets schemaVersion: 2
-    |
-    v
-BlueprintConfigSchema.safeParse() --> validates, defaults kick in
-    |
-    v
-ValidatedBlueprintConfig (schemaVersion: 2)
-```
+---
 
 ## Architectural Patterns
 
-### Pattern 1: Section Registry Extension (Proven, HIGH confidence)
+### Pattern 1: CSS-Scoped Token Themes
 
-**What:** Add new section types by following the established registry pattern -- type definition, Zod schema, renderer, property form, catalog entry, all registered in `SECTION_REGISTRY`.
+**What:** All token values are scoped to `[data-wf-theme="light"]` and `[data-wf-theme="dark"]`
+selector blocks. WireframeThemeProvider sets the attribute. Components never handle
+light/dark logic — the CSS scope does all the work.
 
-**When to use:** Every new content section that lives inside `screen.rows[].sections[]`.
+**When to use:** Always for wireframe-specific styles. Every new token belongs in
+wireframe-tokens.css, not in global CSS or component-level style blocks.
 
-**Trade-offs:** Each new section type requires 5-6 files (type, schema, renderer, form, component, registry entry). This is intentional -- it ensures type safety and completeness. The registry guarantees no dead code paths.
+**Trade-offs:** Theme switching is zero-JS. Dark mode works automatically for every
+component that uses `var(--wf-*)`. The constraint is that only light/dark variants exist —
+per-client palette overrides go through the separate `--brand-*` mechanism.
 
-**Checklist for adding one section type:**
-```
-1. types/blueprint.ts       -- add SectionType to union
-2. lib/blueprint-schema.ts  -- add Zod schema, add to discriminated union
-3. components/MyChart.tsx    -- presentational component
-4. sections/MyRenderer.tsx   -- registry-compatible renderer
-5. editor/property-forms/MyForm.tsx -- property editor
-6. lib/section-registry.tsx  -- register all pieces
-```
+### Pattern 2: Semantic Token Indirection
 
-### Pattern 2: Config-Level Layout (New, for v1.3)
+**What:** Components reference semantic tokens (`--wf-card`, `--wf-heading`) not
+scale tokens (`--wf-neutral-50`). Semantic tokens alias to scale tokens in CSS.
 
-**What:** Blueprint-level configuration for shell elements (sidebar, header, filter bar) that sit outside the per-screen content area.
+**Why it matters for this migration:** Updating scale values propagates to semantics
+automatically. Components are completely isolated from the scale-to-semantic mapping.
 
-**When to use:** Elements that wrap or sit alongside all screens, not elements within a screen's content flow.
+**When to break this pattern:** When the target design needs a value that doesn't
+match any scale step. Example: `--wf-canvas: #f6f6f8` in the HTML reference doesn't
+exactly match `--wf-neutral-100: #f1f5f9`. Use a direct hex value rather than forcing
+the scale to match an arbitrary design value.
 
-**Trade-offs:** Introduces a new configuration surface (layout config panel) and new components. However, it cleanly separates shell concerns from content concerns and avoids the anti-pattern of putting layout chrome into the sections array.
+### Pattern 3: color-mix() for Transparency
 
-### Pattern 3: ChartType Sub-Dispatch (Existing, Extended)
+**What:** Semi-transparent fills use `color-mix(in srgb, var(--wf-token) N%, transparent)`
+instead of `rgba()` with hardcoded hex values.
 
-**What:** The `bar-line-chart` section type has a `chartType` discriminator that selects the specific chart component. ChartRenderer contains the dispatch switch.
+**Why it matters:** `rgba()` with hardcoded hex becomes stale when the token changes.
+`color-mix()` resolves at runtime from the current token value. The `--wf-accent-muted`
+definition in wireframe-tokens.css currently uses `rgba()` — this is a debt that should
+be fixed in Phase 1.
 
-**When to use:** Charts sharing the same core data model (categories-based cartesian charts: bar, line, area, stacked, grouped, horizontal).
+**Browser support:** color-mix() is baseline in all modern browsers. No polyfill needed.
 
-**Trade-offs:** The switch statement in ChartRenderer grows, but all these charts share the same `BarLineChartSection` type definition (title, chartType, height, categories, xLabel, yLabel). This is correct because they genuinely share a data shape. The alternative (separate section types for each) would create 13 near-identical types.
+---
 
-## Anti-Patterns
+## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Sidebar/Header as Section Types
+### Anti-Pattern 1: Renaming wf-* tokens
 
-**What people do:** Add sidebar and header as entries in `SECTION_REGISTRY` and put them in `screen.sections[]`.
+**What people do:** Rename tokens for semantic clarity — e.g., `--wf-accent` to `--wf-primary`.
 
-**Why it's wrong:** Sidebar wraps ALL screens, not one screen. Header has fixed positioning outside the content scroll area. Putting them in sections would mean they appear in the drag-reorder list, can be deleted by users, and render inside the scrollable content area. It fundamentally breaks the layout model.
+**Why it's wrong:** 31 component files reference `var(--wf-accent)` or `wf-accent` Tailwind
+classes. 240 total `--wf-*` references across 31 files. Renaming propagates required edits
+to every file, turning a CSS-only change into an 86-file PR.
 
-**Do this instead:** Add `layout` config at `BlueprintConfig` level (see Pattern 2 above).
+**Do this instead:** Change values only. The accent name is still semantically correct
+for a highlight/interactive color regardless of whether it is gold or blue.
 
-### Anti-Pattern 2: God ChartRenderer
+### Anti-Pattern 2: Hardcoding hex values in components during restructure
 
-**What people do:** Put every possible chart type through the same ChartRenderer switch, even those with entirely different data shapes (sankey nodes/links vs bar categories).
+**What people do:** While restructuring WireframeHeader, hardcode `color: '#1152d4'` directly.
 
-**Why it's wrong:** Forces unrelated data shapes into the same section type schema. The `BarLineChartSection` type would need optional fields for nodes, links, sunburst children, etc., making it impossible to validate properly.
+**Why it's wrong:** Breaks dark mode (the token scoping doesn't apply to hardcoded hex),
+breaks the branding layer independence, and creates drift between CSS and JSX.
 
-**Do this instead:** Create new section types for charts with fundamentally different data shapes. Keep `bar-line-chart` for charts that genuinely share the categories/values data model.
+**Do this instead:** If a color is needed that has no existing token, add the token to
+wireframe-tokens.css first (both light and dark blocks), register it in tailwind.config.ts,
+then use it via `var()` or Tailwind class in the component.
 
-### Anti-Pattern 3: Gallery as Independent Data Source
+### Anti-Pattern 3: Static rgba() for token-derived transparency
 
-**What people do:** Maintain the gallery as a completely separate hardcoded component list (current state).
+**What people do:** Write `rgba(17, 82, 212, 0.12)` (the blue accent as rgba).
 
-**Why it's wrong:** Double maintenance burden -- every new section type needs changes in both the registry and the gallery. Categories drift out of sync. Components exist in gallery but not in registry, or vice versa.
+**Why it's wrong:** The value is frozen at that color. If the token changes in a future
+redesign, the rgba doesn't follow. This is how `--wf-accent-muted` ended up as `rgba(212,160,23, 0.12)` — it was correct when written but is now stale.
 
-**Do this instead:** Drive the gallery from `SECTION_REGISTRY` for content sections. Manually curate only shell components (sidebar, header, modal) that are not section types.
+**Do this instead:** Always use `color-mix(in srgb, var(--wf-token) N%, transparent)`.
 
-### Anti-Pattern 4: Schema Version Skip
+### Anti-Pattern 4: Registering Tailwind aliases pointing to hardcoded values
 
-**What people do:** Change the schema shape without bumping `schemaVersion` and adding a migrator.
+**What people do:** Add a new entry to `wf:` in tailwind.config.ts with a hardcoded hex.
 
-**Why it's wrong:** Existing blueprints in Supabase will fail Zod validation. The `migrateBlueprint()` pipeline exists specifically to handle this.
+**Why it's wrong:** That color is frozen — doesn't change with dark mode, doesn't participate
+in the token system.
 
-**Do this instead:** Always bump `CURRENT_SCHEMA_VERSION`, add a migrator function for the previous version, and handle defaults for new optional fields.
+**Do this instead:** The tailwind.config.ts `wf:` block must always point to `var(--wf-token-name)`.
+The CSS file defines the actual values.
 
-## Integration Points
+### Anti-Pattern 5: Splitting wireframe-tokens.css into per-component files
 
-### Internal Boundaries
+**What people do:** Create a `sidebar-tokens.css`, `header-tokens.css` for organization.
 
-| Boundary | Communication | Impact of v1.3 |
-|----------|---------------|-----------------|
-| `BlueprintConfig` <-> `WireframeViewer` | Direct prop passing from DB load | Add `layout` field reading |
-| `SECTION_REGISTRY` <-> `SectionRenderer` | Lookup by `section.type` key | Add 5 new keys |
-| `SECTION_REGISTRY` <-> `ComponentPicker` | `getCatalog()` function | Auto-picks up new entries |
-| `SECTION_REGISTRY` <-> `ComponentGallery` | Currently NONE (independent) | Must connect via registry |
-| `ChartRenderer` <-> chart components | Switch dispatch on `chartType` | Add 5 new cases |
-| `blueprint-schema.ts` <-> `blueprint-migrations.ts` | Schema version + migrators | Bump to v2, add migrator |
-| `WireframeViewer` <-> `WireframeHeader` | Direct rendering, hardcoded | Extract to configurable component |
-| `WireframeViewer` <-> sidebar `<aside>` | Hardcoded HTML in viewer | Extract to `ConfigurableSidebar` component |
+**Why it's wrong:** The light/dark scoping depends on the `[data-wf-theme]` blocks being
+co-located. Splitting creates loading order dependencies and makes it easy to define a light
+value without its dark counterpart.
 
-### Supabase Impact
+**Do this instead:** Keep wireframe-tokens.css as the single token source file.
+Use grouped comments within the file to organize sections.
 
-| Table | Change | Migration Needed |
-|-------|--------|-----------------|
-| `blueprints` | JSON column gains `layout` field | No SQL migration -- JSON is schemaless. Handled by app-level `migrateBlueprint()` |
-
-### Zod Schema Impact
-
-The discriminated union in `BlueprintSectionSchema` currently has 21 members. Adding 5 new section types brings it to 26. This is within Zod's comfortable handling range. The `ChartType` enum extends from 8 to 13 values.
-
-```typescript
-// Extended ChartType
-export type ChartType =
-  | 'bar' | 'line' | 'bar-line' | 'area'       // existing
-  | 'radar' | 'treemap' | 'funnel' | 'scatter'  // existing
-  | 'stacked-bar' | 'grouped-bar' | 'horizontal-bar'  // new
-  | 'stacked-area' | 'multi-line'                      // new
-```
-
-## Recommended Build Order
-
-Build order follows dependency chains. Each phase can be independently tested.
-
-### Phase 1: Schema & Infrastructure (Foundation)
-1. Extend `ChartType` enum in `types/blueprint.ts` (add 5 sub-types)
-2. Add 5 new section types to `BlueprintSection` union in `types/blueprint.ts`
-3. Add `LayoutConfig` types (`SidebarConfig`, `HeaderConfig`, `FilterBarConfig`) to `types/blueprint.ts`
-4. Add `layout?` to `BlueprintConfig` type
-5. Extend `lib/blueprint-schema.ts` with all new Zod schemas
-6. Bump `CURRENT_SCHEMA_VERSION` to 2 in `lib/blueprint-migrations.ts`
-7. Add v1->v2 migrator
-8. Update tests
-
-**Rationale:** Everything downstream depends on types and schemas being correct first.
-
-### Phase 2: New Chart Components (Independent, Parallelizable)
-For each new chart type, create the component + renderer + property form + registry entry. These are independent of each other.
-
-**Bar-line sub-variants (5 components, use existing `bar-line-chart` section type):**
-1. `StackedBarChart.tsx` + update ChartRenderer switch
-2. `GroupedBarChart.tsx` + update ChartRenderer switch
-3. `HorizontalBarChart.tsx` + update ChartRenderer switch
-4. `StackedAreaChart.tsx` + update ChartRenderer switch
-5. `MultiLineChart.tsx` + update ChartRenderer switch
-6. Update `BarLineChartForm` to show new chartType options
-
-**New section types (5 complete sets: component + renderer + form + registry):**
-1. `RadialBarChartComponent` + `RadialBarRenderer` + `RadialBarForm` + registry entry
-2. `GaugeChart` + `GaugeRenderer` + `GaugeForm` + registry entry
-3. `SankeyChart` + `SankeyRenderer` + `SankeyForm` + registry entry
-4. `SunburstChart` + `SunburstRenderer` + `SunburstForm` + registry entry
-5. `BulletChart` + `BulletRenderer` + `BulletForm` + registry entry
-
-**Rationale:** Each chart is self-contained. The registry pattern means adding one chart never affects another.
-
-### Phase 3: Layout Config (Sidebar/Header/Filter)
-1. Extract sidebar from hardcoded `<aside>` in WireframeViewer into `ConfigurableSidebar` component
-2. Update `WireframeSidebar.tsx` to accept `SidebarConfig` props
-3. Update `WireframeHeader.tsx` to accept `HeaderConfig` props
-4. Create `LayoutConfigPanel.tsx` (editor panel for layout settings)
-5. Wire `AdminToolbar` to open layout config panel
-6. Update WireframeViewer to read `config.layout` and pass to components
-7. Ensure header z-index stacking respects `header.position` setting
-
-**Rationale:** Depends on schema (Phase 1). Most complex change. Requires careful refactoring of WireframeViewer without breaking existing functionality.
-
-### Phase 4: Gallery Reorganization
-1. Refactor `ComponentGallery.tsx` to use registry-driven tier for section types
-2. Create mock data rendering for new section types
-3. Add shell/chrome tier for non-section components
-4. Add tab or section navigation for the expanded gallery
-
-**Rationale:** Depends on all new section types existing in the registry (Phase 2). Low risk, mostly UI reorganization.
-
-## Scaling Considerations
-
-| Concern | Current (21 types) | After v1.3 (26 types) | At 40+ types |
-|---------|---------------------|------------------------|--------------|
-| Registry object size | Trivial | Trivial | Still trivial (JS objects, not arrays) |
-| Bundle size | ~150KB for chart components | ~200KB estimated | Consider lazy loading per chart type |
-| ComponentPicker dialog | 7 categories, fits in dialog | 8 categories, still fits | May need search/filter in picker |
-| Schema validation | Fast (<5ms) | Fast | Still fast (discriminated union is O(1) lookup) |
-| ChartRenderer switch | 8 cases | 13 cases | Consider dynamic dispatch map instead of switch |
-
-**First bottleneck:** Bundle size as chart components grow. Mitigation: React.lazy() for chart components that are rarely used (sankey, sunburst, bullet). The registry can store lazy component references.
-
-**Second bottleneck:** ComponentPicker UX with 26+ types in the dialog. Mitigation: Add search/filter to the picker dialog (keyboard-driven, like the existing Cmd+K search).
+---
 
 ## Sources
 
-- Complete codebase analysis of all files listed above (HIGH confidence)
-- Recharts 2.15.4 installed package -- verified available chart primitives via `es6/index.js` exports
-- Existing section registry pattern established in v1.1 (proven in production)
-- Blueprint schema migration system established in v1.1 (proven with v0->v1 migration)
+- Direct inspection: `tools/wireframe-builder/styles/wireframe-tokens.css` (45 tokens, 2 theme blocks)
+- Direct inspection: `tailwind.config.ts` (wf: color extension, 18 registered aliases + app tokens)
+- Direct inspection: `tools/wireframe-builder/lib/wireframe-theme.tsx` (WireframeThemeProvider, localStorage key)
+- Direct inspection: `tools/wireframe-builder/lib/branding.ts` (brandingToCssVars, brandingToWfOverrides no-op)
+- Direct inspection: `tools/wireframe-builder/types/branding.ts` (BrandingConfig, DEFAULT_BRANDING)
+- Component-level inspection: KpiCard, KpiCardFull, WireframeSidebar, WireframeHeader, DataTable, WireframeFilterBar, StatCardRenderer, ProgressBarRenderer, DonutChart (all 3 styling patterns)
+- Grep analysis: 240 total `--wf-*` references across 31 files; 28 files importing lucide-react
+- Grep analysis: `color-mix()` in 7 files; `wf-sidebar` in 3 files (Sidebar, ScreenManager, tokens.css)
+- `.planning/PROJECT.md` for v1.4 milestone goals and key decisions
 
 ---
-*Architecture research for: v1.3 Builder & Components*
-*Researched: 2026-03-10*
+
+*Architecture research for: v1.4 Wireframe Visual Redesign — token migration*
+*Researched: 2026-03-11*

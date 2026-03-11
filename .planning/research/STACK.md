@@ -1,234 +1,351 @@
-# Stack Research: v1.3 Builder & Components
+# Stack Research: v1.4 Wireframe Visual Redesign
 
-**Domain:** Wireframe builder expansion -- charts, layout components, gallery reorganization
-**Researched:** 2026-03-10
-**Confidence:** HIGH (verified against npm registry, recharts API docs, existing codebase analysis)
+**Domain:** Wireframe component visual redesign — financial dashboard aesthetic
+**Researched:** 2026-03-11
+**Confidence:** HIGH (npm registry verified, official docs consulted, existing codebase analyzed)
 
 ## Scope
 
-This research covers ONLY stack additions/changes needed for v1.3. The existing validated stack is unchanged:
+This research covers ONLY stack additions/changes needed for v1.4. The validated existing stack is unchanged:
 
 - React 18.3 + TypeScript 5.6 strict + Tailwind CSS 3.4 + Vite 5.4
-- Recharts 2.13.3 (current) -- all chart types already available
-- Zod 4.3 for blueprint validation
-- @dnd-kit for drag-reorder
-- lucide-react for icons
-- shadcn/ui for UI primitives
-- --wf-* design token system for wireframe theming
-- Section registry pattern with 21 types
+- Recharts 2.13.3 (all chart types), lucide-react 0.460, shadcn/ui
+- --wf-* CSS design token system (wireframe-tokens.css, ~45 variables)
+- WireframeThemeProvider context, color-mix(in srgb) already in use
+- Inter Variable font already loaded via @fontsource-variable/inter
 
-Three target areas:
-1. **20+ chart types** -- expanding from 9 to 20+ via Recharts 2.x built-in components
-2. **Configurable sidebar/header/filter bar** -- blueprint schema additions for layout shell
-3. **Component gallery reorganization** -- structural refactor, no new dependencies
+The HTML reference design (`visual-redesign-reference.html`) uses:
+- Tailwind CSS CDN with `plugins=forms,container-queries`
+- Google Fonts CDN for Inter (not variable font)
+- Material Symbols Outlined icons via CSS ligature font (not React components)
+- CSS patterns: `backdrop-blur-md`, `bg-white/80`, hover states, `tracking-widest`
 
-**Critical finding: Zero new npm packages required.** Recharts 2.x already ships all needed chart containers. The expansion is pure application code -- new components, new section types, and schema evolution.
+Questions to answer: (1) container-queries plugin needed? (2) icon strategy — keep lucide or switch to Material Symbols? (3) any new CSS features needed?
 
 ---
 
 ## Recommended Stack Changes
 
-### 1. Recharts Version Bump: 2.13.3 -> 2.15.4
+### Critical Finding: One New Package, Zero Breaking Changes
 
-| Technology | Current | Target | Why |
-|------------|---------|--------|-----|
-| recharts | 2.13.3 | 2.15.4 | Latest stable 2.x. Bug fixes for Treemap, RadialBarChart, FunnelChart rendering. No breaking changes within 2.x line. Project explicitly excludes Recharts 3.x (migration guide shows significant breaking changes). |
+The visual redesign requires exactly **one new npm package** (`@tailwindcss/container-queries`) and
+**one Tailwind config change** (add plugin, expand wf color tokens). The CSS patterns in the reference
+HTML (backdrop-blur, color-mix, group-hover) are already supported by Tailwind 3 + the existing
+browser baseline. The icon strategy stays with lucide-react.
 
-**Verification:** `npm view recharts versions --json` confirms 2.15.4 is the latest stable 2.x release. The `latest` dist-tag points to 3.8.0, but the project constraint ("Recharts 3.x upgrade -- breaking changes, 2.x tem todos os charts necessarios") rules this out.
+---
 
-**Confidence:** HIGH -- 2.x minor versions are backward-compatible. Same API surface, same dependencies. Drop-in upgrade.
+## Package Change: @tailwindcss/container-queries
+
+| | Details |
+|-|---------|
+| **Package** | `@tailwindcss/container-queries` |
+| **Version** | `0.1.1` (latest — last published March 2023, stable) |
+| **Peer dep** | `tailwindcss >= 3.2.0` (project uses 3.4.15 — compatible) |
+| **Purpose** | Enables `@container` + `@sm:`, `@md:`, `@lg:` responsive utilities |
+| **Why** | The reference HTML uses container queries for KPI cards that reflow based on their grid cell width, not viewport. This is the correct pattern for dashboard grid components that appear in 1-col, 2-col, and 3-col layouts at the same viewport width. |
 
 **Installation:**
+
 ```bash
-npm install recharts@^2.15.4
+npm install -D @tailwindcss/container-queries
 ```
 
-### 2. No New Chart Libraries Needed
+**Tailwind config change (tailwind.config.ts):**
 
-Recharts 2.x provides **12 chart containers** out of the box. The project currently uses 9 of them. The remaining 3 are directly available:
+```typescript
+import containerQueries from '@tailwindcss/container-queries'
+import animate from 'tailwindcss-animate'
 
-| Chart Container | Status | Used In Project |
-|-----------------|--------|-----------------|
-| BarChart | Built-in | Yes (BarLineChart.tsx) |
-| LineChart | Built-in | Yes (BarLineChart.tsx) |
-| ComposedChart | Built-in | Yes (BarLineChart.tsx, bar-line mode) |
-| PieChart | Built-in | Yes (DonutChart.tsx) |
-| RadarChart | Built-in | Yes (RadarChartComponent.tsx) |
-| ScatterChart | Built-in | Yes (ScatterChartComponent.tsx) |
-| FunnelChart | Built-in | Yes (FunnelChartComponent.tsx) |
-| Treemap | Built-in | Yes (TreemapComponent.tsx) |
-| AreaChart | Built-in | Yes (AreaChartComponent.tsx) |
-| **RadialBarChart** | Built-in | **Not yet used** -- needed for gauge/radial bar |
-| **Sankey** | Built-in | **Not yet used** -- available but LOW priority for BI |
-| **SunburstChart** | Built-in | **Not yet used** -- available but LOW priority for BI |
+const config: Config = {
+  // ... existing config unchanged ...
+  plugins: [animate, containerQueries],
+}
+```
 
-**New chart types achievable with zero dependencies** by leveraging existing Recharts components in new combinations:
+**Note on Tailwind v4:** Container queries are built-in to Tailwind v4 (no plugin needed). But
+PROJECT.md explicitly defers the Tailwind v4 upgrade. For v1.4, the plugin is the correct path.
 
-| New Chart Type | Recharts Components Used | Implementation Pattern |
-|----------------|--------------------------|----------------------|
-| Stacked Bar | BarChart + multiple Bar (same stackId) | Prop variation on BarLineChart |
-| Grouped Bar | BarChart + multiple Bar (different dataKeys) | Prop variation on BarLineChart |
-| Horizontal Bar | BarChart with layout="vertical" | Prop variation on BarLineChart |
-| Stacked Area | AreaChart + multiple Area (stackId) | Prop variation on AreaChartComponent |
-| 100% Stacked Bar | BarChart + percentage data normalization | Data transform + BarChart |
-| Radial Bar / Gauge | RadialBarChart + RadialBar | New component (RadialBarChartComponent.tsx) |
-| Pie (non-donut) | PieChart + Pie (innerRadius=0) | Prop variation on DonutChart |
-| Multi-Line | LineChart + multiple Line | Prop variation on BarLineChart |
-| Combo (multi-series) | ComposedChart + mixed Bar/Line/Area | Extended BarLineChart |
-| Bullet Chart | BarChart with reference lines | Custom composition (BarChart + ReferenceLine) |
-| Mini Sparkline | LineChart (no axis, minimal) | Thin wrapper, already partially in KpiCard |
+**Usage pattern in wireframe components:**
 
-### 3. No New UI Libraries Needed
+```tsx
+// Parent container: mark as @container
+<div className="@container rounded-lg border border-wf-card-border bg-wf-card">
+  {/* Child: respond to container width, not viewport */}
+  <div className="flex flex-col @md:flex-row @md:items-center gap-3">
+    <p className="text-2xl font-bold @md:text-3xl">{value}</p>
+  </div>
+</div>
+```
 
-**shadcn/ui Chart component (NOT recommended):**
-shadcn/ui offers a Chart component (`npx shadcn-ui@latest add chart`) that wraps Recharts with ChartContainer, ChartTooltip, and ChartConfig abstractions. However:
+**When to use it:** Only in KpiCard and KpiCardFull where the same component appears in 1, 2, or 3
+column grids. Do NOT apply `@container` to section wrappers — those already use the viewport-level
+grid system. Overusing container queries adds unnecessary nesting complexity.
 
-- The project already has a mature charting pattern: each chart component wraps Recharts directly with --wf-* token integration and chartColors passthrough
-- Adding ChartContainer would create two competing wrappers
-- The ChartConfig pattern (mapping data keys to labels/colors) conflicts with the blueprint-driven approach where config comes from BlueprintSection types
-- Zero value-add for wireframe components that already handle responsive sizing and theming
-
-**Verdict:** Continue using Recharts directly. The existing pattern (ResponsiveContainer + chart + --wf-* tokens + chartColors prop) is clean and consistent across 9 chart components. Extending it to 20+ follows the same pattern.
+**Confidence:** HIGH — peerDependencies verified against npm registry. Plugin is stable (2023, no
+reported issues with Tailwind 3.4). Official Tailwind docs confirm this is the Tailwind 3 path.
 
 ---
 
-## Blueprint Schema Additions (Pure TypeScript/Zod)
+## Icon Strategy: Keep lucide-react, Do NOT Add Material Symbols
 
-### Layout Shell Configuration
+**Decision: Keep lucide-react exclusively. Do not install any Material Symbols package.**
 
-Currently, sidebar/header/filter bar are separate components outside the blueprint schema. For v1.3, they become configurable at the blueprint level. This requires schema evolution, not new libraries.
+### Why the HTML reference uses Material Symbols but we should not
 
-**New types needed in blueprint.ts:**
-```typescript
-// Blueprint-level layout configuration (new in v1.3)
-export type SidebarConfig = {
-  enabled: boolean
-  width?: number            // default: 48 (w-48 = 192px)
-  logo?: string             // icon name from lucide-react
-  title?: string            // brand label
-  collapsible?: boolean     // allow toggle
-  groups?: {
-    label?: string
-    items: { screenId: string; label: string; icon?: string }[]
-  }[]
-}
+The HTML reference was a quick prototype built with Google CDN tools, not a React project. It uses
+Material Symbols as a webfont because that's the easiest path for a static HTML file. In a Vite +
+React project, the calculus is different.
 
-export type HeaderConfig = {
-  enabled: boolean
-  height?: number           // default: 56px
-  title?: string
-  showPeriodSelector?: boolean
-  periodType?: PeriodType
-  actions?: { label: string; icon?: string; variant?: 'primary' | 'ghost' }[]
-}
+### Why lucide-react is the correct choice for this codebase
 
-export type FilterBarConfig = {
-  enabled: boolean
-  position?: 'below-header' | 'inline-content'
-  filters: FilterOption[]
-  showSearch?: boolean
-  showCompareSwitch?: boolean
-}
+| Criterion | lucide-react | Material Symbols (any approach) |
+|-----------|-------------|----------------------------------|
+| Already in codebase | Yes — 86 component files import from it | No — would require audit + migration |
+| Tree-shaking | Per-icon SVG import, zero unused bundle | webfont: loads all 2500+ icons; SVG pkg: needs careful import discipline |
+| Tailwind integration | `className` prop, `currentColor` fill | Same for SVG packages; webfont uses CSS font-size for sizing |
+| Consistency with app | Entire FXL Core app uses lucide-react | Mixing sets creates visual inconsistency (stroke weight, grid size) |
+| TypeScript | Fully typed, named exports | Varies by package; some packages have 3000+ named exports |
+| Maintenance surface | One package, stable API | Adds new dependency for visual-only reason |
+| Design delta | New dashboard design uses filled/outlined icons — lucide has both styles via `fill` prop | Only reason to switch |
 
-// Extended BlueprintConfig
-export type BlueprintConfig = {
-  slug: string
-  label: string
-  schemaVersion?: number      // bump to 2
-  layout?: {                  // NEW -- layout shell config
-    sidebar?: SidebarConfig
-    header?: HeaderConfig
-    filterBar?: FilterBarConfig
-  }
-  screens: BlueprintScreen[]
-}
+### What "matching the reference design" actually requires
+
+The reference HTML uses filled/outlined icon variants for visual hierarchy (filled = active state,
+outlined = default). **lucide-react achieves this with the `fill` prop and `strokeWidth` control:**
+
+```tsx
+// Default (outline, equivalent to Material Symbols Outlined)
+<LayoutDashboard size={20} strokeWidth={1.5} />
+
+// Active/filled state (equivalent to Material Symbols Filled)
+<LayoutDashboard size={20} fill="currentColor" strokeWidth={0} />
 ```
 
-**Zod schema extension** follows the existing pattern (add schemas to blueprint-schema.ts, export for registry). The recursive BlueprintSectionSchema is unaffected -- layout config is at the BlueprintConfig level, not section level.
+The specific icon vocabulary differs (lucide has `LayoutDashboard`, not Material's `grid_view`),
+but dashboard icons — home, charts, settings, user, notifications, search — exist in both sets.
+Map Material Symbols icon names to lucide equivalents during component implementation, not during
+research. This is a one-time naming exercise, not a structural problem.
 
-**Schema migration:** The existing `schemaVersion: 1` data will work as-is (layout field is optional). New blueprints with layout config get `schemaVersion: 2`. The migration path is additive, not breaking.
+**Confidence:** HIGH — lucide-react is already installed and used throughout the project. The
+decision to not add Material Symbols is based on existing codebase analysis, bundle architecture,
+and the absence of any capability gap that would justify the migration cost.
 
 ---
 
-## ChartType Enum Expansion
+## CSS Features: Already Supported, No New Packages
 
-The current `ChartType` union covers 8 values:
-```typescript
-export type ChartType = 'bar' | 'line' | 'bar-line' | 'radar' | 'treemap' | 'funnel' | 'scatter' | 'area'
+### backdrop-blur (filter bar, header)
+
+**Status:** Already works. Tailwind 3 ships `backdrop-blur-*` utilities natively.
+**Browser support:** 95.75% globally (Chrome 76+, Firefox 103+, Safari 9+, Edge 17+).
+**Current use in codebase:** The FXL Core app shell already uses `backdrop-blur-md` on the sticky
+header (frosted glass pattern from v1.2). The wireframe filter bar redesign can use the same pattern.
+
+```tsx
+// WireframeFilterBar redesign — works today, no new packages
+<div className="sticky top-14 z-10 backdrop-blur-md bg-wf-canvas/80 border-b border-wf-border">
 ```
 
-**Recommended expansion to 16+ values:**
-```typescript
-export type ChartType =
-  // Existing
-  | 'bar' | 'line' | 'bar-line' | 'radar' | 'treemap' | 'funnel' | 'scatter' | 'area'
-  // New bar variants
-  | 'stacked-bar' | 'grouped-bar' | 'horizontal-bar' | 'stacked-bar-100'
-  // New line/area variants
-  | 'multi-line' | 'stacked-area'
-  // New chart types
-  | 'radial-bar' | 'pie'
+Note: `bg-wf-canvas/80` requires wf-canvas to be a hex value (or hsl) that Tailwind can apply
+opacity to. The current `--wf-canvas: var(--wf-neutral-100)` (a CSS variable reference) does NOT
+work with Tailwind's opacity modifier. **Fix:** update `wf.canvas` in tailwind.config.ts to use
+`color-mix(in srgb, var(--wf-canvas) 80%, transparent)` via inline style for the blur effect, OR
+add a dedicated `--wf-canvas-80` token. See Token Update section below.
+
+### color-mix(in srgb) (badge fills, semi-transparent backgrounds)
+
+**Status:** Already in use. KpiCard.tsx uses `color-mix(in srgb, var(--wf-positive) 10%, transparent)`.
+**Browser support:** 92%+ globally, Baseline Widely Available since May 2023.
+**No changes needed.** Continue using this pattern for all badge/chip backgrounds in the redesign.
+
+```tsx
+// Already established pattern — use for all trend badges, status chips
+style={{
+  backgroundColor: 'color-mix(in srgb, var(--wf-primary) 12%, transparent)',
+  color: 'var(--wf-primary)',
+}}
 ```
 
-**Why this expansion pattern works:**
-- All variants share the `bar-line-chart` section type -- ChartRenderer.tsx dispatches by `chartType`
-- New variants are handled by existing components (BarLineChart) with prop variations, or by new single-file components (RadialBarChartComponent)
-- The Zod schema just extends the z.enum array in BarLineChartSectionSchema
-- The section registry entry for 'bar-line-chart' already covers all chartType sub-variants -- no new registry entries needed for chart sub-types
+### group-hover (KPI card hover effects)
 
-**Separate section types to add (distinct section types, not chartType variants):**
+**Status:** Already supported in Tailwind 3. Mark parent with `group`, children use `group-hover:`.
+**Limitation:** Tailwind's `group-hover:` modifier generates predefined utility classes only — it
+cannot dynamically change CSS custom property values. For hover effects that need to change CSS var
+values, use inline styles + CSS transitions, or add dedicated Tailwind utility classes to the wf
+color palette.
 
-| New Section Type | Purpose | Rationale for Separate Type |
-|-----------------|---------|---------------------------|
-| `radial-bar` | Gauge/radial progress visualization | Different data shape (single value + max, not series data) |
-| `pie-chart` | Standard pie (non-donut) | Could reuse donut with innerRadius=0, but pie has different config (no hole, label layout) |
+**Pattern for KPI card hover effects:**
 
-**Total section types after v1.3: ~23** (21 existing + 2 new). The registry pattern scales cleanly.
+```tsx
+// Correct pattern: group-hover with standard Tailwind utilities
+<div className="group rounded-lg border border-wf-card-border bg-wf-card
+                transition-shadow hover:shadow-md cursor-pointer">
+  <div className="text-wf-muted group-hover:text-wf-body transition-colors">
+    {label}
+  </div>
+</div>
+
+// For CSS var changes on hover: use CSS in wireframe-tokens.css directly
+// [data-wf-theme] .group:hover .kpi-trend { color: var(--wf-primary); }
+```
+
+### Inter font weight axis (extrabold headings)
+
+**Status:** Already loaded via `@fontsource-variable/inter` (package already installed, font-sans
+already configured). The variable font covers weights 100–900, including `font-extrabold` (800)
+and `font-black` (900). No new font package needed.
+
+```tsx
+// Already works — Inter Variable supports all weights
+<h1 className="text-4xl font-extrabold tracking-tight text-wf-heading">
+```
+
+### tracking-widest, text-[10px], text-[11px] (micro labels)
+
+**Status:** Supported natively. `tracking-widest` is a core Tailwind utility.
+Arbitrary text sizes like `text-[10px]` and `text-[11px]` work with Tailwind 3's JIT engine —
+no configuration needed.
+
+---
+
+## Token System Updates: wireframe-tokens.css
+
+The v1.4 redesign introduces a new primary color (`#1152d4` — blue, replacing gold accent) and
+new neutral palette (`background-light #f6f6f8`, `background-dark #101622`). The existing
+`--wf-*` token schema is the right structure — only the values and a few new tokens change.
+
+**New tokens to add (in wireframe-tokens.css):**
+
+```css
+[data-wf-theme="light"] {
+  /* Replace warm stone grays with slate scale */
+  --wf-neutral-50:  #f8fafc;   /* slate-50 */
+  --wf-neutral-100: #f1f5f9;   /* slate-100 */
+  --wf-neutral-200: #e2e8f0;   /* slate-200 */
+  --wf-neutral-300: #cbd5e1;   /* slate-300 */
+  --wf-neutral-400: #94a3b8;   /* slate-400 */
+  --wf-neutral-500: #64748b;   /* slate-500 */
+  --wf-neutral-600: #475569;   /* slate-600 */
+  --wf-neutral-700: #334155;   /* slate-700 */
+  --wf-neutral-800: #1e293b;   /* slate-800 */
+  --wf-neutral-900: #0f172a;   /* slate-900 */
+
+  /* New semantic background */
+  --wf-canvas: #f6f6f8;          /* background-light from reference */
+
+  /* Primary blue (replaces gold accent) */
+  --wf-primary: #1152d4;
+  --wf-primary-muted: color-mix(in srgb, #1152d4 12%, transparent);
+  --wf-primary-fg: #ffffff;
+
+  /* Keep --wf-accent as alias for backward compat during transition */
+  --wf-accent: var(--wf-primary);
+  --wf-accent-muted: var(--wf-primary-muted);
+
+  /* New chart palette (blue-first) */
+  --wf-chart-1: #1152d4;   /* primary blue */
+  --wf-chart-2: #4f46e5;   /* indigo-600 */
+  --wf-chart-3: #7c3aed;   /* violet-600 */
+  --wf-chart-4: #0891b2;   /* cyan-600 */
+  --wf-chart-5: #059669;   /* emerald-600 */
+
+  /* Header update: white with blur */
+  --wf-header-bg: rgba(255, 255, 255, 0.85);
+}
+
+[data-wf-theme="dark"] {
+  --wf-canvas: #101622;          /* background-dark from reference */
+  --wf-primary: #3b82f6;         /* blue-500 (brighter for dark bg) */
+  --wf-primary-muted: color-mix(in srgb, #3b82f6 15%, transparent);
+  --wf-primary-fg: #ffffff;
+
+  /* Keep sidebar dark (--wf-sidebar-bg stays slate-900/950) */
+  --wf-sidebar-bg: #0d1117;
+
+  /* New chart palette (brighter for dark) */
+  --wf-chart-1: #60a5fa;   /* blue-400 */
+  --wf-chart-2: #818cf8;   /* indigo-400 */
+  --wf-chart-3: #a78bfa;   /* violet-400 */
+  --wf-chart-4: #22d3ee;   /* cyan-400 */
+  --wf-chart-5: #34d399;   /* emerald-400 */
+}
+```
+
+**Tailwind config additions (tailwind.config.ts) for new wf tokens:**
+
+```typescript
+wf: {
+  // ... existing tokens unchanged ...
+  primary: 'var(--wf-primary)',
+  'primary-muted': 'var(--wf-primary-muted)',
+  'primary-fg': 'var(--wf-primary-fg)',
+}
+```
+
+**Migration note:** `--wf-accent` remains as an alias during v1.4 to avoid breaking 86 component
+files. After v1.4 ships, a cleanup pass can replace `wf-accent` → `wf-primary` across all files.
+The alias (`--wf-accent: var(--wf-primary)`) means no visual regression during the transition.
 
 ---
 
 ## What Stays Unchanged
 
-| Technology | Current Version | Why No Change |
-|------------|----------------|---------------|
-| react | ^18.3.1 | Component expansion is standard React patterns. No hooks/API changes needed. |
-| typescript | ^5.6.3 | Strict mode with z.ZodType for recursive types works. Discriminated unions scale to 23+ types. |
-| tailwindcss | ^3.4.15 | All wireframe styling uses --wf-* CSS vars + Tailwind utilities. No config changes. |
-| vite | ^5.4.10 | No build changes. More components = more tree-shaking-eligible code, no build pipeline impact. |
-| zod | ^4.3.6 | z.discriminatedUnion scales to 23+ types. z.enum scales to 16+ chart types. No Zod changes. |
-| @dnd-kit/core | ^6.3.1 | Drag-reorder in BlueprintRenderer unaffected by new section types. |
-| @dnd-kit/sortable | ^10.0.0 | Same. |
-| lucide-react | ^0.460.0 | New section types need icons -- lucide has 1500+. No version bump needed. |
-| shadcn/ui | current | UI primitives (Switch, Select, Dialog) used in property forms. No new shadcn components needed. |
-| @supabase/supabase-js | ^2.98.0 | Blueprint storage unchanged. Schema evolution is in the JSON payload, not the DB schema. |
+| Technology | Version | Why No Change |
+|------------|---------|---------------|
+| React | ^18.3.1 | Standard component patterns. No new hooks or APIs needed. |
+| TypeScript | ^5.6.3 | Strict mode. No type changes from CSS updates. |
+| Tailwind CSS | ^3.4.15 | Container queries added via plugin (not upgrade). All other patterns already work. |
+| Vite | ^5.4.10 | No build changes. |
+| lucide-react | ^0.460.0 | Stays. All 86 wireframe files keep their current icons. New components use lucide. |
+| recharts | ^2.13.3 | Chart palette updates via chartColors prop — no Recharts changes. |
+| @fontsource-variable/inter | ^5.2.8 | Already loaded, covers all weights including extrabold. |
+| tailwindcss-animate | ^1.0.7 | Transition utilities (hover effects) already covered. |
+| shadcn/ui | current | No new shadcn components for the redesign. |
+| --wf-* token system | — | Schema unchanged. Only values and 2-3 new tokens added. |
 
 ---
 
 ## What NOT to Add
 
+### Material Symbols (any package): DO NOT ADD
+
+The three candidate packages are `react-material-symbols@4.4.0`, `@material-symbols-svg/react@4.4.0`,
+and `@project-lary/react-material-symbols`. All are rejected:
+
+- `react-material-symbols` — webfont ligature approach, loads full font (not tree-shaken)
+- `@material-symbols-svg/react` — SVG components, but adds 3000+ named exports, requires
+  discipline in imports to avoid bundle bloat, and creates a two-icon-system in the codebase
+- `@project-lary/react-material-symbols` — same as above
+
+The reference HTML uses Material Symbols because it's a static HTML prototype. React components
+should use what the project already has. lucide-react is already integrated, tree-shaken, and
+used consistently across the entire codebase. Adding Material Symbols to match a prototype aesthetic
+is a dependency with no capability justification.
+
+### Google Fonts CDN for Inter: DO NOT ADD
+
+The reference HTML loads Inter via `fonts.googleapis.com`. The project uses
+`@fontsource-variable/inter` which self-hosts the variable font — faster (no external CDN), works
+offline, and already includes all weights. Do not add a Google Fonts link tag.
+
+### Tailwind v4 Upgrade: DO NOT DO
+
+PROJECT.md explicitly defers this. Container queries are built-in to v4, but the upgrade itself
+has breaking changes (configuration format, CSS-first config, plugin API changes) that are out of
+scope for a visual redesign milestone.
+
 ### Recharts 3.x: DO NOT UPGRADE
-Per PROJECT.md: "Recharts 3.x upgrade -- breaking changes, 2.x tem todos os charts necessarios." The 3.x migration guide (https://github.com/recharts/recharts/wiki/3.0-migration-guide) shows significant API changes. The 2.x line (up to 2.15.4) has every chart type needed for this milestone. The `latest` npm tag points to 3.8.0 -- **do not use `npm install recharts@latest`**, use `npm install recharts@^2.15.4` explicitly.
 
-### D3.js Direct: DO NOT ADD
-Recharts wraps D3 internally. Adding d3 directly would create competing rendering approaches. Every chart type in scope is achievable with Recharts components. If a chart needs custom SVG (e.g., bullet chart), use Recharts' `<ReferenceLine>` and `<ReferenceArea>` components, not raw D3.
+Established constraint from PROJECT.md. The chart palette update for v1.4 is purely in the
+`chartColors` prop and `--wf-chart-*` tokens — no Recharts API changes needed.
 
-### Chart.js / react-chartjs-2: DO NOT ADD
-Mixing charting libraries creates inconsistent theming, different API patterns, and double the bundle size for charts. Recharts covers all BI chart types needed.
+### Framer Motion / React Spring for animations: DO NOT ADD
 
-### nivo / visx: DO NOT ADD
-Same reasoning as Chart.js. These are complete charting frameworks that would conflict with the Recharts-based architecture. nivo has its own theming system that would clash with --wf-* tokens.
-
-### @tanstack/react-table: PREMATURE
-The existing table components (DataTable, DrillDownTable, ClickableTable, ConfigTable) are custom wireframe-styled components with mock data. They render blueprint-defined column/row structure, not real data. @tanstack/react-table is for runtime data management (sorting, filtering, pagination) which is out of scope for wireframe preview components.
-
-### Additional Zod or Form Libraries (react-hook-form, etc.): NOT NEEDED
-Property forms in the editor use controlled state (`onChange` callbacks). The existing pattern (PropertyFormProps with `section` and `onChange`) scales to new section types without form libraries. Zod is used for DB validation, not form validation.
-
-### react-grid-layout or Similar: NOT NEEDED
-The grid system already exists (GridLayoutPicker with '1', '2', '3', '2-1', '1-2' layouts). New section types render within this existing grid. Full Figma-style drag-and-drop is explicitly deferred to v2 (ADVW-04).
-
-### shadcn/ui Charts Component: NOT NEEDED
-As analyzed above, it would create a competing abstraction layer over Recharts. The project's direct Recharts wrapper pattern is more appropriate for wireframe components where theming comes from --wf-* tokens and chartColors prop, not shadcn's ChartConfig.
+The reference design uses CSS transitions (`transition-all`, `transition-colors`) — standard
+Tailwind utilities via `tailwindcss-animate`. No JavaScript animation library is needed for
+hover effects, smooth transitions, or the blur effect. CSS transitions are sufficient and
+keep the bundle lean.
 
 ---
 
@@ -236,13 +353,26 @@ As analyzed above, it would create a competing abstraction layer over Recharts. 
 
 | Recommended | Alternative | Why Not |
 |-------------|-------------|---------|
-| Recharts 2.15.4 (minor bump) | Recharts 3.8.0 (major upgrade) | 3.x has breaking API changes. PROJECT.md explicitly excludes. 2.x has all chart types. |
-| Direct Recharts wrapping | shadcn/ui Chart component | shadcn Charts add ChartContainer/ChartConfig that conflict with --wf-* token approach. |
-| ChartType enum expansion (16 variants) | Separate section types per chart | Would bloat section registry to 35+ types. Chart sub-variants share the same data shape and section config -- only the rendering differs. |
-| Layout config at BlueprintConfig level | Sidebar/Header as section types | Layout shell is not a "section" -- it wraps all sections. Modeling it as section types would break the rendering hierarchy. |
-| RadialBarChart from Recharts | react-gauge-chart npm package | Adds a dependency for one chart type. RadialBarChart + custom component achieves the same with existing recharts. |
-| Custom heatmap via Recharts ScatterChart | nivo HeatMap or react-heatmap | Heatmaps are LOW priority for BI wireframes. If needed later, a custom component using Recharts grid + colored cells is sufficient. Not worth a new dependency. |
-| Pie chart as DonutChart variant (innerRadius=0) | Separate pie-chart section type | RECOMMENDED to keep as variant first, promote to section type only if the config shape diverges significantly. |
+| @tailwindcss/container-queries@0.1.1 | Inline CSS container query styles | Plugin generates consistent `@sm:`, `@md:` utilities; raw CSS in JSX loses Tailwind's utility-first consistency |
+| @tailwindcss/container-queries@0.1.1 | Upgrade to Tailwind v4 (built-in CQ) | v4 upgrade is deferred in PROJECT.md; too broad a change for a visual redesign milestone |
+| lucide-react (keep) | react-material-symbols@4.4.0 | Webfont approach; not tree-shaken; adds external font dependency; 86 files already use lucide |
+| lucide-react (keep) | @material-symbols-svg/react@4.4.0 | 3000+ SVG components; requires import discipline; visual inconsistency mixing icon sets |
+| --wf-primary replacing --wf-accent (alias) | Rename --wf-accent across all 86 files immediately | Alias approach (--wf-accent: var(--wf-primary)) allows incremental migration with zero visual regression risk |
+| color-mix(in srgb) for semi-transparent fills | Hardcoded rgba values | color-mix keeps relationship to token values; rgba values drift out of sync when tokens update |
+| backdrop-blur via Tailwind utility + inline style for opacity | New --wf-canvas-blur token | Inline style is clearer intent for one-off use; a dedicated token adds complexity for a single component |
+
+---
+
+## Installation Plan
+
+```bash
+# New package (devDependency — Tailwind plugin)
+npm install -D @tailwindcss/container-queries
+
+# No other package changes
+```
+
+**Total: 1 new package (dev dependency only). Zero breaking changes. Zero new runtime dependencies.**
 
 ---
 
@@ -250,128 +380,25 @@ As analyzed above, it would create a competing abstraction layer over Recharts. 
 
 | Package | Compatible With | Notes |
 |---------|-----------------|-------|
-| recharts@2.15.4 | react@^18.3.1 | Uses react-is@^18.3.1 internally. Compatible. |
-| recharts@2.15.4 | typescript@^5.6.3 | Ships with @types included. No separate @types/recharts needed. |
-| recharts@2.15.4 | vite@^5.4.10 | Tree-shakes unused chart components. No build config changes. |
-| zod@^4.3.6 | z.enum with 16+ values | z.enum scales to arbitrary string unions. No performance concern. |
-| zod@^4.3.6 | z.discriminatedUnion with 23+ branches | Validated in existing 21-type union. 23 is well within limits. |
-
----
-
-## Chart Type Inventory: Current vs Target
-
-### Currently Implemented (9 chart components)
-
-| # | Chart Type | Component File | Section Type | Blueprint ChartType |
-|---|-----------|---------------|-------------|-------------------|
-| 1 | Bar | BarLineChart.tsx | bar-line-chart | 'bar' |
-| 2 | Line | BarLineChart.tsx | bar-line-chart | 'line' |
-| 3 | Bar+Line Combo | BarLineChart.tsx | bar-line-chart | 'bar-line' |
-| 4 | Donut | DonutChart.tsx | donut-chart | n/a (own type) |
-| 5 | Waterfall | WaterfallChart.tsx | waterfall-chart | n/a (own type) |
-| 6 | Pareto | ParetoChart.tsx | pareto-chart | n/a (own type) |
-| 7 | Radar | RadarChartComponent.tsx | bar-line-chart | 'radar' |
-| 8 | Treemap | TreemapComponent.tsx | bar-line-chart | 'treemap' |
-| 9 | Funnel | FunnelChartComponent.tsx | bar-line-chart | 'funnel' |
-| 10 | Scatter | ScatterChartComponent.tsx | bar-line-chart | 'scatter' |
-| 11 | Area | AreaChartComponent.tsx | bar-line-chart | 'area' |
-
-*(Note: 11 logical types, 9 distinct component files -- bar/line/bar-line share BarLineChart.tsx)*
-
-### New Chart Types for v1.3 (target: 20+ total)
-
-| # | New Chart Type | Implementation | Recharts Components | Effort |
-|---|---------------|---------------|-------------------|--------|
-| 12 | Stacked Bar | Extend BarLineChart | BarChart + multiple Bar (stackId) | Low |
-| 13 | Grouped Bar | Extend BarLineChart | BarChart + multiple Bar | Low |
-| 14 | Horizontal Bar | Extend BarLineChart | BarChart (layout="vertical") | Low |
-| 15 | 100% Stacked Bar | New component or extend | BarChart + percentage normalization | Medium |
-| 16 | Stacked Area | Extend AreaChartComponent | AreaChart + multiple Area (stackId) | Low |
-| 17 | Multi-Line | Extend BarLineChart | LineChart + multiple Line | Low |
-| 18 | Radial Bar / Gauge | New: RadialBarChartComponent.tsx | RadialBarChart + RadialBar | Medium |
-| 19 | Pie (non-donut) | Variant of DonutChart | PieChart + Pie (innerRadius=0) | Low |
-| 20 | Combo Multi-Series | Extend BarLineChart | ComposedChart + mixed types | Medium |
-| 21 | Bullet | New: BulletChartComponent.tsx | BarChart + ReferenceLine | Medium |
-
-**Total after v1.3: 21 chart types minimum** (11 existing + 10 new), achievable with 2-3 new component files and extensions to existing ones.
-
-### Chart Types Explicitly Deferred
-
-| Chart Type | Why Defer | Recharts Support |
-|-----------|----------|-----------------|
-| Sankey | Complex data shape (links + nodes). Niche BI use. | Yes (Sankey component) |
-| Sunburst | Hierarchical data rare in PME BI. | Yes (SunburstChart) |
-| Heatmap | Not a native Recharts component. Needs custom SVG or ScatterChart hack. | Partial |
-| Calendar Chart | GitHub-contribution-style. Not standard BI. | No (would need custom) |
-| Bubble Chart | Niche. Can be approximated via ScatterChart with variable size. | Partial |
-
----
-
-## Implementation Pattern for New Charts
-
-All new chart components follow the **established pattern** visible in existing components:
-
-```typescript
-// Pattern: tools/wireframe-builder/components/[Name]ChartComponent.tsx
-
-import { [Container], [Items], ResponsiveContainer, Tooltip } from 'recharts'
-
-type Props = {
-  title: string
-  height?: number
-  chartColors?: string[]  // Brand palette passthrough
-  // Chart-specific props
-}
-
-export default function [Name]ChartComponent({ title, height = 250, chartColors }: Props) {
-  const data = MOCK_DATA  // Wireframe = mock data always
-
-  return (
-    <div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-      <p className="mb-3 text-sm font-semibold text-wf-heading">{title}</p>
-      <ResponsiveContainer width="100%" height={height}>
-        {/* Recharts chart here */}
-      </ResponsiveContainer>
-    </div>
-  )
-}
-```
-
-**Key invariants maintained:**
-- --wf-card, --wf-card-border, --wf-heading tokens for container
-- chartColors prop for brand color passthrough
-- ResponsiveContainer for sizing
-- Mock data (wireframes show structure, not real data)
-- TypeScript strict, zero `any`
-
-**For chart sub-variants (stacked, grouped, horizontal):** extend ChartRenderer.tsx's switch statement with new chartType cases, reusing BarLineChart with additional props or minor modifications.
-
----
-
-## Installation Plan
-
-```bash
-# Single dependency update -- minor version bump
-npm install recharts@^2.15.4
-```
-
-**Total: 0 new packages, 1 minor version bump.** Everything else is application code.
-
-**Bundle size impact:** Negligible. Recharts 2.15.4 is the same size as 2.13.3 (same major features). New chart components import from the same recharts package -- tree-shaking handles unused chart containers.
+| @tailwindcss/container-queries@0.1.1 | tailwindcss@^3.4.15 | peerDependencies: tailwindcss >= 3.2.0. Verified. |
+| @tailwindcss/container-queries@0.1.1 | tailwindcss-animate@^1.0.7 | Both are plugins in the same array. No conflicts. |
+| color-mix(in srgb) | All target browsers | 92%+ global support. Baseline Widely Available since May 2023. Already used in production in KpiCard.tsx. |
+| backdrop-filter: blur | All target browsers | 95.75% global support. Chrome 76+, Firefox 103+, Safari 9+. Already used in FXL Core app shell header. |
 
 ---
 
 ## Sources
 
-- [Recharts API Documentation](https://recharts.github.io/en-US/api/) -- full list of chart containers and components (HIGH confidence)
-- [npm: recharts versions](https://www.npmjs.com/package/recharts) -- 2.15.4 confirmed as latest stable 2.x via `npm view recharts versions --json` (HIGH confidence)
-- [Recharts GitHub Releases](https://github.com/recharts/recharts/releases) -- 3.x migration guide confirms breaking changes (HIGH confidence)
-- [Recharts 3.0 Migration Guide](https://github.com/recharts/recharts/wiki/3.0-migration-guide) -- breaking changes documented (HIGH confidence)
-- [shadcn/ui Chart Component](https://ui.shadcn.com/docs/components/radix/chart) -- thin Recharts wrappers, not needed for this project (HIGH confidence)
-- [Recharts Stacked Bar Example](https://recharts.github.io/en-US/examples/StackedBarChart/) -- stackId pattern verified (MEDIUM confidence)
-- [Recharts RadialBarChart API](https://recharts.github.io/en-US/api/RadialBarChart/) -- gauge/radial bar capability verified (MEDIUM confidence)
-- Existing codebase analysis: 11 chart components, 21 section types, section-registry.tsx, blueprint-schema.ts, ChartRenderer.tsx, BlueprintRenderer.tsx, ComponentGallery.tsx (HIGH confidence)
+- [npm: @tailwindcss/container-queries](https://www.npmjs.com/package/@tailwindcss/container-queries) — version 0.1.1, peerDep tailwindcss >= 3.2.0 (HIGH confidence, npm registry)
+- [GitHub: tailwindlabs/tailwindcss-container-queries](https://github.com/tailwindlabs/tailwindcss-container-queries) — official plugin, compatible with Tailwind 3.2+ (HIGH confidence, official source)
+- [Tailwind CSS v3 docs: hover-focus-and-other-states](https://v3.tailwindcss.com/docs/hover-focus-and-other-states) — group-hover pattern and limitations (HIGH confidence, official docs)
+- [Can I use: CSS backdrop-filter](https://caniuse.com/css-backdrop-filter) — 95.75% global support (HIGH confidence, caniuse)
+- [Can I use: color-mix()](https://caniuse.com/mdn-css_types_color_color-mix) — 92%+ global support, Baseline Widely Available (HIGH confidence, caniuse)
+- [Google Fonts: Material Symbols guide](https://developers.google.com/fonts/docs/material_symbols) — webfont approach, variable font axes (HIGH confidence, official Google docs)
+- [npm: react-material-symbols@4.4.0](https://www.npmjs.com/package/react-material-symbols) — version confirmed via npm registry (HIGH confidence)
+- [Lucide: lucide-react guide](https://lucide.dev/guide/packages/lucide-react) — icon customization including fill/strokeWidth props (HIGH confidence, official docs)
+- Existing codebase analysis: 86 wireframe component files, wireframe-tokens.css (~45 vars), tailwind.config.ts, KpiCard.tsx (color-mix pattern), WireframeHeader.tsx, package.json (HIGH confidence, direct inspection)
 
 ---
-*Stack research for: FXL Core v1.3 Builder & Components*
-*Researched: 2026-03-10*
+*Stack research for: FXL Core v1.4 Wireframe Visual Redesign*
+*Researched: 2026-03-11*

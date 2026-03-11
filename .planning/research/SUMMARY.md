@@ -1,164 +1,193 @@
 # Project Research Summary
 
-**Project:** FXL Core v1.3 -- Builder & Components
-**Domain:** BI Dashboard Wireframe Builder -- configurable layout shell, chart type expansion, gallery reorganization
-**Researched:** 2026-03-10
+**Project:** FXL Core v1.4 — Wireframe Visual Redesign
+**Domain:** CSS token migration + BI dashboard component visual redesign (financial dashboard aesthetic)
+**Researched:** 2026-03-11
 **Confidence:** HIGH
 
 ## Executive Summary
 
-FXL Core v1.3 expands the wireframe builder from a content-section system (21 section types, 11 chart types) into a full-dashboard authoring tool where the entire dashboard chrome -- sidebar, header, filter bar -- is declarative and blueprint-driven. The second pillar is chart coverage: expanding from 11 to 20+ chart types to match Power BI and Metabase parity for PME BI use cases. The third is reorganizing the component gallery from a hardcoded flat list into a registry-driven, categorized experience. The critical finding across all research: zero new npm packages are required. Recharts 2.x already ships every chart container needed, and the layout/schema work is pure TypeScript/Zod application code. The only dependency change is a minor Recharts bump (2.13.3 to 2.15.4).
+The v1.4 milestone is a visual redesign of the existing wireframe component library — replacing the warm stone + gold palette with a professional financial dashboard aesthetic (primary blue `#1152d4`, slate neutrals, dark slate-950 sidebar). All four research areas converge on the same conclusion: the underlying architecture is already well-suited to this change. The CSS token system (`wireframe-tokens.css` scoped to `[data-wf-theme]`) means the vast majority of components (approximately 75 of 85) update automatically when token values change. Only 10 files require structural JSX edits. The stack change required is exactly one new dev dependency: `@tailwindcss/container-queries@0.1.1`.
 
-The recommended approach is schema-first: extend `BlueprintConfig` with a `layout` field for sidebar/header/filter bar configuration (dashboard-level, not section-level), expand the `ChartType` enum for cartesian chart variants, and introduce new section types only for charts with fundamentally different data shapes (gauge, radial-bar). Layout elements must NOT be modeled as section types -- they are shell/chrome that wraps all screens, not content within a screen. This is the single most important architectural decision and getting it wrong would require a painful schema migration later. The gallery should be refactored to consume the section registry before new components are added, not after.
+The recommended execution strategy is token-first and incremental. Phase 1 updates only `wireframe-tokens.css` and `tailwind.config.ts`, which immediately propagates the new palette to ~55 auto-updating components. Subsequent phases handle the 7 components requiring structural JSX changes (sidebar, header, filter bar, KPI cards, tables) independently of each other. This approach yields visible progress after a single small commit, reduces regression surface at each step, and makes the work reviewable in isolation. The alternative — a big-bang simultaneous redesign — turns a low-risk CSS migration into a high-risk 86-file PR.
 
-The primary risks are: (1) blueprint schema migration corrupting existing client data in Supabase if new fields are required instead of optional, (2) the discriminated union and section registry becoming unmaintainable as types grow from 21 toward 26+, and (3) the wireframe viewer's z-index/layout stack breaking when the header is restructured to sit above the sidebar. All three are mitigable with upfront design decisions in Phase 1 before any component implementation begins.
+The primary risks are not in implementation complexity but in discipline: renaming existing `--wf-*` tokens (breaks 240 usages silently, no TypeScript enforcement), updating light-mode tokens without updating their dark-mode counterparts, and introducing hardcoded hex values or Radix portal-based components during JSX restructures. All of these are entirely avoidable with explicit checklists. The secondary risk is ensuring client branding (`financeiro-conta-azul`, `primaryColor: '#1B6B93'`) still overrides the new `--wf-primary` token correctly after the redesign.
 
 ## Key Findings
 
 ### Recommended Stack
 
-Zero new packages. The existing stack (React 18, TypeScript 5, Tailwind 3, Recharts 2.x, Zod 4, shadcn/ui, dnd-kit) covers every v1.3 requirement. The only change is a Recharts minor bump for bug fixes in RadialBarChart and FunnelChart rendering.
+The existing stack requires no version upgrades. One new plugin is needed: `@tailwindcss/container-queries@0.1.1`, which enables `@container` + `@sm:`/`@md:` responsive utilities for KPI cards that appear in 1-column, 2-column, and 3-column grid layouts at the same viewport width. All other CSS patterns used in the HTML reference (backdrop-blur, color-mix, group-hover, Inter extrabold) are already supported by Tailwind 3.4 and the existing browser baseline. The icon library stays as lucide-react — the HTML reference uses Material Symbols only because it is a static prototype; switching would touch 86 component files and add a bundle dependency with no capability gap.
 
-**Core technologies (unchanged, confirmed adequate):**
-- **Recharts 2.15.4:** All 12 chart containers built in; 3 unused ones (RadialBarChart, Sankey, SunburstChart) become available without new imports. Recharts 3.x is explicitly excluded (breaking API changes, per PROJECT.md).
-- **Zod 4.3:** Discriminated union scales to 26+ types. `z.enum` scales to 16+ chart type values. Schema migration system already proven with v0-to-v1.
-- **TypeScript 5.6 strict:** Discriminated unions and template literal types handle the expanded type system. Monitor compile time if types exceed 40.
-- **shadcn/ui Charts component:** Evaluated and rejected -- it adds a ChartContainer/ChartConfig abstraction that conflicts with the existing `--wf-*` token + `chartColors` prop pattern. Continue wrapping Recharts directly.
+**Core technologies:**
+- `@tailwindcss/container-queries@0.1.1` (new devDep): KPI card responsive layout at container level, not viewport — peerDep compatible with Tailwind 3.4.15, verified on npm registry
+- `--wf-* CSS token system` (existing, primary change surface): update values in `wireframe-tokens.css`, zero component file renames
+- `lucide-react@0.460` (existing, keep): 86 files import it; icon fill/strokeWidth props replicate the filled/outlined icon variants from the reference design
+- `color-mix(in srgb, ...)` (existing): all semi-transparent badge fills, already 92%+ browser support baseline
+- `backdrop-filter: blur` via Tailwind `backdrop-blur-sm` (existing): sticky filter bar blur, 95.75% browser support, already used in app shell header
 
-**What NOT to add:** D3.js, Chart.js, nivo, visx, react-grid-layout, @tanstack/react-table, react-hook-form. Each was evaluated and excluded for concrete reasons (see STACK.md).
+**Critical constraint:** Do NOT upgrade Tailwind v4, Recharts 3.x, or add Material Symbols/Framer Motion — all explicitly excluded.
 
 ### Expected Features
 
-**Must have (table stakes):**
-- Configurable sidebar via blueprint schema (groups, icons, collapsible, derived from screens)
-- Configurable header via blueprint schema (period selector toggle, action buttons, full-width above sidebar)
-- Extended filter types with discriminator (`select`, `multi-select`, `date-range`, `search`)
-- Stacked bar, stacked area, horizontal bar chart variants (every BI tool has these)
-- Gauge/radial meter chart (KPI vs target -- standard in Metabase, Power BI)
-- Bubble chart variant (scatter with size dimension)
-- Gallery organized by thematic sections from section registry categories
-- Softer wireframe palette (less harsh blacks)
+The HTML reference (`dummy.html`) is the ground truth for all feature decisions. Features fall into a strict dependency order: token system must be done before any component changes; gallery update must be done last.
 
-**Should have (differentiators):**
-- Blueprint-driven layout hierarchy (entire dashboard structure as typed schema -- no competitor does this for wireframes)
-- Composed chart with configurable multi-series
-- Sidebar badge counts, footer with version/environment
-- Boolean toggle filter, date-range calendar widget
-- Logo/brand display in header
+**Must have (table stakes — core redesign):**
+- CSS token update: primary blue `#1152d4`, background-light `#f6f6f8`, background-dark `#101622`, slate chart palette — all other visual changes flow from this
+- KpiCard: icon slot with `bg-primary/10` container, `rounded-full` trend badge, `font-extrabold` value text, `group`/`group-hover:` card hover effects
+- DataTable: `tracking-widest font-black` th headers + dark `<tfoot>` row with totals (`--wf-table-footer-bg`/`fg` tokens)
+- WireframeSidebar: icon rendering per nav item, section group micro-labels (`text-[10px] font-bold uppercase tracking-wider`), footer status block with green pulse dot
+- WireframeHeader: right-side search input + notification bell + user chip with avatar `ring-primary hover`
+- WireframeFilterBar: `backdrop-blur-sm` sticky container + 10px bold uppercase filter labels
+- Chart palette: update `--wf-chart-1` through `--wf-chart-5` from gold/amber to blue/slate/indigo scale
+- Table audit: apply same `tracking-widest font-black` header treatment to ClickableTable, DrillDownTable, ConfigTable
+- Inter `font-extrabold` pass: card titles, KPI values, page h1
+
+**Should have (polish pass, P2):**
+- KpiCard sparkline: 4-column pure-CSS mini bar chart as `sparkline?: number[]` prop — zero Recharts dependency
+- CompositionBar: new component for multi-segment stacked horizontal bar + color legend
+- Custom chart header legend: replaces Recharts default `<Legend>` with header-aligned custom rendering
+- Table status dot column: `type: 'status'` on Column definition renders `h-2 w-2 rounded-full` with ring
+- DetailViewSwitcher audit: verify existing component matches the pill-tab reference pattern
 
 **Defer to v2+:**
-- Map/geographic charts (heavy dependency, niche for PME)
-- Pivot table / matrix (extreme complexity, react-pivottable needed)
-- Cross-chart filtering (meaningless with mock data, requires global state)
-- Sankey, sunburst, histogram, box plot (niche/statistical, low PME demand)
-- Nested sidebar 3+ levels, drag-and-drop sidebar reordering
+- CSS-only animated charts (keyframe animations distract from wireframe UX review)
+- Custom WebKit scrollbar styling (cross-browser risk for cosmetic gain)
+- Replace Recharts with CSS-only charts (regression risk across 14 chart types)
+- Full dark-first mode redesign (light is primary; dark inherits via `[data-wf-theme="dark"]` block)
 
 ### Architecture Approach
 
-The architecture extends three established patterns: (1) section registry for new chart types, (2) blueprint schema for layout configuration, and (3) ChartRenderer dispatch for chart sub-variants. The key structural change is lifting sidebar/header/filter bar from hardcoded elements in `WireframeViewer.tsx` into configurable components driven by `BlueprintConfig.layout`. Content sections continue to flow through the existing `SectionRenderer -> SECTION_REGISTRY -> Renderer` pipeline unchanged. Gallery becomes registry-driven (auto-generated from `getCatalog()`) with a separate curated tier for shell components.
+The token architecture enforces a strict four-layer hierarchy: CSS token definition (`wireframe-tokens.css`) → theme provider (sets `data-wf-theme` attribute) → Tailwind alias layer (`tailwind.config.ts` `wf:` block) → component layer (85 files using Pattern A Tailwind classes, Pattern B inline `var()`, or Pattern C `color-mix()`). The key architectural insight: ALL token changes are purely CSS-side — zero component file edits required for value-only updates. Only structural JSX changes (new search input, icon slots, group hover classes) touch component files. Three new CSS tokens must be added (`--wf-header-search-bg`, `--wf-table-footer-bg`, `--wf-table-footer-fg`) and two hardcoded values must be converted to tokens (`--wf-accent-muted` from static `rgba()` to `color-mix()`, `GaugeChartComponent` `#f59e0b` to `--wf-warning`).
 
-**Major components and their v1.3 changes:**
-1. **BlueprintConfig schema** -- gains `layout?: { sidebar, header, filterBar }` at config level (not screen level). Schema version bumps. All new fields optional for backward compatibility.
-2. **WireframeViewer** -- restructured from `flex row (sidebar + column(header, main))` to `flex column (header + row(sidebar, main))`. Header becomes full-width, highest z-order.
-3. **Section registry + ChartRenderer** -- adds 5 new `chartType` sub-variants to `bar-line-chart`, plus 1-2 new section types (`gauge-chart`, potentially `radial-bar-chart`) with full registry entries.
-4. **ComponentGallery** -- refactored from hardcoded imports to registry-driven tier (sections from `SECTION_REGISTRY`) + curated tier (shell components).
-5. **Property forms** -- shared field components extracted (`TitleField`, `HeightField`, `EnumSelector`) before building new forms.
+**Major components by migration category:**
+1. `wireframe-tokens.css` + `tailwind.config.ts` — Phase 1 sole targets; 75 components auto-update
+2. `WireframeSidebar`, `WireframeHeader`, `WireframeFilterBar` — structural JSX expansion, new sub-elements
+3. `KpiCard`, `KpiCardFull` — JSX restructure for hover group pattern (cannot use inline styles for `group-hover:`)
+4. `DataTable`, `DrillDownTable` — additive `<tfoot>` rendering with new footer tokens
+5. `ScreenManager` — cosmetic sync with WireframeSidebar, behavior unchanged
+6. Component gallery — smoke test only, no development; auto-reflects component changes
 
 ### Critical Pitfalls
 
-1. **Layout vs content confusion (CRITICAL)** -- Sidebar/header modeled as section types would break the rendering hierarchy (drag-reorderable, deletable, inside scroll area). Model them at `BlueprintConfig.layout` level. Decide this in Phase 1 before any implementation.
+1. **Renaming or removing existing `--wf-*` tokens** — 240 usages across 31 files fail silently (CSS custom properties have no TypeScript enforcement). Prevention: change values only, never names. Add aliases for backward compat. Run `grep -r 'wf-[token-name]'` before any removal.
 
-2. **Blueprint migration corrupts data (CRITICAL)** -- The `loadBlueprint()` write-back-immediately pattern overwrites original data with migrated data. If the v2 schema rejects old data, client blueprints appear to vanish. Make all new fields optional, add snapshot tests with real client data, consider a backup column.
+2. **Recharts legend/tooltip ignoring CSS var updates** — `fill="var(--wf-chart-1)"` works for SVG bars but Recharts Legend renders HTML spans where color may not re-resolve after token changes. Prevention: implement `useWireframeChartPalette()` hook that calls `getComputedStyle` to resolve tokens to hex strings at runtime, re-executed on theme change.
 
-3. **Discriminated union scaling (HIGH)** -- At 40+ types, TypeScript compile time degrades (O(n^2) pairwise comparison). The `z.ZodType` annotation erases type inference. Split schemas by category before adding types, not after.
+3. **Dark mode breakage from light-only token updates** — `[data-wf-theme="light"]` and `[data-wf-theme="dark"]` blocks are independent. Updating one without the other produces visible inconsistency. Prevention: always update both blocks in the same file edit; visual gallery dark-mode pass after every component phase.
 
-4. **ChartRenderer switch explosion (HIGH)** -- The `bar-line-chart` section is already overloaded with 8 sub-variants. Adding 5 more is acceptable. Adding 15+ creates a god-object schema. Keep cartesian variants in `bar-line-chart`, give unique data shapes their own section types.
+4. **WireframeThemeProvider boundary violations** — All `var(--wf-*)` tokens only resolve inside the `data-wf-theme` container div. Radix UI portals (shadcn `Select`, `Dialog`, `Tooltip`) render into `document.body`, outside the boundary. Prevention: never introduce shadcn portal-based components in wireframe components; use absolutely-positioned divs for dropdowns as current components do.
 
-5. **Z-index stacking breaks on layout restructure (MEDIUM)** -- Moving header from inside-content to above-sidebar cascades through AdminToolbar, PropertyPanel, CommentOverlay, and modals. Define a z-index scale before restructuring, extract a `WireframeShell` component.
+5. **Client branding break via new `--wf-primary` token** — The `financeiro-conta-azul` client has `primaryColor: '#1B6B93'`. If redesigned components use `--wf-primary` for interactive elements but `generateBrandCssVars()` does not map `--brand-primary` to override `--wf-primary`, the client's teal is ignored. Prevention: decide branding overridability for each new token in Phase 1; update `generateBrandCssVars()` accordingly; test with the pilot client after every phase.
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure:
+Based on the dependency graph validated by all four research files, the phase structure is clear and non-negotiable in terms of ordering. Phase 1 is the only strict blocker for everything else. Phases 2-6 are independent of each other once Phase 1 is committed.
 
-### Phase 1: Schema Foundation & Layout Restructure
-**Rationale:** Every downstream phase depends on the type system, Zod schemas, and layout hierarchy being correct. Schema design errors compound -- a wrong decision here requires migrating every stored blueprint later. This is the highest-risk, lowest-code-volume phase.
-**Delivers:** Extended `BlueprintConfig` with `layout` field, expanded `ChartType` enum, new section type definitions (gauge-chart, radial-bar-chart), Zod schemas, schema migration v1-to-v2 with snapshot tests, WireframeViewer layout restructure (header above sidebar), z-index scale, Recharts bump to 2.15.4.
-**Addresses features:** SidebarConfig, HeaderConfig, FilterOption type extension, header-above-sidebar layout, "Gerenciar" as header button.
-**Avoids pitfalls:** Layout-vs-content confusion (Pitfall 2), migration data corruption (Pitfall 3), z-index stacking (Pitfall 7).
+### Phase 1: Token Foundation
+**Rationale:** Every subsequent visual change depends on the token system being correct first. This phase touches 0 component files — only 2 files (`wireframe-tokens.css`, `tailwind.config.ts`) — yet immediately updates ~55 components automatically via CSS cascade. Highest leverage-to-risk ratio of any commit in the milestone.
+**Delivers:** New slate neutral scale, primary blue `#1152d4` replacing gold `#d4a017`, updated chart palette (5 tokens per theme), 3 new tokens (`--wf-header-search-bg`, `--wf-table-footer-*`), `--wf-warning` token for GaugeChartComponent, `--wf-accent-muted` converted from static `rgba()` to `color-mix()`, `@tailwindcss/container-queries` installed, branding overridability decision documented.
+**Addresses:** Token table stakes from FEATURES.md; chart palette; Pitfalls 1, 2, 3, 5, 8.
+**Avoids:** Any token rename — values only; both light AND dark blocks updated in the same edit.
 
-### Phase 2: Chart Type Expansion
-**Rationale:** Chart components are independent of each other and parallelizable. Each follows the proven section registry pattern (type + schema + component + renderer + form + registry entry). Low risk per component, high cumulative value.
-**Delivers:** 5 new chartType sub-variants (stacked-bar, grouped-bar, horizontal-bar, stacked-area, multi-line/bubble) in ChartRenderer, 1-2 new section types (gauge-chart, radial-bar-chart) with full registry entries, updated property forms with shared field components.
-**Addresses features:** All P1 chart types, gauge chart with target zones, bubble chart.
-**Avoids pitfalls:** ChartRenderer explosion (Pitfall 4) -- keep variant count per section type under 8. Property form duplication (Pitfall 6) -- extract shared fields first.
+### Phase 2: Sidebar + Header Chrome
+**Rationale:** Sidebar and header are visible on every wireframe screen. Wrong aesthetic on chrome breaks the overall design impression regardless of content quality. These are independent of each other (sidebar first — simpler, no state management; header second — has period selector state).
+**Delivers:** WireframeSidebar with icon rendering per nav item, section group micro-labels, status footer block with green pulse dot. WireframeHeader with right-side search pill, notification bell, dark mode toggle, divider, user chip with avatar.
+**Uses:** `--wf-header-search-bg` new token from Phase 1; lucide-react icon mapping for sidebar items.
+**Avoids:** No shadcn portal components; all chrome inside `data-wf-theme` div (Pitfall 7). Dark mode visual pass after each component (Pitfall 3).
 
-### Phase 3: Configurable Layout Components
-**Rationale:** Depends on schema from Phase 1 being stable. The sidebar, header, and filter bar components are refactored from hardcoded to config-driven. This is the most complex UI work -- WireframeViewer refactoring, new ConfigurableSidebar/ConfigurableHeader components, LayoutConfigPanel for the editor.
-**Delivers:** ConfigurableSidebar (groups, icons, collapsible), ConfigurableHeader (period selector toggle, actions, full-width), extended WireframeFilterBar (multi-select, date-range, search filter types), LayoutConfigPanel in editor, softer wireframe palette.
-**Addresses features:** Sidebar icons, sidebar groups, collapsible sidebar, configurable header, extended filter types, palette softening.
-**Avoids pitfalls:** Z-index stacking (Pitfall 7) -- uses scale defined in Phase 1. Layout-content confusion (Pitfall 2) -- layout editing is separate from content editing.
+### Phase 3: KPI Cards
+**Rationale:** KPI cards are the first content section on any financial dashboard and have the highest impact on the "premium" feeling of the new design. The `group`/`group-hover:` hover pattern is a known conflict with the existing inline style approach and must be addressed explicitly.
+**Delivers:** `KpiCard` and `KpiCardFull` with icon slot, `rounded-full` trend badge, `font-extrabold` values, `group` hover effects (icon transitions from `bg-primary/10 text-primary` to `bg-primary text-white`), optional `sparkline?: number[]` pure-CSS mini bars. `@container` applied for grid-responsive layout.
+**Avoids:** Do not use inline styles for `group-hover:` variants — must be Tailwind class strings only.
 
-### Phase 4: Gallery Reorganization & Polish
-**Rationale:** Must come last because it depends on all new components and section types existing in the registry. Refactoring the gallery to be registry-driven before all components exist would leave gaps. Refactoring it after is clean.
-**Delivers:** Registry-driven gallery (auto-generated from `getCatalog()`), shell component tier (manually curated sidebar/header/filter bar previews), lazy-loaded category sections, mock data for all new chart types, aligned categories between gallery and ComponentPicker.
-**Addresses features:** Gallery reorganization by thematic sections, all new chart types visible with previews.
-**Avoids pitfalls:** Gallery unmaintainability (Pitfall 5) -- drives from registry, not hardcoded list.
+### Phase 4: Table Components
+**Rationale:** Tables are the most-used section type in financial dashboards. The `<tfoot>` addition is purely additive — zero risk of breaking existing `<tbody>` rendering. All four table components must be updated together to maintain visual consistency.
+**Delivers:** `DataTable`, `ClickableTable`, `DrillDownTable`, `ConfigTable` with `tracking-widest font-black` th headers. `DataTable` and `DrillDownTable` with dark `<tfoot>` totals row using `--wf-table-footer-bg`/`fg` tokens. Optional `status` column type with `h-2 w-2 rounded-full` status dots.
+**Avoids:** Test dark mode table footer contrast after implementation (Pitfall 3). Audit `galleryMockData.ts` for hardcoded hex colors before finalizing (Pitfall 6).
+
+### Phase 5: Filter Bar Enhancement
+**Rationale:** Filter bar is sticky and always visible, making its styling prominent. It also has the highest inline style density in the codebase (46 `--wf-*` references in WireframeFilterBar alone). Deserves its own phase to audit and eliminate hardcoded values before adding `backdrop-blur`.
+**Delivers:** `WireframeFilterBar` with `backdrop-blur-sm` on sticky container, 10px bold uppercase filter labels, action buttons (primary and ghost variants). All hardcoded `fontFamily: 'Inter, sans-serif'` strings removed in favor of Tailwind `font-sans`. All `rgba(0,0,0,N)` shadow values replaced with `--wf-shadow-sm`/`md` tokens (added to Phase 1 if possible, else Phase 5).
+**Avoids:** `backdrop-blur` must be a Tailwind className, not inline `backdropFilter` style (Pitfall 4). Maintain non-portal dropdown approach for filters (Pitfall 7).
+
+### Phase 6: ScreenManager Sync
+**Rationale:** ScreenManager uses `wf-sidebar-*` Tailwind classes and should visually match the redesigned WireframeSidebar to avoid the admin UI looking out-of-sync with the wireframe preview. Cosmetic-only change — behavior unchanged. Must follow Phase 2 (sidebar).
+**Delivers:** `ScreenManager.tsx` updated with Phase 2 sidebar visual: correct spacing, icon sizing, typography. Zero behavior changes.
+
+### Phase 7: Gallery Validation + Final Verification
+**Rationale:** Gallery auto-reflects component changes because previews render inside `WireframeThemeProvider`. This phase is smoke-testing only — no development. Structured checklist from PITFALLS.md governs what must pass.
+**Delivers:** Confirmation that all 86 wireframe components render correctly in light and dark mode. Client branding verified with `financeiro-conta-azul` (`#1B6B93` teal in interactive elements). `npx tsc --noEmit` zero errors. Gallery mock data audited for hardcoded hex colors.
+**Avoids:** Do not change `--primary` in `globals.css` in the same commit as any wireframe token change (Pitfall 6).
 
 ### Phase Ordering Rationale
 
-- **Phase 1 before everything:** Types and schemas are the foundation. Every component, renderer, form, and gallery entry references types defined here. The layout restructure (header above sidebar) must be stable before building configurable layout components on top of it.
-- **Phase 2 before Phase 3:** Chart components are simpler (follow existing registry pattern) and can be built in parallel. Layout components require the more complex WireframeViewer refactoring. Delivering charts early provides visible progress.
-- **Phase 3 after Phase 1+2:** Layout components are the riskiest UI work (refactoring a 945-line WireframeViewer). Having stable schemas and a working chart expansion reduces the variables.
-- **Phase 4 last:** Gallery is a consumption layer. Building it before the components it displays would require constant updates. Building it after lets it consume the final registry state.
+- Phase 1 is the only strict prerequisite — Phases 2-6 are fully independent of each other and can be committed in any order after Phase 1. Phase 7 is always last.
+- Sidebar + header grouped in Phase 2 because they share the same visual context and are simultaneously visible on every screen.
+- KPI cards (Phase 3) before tables (Phase 4) follows visual hierarchy: cards are above-the-fold, tables are scrolled content.
+- Filter bar (Phase 5) after KPI cards because the `group-hover:` pattern conflict resolution in Phase 3 informs how to handle similar Tailwind-vs-inline-style tensions in the filter bar.
+- ScreenManager (Phase 6) strictly after sidebar Phase 2 since it mirrors the sidebar visually.
+- Token-first approach eliminates Pitfall 1 risk entirely; phase isolation enables targeted dark-mode verification after each commit (Pitfall 3); additive-only changes minimize regression surface (Pitfalls 6, 7).
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 1 (Schema):** The chart taxonomy decision (which charts stay as `bar-line-chart` sub-variants vs get their own section types) has significant downstream impact. Research-phase recommended to finalize the taxonomy with concrete Zod schema prototypes.
-- **Phase 3 (Layout Components):** The WireframeViewer refactoring touches 945 lines across 4+ positioning contexts. Research-phase recommended to map every CSS positioning dependency before coding.
+All phases have well-documented patterns. No phase requires a dedicated research-phase during planning.
 
-Phases with standard patterns (skip research-phase):
-- **Phase 2 (Charts):** Well-documented Recharts API. Each new chart follows the identical pattern of existing 11 chart components. No ambiguity.
-- **Phase 4 (Gallery):** Straightforward UI refactoring. The registry API (`getCatalog()`, `defaultProps()`) already exists. Just wire the gallery to consume it.
+Standard patterns (skip research-phase):
+- **Phase 1 (Token Foundation):** Pure mechanical value substitution on a fully inventoried token system. Zero implementation ambiguity.
+- **Phase 2 (Chrome):** Lucide icon mapping to sidebar items is a naming exercise, not a structural problem. Standard JSX restructure.
+- **Phase 3 (KPI Cards):** `group`/`group-hover:` is documented Tailwind pattern. Container queries plugin is verified and installed.
+- **Phase 4 (Tables):** Additive `<tfoot>` with pre-defined tokens. No complex patterns.
+- **Phase 5 (Filter Bar):** `backdrop-blur-sm` via Tailwind class is straightforward. Token cleanup is grep-driven.
+- **Phase 6 (ScreenManager):** Cosmetic sync only.
+- **Phase 7 (Gallery):** Verification only.
+
+One implementation decision to make explicitly in Phase 1 planning (not a research gap):
+- **`useWireframeChartPalette()` hook** (Pitfall 2): Decide whether to implement the `getComputedStyle`-based hook in Phase 1 or defer. Recommendation: implement in Phase 1 — small code, high long-term value for Recharts legend/tooltip color consistency.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Verified against npm registry, Recharts docs, existing codebase. Zero new dependencies confirmed. |
-| Features | HIGH | Cross-referenced against Power BI, Metabase, Looker, Databricks. Feature taxonomy grounded in competitive analysis. |
-| Architecture | HIGH | Based on complete codebase analysis of section registry, blueprint schema, renderer pipeline. Patterns proven in v1.1/v1.2. |
-| Pitfalls | HIGH | Grounded in specific code locations (line numbers), verified against TypeScript/Zod issue trackers, codebase measurements (file sizes, import counts). |
+| Stack | HIGH | npm registry verified, official docs consulted, existing codebase directly inspected. One new package with confirmed peer dependency compatibility. |
+| Features | HIGH | HTML reference (`dummy.html`) is ground truth — patterns extracted directly from source, not inferred. Table stakes confirmed against Metabase/Power BI conventions. |
+| Architecture | HIGH | All findings code-verified via direct codebase inspection (grep counts, line references, file counts). Token inventory is exhaustive — 240 usages across 31 files accounted for. |
+| Pitfalls | HIGH | All 8 critical pitfalls grounded in direct file inspection (hardcoded hex locations, inline style counts, provider boundary analysis, specific line numbers). No speculative pitfalls. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Chart taxonomy finalization:** Research identifies two valid approaches (keep `bar-line-chart` overloaded vs introduce category-based chart types). The recommendation leans toward keeping existing patterns and adding only 1-2 new section types, but the final taxonomy should be validated with concrete Zod schema prototypes in Phase 1 planning.
-- **Migration safety for client data:** The `financeiro-conta-azul` blueprint is the only production data. A snapshot test must be written before any schema change. The current `loadBlueprint()` write-back-immediately pattern needs a safety check (validate before writing) -- this is not a research gap but a required implementation task.
-- **Wireframe palette specifics:** "Softer palette" is a design decision, not a technical one. The `--wf-*` token system supports any palette values. The specific color choices need design input during Phase 3.
-- **Composed chart complexity:** The multi-series composed chart (multiple bar + line + area series in one chart) has a complex config schema. Whether this ships in v1.3 or defers to v1.4 depends on Phase 2 velocity.
+- **`useWireframeChartPalette()` hook — implement or defer:** The Recharts CSS var resolution issue (Pitfall 2) is confirmed but the fix adds implementation work to Phase 1. Decide in Phase 1 planning whether to implement proactively or do a manual visual verification pass of all 14 chart types post token-update. Recommendation: implement — it is a small hook with outsized long-term value.
+
+- **`--wf-accent` alias strategy must be explicit:** STACK.md and ARCHITECTURE.md both confirm that keeping `--wf-accent: var(--wf-primary)` as a transitional alias (rather than renaming 240 usages) is the correct approach for v1.4. This must be stated explicitly in Phase 1 implementation notes so no one attempts a direct rename.
+
+- **Branding overridability for `--wf-primary` must be decided in Phase 1:** Should `generateBrandCssVars()` map `--brand-primary` to also override `--wf-primary`? Research says yes (Pitfall 5). This is a one-line addition to `branding.ts` but must be done alongside the token addition, not discovered afterward.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Recharts API Documentation -- chart container inventory, RadialBarChart/Sankey/SunburstChart availability
-- npm registry (`recharts versions`) -- 2.15.4 confirmed as latest stable 2.x
-- Recharts 3.0 Migration Guide -- breaking changes documented, exclusion justified
-- FXL Core codebase analysis -- section-registry.tsx, blueprint-schema.ts, blueprint.ts, blueprint-migrations.ts, BlueprintRenderer.tsx, ChartRenderer.tsx, WireframeViewer.tsx, ComponentGallery.tsx (all files directly inspected)
+- `tools/wireframe-builder/styles/wireframe-tokens.css` — 124 lines, 45 token definitions, complete inventory confirmed
+- `tailwind.config.ts` — `wf:` extension block, 18 registered aliases, app theme tokens
+- `src/styles/globals.css` — app theme root, wireframe-tokens.css import confirmed
+- `tools/wireframe-builder/lib/wireframe-theme.tsx` — WireframeThemeProvider scope boundary
+- `tools/wireframe-builder/lib/branding.ts` — generateBrandCssVars, chartColors prop chain, brandingToWfOverrides no-op
+- `tools/wireframe-builder/components/GaugeChartComponent.tsx` — hardcoded `#f59e0b` line 45 confirmed
+- `tools/wireframe-builder/components/WireframeFilterBar.tsx` — 46 inline style token references confirmed
+- `clients/financeiro-conta-azul/wireframe/branding.config.ts` — `primaryColor: '#1B6B93'` confirmed
+- `.planning/research/visual-redesign-reference.html` — HTML reference design, all CSS patterns extracted directly
+- [npm: @tailwindcss/container-queries](https://www.npmjs.com/package/@tailwindcss/container-queries) — version 0.1.1, peerDep tailwindcss >= 3.2.0, verified
+- [GitHub: tailwindlabs/tailwindcss-container-queries](https://github.com/tailwindlabs/tailwindcss-container-queries) — official plugin, Tailwind 3.2+ compatible
+- [Can I use: CSS backdrop-filter](https://caniuse.com/css-backdrop-filter) — 95.75% global support
+- [Can I use: color-mix()](https://caniuse.com/mdn-css_types_color_color-mix) — 92%+ global support, Baseline Widely Available
 
 ### Secondary (MEDIUM confidence)
-- Metabase Visualization Overview and Dashboard Filters -- chart type taxonomy, filter widget patterns
-- Power BI Charts & Visualizations -- competitive chart coverage analysis
-- Databricks Dashboard Filter Types -- filter widget pattern validation
-- shadcn/ui Sidebar and Radial Charts -- architecture patterns for sidebar and gauge charts
-- TypeScript issue #42522 -- discriminated union performance at scale
-- Dashboard Design Best Practices -- layout and sidebar patterns from DataCamp, Yellowfin, Justinmind
-
-### Tertiary (LOW confidence, needs validation)
-- Estimated compile time impact of 40+ discriminated union members -- based on reported issues, not measured on this codebase
-- Bundle size estimates for 26+ chart components -- theoretical, not profiled
+- [Tailwind CSS v3 docs: hover-focus-and-other-states](https://v3.tailwindcss.com/docs/hover-focus-and-other-states) — group-hover pattern and limitations
+- [Lucide: lucide-react guide](https://lucide.dev/guide/packages/lucide-react) — fill/strokeWidth props for icon variants
+- [Metabase BI Dashboard Best Practices](https://www.metabase.com/learn/metabase-basics/querying-and-dashboards/dashboards/bi-dashboard-best-practices) — dark sidebar as industry standard
+- [Design Tokens specification (W3C Community Group)](https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/) — token-first approach confirmed as standard
+- Recharts GitHub issue #2239 — CSS variables in `fill` prop, Legend color swatch inconsistency pattern
 
 ---
-*Research completed: 2026-03-10*
+*Research completed: 2026-03-11*
 *Ready for roadmap: yes*
