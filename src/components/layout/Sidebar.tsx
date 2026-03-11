@@ -8,6 +8,7 @@ type NavItem = {
   label: string
   href?: string
   children?: NavItem[]
+  external?: boolean
 }
 
 const navigation: NavItem[] = [
@@ -115,9 +116,9 @@ const navigation: NavItem[] = [
         children: [
           { label: 'Briefing', href: '/clients/financeiro-conta-azul/briefing' },
           { label: 'Blueprint', href: '/clients/financeiro-conta-azul/blueprint' },
+          { label: 'Wireframe', href: '/clients/financeiro-conta-azul/wireframe', external: true },
           { label: 'Branding', href: '/clients/financeiro-conta-azul/branding' },
           { label: 'Changelog', href: '/clients/financeiro-conta-azul/changelog' },
-          { label: 'Wireframe', href: '/clients/financeiro-conta-azul/wireframe' },
         ],
       },
     ],
@@ -150,6 +151,18 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
 
   // Leaf node (no children, has href)
   if (!hasChildren && item.href) {
+    if (item.external) {
+      return (
+        <a
+          href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block text-sm transition-colors text-slate-500 hover:text-indigo-600 dark:text-sidebar-muted-foreground dark:hover:text-sidebar-accent"
+        >
+          {item.label}
+        </a>
+      )
+    }
     return (
       <NavLink
         to={item.href}
