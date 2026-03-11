@@ -71,18 +71,31 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ Right-side TOC com IntersectionObserver scroll tracking e border-l rail — v1.2
 - ✓ Consistency pass: Home, client pages, auth pages, shared components em nova linguagem visual — v1.2
 
+- ✓ Softer wireframe palette (no harsh blacks), --wf-border alias — v1.3
+- ✓ Header full-width above sidebar, Gerenciar action in header — v1.3
+- ✓ SidebarConfig and HeaderConfig at dashboard level in BlueprintConfig schema — v1.3
+- ✓ FilterOption.filterType discriminator (date-range, multi-select, search, toggle, period presets) — v1.3
+- ✓ Sidebar icons, grouped sections, collapse rail, badge counts, footer — v1.3
+- ✓ Header logo/brand, period selector, user/role indicator, action buttons — v1.3
+- ✓ 6 new chart variants (stacked-bar, stacked-area, horizontal-bar, bubble, gauge, composed) — v1.3
+- ✓ Gallery reorganized into 6 thematic sections with all new components — v1.3
+
 ### Active
 
-## Current Milestone: v1.3 Builder & Components
+## Current Milestone: v1.4 Wireframe Visual Redesign
 
-**Goal:** Expandir o wireframe builder com layout hierarchy correto, blueprint schema para sidebar/header/filter bar, e repertório massivo de componentes (20+ charts, tabelas, KPIs).
+**Goal:** Reformular o visual de todos os componentes de wireframe baseado em novo design system (primary blue #1152d4, slate palette, Inter extrabold typography, hover group effects, dark sidebar, professional dashboard aesthetic).
 
 **Target features:**
-- Suavizar paleta de cores dos componentes wireframe (preto menos bruto)
-- Header do wireframe acima de tudo (inclusive sidebar), "Gerenciar" vira botão no header
-- Sidebar, header e filter bar como itens configuráveis no blueprint
-- Expansão massiva do repertório: 20+ tipos de gráfico, tabelas, KPIs, componentes de sidebar/header/filtro
-- Galeria de componentes reorganizada em seções temáticas
+- Novo design token system: primary #1152d4, background-light #f6f6f8, background-dark #101622, escala slate
+- Sidebar dark (slate-900/950) com nav items, section groups, status footer
+- Header com search input, notifications, dark mode toggle, user chip com avatar
+- KPI cards com hover group effects, trend badges (rounded-full), sparklines
+- Tabelas com uppercase tracking-widest headers, dark footer row, hover transitions
+- Charts com nova paleta (primary blue + slate + indigo scale)
+- Sticky filter bar com backdrop-blur, selects, toggles, action buttons
+- Tipografia Inter com pesos variados (extrabold headings, bold labels, 10px-11px micro labels)
+- Galeria atualizada com novo visual em todos os previews
 
 ### Out of Scope
 
@@ -114,10 +127,11 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ## Context
 
-Shipped v1.2 Visual Redesign with ~33,000 LOC TypeScript across ~240 files.
+Shipped v1.3 Builder & Components with expanded wireframe system.
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
-3 new packages added in v1.2: @fontsource-variable/inter, @fontsource-variable/jetbrains-mono, rehype-highlight.
-237 tests passing (vitest).
+270 tests passing (vitest). ~86 wireframe component files (39 root + 14 renderers + 33 editor-related).
+CSS token system: wireframe-tokens.css with ~45 --wf-* variables. Theme via WireframeThemeProvider context.
+HTML reference design provided as v1.4 target — professional financial dashboard with specific design patterns.
 
 The platform covers the full operator workflow:
 1. **Documentation** — 4-section taxonomy, onboarding, Claude Code + GSD workflow
@@ -179,4 +193,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Visual language**: Slate + indigo palette, Inter body / JetBrains Mono code, border-l rail nav pattern
 
 ---
-*Last updated: 2026-03-10 after v1.3 milestone start*
+*Last updated: 2026-03-11 after v1.4 milestone start*
