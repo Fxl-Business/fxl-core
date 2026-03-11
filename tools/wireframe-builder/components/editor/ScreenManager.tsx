@@ -106,7 +106,7 @@ function SortableScreenItem({
     <div ref={setNodeRef} style={style} className="relative">
       <div
         className={cn(
-          'flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer text-sm transition-colors',
+          'flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer text-xs transition-colors',
           isActive
             ? 'bg-wf-accent-muted text-wf-accent font-medium'
             : 'text-wf-sidebar-muted hover:bg-slate-800 hover:text-white'
@@ -384,7 +384,7 @@ export default function ScreenManager({
               key={screen.id}
               type="button"
               className={cn(
-                'flex w-full items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors',
+                'flex w-full items-center gap-2 px-2 py-1.5 rounded-md text-xs transition-colors',
                 index === activeIndex
                   ? 'bg-wf-accent-muted text-wf-accent font-medium'
                   : 'text-wf-sidebar-muted hover:bg-slate-800 hover:text-white'
