@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { ChevronDown, ChevronUp, MessageSquare, Moon, Pencil, Save, Share2, Sun, X } from 'lucide-react'
 import { useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
 
@@ -7,6 +6,8 @@ type Props = {
   editMode: boolean
   dirty: boolean
   saving: boolean
+  collapsed: boolean
+  onToggleCollapse: () => void
   onToggleEdit: () => void
   onSave: () => void
   onOpenComments: () => void
@@ -20,6 +21,8 @@ export default function AdminToolbar({
   editMode,
   dirty,
   saving,
+  collapsed,
+  onToggleCollapse,
   onToggleEdit,
   onSave,
   onOpenComments,
@@ -28,14 +31,13 @@ export default function AdminToolbar({
   userRole,
 }: Props) {
   const { theme, toggle } = useWireframeTheme()
-  const [collapsed, setCollapsed] = useState(false)
 
   if (collapsed) {
     return (
       <div className="relative shrink-0" style={{ height: 0 }}>
         <button
           type="button"
-          onClick={() => setCollapsed(false)}
+          onClick={onToggleCollapse}
           className="absolute left-1/2 top-0 z-30 -translate-x-1/2 rounded-b-md px-4 py-0.5 transition-colors"
           style={{
             background: 'var(--wf-header-bg)',
@@ -70,7 +72,7 @@ export default function AdminToolbar({
 
       <button
         type="button"
-        onClick={() => setCollapsed(true)}
+        onClick={onToggleCollapse}
         className="inline-flex items-center justify-center rounded-md p-1 transition-colors"
         style={{ color: 'var(--wf-muted)' }}
         onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)' }}

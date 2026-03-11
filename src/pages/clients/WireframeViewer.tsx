@@ -708,8 +708,11 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     )
   }
 
+  // AdminToolbar collapse state
+  const [toolbarCollapsed, setToolbarCollapsed] = useState(false)
+
   // Layout height constants — only app header is above sidebar
-  const appHeaderH = user ? 40 : 0
+  const appHeaderH = user && !toolbarCollapsed ? 40 : 0
 
   return (
     <>
@@ -730,6 +733,8 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               editMode={editMode.active}
               dirty={editMode.dirty}
               saving={editMode.saving}
+              collapsed={toolbarCollapsed}
+              onToggleCollapse={() => setToolbarCollapsed((v) => !v)}
               onToggleEdit={handleToggleEdit}
               onSave={handleSave}
               onOpenComments={handleOpenScreenComments}
@@ -935,7 +940,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
             <WireframeHeader
               title={activeScreen.title}
               logoUrl={branding.logoUrl}
-              brandLabel={activeConfig?.label}
               showLogo={activeConfig?.header?.showLogo}
             />
             {staleWarning && (

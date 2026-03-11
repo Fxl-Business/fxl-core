@@ -51,6 +51,9 @@ export default function FinanceiroWireframeViewer() {
   // Tracks DB row timestamp for optimistic locking
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null)
 
+  // AdminToolbar collapse state
+  const [toolbarCollapsed, setToolbarCollapsed] = useState(false)
+
   // Conflict resolution
   const [conflictOpen, setConflictOpen] = useState(false)
   const [staleWarning, setStaleWarning] = useState(false)
@@ -720,6 +723,8 @@ export default function FinanceiroWireframeViewer() {
                 editMode={editMode.active}
                 dirty={editMode.dirty}
                 saving={editMode.saving}
+                collapsed={toolbarCollapsed}
+                onToggleCollapse={() => setToolbarCollapsed((v) => !v)}
                 onToggleEdit={handleToggleEdit}
                 onSave={handleSave}
                 onOpenComments={handleOpenScreenComments}
@@ -750,6 +755,7 @@ export default function FinanceiroWireframeViewer() {
             )}
             <WireframeHeader
               title={activeScreen.title}
+              logoUrl={branding.logoUrl}
             />
             <div
               style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}
