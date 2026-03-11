@@ -91,7 +91,12 @@ Plans:
   3. Sidebar shows badge/notification counts on items and footer text (version/environment) at the bottom
   4. Header displays the client logo/brand and a period selector driven by config
   5. Header renders user/role indicator and action buttons (manage, share, export)
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 18-01-PLAN.md -- Extend SidebarConfig, HeaderConfig, BlueprintScreen types and Zod schemas + 7 test cases (SIDE-03, SIDE-05, HEAD-02/03/04/05)
+- [ ] 18-02-PLAN.md -- Sidebar collapse rail, groups rendering, badge pill, footer from config (SIDE-02, SIDE-03, SIDE-04, SIDE-05, SIDE-06, SIDE-07)
+- [ ] 18-03-PLAN.md -- WireframeHeader logo, user chip, action buttons, wire in WireframeViewer (HEAD-02, HEAD-03, HEAD-04, HEAD-05)
 
 ### Phase 19: Filter Bar Expansion
 **Goal**: The filter bar supports all common BI filter patterns so blueprint authors can configure rich filtering without custom code
