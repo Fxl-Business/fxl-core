@@ -1,4 +1,7 @@
 # TODO
+## Padrão
+- [ ] Cores pré-definidas para graficso
+- [ ] Graficos padrões por tipo de analise (ex: Ranking -> Barra horizontal) 
 ## Segurança
 - [ ] Não expor variaveis de ambiente, premissa obrigatória, local para confiuraçõa de variaveis
 - [ ] Mapear a importancia e o uso de edge functios
