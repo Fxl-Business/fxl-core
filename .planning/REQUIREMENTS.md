@@ -54,8 +54,8 @@ Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
 
 ### Gallery
 
-- [ ] **GAL-01**: Component gallery reorganizada por secoes tematicas
-- [ ] **GAL-02**: Todos os novos chart types visiveis na gallery com mock data
+- [x] **GAL-01**: Component gallery reorganizada por secoes tematicas
+- [x] **GAL-02**: Todos os novos chart types visiveis na gallery com mock data
 
 ## Future Requirements
 
@@ -122,8 +122,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHART-04 | Phase 20 | Complete |
 | CHART-05 | Phase 20 | Complete |
 | CHART-06 | Phase 20 | Complete |
-| GAL-01 | Phase 21 | Pending |
-| GAL-02 | Phase 21 | Pending |
+| GAL-01 | Phase 21 | Complete |
+| GAL-02 | Phase 21 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 26 total
