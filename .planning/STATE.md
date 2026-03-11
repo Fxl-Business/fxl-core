@@ -4,7 +4,7 @@ milestone: v1.3
 milestone_name: Builder & Components
 status: planning
 stopped_at: "Completed 17-02-PLAN.md (layout restructure: full-width header above sidebar, Gerenciar moved to header)"
-last_updated: "2026-03-11T03:15:22.263Z"
+last_updated: "2026-03-11T03:20:00.516Z"
 last_activity: 2026-03-10 -- Roadmap created for v1.3 (5 phases, 26 requirements mapped)
 progress:
   total_phases: 5
