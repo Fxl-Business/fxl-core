@@ -165,8 +165,8 @@ Plans:
   5. A new CompositionBar component renders a horizontal stacked bar with hover:brightness-90 segments and a color legend grid below
 **Plans:** 2 plans
 Plans:
-- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
-- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
+- [ ] 27-01-PLAN.md — Chart container/title/legend restyle across all 15 chart components + activeBar hover
+- [ ] 27-02-PLAN.md — CompositionBar new component + gallery entry
 
 ### Phase 28: Editor Sync & Gallery Validation
 **Goal**: The editor UI matches the new wireframe aesthetic and all 86 wireframe components are confirmed working in both light and dark mode
@@ -218,5 +218,5 @@ Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other 
 | 24. KPI Cards | 1/1 | Complete    | 2026-03-11 | - |
 | 25. Table Components | 2/2 | Complete    | 2026-03-11 | - |
 | 26. Filter Bar Enhancement | 1/1 | Complete    | 2026-03-11 | - |
-| 27. Chart Palette & Composition | v1.4 | TBD | Not started | - |
+| 27. Chart Palette & Composition | v1.4 | 0/2 | Planned | - |
 | 28. Editor Sync & Gallery Validation | v1.4 | TBD | Not started | - |
