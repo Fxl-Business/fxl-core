@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
-status: in_progress
-stopped_at: null
-last_updated: "2026-03-11T12:00:00.000Z"
-last_activity: 2026-03-11 -- Roadmap created for v1.4 (7 phases, 39 requirements)
+status: planning
+stopped_at: Completed 22-token-foundation-01-PLAN.md
+last_updated: "2026-03-11T18:20:57.615Z"
+last_activity: 2026-03-11 -- v1.4 roadmap created (7 phases, 39 requirements, 100% coverage)
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -57,6 +57,9 @@ v1.4 architectural decisions (from research):
 - --wf-accent kept as alias to --wf-primary for backward compat (no rename of 240 usages)
 - CompositionBar is the only new component in v1.4 (all others are restyles)
 - @tailwindcss/container-queries@0.1.1 added as new devDep for KPI card @container responsive layout
+- [Phase 22-token-foundation]: Kept --wf-accent as alias to var(--wf-primary) rather than renaming 240+ usages across 31 files
+- [Phase 22-token-foundation]: Used color-mix() for --wf-accent-muted in both themes (12% light, 15% dark) to avoid hardcoded rgba values
+- [Phase 22-token-foundation]: --wf-canvas hardcoded (#f6f6f8 light, #101622 dark) not aliased to neutral token for exact visual control
 
 ### Pending Todos
 
@@ -68,6 +71,6 @@ None active.
 
 ## Session Continuity
 
-Last session: 2026-03-11
-Stopped at: v1.4 roadmap created -- ready to plan Phase 22
+Last session: 2026-03-11T18:20:57.613Z
+Stopped at: Completed 22-token-foundation-01-PLAN.md
 Next: `/gsd:plan-phase 22`

@@ -9,12 +9,12 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 
 ### Token Foundation
 
-- [ ] **TOK-01**: Wireframe palette uses slate color scale (replacing warm stone grays) with primary blue #1152d4 (replacing gold #d4a017)
-- [ ] **TOK-02**: Both light and dark theme blocks in wireframe-tokens.css update simultaneously with new values
-- [ ] **TOK-03**: --wf-accent-muted uses color-mix() derived from --wf-accent (replacing hardcoded rgba)
-- [ ] **TOK-04**: Three new tokens added: --wf-header-search-bg, --wf-table-footer-bg, --wf-table-footer-fg
-- [ ] **TOK-05**: Background tokens update to #f6f6f8 (light) and #101622 (dark)
-- [ ] **TOK-06**: All hardcoded colors in components (e.g., GaugeChart #f59e0b) replaced with token references
+- [x] **TOK-01**: Wireframe palette uses slate color scale (replacing warm stone grays) with primary blue #1152d4 (replacing gold #d4a017)
+- [x] **TOK-02**: Both light and dark theme blocks in wireframe-tokens.css update simultaneously with new values
+- [x] **TOK-03**: --wf-accent-muted uses color-mix() derived from --wf-accent (replacing hardcoded rgba)
+- [x] **TOK-04**: Three new tokens added: --wf-header-search-bg, --wf-table-footer-bg, --wf-table-footer-fg
+- [x] **TOK-05**: Background tokens update to #f6f6f8 (light) and #101622 (dark)
+- [x] **TOK-06**: All hardcoded colors in components (e.g., GaugeChart #f59e0b) replaced with token references
 - [ ] **TOK-07**: Client branding brandingToWfOverrides() updated to emit --wf-primary from primaryColor, wired into WireframeThemeProvider callers
 
 ### Sidebar
@@ -95,12 +95,12 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TOK-01 | Phase 22 | Pending |
-| TOK-02 | Phase 22 | Pending |
-| TOK-03 | Phase 22 | Pending |
-| TOK-04 | Phase 22 | Pending |
-| TOK-05 | Phase 22 | Pending |
-| TOK-06 | Phase 22 | Pending |
+| TOK-01 | Phase 22 | Complete |
+| TOK-02 | Phase 22 | Complete |
+| TOK-03 | Phase 22 | Complete |
+| TOK-04 | Phase 22 | Complete |
+| TOK-05 | Phase 22 | Complete |
+| TOK-06 | Phase 22 | Complete |
 | TOK-07 | Phase 22 | Pending |
 | SIDE-01 | Phase 23 | Pending |
 | SIDE-02 | Phase 23 | Pending |
