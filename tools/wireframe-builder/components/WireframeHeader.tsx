@@ -1,63 +1,21 @@
-import { useState } from 'react'
-
-type PeriodType = 'mensal' | 'anual' | 'none'
+import { Search, Bell, Moon, Sun } from 'lucide-react'
+import { useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
 
 type Props = {
   title: string
-  periodType?: PeriodType
   // Logo / branding
   logoUrl?: string          // from branding.logoUrl — shown in header left
   brandLabel?: string       // from config.label — fallback text when no logo
   showLogo?: boolean        // from config.header?.showLogo — defaults true
-  // Period selector
-  showPeriodSelector?: boolean  // from config.header?.showPeriodSelector — defaults true
 }
-
-const MESES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
-]
-
-const arrowButtonStyle: React.CSSProperties = {
-  background: 'transparent',
-  border: '1px solid var(--wf-card-border)',
-  borderRadius: 4,
-  width: 24,
-  height: 24,
-  fontSize: 16,
-  color: 'var(--wf-body)',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  outline: 'none',
-}
-
 
 export default function WireframeHeader({
   title,
-  periodType = 'mensal',
   logoUrl,
   brandLabel,
   showLogo,
-  showPeriodSelector,
 }: Props) {
-  const [mensal, setMensal] = useState({ monthIndex: 0, year: 2026 })
-  const [anualYear, setAnualYear] = useState(2025)
-
-  function prevMensal() {
-    setMensal((prev) => {
-      if (prev.monthIndex === 0) return { monthIndex: 11, year: prev.year - 1 }
-      return { ...prev, monthIndex: prev.monthIndex - 1 }
-    })
-  }
-
-  function nextMensal() {
-    setMensal((prev) => {
-      if (prev.monthIndex === 11) return { monthIndex: 0, year: prev.year + 1 }
-      return { ...prev, monthIndex: prev.monthIndex + 1 }
-    })
-  }
+  const { theme, toggle } = useWireframeTheme()
 
   return (
     <header
@@ -67,7 +25,7 @@ export default function WireframeHeader({
         borderBottom: '1px solid var(--wf-header-border)',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 32px',
+        padding: '0 24px',
         position: 'sticky',
         top: 0,
         zIndex: 10,
@@ -92,33 +50,75 @@ export default function WireframeHeader({
         )}
       </div>
 
-      {/* Center: period selector (absolute centered) */}
-      {(showPeriodSelector !== false) && (
-        <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
-          {periodType === 'mensal' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button style={arrowButtonStyle} onClick={prevMensal}>‹</button>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--wf-heading)', minWidth: 130, textAlign: 'center' }}>
-                {MESES[mensal.monthIndex]} / {String(mensal.year).slice(2)}
-              </span>
-              <button style={arrowButtonStyle} onClick={nextMensal}>›</button>
-            </div>
-          )}
-
-          {periodType === 'anual' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button style={arrowButtonStyle} onClick={() => setAnualYear((y) => y - 1)}>‹</button>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--wf-heading)', minWidth: 60, textAlign: 'center' }}>
-                {anualYear}
-              </span>
-              <button style={arrowButtonStyle} onClick={() => setAnualYear((y) => y + 1)}>›</button>
-            </div>
-          )}
+      {/* Center: search input (decorative) */}
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+        <div style={{ position: 'relative', width: '100%', maxWidth: 280, margin: '0 32px' }}>
+          <Search
+            style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 14, height: 14, color: 'var(--wf-muted)', pointerEvents: 'none' }}
+          />
+          <input
+            type="text"
+            placeholder="Pesquisar..."
+            readOnly
+            style={{
+              width: '100%',
+              borderRadius: 8,
+              paddingLeft: 36,
+              paddingRight: 12,
+              paddingTop: 6,
+              paddingBottom: 6,
+              fontSize: 12,
+              color: 'var(--wf-body)',
+              background: 'var(--wf-header-search-bg)',
+              border: 'none',
+              outline: 'none',
+            }}
+          />
         </div>
-      )}
+      </div>
 
-      {/* Right: empty spacer for balance */}
-      <div style={{ flex: 1 }} />
+      {/* Right: actions — bell, theme toggle, divider, user chip */}
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Notification bell — decorative */}
+        <button
+          type="button"
+          style={{
+            padding: 6, borderRadius: 8, border: 'none', background: 'transparent',
+            color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Bell style={{ width: 16, height: 16 }} />
+        </button>
+
+        {/* Dark mode toggle — functional */}
+        <button
+          type="button"
+          onClick={toggle}
+          style={{
+            padding: 6, borderRadius: 8, border: 'none', background: 'transparent',
+            color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          {theme === 'light' ? <Moon style={{ width: 16, height: 16 }} /> : <Sun style={{ width: 16, height: 16 }} />}
+        </button>
+
+        {/* Divider */}
+        <div style={{ height: 20, width: 1, background: 'var(--wf-border)', margin: '0 4px' }} />
+
+        {/* User chip — static mock data (HEAD-04) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--wf-heading)', lineHeight: 1.3, margin: 0 }}>Operador FXL</p>
+            <p style={{ fontSize: 10, color: 'var(--wf-muted)', lineHeight: 1.3, margin: 0 }}>Analista</p>
+          </div>
+          <div style={{
+            height: 32, width: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            background: 'var(--wf-accent)', color: 'var(--wf-accent-fg)',
+          }}>
+            <span style={{ fontSize: 12, fontWeight: 700 }}>OF</span>
+          </div>
+        </div>
+      </div>
     </header>
   )
 }
