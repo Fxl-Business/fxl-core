@@ -31,6 +31,7 @@ export default function KpiGridRenderer({ section, compareMode }: Props) {
             semaforoLabel={item.semaforoLabel}
             wide={item.wide}
             compareMode={compareMode}
+            icon={item.icon}
           />
         ))}
       </div>

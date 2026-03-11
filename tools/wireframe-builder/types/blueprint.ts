@@ -5,6 +5,7 @@ import type { WaterfallBar } from '../components/WaterfallChart'
 import type { ClickRow, ClickColumn } from '../components/ClickableTable'
 import type { ConfigColumn, ConfigRow } from '../components/ConfigTable'
 import type { FilterOption } from '../components/WireframeFilterBar'
+import type { LucideIcon } from 'lucide-react'
 
 // Re-export component types for convenience
 export type {
@@ -31,6 +32,7 @@ export type KpiConfig = {
   semaforo?: 'verde' | 'amarelo' | 'vermelho'
   semaforoLabel?: string
   wide?: boolean
+  icon?: LucideIcon
 }
 
 export type ColumnConfig = {
