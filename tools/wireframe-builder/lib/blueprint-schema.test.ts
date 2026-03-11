@@ -3,6 +3,7 @@ import {
   BlueprintConfigSchema,
   BlueprintScreenSchema,
   BlueprintSectionSchema,
+  FilterOptionSchema,
 } from './blueprint-schema'
 
 // ---------------------------------------------------------------------------
@@ -299,5 +300,55 @@ describe('BlueprintScreenSchema', () => {
     }
     const result = BlueprintScreenSchema.safeParse(withRows)
     expect(result.success).toBe(true)
+  })
+})
+
+describe('Phase 17 schema extensions', () => {
+  // --- BlueprintConfigSchema new optional fields ---
+
+  it('accepts config with sidebar: {} and header: {} (new optional fields)', () => {
+    const config = { ...validConfig, sidebar: {}, header: {} }
+    const result = BlueprintConfigSchema.safeParse(config)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts config WITHOUT sidebar and header (backward compat)', () => {
+    // validConfig has no sidebar/header — must still parse successfully
+    const result = BlueprintConfigSchema.safeParse(validConfig)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts header: { anyFutureField: "x" } (forward-compat guard — Phase 18 fields must not be rejected)', () => {
+    const config = { ...validConfig, header: { anyFutureField: 'x' } }
+    const result = BlueprintConfigSchema.safeParse(config)
+    expect(result.success).toBe(true)
+  })
+
+  // --- FilterOptionSchema new filterType discriminator ---
+
+  it('accepts FilterOption with filterType: "select"', () => {
+    const option = { key: 'period', label: 'Period', filterType: 'select' }
+    const result = FilterOptionSchema.safeParse(option)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts FilterOption with filterType: "date-range"', () => {
+    const option = { key: 'date', label: 'Date', filterType: 'date-range' }
+    const result = FilterOptionSchema.safeParse(option)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts FilterOption without filterType (backward compat — undefined should work)', () => {
+    const option = { key: 'month', label: 'Month' }
+    const result = FilterOptionSchema.safeParse(option)
+    expect(result.success).toBe(true)
+  })
+
+  it('existing validConfig fixture still passes parse without modification (regression guard)', () => {
+    const result = BlueprintConfigSchema.safeParse(validConfig)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.slug).toBe('test-client')
+    }
   })
 })

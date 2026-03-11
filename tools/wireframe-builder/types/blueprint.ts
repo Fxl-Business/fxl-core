@@ -289,9 +289,20 @@ export type BlueprintScreen = {
   rows?: ScreenRow[] // source of truth when present; sections kept for backward compat
 }
 
+export type SidebarConfig = {
+  footer?: string  // version/environment text (Phase 18 extends further)
+}
+
+// HeaderConfig is intentionally open — Phase 18 fills in logo, period, etc.
+// Use Record<string, unknown> (not Record<string, never>) so downstream phases
+// can add fields without a breaking change to this type.
+export type HeaderConfig = Record<string, unknown>
+
 export type BlueprintConfig = {
   slug: string
   label: string
   schemaVersion?: number
+  sidebar?: SidebarConfig    // NEW — optional, dashboard-level
+  header?: HeaderConfig      // NEW — optional, dashboard-level
   screens: BlueprintScreen[]
 }

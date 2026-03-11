@@ -5,6 +5,7 @@ export type FilterOption = {
   key: string
   label: string
   options?: string[]
+  filterType?: 'select' | 'date-range' | 'multi-select' | 'search' | 'toggle'
 }
 
 type Props = {

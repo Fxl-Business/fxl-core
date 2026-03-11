@@ -47,11 +47,21 @@ const BankEntrySchema = z.object({
   value: z.string(),
 })
 
-const FilterOptionSchema = z.object({
+export const FilterOptionSchema = z.object({
   key: z.string(),
   label: z.string(),
   options: z.array(z.string()).optional(),
+  filterType: z.enum(['select', 'date-range', 'multi-select', 'search', 'toggle']).optional(),
 })
+
+const SidebarConfigSchema = z.object({
+  footer: z.string().optional(),
+})
+
+// passthrough() allows Phase 18 to add logo, period, etc. without making
+// this schema a breaking-change boundary. Record<string, never> would silently
+// reject every field Phase 18 adds — passthrough() accepts unknown fields instead.
+const HeaderConfigSchema = z.object({}).passthrough()
 
 // Component types -- mirrored for runtime DB validation
 // Note: DrilRow.data and ClickRow.data use Record<string, React.ReactNode>
@@ -395,6 +405,8 @@ export const BlueprintConfigSchema = z.object({
   slug: z.string(),
   label: z.string(),
   schemaVersion: z.number().default(1),
+  sidebar: SidebarConfigSchema.optional(),
+  header: HeaderConfigSchema.optional(),
   screens: z.array(BlueprintScreenSchema),
 })
 
