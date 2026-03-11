@@ -8,6 +8,12 @@ import BarLineChart from '@tools/wireframe-builder/components/BarLineChart'
 import WaterfallChart from '@tools/wireframe-builder/components/WaterfallChart'
 import DonutChart from '@tools/wireframe-builder/components/DonutChart'
 import ParetoChart from '@tools/wireframe-builder/components/ParetoChart'
+import StackedBarChartComponent from '@tools/wireframe-builder/components/StackedBarChartComponent'
+import StackedAreaChartComponent from '@tools/wireframe-builder/components/StackedAreaChartComponent'
+import HorizontalBarChartComponent from '@tools/wireframe-builder/components/HorizontalBarChartComponent'
+import BubbleChartComponent from '@tools/wireframe-builder/components/BubbleChartComponent'
+import ComposedChartComponent from '@tools/wireframe-builder/components/ComposedChartComponent'
+import GaugeChartComponent from '@tools/wireframe-builder/components/GaugeChartComponent'
 import DataTable from '@tools/wireframe-builder/components/DataTable'
 import DrillDownTable from '@tools/wireframe-builder/components/DrillDownTable'
 import ClickableTable from '@tools/wireframe-builder/components/ClickableTable'
@@ -50,6 +56,12 @@ import {
   wireframeModalMock,
   waterfallCompareBars,
   calculoCardCompareRows,
+  stackedBarChartMock,
+  stackedAreaChartMock,
+  horizontalBarChartMock,
+  bubbleChartMock,
+  composedChartMock,
+  gaugeChartMock,
 } from './galleryMockData'
 
 type ComponentStatus = 'available' | 'pending'
@@ -271,14 +283,75 @@ function CalculoCardPreview() {
 
 function WireframeHeaderPreview() {
   const [periodType, setPeriodType] = useState<'mensal' | 'anual' | 'none'>('mensal')
+  const [showUserIndicator, setShowUserIndicator] = useState(true)
   return (
     <div>
       <PropsToolbar>
         <PropPills label="periodType" options={['mensal', 'anual', 'none']} value={periodType} onChange={setPeriodType} />
+        <PropToggle label="showUserIndicator" value={showUserIndicator} onChange={setShowUserIndicator} />
       </PropsToolbar>
       <div className="overflow-hidden rounded-b-lg border border-border">
-        <WireframeHeader title={wireframeHeaderMock.title} periodType={periodType} />
+        <WireframeHeader
+          title={wireframeHeaderMock.title}
+          periodType={periodType}
+          brandLabel={wireframeHeaderMock.brandLabel}
+          userDisplayName={wireframeHeaderMock.userDisplayName}
+          showUserIndicator={showUserIndicator}
+        />
       </div>
+    </div>
+  )
+}
+
+function StackedBarChartPreview() {
+  return (
+    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+      <StackedBarChartComponent title={stackedBarChartMock.title} />
+    </div>
+  )
+}
+
+function StackedAreaChartPreview() {
+  return (
+    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+      <StackedAreaChartComponent title={stackedAreaChartMock.title} />
+    </div>
+  )
+}
+
+function HorizontalBarChartPreview() {
+  return (
+    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+      <HorizontalBarChartComponent title={horizontalBarChartMock.title} xLabel={horizontalBarChartMock.xLabel} yLabel={horizontalBarChartMock.yLabel} />
+    </div>
+  )
+}
+
+function BubbleChartPreview() {
+  return (
+    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+      <BubbleChartComponent title={bubbleChartMock.title} xLabel={bubbleChartMock.xLabel} yLabel={bubbleChartMock.yLabel} />
+    </div>
+  )
+}
+
+function ComposedChartPreview() {
+  return (
+    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+      <ComposedChartComponent title={composedChartMock.title} />
+    </div>
+  )
+}
+
+function GaugeChartPreview() {
+  return (
+    <div className="rounded-lg border border-dashed border-border bg-muted/50 p-4">
+      <GaugeChartComponent
+        title={gaugeChartMock.title}
+        value={gaugeChartMock.value}
+        min={gaugeChartMock.min}
+        max={gaugeChartMock.max}
+      />
     </div>
   )
 }
@@ -296,32 +369,41 @@ function CommentOverlayPreview() {
 
 const categories: Category[] = [
   {
-    id: 'cards',
-    label: 'Cards',
+    id: 'shell',
+    label: 'Layout / Shell',
     components: [
       {
-        name: 'KpiCard',
+        name: 'WireframeSidebar',
         status: 'available',
-        hasToolbar: true,
-        props: ['label', 'value', 'variation?', 'description?', 'variationPositive?'],
-        render: () => <KpiCardPreview />,
-        specHref: '/ferramentas/blocos/kpi-card',
+        props: ['screens: Screen[]', 'onSelect?'],
+        render: () => (
+          <div className="h-48 w-56 overflow-hidden rounded border border-border">
+            <WireframeSidebar {...wireframeSidebarMock} />
+          </div>
+        ),
+        specHref: '/ferramentas/blocos/wireframe-sidebar',
       },
       {
-        name: 'KpiCardFull',
+        name: 'WireframeHeader',
         status: 'available',
         hasToolbar: true,
-        props: ['label', 'value', 'sub?', 'variation?', 'variationPositive?', 'semaforo?', 'semaforoLabel?', 'sparkline?', 'wide?', 'compareMode?'],
-        render: () => <KpiCardFullPreview />,
-        specHref: '/ferramentas/blocos/kpi-card-full',
+        props: ['title', 'periodType?: mensal | anual | none', 'brandLabel?', 'showUserIndicator?', 'userDisplayName?', 'userRole?', 'showManage?'],
+        render: () => <WireframeHeaderPreview />,
+        specHref: '/ferramentas/blocos/wireframe-header',
       },
       {
-        name: 'CalculoCard',
+        name: 'WireframeFilterBar',
         status: 'available',
-        hasToolbar: true,
-        props: ['title?', 'rows: CalculoRow[]', 'compareMode?', 'comparePeriodLabel?'],
-        render: () => <CalculoCardPreview />,
-        specHref: '/ferramentas/blocos/calculo-card',
+        props: ['filters: FilterOption[]', 'showSearch?', 'showCompareSwitch?', 'compareMode?'],
+        render: () => <WireframeFilterBar {...wireframeFilterBarMock} />,
+        specHref: '/ferramentas/blocos/wireframe-filter-bar',
+      },
+      {
+        name: 'GlobalFilters',
+        status: 'available',
+        props: ['filters: FilterType[]'],
+        render: () => <GlobalFilters {...globalFiltersMock} />,
+        specHref: '/ferramentas/blocos/global-filters',
       },
     ],
   },
@@ -358,6 +440,72 @@ const categories: Category[] = [
         props: ['title', 'data: Entry[]', 'height?', 'valueLabel?'],
         render: () => <ParetoChart {...paretoChartMock} />,
         specHref: '/ferramentas/blocos/pareto-chart',
+      },
+      {
+        name: 'StackedBarChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'chartColors?'],
+        render: () => <StackedBarChartPreview />,
+      },
+      {
+        name: 'StackedAreaChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'chartColors?'],
+        render: () => <StackedAreaChartPreview />,
+      },
+      {
+        name: 'HorizontalBarChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'xLabel?', 'yLabel?', 'chartColors?'],
+        render: () => <HorizontalBarChartPreview />,
+      },
+      {
+        name: 'BubbleChart',
+        status: 'available',
+        props: ['title', 'height?', 'xLabel?', 'yLabel?', 'chartColors?'],
+        render: () => <BubbleChartPreview />,
+      },
+      {
+        name: 'ComposedChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'chartColors?'],
+        render: () => <ComposedChartPreview />,
+      },
+      {
+        name: 'GaugeChart',
+        status: 'available',
+        props: ['title', 'value', 'min?', 'max?', 'zones?', 'height?'],
+        render: () => <GaugeChartPreview />,
+      },
+    ],
+  },
+  {
+    id: 'cards',
+    label: 'Cards & Métricas',
+    components: [
+      {
+        name: 'KpiCard',
+        status: 'available',
+        hasToolbar: true,
+        props: ['label', 'value', 'variation?', 'description?', 'variationPositive?'],
+        render: () => <KpiCardPreview />,
+        specHref: '/ferramentas/blocos/kpi-card',
+      },
+      {
+        name: 'KpiCardFull',
+        status: 'available',
+        hasToolbar: true,
+        props: ['label', 'value', 'sub?', 'variation?', 'variationPositive?', 'semaforo?', 'semaforoLabel?', 'sparkline?', 'wide?', 'compareMode?'],
+        render: () => <KpiCardFullPreview />,
+        specHref: '/ferramentas/blocos/kpi-card-full',
+      },
+      {
+        name: 'CalculoCard',
+        status: 'available',
+        hasToolbar: true,
+        props: ['title?', 'rows: CalculoRow[]', 'compareMode?', 'comparePeriodLabel?'],
+        render: () => <CalculoCardPreview />,
+        specHref: '/ferramentas/blocos/calculo-card',
       },
     ],
   },
@@ -396,66 +544,6 @@ const categories: Category[] = [
     ],
   },
   {
-    id: 'layout',
-    label: 'Layout',
-    components: [
-      {
-        name: 'WireframeSidebar',
-        status: 'available',
-        props: ['screens: Screen[]', 'onSelect?'],
-        render: () => (
-          <div className="h-48 w-56 overflow-hidden rounded border border-border">
-            <WireframeSidebar {...wireframeSidebarMock} />
-          </div>
-        ),
-        specHref: '/ferramentas/blocos/wireframe-sidebar',
-      },
-      {
-        name: 'WireframeHeader',
-        status: 'available',
-        hasToolbar: true,
-        props: ['title', 'periodType?: mensal | anual | none'],
-        render: () => <WireframeHeaderPreview />,
-        specHref: '/ferramentas/blocos/wireframe-header',
-      },
-      {
-        name: 'WireframeFilterBar',
-        status: 'available',
-        props: ['filters: FilterOption[]', 'showSearch?', 'showCompareSwitch?', 'compareMode?', 'comparePeriodType?'],
-        render: () => <WireframeFilterBar {...wireframeFilterBarMock} />,
-        specHref: '/ferramentas/blocos/wireframe-filter-bar',
-      },
-      {
-        name: 'GlobalFilters',
-        status: 'available',
-        props: ['filters: FilterType[]'],
-        render: () => <GlobalFilters {...globalFiltersMock} />,
-        specHref: '/ferramentas/blocos/global-filters',
-      },
-      {
-        name: 'CommentOverlay',
-        status: 'available',
-        props: ['screenName', 'comments?'],
-        render: () => <CommentOverlayPreview />,
-        specHref: '/ferramentas/blocos/comment-overlay',
-      },
-      {
-        name: 'WireframeModal',
-        status: 'available',
-        props: ['title', 'open', 'onClose', 'children', 'footer?', 'size?: md | lg | xl'],
-        render: () => <ModalPreview />,
-        specHref: '/ferramentas/blocos/wireframe-modal',
-      },
-      {
-        name: 'DetailViewSwitcher',
-        status: 'available',
-        props: ['options: string[]', 'activeOption', 'onChange'],
-        render: () => <DetailViewSwitcherPreview />,
-        specHref: '/ferramentas/blocos/detail-view-switcher',
-      },
-    ],
-  },
-  {
     id: 'inputs',
     label: 'Inputs',
     components: [
@@ -486,6 +574,33 @@ const categories: Category[] = [
         props: ['title?', 'note?', 'banks: BankEntry[]', 'total'],
         render: () => <SaldoBancoInput {...saldoBancoInputMock} />,
         specHref: '/ferramentas/blocos/saldo-banco-input',
+      },
+    ],
+  },
+  {
+    id: 'modals',
+    label: 'Modais & Overlays',
+    components: [
+      {
+        name: 'WireframeModal',
+        status: 'available',
+        props: ['title', 'open', 'onClose', 'children', 'footer?', 'size?: md | lg | xl'],
+        render: () => <ModalPreview />,
+        specHref: '/ferramentas/blocos/wireframe-modal',
+      },
+      {
+        name: 'DetailViewSwitcher',
+        status: 'available',
+        props: ['options: string[]', 'activeOption', 'onChange'],
+        render: () => <DetailViewSwitcherPreview />,
+        specHref: '/ferramentas/blocos/detail-view-switcher',
+      },
+      {
+        name: 'CommentOverlay',
+        status: 'available',
+        props: ['screenName', 'comments?'],
+        render: () => <CommentOverlayPreview />,
+        specHref: '/ferramentas/blocos/comment-overlay',
       },
     ],
   },
