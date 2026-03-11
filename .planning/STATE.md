@@ -69,6 +69,7 @@ None active.
 | 4 | Evolve BriefingConfig + seed financeiro-conta-azul briefing | 2026-03-10 | 311e258 | [4-evolve-briefingconfig](./quick/4-evolve-briefingconfig-populate-conta-azul/) |
 | 5 | Add view/edit mode toggle to BriefingForm page | 2026-03-10 | 28d563a | [5-briefing-view-edit-mode](./quick/5-briefing-view-edit-mode/) |
 | 6 | Audit CLAUDE.md completeness as codebase orchestrator | 2026-03-10 | c0dbbad | [6-audit-claude-md](./quick/6-audit-claude-md-completeness-as-codebase/) |
+| 7 | Fix client sidebar order and open Wireframe in new tab | 2026-03-10 | 454dad7 | [7-fix-client-sidebar-order-and-open-wirefr](./quick/7-fix-client-sidebar-order-and-open-wirefr/) |
 
 ### Roadmap Evolution
 
