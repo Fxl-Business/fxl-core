@@ -149,10 +149,9 @@ Plans:
   3. Filter labels appear at 10px uppercase bold slate-500 above their controls
   4. Action buttons (date picker, share, export) render with distinct hierarchy: outline style for secondary actions and filled for primary actions, all with rounded-lg shape
   5. Compare toggle uses a primary-colored switch with 11px bold label
-**Plans:** 2 plans
+**Plans:** 1 plan
 Plans:
-- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
-- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
+- [ ] 26-01-PLAN.md — Sticky blur container, vertical stacked labels, action button hierarchy, compare toggle bold label
 
 ### Phase 27: Chart Palette & Composition
 **Goal**: All charts use the new blue-slate palette and the gallery gains a new CompositionBar component for horizontal stacked breakdown visualization
