@@ -19,12 +19,12 @@ Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
 ### Sidebar
 
 - [x] **SIDE-01**: SidebarConfig adicionado ao BlueprintConfig schema (dashboard-level)
-- [ ] **SIDE-02**: Sidebar renderiza icones por item de menu via BlueprintScreen.icon
+- [x] **SIDE-02**: Sidebar renderiza icones por item de menu via BlueprintScreen.icon
 - [x] **SIDE-03**: Sidebar suporta groups/secoes com headings rotulados
-- [ ] **SIDE-04**: Sidebar colapsa para icon-only rail mode
+- [x] **SIDE-04**: Sidebar colapsa para icon-only rail mode
 - [x] **SIDE-05**: Sidebar items mostram badge/notification counts
-- [ ] **SIDE-06**: Sidebar renderiza footer text (versao/ambiente)
-- [ ] **SIDE-07**: Active screen highlighted na sidebar (preservado do existente)
+- [x] **SIDE-06**: Sidebar renderiza footer text (versao/ambiente)
+- [x] **SIDE-07**: Active screen highlighted na sidebar (preservado do existente)
 
 ### Header
 
@@ -37,11 +37,11 @@ Requirements for v1.3 Builder & Components. Each maps to roadmap phases.
 ### Filter Bar
 
 - [x] **FILT-01**: FilterOption type extendido com filterType discriminator
-- [ ] **FILT-02**: Date range picker filter type
-- [ ] **FILT-03**: Multi-select dropdown filter type
-- [ ] **FILT-04**: Search/text filter type
-- [ ] **FILT-05**: Period quick-select presets para date-range filter
-- [ ] **FILT-06**: Boolean toggle filter type
+- [x] **FILT-02**: Date range picker filter type
+- [x] **FILT-03**: Multi-select dropdown filter type
+- [x] **FILT-04**: Search/text filter type
+- [x] **FILT-05**: Period quick-select presets para date-range filter
+- [x] **FILT-06**: Boolean toggle filter type
 
 ### Charts
 
@@ -99,23 +99,23 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LAYOUT-01 | Phase 17 | Complete |
 | LAYOUT-02 | Phase 17 | Complete |
 | SIDE-01 | Phase 17 | Complete |
-| SIDE-02 | Phase 18 | Pending |
+| SIDE-02 | Phase 18 | Complete |
 | SIDE-03 | Phase 18 | Complete |
-| SIDE-04 | Phase 18 | Pending |
+| SIDE-04 | Phase 18 | Complete |
 | SIDE-05 | Phase 18 | Complete |
-| SIDE-06 | Phase 18 | Pending |
-| SIDE-07 | Phase 18 | Pending |
+| SIDE-06 | Phase 18 | Complete |
+| SIDE-07 | Phase 18 | Complete |
 | HEAD-01 | Phase 17 | Complete |
 | HEAD-02 | Phase 18 | Complete |
 | HEAD-03 | Phase 18 | Complete |
 | HEAD-04 | Phase 18 | Complete |
 | HEAD-05 | Phase 18 | Complete |
 | FILT-01 | Phase 17 | Complete |
-| FILT-02 | Phase 19 | Pending |
-| FILT-03 | Phase 19 | Pending |
-| FILT-04 | Phase 19 | Pending |
-| FILT-05 | Phase 19 | Pending |
-| FILT-06 | Phase 19 | Pending |
+| FILT-02 | Phase 19 | Complete |
+| FILT-03 | Phase 19 | Complete |
+| FILT-04 | Phase 19 | Complete |
+| FILT-05 | Phase 19 | Complete |
+| FILT-06 | Phase 19 | Complete |
 | CHART-01 | Phase 20 | Pending |
 | CHART-02 | Phase 20 | Pending |
 | CHART-03 | Phase 20 | Pending |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Builder & Components
 status: planning
-stopped_at: Completed 18-03-PLAN.md (header logo, user chip, share/export/gerenciar buttons, simplified sidebar branding)
-last_updated: "2026-03-11T03:53:07.966Z"
+stopped_at: Completed 19-01-PLAN.md (filterType dispatch and 5 filter sub-components in WireframeFilterBar)
+last_updated: "2026-03-11T04:09:16.479Z"
 last_activity: 2026-03-10 -- Roadmap created for v1.3 (5 phases, 26 requirements mapped)
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 8
+  completed_plans: 7
   percent: 0
 ---
 
@@ -66,6 +66,9 @@ v1.3 architectural decisions (from research):
 - [Phase 18-configurable-sidebar-header]: Badge pill in collapsed sidebar rail clipped by overflow:hidden on aside — intentional, collapsed rail is for navigation not notification counts
 - [Phase 18-03]: Props for action visibility default to shown when undefined (showManage !== false, showUserIndicator !== false) — consistent with opt-out pattern from HeaderConfig design
 - [Phase 18-03]: Sidebar branding slot reduced to 40px label-only strip after logo moves to header — avoids dead space, uppercase muted label provides visual separation
+- [Phase 19-filter-bar-expansion]: FilterControl dispatch uses const ft = filter.filterType ?? 'select' — backward-compat default keeps existing blueprint filters rendering as SelectFilter
+- [Phase 19-filter-bar-expansion]: Filter sub-components are module-private (no export) — only WireframeFilterBar is public API
+- [Phase 19-filter-bar-expansion]: DateRangeFilter trigger is NOT disabled (opens panel), only date input fields inside panel are disabled
 
 ### Pending Todos
 
@@ -92,6 +95,7 @@ None active.
 | Phase 18-configurable-sidebar-header P01 | 5 | 2 tasks | 3 files |
 | Phase 18-configurable-sidebar-header P02 | 8 | 3 tasks | 2 files |
 | Phase 18-configurable-sidebar-header P03 | 93 | 3 tasks | 2 files |
+| Phase 19-filter-bar-expansion P01 | 2 | 2 tasks | 2 files |
 
 ### Roadmap Evolution
 
@@ -108,6 +112,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-11T03:48:36.210Z
-Stopped at: Completed 18-03-PLAN.md (header logo, user chip, share/export/gerenciar buttons, simplified sidebar branding)
+Last session: 2026-03-11T04:09:16.476Z
+Stopped at: Completed 19-01-PLAN.md (filterType dispatch and 5 filter sub-components in WireframeFilterBar)
 Next: `/gsd:plan-phase 17` (Schema Foundation & Layout Restructure)
