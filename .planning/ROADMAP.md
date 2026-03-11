@@ -74,7 +74,12 @@ Full details: [milestones/v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md)
   3. Wireframe components use softer gray palette (no harsh blacks in cards, tables, section borders)
   4. BlueprintConfig schema accepts optional SidebarConfig and HeaderConfig at dashboard level (not screen level)
   5. FilterOption type supports a filterType discriminator field that defaults to 'select' for backward compatibility
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 17-01-PLAN.md -- Fix --wf-border CSS token alias (VIS-01)
+- [ ] 17-02-PLAN.md -- Restructure layout: full-width header above sidebar, move Gerenciar (LAYOUT-01, LAYOUT-02)
+- [ ] 17-03-PLAN.md -- Extend TypeScript types and Zod schemas with SidebarConfig, HeaderConfig, filterType (SIDE-01, HEAD-01, FILT-01)
 
 ### Phase 18: Configurable Sidebar & Header
 **Goal**: Operators see a fully configurable dashboard shell (sidebar + header) driven entirely by blueprint config
@@ -148,7 +153,7 @@ Phases 18, 19, 20 can execute in parallel after Phase 17. Phase 21 requires 18+1
 | 14. Sidebar Navigation | v1.2 | 1/1 | Complete | 2026-03-10 |
 | 15. Doc Rendering and TOC | v1.2 | 2/2 | Complete | 2026-03-10 |
 | 16. Consistency Pass | v1.2 | 2/2 | Complete | 2026-03-10 |
-| 17. Schema Foundation & Layout Restructure | v1.3 | 0/0 | Not started | - |
+| 17. Schema Foundation & Layout Restructure | v1.3 | 0/3 | Not started | - |
 | 18. Configurable Sidebar & Header | v1.3 | 0/0 | Not started | - |
 | 19. Filter Bar Expansion | v1.3 | 0/0 | Not started | - |
 | 20. Chart Type Expansion | v1.3 | 0/0 | Not started | - |
