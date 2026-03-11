@@ -1,5 +1,25 @@
 # Milestones
 
+## v1.2 Visual Redesign (Shipped: 2026-03-11)
+
+**Phases:** 5 (12, 13, 14, 15, 16) | **Plans:** 7 | **Tasks:** ~14
+**Timeline:** 4 days (2026-03-06 → 2026-03-10) | **Commits:** 38 | **LOC delta:** +5,483 / -334
+**Git range:** 42d4c29 → eec033c
+
+**Delivered:** Complete visual redesign of FXL Core with slate + indigo palette, Inter/JetBrains Mono typography, frosted glass header, border-l rail navigation, dark-themed syntax-highlighted code blocks, right-side TOC with scroll tracking, and consistent visual language across all pages.
+
+**Key accomplishments:**
+1. Design foundation with slate + indigo CSS palette, Inter/JetBrains Mono fonts via @fontsource-variable, and wireframe --wf-* token isolation
+2. Frosted glass sticky header with viewport-level scrolling, input-styled search trigger, and page-delegated width constraints
+3. Sidebar border-l rail navigation with indigo-600 active states, uppercase section headers, and container-level sub-item indentation
+4. Dark-themed code blocks with rehype-highlight syntax highlighting, terminal dots, and upgraded prose typography hierarchy
+5. Right-side table of contents with IntersectionObserver scroll tracking, border-l rail, and sticky positioning
+6. Consistency pass aligning Home, client pages, auth pages, and shared components (Callout, PromptBlock, InfoBlock) to new visual language
+
+**Archive:** [v1.2-ROADMAP.md](milestones/v1.2-ROADMAP.md) | [v1.2-REQUIREMENTS.md](milestones/v1.2-REQUIREMENTS.md)
+
+---
+
 ## v1.1 Wireframe Evolution (Shipped: 2026-03-10)
 
 **Phases:** 5 (7, 8, 9, 10, 11) | **Plans:** 15 | **Tasks:** ~30

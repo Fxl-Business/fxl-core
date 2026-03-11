@@ -101,6 +101,56 @@
 
 ---
 
+## Milestone: v1.2 — Visual Redesign
+
+**Shipped:** 2026-03-11
+**Phases:** 5 | **Plans:** 7 | **Timeline:** 4 days
+
+### What Was Built
+- Design foundation: slate + indigo CSS palette, Inter/JetBrains Mono fonts via @fontsource-variable, 6px scrollbar styling, wireframe --wf-* token isolation verified
+- Layout shell: frosted glass sticky header with backdrop-blur, viewport-level scrolling (removed nested overflow containers), input-styled search trigger with Cmd+K badge
+- Sidebar navigation: border-l rail with -ml-px overlap trick for indigo-600 active indicator, uppercase section headers, container-level sub-item indentation
+- Doc rendering: ChevronRight breadcrumbs, indigo badge pills, text-4xl/5xl titles, dark code blocks with rehype-highlight syntax highlighting and terminal dots, prose typography hierarchy (h2 2xl bold, h3 xl semibold, p base relaxed)
+- Right-side TOC: "NESTA PAGINA" heading, IntersectionObserver scroll tracking, border-l rail matching sidebar pattern, sticky top-24 positioning
+- Consistency pass: Home page slate+indigo cards, Callout/PromptBlock/InfoBlock switched from blue to indigo palette, client pages breadcrumb nav, auth pages slate-50 backgrounds with brand presence
+
+### What Worked
+- **CSS-only approach:** v1.2 was entirely Tailwind class changes — zero component logic modifications, zero new components, zero new hooks
+- **Sequential dependency chain:** Phases 12→13→14→15→16 built on each other (palette → layout → sidebar → docs → consistency), preventing rework
+- **Parallel plan execution:** Phase 15 (2 plans) and Phase 16 (2 plans) ran plans in parallel within each phase
+- **Reference-driven design:** External HTML reference file gave clear target, eliminating design decision overhead
+- **Pattern reuse:** border-l rail pattern from Phase 14 sidebar reused in Phase 15 TOC — consistency by design
+- **3 packages only:** @fontsource-variable/inter, @fontsource-variable/jetbrains-mono, rehype-highlight — minimal dependency growth
+
+### What Was Inefficient
+- **No milestone audit:** Skipped /gsd:audit-milestone for v1.2, same pattern as v1.1
+- **Requirements bookkeeping lag:** Phases 12 and 15 completed without checking off their requirements in REQUIREMENTS.md (16/30 unchecked at milestone close)
+- **ROADMAP.md plan checkbox drift:** Plans 15-01, 15-02, 16-02 showed as [ ] unchecked in roadmap despite being complete (executor agents didn't update roadmap)
+- **Progress table formatting:** ROADMAP.md progress table had column misalignment for phases 13-16 (cosmetic but accumulated)
+
+### Patterns Established
+- `page-owns-width`: Layout.tsx delegates max-w to each page instead of wrapping centrally
+- Viewport-level scrolling: remove overflow-hidden/overflow-y-auto from Layout containers for proper sticky positioning
+- `-ml-px border-l-2` overlap trick: active indicator overlaps container border-l for clean single-pixel transition
+- Explicit color tokens: `text-indigo-600` / `border-indigo-600` instead of semantic tokens for active states
+- Terminal dots pre wrapper: outer div owns bg + rounded corners, inner pre scrolls
+- `.hljs { background: transparent }` override: wrapper div controls code block background, not highlight.js
+- Inline code scoping: `.prose :not(pre) > code` avoids styling code inside syntax-highlighted blocks
+
+### Key Lessons
+1. **CSS-only milestones are fast** — 7 plans in 4 days with zero logic changes, zero test failures, zero type errors
+2. **Sequential phase chains prevent rework** — each phase built cleanly on the previous, no backtracking needed
+3. **Requirements checkboxes need automation** — manual checkbox maintenance drifts; consider executor agents updating REQUIREMENTS.md on plan completion
+4. **Reference-driven design eliminates decision fatigue** — external HTML target meant zero time debating colors, fonts, or spacing
+5. **Border-l rail is the universal nav pattern** — works for sidebar, TOC, and potentially future navigation elements
+
+### Cost Observations
+- Model mix: ~60% opus, ~40% sonnet (balanced profile, sonnet for executors)
+- Sessions: 2 main sessions (phases 12-14 + 15-16 with planning/execution)
+- Notable: 7 plans in ~4 days; fastest milestone per-plan (~15 min avg including planning overhead)
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -109,6 +159,7 @@
 |-----------|----------|--------|-------|------------|
 | v1.0 | 4 days | 9 | 27 | First milestone — established GSD workflow, decimal phases, audit process |
 | v1.1 | 2 days | 5 | 15 | Parallel phase execution, TDD for engine, quick tasks for post-phase polish |
+| v1.2 | 4 days | 5 | 7 | CSS-only milestone, sequential dependency chain, reference-driven design |
 
 ### Cumulative Quality
 
@@ -116,6 +167,7 @@
 |-----------|-------|----------|-------------------|
 | v1.0 | Vitest (Phase 06) | spec-generator only | 3 (recharts, @supabase/supabase-js, @clerk/react) |
 | v1.1 | 237 tests | generation engine + schemas + recipes | 1 (zod v4) |
+| v1.2 | 237 tests | no new tests (CSS-only) | 3 (@fontsource-variable/inter, @fontsource-variable/jetbrains-mono, rehype-highlight) |
 
 ### Velocity
 
@@ -123,10 +175,13 @@
 |-----------|-------|-----------------|----------|
 | v1.0 | 27 | ~95 min | ~3.5 min |
 | v1.1 | 15 | ~51 min | ~3.4 min |
+| v1.2 | 7 | ~105 min | ~15 min |
 
 ### Top Lessons (Verified Across Milestones)
 
-1. Run `/gsd:audit-milestone` before completing — catches gaps that session-level verification misses
-2. Traceability maintenance is as important as code execution
-3. Pure functions are the right default for data transformations — validated in both Config Resolver (v1.0) and generation engine (v1.1)
+1. Run `/gsd:audit-milestone` before completing — catches gaps that session-level verification misses (v1.0 proved it, v1.1 + v1.2 skipped it)
+2. Traceability maintenance is as important as code execution — requirements checkboxes drifted in v1.0 and v1.2
+3. Pure functions are the right default for data transformations — validated in Config Resolver (v1.0), generation engine (v1.1)
 4. Registry/single-source-of-truth patterns scale well — semantic tokens (v1.0), section registry (v1.1)
+5. Reference-driven design eliminates decision fatigue — v1.2 shipped faster per-plan because visual decisions were pre-made
+6. CSS-only milestones are inherently safe — zero logic changes means zero regressions, zero test failures

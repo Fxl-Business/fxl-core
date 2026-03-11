@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Plataforma operacional interna da FXL (BI para PMEs). Combina documentacao de processo, knowledge de clientes, ferramentas AI-first (wireframe-builder com editor visual, design system semantico, 21 tipos de secao, briefing estruturado) e pipeline completo Briefing → Blueprint → Wireframe → Spec Generation. O objetivo e ter um processo capaz de entender qualquer negocio e, a partir de perguntas e respostas estruturadas, gerar qualquer produto digital de forma progressivamente automatizada.
+Plataforma operacional interna da FXL (BI para PMEs). Combina documentacao de processo, knowledge de clientes, ferramentas AI-first (wireframe-builder com editor visual, design system semantico, 21 tipos de secao, briefing estruturado) e pipeline completo Briefing → Blueprint → Wireframe → Spec Generation. Interface visual redesenhada com paleta slate + indigo, tipografia Inter/JetBrains Mono, e componentes consistentes (frosted glass header, border-l rail navigation, dark code blocks com syntax highlighting, TOC com scroll tracking). O objetivo e ter um processo capaz de entender qualquer negocio e, a partir de perguntas e respostas estruturadas, gerar qualquer produto digital de forma progressivamente automatizada.
 
 ## Core Value
 
@@ -63,19 +63,17 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ AI generation: screen recipes tipadas para 10 contextos de negocio — v1.1
 - ✓ AI generation: vertical templates (financeiro/varejo/servicos) — v1.1
 - ✓ AI generation: engine pura BriefingConfig → BlueprintConfig + CLI bridge — v1.1
+- ✓ Paleta slate + indigo com CSS vars e Inter/JetBrains Mono fonts — v1.2
+- ✓ Frosted glass sticky header com brand identity e search integrado — v1.2
+- ✓ Border-l rail sidebar nav com indigo active states e uppercase section headers — v1.2
+- ✓ Doc rendering com breadcrumbs, badge pills, 4xl titles, prose typography hierarchy — v1.2
+- ✓ Dark code blocks com rehype-highlight syntax highlighting e terminal dots — v1.2
+- ✓ Right-side TOC com IntersectionObserver scroll tracking e border-l rail — v1.2
+- ✓ Consistency pass: Home, client pages, auth pages, shared components em nova linguagem visual — v1.2
 
 ### Active
 
-## Current Milestone: v1.2 Visual Redesign
-
-**Goal:** Redesign visual completo da aplicacao baseado em HTML de referencia externo, estabelecendo paleta slate + indigo, tipografia Inter com hierarquia clara, e componentes visuais consistentes (code blocks, sidebars, headers, doc rendering).
-
-**Target features:**
-- Layout shell redesign (Header com backdrop-blur, brand subtitle, search integrado)
-- Sidebar redesign (bg-slate-50/50, uppercase section headers, border-l nav, indigo accent)
-- Doc rendering redesign (breadcrumbs, badge, tipografia 4xl/5xl, code blocks dark theme)
-- Table of Contents sidebar (right-side "NESTA PAGINA")
-- Consistency pass em paginas especiais (Home, Client pages, Login/Profile)
+(No active milestone — planning next)
 
 ### Out of Scope
 
@@ -99,11 +97,17 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - Edicao colaborativa em tempo real (CRDT) — v2 (ADVW-03)
 - Drag-and-drop visual estilo Figma — v2 (ADVW-04)
 - Edicao por linguagem natural — v2 (ADVW-05)
+- Dark mode fine-tuning — v1.2 focused on light mode, dark inherits tokens automatically
+- Mobile responsive sidebar drawer — v2
+- @tailwindcss/typography plugin — custom prose styles sufficient
+- Copy button / language label on code blocks — future (ADOC-01/02/03)
+- Mobile hamburger menu — future (ADOC-04)
 
 ## Context
 
-Shipped v1.1 Wireframe Evolution with ~27,500 LOC TypeScript across ~230 files.
+Shipped v1.2 Visual Redesign with ~33,000 LOC TypeScript across ~240 files.
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
+3 new packages added in v1.2: @fontsource-variable/inter, @fontsource-variable/jetbrains-mono, rehype-highlight.
 237 tests passing (vitest).
 
 The platform covers the full operator workflow:
@@ -118,6 +122,7 @@ The platform covers the full operator workflow:
 9. **Component library** — Section registry with 21 types, 9 chart variants, generic parametric viewer
 10. **Briefing & views** — Structured briefing form, blueprint text view, MD export, share link management
 11. **AI generation** — Screen recipes + vertical templates + pure generation engine with CLI bridge
+12. **Visual identity** — Slate + indigo palette, Inter/JetBrains Mono fonts, frosted glass header, border-l rail nav, dark code blocks with syntax highlighting, right-side TOC
 
 Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint + branding + TechnicalConfig).
 
@@ -147,6 +152,12 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Pure function generateBlueprint() | Zero side effects, testable without Supabase | ✓ Good — 10 unit tests cover engine |
 | CLI bridge with process.env (not import.meta.env) | Vite env vars incompatible with Node.js scripts | ✓ Good — npx tsx --env-file .env.local |
 | Screen recipes with keyword scoring | Flexible matching: briefing module names → screen templates | ✓ Good — 10 recipes cover common BI contexts |
+| Slate + indigo palette (not blue-gray + gold) | Matches reference HTML design, consistent with Inter font | ✓ Good — cohesive visual identity |
+| rehype-highlight (not shiki/react-syntax-highlighter) | Lighter, integrates with existing react-markdown pipeline | ✓ Good — zero-config syntax highlighting |
+| Page-owns-width pattern | Layout.tsx delegates max-w to each page | ✓ Good — flexible per-page layouts |
+| Viewport-level scrolling | Remove nested overflow containers for proper sticky | ✓ Good — sidebar, header, TOC all stick correctly |
+| CSS-only sidebar restyle (zero logic changes) | -ml-px border-l overlap trick for active indicator | ✓ Good — minimal risk, clean result |
+| Explicit color tokens (not semantic) | text-indigo-600 instead of text-primary for active states | ✓ Good — clear intent, easy to audit |
 
 ## Constraints
 
@@ -156,6 +167,7 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Blueprint prevalece**: Se blueprint e wireframe divergirem, blueprint e a fonte da verdade
 - **Componentes compartilhados**: Nunca criar componentes locais em clients/ — tudo em tools/
 - **Section registry**: All new section types must go through the registry (no direct switch statements)
+- **Visual language**: Slate + indigo palette, Inter body / JetBrains Mono code, border-l rail nav pattern
 
 ---
-*Last updated: 2026-03-10 after v1.2 milestone start*
+*Last updated: 2026-03-11 after v1.2 milestone*

@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Visual Redesign
-status: verifying
-stopped_at: Completed 16-02-PLAN.md
-last_updated: "2026-03-11T00:01:34.338Z"
-last_activity: 2026-03-10 -- Plan 16-02 complete (client pages breadcrumb nav + auth pages slate-50 backgrounds)
+status: completed
+stopped_at: Milestone v1.2 archived
+last_updated: "2026-03-11"
+last_activity: 2026-03-11 -- Milestone v1.2 Visual Redesign archived
 progress:
   total_phases: 5
   completed_phases: 5
@@ -18,17 +18,16 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-10)
+See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.2 Visual Redesign -- Phase 16 Consistency Pass complete, milestone verifying
+**Current focus:** v1.2 complete -- planning next milestone
 
 ## Current Position
 
-Phase: 16 of 16 (Consistency Pass) -- fifth of 5 phases in v1.2
-Plan: 2/2 complete
-Status: All plans complete, running milestone verification
-Last activity: 2026-03-10 -- Plan 16-02 complete (client pages breadcrumb nav + auth pages slate-50 backgrounds)
+Milestone v1.2 Visual Redesign: SHIPPED
+All 3 milestones complete (v1.0 MVP, v1.1 Wireframe Evolution, v1.2 Visual Redesign)
+Next: /gsd:new-milestone
 
 Progress: [██████████] 100%
 
@@ -39,8 +38,8 @@ Progress: [██████████] 100%
 - Average duration: ~15 min
 - Total execution time: ~10.5 hours
 
-**Recent Trend (v1.1):**
-- 15 plans across 5 phases in ~1 day
+**v1.2 Trend:**
+- 7 plans across 5 phases in ~4 days
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -49,20 +48,8 @@ Progress: [██████████] 100%
 
 ### Decisions
 
-All v1.0 + v1.1 decisions logged in PROJECT.md Key Decisions table (23 decisions, all good).
-Full v1.1 decision log archived in milestones/v1.1-ROADMAP.md.
-
-v1.2 research decisions:
-- Slate + indigo palette (not blue-gray + gold) -- matches reference HTML
-- 3 new packages only (@fontsource-variable/inter, @fontsource-variable/jetbrains-mono, rehype-highlight)
-- No Tailwind plugins, no shiki, no @tailwindcss/typography
-- DOC + TOC merged into single phase (co-dependent: TOC reads heading IDs from doc rendering)
-- [Phase 13]: Page-owns-width pattern: Layout.tsx no longer wraps content in max-w -- each page sets its own
-- [Phase 13]: Viewport-level scrolling: removed overflow-hidden/overflow-y-auto from Layout containers
-- [Phase 14]: CSS-only sidebar restyle with zero logic changes -- container-level indentation, -ml-px border-l overlap trick for active indicator
-- [Phase 14]: Explicit color tokens (text-indigo-600, border-indigo-600) instead of semantic tokens for active states
-- [Phase 16]: CSS-class-only consistency pass -- no component structure changes, only Tailwind class replacements
-- [Phase 16]: [Phase 16-02]: Explicit slate/indigo tokens on client pages + brand header on Login/SignUp but not Profile
+All v1.0 + v1.1 + v1.2 decisions logged in PROJECT.md Key Decisions table (28 decisions, all good).
+Full v1.2 decision log archived in milestones/v1.2-ROADMAP.md.
 
 ### Pending Todos
 
@@ -70,9 +57,7 @@ None.
 
 ### Blockers/Concerns
 
-- Pitfall: HSL channel format for Tailwind 3 opacity modifiers -- must NOT wrap in hsl()
-- (Resolved in Phase 13) Pitfall: Removing overflow-hidden from Layout.tsx changes scroll context for IntersectionObserver
-- Pitfall: Wireframe --wf-* token isolation must be verified after palette change
+None active.
 
 ### Quick Tasks Completed
 
@@ -100,6 +85,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-10T23:57:26.673Z
-Stopped at: Completed 16-02-PLAN.md
-Next: Milestone verification
+Last session: 2026-03-11
+Stopped at: Milestone v1.2 archived
+Next: /gsd:new-milestone
