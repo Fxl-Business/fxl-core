@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Builder & Components
 status: planning
-stopped_at: "Completed 18-01-PLAN.md (schema extensions: SidebarGroup, typed HeaderConfig, badge on BlueprintScreen, 7 new tests)"
-last_updated: "2026-03-11T03:38:45.330Z"
+stopped_at: Completed 18-02-PLAN.md (sidebar collapse rail, groups rendering, badge pill, footer from config)
+last_updated: "2026-03-11T03:44:56.477Z"
 last_activity: 2026-03-10 -- Roadmap created for v1.3 (5 phases, 26 requirements mapped)
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -62,6 +62,8 @@ v1.3 architectural decisions (from research):
 - [Phase 18-01]: SidebarConfigSchema exported from blueprint-schema.ts so test file can import and test it directly
 - [Phase 18-01]: HeaderConfigSchema keeps .passthrough() even after gaining explicit typed fields — Phase 19/20 may add more fields without breaking this schema boundary
 - [Phase 18-01]: badge field added after icon in BlueprintScreen — both are optional display hints for sidebar nav items
+- [Phase 18-configurable-sidebar-header]: effectiveSidebarCollapsed derived from sidebarCollapsed && !editMode.active — single state, no separate forceExpanded flag
+- [Phase 18-configurable-sidebar-header]: Badge pill in collapsed sidebar rail clipped by overflow:hidden on aside — intentional, collapsed rail is for navigation not notification counts
 
 ### Pending Todos
 
@@ -86,6 +88,7 @@ None active.
 | Phase 17-schema-foundation-layout-restructure P03 | 2 | 2 tasks | 4 files |
 | Phase 17-schema-foundation-layout-restructure P02 | 2 | 3 tasks | 2 files |
 | Phase 18-configurable-sidebar-header P01 | 5 | 2 tasks | 3 files |
+| Phase 18-configurable-sidebar-header P02 | 8 | 3 tasks | 2 files |
 
 ### Roadmap Evolution
 
@@ -102,6 +105,6 @@ v1.2:
 
 ## Session Continuity
 
-Last session: 2026-03-11T03:38:45.327Z
-Stopped at: Completed 18-01-PLAN.md (schema extensions: SidebarGroup, typed HeaderConfig, badge on BlueprintScreen, 7 new tests)
+Last session: 2026-03-11T03:44:56.475Z
+Stopped at: Completed 18-02-PLAN.md (sidebar collapse rail, groups rendering, badge pill, footer from config)
 Next: `/gsd:plan-phase 17` (Schema Foundation & Layout Restructure)
