@@ -22,8 +22,8 @@ export default function WireframeSidebar({ screens, onSelect }: Props) {
             className={cn(
               'flex w-full items-center rounded-md px-2 py-1.5 text-left text-xs transition-colors',
               screen.active
-                ? 'bg-wf-sidebar-active font-medium text-wf-sidebar-fg'
-                : 'text-wf-sidebar-muted hover:bg-wf-sidebar-active/10 hover:text-wf-sidebar-fg',
+                ? 'bg-wf-accent-muted font-medium text-wf-accent'
+                : 'text-wf-sidebar-muted hover:bg-slate-800 hover:text-white',
             )}
           >
             {screen.label}

@@ -44,10 +44,10 @@
   --wf-negative: #dc2626;
 
   /* Sidebar (part of wireframe chrome) */
-  --wf-sidebar-bg: var(--wf-neutral-800);
-  --wf-sidebar-fg: var(--wf-neutral-50);
+  --wf-sidebar-bg: #0f172a;
+  --wf-sidebar-fg: var(--wf-neutral-300);
   --wf-sidebar-active: var(--wf-accent);
-  --wf-sidebar-muted: var(--wf-neutral-400);
+  --wf-sidebar-muted: var(--wf-neutral-500);
   --wf-sidebar-border: var(--wf-neutral-700);
 
   /* Header chrome */
