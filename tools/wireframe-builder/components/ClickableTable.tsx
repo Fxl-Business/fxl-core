@@ -1,5 +1,30 @@
 import { cn } from '@/lib/utils'
 
+/**
+ * Trend indicator cell pattern (TBL-05):
+ * Row data values support ReactNode — use inline JSX for trend icons:
+ *
+ * ```tsx
+ * import { TrendingUp, TrendingDown } from 'lucide-react'
+ *
+ * const row: ClickRow = {
+ *   id: 'row-1',
+ *   data: {
+ *     produto: 'Produto A',
+ *     variacao: (
+ *       <span className="inline-flex items-center gap-1 text-emerald-600 transition-transform hover:scale-110">
+ *         <TrendingUp className="h-3.5 w-3.5" />
+ *         <span>+8%</span>
+ *       </span>
+ *     ),
+ *   },
+ * }
+ * ```
+ *
+ * Negative trends: use text-rose-500 + TrendingDown.
+ * Color tokens: var(--wf-positive) for up, var(--wf-negative) for down.
+ */
+
 export type ClickColumn = {
   key: string
   label: string
