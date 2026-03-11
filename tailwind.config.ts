@@ -87,6 +87,7 @@ const config: Config = {
   				},
   				'table-row-alt': 'var(--wf-table-row-alt)',
   				'table-border': 'var(--wf-table-border)',
+  				border: 'var(--wf-border)',
   			}
   		},
   		borderRadius: {

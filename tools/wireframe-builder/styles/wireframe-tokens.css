@@ -26,6 +26,7 @@
   --wf-canvas: var(--wf-neutral-100);
   --wf-card: var(--wf-neutral-50);
   --wf-card-border: var(--wf-neutral-200);
+  --wf-border: var(--wf-card-border);
   --wf-heading: var(--wf-neutral-700);
   --wf-body: var(--wf-neutral-600);
   --wf-muted: var(--wf-neutral-400);
@@ -82,6 +83,7 @@
   --wf-canvas: var(--wf-neutral-900);
   --wf-card: var(--wf-neutral-800);
   --wf-card-border: var(--wf-neutral-700);
+  --wf-border: var(--wf-card-border);
   --wf-heading: var(--wf-neutral-200);
   --wf-body: var(--wf-neutral-300);
   --wf-muted: var(--wf-neutral-500);
