@@ -179,8 +179,8 @@ Plans:
   4. npx tsc --noEmit reports zero errors after all phases
 **Plans:** 2 plans
 Plans:
-- [ ] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
-- [ ] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
+- [ ] 28-01-PLAN.md — ScreenManager typography sync + gallery dark mode and branding toggles
+- [ ] 28-02-PLAN.md — Gallery visual validation checklist + TypeScript audit
 
 ## Progress
 
