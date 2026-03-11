@@ -42,11 +42,11 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 
 ### Cards
 
-- [ ] **CARD-01**: KPI cards use white/slate-900 background with rounded-xl border and shadow-sm
-- [ ] **CARD-02**: KPI cards have group-hover effect: icon container transitions from primary/10 to solid primary
-- [ ] **CARD-03**: Trend badges use rounded-full pill with color-coded background (emerald for positive, rose for negative)
-- [ ] **CARD-04**: Card values use text-2xl font-extrabold, labels use text-sm font-medium slate-500
-- [ ] **CARD-05**: Comparison text uses text-[10px] text-slate-400 below value
+- [x] **CARD-01**: KPI cards use white/slate-900 background with rounded-xl border and shadow-sm
+- [x] **CARD-02**: KPI cards have group-hover effect: icon container transitions from primary/10 to solid primary
+- [x] **CARD-03**: Trend badges use rounded-full pill with color-coded background (emerald for positive, rose for negative)
+- [x] **CARD-04**: Card values use text-2xl font-extrabold, labels use text-sm font-medium slate-500
+- [x] **CARD-05**: Comparison text uses text-[10px] text-slate-400 below value
 
 ### Tables
 
@@ -116,11 +116,11 @@ Requirements for wireframe visual redesign. Each maps to roadmap phases.
 | FILT-03 | Phase 26 | Pending |
 | FILT-04 | Phase 26 | Pending |
 | FILT-05 | Phase 26 | Pending |
-| CARD-01 | Phase 24 | Pending |
-| CARD-02 | Phase 24 | Pending |
-| CARD-03 | Phase 24 | Pending |
-| CARD-04 | Phase 24 | Pending |
-| CARD-05 | Phase 24 | Pending |
+| CARD-01 | Phase 24 | Complete |
+| CARD-02 | Phase 24 | Complete |
+| CARD-03 | Phase 24 | Complete |
+| CARD-04 | Phase 24 | Complete |
+| CARD-05 | Phase 24 | Complete |
 | TBL-01 | Phase 25 | Pending |
 | TBL-02 | Phase 25 | Pending |
 | TBL-03 | Phase 25 | Pending |
