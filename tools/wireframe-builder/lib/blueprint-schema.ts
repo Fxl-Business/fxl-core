@@ -54,14 +54,26 @@ export const FilterOptionSchema = z.object({
   filterType: z.enum(['select', 'date-range', 'multi-select', 'search', 'toggle']).optional(),
 })
 
-const SidebarConfigSchema = z.object({
-  footer: z.string().optional(),
+const SidebarGroupSchema = z.object({
+  label: z.string(),
+  screenIds: z.array(z.string()),
 })
 
-// passthrough() allows Phase 18 to add logo, period, etc. without making
-// this schema a breaking-change boundary. Record<string, never> would silently
-// reject every field Phase 18 adds — passthrough() accepts unknown fields instead.
-const HeaderConfigSchema = z.object({}).passthrough()
+export const SidebarConfigSchema = z.object({
+  footer: z.string().optional(),
+  groups: z.array(SidebarGroupSchema).optional(),
+})
+
+const HeaderConfigSchema = z.object({
+  showLogo: z.boolean().optional(),
+  showPeriodSelector: z.boolean().optional(),
+  showUserIndicator: z.boolean().optional(),
+  actions: z.object({
+    manage: z.boolean().optional(),
+    share: z.boolean().optional(),
+    export: z.boolean().optional(),
+  }).optional(),
+}).passthrough() // keep passthrough for forward-compat (Phase 19/20 may add fields)
 
 // Component types -- mirrored for runtime DB validation
 // Note: DrilRow.data and ClickRow.data use Record<string, React.ReactNode>
@@ -394,6 +406,7 @@ export const BlueprintScreenSchema = z.object({
   id: z.string(),
   title: z.string(),
   icon: z.string().optional(),
+  badge: z.union([z.number(), z.string()]).optional(),
   periodType: PeriodTypeSchema,
   filters: z.array(FilterOptionSchema),
   hasCompareSwitch: z.boolean(),
