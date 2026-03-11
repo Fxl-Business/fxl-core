@@ -393,6 +393,23 @@ export default function ScreenManager({
             >
               {Icon && <Icon className="h-4 w-4 shrink-0" />}
               <span className="truncate">{screen.title}</span>
+              {screen.badge !== undefined && (
+                <span style={{
+                  marginLeft: 'auto',
+                  background: 'var(--wf-accent)',
+                  color: 'var(--wf-accent-fg)',
+                  fontSize: 10,
+                  fontWeight: 600,
+                  borderRadius: 10,
+                  padding: '1px 6px',
+                  minWidth: 18,
+                  textAlign: 'center' as const,
+                  lineHeight: '16px',
+                  flexShrink: 0,
+                }}>
+                  {screen.badge}
+                </span>
+              )}
             </button>
           )
         })
