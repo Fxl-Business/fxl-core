@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Calendar, ChevronDown } from 'lucide-react'
 
 export type FilterOption = {
   key: string
@@ -27,6 +27,215 @@ const MESES_MOCK = [
 ]
 
 const ANOS_MOCK = ['2025', '2024', '2023']
+
+// ---------------------------------------------------------------------------
+// Filter sub-components (module-private)
+// ---------------------------------------------------------------------------
+
+function SelectFilter({ filter }: { filter: FilterOption }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+        {filter.label}:
+      </span>
+      <select disabled style={{
+        fontSize: 12, color: 'var(--wf-body)', border: 'none',
+        background: 'transparent', cursor: 'default',
+        fontFamily: 'Inter, sans-serif', fontWeight: 500, padding: '2px 4px',
+      }}>
+        <option>{filter.options?.[0] ?? 'Todos'}</option>
+      </select>
+    </div>
+  )
+}
+
+function DateRangeFilter({ filter }: { filter: FilterOption }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4, position: 'relative' }}>
+      <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+        {filter.label}:
+      </span>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 4,
+          fontSize: 12, color: 'var(--wf-body)', fontWeight: 500,
+          border: '1px solid var(--wf-card-border)', borderRadius: 6,
+          background: 'var(--wf-card)', padding: '2px 8px',
+          cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+        }}
+      >
+        <Calendar size={12} color="var(--wf-muted)" />
+        01/01/2026 — 28/02/2026
+        <ChevronDown size={12} color="var(--wf-muted)" />
+      </button>
+
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, zIndex: 20, marginTop: 4,
+          background: 'var(--wf-card)', border: '1px solid var(--wf-card-border)',
+          borderRadius: 8, padding: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          minWidth: 280,
+        }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
+            {['Últimos 7 dias', 'Últimos 30 dias', 'Mês anterior', 'YTD', 'Último ano'].map(p => (
+              <button key={p} style={{
+                fontSize: 11, padding: '2px 8px', borderRadius: 4,
+                border: '1px solid var(--wf-card-border)',
+                background: 'transparent', color: 'var(--wf-body)',
+                cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+              }}>
+                {p}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input type="date" disabled defaultValue="2026-01-01"
+              style={{
+                fontSize: 12, padding: '4px 6px', border: '1px solid var(--wf-card-border)',
+                borderRadius: 4, color: 'var(--wf-body)', background: 'var(--wf-card)',
+                fontFamily: 'Inter, sans-serif',
+              }} />
+            <span style={{ color: 'var(--wf-muted)', fontSize: 12 }}>—</span>
+            <input type="date" disabled defaultValue="2026-02-28"
+              style={{
+                fontSize: 12, padding: '4px 6px', border: '1px solid var(--wf-card-border)',
+                borderRadius: 4, color: 'var(--wf-body)', background: 'var(--wf-card)',
+                fontFamily: 'Inter, sans-serif',
+              }} />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MultiSelectFilter({ filter }: { filter: FilterOption }) {
+  const [open, setOpen] = useState(false)
+  const selected = filter.options?.slice(0, 2) ?? ['Todos']
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4, position: 'relative' }}>
+      <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+        {filter.label}:
+      </span>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 4,
+          fontSize: 12, border: '1px solid var(--wf-card-border)', borderRadius: 6,
+          background: 'var(--wf-card)', padding: '2px 8px', cursor: 'pointer',
+          fontFamily: 'Inter, sans-serif',
+        }}
+      >
+        {selected.map(s => (
+          <span key={s} style={{
+            fontSize: 11, background: 'var(--wf-accent-muted)', color: 'var(--wf-accent-fg)',
+            borderRadius: 4, padding: '1px 6px', fontWeight: 500,
+          }}>{s}</span>
+        ))}
+        {(filter.options?.length ?? 0) > 2 && (
+          <span style={{ fontSize: 11, color: 'var(--wf-muted)' }}>
+            +{(filter.options?.length ?? 0) - 2}
+          </span>
+        )}
+        <ChevronDown size={12} color="var(--wf-muted)" />
+      </button>
+
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, zIndex: 20, marginTop: 4,
+          background: 'var(--wf-card)', border: '1px solid var(--wf-card-border)',
+          borderRadius: 8, padding: 8, minWidth: 160,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+        }}>
+          {(filter.options ?? ['Todos']).map(opt => (
+            <div key={opt} style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '4px 8px', fontSize: 12, color: 'var(--wf-body)',
+              cursor: 'default',
+            }}>
+              <span style={{
+                width: 14, height: 14, border: '1px solid var(--wf-card-border)',
+                borderRadius: 3, background: 'var(--wf-accent-muted)', display: 'inline-block',
+              }} />
+              {opt}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SearchFilter({ filter }: { filter: FilterOption }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+        {filter.label}:
+      </span>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 4,
+        border: '1px solid var(--wf-card-border)', borderRadius: 6,
+        background: 'var(--wf-card)', padding: '2px 8px',
+      }}>
+        <Search size={12} color="var(--wf-muted)" />
+        <input
+          disabled
+          placeholder="Buscar..."
+          style={{
+            border: 'none', outline: 'none', fontSize: 12, color: 'var(--wf-muted)',
+            background: 'transparent', width: 120, fontFamily: 'Inter, sans-serif',
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+function ToggleFilter({ filter }: { filter: FilterOption }) {
+  const [on, setOn] = useState(false)
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+        {filter.label}
+      </span>
+      <button
+        onClick={() => setOn(v => !v)}
+        style={{
+          display: 'inline-flex', alignItems: 'center',
+          width: 36, height: 20, borderRadius: 10,
+          background: on ? 'var(--wf-accent)' : 'var(--wf-card-border)',
+          border: 'none', cursor: 'pointer', transition: 'background 0.2s',
+          padding: 0, flexShrink: 0,
+        }}
+      >
+        <span style={{
+          display: 'block', width: 16, height: 16, borderRadius: '50%',
+          background: 'var(--wf-card)', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+          transform: on ? 'translateX(18px)' : 'translateX(2px)',
+          transition: 'transform 0.2s',
+        }} />
+      </button>
+    </div>
+  )
+}
+
+function FilterControl({ filter }: { filter: FilterOption }) {
+  const ft = filter.filterType ?? 'select'
+  if (ft === 'date-range')   return <DateRangeFilter filter={filter} />
+  if (ft === 'multi-select') return <MultiSelectFilter filter={filter} />
+  if (ft === 'search')       return <SearchFilter filter={filter} />
+  if (ft === 'toggle')       return <ToggleFilter filter={filter} />
+  return <SelectFilter filter={filter} />
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 
 export default function WireframeFilterBar({
   filters,
@@ -100,26 +309,7 @@ export default function WireframeFilterBar({
       )}
 
       {filters.map((filter) => (
-        <div key={filter.key} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ fontSize: 11, color: 'var(--wf-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
-            {filter.label}:
-          </span>
-          <select
-            disabled
-            style={{
-              fontSize: 12,
-              color: 'var(--wf-body)',
-              border: 'none',
-              background: 'transparent',
-              cursor: 'default',
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 500,
-              padding: '2px 4px',
-            }}
-          >
-            <option>{filter.options?.[0] ?? 'Todos'}</option>
-          </select>
-        </div>
+        <FilterControl key={filter.key} filter={filter} />
       ))}
 
       {showCompareSwitch && (
