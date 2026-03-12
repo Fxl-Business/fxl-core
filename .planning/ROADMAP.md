@@ -220,7 +220,11 @@ Plans:
   2. Migration 006 applies cleanly and `tasks` table exists with status CHECK constraint accepting todo/in_progress/done/blocked
   3. Existing operations (blueprint save, wireframe comment, briefing submit) continue working after both migrations
   4. kb-service.ts and tasks-service.ts export typed CRUD functions that TypeScript compiles without errors
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 30-01-PLAN.md -- Supabase migrations: knowledge_entries (005) and tasks (006) tables with RLS, FTS, CHECK constraints
+- [ ] 30-02-PLAN.md -- Typed service layer: kb-service.ts and tasks-service.ts with TDD tests
 
 ### Phase 31: Knowledge Base Module
 **Goal**: Operators can record, search, and retrieve structured knowledge (bugs, decisions, patterns, lessons) from a dedicated module with full-text search
@@ -296,7 +300,7 @@ For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in seque
 | 27. Chart Palette & Composition | v1.4 | 2/2 | Complete | 2026-03-11 |
 | 28. Editor Sync & Gallery Validation | v1.4 | 1/2 | In Progress | - |
 | 29. Module Foundation & Registry | v1.5 | TBD | Not started | - |
-| 30. Supabase Migrations & Data Layer | v1.5 | TBD | Not started | - |
+| 30. Supabase Migrations & Data Layer | v1.5 | 0/2 | Not started | - |
 | 31. Knowledge Base Module | v1.5 | TBD | Not started | - |
 | 32. Task Management Module | v1.5 | TBD | Not started | - |
 | 33. Home Page & Cross-Module Integration | v1.5 | TBD | Not started | - |
