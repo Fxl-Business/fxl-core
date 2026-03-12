@@ -17,18 +17,18 @@ created: 2026-03-12
 
 | Property | Value |
 |----------|-------|
-| **Framework** | vitest |
-| **Config file** | vitest.config.ts (or "none — Wave 0 installs") |
-| **Quick run command** | `npx vitest run --reporter=verbose` |
-| **Full suite command** | `npx vitest run && npx tsc --noEmit` |
-| **Estimated runtime** | ~15 seconds |
+| **Framework** | Vitest ^4.0.18 |
+| **Config file** | `vitest.config.ts` (root) |
+| **Quick run command** | `npx vitest run src/modules/knowledge-base` |
+| **Full suite command** | `npx vitest run` |
+| **Estimated runtime** | ~10 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `npx vitest run --reporter=verbose`
-- **After every plan wave:** Run `npx vitest run && npx tsc --noEmit`
+- **After every task commit:** Run `npx tsc --noEmit`
+- **After every plan wave:** Run `npx tsc --noEmit && npx vitest run src/modules/knowledge-base`
 - **Before `/gsd:verify-work`:** Full suite must be green
 - **Max feedback latency:** 15 seconds
 
@@ -38,11 +38,12 @@ created: 2026-03-12
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 31-01-01 | 01 | 1 | KB-02 | manual + tsc | `npx tsc --noEmit` | ❌ W0 | ⬜ pending |
-| 31-01-02 | 01 | 1 | KB-03 | manual + tsc | `npx tsc --noEmit` | ❌ W0 | ⬜ pending |
-| 31-02-01 | 02 | 1 | KB-04 | manual + tsc | `npx tsc --noEmit` | ❌ W0 | ⬜ pending |
-| 31-02-02 | 02 | 1 | KB-05 | unit | `npx vitest run` | ❌ W0 | ⬜ pending |
-| 31-03-01 | 03 | 2 | KB-06 | manual + tsc | `npx tsc --noEmit` | ❌ W0 | ⬜ pending |
+| 31-01-01 | 01 | 1 | KB-02 | unit | `npx vitest run src/modules/knowledge-base/hooks/useKBEntries.test.ts` | ❌ W0 | ⬜ pending |
+| 31-01-02 | 01 | 1 | KB-03 | manual-only | Visual browser check on /knowledge-base/:id | N/A | ⬜ pending |
+| 31-01-03 | 01 | 1 | KB-04 | manual-only | Visual browser check: create + verify in list | N/A | ⬜ pending |
+| 31-01-04 | 01 | 1 | KB-05 | unit | `npx vitest run src/modules/knowledge-base/hooks/useKBSearch.test.ts` | ❌ W0 | ⬜ pending |
+| 31-01-05 | 01 | 1 | KB-06 | unit | `npx vitest run src/modules/knowledge-base/pages/KBFormPage.test.ts` | ❌ W0 | ⬜ pending |
+| ALL | — | — | ALL | type check | `npx tsc --noEmit` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -50,10 +51,11 @@ created: 2026-03-12
 
 ## Wave 0 Requirements
 
-- [ ] Vitest config — if no vitest.config.ts exists, create one
-- [ ] Confirm Phase 30 service layer (`kb-service.ts`) exists and exports expected functions
+- [ ] `src/modules/knowledge-base/hooks/useKBEntries.test.ts` — stubs for KB-02 filter composition
+- [ ] `src/modules/knowledge-base/hooks/useKBSearch.test.ts` — stubs for KB-05 search_vec + plain type
+- [ ] `src/modules/knowledge-base/pages/KBFormPage.test.ts` — stubs for KB-06 ADR template injection
 
-*If none: "Existing infrastructure covers all phase requirements."*
+*Mock pattern: same as `tools/wireframe-builder/lib/blueprint-store.test.ts` — mock `@/lib/supabase` with `vi.mock()`, wire fluent chain with `vi.fn()`.*
 
 ---
 
@@ -61,10 +63,8 @@ created: 2026-03-12
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| KB list page renders with filters | KB-02 | Visual rendering + filter UX | Visit /knowledge-base, verify list renders, apply type/tag/client filters |
-| KB detail page renders markdown | KB-03 | Visual markdown rendering | Click entry, verify markdown body + metadata display |
-| Create/edit form saves to Supabase | KB-04 | Requires Supabase connection | Create entry via form, verify it appears in list |
-| ADR template injection | KB-06 | Visual template rendering | Create Decision-type entry, verify template sections appear |
+| Detail page renders entry with metadata | KB-03 | Requires live Supabase + browser rendering | Navigate to /knowledge-base/:id, verify title, body markdown, type, tags, client, dates visible |
+| Form saves and entry appears in list | KB-04 | Requires live Supabase connection | Create entry via form, verify toast, verify entry in list immediately |
 
 ---
 
