@@ -240,7 +240,11 @@ Plans:
   3. Creating or editing an entry via the form saves to Supabase and the entry immediately appears in the list
   4. Typing a query in the KB search page returns ranked results via Supabase full-text search (Portuguese stemming)
   5. Creating a Decision-type entry presents an ADR-structured template (Context, Decision, Consequences sections)
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 31-01-PLAN.md -- KB module scaffold: types, hooks (useKBEntries, useKBEntry, useKBSearch), and shared components (KBEntryCard, KBTypeFilter, KBMetaPanel)
+- [ ] 31-02-PLAN.md -- KB pages (list, detail, form, search) and App.tsx route wiring
 
 ### Phase 32: Task Management Module
 **Goal**: Operators can create, track, and close tasks per client with a kanban board and a direct link from completed tasks to KB documentation
@@ -251,7 +255,11 @@ Plans:
   2. Creating or editing a task via the form saves title, description, status, priority, due date, and client slug to Supabase
   3. Visiting /tarefas/kanban shows 4 columns (todo, in_progress, done, blocked); clicking a task status badge moves it to the next state
   4. A "Documentar" button appears on tasks with status done and pre-fills the KB entry form with the task title and a bug or decision type selector
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 31-01-PLAN.md -- KB types, data hooks, and shared components (KBEntryCard, KBTypeFilter, KBMetaPanel)
+- [ ] 31-02-PLAN.md -- KB pages (list, detail, form, search) and App.tsx route wiring
 
 ### Phase 33: Home Page & Cross-Module Integration
 **Goal**: The home page is a live operational hub that reflects all active modules and recent activity, and knowledge surfaces where operators need it most
@@ -305,6 +313,6 @@ For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in seque
 | 28. Editor Sync & Gallery Validation | v1.4 | 1/2 | In Progress | - |
 | 29. Module Foundation & Registry | v1.5 | 0/2 | Not started | - |
 | 30. Supabase Migrations & Data Layer | v1.5 | 0/2 | Not started | - |
-| 31. Knowledge Base Module | v1.5 | TBD | Not started | - |
+| 31. Knowledge Base Module | v1.5 | 0/2 | Not started | - |
 | 32. Task Management Module | v1.5 | TBD | Not started | - |
 | 33. Home Page & Cross-Module Integration | v1.5 | TBD | Not started | - |
