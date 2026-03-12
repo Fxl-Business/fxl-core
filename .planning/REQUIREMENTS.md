@@ -73,31 +73,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MOD-01 | — | Pending |
-| MOD-02 | — | Pending |
-| MOD-03 | — | Pending |
-| MOD-04 | — | Pending |
-| KB-01 | — | Pending |
-| KB-02 | — | Pending |
-| KB-03 | — | Pending |
-| KB-04 | — | Pending |
-| KB-05 | — | Pending |
-| KB-06 | — | Pending |
-| KB-07 | — | Pending |
-| TASK-01 | — | Pending |
-| TASK-02 | — | Pending |
-| TASK-03 | — | Pending |
-| TASK-04 | — | Pending |
-| TASK-05 | — | Pending |
-| HOME-01 | — | Pending |
-| HOME-02 | — | Pending |
-| HOME-03 | — | Pending |
+| MOD-01 | Phase 29 | Pending |
+| MOD-02 | Phase 29 | Pending |
+| MOD-03 | Phase 29 | Pending |
+| MOD-04 | Phase 29 | Pending |
+| KB-01 | Phase 30 | Pending |
+| KB-02 | Phase 31 | Pending |
+| KB-03 | Phase 31 | Pending |
+| KB-04 | Phase 31 | Pending |
+| KB-05 | Phase 31 | Pending |
+| KB-06 | Phase 31 | Pending |
+| KB-07 | Phase 33 | Pending |
+| TASK-01 | Phase 30 | Pending |
+| TASK-02 | Phase 32 | Pending |
+| TASK-03 | Phase 32 | Pending |
+| TASK-04 | Phase 32 | Pending |
+| TASK-05 | Phase 32 | Pending |
+| HOME-01 | Phase 33 | Pending |
+| HOME-02 | Phase 33 | Pending |
+| HOME-03 | Phase 33 | Pending |
 
 **Coverage:**
 - v1.5 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19
+- Mapped to phases: 19
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-12*
-*Last updated: 2026-03-12 after initial definition*
+*Last updated: 2026-03-12 after roadmap creation (all 19 requirements mapped)*

@@ -7,6 +7,7 @@
 - v1.2 Visual Redesign -- Phases 12-16 (shipped 2026-03-11)
 - v1.3 Builder & Components -- Phases 17-21 (shipped 2026-03-11)
 - v1.4 Wireframe Visual Redesign -- Phases 22-28 (in progress)
+- v1.5 Modular Foundation & Knowledge Base -- Phases 29-33 (planned)
 
 ## Phases
 
@@ -78,6 +79,16 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 - [x] **Phase 27: Chart Palette & Composition** - Primary blue + slate chart palette, custom header legend, CompositionBar new component (completed 2026-03-11)
 - [ ] **Phase 28: Editor Sync & Gallery Validation** - ScreenManager visual sync with sidebar, gallery smoke test, final TypeScript verification
 
+### v1.5 Modular Foundation & Knowledge Base (Planned)
+
+**Milestone Goal:** Transformar o FXL Core de um sistema monolitico em uma plataforma modular com fronteiras claras entre areas, preparada para expansao futura. Introduzir base de conhecimento autoalimentada e gestao de tarefas por cliente.
+
+- [ ] **Phase 29: Module Foundation & Registry** - ModuleManifest type, MODULE_REGISTRY, ESLint boundary enforcement, sidebar and routing driven by registry
+- [ ] **Phase 30: Supabase Migrations & Data Layer** - knowledge_entries and tasks tables with tsvector FTS, anon-permissive RLS, and typed service stubs
+- [ ] **Phase 31: Knowledge Base Module** - Full KB module: list, detail, form, full-text search, ADR format for decision entries
+- [ ] **Phase 32: Task Management Module** - Full tasks module: list, kanban, create/edit form, task-to-KB documentation link
+- [ ] **Phase 33: Home Page & Cross-Module Integration** - Module hub grid from registry, activity feed, KB section in client workspace, KB in Cmd+K
+
 ## Phase Details
 
 ### Phase 22: Token Foundation
@@ -91,9 +102,10 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
   4. Three new tokens exist and resolve correctly: --wf-header-search-bg, --wf-table-footer-bg, --wf-table-footer-fg
   5. Client branding for financeiro-conta-azul (#1B6B93) still overrides --wf-primary correctly in the wireframe viewer
 **Plans:** 2/2 plans complete
+
 Plans:
-- [ ] 22-01-PLAN.md -- Slate + blue token overhaul, GaugeChart hardcode fix, Tailwind config update
-- [ ] 22-02-PLAN.md -- Branding override pipeline (brandingToWfOverrides + WireframeThemeProvider) and chart palette hook
+- [x] 22-01-PLAN.md -- Slate + blue token overhaul, GaugeChart hardcode fix, Tailwind config update
+- [x] 22-02-PLAN.md -- Branding override pipeline (brandingToWfOverrides + WireframeThemeProvider) and chart palette hook
 
 ### Phase 23: Sidebar & Header Chrome
 **Goal**: Every wireframe screen shows a professional dark sidebar and clean white header that immediately communicate financial dashboard quality
@@ -106,9 +118,10 @@ Plans:
   4. Header renders with white/slate-900 background, bottom border, and a rounded-lg search input with slate-100/800 background
   5. Header right side displays notification icon, dark mode toggle, and a user chip with avatar showing name and role
 **Plans:** 2/2 plans complete
+
 Plans:
-- [x] 23-01-PLAN.md — Sidebar chrome: dark tokens, active/hover states, group labels, status footer
-- [x] 23-02-PLAN.md — Header chrome: search input, bell, theme toggle, user chip
+- [x] 23-01-PLAN.md -- Sidebar chrome: dark tokens, active/hover states, group labels, status footer
+- [x] 23-02-PLAN.md -- Header chrome: search input, bell, theme toggle, user chip
 
 ### Phase 24: KPI Cards
 **Goal**: KPI cards deliver the premium hover-responsive feel that defines a professional financial dashboard first impression
@@ -121,8 +134,9 @@ Plans:
   4. Card values use text-2xl font-extrabold and labels use text-sm font-medium slate-500
   5. Comparison text appears below the value at text-[10px] text-slate-400
 **Plans:** 1/1 plans complete
+
 Plans:
-- [ ] 24-01-PLAN.md — KpiCardFull + KpiCard restyle (icon slot, group-hover, rounded-full badges, extrabold values, type update)
+- [x] 24-01-PLAN.md -- KpiCardFull + KpiCard restyle (icon slot, group-hover, rounded-full badges, extrabold values, type update)
 
 ### Phase 25: Table Components
 **Goal**: All four table variants share a consistent professional header treatment and the primary analytical table gains a dark footer totals row
@@ -135,9 +149,10 @@ Plans:
   4. DataTable and DrillDownTable render a dark footer row (bg-slate-900 text-white font-black) with aggregate totals when footer data is provided
   5. Trend indicator cells show color-coded icons that scale to scale-110 on hover
 **Plans:** 2/2 plans complete
+
 Plans:
-- [x] 25-01-PLAN.md — Header typography, row hover, total/highlight row restyle across all 4 tables (completed 2026-03-11)
-- [ ] 25-02-PLAN.md — Dark footer row (type + render) and trend indicator cell pattern
+- [x] 25-01-PLAN.md -- Header typography, row hover, total/highlight row restyle across all 4 tables (completed 2026-03-11)
+- [ ] 25-02-PLAN.md -- Dark footer row (type + render) and trend indicator cell pattern
 
 ### Phase 26: Filter Bar Enhancement
 **Goal**: The sticky filter bar reads as a premium control surface with blur depth and typographic clarity that matches the dashboard chrome
@@ -150,8 +165,9 @@ Plans:
   4. Action buttons (date picker, share, export) render with distinct hierarchy: outline style for secondary actions and filled for primary actions, all with rounded-lg shape
   5. Compare toggle uses a primary-colored switch with 11px bold label
 **Plans:** 1/1 plans complete
+
 Plans:
-- [ ] 26-01-PLAN.md — Sticky blur container, vertical stacked labels, action button hierarchy, compare toggle bold label
+- [x] 26-01-PLAN.md -- Sticky blur container, vertical stacked labels, action button hierarchy, compare toggle bold label
 
 ### Phase 27: Chart Palette & Composition
 **Goal**: All charts use the new blue-slate palette and the gallery gains a new CompositionBar component for horizontal stacked breakdown visualization
@@ -164,9 +180,10 @@ Plans:
   4. Bar chart variants transition individual bars from muted to full opacity on group hover
   5. A new CompositionBar component renders a horizontal stacked bar with hover:brightness-90 segments and a color legend grid below
 **Plans:** 2/2 plans complete
+
 Plans:
-- [ ] 27-01-PLAN.md — Chart container/title/legend restyle across all 15 chart components + activeBar hover
-- [ ] 27-02-PLAN.md — CompositionBar new component + gallery entry
+- [x] 27-01-PLAN.md -- Chart container/title/legend restyle across all 15 chart components + activeBar hover
+- [x] 27-02-PLAN.md -- CompositionBar new component + gallery entry
 
 ### Phase 28: Editor Sync & Gallery Validation
 **Goal**: The editor UI matches the new wireframe aesthetic and all 86 wireframe components are confirmed working in both light and dark mode
@@ -178,14 +195,72 @@ Plans:
   3. Client branding (financeiro-conta-azul #1B6B93) applied in the gallery passes the branding-override visual check
   4. npx tsc --noEmit reports zero errors after all phases
 **Plans:** 1/2 plans executed
+
 Plans:
-- [ ] 28-01-PLAN.md — ScreenManager typography sync + gallery dark mode and branding toggles
-- [ ] 28-02-PLAN.md — Gallery visual validation checklist + TypeScript audit
+- [ ] 28-01-PLAN.md -- ScreenManager typography sync + gallery dark mode and branding toggles
+- [ ] 28-02-PLAN.md -- Gallery visual validation checklist + TypeScript audit
+
+### Phase 29: Module Foundation & Registry
+**Goal**: The platform has typed module boundaries and a single registry that drives routing, sidebar navigation, and the home page — ending hardcoded navigation arrays
+**Depends on**: Phase 28 (v1.4 complete)
+**Requirements**: MOD-01, MOD-02, MOD-03, MOD-04
+**Success Criteria** (what must be TRUE):
+  1. Navigating the sidebar shows links generated from MODULE_REGISTRY (no hardcoded nav arrays remain in Sidebar.tsx)
+  2. App.tsx composes routes from module manifests and stays under 60 lines of route definitions
+  3. ESLint boundary rules are configured and `npm run lint` passes with cross-module import violations reported as errors
+  4. Existing docs and wireframe-builder areas continue working via wrapper manifests without any code being moved
+**Plans**: TBD
+
+### Phase 30: Supabase Migrations & Data Layer
+**Goal**: The database has knowledge_entries and tasks tables with full-text search support and the service layer is ready for UI to consume — before any UI is built
+**Depends on**: Phase 29
+**Requirements**: KB-01, TASK-01
+**Success Criteria** (what must be TRUE):
+  1. Migration 005 applies cleanly and `knowledge_entries` table exists with tsvector generated column and GIN index
+  2. Migration 006 applies cleanly and `tasks` table exists with status CHECK constraint accepting todo/in_progress/done/blocked
+  3. Existing operations (blueprint save, wireframe comment, briefing submit) continue working after both migrations
+  4. kb-service.ts and tasks-service.ts export typed CRUD functions that TypeScript compiles without errors
+**Plans**: TBD
+
+### Phase 31: Knowledge Base Module
+**Goal**: Operators can record, search, and retrieve structured knowledge (bugs, decisions, patterns, lessons) from a dedicated module with full-text search
+**Depends on**: Phase 30
+**Requirements**: KB-02, KB-03, KB-04, KB-05, KB-06
+**Success Criteria** (what must be TRUE):
+  1. Visiting /knowledge-base shows a list of entries filterable by type (bug/decision/pattern/lesson), tags, and client slug
+  2. Clicking an entry opens /knowledge-base/:id with the markdown body rendered and all metadata (type, tags, client, dates) visible
+  3. Creating or editing an entry via the form saves to Supabase and the entry immediately appears in the list
+  4. Typing a query in the KB search page returns ranked results via Supabase full-text search (Portuguese stemming)
+  5. Creating a Decision-type entry presents an ADR-structured template (Context, Decision, Consequences sections)
+**Plans**: TBD
+
+### Phase 32: Task Management Module
+**Goal**: Operators can create, track, and close tasks per client with a kanban board and a direct link from completed tasks to KB documentation
+**Depends on**: Phase 30
+**Requirements**: TASK-02, TASK-03, TASK-04, TASK-05
+**Success Criteria** (what must be TRUE):
+  1. Visiting /tarefas shows a task list filterable by status, client slug, and priority
+  2. Creating or editing a task via the form saves title, description, status, priority, due date, and client slug to Supabase
+  3. Visiting /tarefas/kanban shows 4 columns (todo, in_progress, done, blocked); clicking a task status badge moves it to the next state
+  4. A "Documentar" button appears on tasks with status done and pre-fills the KB entry form with the task title and a bug or decision type selector
+**Plans**: TBD
+
+### Phase 33: Home Page & Cross-Module Integration
+**Goal**: The home page is a live operational hub that reflects all active modules and recent activity, and knowledge surfaces where operators need it most
+**Depends on**: Phase 31, Phase 32
+**Requirements**: HOME-01, HOME-02, HOME-03, KB-07
+**Success Criteria** (what must be TRUE):
+  1. The home page displays a grid of module cards populated from MODULE_REGISTRY (Docs, WF Builder, Clientes, KB, Tarefas) with each card showing a link to the module
+  2. An activity feed below the module grid shows the last 10 updates across kb_entries and tasks ordered by recency
+  3. Visiting a client page (/clients/:slug) shows a "Conhecimento" section listing KB entries for that client_slug
+  4. Opening Cmd+K and typing a query returns KB entries as a separate result group alongside docs results
+**Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other and can execute in any order after Phase 22. Phase 28 requires all prior phases complete.
+Phase 22 is the strict prerequisite for v1.4. Phases 23-27 are independent of each other. Phase 28 requires all v1.4 phases.
+For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in sequence), then Phase 33.
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -213,10 +288,15 @@ Phase 22 is the strict prerequisite. Phases 23-27 are independent of each other 
 | 19. Filter Bar Expansion | v1.3 | 2/2 | Complete | 2026-03-11 |
 | 20. Chart Type Expansion | v1.3 | 4/4 | Complete | 2026-03-11 |
 | 21. Gallery Reorganization | v1.3 | 2/2 | Complete | 2026-03-11 |
-| 22. Token Foundation | 2/2 | Complete    | 2026-03-11 | - |
-| 23. Sidebar & Header Chrome | v1.4 | Complete    | 2026-03-11 | 2026-03-11 |
-| 24. KPI Cards | 1/1 | Complete    | 2026-03-11 | - |
-| 25. Table Components | 2/2 | Complete    | 2026-03-11 | - |
-| 26. Filter Bar Enhancement | 1/1 | Complete    | 2026-03-11 | - |
-| 27. Chart Palette & Composition | 2/2 | Complete    | 2026-03-11 | - |
-| 28. Editor Sync & Gallery Validation | 1/2 | In Progress|  | - |
+| 22. Token Foundation | v1.4 | 2/2 | Complete | 2026-03-11 |
+| 23. Sidebar & Header Chrome | v1.4 | 2/2 | Complete | 2026-03-11 |
+| 24. KPI Cards | v1.4 | 1/1 | Complete | 2026-03-11 |
+| 25. Table Components | v1.4 | 2/2 | Complete | 2026-03-11 |
+| 26. Filter Bar Enhancement | v1.4 | 1/1 | Complete | 2026-03-11 |
+| 27. Chart Palette & Composition | v1.4 | 2/2 | Complete | 2026-03-11 |
+| 28. Editor Sync & Gallery Validation | v1.4 | 1/2 | In Progress | - |
+| 29. Module Foundation & Registry | v1.5 | TBD | Not started | - |
+| 30. Supabase Migrations & Data Layer | v1.5 | TBD | Not started | - |
+| 31. Knowledge Base Module | v1.5 | TBD | Not started | - |
+| 32. Task Management Module | v1.5 | TBD | Not started | - |
+| 33. Home Page & Cross-Module Integration | v1.5 | TBD | Not started | - |

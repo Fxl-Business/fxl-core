@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Modular Foundation & Knowledge Base
-status: defining_requirements
+status: roadmap_ready
 stopped_at: null
 last_updated: "2026-03-12"
-last_activity: "2026-03-12 -- Milestone v1.5 started"
+last_activity: "2026-03-12 -- Roadmap created for v1.5 (Phases 29-33)"
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-12)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.5 Modular Foundation & Knowledge Base
+**Current focus:** v1.5 Modular Foundation & Knowledge Base -- Phase 29 ready to plan
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-12 — Milestone v1.5 started
+Phase: 0 of 5 (roadmap defined, ready to plan Phase 29)
+Plan: --
+Status: Ready to plan
+Last activity: 2026-03-12 -- Roadmap written for v1.5 (Phases 29-33), 19 requirements mapped
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -47,21 +47,25 @@ Progress: [░░░░░░░░░░] 0%
 
 All v1.0-v1.4 decisions logged in PROJECT.md Key Decisions table.
 
+v1.5 decisions to track during execution:
+- Module manifest pattern: static typed constant in src/registry/modules.ts (not dynamic)
+- Service layer: each module uses its own lib/[name]-service.ts, never imports Supabase client directly in components
+- RLS: anon-permissive on new tables (same as existing), Clerk auth at application layer
+- tsvector language: 'portuguese' (KB content is in Portuguese)
+- knowledge_entries column: entry_type (not kind/category)
+
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-None active.
-
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
+- Phase 28 (v1.4) still in progress -- v1.5 phases start after Phase 28 completes
+- Research flag: eslint-plugin-boundaries exact config syntax needs verification during Phase 29 execution
+- Research flag: import.meta.glob literal constraint -- verify existing docs-parser.ts pattern before KB indexer
 
 ## Session Continuity
 
 Last session: 2026-03-12
-Stopped at: Defining requirements for v1.5
-Next: Complete requirements, create roadmap
+Stopped at: Roadmap created for v1.5, all 19 requirements mapped to Phases 29-33
+Next: Complete Phase 28 (v1.4), then plan Phase 29 via /gsd:plan-phase 29
