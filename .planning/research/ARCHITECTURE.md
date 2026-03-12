@@ -1,8 +1,8 @@
-# Architecture Research: v1.4 Wireframe Visual Redesign
+# Architecture Research
 
-**Domain:** CSS token system migration — warm stone + gold to slate + primary blue
-**Researched:** 2026-03-11
-**Confidence:** HIGH (based on direct codebase inspection, all findings code-verified)
+**Domain:** Modular SPA — Knowledge Base + Task Management integration into existing React + Supabase platform
+**Researched:** 2026-03-12
+**Confidence:** HIGH (based on direct codebase reading + established React SPA patterns)
 
 ---
 
@@ -10,555 +10,522 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    Token Definition Layer                            │
-│  wireframe-tokens.css  -- [data-wf-theme="light|dark"]              │
-│  45 CSS variables: --wf-neutral-*, --wf-canvas, --wf-card,          │
-│  --wf-accent (gold), --wf-sidebar-*, --wf-chart-1..5                │
-└──────────────────────────┬──────────────────────────────────────────┘
-                           | sets data-wf-theme attribute
-┌──────────────────────────v──────────────────────────────────────────┐
-│                    Theme Provider Layer                              │
-│  wireframe-theme.tsx  -- WireframeThemeProvider                     │
-│  Reads localStorage(fxl_wf_theme), wraps children in                │
-│  <div data-wf-theme={theme}>. Exposes toggle() + setTheme().        │
-└──────────────────────────┬──────────────────────────────────────────┘
-                           | provides context
-┌──────────────────────────v──────────────────────────────────────────┐
-│                    Tailwind Alias Layer                              │
-│  tailwind.config.ts  -- wf.* color map                              │
-│  bg-wf-card, text-wf-heading, border-wf-card-border, etc.           │
-│  Maps Tailwind class names to CSS var() references                   │
-└──────────────────────────┬──────────────────────────────────────────┘
-                           | consumed by
-┌──────────────────────────v──────────────────────────────────────────┐
-│                    Component Layer (85 files)                        │
-│  Pattern A: Tailwind classes  -- bg-wf-card, text-wf-heading        │
-│  Pattern B: inline style      -- style={{ color: 'var(--wf-body)' }}│
-│  Pattern C: color-mix()       -- for semi-transparent fills         │
-│  7 files use Pattern C (KpiCard, KpiCardFull, StatCard, Progress,   │
-│  ManualInput, CalculoCard, Waterfall)                                │
-└──────────────────────────┬──────────────────────────────────────────┘
-                           | branding override injected here
-┌──────────────────────────v──────────────────────────────────────────┐
-│                    Branding Override Layer                           │
-│  branding.ts  -- brandingToCssVars() injects --brand-chart-1..5     │
-│  getChartPalette() returns hex[] for recharts Cell fill              │
-│  brandingToWfOverrides() currently returns {} (intentional no-op)   │
-│  --brand-* vars used by chart components via chartColors? prop       │
+│                           TopNav (sticky, full-width)               │
+├──────────────────┬──────────────────────────────────────────────────┤
+│                  │                                                   │
+│   Sidebar.tsx    │            <Outlet /> (page content)             │
+│   (w-64, fixed)  │                                                   │
+│                  │   / Home (modular hub)                           │
+│   [nav tree      │   /processo/*  DocRenderer                       │
+│    hardcoded     │   /ferramentas/* DocRenderer                     │
+│    today]        │   /clients/:slug/* interactive pages             │
+│                  │   /knowledge-base/* (NEW)                        │
+│                  │   /tasks/* (NEW)                                  │
+│                  │                                                   │
+├──────────────────┴──────────────────────────────────────────────────┤
+│                        Supabase (data layer)                        │
+│  comments | share_tokens | blueprint_configs | briefing_configs     │
+│  knowledge_entries (NEW) | tasks (NEW) | projects (NEW)             │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
----
+### Component Responsibilities (Current State)
 
-## Token Inventory: Current vs Target
-
-### Neutral Scale — Full Value Replace (0 component files affected)
-
-Current tokens use Tailwind Stone (warm grays). Target uses Slate (cool blue-grays).
-All 10 neutral vars need value updates. Names stay identical — zero component edits.
-
-| Token | Current (Stone) | Target (Slate) |
-|-------|-----------------|----------------|
-| `--wf-neutral-50` | `#fafaf9` | `#f8fafc` |
-| `--wf-neutral-100` | `#f5f5f4` | `#f1f5f9` |
-| `--wf-neutral-200` | `#e7e5e4` | `#e2e8f0` |
-| `--wf-neutral-300` | `#d6d3d1` | `#cbd5e1` |
-| `--wf-neutral-400` | `#a8a29e` | `#94a3b8` |
-| `--wf-neutral-500` | `#78716c` | `#64748b` |
-| `--wf-neutral-600` | `#57534e` | `#475569` |
-| `--wf-neutral-700` | `#44403c` | `#334155` |
-| `--wf-neutral-800` | `#292524` | `#1e293b` |
-| `--wf-neutral-900` | `#1c1917` | `#0f172a` |
-
-Components reference semantic tokens (`--wf-card`, `--wf-heading`), not neutral scale directly.
-Updating 10 values automatically propagates to all semantic aliases.
-
-### Semantic Tokens — Value Update Only (0 component files affected)
-
-| Token | Current Mapping | Target Value |
-|-------|-----------------|-------------|
-| `--wf-canvas` | `--wf-neutral-100` alias | `#f6f6f8` (light) / `#101622` (dark) — direct hex, not alias |
-| `--wf-card` | `--wf-neutral-50` alias | `#ffffff` (light) / `#1a2236` (dark) — direct hex |
-| `--wf-card-border` | `--wf-neutral-200` alias | inherits from updated neutral-200 |
-| `--wf-heading` | `--wf-neutral-700` alias | inherits from updated neutral-700 |
-| `--wf-body` | `--wf-neutral-600` alias | inherits from updated neutral-600 |
-| `--wf-muted` | `--wf-neutral-400` alias | inherits from updated neutral-400 |
-| `--wf-border` | alias of `--wf-card-border` | keep alias pattern |
-| `--wf-positive` | `#16a34a` | keep — green-600 is appropriate |
-| `--wf-negative` | `#dc2626` | keep — red-600 is appropriate |
-
-Note: `--wf-canvas` and `--wf-card` should be set to direct hex values rather than neutral aliases.
-The HTML reference uses `#f6f6f8` and `#ffffff` specifically, which don't exactly match slate-100/50.
-
-### Accent — Replace Gold with Primary Blue (values only, 0 component renames)
-
-This is the highest-impact single change. `--wf-accent` (gold `#d4a017`) is referenced in
-10 component files. They all consume it via Tailwind class or `var()` reference — changing
-the CSS value propagates to all automatically.
-
-| Token | Current | Target |
-|-------|---------|--------|
-| `--wf-accent` | `#d4a017` (gold) | `#1152d4` (primary blue) |
-| `--wf-accent-muted` | `rgba(212,160,23, 0.12)` static | `color-mix(in srgb, var(--wf-accent) 12%, transparent)` |
-| `--wf-accent-fg` | `#78590a` (dark gold) | `#0e3fa8` (dark blue, light mode) |
-| `--wf-accent-fg` dark | `#fef3c7` (amber-50) | `#93b4ff` (light blue, dark mode) |
-
-Converting `--wf-accent-muted` from a static `rgba()` to a `color-mix()` form ensures it
-automatically tracks future accent color changes. This is a pure CSS change affecting 0 components
-(the formula resolves identically at runtime).
-
-### Sidebar Tokens — Value Update Only (0 component renames)
-
-The sidebar shifts from warm dark stone to true slate-950. `--wf-sidebar-active` inherits
-the accent change automatically since it aliases `--wf-accent`.
-
-| Token | Current | Target |
-|-------|---------|--------|
-| `--wf-sidebar-bg` | `--wf-neutral-800` (warm `#292524`) | `#0f172a` (slate-950) |
-| `--wf-sidebar-fg` | `--wf-neutral-50` | `#f1f5f9` (slate-100) |
-| `--wf-sidebar-active` | `--wf-accent` (gold) | `--wf-accent` (now blue — inherits) |
-| `--wf-sidebar-muted` | `--wf-neutral-400` | `#64748b` (slate-500) — direct hex |
-| `--wf-sidebar-border` | `--wf-neutral-700` | `#1e293b` (slate-800) — direct hex |
-
-### Header Tokens — Keep Existing, Add 1 New Token
-
-| Token | Status | Target Value |
-|-------|--------|-------------|
-| `--wf-header-bg` | Keep | `#ffffff` (light) / `#1a2236` (dark) |
-| `--wf-header-border` | Keep | inherits `--wf-card-border` |
-| `--wf-header-search-bg` | **NEW** | `#f6f6f8` (light) / `#0f172a` (dark) |
-
-`--wf-header-search-bg` is the only structurally new token needed for the header redesign.
-The notification bell, user chip, and dark mode toggle use existing semantic tokens.
-
-### Table Tokens — Keep Existing, Add 2 New Tokens
-
-| Token | Status | Change |
-|-------|--------|--------|
-| `--wf-table-header-bg` | Keep | Value update (lighter in new design) |
-| `--wf-table-header-fg` | Keep | Value update (tracking-widest style is already in component) |
-| `--wf-table-row-alt` | Keep | Value update |
-| `--wf-table-border` | Keep | Value update |
-| `--wf-table-footer-bg` | **NEW** | `#1e293b` (slate-800 dark footer row) |
-| `--wf-table-footer-fg` | **NEW** | `#f1f5f9` (slate-100 text on dark footer) |
-
-### Chart Palette — Full Value Replace (0 component files affected)
-
-Current: gold/amber monochromatic. Target: primary blue + slate/indigo scale.
-
-| Token | Current | Target |
-|-------|---------|--------|
-| `--wf-chart-1` | `#d4a017` (gold) | `#1152d4` (primary blue) |
-| `--wf-chart-2` | `#b45309` (amber) | `#3b82f6` (blue-500) |
-| `--wf-chart-3` | `#92400e` (deep amber) | `#6366f1` (indigo-500) |
-| `--wf-chart-4` | `#78716c` (neutral-500) | `#0ea5e9` (sky-500) |
-| `--wf-chart-5` | `#57534e` (neutral-600) | `#64748b` (slate-500) |
-
-All 9 chart components reference `var(--wf-chart-*)` in their Recharts `<Cell fill>` or
-as a COLORS array. The value update propagates automatically.
-
-### New Tokens Summary
-
-Three new tokens must be added to `wireframe-tokens.css` AND registered in `tailwind.config.ts`:
-
-| Token | Light | Dark | Tailwind Key |
-|-------|-------|------|-------------|
-| `--wf-header-search-bg` | `#f6f6f8` | `#0f172a` | `wf.header-search-bg` |
-| `--wf-table-footer-bg` | `#1e293b` | `#0f172a` | `wf.table-footer` (DEFAULT) |
-| `--wf-table-footer-fg` | `#f1f5f9` | `#f1f5f9` | `wf.table-footer.fg` |
-
-```typescript
-// tailwind.config.ts — additions to wf: block
-'header-search-bg': 'var(--wf-header-search-bg)',
-'table-footer': {
-  DEFAULT: 'var(--wf-table-footer-bg)',
-  fg: 'var(--wf-table-footer-fg)',
-},
-```
+| Component | Responsibility | Location |
+|-----------|---------------|----------|
+| `App.tsx` | Route definitions, layout grouping | `src/App.tsx` |
+| `Layout.tsx` | Sidebar + TopNav + Outlet wrapper | `src/components/layout/` |
+| `Sidebar.tsx` | Hardcoded nav tree (`NavItem[]`) | `src/components/layout/` |
+| `docs-parser.ts` | `import.meta.glob` over `docs/`, frontmatter + section parsing | `src/lib/` |
+| `search-index.ts` | Builds flat `SearchEntry[]` from all docs | `src/lib/` |
+| `DocRenderer.tsx` | Route handler for any `/docs/*.md` path | `src/pages/` |
+| `WireframeViewer` | Full-screen, outside Layout, parametric by `:clientSlug` | `src/pages/clients/` |
 
 ---
 
-## Styling Pattern Analysis
+## Recommended Structure for v1.5
 
-Three distinct patterns exist across the 85 component files. Migration surface per pattern:
+The existing architecture is a flat SPA. The modularization goal is NOT a micro-frontend split — it is
+organizing code into module-shaped feature folders while keeping a single React app, single router,
+and single Supabase client.
 
-### Pattern A: Tailwind wf-* Classes (majority — ~38 files)
-
-```tsx
-// KpiCard.tsx, DataTable.tsx, DonutChart.tsx, KpiCardFull.tsx
-<div className="rounded-lg border border-wf-card-border bg-wf-card p-4">
-  <p className="text-xs font-medium text-wf-muted">{label}</p>
-  <p className="text-2xl font-bold text-wf-heading">{value}</p>
-```
-
-**Migration impact for color changes: zero.** Token values update in CSS, Tailwind aliases
-stay identical. Classes like `bg-wf-card`, `text-wf-heading`, `border-wf-card-border`
-resolve to the updated token values automatically.
-
-### Pattern B: Inline style with var() (~18 files)
-
-```tsx
-// WireframeHeader.tsx, WireframeFilterBar.tsx, StatCardRenderer.tsx
-style={{
-  background: 'var(--wf-header-bg)',
-  borderBottom: '1px solid var(--wf-header-border)',
-  color: 'var(--wf-body)',
-}}
-```
-
-**Migration impact for color changes: zero.** Token values update in CSS. Inline
-`var()` references resolve to new values automatically. Impact only when the component
-needs JSX restructuring to implement new design patterns (new search input, bell icon, etc.).
-
-### Pattern C: color-mix() for fills (7 files)
-
-```tsx
-// KpiCardFull.tsx, StatCardRenderer.tsx, ProgressBarRenderer.tsx
-backgroundColor: variationPositive
-  ? 'color-mix(in srgb, var(--wf-positive) 10%, transparent)'
-  : 'color-mix(in srgb, var(--wf-negative) 10%, transparent)',
-```
-
-**Migration impact: zero.** The `color-mix()` function resolves at runtime using the
-updated token values automatically. These 7 files require no edits for color changes.
-
----
-
-## Component Migration Surface by Category
-
-### Category 1: Zero-edit components (token values update, components unchanged)
-
-All 9+ chart components (BarLineChart, DonutChart, AreaChart, StackedBar, StackedArea,
-HorizontalBar, Scatter, Bubble, Composed, Funnel, Radar, Treemap, Waterfall, Pareto, Gauge):
-use `var(--wf-chart-*)` in COLORS arrays or Cell fill — value change propagates automatically.
-
-All form/input components: ManualInputSection, SaldoBancoInput, InputsScreen, UploadSection.
-All section renderers without new behavior: DividerRenderer, InfoBlockRenderer, FilterConfigRenderer.
-All 17 property-form files: use app shadcn/ui tokens, not wf-* tokens at all.
-
-**Count: ~55 files require zero edits.**
-
-### Category 2: Layout restructure required (new JSX, same token names)
-
-Token names are preserved throughout. These components need structural JSX changes to
-implement the new design patterns from the HTML reference.
-
-| Component | Required Change | Tokens Involved |
-|-----------|-----------------|-----------------|
-| `WireframeSidebar.tsx` | Add grouped sections, icons, status footer | `wf-sidebar-*` (unchanged names) |
-| `WireframeHeader.tsx` | Add search input, bell icon, dark mode toggle, user chip | Existing + new `--wf-header-search-bg` |
-| `WireframeFilterBar.tsx` | Add backdrop-blur, sticky behavior, action buttons | `wf-card`, `wf-card-border`, `wf-accent` |
-| `KpiCard.tsx` | Add hover group effects, rounded-full trend badge | `wf-card`, `wf-positive`, `wf-negative` |
-| `KpiCardFull.tsx` | Add hover group, sparkline stroke with accent color | Same + `--wf-accent` (now blue) |
-| `DataTable.tsx` | Add dark footer row using new `--wf-table-footer-*` | New tokens from Phase 1 |
-| `DrillDownTable.tsx` | Same dark footer treatment | New tokens from Phase 1 |
-
-**Count: 7 files — JSX restructure, zero token renames.**
-
-### Category 3: Editor components (out of v1.4 scope, except one)
-
-25 files in `components/editor/` and `components/editor/property-forms/` use app shadcn/ui
-tokens. They are the administrative editing interface, not the wireframe preview.
-
-**Exception:** `ScreenManager.tsx` uses `wf-sidebar-*` Tailwind classes for its dark panel
-(13 references confirmed by grep). It should receive visual updates alongside WireframeSidebar
-to maintain consistency, but its behavior does not change.
-
-**Count: 24 files excluded from scope, ScreenManager receives cosmetic update only.**
-
----
-
-## Migration Strategy: Incremental, Token-First
-
-The architectural separation of CSS tokens from component class names makes this uniquely
-safe to execute incrementally. No feature flags, no parallel implementations needed.
-
-**Big bang is riskier than token-first.** Restructuring 7 components simultaneously means
-a large, hard-to-review PR. Token-first yields immediately visible results after Phase 1
-that validate the direction, then component work proceeds at lower risk.
-
-### Phase 1 — Token Layer (1 CSS file + 1 config file, zero component edits)
-
-Update `wireframe-tokens.css`:
-1. Replace all 10 neutral values (stone → slate)
-2. Update semantic token values for `--wf-canvas` and `--wf-card` to direct hex values
-3. Replace accent gold → primary blue (`--wf-accent`, `--wf-accent-muted`, `--wf-accent-fg`)
-4. Convert `--wf-accent-muted` from `rgba()` to `color-mix()` form
-5. Replace chart palette (5 values per theme = 10 values total)
-6. Update sidebar token values (bg to slate-950, muted/border to direct slate hex)
-7. Add 3 new tokens in both light and dark blocks
-
-Update `tailwind.config.ts`:
-8. Register the 3 new tokens in the `wf:` color extension block
-
-**Result after Phase 1:** ~55 components render with the new slate + primary blue palette.
-Gallery previews, KPI cards, charts, tables (minus footer row), filter bar colors — all
-updated in a single commit. The wireframe visual shifts from warm stone + gold to
-cool slate + blue automatically.
-
-### Phase 2 — Chrome: WireframeSidebar + WireframeHeader
-
-Restructure with new JSX. Color environment is already correct from Phase 1.
-Only layout structure, new sub-components (search pill, bell, user chip), and
-typography changes remain.
-
-Build sidebar first: simpler structure, no internal state beyond screen selection.
-Build header second: has period selector state and multiple interactive elements.
-
-### Phase 3 — KPI Cards
-
-Update `KpiCard.tsx` and `KpiCardFull.tsx`:
-- Add `group` class to container, `group-hover:` modifiers to interactive elements
-- Change trend badge from `rounded` to `rounded-full`
-- Update Sparkline stroke from `var(--wf-muted)` to `var(--wf-accent)` (now blue from Phase 1)
-
-### Phase 4 — Table Dark Footer Row
-
-Add dark summary footer to `DataTable.tsx` and `DrillDownTable.tsx` using
-`--wf-table-footer-bg` and `--wf-table-footer-fg` tokens added in Phase 1.
-Low risk — additive change to existing components.
-
-### Phase 5 — Filter Bar Enhancement
-
-Update `WireframeFilterBar.tsx` with backdrop-blur sticky behavior and action buttons.
-Color environment is already correct from Phase 1. Only structural additions needed.
-
-### Phase 6 — ScreenManager Editor Sync
-
-Update `ScreenManager.tsx` to match the new sidebar visual from Phase 2.
-Cosmetic only — spacing, icon size, typography adjustments. Behavior unchanged.
-
-### Phase 7 — Gallery Validation
-
-Run through all gallery section previews. No development — smoke testing only.
-Verify every component renders correctly in both light and dark mode.
-
----
-
-## Build Order Dependency Graph
+### Target File Structure
 
 ```
-Phase 1: wireframe-tokens.css + tailwind.config.ts
-    |  [single commit, zero component risk, unlocks automatic updates to ~55 files]
-    |
-    +---> Phase 2: WireframeSidebar  (sidebar color correct from Phase 1)
-    |         |
-    |         +---> Phase 6: ScreenManager  (syncs with sidebar Phase 2)
-    |
-    +---> Phase 2: WireframeHeader   (header color correct from Phase 1)
-    |
-    +---> Phase 3: KpiCard + KpiCardFull  (accent blue correct from Phase 1)
-    |
-    +---> Phase 4: DataTable + DrillDownTable  (footer tokens exist from Phase 1)
-    |
-    +---> Phase 5: WireframeFilterBar  (accent + card colors correct from Phase 1)
-    |
-    v
-Phase 7: Gallery Validation  (after all components updated)
+src/
+├── modules/                     # NEW — feature modules, each self-contained
+│   ├── knowledge-base/
+│   │   ├── index.ts             # module manifest (routes, nav items, display name)
+│   │   ├── pages/
+│   │   │   ├── KBIndex.tsx      # list view — all entries, filterable
+│   │   │   └── KBEntry.tsx      # single entry detail view
+│   │   ├── components/
+│   │   │   ├── KBEntryCard.tsx
+│   │   │   └── KBEntryForm.tsx
+│   │   ├── lib/
+│   │   │   └── kb-service.ts    # Supabase CRUD wrappers for knowledge_entries
+│   │   └── types.ts             # KnowledgeEntry, KBCategory, etc.
+│   │
+│   ├── tasks/
+│   │   ├── index.ts             # module manifest
+│   │   ├── pages/
+│   │   │   ├── TasksIndex.tsx   # board / list view
+│   │   │   └── TaskDetail.tsx
+│   │   ├── components/
+│   │   │   ├── TaskCard.tsx
+│   │   │   ├── TaskForm.tsx
+│   │   │   └── TaskStatusBadge.tsx
+│   │   ├── lib/
+│   │   │   └── tasks-service.ts
+│   │   └── types.ts             # Task, Project, TaskStatus, etc.
+│   │
+│   ├── docs/                    # WRAP existing doc machinery (not rewrite)
+│   │   └── index.ts             # manifest only — pages/lib already in src/pages + src/lib
+│   │
+│   └── wireframe-builder/       # WRAP existing tool (not move)
+│       └── index.ts             # manifest only — code stays in tools/wireframe-builder/
+│
+├── registry/
+│   └── modules.ts               # imports all module manifests, exports MODULE_REGISTRY
+│
+├── components/
+│   ├── layout/
+│   │   ├── Layout.tsx           # unchanged structure
+│   │   ├── Sidebar.tsx          # MODIFY: accepts nav from registry instead of hardcoded tree
+│   │   ├── TopNav.tsx           # unchanged
+│   │   ├── ThemeToggle.tsx      # unchanged
+│   │   └── ScrollToTop.tsx      # unchanged
+│   ├── docs/                    # unchanged
+│   └── ui/                      # unchanged (shadcn)
+│
+├── pages/                       # unchanged — existing pages stay here
+│   ├── Home.tsx                 # MODIFY: reads MODULE_REGISTRY to render module cards
+│   ├── DocRenderer.tsx          # unchanged
+│   ├── Login.tsx                # unchanged
+│   ├── Profile.tsx              # unchanged
+│   ├── SharedWireframeView.tsx  # unchanged
+│   ├── clients/                 # unchanged
+│   └── docs/                   # unchanged
+│
+├── lib/                         # unchanged
+│   ├── docs-parser.ts           # unchanged
+│   ├── search-index.ts          # MODIFY: include KB entries in search
+│   ├── supabase.ts              # unchanged
+│   └── utils.ts                 # unchanged
+│
+└── App.tsx                      # MODIFY: reads MODULE_REGISTRY to register routes
 ```
 
-**Phases 2-5 are independent of each other** — they can be committed in any order
-after Phase 1. Phase 6 should follow Phase 2 (sidebar). Phase 7 is always last.
+### Structure Rationale
 
----
+- **`src/modules/`:** Each module owns its pages, components, lib, and types. This is the key addition — it creates a named boundary without requiring a micro-frontend split. Existing code is NOT moved inside; legacy code remains in `src/pages/`, `src/lib/`, and `tools/`.
 
-## Component Counts by Phase
+- **`src/registry/modules.ts`:** Single import point. `App.tsx` and `Sidebar.tsx` read from it. This is the "module registry" pattern that lets new modules be added by creating a folder + exporting a manifest.
 
-| Phase | Files Changed | Risk | Prereqs |
-|-------|--------------|------|---------|
-| 1 — Token CSS + config | 2 | Low | None |
-| 2 — WireframeSidebar | 1 | Medium | Phase 1 |
-| 2 — WireframeHeader | 1 | Medium | Phase 1 |
-| 3 — KpiCard + KpiCardFull | 2 | Low | Phase 1 |
-| 4 — DataTable + DrillDownTable | 2 | Low | Phase 1 |
-| 5 — WireframeFilterBar | 1 | Medium | Phase 1 |
-| 6 — ScreenManager | 1 | Low | Phase 2 Sidebar |
-| 7 — Gallery Validation | 0 | Low | Phases 1-6 |
+- **Module manifests (`index.ts`):** Lightweight descriptor objects — not runtime classes. Keep them plain data so App.tsx can safely import without circular deps.
 
-**Total files requiring edits: 10 out of 85.**
-The other 75 update automatically via the CSS token changes in Phase 1.
-
----
-
-## Icon System: Retain Lucide, No Migration
-
-**Recommendation: Keep lucide-react for all wireframe icons in v1.4.**
-
-Evidence for this decision:
-- 28 component files import from lucide-react (grep confirmed)
-- `IconPicker.tsx` has a typed `ICON_MAP` with 20 icons mapped to LucideIcon components
-- Icon names are string literals stored in Supabase BlueprintConfig (`sidebar.items[].icon`)
-- Replacing icon names requires a Supabase data migration for all existing blueprints
-
-The visual quality gap between Lucide and Material Symbols Rounded at 16-18px wireframe
-sidebar context is negligible. The design quality improvement in v1.4 comes from typography
-weight changes (extrabold headings, tracking-widest labels), the new palette, and hover
-group effects — not from the icon library.
-
-**If Material Symbols is desired later (v2 scope):**
-- Add `@material-symbols/font-variable` as a CSS variable font (no JS bundle cost)
-- Update IconPicker.tsx ICON_MAP with new name mappings
-- Write a Supabase migration to update `icon` string values in all blueprints
-- This is a clean, isolated change — worth deferring until the need is demonstrated
-
----
-
-## Branding Integration Points
-
-Three integration points are affected by the token migration. All three continue working
-without changes to branding.ts.
-
-### Integration Point 1: chartColors prop chain (unchanged)
-
-```
-BrandingConfig
-    -> getChartPalette() -- returns hex[]
-    -> BlueprintRenderer -> SectionRenderer -> ChartRenderer
-    -> DonutChart / BarLineChart / etc. (chartColors?: string[] prop)
-```
-
-When `chartColors` is present, it overrides the default `var(--wf-chart-*)` CSS vars.
-This mechanism is independent of the token system. After Phase 1, the new blue
-chart palette becomes the default. Client branding still overrides it via the prop chain.
-
-### Integration Point 2: brandingToWfOverrides() (intentional no-op, unchanged)
-
-This function returns `{}` by design. The decision that client branding does NOT
-override wireframe chrome (sidebar color, header color) is preserved in v1.4.
-The new slate + blue aesthetic becomes the universal wireframe chrome identity.
-Client branding continues to express itself through charts, logo, and fonts only.
-
-No changes to `branding.ts` are needed for this migration.
-
-### Integration Point 3: tailwind.config.ts wf: extension (requires update)
-
-The 3 new tokens must be registered. This is a prerequisite for using them as
-Tailwind classes in DataTable and WireframeHeader:
-
-```typescript
-// In tailwind.config.ts, wf: block additions
-'header-search-bg': 'var(--wf-header-search-bg)',
-'table-footer': {
-  DEFAULT: 'var(--wf-table-footer-bg)',
-  fg: 'var(--wf-table-footer-fg)',
-},
-```
-
-This change belongs in Phase 1 alongside the CSS token additions.
+- **Wrapper manifests for existing code:** `docs/index.ts` and `wireframe-builder/index.ts` do NOT move code. They exist only so the registry knows these areas exist and can surface them in Home + Sidebar. This preserves the migration path: zero risk of breaking existing pages.
 
 ---
 
 ## Architectural Patterns
 
-### Pattern 1: CSS-Scoped Token Themes
+### Pattern 1: Module Manifest
 
-**What:** All token values are scoped to `[data-wf-theme="light"]` and `[data-wf-theme="dark"]`
-selector blocks. WireframeThemeProvider sets the attribute. Components never handle
-light/dark logic — the CSS scope does all the work.
+**What:** Each module exports a plain object describing its identity, routes, nav items, and home card. The registry assembles them.
+**When to use:** Whenever a new top-level area of the platform is added.
+**Trade-offs:** Simpler than dynamic import() plugin systems. No lazy discovery — all modules are statically imported. That is intentional: small team, explicit control.
 
-**When to use:** Always for wireframe-specific styles. Every new token belongs in
-wireframe-tokens.css, not in global CSS or component-level style blocks.
+```typescript
+// src/modules/knowledge-base/index.ts
+import type { ModuleManifest } from '@/registry/modules'
+import KBIndex from './pages/KBIndex'
+import KBEntry from './pages/KBEntry'
+import KBEntryForm from './pages/KBEntryForm'
 
-**Trade-offs:** Theme switching is zero-JS. Dark mode works automatically for every
-component that uses `var(--wf-*)`. The constraint is that only light/dark variants exist —
-per-client palette overrides go through the separate `--brand-*` mechanism.
+export const knowledgeBaseModule: ModuleManifest = {
+  id: 'knowledge-base',
+  displayName: 'Knowledge Base',
+  description: 'Registro estruturado de bugs, decisoes e padroes',
+  icon: 'BookOpen',
+  rootPath: '/knowledge-base',
+  navItems: [
+    { label: 'Todas as Entradas', href: '/knowledge-base' },
+    { label: 'Nova Entrada', href: '/knowledge-base/new' },
+  ],
+  routes: [
+    { path: '/knowledge-base', component: KBIndex },
+    { path: '/knowledge-base/new', component: KBEntryForm },
+    { path: '/knowledge-base/:id', component: KBEntry },
+  ],
+  homeCard: {
+    badge: 'Knowledge Base',
+    title: 'Bugs, decisoes e padroes',
+    description: 'Consulte antes de investigar qualquer problema',
+    href: '/knowledge-base',
+  },
+}
+```
 
-### Pattern 2: Semantic Token Indirection
+```typescript
+// src/registry/modules.ts
+import type { ComponentType } from 'react'
 
-**What:** Components reference semantic tokens (`--wf-card`, `--wf-heading`) not
-scale tokens (`--wf-neutral-50`). Semantic tokens alias to scale tokens in CSS.
+export type NavItem = {
+  label: string
+  href: string
+  children?: NavItem[]
+}
 
-**Why it matters for this migration:** Updating scale values propagates to semantics
-automatically. Components are completely isolated from the scale-to-semantic mapping.
+export type RouteDescriptor = {
+  path: string
+  component: ComponentType
+}
 
-**When to break this pattern:** When the target design needs a value that doesn't
-match any scale step. Example: `--wf-canvas: #f6f6f8` in the HTML reference doesn't
-exactly match `--wf-neutral-100: #f1f5f9`. Use a direct hex value rather than forcing
-the scale to match an arbitrary design value.
+export type HomeCard = {
+  badge: string
+  title: string
+  description: string
+  href: string
+}
 
-### Pattern 3: color-mix() for Transparency
+export type ModuleManifest = {
+  id: string
+  displayName: string
+  description: string
+  icon: string
+  rootPath: string
+  navItems: NavItem[]
+  routes: RouteDescriptor[]
+  homeCard: HomeCard
+}
 
-**What:** Semi-transparent fills use `color-mix(in srgb, var(--wf-token) N%, transparent)`
-instead of `rgba()` with hardcoded hex values.
+import { docsModule } from '@/modules/docs'
+import { wireframeBuilderModule } from '@/modules/wireframe-builder'
+import { knowledgeBaseModule } from '@/modules/knowledge-base'
+import { tasksModule } from '@/modules/tasks'
 
-**Why it matters:** `rgba()` with hardcoded hex becomes stale when the token changes.
-`color-mix()` resolves at runtime from the current token value. The `--wf-accent-muted`
-definition in wireframe-tokens.css currently uses `rgba()` — this is a debt that should
-be fixed in Phase 1.
+export const MODULE_REGISTRY: ModuleManifest[] = [
+  docsModule,
+  wireframeBuilderModule,
+  knowledgeBaseModule,
+  tasksModule,
+]
+```
 
-**Browser support:** color-mix() is baseline in all modern browsers. No polyfill needed.
+### Pattern 2: Registry-Driven Sidebar
+
+**What:** Sidebar reads `MODULE_REGISTRY` instead of a hardcoded `navigation` array. The existing `NavItem[]` type in Sidebar.tsx maps 1:1 to manifest `navItems`.
+**When to use:** Immediately when introducing the registry.
+**Trade-offs:** Slightly less direct than hardcoded nav, but eliminates the need to manually sync App.tsx + Sidebar.tsx + Home.tsx every time a module is added.
+
+The migration is:
+1. Extract hardcoded `navigation` array into `docsModule.navItems` + `wireframeBuilderModule.navItems`
+2. Sidebar reads `MODULE_REGISTRY.flatMap(m => m.navItems)`
+3. No change to `NavSection` component — structure is identical to existing `NavItem[]` shape
+
+### Pattern 3: Registry-Driven Route Registration
+
+**What:** App.tsx reads `MODULE_REGISTRY` to register routes instead of hardcoding every import.
+**When to use:** Alongside Pattern 2 — these ship together.
+**Trade-offs:** Slightly harder to trace at a glance vs explicit imports, but scales cleanly. Component references (not strings) in route descriptors preserve TypeScript safety and tree-shaking.
+
+```tsx
+// App.tsx — new section inside the Layout route group
+{MODULE_REGISTRY.flatMap(mod =>
+  mod.routes.map(route => (
+    <Route
+      key={route.path}
+      path={route.path}
+      element={<route.component />}
+    />
+  ))
+)}
+```
+
+All module routes go inside the `<ProtectedRoute><Layout /></ProtectedRoute>` group. The existing hardcoded client/doc routes stay hardcoded until explicitly migrated.
+
+### Pattern 4: Service Layer per Module
+
+**What:** Each module has a `lib/[module]-service.ts` that wraps all Supabase calls. Pages import from the service, not from `src/lib/supabase.ts` directly.
+**When to use:** For any new Supabase-backed feature (KB, tasks).
+**Trade-offs:** Thin indirection, but consistent with how the rest of the app works. Supabase client access stays in lib files only.
+
+```typescript
+// src/modules/knowledge-base/lib/kb-service.ts
+import { supabase } from '@/lib/supabase'
+import type { KnowledgeEntry, CreateKnowledgeEntryInput } from '../types'
+
+export async function getKBEntries(): Promise<KnowledgeEntry[]> {
+  const { data, error } = await supabase
+    .from('knowledge_entries')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export async function createKBEntry(
+  input: CreateKnowledgeEntryInput
+): Promise<KnowledgeEntry> {
+  const { data, error } = await supabase
+    .from('knowledge_entries')
+    .insert(input)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+```
+
+---
+
+## Data Flow
+
+### Knowledge Base Entry Flow
+
+```
+User submits KB form
+    |
+KBEntryForm.tsx
+    |
+kb-service.createKBEntry(input)
+    |
+Supabase INSERT knowledge_entries
+    |
+Redirect to /knowledge-base/:id
+    |
+KBEntry.tsx -> kb-service.getKBEntry(id) -> render detail
+```
+
+### Task Creation Flow (with Client Link)
+
+```
+User creates task from client page
+    |
+TaskForm.tsx (receives clientSlug prop or from URL context)
+    |
+tasks-service.createTask({ ...input, client_slug })
+    |
+Supabase INSERT tasks
+    |
+Redirect to /tasks/:id (or back to client page)
+    |
+TaskDetail.tsx loads task + linked entities (blueprint, KB entries)
+```
+
+### Module Registration Flow (build time)
+
+```
+Developer adds new module folder + exports ModuleManifest
+    |
+Import manifest in src/registry/modules.ts
+    |
+MODULE_REGISTRY updated (static constant)
+    |
+Vite rebuilds — App.tsx picks up new routes
+Sidebar.tsx renders new nav section
+Home.tsx renders new module card
+```
+
+---
+
+## Supabase Schema for New Features
+
+### knowledge_entries table (migration 005)
+
+```sql
+CREATE TABLE public.knowledge_entries (
+  id          uuid      PRIMARY KEY DEFAULT gen_random_uuid(),
+  category    text      NOT NULL
+                CHECK (category IN ('bug', 'decision', 'pattern', 'gotcha')),
+  title       text      NOT NULL,
+  body        text      NOT NULL,         -- markdown content
+  tags        text[]    DEFAULT '{}',
+  client_slug text,                       -- nullable: global or client-specific
+  related_phase text,                     -- optional: 'wireframe', 'briefing', etc.
+  author_id   text,                       -- Clerk user ID (text, not uuid)
+  author_name text,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+
+-- Same anon-permissive RLS as blueprint_configs / briefing_configs
+ALTER TABLE public.knowledge_entries ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "anon_read_kb" ON knowledge_entries FOR SELECT TO anon USING (true);
+CREATE POLICY "anon_insert_kb" ON knowledge_entries FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "anon_update_kb" ON knowledge_entries FOR UPDATE TO anon USING (true);
+CREATE POLICY "anon_delete_kb" ON knowledge_entries FOR DELETE TO anon USING (true);
+```
+
+### tasks table (migration 006)
+
+```sql
+CREATE TABLE public.tasks (
+  id                          uuid    PRIMARY KEY DEFAULT gen_random_uuid(),
+  title                       text    NOT NULL,
+  description                 text,           -- markdown
+  status                      text    NOT NULL DEFAULT 'open'
+                                CHECK (status IN ('open', 'in_progress', 'done', 'blocked')),
+  priority                    text    NOT NULL DEFAULT 'medium'
+                                CHECK (priority IN ('low', 'medium', 'high')),
+  project_slug                text    NOT NULL, -- 'fxl-core' | client slug
+  client_slug                 text,             -- nullable: internal tasks have no client
+  assignee_id                 text,             -- Clerk user ID
+  assignee_name               text,
+  due_date                    date,
+  linked_kb_entry_id          uuid    REFERENCES knowledge_entries(id) ON DELETE SET NULL,
+  linked_blueprint_client_slug text,            -- soft link, not FK (clients are FS-based)
+  created_by                  text,
+  created_at                  timestamptz NOT NULL DEFAULT now(),
+  updated_at                  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE public.projects (
+  slug         text    PRIMARY KEY,         -- 'fxl-core', 'financeiro-conta-azul', etc.
+  display_name text    NOT NULL,
+  description  text,
+  status       text    NOT NULL DEFAULT 'active'
+                 CHECK (status IN ('active', 'paused', 'archived')),
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+
+-- Same anon-permissive RLS pattern
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "anon_all_tasks" ON tasks FOR ALL TO anon USING (true) WITH CHECK (true);
+
+ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "anon_all_projects" ON projects FOR ALL TO anon USING (true) WITH CHECK (true);
+```
+
+---
+
+## Integration Points
+
+### New vs Modified
+
+| File | Status | What Changes |
+|------|--------|-------------|
+| `src/App.tsx` | MODIFY | Add module route registration from registry |
+| `src/components/layout/Sidebar.tsx` | MODIFY | Read nav from MODULE_REGISTRY instead of hardcoded array |
+| `src/pages/Home.tsx` | MODIFY | Add KB + Tasks module cards; reads homeCard from registry |
+| `src/lib/search-index.ts` | MODIFY | Add async KB entries fetch; return combined SearchEntry[] |
+| `src/registry/modules.ts` | NEW | ModuleManifest type + MODULE_REGISTRY constant |
+| `src/modules/knowledge-base/` | NEW | Full module: index, pages, components, lib, types |
+| `src/modules/tasks/` | NEW | Full module: index, pages, components, lib, types |
+| `src/modules/docs/index.ts` | NEW | Wrapper manifest only — no code moved |
+| `src/modules/wireframe-builder/index.ts` | NEW | Wrapper manifest only — no code moved |
+| `supabase/migrations/005_knowledge_base.sql` | NEW | `knowledge_entries` table + RLS |
+| `supabase/migrations/006_tasks.sql` | NEW | `tasks` + `projects` tables + RLS |
+
+### Internal Boundaries
+
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| Module pages -> Supabase | Via module-scoped service (`lib/[module]-service.ts`) | No direct supabase import in components |
+| KB entries -> Search | `search-index.ts` calls Supabase async for KB entries | KB results shown in a distinct section of the Cmd+K palette; docs search remains static (import.meta.glob) |
+| Tasks -> Clients | Task holds `client_slug` text field | No FK (clients are filesystem-based, not DB rows). Resolve client display name from slug at render time. |
+| Tasks -> KB | `linked_kb_entry_id` FK | Optional link: "this task fixed this KB bug" |
+| Sidebar -> Registry | Static import | Registry is a module constant, not React context |
+| Home -> Registry | Static import | Same constant, no prop drilling |
+| App.tsx -> Registry | Static import | Same constant |
+
+### External Services
+
+| Service | Integration | Notes |
+|---------|-------------|-------|
+| Supabase | New tables via migration files | Same anon RLS pattern as blueprint_configs and briefing_configs — Clerk handles auth externally |
+| Clerk | No change | author_id stored as Clerk user ID (text) in new tables — same as existing pattern |
+| Vercel | No change | SPA deploy — new routes handled by Vite client-side routing |
+
+---
+
+## Build Order (considers dependencies)
+
+The registry must exist before any module uses it. Supabase migrations must run before service layer code is tested. Home page changes are the lowest risk and can be done last.
+
+1. **Registry scaffold** — Create `src/registry/modules.ts` with the `ModuleManifest` type and an empty `MODULE_REGISTRY`. Update `Sidebar.tsx` to accept nav from the registry alongside (or replacing) the hardcoded tree. This is the foundation; nothing else can be registered until this exists.
+
+2. **Supabase migrations** — Run `005_knowledge_base.sql` and `006_tasks.sql`. No app code depends on this, but the service layer cannot be tested until tables exist.
+
+3. **Knowledge Base module** — Full module: types, service, pages, components, manifest. Register in `MODULE_REGISTRY`. Wire routes in `App.tsx`. Independent of Tasks, can ship first.
+
+4. **Tasks module** — Types, service, pages, components, manifest. Depends on KB types for the `linked_kb_entry_id` reference. Register in `MODULE_REGISTRY`.
+
+5. **Home page modular hub** — Refactor `Home.tsx` to read `MODULE_REGISTRY.map(m => m.homeCard)` for the module card grid. Depends on registry having final shape (after KB and Tasks are registered).
+
+6. **Search integration** — Extend `search-index.ts` to include KB entries. Depends on KB module being live and `knowledge_entries` table existing.
+
+7. **Wrapper manifests for existing modules** — `docs/index.ts` and `wireframe-builder/index.ts`. No behavior change. Can be done at any point but are lowest priority — they only affect Home page layout.
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Renaming wf-* tokens
+### Anti-Pattern 1: Moving Existing Code into Module Folders
 
-**What people do:** Rename tokens for semantic clarity — e.g., `--wf-accent` to `--wf-primary`.
+**What people do:** Move `src/pages/DocRenderer.tsx` into `src/modules/docs/pages/DocRenderer.tsx` on the same PR that adds the registry.
 
-**Why it's wrong:** 31 component files reference `var(--wf-accent)` or `wf-accent` Tailwind
-classes. 240 total `--wf-*` references across 31 files. Renaming propagates required edits
-to every file, turning a CSS-only change into an 86-file PR.
+**Why it's wrong:** High breakage risk for zero feature gain. Existing routes, imports, and tests reference the old paths. Two concerns — registry introduction + code reorganization — should be separate phases.
 
-**Do this instead:** Change values only. The accent name is still semantically correct
-for a highlight/interactive color regardless of whether it is gold or blue.
+**Do this instead:** Create `src/modules/docs/index.ts` as a manifest only. Leave code in `src/pages/`. Move later, in a dedicated refactoring phase if desired.
 
-### Anti-Pattern 2: Hardcoding hex values in components during restructure
+### Anti-Pattern 2: Anon RLS with Clerk JWT Assumptions
 
-**What people do:** While restructuring WireframeHeader, hardcode `color: '#1152d4'` directly.
+**What people do:** Add `USING (auth.uid() = author_id::uuid)` to new table RLS policies, assuming Clerk's JWT works with `auth.uid()`.
 
-**Why it's wrong:** Breaks dark mode (the token scoping doesn't apply to hardcoded hex),
-breaks the branding layer independence, and creates drift between CSS and JSX.
+**Why it's wrong:** Clerk JWTs are not Supabase Auth JWTs. `auth.uid()` returns NULL for Clerk sessions. The existing pattern in this codebase (anon-permissive RLS, Clerk handles auth externally) is already the validated workaround.
 
-**Do this instead:** If a color is needed that has no existing token, add the token to
-wireframe-tokens.css first (both light and dark blocks), register it in tailwind.config.ts,
-then use it via `var()` or Tailwind class in the component.
+**Do this instead:** Keep the anon-permissive RLS pattern from `003_blueprint_configs.sql` and `004_briefing_configs.sql`. Application-level auth via Clerk (check `useAuth()` before calling service functions that write data).
 
-### Anti-Pattern 3: Static rgba() for token-derived transparency
+### Anti-Pattern 3: String-Based Component Resolution in Registry
 
-**What people do:** Write `rgba(17, 82, 212, 0.12)` (the blue accent as rgba).
+**What people do:** Store component names as strings in the registry (`route.component = 'KBIndex'`) and use a generic string-to-component lookup map.
 
-**Why it's wrong:** The value is frozen at that color. If the token changes in a future
-redesign, the rgba doesn't follow. This is how `--wf-accent-muted` ended up as `rgba(212,160,23, 0.12)` — it was correct when written but is now stale.
+**Why it's wrong:** Loses TypeScript type safety, breaks tree-shaking, and moves errors from compile time to runtime.
 
-**Do this instead:** Always use `color-mix(in srgb, var(--wf-token) N%, transparent)`.
+**Do this instead:** Import page components directly in the module manifest. Pass `ComponentType` references in the route descriptor. The `ModuleManifest` type enforces this.
 
-### Anti-Pattern 4: Registering Tailwind aliases pointing to hardcoded values
+### Anti-Pattern 4: Dynamic Sidebar via Context/State
 
-**What people do:** Add a new entry to `wf:` in tailwind.config.ts with a hardcoded hex.
+**What people do:** Introduce a `SidebarContext` that modules push nav items into at runtime (e.g., on component mount).
 
-**Why it's wrong:** That color is frozen — doesn't change with dark mode, doesn't participate
-in the token system.
+**Why it's wrong:** Causes nav to flicker on load, creates ordering ambiguity, and couples page lifecycle to nav rendering. Hard to debug.
 
-**Do this instead:** The tailwind.config.ts `wf:` block must always point to `var(--wf-token-name)`.
-The CSS file defines the actual values.
+**Do this instead:** Registry is a static constant. Nav is determined at compile time. Simpler, faster, and predictable.
 
-### Anti-Pattern 5: Splitting wireframe-tokens.css into per-component files
+### Anti-Pattern 5: Overloading the Supabase Client for App-Level Auth Checks
 
-**What people do:** Create a `sidebar-tokens.css`, `header-tokens.css` for organization.
+**What people do:** Use `supabase.auth.getUser()` to check operator identity before KB/task writes.
 
-**Why it's wrong:** The light/dark scoping depends on the `[data-wf-theme]` blocks being
-co-located. Splitting creates loading order dependencies and makes it easy to define a light
-value without its dark counterpart.
+**Why it's wrong:** Supabase Auth is not the auth layer here — Clerk is. `supabase.auth.getUser()` returns nothing meaningful for Clerk sessions. Auth checks must go through `@clerk/react`'s `useAuth()` hook.
 
-**Do this instead:** Keep wireframe-tokens.css as the single token source file.
-Use grouped comments within the file to organize sections.
+**Do this instead:** Gate write operations with `useAuth().isSignedIn` from Clerk. The service functions themselves are auth-agnostic (anon policies allow all); the UI enforces access.
+
+---
+
+## Scaling Considerations
+
+This is an internal operator tool. Scaling to millions of users is out of scope. The relevant scaling concerns:
+
+| Concern | Current (1-5 users) | If FXL grows (10-50 clients) |
+|---------|---------------------|------------------------------|
+| KB entries volume | Trivial | Add pagination + `pg_trgm` full-text search in Supabase |
+| Tasks volume | Trivial | Add filters by project/status/assignee; manageable in Supabase |
+| Module count | 4 modules in v1.5 | Add new module folder + manifest; no architectural change needed |
+| Bundle size | Fine — Vite splits by route already | Use `React.lazy` per module if bundle grows |
+| RLS security | Anon-permissive (operator-only tool) | Add Clerk JWT integration when multi-tenant v2 ships (SEC-01/02 in backlog) |
 
 ---
 
 ## Sources
 
-- Direct inspection: `tools/wireframe-builder/styles/wireframe-tokens.css` (45 tokens, 2 theme blocks)
-- Direct inspection: `tailwind.config.ts` (wf: color extension, 18 registered aliases + app tokens)
-- Direct inspection: `tools/wireframe-builder/lib/wireframe-theme.tsx` (WireframeThemeProvider, localStorage key)
-- Direct inspection: `tools/wireframe-builder/lib/branding.ts` (brandingToCssVars, brandingToWfOverrides no-op)
-- Direct inspection: `tools/wireframe-builder/types/branding.ts` (BrandingConfig, DEFAULT_BRANDING)
-- Component-level inspection: KpiCard, KpiCardFull, WireframeSidebar, WireframeHeader, DataTable, WireframeFilterBar, StatCardRenderer, ProgressBarRenderer, DonutChart (all 3 styling patterns)
-- Grep analysis: 240 total `--wf-*` references across 31 files; 28 files importing lucide-react
-- Grep analysis: `color-mix()` in 7 files; `wf-sidebar` in 3 files (Sidebar, ScreenManager, tokens.css)
-- `.planning/PROJECT.md` for v1.4 milestone goals and key decisions
+- Direct codebase reading: `src/App.tsx`, `src/components/layout/Sidebar.tsx`, `src/components/layout/Layout.tsx`, `src/pages/Home.tsx`, `src/lib/docs-parser.ts`, `src/lib/search-index.ts`, `supabase/migrations/001-004`
+- `.planning/PROJECT.md` — architecture decisions, constraints, key decisions table, v1.5 milestone goals
+- Established React SPA feature-folder patterns (MEDIUM confidence — widely documented, no single canonical source; consistent with how the wireframe-builder module is already structured)
+- Supabase anon RLS + Clerk external auth pattern — HIGH confidence (already validated in production in this codebase since v1.1)
 
 ---
 
-*Architecture research for: v1.4 Wireframe Visual Redesign — token migration*
-*Researched: 2026-03-11*
+*Architecture research for: v1.5 Modular Foundation & Knowledge Base — FXL Core*
+*Researched: 2026-03-12*

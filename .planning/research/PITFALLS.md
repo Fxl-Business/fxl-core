@@ -1,262 +1,296 @@
 # Pitfalls Research
 
-**Domain:** Visual redesign of an existing wireframe component library (86 files, CSS token architecture, Recharts, Tailwind + inline styles, client branding overrides)
-**Researched:** 2026-03-11
-**Confidence:** HIGH (grounded in direct codebase analysis: `wireframe-tokens.css`, `tailwind.config.ts`, `globals.css`, 31 component files with 240 `--wf-*` usages, `wireframe-theme.tsx`, `branding.ts`, `ComponentGallery.tsx`, and `clients/financeiro-conta-azul/wireframe/branding.config.ts`)
+**Domain:** Adding modular architecture, auto-fed knowledge base, and task management to an existing React 18 + Vite + TypeScript SPA (28 phases of accumulated code, 86 wireframe component files, 4 Supabase tables, single App.tsx routing)
+**Researched:** 2026-03-12
+**Confidence:** HIGH (grounded in direct codebase analysis of App.tsx, src/lib/docs-parser.ts, supabase/migrations/, vite.config.ts, and the current PROJECT.md; supplemented by WebSearch on circular dependency detection, ESLint boundary enforcement, Vite import.meta.glob constraints, and Supabase JSONB migration patterns)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Renaming or Removing Existing --wf-* Tokens Breaks 240 Usages Across 31 Files
+### Pitfall 1: Refactoring to Modules Without Enforcing Boundaries First
 
 **What goes wrong:**
-The v1.4 redesign introduces new tokens (`--wf-primary`, `--wf-bg-light`, `--wf-bg-dark`, new sidebar/header semantics). If any existing token name is changed or dropped -- even a "cleanup" like renaming `--wf-card-border` to `--wf-border-card` -- every component that references the old name silently falls back to the browser's `initial` value (usually `transparent` or `inherit`). There is no compile-time error. The breakage appears visually at runtime: borders disappear, backgrounds go transparent, text becomes invisible.
-
-The current system has 240 `--wf-*` usages across 31 component files, split between Tailwind utility classes (e.g. `border-wf-card-border`, `bg-wf-card`) and inline `style` props (e.g. `border: '1px solid var(--wf-card-border)'`). There is also a `--wf-border` alias that points to `--wf-card-border`. Breaking this alias silently breaks the alias consumers without touching the definition.
+The team reorganizes files into `src/modules/docs/`, `src/modules/wireframe-builder/`, `src/modules/knowledge-base/`, `src/modules/tasks/` but never installs a boundary linter. Within two sprints, cross-module imports reappear: the task module imports a helper from the wireframe-builder module, the knowledge-base imports a type from the docs module's internals. The modular directory structure exists cosmetically but the dependency graph is still a tangled monolith. When a module needs to be extracted or independently deployed later, untangling takes as long as the original refactor.
 
 **Why it happens:**
-CSS custom property consumers have no awareness of provider changes. TypeScript does not check CSS variable names. The tailwind config maps token names to utilities (line 68: `'card-border': 'var(--wf-card-border)'`), but changing either the CSS var name in `wireframe-tokens.css` or the Tailwind alias key name creates a silent mismatch -- Tailwind generates valid CSS with a dead `var()` reference.
+Directory restructuring is visible progress. Import enforcement is invisible discipline. Without a lint rule that fails CI when `src/modules/tasks` imports from `src/modules/wireframe-builder`, the boundary erodes silently on every PR that "just needs this one utility from over there."
 
 **How to avoid:**
-1. **Never remove or rename existing tokens during redesign.** Add new tokens alongside old ones. Once all consumers are migrated to the new name, remove the old name in a separate cleanup pass.
-2. **Add backward-compatible aliases.** If `--wf-card` must become `--wf-surface`, add `--wf-card: var(--wf-surface)` as a transitional alias so existing consumers keep working during the migration.
-3. **Run a grep audit before removing any token:** `grep -r 'wf-[token-name]' tools/wireframe-builder/components/ src/` and verify zero results before removing it from `wireframe-tokens.css` and `tailwind.config.ts`.
-4. **Update `tailwind.config.ts` in lockstep with `wireframe-tokens.css`.** Any token added to the CSS file needs a Tailwind alias if it will be used in className strings. Any token removed from the CSS file must have its Tailwind alias removed too -- otherwise Tailwind generates utility classes that resolve to a dead CSS var.
+Install `eslint-plugin-boundaries` (no Nx required, works in any Vite project) before moving a single file. Define allowed dependency directions:
+
+```jsonc
+// .eslintrc boundaries config
+"boundaries/element-types": [
+  "error",
+  {
+    "default": "disallow",
+    "rules": [
+      { "from": "modules/tasks", "allow": ["modules/shared"] },
+      { "from": "modules/knowledge-base", "allow": ["modules/shared"] },
+      { "from": "modules/docs", "allow": ["modules/shared"] },
+      { "from": "modules/wireframe-builder", "allow": ["modules/shared"] }
+    ]
+  }
+]
+```
+
+Cross-module needs go through `src/modules/shared/` (types, hooks, utilities). Modules communicate via shared contracts, not direct imports.
 
 **Warning signs:**
-- Borders on any card or table disappear after a token rename
-- Chart grid lines (`stroke="var(--wf-card-border)"`) become invisible (default SVG stroke color)
-- Sidebar nav items lose hover backgrounds
-- `grep 'var(--wf-old-name)'` still returns results after "renaming" the token
+- Files moved to new module directories but no new ESLint config committed
+- A module's `index.ts` re-exports internal implementation files (barrel file over-exposure)
+- TypeScript builds cleanly but `madge --circular src/` shows cycles between modules
 
 **Phase to address:**
-Phase 1 (Token architecture) -- audit all token usages before writing a single new token. Produce a usage map showing which components use which tokens. This map drives the migration plan.
+Module Foundation phase (first) — boundary rules must be in place before any code moves. Enforcing boundaries AFTER migration is exponentially harder.
 
 ---
 
-### Pitfall 2: Recharts Ignores CSS Variable Strings When Used as fill/stroke Props
+### Pitfall 2: App.tsx Route Explosion as Modules Add Their Own Pages
 
 **What goes wrong:**
-Recharts renders to SVG. SVG `fill` and `stroke` attributes do NOT resolve CSS custom properties set on ancestor HTML elements the same way HTML elements do. Specifically:
-
-- `fill="var(--wf-chart-1)"` works in browsers that support CSS custom properties in SVG presentation attributes (Chrome 85+, Firefox 94+). However, Recharts's tooltip, legend, and certain internal SVG elements (e.g. the `LegendItem` color swatch, the `CartesianGrid` stroke) may render the literal string `"var(--wf-chart-1)"` instead of the resolved color in some contexts.
-- When `chartColors` is `undefined` and the fallback is `'var(--wf-chart-1)'` (current pattern in `BarLineChart`, `StackedBarChartComponent`, `DonutChart`, etc.), updating `--wf-chart-1` in `wireframe-tokens.css` DOES change the visual -- but only in the SVG fill, not in the Recharts `<Legend>` color swatches or `<Tooltip>` dot colors, which are rendered as HTML spans with inline background-color that receives the literal CSS var string unevaluated.
-- When `chartColors` IS provided (branding override), the resolved hex string is passed directly. This path works correctly and is unaffected by token changes.
-
-The net result: after redesigning `--wf-chart-1` from gold `#d4a017` to primary blue `#1152d4`, the bars turn blue but the legend swatches and tooltip dots remain showing the old gold color (because the Legend component renders an HTML `<span style="background-color: var(--wf-chart-1)">` which does resolve the token), OR the legend appears broken because Recharts's internal color resolution doesn't pick up the parent's CSS context.
+The current `App.tsx` already has 20+ route definitions mixing client pages, tool pages, doc pages, and auth. As the knowledge-base module adds `/kb/*` routes and the task module adds `/tasks/*` routes, `App.tsx` grows to 40-60 route entries, becoming unreadable and a merge conflict magnet. Worse: each module's routes are embedded in the same file as unrelated routes, so adding a new module-level route means touching the top-level routing file, violating the encapsulation goal of modularization.
 
 **Why it happens:**
-Recharts uses `fill` and `stroke` as SVG presentation attributes, not CSS properties. In SVG, presentation attributes have lower specificity than CSS and resolve against a different cascade. CSS custom properties DO propagate through the DOM tree and are available in SVG, but only if the SVG element is in the same document context (inline SVG, not `<img>`). `ResponsiveContainer` wraps an SVG -- this works. But Recharts's generated legend and tooltip HTML elements may receive the token as a static prop value, not re-evaluated when the DOM context changes.
+React Router's flat route array in a single file is the path of least resistance. Each new feature adds two lines and moves on. The file is never "broken" — it just grows.
 
 **How to avoid:**
-1. **For the default palette, resolve CSS tokens to hex at the JavaScript level** rather than passing `'var(--wf-chart-N)'` strings to Recharts. Create a `useWireframeChartPalette()` hook that reads the resolved values at runtime:
-   ```typescript
-   function useWireframeChartPalette(): string[] {
-     const { theme } = useWireframeTheme()
-     const ref = useRef<HTMLDivElement>(null)
-     const [palette, setPalette] = useState<string[]>([])
-     useEffect(() => {
-       if (!ref.current) return
-       const style = getComputedStyle(ref.current)
-       setPalette([
-         style.getPropertyValue('--wf-chart-1').trim(),
-         style.getPropertyValue('--wf-chart-2').trim(),
-         // ...
-       ])
-     }, [theme]) // re-resolve when theme switches
-     return palette
-   }
-   ```
-   This hook subscribes to theme changes and returns resolved hex strings, making legend/tooltip colors consistent with SVG fills.
-2. **Alternatively, keep the `var()` pattern but verify Legend/Tooltip colors match.** Open each chart type in the gallery under both themes after token changes and confirm legend swatches and tooltip dots match the chart fills visually.
-3. **Never use `var(--wf-chart-N)` inside Recharts `<Cell fill={...}>` for the `DonutChart` legend spans.** The `<Cell>` SVG fill is fine; the legend color swatch is an HTML element that gets the color from the `fill` prop as a prop string -- verify this resolves correctly.
+Establish a route composition pattern from day one of the module phase. Each module exports its own routes array:
+
+```typescript
+// src/modules/knowledge-base/routes.tsx
+export const kbRoutes = [
+  { path: '/kb', element: <KnowledgeBaseHome /> },
+  { path: '/kb/:entryId', element: <KbEntryView /> },
+]
+```
+
+`App.tsx` composes them:
+```typescript
+import { kbRoutes } from '@/modules/knowledge-base/routes'
+import { taskRoutes } from '@/modules/tasks/routes'
+// ...
+<Routes>
+  {kbRoutes.map(r => <Route key={r.path} path={r.path} element={r.element} />)}
+  {taskRoutes.map(r => <Route key={r.path} path={r.path} element={r.element} />)}
+</Routes>
+```
+
+This keeps `App.tsx` as an orchestrator, not an implementation file.
 
 **Warning signs:**
-- Legend swatches show a different color than the chart fills after a token palette change
-- Tooltip color dots appear in the old color after updating tokens
-- `getComputedStyle(element).fill` returns `'var(--wf-chart-1)'` literally instead of a hex string in test environments
+- App.tsx exceeds 80 lines during module migration
+- A module's page component is imported directly at the top of App.tsx alongside unrelated pages
+- PRs for different modules always touch App.tsx and create merge conflicts
 
 **Phase to address:**
-Phase 1 (Token + chart palette) -- establish the correct palette resolution pattern before redesigning chart colors. All chart components should migrate to the consistent pattern.
+Module Foundation phase — establish route composition pattern alongside boundary enforcement, before modules ship pages.
 
 ---
 
-### Pitfall 3: Dark Mode Broken Because Light-Mode Token Values Are Hardcoded in Inline Styles
+### Pitfall 3: import.meta.glob Literal-Only Constraint Breaks Knowledge Base Dynamic Indexing
 
 **What goes wrong:**
-The redesign will update light-mode token values (e.g. `--wf-canvas` changes from `#f5f5f4` to `#f6f6f8`, `--wf-accent` changes from gold `#d4a017` to blue `#1152d4`). The dark-mode block in `wireframe-tokens.css` has its own independent set of values for these same semantic tokens. If the redesign updates light-mode values but the developer forgets to update dark-mode counterparts, dark mode retains the old visual -- or worse, retains a gold accent against a new blue-primary design, making it look inconsistent.
-
-Additionally, several components use inline styles with `rgba(0,0,0,0.08)` or `rgba(0,0,0,0.25)` for shadows (e.g. `WireframeFilterBar` dropdown shadow, `WireframeModal` box-shadow, `ScreenManager` dropdown). These hardcoded dark-channel shadows are invisible in light mode but look flat in dark mode where a darker shadow needs a lighter channel or a different approach. After redesign, the dark sidebar (`slate-900/950` per the v1.4 goal) will need shadow values that work on very dark backgrounds -- `rgba(0,0,0,0.08)` is imperceptible.
+The current docs parser uses `import.meta.glob('/docs/**/*.md', { query: '?raw', import: 'default', eager: true })` — a literal string pattern. The knowledge base needs to index files from a different directory (e.g. `.planning/research/` or a future `knowledge/` directory). The temptation is to accept a directory path as a parameter and pass it to `import.meta.glob`. This silently fails at build time or throws a runtime error: Vite requires ALL arguments to `import.meta.glob` to be string literals, resolved at build time. Variables are not allowed.
 
 **Why it happens:**
-The token file has two independent blocks: `[data-wf-theme="light"]` and `[data-wf-theme="dark"]`. They share token names but have independent values. It is easy to update one block and forget the other. Inline `rgba()` shadows are invisible to the token system -- they never change when the theme toggles.
+Vite's `import.meta.glob` looks like a regular function call in TypeScript but is actually a build-time transformation. The constraint (literals only) is documented but easy to miss, especially when adapting the existing `docs-parser.ts` pattern for the knowledge base.
+
+Source: Vite issue #15926 — "Making a function that uses `import.meta.glob()` is not statically analyzable when it could be."
 
 **How to avoid:**
-1. **Update light and dark token blocks in the same commit, in the same file edit.** Never touch one block without reviewing the other. A checklist comment in `wireframe-tokens.css` above each semantic group helps: "-- When changing light mode value, also update dark mode counterpart on line N."
-2. **Replace `rgba(0,0,0,N)` shadow values with token-based shadows.** Add `--wf-shadow-sm` and `--wf-shadow-md` tokens to both theme blocks:
-   ```css
-   [data-wf-theme="light"] {
-     --wf-shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-     --wf-shadow-md: 0 4px 12px rgba(0,0,0,0.10);
-   }
-   [data-wf-theme="dark"] {
-     --wf-shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
-     --wf-shadow-md: 0 4px 12px rgba(0,0,0,0.5);
-   }
-   ```
-   All components that currently hardcode `rgba()` shadows switch to `var(--wf-shadow-sm)` / `var(--wf-shadow-md)`.
-3. **After any token file change, toggle the theme in the browser and do a visual pass** over every gallery component. This is the fastest way to catch dark-mode regressions.
+Each distinct directory that needs globbing must have its own top-level `import.meta.glob` call with a literal pattern:
+
+```typescript
+// In knowledge-base parser — literal only
+const kbFiles = import.meta.glob('/knowledge/**/*.md', { query: '?raw', import: 'default', eager: true })
+
+// Cannot do this — will break at build time:
+// function parseDirectory(dir: string) {
+//   const files = import.meta.glob(`${dir}/**/*.md`) // ERROR: not a literal
+// }
+```
+
+Design the knowledge base indexer with separate, static glob patterns per content type. If the knowledge base needs to pull from multiple directories, declare multiple top-level glob calls.
 
 **Warning signs:**
-- Dark mode sidebar or header appears with the old gold accent instead of new blue primary
-- Dropdown shadows in `WireframeFilterBar` are invisible in dark mode (shadow lost against dark background)
-- `WireframeModal` appears flat with no depth in dark mode after the redesign
-- Light-mode components look correct but dark-mode screenshots still show the old palette
+- A knowledge base indexer function accepts a `basePath` or `directory` parameter and passes it to `import.meta.glob`
+- Vite build succeeds locally but the knowledge base shows empty results in production (eager: false glob with variable path fails silently in prod bundle)
+- The pattern was adapted from `docs-parser.ts` but the directory path is a variable rather than a literal
 
 **Phase to address:**
-Phase 1 (Token redesign) -- update both blocks together. Phase N (visual verification) -- automated screenshot tests or explicit dark-mode gallery review after each component phase.
+Knowledge Base phase — verify the glob pattern before building the indexer. Test with `eager: true` to confirm files are picked up at build time.
 
 ---
 
-### Pitfall 4: Inline Style Props Are Invisible to the Token Update -- 46 Instances in WireframeFilterBar Alone
+### Pitfall 4: Knowledge Base Growing Unbounded Without Prune/Archive Strategy
 
 **What goes wrong:**
-`WireframeFilterBar.tsx` has 46 `--wf-*` token references via inline `style` objects, plus additional `rgba()` values and hardcoded font-family strings. This is the highest concentration of inline styles in the system. Inline styles that reference `var(--wf-*)` DO respond to token changes (CSS custom properties work in inline `style` props in React). However, any value that is NOT a token reference -- hardcoded pixel values, `rgba()` colors, hardcoded `fontFamily: 'Inter, sans-serif'` strings -- will not be affected by token changes.
-
-For the v1.4 redesign, the target aesthetic includes `backdrop-blur` on the filter bar. `backdrop-blur` requires CSS `backdrop-filter` property. Inline style objects in React cannot use Tailwind's `backdrop-blur` utilities. If `backdrop-blur` is applied inline (`style={{ backdropFilter: 'blur(8px)' }}`), it works in supported browsers but creates an inconsistency: the filter bar renders without `backdrop-blur` in any context where React's `style` prop processes the value before the blur effect is applied (e.g. some testing environments).
-
-Additionally, font-family strings hardcoded as `fontFamily: 'Inter, sans-serif'` in inline styles will not update if the wireframe design system adopts a different body font token. The correct approach is `fontFamily: 'var(--wf-font-body, Inter, sans-serif)'` with a `--wf-font-body` token.
+The knowledge base is designed to be "auto-fed" — bugs, decisions, and patterns are added over time. Six months in, it has 300+ entries. The docs-parser (which uses `eager: true` glob loading) pulls ALL entries into the initial JavaScript bundle. Search index grows. The initial page load time increases to 4-6 seconds. Claude's context window fills with KB entries before it reads the relevant ones. The knowledge base has become the problem it was meant to solve: noise drowning out signal.
 
 **Why it happens:**
-`WireframeFilterBar` was built using inline styles throughout because its sub-components are module-private functions (not exported) and the developer chose inline styles for co-location with logic. This is valid but creates a maintenance challenge: inline styles cannot use Tailwind utilities, so features like `backdrop-blur`, `transition-all`, and responsive variants must be approximated with JavaScript values.
+Adding entries is frictionless by design. Removing entries feels like losing knowledge. There is no defined maximum size, no archival policy, no mechanism to mark entries as "resolved" or "superseded."
 
 **How to avoid:**
-1. **Add font-family and backdrop-filter as CSS tokens.** Add `--wf-font-body` and `--wf-font-heading` to the token file. Add `--wf-backdrop-blur: blur(8px)` as a token. Inline styles reference these tokens.
-2. **For backdrop-blur specifically, use a Tailwind class on the container, not an inline style.** Convert the WireframeFilterBar container from an inline-style-only div to a component that uses `className="backdrop-blur-sm ..."` for blur effects, while keeping `style={{ background: 'var(--wf-card)', ... }}` for token-based colors.
-3. **Audit all hardcoded font-family strings before redesign.** Run: `grep -r "Inter, sans-serif\|fontFamily" tools/wireframe-builder/components/`. Each instance should reference a token or Tailwind class.
+Define the retention policy before the first entry is written:
+1. **Entry states:** Active (current, searchable), Resolved (superseded, archive-only), Archived (older than 6 months or explicitly closed)
+2. **Bundle boundary:** Only Active entries are included in the eager glob. Resolved/Archived entries live in a separate directory and are lazy-loaded.
+3. **Size gate:** Monthly review — any KB section with more than 50 entries triggers a summary/consolidation pass (combine related entries into a pattern document).
+4. **Supabase persistence option:** For long-lived KB, consider moving entries to Supabase table (`knowledge_entries`) with metadata (tags, status, created_at, superseded_by). The Vite glob approach is appropriate for bootstrapping; it hits limits at ~200 entries.
 
 **Warning signs:**
-- Changing the body font token has no visible effect (components still render in hardcoded 'Inter, sans-serif')
-- `backdrop-blur` is present in the design spec but the filter bar doesn't show blur effect
-- The filter bar renders with slightly different styling than other token-based components after a token update
+- KB directory has more than 100 `.md` files with no subdirectory organization
+- `npx vite build` bundle analysis shows KB content in the main chunk rather than code-split
+- Claude's responses in sessions start with extensive KB context summaries before addressing the actual question
 
 **Phase to address:**
-Phase 2 (WireframeFilterBar redesign) -- add font tokens to `wireframe-tokens.css` before redesigning the filter bar component. The filter bar has the highest inline style density and most risk of hardcoded value proliferation.
+Knowledge Base phase — architecture (file layout, naming, active/archived split) before content creation. Do not design the indexer without also designing the archival boundary.
 
 ---
 
-### Pitfall 5: Client Branding Overrides Reference Old Token Names and Break Silently
+### Pitfall 5: Circular Dependencies Introduced During Module Extraction
 
 **What goes wrong:**
-The branding system (`tools/wireframe-builder/lib/branding.ts`) injects `--brand-*` CSS variables as inline styles on the wireframe container. These brand variables are then referenced in components via `chartColors` prop (resolved hex strings from `branding.ts`). The current system was designed to coexist with `--wf-*` tokens without collision (decision documented in `PROJECT.md`: `--brand-* prefix avoids collision with app theme --primary, --accent`).
-
-However, the branding injection in `branding.ts` also sets `--brand-chart-1` through `--brand-chart-5` as resolved hex values derived from `branding.primaryColor`. When a component falls back from `chartColors` to `'var(--wf-chart-1)'`, it uses the wireframe palette. When `chartColors` is provided (branding-applied mode), it uses the brand palette. After the v1.4 redesign changes `--wf-chart-1` from gold to primary blue, any wireframe viewed WITHOUT branding overrides will show the new blue palette. Any wireframe viewed WITH branding will show the client's brand colors. This is correct behavior.
-
-The risk is if the redesign adds NEW token names that the branding injection layer needs to know about (e.g. a new `--wf-primary` token for interactive elements) but the branding layer does not map `--brand-primary` to override it. The new `--wf-primary` will always show the design system's blue, even when the client has a different primary color.
-
-Additionally, `financeiro-conta-azul`'s `branding.config.ts` has `primaryColor: '#1B6B93'`. The `generateBrandCssVars()` function in `branding.ts` maps this to `--brand-primary`. If the redesigned components use `--wf-primary` as an accent color (from the token system) instead of reading from `--brand-primary`, the client's teal brand color will be ignored for those elements.
+The existing codebase has no circular dependency enforcement. When moving files from `src/components/` and `src/pages/` into module directories, it is common to create cycles: `modules/shared` imports from `modules/docs` for a utility, `modules/docs` imports from `modules/shared` for a type, and now shared → docs → shared is a cycle. TypeScript does not error on cycles. Vite does not warn on cycles at build time (though webpack's `circular-dependency-plugin` exists, Vite's equivalent is not built-in). The cycle manifests as an undefined import at runtime in specific execution orders — a bug that is intermittent and hard to reproduce.
 
 **Why it happens:**
-The token system and branding system evolved in parallel. `--wf-accent` is the wireframe's gold accent (design system). `--brand-primary` is the client's override. Components that use `var(--wf-accent)` for interactive elements (toggle buttons, active states) only change when the wireframe token changes -- they do not automatically pick up the client's brand color. This is intentional isolation: wireframe = design system, brand = client overlay. But the redesign may introduce new design system colors (a primary blue `#1152d4`) that should be overridable by client branding but currently aren't.
+Large codebases accumulate implicit dependencies. When files are moved, their hidden coupling becomes cycles. Barrel files (`index.ts` that re-exports everything in a directory) are a primary amplifier — importing anything from a barrel transitively imports everything, creating cycles through paths that were never intended.
 
 **How to avoid:**
-1. **Before the redesign, document which token categories should be brand-overridable.** Semantic tokens like `--wf-accent` (interactive accent) SHOULD be overridable by `--brand-primary`. Structural tokens like `--wf-canvas`, `--wf-card`, `--wf-sidebar-bg` should NOT be overridable (they define the wireframe aesthetic, not the client's brand).
-2. **Update `generateBrandCssVars()` to also set any new wireframe tokens that should respond to brand color.** If the new design introduces `--wf-primary: #1152d4` as the interactive primary color, add to `generateBrandCssVars()`: `'--wf-primary': branding.primaryColor` so client branding overrides it.
-3. **Test the pilot client (`financeiro-conta-azul`) after every token redesign phase.** Open the wireframe viewer in client branding mode and verify the client's teal color (`#1B6B93`) appears where expected (chart bars, active sidebar items, toggle buttons).
+1. Run `madge --circular --extensions ts,tsx src/` before starting any module extraction. Fix existing cycles first.
+2. Add `eslint-plugin-import/no-cycle` to the ESLint config.
+3. Avoid barrel files in modules. Instead of `modules/docs/index.ts` re-exporting everything, export only the module's public API explicitly.
+4. Use `import type { Foo }` for type-only imports — these are erased at runtime and cannot create runtime cycles.
+
+```bash
+# Install detection tools before refactoring
+npm install -D madge eslint-plugin-import
+npx madge --circular --extensions ts,tsx src/
+```
 
 **Warning signs:**
-- Active sidebar items show the new design system blue (`#1152d4`) in the `financeiro-conta-azul` wireframe instead of the client's teal (`#1B6B93`)
-- Toggle buttons and interactive elements ignore client branding
-- Chart bars in client-branded wireframes show the design system palette instead of `--brand-chart-1`
+- A module's `index.ts` re-exports more than 5-6 symbols (barrel file scope creep)
+- TypeScript compiles but a module's import resolves to `undefined` at runtime on first load
+- `import.meta.hot` reloads cause inconsistent module initialization in development
 
 **Phase to address:**
-Phase 1 (Token architecture) -- define which tokens are brand-overridable before any redesign. Phase (last, verification) -- test with `financeiro-conta-azul` branding applied.
+Module Foundation phase — run circular dependency audit before extraction begins. The report is a prerequisite for the extraction plan.
 
 ---
 
-### Pitfall 6: Gallery Previews Do Not Automatically Reflect Redesigned Components
+### Pitfall 6: Task Management Scope Creep (Starting Simple, Ending Jira)
 
 **What goes wrong:**
-`ComponentGallery.tsx` wraps every preview in `WireframeThemeProvider`, which applies `[data-wf-theme="light"]` to a container div. This means gallery previews DO respond to token changes in `wireframe-tokens.css`. When `--wf-chart-1` changes from gold to blue, chart previews in the gallery will show blue bars.
-
-The problems are:
-
-1. **Stateful preview wrappers in the gallery file use mock data that was designed for the old visual.** The `BarLineChart` preview uses `barLineChartMock` from `galleryMockData.ts`. If the mock data includes hardcoded colors (e.g. `chartColors: ['#d4a017', '#b45309']` in the mock), the gallery preview will show the old gold colors even after updating the tokens -- because `chartColors` bypasses the token system entirely by passing resolved hex strings.
-2. **Gallery section headers and UI chrome use app theme tokens** (`bg-primary`, `text-muted-foreground`, `border-border`), not wireframe tokens. These are correct -- but if a developer tries to match gallery UI chrome to the wireframe visual, they might accidentally add `--wf-*` references to gallery chrome, which then render outside the `WireframeThemeProvider` boundary.
-3. **The gallery's `PropToggle` buttons use `bg-primary text-primary-foreground`** (app theme tokens). This is intentional. But if the app theme's `--primary` changes in `globals.css` as part of the v1.4 redesign (changing app `--primary` from indigo to the new blue `#1152d4`), ALL gallery chrome will change color simultaneously with the wireframe components -- making it hard to visually verify what changed.
+The task management MVP is scoped as "basic kanban/list per client + for FXL Core itself." During implementation, feature requests arrive: due dates, assignees, priority levels, recurring tasks, task dependencies, email notifications, time tracking. Each request seems small. After six weeks, the task module is 30+ components, 5 new Supabase tables, and 3,000 lines of TypeScript. It has consumed the entire v1.5 milestone. The original goals (modular architecture, knowledge base) are deprioritized.
 
 **Why it happens:**
-The gallery is an internal tool that mixes app-theme-styled chrome (the category headers, search, toggle buttons) with wireframe-theme-wrapped previews. These two layers are intentionally separate but visually adjacent, so a change to either layer affects the gallery's overall look.
+Task management has an infinite feature surface. Every team has "just one more thing" they need. The first usable state (a list you can check off) is actually enough value to justify stopping there for v1, but it feels incomplete compared to commercial tools.
 
 **How to avoid:**
-1. **Audit `galleryMockData.ts` for any hardcoded hex color strings before redesign.** Run: `grep -n '#[0-9a-fA-F]\{6\}' src/pages/tools/galleryMockData.ts`. Any hardcoded color in mock data that is meant to test the "default palette" case should be removed (let the token system provide the color) or explicitly labeled as a branding override test.
-2. **Keep app theme changes and wireframe token changes in separate commits.** Do not change `--primary` in `globals.css` in the same commit that updates `--wf-chart-1` in `wireframe-tokens.css`. This makes it easier to identify what caused a visual change in the gallery.
-3. **After each component redesign phase, do a gallery review pass.** Open the gallery page, verify each section matches the target design, and screenshot for comparison.
-4. **The gallery's `WireframeThemeProvider` must be present.** If a new component is added to the gallery without wrapping it in `WireframeThemeProvider`, `useWireframeTheme()` will throw and the page will crash. All wireframe component previews must render inside the provider that wraps the gallery.
+Define the hard boundary for v1.5 task management in the phase plan, not the feature plan:
+- **In scope v1.5:** Task entity (title, status, client_slug, created_at), list view per client, create/complete/delete, link to existing client entities (blueprint, wireframe screens)
+- **Out of scope v1.5:** Due dates, assignees, priorities, notifications, subtasks, dependencies, recurring tasks, time tracking, comments on tasks (separate from wireframe comments)
+
+Pin the Supabase schema to exactly ONE new table (`tasks`) in the migration for this milestone. If a feature requires a second table, it is deferred to v1.6.
 
 **Warning signs:**
-- Gallery chart previews show old gold bars after updating `--wf-chart-1` to blue (likely cause: `chartColors` in mock data has hardcoded old values)
-- A gallery preview renders with `transparent` backgrounds and no borders (likely cause: the preview is outside the `WireframeThemeProvider` boundary)
-- Gallery chrome buttons (PropToggle, category tabs) change color at the same time as wireframe components (likely cause: app theme and wireframe token changes in same commit)
+- The task module plan lists more than 8 distinct user-facing features
+- A new Supabase migration is proposed for tasks during the same milestone as the module foundation migration
+- The task component count exceeds 10 files before the basic list view is shipped
 
 **Phase to address:**
-Phase 1 (Token audit) -- audit and fix mock data before redesign. Phase (last, per-component) -- gallery review after each component phase.
+Task Management phase — write the "out of scope" list in the phase plan before writing any code. Show it to all stakeholders. Treat it as a contract.
 
 ---
 
-### Pitfall 7: WireframeThemeProvider Scope -- Components Rendered Outside the Provider Boundary Get No Tokens
+### Pitfall 7: Supabase Schema Migration Breaks Existing RLS Policies
 
 **What goes wrong:**
-`WireframeThemeProvider` renders a `<div data-wf-theme={theme}>` container. ALL `--wf-*` tokens in `wireframe-tokens.css` are scoped to `[data-wf-theme]` selectors. Any wireframe component rendered outside this container gets zero wireframe tokens -- all `var(--wf-*)` expressions resolve to empty string (CSS custom property fallback behavior), which typically results in `transparent` backgrounds and `inherit`ed text colors.
-
-The gallery wraps the entire preview area in `WireframeThemeProvider`. The `WireframeViewer.tsx` wraps the entire viewer. The `SharedWireframeView.tsx` also wraps at the top level. This is correct.
-
-The danger during redesign: when adding a NEW feature (e.g. a redesigned header with new sub-components, or a new redesigned sidebar), a developer may create an intermediate component that renders some elements ABOVE the provider (in the outer layout, outside the `data-wf-theme` div) and some elements INSIDE. The outer elements will have no wireframe tokens.
-
-Similarly, Radix UI portals (used by shadcn/ui `Dialog`, `Tooltip`, `Select`, `DropdownMenu`) render their content into `document.body`, outside the `data-wf-theme` container. Any wireframe component that uses a Radix portal (e.g. a select dropdown in the filter bar) will render the portal content WITHOUT `--wf-*` tokens. This is a known limitation -- existing components work around it by using non-portal elements for dropdowns (the current `MultiSelectFilter` and `DateRangeFilter` use absolutely-positioned divs, not Radix portals, specifically to stay inside the provider boundary).
+The v1.5 milestone adds new tables (`knowledge_entries`, `tasks`). The migration also restructures an existing table (e.g. adding a `module` column to `blueprint_configs` to support per-module filtering). The migration runs successfully in development. In production, the new `ALTER TABLE` statement succeeds but the existing RLS policies reference columns that have been renamed or the policy `WITH CHECK` clause is evaluated against the new schema and silently rejects inserts from the anon role. Wireframe saves start failing for the pilot client.
 
 **Why it happens:**
-CSS custom property scoping via attribute selectors is powerful but fragile at DOM boundaries. Portals break out of the DOM tree where the tokens are defined. During redesign, any new shadcn/ui component integration (e.g. using `<Select>` from shadcn for the filter bar dropdowns) will default to portal-based rendering.
+The existing tables use permissive RLS policies (`USING (true)` for anon) inherited from the Clerk migration (002). These are broad by design. But if a migration renames a column referenced in a policy expression, or adds a `NOT NULL` constraint to a column without a default, the policy evaluation fails. Supabase CLI does not validate policy correctness against the new schema before applying.
 
 **How to avoid:**
-1. **Never introduce shadcn/ui portal-based components inside wireframe components** without either: (a) using the non-portal alternative (e.g. custom dropdown div as currently implemented), or (b) injecting tokens into the portal's container via `document.body.style.setProperty('--wf-canvas', ...)` when the wireframe theme mounts.
-2. **When restructuring WireframeViewer layout (header, sidebar), verify that the `data-wf-theme` div wraps ALL wireframe chrome**, including the redesigned header and sidebar. The provider renders `<div data-wf-theme={theme}>{children}</div>` -- the children must be the complete wireframe layout, not just the content area.
-3. **Test for provider boundary issues by temporarily setting `--wf-card: red`** in the CSS. Any element that should be using `--wf-card` but appears in the browser's default color (usually white or transparent) is outside the provider.
+1. **Never alter existing tables in the same migration as creating new tables.** Separate concerns into atomic migrations: `005_knowledge_entries.sql` and `006_tasks.sql` and `007_blueprint_module_column.sql`.
+2. **Test migrations against production data shapes locally using `make migrate`** with a snapshot of the production schema before pushing.
+3. **After every migration in production, immediately test the affected operation** (e.g. save a blueprint, create a comment) before assuming success.
+4. **Column additions to existing tables must have DEFAULT values or be nullable** if existing rows must remain valid.
+
+```sql
+-- Safe: nullable addition, no existing rows break
+ALTER TABLE public.blueprint_configs ADD COLUMN module text;
+
+-- Risky: NOT NULL without default breaks existing rows
+ALTER TABLE public.blueprint_configs ADD COLUMN module text NOT NULL; -- DO NOT DO THIS
+```
 
 **Warning signs:**
-- New redesigned header or sidebar renders with `transparent` background despite having `background: 'var(--wf-header-bg)'`
-- Dropdown in filter bar renders with white background in dark wireframe theme
-- A new shadcn `Select` component in the filter bar shows browser-default select styling instead of wireframe styling
+- A migration file that contains both `CREATE TABLE` and `ALTER TABLE` on different existing tables
+- A new column added to an existing table without a `DEFAULT` or `NULL` declaration
+- Post-migration: Supabase dashboard shows increased error rates in the `blueprint_configs` table operations
 
 **Phase to address:**
-Phase (header redesign) and Phase (sidebar redesign) -- verify `data-wf-theme` scope before considering a component complete. Phase (filter bar redesign) -- maintain the non-portal dropdown approach.
+Every phase that adds a Supabase migration — review the migration against existing RLS policies before applying. Add a post-migration verification checklist item.
 
 ---
 
-### Pitfall 8: GaugeChartComponent Has a Hardcoded Non-Token Color (#f59e0b)
+### Pitfall 8: Modular Home Page Becomes a Static Hub That Needs Constant Manual Updates
 
 **What goes wrong:**
-`GaugeChartComponent.tsx` line 45 hardcodes `'#f59e0b'` (amber-400) as the middle zone color of the gauge arc. This value is not a token reference, not a `--wf-chart-*` variable, and not part of the `chartColors` prop. It will not change when the palette redesign updates `wireframe-tokens.css`.
-
-After the v1.4 redesign, if the chart palette moves from `gold + amber + neutral` to `primary blue + slate + indigo`, the gauge chart will still display amber for its middle zone. This creates a visible inconsistency: all other charts adapt to the new palette, but the gauge still shows the old amber.
-
-The same file accepts `chartColors?: string[]` as a prop but ignores it (the prop is destructured as `_chartColors`), which means there is no branding override path for gauge zone colors either.
+The home page is redesigned as a "module hub" with cards for Docs, Wireframe Builder, Knowledge Base, Tasks. Each card is hardcoded in `Home.tsx` with a title, description, and link. When a new module is added in v1.6, someone must remember to add a card to Home.tsx. Six months later, the home page doesn't reflect the actual modules active in the system. More subtly: the home page shows the Knowledge Base card even when there are zero entries, and the Tasks card even when no tasks exist — making the platform feel empty to a new user.
 
 **Why it happens:**
-The gauge's zone colors (red = bad, amber = caution, green = good) have semantic meaning that is independent of brand palette. The developer intentionally used `var(--wf-negative)`, `#f59e0b` (warning amber), and `var(--wf-positive)` rather than chart palette slots 1-5. However, `#f59e0b` should be a semantic token (`--wf-warning`) rather than a hardcoded hex.
+The first implementation of a hub page is always hardcoded. It ships fast, looks complete, and seems like it can be made dynamic "later." Later never comes because the hub works well enough.
 
 **How to avoid:**
-1. **Add `--wf-warning: #f59e0b` (light) and `--wf-warning: #fbbf24` (dark) to `wireframe-tokens.css`** as a semantic warning color token alongside `--wf-positive` and `--wf-negative`.
-2. **Update `GaugeChartComponent` to use `var(--wf-warning)`** instead of the hardcoded hex.
-3. **Run `grep -r '#f59e0b\|#[Ff][Aa-Ff][0-9][0-9][0-9]' tools/wireframe-builder/components/`** before the redesign to find all hardcoded amber/warning color usages.
+Design the home page against a `ModuleManifest` type from day one:
+
+```typescript
+type ModuleCard = {
+  id: string
+  title: string
+  description: string
+  href: string
+  isActive: boolean // computed, not hardcoded
+  count?: number    // e.g. number of KB entries, tasks in flight
+}
+```
+
+Each module exports its manifest entry. `Home.tsx` maps over the array. Adding a module = adding one manifest entry, not editing the home page. The `isActive` flag allows hiding modules with no content.
 
 **Warning signs:**
-- After updating the chart palette to blue, all charts show blue bars but the gauge still shows amber zones
-- Client-branded wireframes show amber in the gauge regardless of brand colors
+- `Home.tsx` contains hardcoded string titles and descriptions for each module (not imported from module manifests)
+- A new module shipped in a PR did not include an update to the home page
+- The home page shows "0 entries" or empty state for multiple modules simultaneously
 
 **Phase to address:**
-Phase 1 (Token architecture) -- add `--wf-warning` token. Phase (gauge component redesign) -- replace hardcoded hex.
+Module Foundation phase — define `ModuleManifest` type as part of the module contract. Home page phase — implement map-over-manifest rendering, not hardcoded cards.
+
+---
+
+### Pitfall 9: GSD Workflow (.claude/) Tightly Coupled to File Paths That Move During Modularization
+
+**What goes wrong:**
+The GSD workflow (`.claude/get-shit-done/`, slash commands) reads from and writes to specific paths: `.planning/STATE.md`, `.planning/ROADMAP.md`, `.planning/research/`. Phase plans reference `src/components/layout/`, `src/pages/`, `src/lib/`. After modularization, some files move to `src/modules/docs/components/`, `src/modules/shared/lib/`. Existing phase plans and the ARCHITECTURE.md in `.planning/codebase/` now reference wrong paths. Claude Code, reading these plans, writes new code to the old locations or reads stale architecture context.
+
+**Why it happens:**
+Planning documents are written once and read many times. They are not code — they don't fail a build when they go stale. The GSD system has no mechanism to detect that an architecture snapshot has diverged from the actual codebase.
+
+**How to avoid:**
+1. **In the Module Foundation phase plan, explicitly list every file that will move**, its current path and its target path. This creates a migration manifest that can be referenced during execution.
+2. **Update `.planning/codebase/ARCHITECTURE.md` as part of the Module Foundation phase completion criteria**, not as an afterthought.
+3. **After modularization, run a quick validation:** `grep -r "src/components/layout\|src/pages/clients" .planning/` — any hits in phase plans that still reference old paths need updating.
+4. **Do not rename or move `.planning/` directory structure.** The GSD workflow reads `.planning/STATE.md` and `.planning/ROADMAP.md` as fixed paths. These are infrastructure, not code.
+
+**Warning signs:**
+- A phase plan from a previous milestone references `src/pages/` paths that no longer exist
+- Claude Code creates a new component in `src/components/` during the module phase instead of the target module directory
+- `.planning/codebase/ARCHITECTURE.md` was last updated before the module migration
+
+**Phase to address:**
+Module Foundation phase — update ARCHITECTURE.md as a gating condition for phase completion. Add a "stale path audit" to the verification checklist.
 
 ---
 
@@ -266,51 +300,80 @@ Shortcuts that seem reasonable but create long-term problems.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Passing `'var(--wf-chart-N)'` strings directly to Recharts `fill` prop | Works in most browsers, no hook needed | Legend/Tooltip color swatches may render literal string; inconsistency after token update | Acceptable if verified visually in all contexts; replace with resolved-hex hook for reliability |
-| Hardcoding `rgba(0,0,0,0.08)` shadows in inline styles | Simple, works immediately | Invisible in dark mode; doesn't respond to theme switching | Never -- replace with `--wf-shadow-*` tokens |
-| Hardcoding `fontFamily: 'Inter, sans-serif'` in inline styles | Explicit, reliable | Won't update if font token changes; inconsistent with Tailwind `font-sans` | Never in wireframe components -- use `fontFamily: 'var(--wf-font-body, Inter, sans-serif)'` or Tailwind class |
-| Using CSS fallback values in token references (`var(--wf-positive, #16a34a)`) | Defensive, prevents broken UI if token missing | Fallback hex may be the old color from a previous design system version | Acceptable during migration; remove hardcoded fallbacks once tokens are stable |
-| Changing `--wf-accent` from gold to blue without checking all `--wf-accent-muted` consumers | Fast single-line update | `--wf-accent-muted` is `rgba(212, 160, 23, 0.12)` hardcoded in light mode (not derived from `--wf-accent`), so it stays gold even after accent changes | Never -- `--wf-accent-muted` must be updated simultaneously |
+| Keeping all routes in App.tsx during module migration | Avoids restructuring routing mid-flight | App.tsx becomes a 60-line merge conflict magnet; new modules must touch unrelated file | Never — establish route composition at phase start |
+| Using directory structure alone (no ESLint boundary rules) as module enforcement | Fast to set up, zero tooling | Boundaries erode within 2 sprints; cross-module imports reappear silently | Never — linting is the only enforcement that survives team growth |
+| Eager-loading all KB entries in a single `import.meta.glob` | Simple, works immediately | Bundle grows linearly with KB content; initial load time degrades past 100 entries | Acceptable for initial KB prototype up to ~50 entries; migrate to lazy/paginated before that |
+| Hardcoding task management MVP features as separate Supabase tables each | Each feature ships independently | Schema sprawl; future consolidation is a data migration; RLS policies per table multiply | Never for v1.5 — one `tasks` table covers the MVP; additional tables are v1.6 |
+| Skipping circular dependency audit before modularization | Saves 2 hours upfront | Runtime `undefined` imports appear intermittently; root cause is a 3-hop cycle through barrel files — takes days to debug | Never — madge scan is a 10-minute investment |
+| Knowledge base entries stored as flat `.md` files in a single directory | Zero schema design required | Past 80 entries, navigation and search degrade; no metadata for filtering by tag, status, or module | Acceptable for initial 20-30 entries; design subdirectory structure and metadata before that |
 
 ---
 
 ## Integration Gotchas
 
-Common mistakes when connecting the two token systems (app theme and wireframe theme).
+Common mistakes when connecting the new modules to existing services.
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| App theme (`globals.css`) vs wireframe theme (`wireframe-tokens.css`) | Using `bg-card` (app token) inside a wireframe component, thinking it maps to `--wf-card` | `bg-card` resolves to `hsl(var(--card))` from the app theme. Inside `[data-wf-theme]`, there is no `--card` → `--wf-card` bridge. Use `bg-wf-card` for wireframe surfaces. |
-| Tailwind `wf-*` color utilities vs inline `var(--wf-*)` | Using `text-wf-muted` in Tailwind class but `var(--wf-muted-foreground)` in an inline style (token name doesn't exist) | Wireframe tokens do not follow the `*-foreground` convention. `var(--wf-muted)` is the text color. Verify token names against `wireframe-tokens.css` before writing inline styles. |
-| App dark mode (`.dark` class on `<html>`) vs wireframe dark mode (`data-wf-theme="dark"` attribute) | Assuming app dark mode toggle affects wireframe components | They are completely independent. App dark mode toggles the Tailwind `dark:` variant. Wireframe dark mode switches `data-wf-theme`. A wireframe can be in light mode while the app UI is dark. |
-| `--wf-accent-muted` in `wireframe-tokens.css` | `--wf-accent-muted: rgba(212, 160, 23, 0.12)` is hardcoded (not `color-mix(in srgb, var(--wf-accent) 12%, transparent)`). Changing `--wf-accent` does not automatically update `--wf-accent-muted`. | Replace `rgba()` literals with `color-mix(in srgb, var(--wf-accent) 12%, transparent)` so `--wf-accent-muted` derives automatically from `--wf-accent`. |
-| Branding `--brand-chart-N` vs wireframe `--wf-chart-N` | Components that fall back to `var(--wf-chart-N)` when `chartColors` is undefined will use the wireframe palette. When branding is applied, `chartColors` is set to resolved hex strings. If a component is added that uses `var(--wf-chart-N)` directly (without `chartColors` prop) in branding-applied context, it ignores the brand palette. | All chart components must accept `chartColors?: string[]` and use `chartColors?.[N] ?? 'var(--wf-chart-N)'` pattern. Never reference `var(--wf-chart-N)` statically in a chart component body without the prop fallback path. |
+| Supabase + new module tables | Adding `NOT NULL` column to existing table without `DEFAULT` in the migration | Always add a `DEFAULT` or declare `NULL`; test migration against a copy of the current production data shape |
+| Clerk auth + task ownership | Storing `clerk_user_id` as a foreign key in tasks but not in an RLS policy, making all tasks visible to all operators | Add RLS policy that filters by `auth.uid()` equivalent for Clerk; or use Clerk org membership as the access control boundary |
+| Vite aliases + new module directories | Importing from `@/modules/tasks/` when Vite alias `@` only resolves to `src/` | `@/modules/tasks/` already works if modules live under `src/modules/`. Verify with a test import before restructuring 20 files. |
+| docs-parser + knowledge base parser | Copying docs-parser.ts and adding a `kbFiles` variable with a dynamic path argument | `import.meta.glob` arguments must be string literals — separate static glob calls per directory, not a parameterized function |
+| App theme tokens + module-specific tokens | A new module adds custom CSS variables to `globals.css` that collide with existing `--primary`, `--card`, `--border` | Use a module-specific prefix: `--kb-*` for knowledge base, `--task-*` for tasks. Never add to the global token namespace without a prefix. |
+| Sidebar navigation + dynamic modules | Manually adding sidebar entries in `Sidebar.tsx` for each new module | Sidebar reads from a nav config array; each module exports its nav entry; `Sidebar.tsx` maps over the array |
 
 ---
 
 ## Performance Traps
 
-Patterns that work at small scale but fail during development iteration.
+Patterns that work at small scale but fail as the system grows.
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| `color-mix(in srgb, ...)` in inline styles on every render | Acceptable in browsers; potentially slow in JSDOM test environments | For test environments, verify `color-mix` either works in vitest's happy-dom or provide a polyfill/mock | In vitest with happy-dom if it doesn't support `color-mix` |
-| Re-evaluating `getComputedStyle` for chart palette resolution on every render | 270 tests slow down; repeated DOM reads in tight render loops | Memoize palette resolution in `useEffect` with `theme` dependency; cache result in ref | When multiple chart components each independently call `getComputedStyle` |
-| Gallery eager-loading all 86 wireframe component files | Gallery page load 3+ seconds | Already documented in v1.3 PITFALLS.md -- use lazy loading. More critical after v1.4 adds redesigned components | Currently marginal; critical if redesigned components add new dependencies |
+| Eager-loading all KB markdown files at build time | Build succeeds; initial load is slow; main bundle is large | Use `eager: false` for KB files; implement paginated or search-triggered loading | Around 80-100 KB entries (~300-500KB raw markdown) |
+| Sidebar rendering the full doc tree on every navigation | Sidebar re-renders on every route change; sluggish navigation | Memoize sidebar nav config; compute it once outside the component render cycle | Not noticeable until docs/ has 50+ pages or the sidebar has 3+ levels of nesting |
+| Supabase `tasks` table with no index on `client_slug` | Queries are fast with 1 client and 50 tasks; slow with 10 clients and 500 tasks | Add `CREATE INDEX idx_tasks_client_slug ON tasks(client_slug)` in the initial migration | Around 500 rows with full-table scans per client page load |
+| Knowledge base search scanning all entries in JavaScript | Fast for 30 entries; slow for 300 | Use a search index (Fuse.js or similar) built at parse time; do not filter in render | Around 100 entries where linear JS search exceeds 16ms frame budget |
+
+---
+
+## Security Mistakes
+
+Domain-specific security issues for this milestone.
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Knowledge base entries stored in `.planning/` or `docs/` with internal business data (client pricing, internal decisions) committed to git | Internal business data leaked if repo is ever made public or shared with contractors | Separate "internal KB" (stays in .planning/, never committed to a public repo) from "operational KB" (safe to commit); add `.gitignore` entries for sensitive KB directories |
+| Tasks with client context visible to all Clerk-authenticated operators without per-client access control | Operator A sees Client B's tasks | For v1.5, tasks are operator-wide (all operators see all tasks — this is an internal tool); document this assumption explicitly so it is not accidentally treated as multi-tenant |
+| Supabase anon-access policies inherited from existing tables applied to new `tasks` table without review | Any anonymous request can read/write tasks | Each new table migration must include explicit RLS policy review; the pattern `USING (true)` for anon is appropriate for blueprint_configs (public wireframes) but NOT for internal tasks |
+
+---
+
+## UX Pitfalls
+
+Common user experience mistakes when adding these modules.
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| Knowledge base entry page has no "back to list" navigation | Operator reads a KB entry, loses context, has to use browser back | Each KB entry view includes breadcrumb back to KB list; sidebar highlights active KB section |
+| Task list shows tasks for ALL clients on a single screen | Visual noise; operator has to scan past irrelevant tasks | Default task view is scoped to the current client context (from URL slug); "All tasks" is an explicit opt-in filter |
+| Modular home page cards are equal size regardless of module maturity | New empty modules appear alongside mature feature-rich modules — feels padded | Cards reflect module activity (entry count, last modified, active tasks); empty modules are de-emphasized or hidden until they have content |
+| Knowledge base search returns results with no context snippet | Operator sees a list of entry titles but cannot tell which entry answers their question | Search results show the matching paragraph context (2-3 lines around the search term), not just the entry title |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-Things that appear complete after redesign but may be missing critical pieces.
+Things that appear complete but are missing critical pieces.
 
-- [ ] **Token renamed or added:** Updated in BOTH `[data-wf-theme="light"]` AND `[data-wf-theme="dark"]` blocks. Added to `tailwind.config.ts` `wf:` extension if it needs Tailwind utility class access. Zero remaining references to old token name across 31 component files.
-- [ ] **Chart palette redesigned:** Verified in all 9 chart types (BarLineChart, DonutChart, WaterfallChart, ParetoChart, StackedBar, StackedArea, HorizontalBar, Bubble, Composed, Scatter, Radar, Treemap, Funnel, Area, Gauge). Legend swatches and tooltip dots match chart fill colors. Branding override (`chartColors` prop) still works.
-- [ ] **Component redesigned visually:** Tested in light mode AND dark mode. Shadows visible in both modes. Font rendering uses token or Tailwind class, not hardcoded `fontFamily` string.
-- [ ] **Gallery preview updated:** Gallery preview shows new design. Mock data in `galleryMockData.ts` has no hardcoded hex colors for the default-palette case. Preview renders inside `WireframeThemeProvider`.
-- [ ] **Client branding still works:** `financeiro-conta-azul` wireframe opened with branding applied shows teal `#1B6B93` in interactive elements (chart bars, active sidebar items, toggle accents). New `--wf-primary` token (if added) is overridden by `--brand-primary` in `generateBrandCssVars()`.
-- [ ] **Dark mode visual pass completed:** Every redesigned component reviewed in dark mode. No element uses `rgba(0,0,0,N)` shadow without a dark-mode alternative. No light-mode-only color assumptions.
-- [ ] **TypeScript gate passed:** `npx tsc --noEmit` returns zero errors. No `any` types introduced during redesign. New token names are strings, not typed (CSS vars have no TypeScript type enforcement -- document new tokens in a comment block in `wireframe-tokens.css`).
+- [ ] **Module boundary enforcement:** ESLint boundary rules installed and passing — not just directory structure created. Verify: `npx eslint src/modules/tasks/components/TaskList.tsx` produces an error if it imports from `src/modules/wireframe-builder/`.
+- [ ] **Knowledge base indexer:** Uses static `import.meta.glob` literals, not parameterized paths. Verify: build with `eager: true` and confirm entries appear in the Vite bundle analysis.
+- [ ] **Route composition:** Each module exports a routes array. App.tsx composes them — does not contain module-specific component imports directly. Verify: `wc -l src/App.tsx` stays under 60 lines after all modules are added.
+- [ ] **Supabase migrations:** Every new table has an explicit RLS policy (not inherited). Every `ALTER TABLE` on existing tables is a separate migration file from `CREATE TABLE` statements. Verify: run `make migrate` on a fresh local Supabase project and confirm no errors.
+- [ ] **Task management scope:** The tasks Supabase table has exactly the columns defined in the v1.5 phase plan (no bonus columns added during implementation). Verify: compare `tasks` table schema against the phase plan spec.
+- [ ] **GSD paths updated:** `.planning/codebase/ARCHITECTURE.md` reflects new module structure. No `.planning/phases/*.md` references paths that no longer exist. Verify: `grep -r "src/components\|src/pages" .planning/phases/` returns no hits for paths moved to modules.
+- [ ] **Circular dependencies resolved:** `npx madge --circular --extensions ts,tsx src/` returns zero cycles. Verify as part of Module Foundation phase completion gate.
+- [ ] **Knowledge base retention policy defined:** Active/Archived split exists in directory structure before the first 10 entries are added. Verify: `ls knowledge/` (or equivalent) shows at minimum `active/` and `archived/` subdirectories.
 
 ---
 
@@ -320,13 +383,14 @@ When pitfalls occur despite prevention, how to recover.
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Token renamed, 31 files broken (Pitfall 1) | MEDIUM | Add backward-compatible alias (`--wf-old-name: var(--wf-new-name)`) immediately. Then migrate consumers gradually. Remove alias in cleanup. |
-| Recharts legend/tooltip colors wrong after palette change (Pitfall 2) | LOW | Implement `useWireframeChartPalette()` hook. Migrate chart components to pass resolved hex strings. One-afternoon effort. |
-| Dark mode broken after light-mode token update (Pitfall 3) | LOW | Update `[data-wf-theme="dark"]` block to match new semantics. Usually a 10-minute fix if identified quickly. |
-| Inline hardcoded colors not updating (Pitfalls 4, 8) | LOW | Find with grep, replace with token reference. Each file is independent, changes are contained. |
-| Client branding ignores new token (Pitfall 5) | LOW | Add the new token to `generateBrandCssVars()` in `branding.ts`. One-line fix per token. |
-| Gallery preview shows old colors (Pitfall 6) | LOW | Remove hardcoded hex from `galleryMockData.ts`. Token cascade handles the rest. |
-| Component outside WireframeThemeProvider (Pitfall 7) | LOW | Move the component inside the provider boundary, or extend the provider wrapping. Identified immediately in browser (transparent backgrounds). |
+| Module boundaries eroded (Pitfall 1) | MEDIUM | Install eslint-plugin-boundaries; run lint; fix each violation file-by-file; violations are usually "I just needed one function" — move that function to shared/. Takes 1-2 days for a 10-module system. |
+| App.tsx route explosion (Pitfall 2) | LOW | Extract module route arrays one module at a time; App.tsx slims down with each extraction; zero runtime impact. |
+| import.meta.glob with variable path (Pitfall 3) | LOW | Replace parameterized function with separate top-level glob constants; rebuild; test. One-hour fix. |
+| KB bundle bloat (Pitfall 4) | MEDIUM | Change `eager: true` to `eager: false`; implement lazy loading with `import()`; add search index build step. Half-day effort. |
+| Circular dependencies after extraction (Pitfall 5) | HIGH | Run `madge --circular`; each cycle requires deciding where the shared dependency actually belongs; may require moving 3-5 files to `modules/shared/`. Risk of regressions during moves. Allow 1-3 days. |
+| Task scope creep (Pitfall 6) | HIGH | Freeze feature additions for the milestone; ship what exists; move deferred features to v1.6 backlog. The cost is not technical — it is the conversation about what ships now. |
+| Supabase migration breaks RLS (Pitfall 7) | MEDIUM | Add backward-compatible migration (rollback is not possible in hosted Supabase without data loss); restore permissive policy; fix the policy expression; re-apply. Test in staging before production. |
+| GSD paths stale after modularization (Pitfall 9) | LOW | `grep -r "src/components\|src/pages" .planning/` finds hits; update each reference. Pure documentation — no code change. 1-2 hours. |
 
 ---
 
@@ -336,32 +400,32 @@ How roadmap phases should address these pitfalls.
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Token naming collision / breakage (Pitfall 1) | Phase 1 — Token audit and new token architecture | `grep -r 'wf-[old-token-name]'` returns zero results in components/ after each removal |
-| Recharts CSS var resolution (Pitfall 2) | Phase 1 — Establish chart palette pattern | Legend and tooltip colors match SVG fills in screenshot comparison |
-| Dark mode regressions (Pitfall 3) | Every component phase — dual-block update discipline | Gallery dark-mode review after each phase |
-| Inline style hardcoded values (Pitfall 4) | Phase — WireframeFilterBar redesign | `grep -r "Inter, sans-serif\|rgba(0,0,0" tools/wireframe-builder/` returns zero in component bodies |
-| Client branding break (Pitfall 5) | Phase — last verification | `financeiro-conta-azul` wireframe with branding shows teal `#1B6B93` in interactive elements |
-| Gallery not reflecting redesign (Pitfall 6) | Each component phase — gallery review step | Gallery screenshots compared to target design reference |
-| Provider boundary break (Pitfall 7) | Each new component phase | New component with `background: transparent` test; `--wf-card: red` trick |
-| Hardcoded gauge color (Pitfall 8) | Phase 1 — Token architecture | `--wf-warning` token exists; `GaugeChartComponent` references it |
+| Module boundaries erode (Pitfall 1) | Module Foundation — install eslint-plugin-boundaries before moving files | `npx eslint` on a cross-module import produces an error |
+| App.tsx route explosion (Pitfall 2) | Module Foundation — establish route composition pattern | App.tsx under 60 lines after all modules added |
+| import.meta.glob variable path (Pitfall 3) | Knowledge Base phase — design indexer with literal patterns | `vite build` succeeds; KB entries appear in bundle |
+| KB unbounded growth (Pitfall 4) | Knowledge Base phase — define active/archived split in directory design | Directory structure has active/archived before first entry |
+| Circular dependencies (Pitfall 5) | Module Foundation — pre-extraction audit with madge | `madge --circular src/` returns zero |
+| Task scope creep (Pitfall 6) | Task Management phase — write out-of-scope list before first commit | tasks table has exactly the columns in the phase plan spec |
+| Supabase migration breaks RLS (Pitfall 7) | Every migration phase — separate new tables from existing table alterations | Post-migration: blueprint save and comment post succeed |
+| Home page static hub (Pitfall 8) | Module Foundation — define ModuleManifest type | Adding a new module in v1.6 requires zero changes to Home.tsx |
+| GSD paths stale (Pitfall 9) | Module Foundation — ARCHITECTURE.md update as completion gate | `grep -r "src/components\|src/pages" .planning/phases/` returns no moved paths |
 
 ---
 
 ## Sources
 
-- FXL Core codebase: `tools/wireframe-builder/styles/wireframe-tokens.css` -- 124 lines, two `[data-wf-theme]` blocks, 45 `--wf-*` variable definitions including `--wf-accent-muted` as hardcoded `rgba()`
-- FXL Core codebase: `tailwind.config.ts` -- `wf:` color extension mapping 18 wireframe tokens to Tailwind utilities; app theme tokens (--primary, --card, --border, --muted) as separate `hsl(var())` mappings
-- FXL Core codebase: `src/styles/globals.css` -- app theme with `:root` and `.dark` blocks; `@import '../../tools/wireframe-builder/styles/wireframe-tokens.css'` at top (confirms wireframe tokens are global)
-- FXL Core codebase: `tools/wireframe-builder/lib/wireframe-theme.tsx` -- `WireframeThemeProvider` renders `<div data-wf-theme={theme}>` as the CSS scope boundary; localStorage persistence
-- FXL Core codebase: `tools/wireframe-builder/components/GaugeChartComponent.tsx` -- hardcoded `'#f59e0b'` on line 45; `_chartColors` ignored
-- FXL Core codebase: `tools/wireframe-builder/components/WireframeFilterBar.tsx` -- 46 `--wf-*` token usages; `rgba(0,0,0,0.08)` and `rgba(0,0,0,0.2)` shadows; `fontFamily: 'Inter, sans-serif'` hardcoded in 5 sub-components
-- FXL Core codebase: `tools/wireframe-builder/lib/branding.ts` -- `generateBrandCssVars()` produces `--brand-chart-1` through `--brand-chart-5`; does NOT override `--wf-chart-*` or any new `--wf-primary`
-- FXL Core codebase: `clients/financeiro-conta-azul/wireframe/branding.config.ts` -- `primaryColor: '#1B6B93'` (teal); the active pilot client that must continue working
-- FXL Core codebase: `src/pages/tools/ComponentGallery.tsx` -- imports `WireframeThemeProvider`; `galleryMockData.ts` as separate mock file that may have hardcoded hex colors
-- MDN CSS Custom Properties spec: CSS custom properties work in SVG inline styles but SVG presentation attributes have separate cascade from CSS -- relevant to Recharts fill/stroke resolution
-- Recharts GitHub issue #2239: CSS variables in `fill` prop work in inline SVG but Legend color swatches (rendered as HTML) may need explicit resolution
-- Recharts source: `<Legend>` renders color via `payload.color` prop passed as a string -- if the string is `'var(--wf-chart-1)'`, it renders as `background-color: var(--wf-chart-1)` on an HTML span, which DOES resolve in modern browsers but inconsistently in older engines
+- FXL Core codebase: `src/App.tsx` — 20+ flat route entries, single-file routing, direct component imports
+- FXL Core codebase: `src/lib/docs-parser.ts` — `import.meta.glob('/docs/**/*.md', { eager: true })` with literal path pattern; the correct model for KB indexer
+- FXL Core codebase: `vite.config.ts` — aliases: `@` → `src/`, `@tools` → `tools/`, `@clients` → `clients/`; no module boundaries beyond directory convention
+- FXL Core codebase: `supabase/migrations/` — 4 existing migrations; `003_blueprint_configs.sql` uses `USING (true)` anon policies as the baseline pattern
+- FXL Core `.planning/PROJECT.md` — v1.5 goals: modular architecture, knowledge base, home page, task management
+- Vite GitHub issue #15926: `import.meta.glob` is not statically analyzable when wrapped in a function — arguments must be string literals
+- eslint-plugin-boundaries (npm): boundary enforcement without Nx; supports `from`/`allow` rules for cross-module imports
+- Madge (npm): circular dependency detection for TypeScript projects; `madge --circular --extensions ts,tsx src/` command
+- eslint-plugin-import/no-cycle: prevents new circular imports from being introduced; integrates with existing ESLint setup
+- WebSearch: "circular imports React TypeScript" — barrel files as primary amplifier of circular dependency cycles; `import type` as mitigation
+- WebSearch: "eslint import boundaries module enforcement" — `no-restricted-imports` as built-in alternative; eslint-plugin-boundaries as purpose-built solution
 
 ---
-*Pitfalls research for: v1.4 Wireframe Visual Redesign -- adding new design system to existing 86-file component library with CSS token architecture, Recharts, Tailwind + inline styles, and client branding overrides*
-*Researched: 2026-03-11*
+*Pitfalls research for: v1.5 Modular Foundation & Knowledge Base — adding modular architecture, auto-fed knowledge base, and task management to an existing React 18 + Vite SPA*
+*Researched: 2026-03-12*

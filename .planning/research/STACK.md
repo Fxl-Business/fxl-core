@@ -1,404 +1,402 @@
-# Stack Research: v1.4 Wireframe Visual Redesign
+# Stack Research: v1.5 Modular Foundation & Knowledge Base
 
-**Domain:** Wireframe component visual redesign — financial dashboard aesthetic
-**Researched:** 2026-03-11
-**Confidence:** HIGH (npm registry verified, official docs consulted, existing codebase analyzed)
+**Domain:** React SPA — modular architecture, auto-fed knowledge base, task/project management
+**Researched:** 2026-03-12
+**Confidence:** HIGH (official docs verified, existing codebase analyzed, hooks reference confirmed)
 
 ## Scope
 
-This research covers ONLY stack additions/changes needed for v1.4. The validated existing stack is unchanged:
+This research covers ONLY what is NEW for v1.5. The validated existing stack is unchanged:
 
-- React 18.3 + TypeScript 5.6 strict + Tailwind CSS 3.4 + Vite 5.4
-- Recharts 2.13.3 (all chart types), lucide-react 0.460, shadcn/ui
-- --wf-* CSS design token system (wireframe-tokens.css, ~45 variables)
-- WireframeThemeProvider context, color-mix(in srgb) already in use
-- Inter Variable font already loaded via @fontsource-variable/inter
+- React 18.3 + TypeScript 5.6 strict + Tailwind CSS 3.4 + Vite 5.4 + Vercel
+- Supabase (comments, blueprints, briefings) + Clerk (auth)
+- recharts 2.13.3, lucide-react 0.460, shadcn/ui, cmdk, sonner, dnd-kit
+- Zod 4.x, react-markdown + remark-gfm + rehype-highlight, yaml
+- react-router-dom 6.27, @fontsource-variable/inter + jetbrains-mono
+- vitest 4.x, @testing-library/react 16.x
 
-The HTML reference design (`visual-redesign-reference.html`) uses:
-- Tailwind CSS CDN with `plugins=forms,container-queries`
-- Google Fonts CDN for Inter (not variable font)
-- Material Symbols Outlined icons via CSS ligature font (not React components)
-- CSS patterns: `backdrop-blur-md`, `bg-white/80`, hover states, `tracking-widest`
-
-Questions to answer: (1) container-queries plugin needed? (2) icon strategy — keep lucide or switch to Material Symbols? (3) any new CSS features needed?
+Four questions to answer: (1) How to structure independent modules in the existing SPA? (2) What storage + retrieval approach for the knowledge base? (3) What data model for task/project management? (4) How to auto-feed the knowledge base from GSD workflow events?
 
 ---
 
-## Recommended Stack Changes
+## Decision Summary: Zero New Runtime Dependencies
 
-### Critical Finding: One New Package, Zero Breaking Changes
-
-The visual redesign requires exactly **one new npm package** (`@tailwindcss/container-queries`) and
-**one Tailwind config change** (add plugin, expand wf color tokens). The CSS patterns in the reference
-HTML (backdrop-blur, color-mix, group-hover) are already supported by Tailwind 3 + the existing
-browser baseline. The icon strategy stays with lucide-react.
+The v1.5 features are implementable with the existing stack plus two Supabase migrations and
+Claude Code hook scripts (Node.js, no new npm packages). The module system uses React's built-in
+`lazy` + `Suspense` with Vite's automatic code splitting. State management uses React Context
+(already the project pattern) — Zustand is not needed at this scale. TanStack Query is deferred
+per PROJECT.md (v2 item AGEN-02).
 
 ---
 
-## Package Change: @tailwindcss/container-queries
+## Part 1: Module System Architecture
 
-| | Details |
-|-|---------|
-| **Package** | `@tailwindcss/container-queries` |
-| **Version** | `0.1.1` (latest — last published March 2023, stable) |
-| **Peer dep** | `tailwindcss >= 3.2.0` (project uses 3.4.15 — compatible) |
-| **Purpose** | Enables `@container` + `@sm:`, `@md:`, `@lg:` responsive utilities |
-| **Why** | The reference HTML uses container queries for KPI cards that reflow based on their grid cell width, not viewport. This is the correct pattern for dashboard grid components that appear in 1-col, 2-col, and 3-col layouts at the same viewport width. |
+### Pattern: Feature-Based Directory Modules with Lazy-Loaded Routes
 
-**Installation:**
+The correct approach for this SPA is **feature-based directory modules** — not micro-frontends,
+not a monorepo, not a custom module registry. This is the standard pattern for React SPAs at
+this scale, and it integrates directly with how Vite handles code splitting.
 
-```bash
-npm install -D @tailwindcss/container-queries
+**Module = a directory with its own components/, pages/, types/, and an index barrel.**
+
+Each module is lazy-loaded at the route level via `React.lazy()`. Vite automatically splits
+lazy-imported components into separate chunks during build — zero configuration required. At
+the current project scale (single operator, internal tool), micro-frontends would be massive
+overkill with no benefit.
+
+**Directory structure for modules:**
+
+```
+src/
+  modules/
+    docs/               ← existing docs viewer, moved here
+      components/
+      pages/
+      types/
+      index.ts          ← barrel (re-exports public API)
+    wireframe-builder/  ← existing builder, moved here
+      components/
+      pages/
+      types/
+      index.ts
+    knowledge-base/     ← NEW
+      components/
+      pages/
+      types/
+      index.ts
+    projects/           ← NEW (task/project management)
+      components/
+      pages/
+      types/
+      index.ts
+  components/           ← shared shell components (layout, nav, ui)
+  pages/                ← top-level pages (Home, Login, Profile)
+  lib/                  ← shared utilities (supabase, docs-parser, search-index)
+  App.tsx               ← route definitions with lazy imports
 ```
 
-**Tailwind config change (tailwind.config.ts):**
+**Route-level lazy loading pattern (App.tsx):**
+
+```tsx
+import { lazy, Suspense } from 'react'
+
+const KnowledgeBase = lazy(() => import('./modules/knowledge-base/pages/KnowledgeBasePage'))
+const Projects = lazy(() => import('./modules/projects/pages/ProjectsPage'))
+
+// In router:
+<Route path="/kb/*" element={
+  <Suspense fallback={<PageSkeleton />}>
+    <KnowledgeBase />
+  </Suspense>
+} />
+```
+
+**Why this and not alternatives:**
+- Micro-frontends: overkill — independent deployments, separate build pipelines, module federation
+  complexity are all irrelevant for a single-operator internal tool. Adds 10x the complexity for
+  zero operational benefit at this scale.
+- Monorepo (nx, turborepo): appropriate when teams are separate or packages are published. This is
+  one team, one app, one deploy target.
+- Custom module manifest: unnecessary indirection — Vite's static analysis handles chunking.
+
+**Module boundary rules (to enforce now, prevent future coupling):**
+1. Modules do NOT import from each other's internal directories. Only from their public `index.ts`.
+2. Shared types (client entities, user, etc.) live in `src/types/` — not in any module.
+3. Supabase client, Clerk, and routing utilities live in `src/lib/` — imported by all modules.
+4. No module imports from `src/components/layout/` or other shell components directly — they are
+   provided by the Layout wrapper at the route level.
+
+**Confidence:** HIGH — This is the documented React + Vite pattern. Official React docs, Vite
+docs, and the developer-way.com deep-dive on project structure all confirm feature-based
+organization with lazy-loaded routes.
+
+---
+
+## Part 2: Knowledge Base — Storage and Retrieval
+
+### Storage: Supabase (Postgres) — No New Service Needed
+
+The knowledge base is structured entries (bugs, decisions, patterns), not unstructured documents.
+Postgres + tsvector full-text search is the correct solution. This avoids introducing a vector
+database, Algolia, or any external search service. The existing Supabase project handles this.
+
+**Schema (one migration):**
+
+```sql
+CREATE TABLE knowledge_entries (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  kind        text NOT NULL CHECK (kind IN ('bug', 'decision', 'pattern', 'pitfall')),
+  title       text NOT NULL,
+  body        text NOT NULL,           -- markdown, full description
+  tags        text[] NOT NULL DEFAULT '{}',
+  source      text,                    -- 'gsd-hook', 'manual', 'git-commit'
+  phase_ref   text,                    -- e.g. '25-table-components'
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now(),
+  search_vec  tsvector GENERATED ALWAYS AS (
+    to_tsvector('english', coalesce(title, '') || ' ' || coalesce(body, '') || ' ' || coalesce(array_to_string(tags, ' '), ''))
+  ) STORED
+);
+
+CREATE INDEX knowledge_entries_search_idx ON knowledge_entries USING GIN (search_vec);
+CREATE INDEX knowledge_entries_kind_idx ON knowledge_entries (kind);
+CREATE INDEX knowledge_entries_tags_idx ON knowledge_entries USING GIN (tags);
+```
+
+**Why generated column (not trigger) for tsvector:**
+Generated columns with `STORED` are the modern Postgres approach (Postgres 12+, Supabase supports
+this). They are automatically updated on INSERT/UPDATE without a separate trigger function.
+Supabase's hosted Postgres is version 15.x — generated columns are fully supported.
+
+**Retrieval (via Supabase JS client, no new packages):**
 
 ```typescript
-import containerQueries from '@tailwindcss/container-queries'
-import animate from 'tailwindcss-animate'
+// Full-text search — already available in @supabase/supabase-js 2.x
+const { data } = await supabase
+  .from('knowledge_entries')
+  .select('*')
+  .textSearch('search_vec', query, { type: 'websearch', config: 'english' })
+  .order('created_at', { ascending: false })
+  .limit(20)
 
-const config: Config = {
-  // ... existing config unchanged ...
-  plugins: [animate, containerQueries],
-}
+// Tag filter
+const { data } = await supabase
+  .from('knowledge_entries')
+  .select('*')
+  .contains('tags', ['typescript', 'clerk'])
+  .eq('kind', 'bug')
 ```
 
-**Note on Tailwind v4:** Container queries are built-in to Tailwind v4 (no plugin needed). But
-PROJECT.md explicitly defers the Tailwind v4 upgrade. For v1.4, the plugin is the correct path.
+**Why NOT vector/semantic search for this use case:**
+Semantic search (pgvector, Supabase AI) is valuable for "find conceptually similar" queries.
+The knowledge base is queried by keyword, tag, kind, and phase reference — all well-served by
+tsvector. Adding vector embeddings requires an embedding model API call on every insert, adds
+cost, and introduces a new external dependency. Defer to v2 if semantic search becomes needed.
 
-**Usage pattern in wireframe components:**
-
-```tsx
-// Parent container: mark as @container
-<div className="@container rounded-lg border border-wf-card-border bg-wf-card">
-  {/* Child: respond to container width, not viewport */}
-  <div className="flex flex-col @md:flex-row @md:items-center gap-3">
-    <p className="text-2xl font-bold @md:text-3xl">{value}</p>
-  </div>
-</div>
-```
-
-**When to use it:** Only in KpiCard and KpiCardFull where the same component appears in 1, 2, or 3
-column grids. Do NOT apply `@container` to section wrappers — those already use the viewport-level
-grid system. Overusing container queries adds unnecessary nesting complexity.
-
-**Confidence:** HIGH — peerDependencies verified against npm registry. Plugin is stable (2023, no
-reported issues with Tailwind 3.4). Official Tailwind docs confirm this is the Tailwind 3 path.
+**Confidence:** HIGH — Supabase full-text search documentation confirms tsvector generated
+columns and GIN indexes. The @supabase/supabase-js 2.x textSearch() method is documented.
 
 ---
 
-## Icon Strategy: Keep lucide-react, Do NOT Add Material Symbols
+## Part 3: Task/Project Management — Data Model
 
-**Decision: Keep lucide-react exclusively. Do not install any Material Symbols package.**
+### Approach: Thin Postgres Schema, No External PM Library
 
-### Why the HTML reference uses Material Symbols but we should not
+A minimal task management model linked to existing entities (clients, phases). No external
+library (no Linear SDK, no ClickUp integration). The UI uses shadcn/ui components already
+in the project. This is scoped to MVP: project + task lists, status, assignment to phase/client.
 
-The HTML reference was a quick prototype built with Google CDN tools, not a React project. It uses
-Material Symbols as a webfont because that's the easiest path for a static HTML file. In a Vite +
-React project, the calculus is different.
+**Schema (one migration, same file or separate):**
 
-### Why lucide-react is the correct choice for this codebase
+```sql
+-- Projects (one per client engagement or one for FXL Core itself)
+CREATE TABLE projects (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name          text NOT NULL,
+  client_slug   text,                -- null = internal (FXL Core)
+  status        text NOT NULL DEFAULT 'active'
+                CHECK (status IN ('active', 'paused', 'completed', 'archived')),
+  description   text,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now()
+);
 
-| Criterion | lucide-react | Material Symbols (any approach) |
-|-----------|-------------|----------------------------------|
-| Already in codebase | Yes — 86 component files import from it | No — would require audit + migration |
-| Tree-shaking | Per-icon SVG import, zero unused bundle | webfont: loads all 2500+ icons; SVG pkg: needs careful import discipline |
-| Tailwind integration | `className` prop, `currentColor` fill | Same for SVG packages; webfont uses CSS font-size for sizing |
-| Consistency with app | Entire FXL Core app uses lucide-react | Mixing sets creates visual inconsistency (stroke weight, grid size) |
-| TypeScript | Fully typed, named exports | Varies by package; some packages have 3000+ named exports |
-| Maintenance surface | One package, stable API | Adds new dependency for visual-only reason |
-| Design delta | New dashboard design uses filled/outlined icons — lucide has both styles via `fill` prop | Only reason to switch |
+-- Tasks within a project
+CREATE TABLE tasks (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id    uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  title         text NOT NULL,
+  body          text,                -- markdown, optional details
+  status        text NOT NULL DEFAULT 'todo'
+                CHECK (status IN ('todo', 'in-progress', 'done', 'blocked')),
+  priority      text NOT NULL DEFAULT 'medium'
+                CHECK (priority IN ('low', 'medium', 'high')),
+  phase_ref     text,                -- link to GSD phase (e.g. '25-table-components')
+  kb_entry_id   uuid REFERENCES knowledge_entries(id),  -- optional link to KB
+  due_date      date,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now()
+);
 
-### What "matching the reference design" actually requires
-
-The reference HTML uses filled/outlined icon variants for visual hierarchy (filled = active state,
-outlined = default). **lucide-react achieves this with the `fill` prop and `strokeWidth` control:**
-
-```tsx
-// Default (outline, equivalent to Material Symbols Outlined)
-<LayoutDashboard size={20} strokeWidth={1.5} />
-
-// Active/filled state (equivalent to Material Symbols Filled)
-<LayoutDashboard size={20} fill="currentColor" strokeWidth={0} />
+CREATE INDEX tasks_project_id_idx ON tasks (project_id);
+CREATE INDEX tasks_status_idx ON tasks (status);
 ```
 
-The specific icon vocabulary differs (lucide has `LayoutDashboard`, not Material's `grid_view`),
-but dashboard icons — home, charts, settings, user, notifications, search — exist in both sets.
-Map Material Symbols icon names to lucide equivalents during component implementation, not during
-research. This is a one-time naming exercise, not a structural problem.
+**Why this schema:**
+- `client_slug` ties to the existing clients/ taxonomy without a foreign key to a clients table
+  (which doesn't exist in Supabase yet — clients are file-system entities). Keeps it loose.
+- `phase_ref` is a text field (e.g. '25-table-components') that mirrors the .planning/phases/
+  directory naming — no migration needed when phases change, just a text reference.
+- `kb_entry_id` allows surfacing related knowledge entries from a task without coupling the
+  schemas tightly (nullable FK, not enforced as required).
+- Status and priority as constrained text columns over ENUMs: easier to ALTER if values change
+  (ALTER TYPE in Postgres requires a workaround; text CHECK is simpler to migrate).
 
-**Confidence:** HIGH — lucide-react is already installed and used throughout the project. The
-decision to not add Material Symbols is based on existing codebase analysis, bundle architecture,
-and the absence of any capability gap that would justify the migration cost.
+**No external library for task UI:**
+shadcn/ui already provides Card, Badge, Select, Dialog, Popover — sufficient for task cards,
+status badges, priority selectors, and task detail dialogs. dnd-kit (already installed) can
+handle kanban drag-reorder if needed. No react-beautiful-dnd, no dnd-kit upgrade.
+
+**Confidence:** HIGH — Schema design based on project's established Supabase patterns (existing
+comments and blueprints tables). No new packages.
 
 ---
 
-## CSS Features: Already Supported, No New Packages
+## Part 4: Auto-Feed Mechanism — Claude Code Hooks
 
-### backdrop-blur (filter bar, header)
+### Pattern: PostToolUse + Stop hooks → Node.js script → Supabase REST API
 
-**Status:** Already works. Tailwind 3 ships `backdrop-blur-*` utilities natively.
-**Browser support:** 95.75% globally (Chrome 76+, Firefox 103+, Safari 9+, Edge 17+).
-**Current use in codebase:** The FXL Core app shell already uses `backdrop-blur-md` on the sticky
-header (frosted glass pattern from v1.2). The wireframe filter bar redesign can use the same pattern.
+The project already has a hooks infrastructure in `.claude/settings.json`:
+- `SessionStart` → `gsd-check-update.js`
+- `PostToolUse` → `gsd-context-monitor.js`
+- `Stop` → `pre-stop-checklist.sh`
 
-```tsx
-// WireframeFilterBar redesign — works today, no new packages
-<div className="sticky top-14 z-10 backdrop-blur-md bg-wf-canvas/80 border-b border-wf-border">
+The auto-feed mechanism extends this existing pattern. A new hook script detects when Claude
+resolves a bug, records a decision, or completes a phase, then inserts a knowledge entry.
+
+**Trigger points:**
+- `Stop` hook — fires when Claude finishes a response. Parse stop context for decision/bug keywords.
+- `PostToolUse` on `Write` — fires after writing `.planning/` files. Detect phase summaries written.
+- Manual: `/gsd:kb-add` slash command (creates entry via Supabase REST without leaving Claude Code).
+
+**Hook approach (no new npm packages):**
+
+```javascript
+// .claude/hooks/kb-auto-feed.js
+// Called from Stop hook. Reads the GSD state, detects KB-worthy events,
+// posts to Supabase via fetch() (Node.js 18+ native — no node-fetch needed).
+
+const input = JSON.parse(fs.readFileSync('/dev/stdin', 'utf-8'))
+// input.stop_hook_active — if true, exit 0 immediately (prevent infinite loop)
+if (input.stop_hook_active) process.exit(0)
+
+// Detect: did Claude just write a VERIFICATION.md or phase SUMMARY.md?
+// Read recent STATE.md, extract decisions section, post to knowledge_entries.
 ```
 
-Note: `bg-wf-canvas/80` requires wf-canvas to be a hex value (or hsl) that Tailwind can apply
-opacity to. The current `--wf-canvas: var(--wf-neutral-100)` (a CSS variable reference) does NOT
-work with Tailwind's opacity modifier. **Fix:** update `wf.canvas` in tailwind.config.ts to use
-`color-mix(in srgb, var(--wf-canvas) 80%, transparent)` via inline style for the blur effect, OR
-add a dedicated `--wf-canvas-80` token. See Token Update section below.
+**Why fetch() (native) and not supabase-js in the hook:**
+The hooks run as Node.js scripts. `@supabase/supabase-js` is a browser+Node package, but loading
+it in a hook adds startup latency and requires the package to be resolvable from `~/.claude/`.
+Native `fetch()` + the Supabase REST API (`https://[project].supabase.co/rest/v1/knowledge_entries`)
+with the `apikey` header is simpler, faster, and has zero dependency. The hook reads `VITE_SUPABASE_URL`
+and `VITE_SUPABASE_PUBLISHABLE_KEY` from `.env.local` (same pattern as the existing `make migrate`
+approach that reads credentials from `.env.local`).
 
-### color-mix(in srgb) (badge fills, semi-transparent backgrounds)
-
-**Status:** Already in use. KpiCard.tsx uses `color-mix(in srgb, var(--wf-positive) 10%, transparent)`.
-**Browser support:** 92%+ globally, Baseline Widely Available since May 2023.
-**No changes needed.** Continue using this pattern for all badge/chip backgrounds in the redesign.
-
-```tsx
-// Already established pattern — use for all trend badges, status chips
-style={{
-  backgroundColor: 'color-mix(in srgb, var(--wf-primary) 12%, transparent)',
-  color: 'var(--wf-primary)',
-}}
+```javascript
+// Supabase REST insert — no SDK needed in hooks
+const response = await fetch(`${SUPABASE_URL}/rest/v1/knowledge_entries`, {
+  method: 'POST',
+  headers: {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal'
+  },
+  body: JSON.stringify({ kind, title, body, tags, source: 'gsd-hook', phase_ref })
+})
 ```
 
-### group-hover (KPI card hover effects)
+**Why NOT git hooks (pre-commit, post-commit):**
+Git hooks fire on every commit — the signal-to-noise ratio is low. Most commits are not
+KB-worthy. Claude Code's `Stop` and `PostToolUse` hooks have access to the conversation
+context (what Claude just did), making them better triggers. Git hooks don't know if Claude
+resolved a bug or just formatted code.
 
-**Status:** Already supported in Tailwind 3. Mark parent with `group`, children use `group-hover:`.
-**Limitation:** Tailwind's `group-hover:` modifier generates predefined utility classes only — it
-cannot dynamically change CSS custom property values. For hover effects that need to change CSS var
-values, use inline styles + CSS transitions, or add dedicated Tailwind utility classes to the wf
-color palette.
-
-**Pattern for KPI card hover effects:**
-
-```tsx
-// Correct pattern: group-hover with standard Tailwind utilities
-<div className="group rounded-lg border border-wf-card-border bg-wf-card
-                transition-shadow hover:shadow-md cursor-pointer">
-  <div className="text-wf-muted group-hover:text-wf-body transition-colors">
-    {label}
-  </div>
-</div>
-
-// For CSS var changes on hover: use CSS in wireframe-tokens.css directly
-// [data-wf-theme] .group:hover .kpi-trend { color: var(--wf-primary); }
-```
-
-### Inter font weight axis (extrabold headings)
-
-**Status:** Already loaded via `@fontsource-variable/inter` (package already installed, font-sans
-already configured). The variable font covers weights 100–900, including `font-extrabold` (800)
-and `font-black` (900). No new font package needed.
-
-```tsx
-// Already works — Inter Variable supports all weights
-<h1 className="text-4xl font-extrabold tracking-tight text-wf-heading">
-```
-
-### tracking-widest, text-[10px], text-[11px] (micro labels)
-
-**Status:** Supported natively. `tracking-widest` is a core Tailwind utility.
-Arbitrary text sizes like `text-[10px]` and `text-[11px]` work with Tailwind 3's JIT engine —
-no configuration needed.
+**Confidence:** HIGH — Claude Code hooks reference confirmed. Native fetch() confirmed in Node.js
+18+ (the system runs macOS with Node.js 22+ given darwin 25.3.0). `.env.local` reading pattern
+confirmed from existing codebase (`make migrate` reads it via `--env-file .env.local`).
 
 ---
 
-## Token System Updates: wireframe-tokens.css
+## State Management: React Context (No Zustand)
 
-The v1.4 redesign introduces a new primary color (`#1152d4` — blue, replacing gold accent) and
-new neutral palette (`background-light #f6f6f8`, `background-dark #101622`). The existing
-`--wf-*` token schema is the right structure — only the values and a few new tokens change.
+The project uses React Context for module-level state (WireframeThemeProvider is the example).
+This pattern scales to the new modules.
 
-**New tokens to add (in wireframe-tokens.css):**
+**Decision: Do not add Zustand.**
 
-```css
-[data-wf-theme="light"] {
-  /* Replace warm stone grays with slate scale */
-  --wf-neutral-50:  #f8fafc;   /* slate-50 */
-  --wf-neutral-100: #f1f5f9;   /* slate-100 */
-  --wf-neutral-200: #e2e8f0;   /* slate-200 */
-  --wf-neutral-300: #cbd5e1;   /* slate-300 */
-  --wf-neutral-400: #94a3b8;   /* slate-400 */
-  --wf-neutral-500: #64748b;   /* slate-500 */
-  --wf-neutral-600: #475569;   /* slate-600 */
-  --wf-neutral-700: #334155;   /* slate-700 */
-  --wf-neutral-800: #1e293b;   /* slate-800 */
-  --wf-neutral-900: #0f172a;   /* slate-900 */
+Rationale: The KB and task management UIs are read-heavy (fetch from Supabase, display). There
+is no complex derived state, no cross-module real-time synchronization, and no optimistic update
+choreography that would justify a state management library. React Context + useReducer covers:
+- Filter/sort state in the KB list view (local to that page)
+- Active task status changes (single Supabase mutation, then re-fetch)
+- Module navigation state (already handled by react-router-dom)
 
-  /* New semantic background */
-  --wf-canvas: #f6f6f8;          /* background-light from reference */
+TanStack Query (React Query v5) would genuinely improve the DX for KB and tasks — caching, background
+re-fetch, loading states. However, PROJECT.md explicitly defers it to v2 (AGEN-02). The milestone
+goal is to ship the features, not to solve caching elegance. Manual fetch + useState is sufficient
+for an internal tool with one operator.
 
-  /* Primary blue (replaces gold accent) */
-  --wf-primary: #1152d4;
-  --wf-primary-muted: color-mix(in srgb, #1152d4 12%, transparent);
-  --wf-primary-fg: #ffffff;
+**When to reconsider:** If KB entries exceed 500+ rows and list view performance degrades, or if
+two browser tabs show stale data simultaneously, TanStack Query becomes the right answer. That is
+a v2 concern.
 
-  /* Keep --wf-accent as alias for backward compat during transition */
-  --wf-accent: var(--wf-primary);
-  --wf-accent-muted: var(--wf-primary-muted);
-
-  /* New chart palette (blue-first) */
-  --wf-chart-1: #1152d4;   /* primary blue */
-  --wf-chart-2: #4f46e5;   /* indigo-600 */
-  --wf-chart-3: #7c3aed;   /* violet-600 */
-  --wf-chart-4: #0891b2;   /* cyan-600 */
-  --wf-chart-5: #059669;   /* emerald-600 */
-
-  /* Header update: white with blur */
-  --wf-header-bg: rgba(255, 255, 255, 0.85);
-}
-
-[data-wf-theme="dark"] {
-  --wf-canvas: #101622;          /* background-dark from reference */
-  --wf-primary: #3b82f6;         /* blue-500 (brighter for dark bg) */
-  --wf-primary-muted: color-mix(in srgb, #3b82f6 15%, transparent);
-  --wf-primary-fg: #ffffff;
-
-  /* Keep sidebar dark (--wf-sidebar-bg stays slate-900/950) */
-  --wf-sidebar-bg: #0d1117;
-
-  /* New chart palette (brighter for dark) */
-  --wf-chart-1: #60a5fa;   /* blue-400 */
-  --wf-chart-2: #818cf8;   /* indigo-400 */
-  --wf-chart-3: #a78bfa;   /* violet-400 */
-  --wf-chart-4: #22d3ee;   /* cyan-400 */
-  --wf-chart-5: #34d399;   /* emerald-400 */
-}
-```
-
-**Tailwind config additions (tailwind.config.ts) for new wf tokens:**
-
-```typescript
-wf: {
-  // ... existing tokens unchanged ...
-  primary: 'var(--wf-primary)',
-  'primary-muted': 'var(--wf-primary-muted)',
-  'primary-fg': 'var(--wf-primary-fg)',
-}
-```
-
-**Migration note:** `--wf-accent` remains as an alias during v1.4 to avoid breaking 86 component
-files. After v1.4 ships, a cleanup pass can replace `wf-accent` → `wf-primary` across all files.
-The alias (`--wf-accent: var(--wf-primary)`) means no visual regression during the transition.
-
----
-
-## What Stays Unchanged
-
-| Technology | Version | Why No Change |
-|------------|---------|---------------|
-| React | ^18.3.1 | Standard component patterns. No new hooks or APIs needed. |
-| TypeScript | ^5.6.3 | Strict mode. No type changes from CSS updates. |
-| Tailwind CSS | ^3.4.15 | Container queries added via plugin (not upgrade). All other patterns already work. |
-| Vite | ^5.4.10 | No build changes. |
-| lucide-react | ^0.460.0 | Stays. All 86 wireframe files keep their current icons. New components use lucide. |
-| recharts | ^2.13.3 | Chart palette updates via chartColors prop — no Recharts changes. |
-| @fontsource-variable/inter | ^5.2.8 | Already loaded, covers all weights including extrabold. |
-| tailwindcss-animate | ^1.0.7 | Transition utilities (hover effects) already covered. |
-| shadcn/ui | current | No new shadcn components for the redesign. |
-| --wf-* token system | — | Schema unchanged. Only values and 2-3 new tokens added. |
+**Confidence:** HIGH — Existing codebase pattern analysis. PROJECT.md confirms AGEN-02 deferral.
 
 ---
 
 ## What NOT to Add
 
-### Material Symbols (any package): DO NOT ADD
-
-The three candidate packages are `react-material-symbols@4.4.0`, `@material-symbols-svg/react@4.4.0`,
-and `@project-lary/react-material-symbols`. All are rejected:
-
-- `react-material-symbols` — webfont ligature approach, loads full font (not tree-shaken)
-- `@material-symbols-svg/react` — SVG components, but adds 3000+ named exports, requires
-  discipline in imports to avoid bundle bloat, and creates a two-icon-system in the codebase
-- `@project-lary/react-material-symbols` — same as above
-
-The reference HTML uses Material Symbols because it's a static HTML prototype. React components
-should use what the project already has. lucide-react is already integrated, tree-shaken, and
-used consistently across the entire codebase. Adding Material Symbols to match a prototype aesthetic
-is a dependency with no capability justification.
-
-### Google Fonts CDN for Inter: DO NOT ADD
-
-The reference HTML loads Inter via `fonts.googleapis.com`. The project uses
-`@fontsource-variable/inter` which self-hosts the variable font — faster (no external CDN), works
-offline, and already includes all weights. Do not add a Google Fonts link tag.
-
-### Tailwind v4 Upgrade: DO NOT DO
-
-PROJECT.md explicitly defers this. Container queries are built-in to v4, but the upgrade itself
-has breaking changes (configuration format, CSS-first config, plugin API changes) that are out of
-scope for a visual redesign milestone.
-
-### Recharts 3.x: DO NOT UPGRADE
-
-Established constraint from PROJECT.md. The chart palette update for v1.4 is purely in the
-`chartColors` prop and `--wf-chart-*` tokens — no Recharts API changes needed.
-
-### Framer Motion / React Spring for animations: DO NOT ADD
-
-The reference design uses CSS transitions (`transition-all`, `transition-colors`) — standard
-Tailwind utilities via `tailwindcss-animate`. No JavaScript animation library is needed for
-hover effects, smooth transitions, or the blur effect. CSS transitions are sufficient and
-keep the bundle lean.
-
----
-
-## Alternatives Considered
-
-| Recommended | Alternative | Why Not |
-|-------------|-------------|---------|
-| @tailwindcss/container-queries@0.1.1 | Inline CSS container query styles | Plugin generates consistent `@sm:`, `@md:` utilities; raw CSS in JSX loses Tailwind's utility-first consistency |
-| @tailwindcss/container-queries@0.1.1 | Upgrade to Tailwind v4 (built-in CQ) | v4 upgrade is deferred in PROJECT.md; too broad a change for a visual redesign milestone |
-| lucide-react (keep) | react-material-symbols@4.4.0 | Webfont approach; not tree-shaken; adds external font dependency; 86 files already use lucide |
-| lucide-react (keep) | @material-symbols-svg/react@4.4.0 | 3000+ SVG components; requires import discipline; visual inconsistency mixing icon sets |
-| --wf-primary replacing --wf-accent (alias) | Rename --wf-accent across all 86 files immediately | Alias approach (--wf-accent: var(--wf-primary)) allows incremental migration with zero visual regression risk |
-| color-mix(in srgb) for semi-transparent fills | Hardcoded rgba values | color-mix keeps relationship to token values; rgba values drift out of sync when tokens update |
-| backdrop-blur via Tailwind utility + inline style for opacity | New --wf-canvas-blur token | Inline style is clearer intent for one-off use; a dedicated token adds complexity for a single component |
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| Zustand | No complex cross-module state at this scale; deferred by PROJECT.md | React Context + useReducer |
+| TanStack Query / React Query | Deferred to v2 (AGEN-02) in PROJECT.md | useState + useEffect fetch pattern |
+| pgvector / Supabase AI embeddings | Overkill for keyword+tag search KB; adds cost, external LLM API | Postgres tsvector (built-in) |
+| Algolia / Meilisearch | External service, cost, sync complexity for a small internal KB | Supabase full-text search |
+| node-fetch in hooks | Node.js 18+ has native fetch() | fetch() (no package) |
+| Micro-frontends | One team, one deploy, internal tool — massive complexity for zero benefit | Feature-based modules with lazy routes |
+| nx / turborepo | No separate teams, no publishable packages, no independent deployments | Single repo, feature directories |
+| react-beautiful-dnd | Archived/unmaintained | @dnd-kit (already installed) |
+| Supabase Realtime for KB/tasks | One operator, no concurrent editing — polling or manual refresh is sufficient | Supabase REST via supabase-js |
+| New shadcn components for task UI | Card, Badge, Select, Dialog, Popover already installed | Existing shadcn/ui components |
 
 ---
 
 ## Installation Plan
 
 ```bash
-# New package (devDependency — Tailwind plugin)
-npm install -D @tailwindcss/container-queries
+# No new runtime dependencies.
+# No new dev dependencies.
+# No package.json changes.
 
-# No other package changes
+# New Supabase migration files:
+# supabase/migrations/005_knowledge_base.sql
+# supabase/migrations/006_projects_tasks.sql
+# (or combined: 005_knowledge_projects.sql)
+
+# New hook script:
+# .claude/hooks/kb-auto-feed.js
+
+# New slash command:
+# .claude/commands/gsd/kb-add.md
 ```
 
-**Total: 1 new package (dev dependency only). Zero breaking changes. Zero new runtime dependencies.**
+**Total: 0 new npm packages. 1-2 Supabase migrations. 1 Claude Code hook script.**
 
 ---
 
 ## Version Compatibility
 
-| Package | Compatible With | Notes |
-|---------|-----------------|-------|
-| @tailwindcss/container-queries@0.1.1 | tailwindcss@^3.4.15 | peerDependencies: tailwindcss >= 3.2.0. Verified. |
-| @tailwindcss/container-queries@0.1.1 | tailwindcss-animate@^1.0.7 | Both are plugins in the same array. No conflicts. |
-| color-mix(in srgb) | All target browsers | 92%+ global support. Baseline Widely Available since May 2023. Already used in production in KpiCard.tsx. |
-| backdrop-filter: blur | All target browsers | 95.75% global support. Chrome 76+, Firefox 103+, Safari 9+. Already used in FXL Core app shell header. |
+| Package | Current Version | v1.5 Impact | Notes |
+|---------|-----------------|-------------|-------|
+| @supabase/supabase-js | ^2.98.0 | No change | textSearch() and .contains() for arrays supported in 2.x |
+| react-router-dom | ^6.27.0 | No change | React.lazy + Suspense + nested routes already supported |
+| React | ^18.3.1 | No change | lazy(), Suspense, useReducer all built-in |
+| Vite | ^5.4.10 | No change | Automatic code splitting on dynamic imports, no config change |
+| zod | ^4.3.6 | New schemas for KB entries and tasks | No upgrade needed; z.enum() for kind/status/priority |
 
 ---
 
 ## Sources
 
-- [npm: @tailwindcss/container-queries](https://www.npmjs.com/package/@tailwindcss/container-queries) — version 0.1.1, peerDep tailwindcss >= 3.2.0 (HIGH confidence, npm registry)
-- [GitHub: tailwindlabs/tailwindcss-container-queries](https://github.com/tailwindlabs/tailwindcss-container-queries) — official plugin, compatible with Tailwind 3.2+ (HIGH confidence, official source)
-- [Tailwind CSS v3 docs: hover-focus-and-other-states](https://v3.tailwindcss.com/docs/hover-focus-and-other-states) — group-hover pattern and limitations (HIGH confidence, official docs)
-- [Can I use: CSS backdrop-filter](https://caniuse.com/css-backdrop-filter) — 95.75% global support (HIGH confidence, caniuse)
-- [Can I use: color-mix()](https://caniuse.com/mdn-css_types_color_color-mix) — 92%+ global support, Baseline Widely Available (HIGH confidence, caniuse)
-- [Google Fonts: Material Symbols guide](https://developers.google.com/fonts/docs/material_symbols) — webfont approach, variable font axes (HIGH confidence, official Google docs)
-- [npm: react-material-symbols@4.4.0](https://www.npmjs.com/package/react-material-symbols) — version confirmed via npm registry (HIGH confidence)
-- [Lucide: lucide-react guide](https://lucide.dev/guide/packages/lucide-react) — icon customization including fill/strokeWidth props (HIGH confidence, official docs)
-- Existing codebase analysis: 86 wireframe component files, wireframe-tokens.css (~45 vars), tailwind.config.ts, KpiCard.tsx (color-mix pattern), WireframeHeader.tsx, package.json (HIGH confidence, direct inspection)
+- [Claude Code Hooks Guide](https://code.claude.com/docs/en/hooks-guide) — hook events (PostToolUse, Stop), input schema, exit codes, stop_hook_active field (HIGH confidence, official docs, fetched directly)
+- [Supabase Full Text Search](https://supabase.com/docs/guides/database/full-text-search) — tsvector generated columns, GIN index, textSearch() client method (HIGH confidence, official Supabase docs)
+- [React lazy() and Suspense — React docs](https://react.dev/reference/react/lazy) — lazy import pattern, Suspense fallback (HIGH confidence, official React docs)
+- Existing codebase analysis: `.claude/settings.json` hooks config, `supabase/migrations/`, `src/`, `package.json`, `.planning/PROJECT.md` (HIGH confidence, direct inspection)
+- [React State Management in 2025](https://www.developerway.com/posts/react-state-management-2025) — Context vs Zustand decision framework (MEDIUM confidence, authoritative blog)
+- [React project structure](https://www.developerway.com/posts/react-project-structure) — feature-based module organization rationale (MEDIUM confidence, authoritative blog)
+- [How to Use Supabase with TanStack Query](https://makerkit.dev/blog/saas/supabase-react-query) — confirmed deferral rationale; v5 integration pattern for v2 reference (MEDIUM confidence)
 
 ---
-*Stack research for: FXL Core v1.4 Wireframe Visual Redesign*
-*Researched: 2026-03-11*
+*Stack research for: FXL Core v1.5 Modular Foundation & Knowledge Base*
+*Researched: 2026-03-12*

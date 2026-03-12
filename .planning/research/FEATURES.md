@@ -1,341 +1,295 @@
-# Feature Research: v1.4 Wireframe Visual Redesign
+# Feature Research: v1.5 Modular Foundation & Knowledge Base
 
-**Domain:** BI Dashboard Wireframe Component Visual System — Professional Financial Dashboard Aesthetic
-**Researched:** 2026-03-11
-**Confidence:** HIGH (HTML reference is the ground truth; patterns extracted directly)
+**Domain:** Internal Operational Platform — Modular Architecture, Auto-Fed Knowledge Base, Task/Project Management, Modular Home
+**Researched:** 2026-03-12
+**Confidence:** HIGH for modular architecture and KB entry structure (established patterns, verified against ADR standards and React modular patterns). MEDIUM for task management data model (depends on how tightly FXL wants integration with existing Supabase tables).
+
+---
 
 ## Scope
 
-This research covers the visual redesign features for v1.4 only. The existing component architecture
-(39 root components, 14 renderers, 21 section types, WireframeThemeProvider, blueprint pipeline)
-is treated as baseline. Research focuses exclusively on:
+This research covers **only** the four new capability areas in v1.5:
 
-1. What visual patterns from the HTML reference must be systematized
-2. Which patterns are table stakes vs differentiators for professional dashboard aesthetic
-3. Dependencies between visual patterns (what must exist before what can be built)
+1. **Modular architecture** — module manifest/registry pattern, per-module routing, sidebar integration
+2. **Knowledge base** — entry types (bug, decision, pattern, lesson), auto-capture, search/retrieval
+3. **Task management** — task/project entities, client association, status workflow, views
+4. **Home page** — module hub, activity feed, cross-module links
 
-**HTML reference analyzed:** `.planning/research/visual-redesign-reference.html` (dummy.html — the
-financial dashboard reference with "NexusFin" branding). Key design language confirmed directly from
-source: primary blue `#1152d4`, background-light `#f6f6f8`, background-dark `#101622`, slate-900
-sidebar, Inter extrabold typography.
+The existing system (docs, wireframe-builder, briefing pipeline, client workspaces, Supabase comments/blueprints/briefings, Clerk auth, design tokens) is treated as **baseline infrastructure** that the new modules must integrate with, not replace.
 
 ---
 
 ## Feature Landscape
 
-### Table Stakes (Without These the Redesign Fails)
+### Table Stakes (Users Expect These)
 
-Features that any professional BI financial dashboard must have. Missing these means the wireframe
-still looks like a prototype rather than a production-grade dashboard deliverable.
+Features that any internal operational platform must have. Missing these means the platform
+feels like a collection of disconnected tools, not a cohesive system.
 
-| Feature | Why Expected | Complexity | Current State Gap |
-|---------|--------------|------------|-------------------|
-| Token system: primary blue + slate scale | Every professional dashboard uses a consistent primary color. Current tokens use warm stone gray + gold (not aligned with financial blue typical of banking/fintech dashboards) | LOW | Must change `--wf-chart-1` from gold `#d4a017` to primary blue `#1152d4`. Also needs `--wf-background-light #f6f6f8`, `--wf-background-dark #101622`. All downstream components update automatically via CSS vars |
-| Dark sidebar (slate-900) with icon nav | Industry standard: Power BI, Tableau, Metabase all use dark sidebars. WireframeSidebar currently renders `bg-wf-sidebar` (mapped to `--wf-neutral-800` = `#292524`). The reference uses `bg-slate-900` with lucide icons per item and `bg-primary/10 text-primary` for active state | MEDIUM | WireframeSidebar exists but lacks: icon rendering per item (icon field exists but is unused), section group labels, footer status block. Component needs structural expansion |
-| KPI cards: icon slot + rounded-full trend badge | Reference KPI card has: icon in `bg-primary/10 rounded-lg` top-left, trend badge in `rounded-full` (not `rounded` as current), `text-2xl font-extrabold` value (current uses `font-bold`), `text-sm` label below icon. Current `KpiCard` has none of these structural slots | MEDIUM | KpiCard needs restructure: add `icon?: string` prop, change badge from `rounded` to `rounded-full`, add `bg-primary/10 group-hover:bg-primary` icon container |
-| Tables: `tracking-widest` + `font-black` th headers | Reference table uses `text-[10px] font-black uppercase tracking-widest text-slate-500` headers. Current DataTable uses `text-[11px] font-medium uppercase tracking-wide`. The difference between `tracking-wide` vs `tracking-widest` and `font-medium` vs `font-black` is visually significant at small sizes | LOW | One-line Tailwind class update per table component (DataTable, ClickableTable, DrillDownTable, ConfigTable) |
-| Tables: dark `tfoot` with total rows | Reference table footer row: `bg-slate-900 text-white` with last column `bg-white text-primary`. Current DataTable has no `<tfoot>` element at all | MEDIUM | DataTable needs `showTotals?: boolean` prop + `tfoot` rendering with dark background styling |
-| Header: search input + notifications + user chip | Reference header right side has: search input (`bg-slate-100 rounded-lg`), notifications icon button, dark mode toggle, divider, user chip (name + role text right-aligned, avatar `rounded-lg ring-2 ring-transparent group-hover:ring-primary`). Current WireframeHeader right side is empty (`<div style={{ flex: 1 }} />`) | MEDIUM | WireframeHeader needs right-side slots: `showSearch`, `showNotifications`, `showUserChip` props with user data from config |
-| Filter bar: backdrop-blur sticky | Reference filter bar uses `bg-background-light/95 backdrop-blur-sm border-b`. Current WireframeFilterBar uses `background: 'var(--wf-card)'` (opaque, no blur). Also: reference uses `text-[10px] font-bold uppercase text-slate-500` filter labels and transparent selects with primary color values | LOW | WireframeFilterBar: add `backdrop-blur-sm` + `bg-background-light/95` (via new token). Change internal label styling from current `11px font-medium` to `10px font-bold uppercase` |
-| Micro typography: 10px bold uppercase labels | Reference systematically uses `text-[10px] font-bold uppercase tracking-wider text-slate-500` for ALL secondary labels (section group headers in sidebar, filter labels, table sub-labels). Current components use inconsistent mix of 10px, 11px, `font-medium`, `font-semibold`, `tracking-wide` | LOW | Audit all components for secondary label typography. Establish rule: 10px = `font-bold uppercase tracking-wider`. 11px = `font-semibold`. No exceptions |
-| Card hover group effects | Reference KPI cards use `hover:bg-slate-50 hover:shadow-md transition-all cursor-pointer group`. Icon inside card transitions from `bg-primary/10 text-primary` → `bg-primary text-white` on `group-hover`. This makes the entire card feel interactive without JavaScript | MEDIUM | KpiCard and KpiCardFull need: `group` class on wrapper, `group-hover:` variants on icon container and shadow. Requires CSS class-based approach (Tailwind JIT) not inline style |
-| Chart palette: primary blue scale | Reference charts use primary blue `#1152d4` as main bar color with `bg-primary/60` and `bg-primary/40` for secondary series. Current chart tokens use gold/amber palette (`--wf-chart-1: #d4a017`). Chart colors must shift to blue-centric scale | LOW | Update `--wf-chart-1` through `--wf-chart-5` in wireframe-tokens.css. All Recharts components that use `var(--wf-chart-N)` update automatically |
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Module manifest/registry with typed boundaries | Without explicit module definitions, the codebase becomes a monolith again as new areas are added. Operators expect to know which area owns what | MEDIUM | A `MODULE_REGISTRY` constant or typed manifest (not a runtime registry) is sufficient. Each entry declares: `id`, `label`, `route`, `icon`, `description`, `status` (active/planned/disabled). Lives in `src/modules/registry.ts`. No dynamic loading required for v1 |
+| Per-module folder structure | Operators and Claude Code need predictable locations. `src/modules/[name]/` with own `pages/`, `components/`, `hooks/`, `types/` | LOW | Flat convention enforced by code review/linting. No tooling required. Three new modules: `knowledge-base`, `tasks`, `home` |
+| Sidebar section for new modules | Operators navigate from sidebar. New modules not in sidebar = effectively invisible | LOW | Extend existing `navigation` array in `Sidebar.tsx`. Add "Knowledge Base" and "Tarefas" top-level sections. Sidebar already handles nested items — this is additive |
+| KB entry types: bug, decision, pattern, lesson | These four types cover the full lifecycle of knowledge in a software project. Bug = what broke and why. Decision = why we chose X (ADR format). Pattern = how we solved a recurring problem. Lesson = retrospective insight. Users expect entries to be typed so they can filter | LOW | Supabase table `kb_entries` with `entry_type` enum column. No more than 4 types in v1. Types map to different icon/color in UI |
+| KB entry fields: title, body (markdown), tags, client association | Minimum data model. Title for search, body for detail, tags for cross-cutting grouping, client_slug for scoping. All four are expected | LOW | `kb_entries` table: `id uuid`, `title text`, `body text`, `entry_type`, `tags text[]`, `client_slug text nullable`, `created_by text` (Clerk user ID), `created_at timestamptz`, `updated_at timestamptz` |
+| KB full-text search | Operators need to find entries quickly. A KB without search is a filing cabinet | MEDIUM | Supabase full-text search on `title` + `body` via `tsvector` generated column + `tsquery`. Existing Cmd+K search uses in-memory index over docs — KB needs DB-backed search since entries are dynamic |
+| Task entity: title, description, status, client association | Minimum task model. Operators expect tasks to exist independently of docs and to be linkable to clients | LOW | Supabase table `tasks`: `id uuid`, `title text`, `description text nullable`, `status` (enum: todo/in_progress/done/blocked), `client_slug text nullable`, `priority` (enum: low/medium/high), `created_by text`, `created_at timestamptz`, `due_date date nullable` |
+| Task status workflow: todo → in_progress → done | Simple linear workflow. Users expect to move tasks through states. Blocked is a valid terminal state that needs human resolution | LOW | Enum-based status on table. UI renders status as badge with dropdown to change. No complex state machine — simple column update |
+| List view for tasks | The most basic way to see tasks. Any other view (kanban, timeline) is additive | LOW | Simple `<ul>` with filter/sort by status, client, priority. Existing shadcn/ui components (Badge, Select, Card) cover this without new installs |
+| Home page with module links | The `/` route currently shows a static home page. With new modules, it needs to become a hub that links to all active areas | LOW | Home page redesign: grid of module cards (Docs, Wireframe Builder, Clientes, Knowledge Base, Tarefas). Each card: module name, description, icon, status, quick link. Reads from `MODULE_REGISTRY` |
 
-### Differentiators (Professional Aesthetic Polish)
+### Differentiators (What Makes This Worth Building)
 
-These patterns distinguish a production-grade financial dashboard wireframe from a generic one. Not
-strictly required for baseline redesign but critical for "wow factor" with clients.
+These features distinguish a purpose-built internal platform from a generic Notion/Linear setup.
+They encode FXL-specific workflow knowledge.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| KPI sparkline (mini bar chart) | Reference KPI card 4 (Lucro Liquido) has a 4-column CSS mini sparkline: `div.w-2.bg-primary/40.h-2`, `.h-3`, `.h-4`, `.h-6`. Pure CSS — no Recharts. Shows trend without full chart area. PME clients love seeing at-a-glance trend | LOW | Add optional `sparkline?: number[]` prop to KpiCard. Render as CSS-only absolute-height bars. No dependency on Recharts |
-| Sidebar footer: status indicator | Reference sidebar footer has `bg-slate-800/50 p-4 rounded-xl border border-slate-700/50` container with green pulse dot (`h-2 w-2 rounded-full bg-emerald-500`) + "Operacao Normal" text. Signals production system status — builds trust | LOW | `WireframeSidebar` already supports `footer` via `SidebarConfig` (added in v1.3 schema). Just needs visual implementation of the status block pattern |
-| Grouped bar chart: CSS hover tooltip | Reference bar chart uses `group-hover:opacity-100` CSS tooltip (no Recharts Tooltip) positioned absolutely above bars. Pure CSS — zero JavaScript. More reliable than Recharts tooltip in wireframe context | HIGH | Would require replacing Recharts `<Tooltip>` with CSS-only implementation. High complexity and deviation from existing Recharts pattern. Better approached as an enhancement to existing tooltip styling |
-| Stacked horizontal composition bar | Reference "Composicao de Custos" section uses a single-row `h-12` stacked horizontal bar with `w-[40%]`, `w-[25%]` etc. segments + hover brightness. Below it: color-coded legend rows with `w-3 h-3 rounded-sm` color swatches and percentage labels. This is NOT a Recharts chart — it's pure CSS | MEDIUM | New standalone component `CompositionBar` or enhanced `ProgressBar`. Receives `segments: { label, pct, color }[]`. Renders CSS flex-based stacked bar. Existing `ProgressBar` component is single-series — this is multi-series |
-| Header user chip: avatar ring-primary hover | Reference user chip: right-aligned name (`text-xs font-bold`) + role (`text-[10px] text-slate-500 font-medium`) with avatar image `ring-2 ring-transparent group-hover:ring-primary transition-all`. Communicates personalization and role-based context | LOW | WireframeHeader prop: `user?: { name: string; role: string; avatarUrl?: string }`. Render chip in header right. Avatar uses `rounded-lg` (not `rounded-full`) consistent with reference |
-| Tab group switcher in card header | Reference tables have tab switchers in their header: `px-3 py-1 text-[11px] font-bold` tabs inside `bg-slate-100 p-1 rounded-lg` pill container. Active tab gets `bg-white shadow-sm`. This pattern appears on multiple cards | MEDIUM | Standalone `ViewSwitcher` component (pill tabs). Receives `tabs: string[]` + `activeTab`. Used by DataTable header and ChartGrid header. Actually `DetailViewSwitcher` already exists — verify if it matches this pattern and update |
-| Status dot in table rows | Reference table last column has `h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/10` status indicators (green/amber/slate). Current DataTable has no status column support | LOW | DataTable `columns` type: add `type?: 'status'` to Column. Render status dot when `type === 'status'` using value as color key |
-| Section header legend (chart) | Reference chart card header has custom legend with `w-2.5 h-2.5 rounded-full` color dots + `text-[11px] text-slate-500 font-medium` labels. Replaces Recharts default legend with cleaner custom rendering | MEDIUM | Chart components that use `<Legend />` from Recharts should render a custom header legend instead. Affects BarLineChart, StackedBarChartComponent, ComposedChartComponent |
-| Inter extrabold headings | Reference uses `font-extrabold` (`font-weight: 800`) for h1/h2 in card headers and KPI values. Current components use `font-bold` (`700`) at most. The difference at large sizes is visually significant | LOW | Tailwind class change: `font-bold` → `font-extrabold` on: card title elements, KPI value text, page h1 inside content area. Does not affect body text |
+| KB auto-capture hooks for GSD workflow | When Claude Code completes a phase or quick task via `/gsd:execute`, it can auto-propose a KB entry (bug, decision, or pattern). The entry pre-fills from the execution summary. Operator approves/rejects. This makes the KB self-populating over time without manual effort | HIGH | Requires: (1) KB write API accessible from Claude's hooks, (2) hook in GSD workflow that fires after phase completion, (3) UI prompt to approve. For v1.5 this can be simplified: a "Create KB entry from this" button in the GSD output that pre-fills the KB entry form. Full auto-capture is v2 |
+| KB entry linked to client workspace | KB entries can reference a specific client slug. This enables a "Knowledge about financeiro-conta-azul" filtered view. Client-specific bugs, decisions, and patterns stay discoverable | LOW | `client_slug` foreign reference (text, not a FK — consistent with how blueprints/briefings work). Client workspace page (`/clients/:slug`) shows a "KB for this client" section |
+| Decision entries follow ADR format | Architecture Decision Records are an established engineering practice. Structuring decisions with: Context, Options considered, Decision made, Rationale, Consequences — makes the KB authoritative rather than informal | MEDIUM | For `entry_type = 'decision'`: additional fields or structured body template. Could be a YAML-like preamble in the markdown body that the renderer extracts. Keep body as plain markdown — renderer recognizes `## Context`, `## Decision`, `## Consequences` headings and applies special styling |
+| Activity feed on home page | Operators see what changed recently across all modules: last KB entry added, last task updated, last wireframe commented on. Single feed = situational awareness without opening each module | MEDIUM | Supabase query joining `kb_entries`, `tasks`, and `wireframe_comments` ordered by `updated_at`. Limited to last 10 items. Custom type discriminator to render each item type differently. No realtime — polling every 60s is acceptable for internal tool |
+| KB search integrated into existing Cmd+K | Operators already use Cmd+K for docs search. If KB entries live in a separate search, they will be missed. KB results should appear in the same command palette under a "Knowledge Base" group | MEDIUM | Extend `SearchCommand.tsx` to fetch KB entries from Supabase and merge into the cmdk results. Existing Cmd+K uses in-memory index for docs — KB requires async fetch. Use `cmdk`'s `shouldFilter={false}` with server-side results |
+| Kanban view for tasks (board by status) | Kanban is the most efficient way to see work distribution. Three-column board (Todo / In Progress / Done) maps naturally to the status workflow. Blocked items appear in a dedicated column | MEDIUM | Four-column kanban using CSS grid. Each column shows a filtered list of tasks. Drag-and-drop is NOT needed in v1 — clicking a task card and changing status in a dialog is sufficient. Drag-drop is a v2 differentiator |
+| Task → KB entry linkage | When a task resolves a bug or a decision is made during execution, the operator can create a KB entry from the task. "Document this resolution" button on a done task auto-fills a KB bug or decision entry | LOW | A button on the task detail view that navigates to the KB new entry form with `?task_id=X&prefill=true`. The KB form reads the query param and pre-fills title/body from the task |
 
-### Anti-Features (Avoid During Redesign)
+### Anti-Features (Explicitly Out of Scope)
 
-Patterns that seem appealing but would introduce complexity, inconsistency, or violate the
-wireframe-as-prototype constraint.
+Features that are commonly requested for platforms like this but would hurt more than help in v1.5.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Replace Recharts with CSS-only charts | Reference bar charts are pure CSS divs with hover effects — cleaner, lighter | Recharts is already deeply integrated. All 14 chart types use it. Replacing Recharts would mean rewriting all chart components, losing responsive containers, tooltips, animations. CSS charts look great in the reference but don't scale to the variety of chart types FXL needs | Apply reference visual language (colors, typography, hover patterns) to Recharts containers. Replace Recharts' `<Legend>` with custom header legend component. Keep Recharts as the rendering engine |
-| Material Icons font dependency | Reference uses `material-symbols-outlined` Google font for icons. Looks polished | Adds `@font-face` dependency, FOUT risk, bundle bloat. FXL already uses `lucide-react` across the entire codebase | Keep lucide-react. All reference icons have lucide equivalents: `trending_up` → `TrendingUp`, `payments` → `CreditCard`, `dashboard` → `LayoutDashboard`. No functional gap |
-| Inline style removal (all CSS vars → Tailwind) | Codebase mixes inline styles and Tailwind. Would be cleaner if consistent | Mass refactor of 39 components introduces regression risk. Inline styles that reference `var(--wf-*)` tokens are safe and intentional — they respond to theme switching. CSS vars cannot be used in Tailwind classes without arbitrary value syntax | Keep CSS vars in inline styles where they enable theme switching. Use Tailwind classes for structural/layout properties that don't vary by theme |
-| Unique color per KPI card icon | Reference has card 1 `bg-primary/10`, card 2 `bg-slate-100`, card 4 `bg-indigo-100`. Gives visual variety | Defeats the systematic token approach. Each card would need a manual color assignment. Makes blueprint config more complex | Use `--wf-primary` consistently for icon containers. Clients who want variation can use their `--brand-*` branding overrides |
-| Dark mode as primary mode | Reference dashboard looks great in dark. Should we ship dark-first? | Light mode is what clients present to their customers. Dark mode is a toggle feature. Designing dark-first creates light mode as an afterthought | Light mode is primary. Dark mode inherits updated tokens automatically via `[data-wf-theme="dark"]` overrides. Update dark mode tokens after light tokens are finalized |
-| Pixel-perfect CSS-only animated charts | Reference bar charts animate on hover with CSS transitions. Beautiful | Animation in wireframes distracts from the UX review process. Clients focus on the animation, not the data structure | Use `transition-all` and `transition-colors` for hover state changes only. No CSS keyframe animations. Recharts handles smooth chart rendering |
-| Custom scrollbar styling for sidebar | Reference has custom slim scrollbar on sidebar | Minor cosmetic detail. Chrome/Safari/Firefox have different scrollbar APIs. Adds CSS that only works on WebKit | Defer. Browser default scrollbar is acceptable for wireframe context. Apply if a single CSS rule covers all needs without pseudo-class hacks |
+| Real-time collaboration / live cursors | "It would be great to see when someone else is editing" | Adds WebSocket infrastructure (Supabase realtime) for a single-operator internal tool. FXL has one primary operator (cauetfxl@gmail.com) with occasional collaborators. The complexity is not justified | Optimistic locking (already used for blueprints) is sufficient. Show "last updated by X at Y" timestamp |
+| AI-generated KB summaries | "Claude should summarize my KB automatically" | KB entries are Claude-authored already (via GSD). AI summarizing AI output adds a layer of indirection without reducing work. Claude should write entries, not summarize existing ones | Structured entry templates with required sections do more to keep entries actionable than post-hoc AI summaries |
+| Task dependencies / blocking graph | "Task A blocks Task B, I need to see the graph" | Adds significant data model complexity (adjacency table, cycle detection). FXL task volume is small — operators will not benefit from a dependency graph in v1.5 | Use `description` field to reference related tasks by ID. Visual dependency graph is a v2 feature |
+| Multiple projects per client (project hierarchy) | "I want to organize tasks into sub-projects" | Creates a three-level hierarchy (module > project > task) that is overkill for a small team with one pilot client | In v1.5: tasks belong to a client directly. If a second organizational layer is needed, add a `project` entity in v2 |
+| Kanban drag-and-drop | "Boards should be draggable like Linear or Jira" | Requires `@dnd-kit` or similar library. Adds bundle size and interaction complexity for status changes that are equally efficient via a dropdown | Status change via click → select dialog. Drag-and-drop deferred to v2 when task volume makes it worth the complexity |
+| Email notifications for task assignments | "Notify me when a task is assigned to me" | Requires an email service (Resend, SendGrid, etc.) and a background worker. Out of scope for a Supabase + Vercel static SPA | In-app notifications via the existing activity feed on the home page. Email notifications are a v2 feature |
+| Bi-directional sync with external tools (Linear, Jira, GitHub) | "Sync tasks with our GitHub issues" | Integration complexity for a tool that is meant to reduce external dependencies. FXL Core is the source of truth for FXL's operational knowledge | Use manual task creation. Import/export via CSV if needed. No sync in v1.5 |
+| Versioned KB entries (history/changelog) | "I want to see what a KB entry looked like before I edited it" | Supabase doesn't provide automatic row versioning without triggers and audit tables. Adds schema complexity for a rarely-needed feature | Show `created_at` and `updated_at` timestamps. Note "last edited" in the UI. Full history is a v2 feature |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Layer 0: CSS Token System Update (MUST BE FIRST)
+Existing Infrastructure (BASELINE — do not modify)
     |
-    +-- Replaces warm stone/gold palette with primary blue + slate scale
-    +-- Adds: --wf-primary (#1152d4), --wf-background (#f6f6f8), --wf-background-dark (#101622)
-    +-- Updates: --wf-chart-1 through --wf-chart-5 to blue-centric scale
-    +-- All components that use var(--wf-*) tokens update automatically
-    |
-    v
-Layer 1: Core Components (CAN RUN IN PARALLEL after Layer 0)
-    |
-    +-- KpiCard visual restructure
-    |       |-- Requires token update (uses --wf-primary for icon bg)
-    |       |-- icon slot, rounded-full badge, font-extrabold, group hover
-    |       |-- sparkline prop (pure CSS, no other dependency)
-    |
-    +-- WireframeHeader right-side expansion
-    |       |-- Requires token update (search uses --wf-primary on focus ring)
-    |       |-- showSearch, showNotifications, showUserChip props
-    |       |-- user chip avatar with ring-primary hover
-    |
-    +-- WireframeSidebar visual expansion
-    |       |-- Requires token update (sidebar uses --wf-sidebar-bg)
-    |       |-- Icon rendering (lucide), status footer block
-    |       |-- Visual styling of existing groups (already schema-driven from v1.3)
-    |
-    +-- Table component updates (ALL 4 tables)
-    |       |-- Requires token update (uses --wf-table-header-bg)
-    |       |-- tracking-widest + font-black headers
-    |       |-- tfoot dark row (DataTable, ClickableTable, DrillDownTable)
-    |       |-- status dot column type
-    |
-    +-- WireframeFilterBar backdrop-blur + micro typography
-    |       |-- Requires token update (uses --wf-canvas)
-    |       |-- Label typography: 10px font-bold uppercase
-    |       |-- backdrop-blur-sm on sticky container
+    +-- Supabase (comments, blueprints, briefings tables, Clerk auth)
+    +-- React Router v6 (SPA routing)
+    +-- Sidebar.tsx (static navigation array)
+    +-- Clerk (auth — user ID available as string)
+    +-- SearchCommand.tsx (Cmd+K — in-memory docs index)
     |
     v
-Layer 2: Secondary Components (AFTER Layer 1)
+Layer 0: Module Registry (MUST BE FIRST — no Supabase needed)
     |
-    +-- CompositionBar new component
-    |       |-- Requires token update (uses --wf-primary for segments)
-    |       |-- No dependency on other Layer 1 changes
-    |
-    +-- Custom chart header legend
-    |       |-- Replaces Recharts <Legend> in: BarLineChart, StackedBarChartComponent, ComposedChartComponent
-    |       |-- Requires Layer 1 chart palette update to be visible
-    |
-    +-- DetailViewSwitcher audit + update
-    |       |-- Verify matches reference pill-tab pattern
-    |       |-- Updates DataTable header integration
+    +-- src/modules/registry.ts — typed MODULE_REGISTRY constant
+    +-- Per-module folder structure created
+    +-- Sidebar.tsx extended with Knowledge Base + Tarefas sections
+    +-- App.tsx extended with new module routes
     |
     v
-Layer 3: Gallery Update (MUST BE LAST)
+Layer 1: Data Model — Supabase migrations (AFTER Layer 0)
     |
-    +-- All component previews reflect new visual language
-    +-- Requires ALL Layer 1 and Layer 2 components to be updated
-    +-- Gallery screenshots/previews must use updated token system
+    +-- Migration 005: kb_entries table
+    |       (id, title, body, entry_type, tags, client_slug, created_by, created_at, updated_at)
+    |       tsvector generated column for full-text search
+    |
+    +-- Migration 006: tasks table
+    |       (id, title, description, status, priority, client_slug, created_by, created_at, updated_at, due_date)
+    |
+    v
+Layer 2: Core Module Pages (CAN RUN IN PARALLEL after Layer 1)
+    |
+    +-- Knowledge Base module
+    |       |-- KB index page: list all entries with filter by type/tags/client
+    |       |-- KB entry detail page: markdown render + metadata
+    |       |-- KB new/edit form: type selector + markdown body + tags + client slug
+    |       |-- KB search: Supabase full-text query
+    |
+    +-- Tasks module
+    |       |-- Task list page: filter by status/client/priority
+    |       |-- Task kanban page: 4-column board (todo, in_progress, done, blocked)
+    |       |-- Task detail: full task view + link to KB
+    |       |-- Task create/edit form
+    |
+    v
+Layer 3: Home Page Redesign (AFTER Layer 0, CAN PRECEDE Layer 2)
+    |
+    +-- Module hub: reads MODULE_REGISTRY → renders module cards
+    +-- Activity feed: Supabase query across kb_entries + tasks + wireframe_comments
+    |       (requires Layer 1 tables to exist)
+    |
+    v
+Layer 4: Cross-Module Integration (AFTER Layer 2)
+    |
+    +-- KB search integrated into Cmd+K (extends SearchCommand.tsx)
+    +-- "Create KB entry" from task detail
+    +-- Client workspace shows KB entries for that client slug
 ```
 
 ### Dependency Notes
 
-- **Token system is the only strict blocker.** Every visual component uses `var(--wf-*)` tokens. Changing tokens from gold to primary blue immediately affects all components that render in the wireframe. Start here.
-- **Layer 1 components are safe to parallelize.** KpiCard, WireframeHeader, WireframeSidebar, table components, and WireframeFilterBar do not share state or call each other. Each can be updated independently after tokens are done.
-- **KpiCard hover requires Tailwind class approach.** The `group`/`group-hover:` pattern only works with Tailwind class strings, not inline styles. The existing `KpiCard` uses inline styles for `backgroundColor` via `color-mix()`. Hover state for the icon container must use Tailwind classes, not inline styles. This is a known pattern conflict that must be resolved in implementation.
-- **Table tfoot is additive.** Adding `<tfoot>` does not break existing `<tbody>` rendering. DataTable, ClickableTable, DrillDownTable, and ConfigTable can each add `showTotals?: boolean` independently.
-- **CompositionBar is a new component, not a modification.** It does not replace ProgressBar or HorizontalBarChart. It's a new visual primitive for composition/breakdown displays. No existing component collision.
-- **Gallery update depends on EVERYTHING.** Do not update gallery previews until all components are updated. Gallery runs live renders of the components — it will automatically reflect changes once components are updated.
+- **Module registry has zero runtime cost.** It's a typed constant, not a plugin loader. Defining it first establishes folder structure and routing conventions for all subsequent work without touching Supabase.
+- **Supabase migrations are strictly sequential.** Migration 005 (kb_entries) must be applied before migration 006 (tasks). Both must be in place before any UI that reads from these tables is built.
+- **Home page can be partially built before Layer 2.** The module cards section reads from `MODULE_REGISTRY` (Layer 0) and needs no DB. The activity feed section requires Layer 1 tables. Split the home page into two phases: module cards first, activity feed after migrations.
+- **KB Cmd+K integration modifies existing SearchCommand.tsx.** This is the most fragile integration point — existing docs search must not regress. Implement KB results as a separate cmdk Group with async loading, not merged into the synchronous docs index.
+- **Client workspace integration is purely additive.** Adding a "KB entries for this client" section to `/clients/financeiro-conta-azul` does not change any existing components — it appends a new section to the existing page layout.
 
 ---
 
-## MVP Definition (v1.4 Visual Redesign Scope)
+## MVP Definition (v1.5 Scope)
 
-### Must Ship (Core Redesign)
+### Launch With (Core Milestone)
 
-These establish the new visual identity. Without all of these, the redesign is incomplete.
+These are the minimum deliverables that make v1.5 a meaningful milestone.
+If all of these exist, the platform has modular architecture, a working knowledge base, and basic task tracking.
 
-- [ ] Token system update: primary blue `#1152d4`, background-light `#f6f6f8`, background-dark `#101622`, slate chart palette — why: every other visual change flows from this
-- [ ] KpiCard: icon slot + `rounded-full` trend badge + `font-extrabold` value + `group` hover with icon color transition — why: KPIs are the first thing clients see on any dashboard
-- [ ] DataTable: `tracking-widest font-black` headers + dark `<tfoot>` with totals row — why: tables are the most-used section type; headers are visually prominent
-- [ ] WireframeSidebar: icon rendering per nav item + section group label micro typography + footer status block — why: sidebar is visible on every screen, wrong aesthetic breaks the entire layout
-- [ ] WireframeHeader: search input slot + notifications + user chip right side — why: header empty right side currently looks unfinished compared to reference
-- [ ] WireframeFilterBar: backdrop-blur sticky + 10px bold uppercase filter labels — why: filter bar is sticky and always visible; current styling is too soft for the new palette
-- [ ] Chart palette: update `--wf-chart-1` through `--wf-chart-5` from gold/amber to blue/slate scale — why: charts render with wrong color scheme until this changes
-- [ ] Table component audit: apply `tracking-widest font-black` to ClickableTable, DrillDownTable, ConfigTable (not just DataTable) — why: all table components must be consistent
-- [ ] Inter `font-extrabold` headings: card titles, KPI values, page h1 — why: weight difference at large sizes is what makes the reference feel "premium"
+- [ ] **Module registry** (`src/modules/registry.ts`) with typed manifest for all modules (Docs, Wireframe Builder, Clientes, Knowledge Base, Tarefas) — establishes modular boundary for the entire codebase
+- [ ] **Folder structure** for new modules: `src/modules/knowledge-base/`, `src/modules/tasks/`, `src/modules/home/`
+- [ ] **Sidebar** extended with Knowledge Base and Tarefas sections
+- [ ] **Supabase migration 005**: `kb_entries` table with entry types, tags, client_slug, full-text index
+- [ ] **KB list page** (`/knowledge-base`): list entries, filter by type and client, link to detail
+- [ ] **KB detail page** (`/knowledge-base/:id`): render markdown body, show metadata
+- [ ] **KB new/edit form** (`/knowledge-base/new`, `/knowledge-base/:id/edit`): type selector, markdown body, tags, optional client slug
+- [ ] **Supabase migration 006**: `tasks` table with status enum, priority, client_slug
+- [ ] **Task list page** (`/tarefas`): table view with status badges, filter by client/status/priority
+- [ ] **Task create/edit form**: title, description, status, priority, due date, client slug
+- [ ] **Home page redesign**: module hub grid (reads MODULE_REGISTRY) + basic activity feed (last 10 updates across kb_entries + tasks)
 
-### Add After Core (Polish Pass)
+### Add After Validation (v1.5.x)
 
-Features that add differentiation once core is solid.
+Features to add once the core is shipped and operators are using it.
 
-- [ ] KpiCard sparkline: optional 4-column CSS mini bar in top-right of card — trigger: core KpiCard restructure done
-- [ ] CompositionBar new component: multi-segment stacked horizontal bar + color legend — trigger: at least one blueprint screen needs composition breakdown
-- [ ] Custom chart header legend: replace Recharts `<Legend>` with header-aligned custom legend — trigger: chart palette update done
-- [ ] Table status dot column: `type: 'status'` on Column renders `h-2 w-2 rounded-full` with ring — trigger: DataTable tfoot done
-- [ ] DetailViewSwitcher audit: verify pill-tab pattern matches reference, update if needed — trigger: DataTable header update
-- [ ] Sidebar avatar/logo in header top: update logo display with ring-primary hover on user chip — trigger: WireframeHeader right side done
+- [ ] **Task kanban view** — add `/tarefas/kanban` route with 4-column board; trigger: at least 10 tasks created
+- [ ] **KB Cmd+K integration** — extend SearchCommand with async KB results; trigger: operators report searching for KB entries
+- [ ] **Task → KB entry link** — "Document this" button on completed tasks; trigger: operators start resolving tasks and want to capture decisions
+- [ ] **Client workspace KB section** — add "Conhecimento" section to `/clients/:slug` page; trigger: KB has entries for a specific client
 
-### Defer to v2+
+### Future Consideration (v2+)
 
-- [ ] CSS-only animated charts (keyframe): visual distraction in wireframe review context
-- [ ] Custom WebKit scrollbar styling: minor cosmetic, cross-browser risk
-- [ ] Replace Recharts with CSS-only charts: too much regression risk, no functional benefit
-- [ ] Full dark-first mode redesign: light is primary, dark inherits automatically
+- [ ] **KB auto-capture from GSD hooks** — auto-propose entry after phase completion; requires GSD webhook/hook infrastructure
+- [ ] **Task drag-and-drop kanban** — @dnd-kit integration; defer until task volume justifies the complexity
+- [ ] **KB entry versioning/history** — Supabase row auditing; defer until data maturity
+- [ ] **KB AI summary generation** — defer until entries accumulate and patterns emerge
+- [ ] **Task dependencies / blocking graph** — v2 when team size or project scope requires it
 
 ---
 
 ## Feature Prioritization Matrix
 
-| Feature | Client Impact | Implementation Cost | Priority |
-|---------|---------------|---------------------|----------|
-| CSS token system update | HIGH (everything else) | LOW | P1 |
-| KpiCard visual restructure + hover group | HIGH (first visible section) | MEDIUM | P1 |
-| DataTable headers `tracking-widest` | HIGH (most-used section) | LOW | P1 |
-| DataTable dark `tfoot` totals row | HIGH (financial tables need totals) | MEDIUM | P1 |
-| WireframeSidebar icon rendering | HIGH (visible every screen) | MEDIUM | P1 |
-| WireframeSidebar section groups micro label | MEDIUM | LOW | P1 |
-| WireframeHeader right side (search + user) | HIGH (unfinished look currently) | MEDIUM | P1 |
-| WireframeFilterBar backdrop-blur | MEDIUM | LOW | P1 |
-| Filter bar label micro typography (10px bold) | MEDIUM | LOW | P1 |
-| Chart palette: blue-centric scale | HIGH (all 14 chart types) | LOW | P1 |
-| `font-extrabold` headings pass | MEDIUM | LOW | P1 |
-| Table audit (ClickableTable, DrillDownTable, ConfigTable) | MEDIUM | LOW | P1 |
-| KpiCard sparkline (CSS mini bars) | MEDIUM (delight detail) | LOW | P2 |
-| CompositionBar new component | MEDIUM (new visual primitive) | MEDIUM | P2 |
-| Custom chart header legend | LOW (replaces default Recharts legend) | MEDIUM | P2 |
-| Table status dot column | LOW | LOW | P2 |
-| DetailViewSwitcher audit | LOW | LOW | P2 |
-| Gallery preview update | HIGH (gallery is entry point) | LOW (automatic) | P1 (after all others) |
+| Feature | Operator Value | Implementation Cost | Priority |
+|---------|----------------|---------------------|----------|
+| Module registry + folder structure | HIGH (architectural foundation) | LOW | P1 |
+| Sidebar extension | HIGH (discoverability) | LOW | P1 |
+| Migration 005: kb_entries | HIGH (KB is inert without data) | LOW | P1 |
+| KB list + detail + form | HIGH (core KB workflow) | MEDIUM | P1 |
+| Migration 006: tasks | HIGH (tasks inert without data) | LOW | P1 |
+| Task list + form | HIGH (core task workflow) | MEDIUM | P1 |
+| Home page module hub | HIGH (entry point to platform) | LOW | P1 |
+| Activity feed on home | MEDIUM (situational awareness) | MEDIUM | P1 |
+| Task kanban view | MEDIUM (visual workflow) | MEDIUM | P2 |
+| KB Cmd+K integration | MEDIUM (search UX) | MEDIUM | P2 |
+| Task → KB link | MEDIUM (workflow integration) | LOW | P2 |
+| Client workspace KB section | MEDIUM (client context) | LOW | P2 |
+| KB auto-capture from GSD | HIGH (long-term value) | HIGH | P3 (v2) |
+| Task drag-and-drop | LOW (nice UX) | HIGH | P3 (v2) |
 
 **Priority key:**
-- P1: Must ship in v1.4 core pass
-- P2: Should ship in v1.4 polish pass, add after P1 complete
+- P1: Must ship in v1.5 core
+- P2: Ship in v1.5.x after core is validated
 - P3: Future milestone
 
 ---
 
-## Visual Pattern Reference Index
+## Competitive Context (Internal Platform Comparisons)
 
-Extracted directly from `dummy.html`. Each pattern mapped to implementation target.
+FXL Core is not competing with Notion or Linear. It is purpose-built for the FXL workflow: understanding
+a PME's business, generating a BI dashboard, and delivering it. The feature decisions reflect this:
 
-### Pattern 1: KPI Card with Group Hover
+| Feature | Notion | Linear | FXL Core v1.5 |
+|---------|--------|--------|---------------|
+| KB structure | Flexible (free-form) | None | Typed entries (bug/decision/pattern/lesson) — opinionated by design |
+| Task views | Table, Board, Timeline, Calendar | List, Board, Timeline, Cycle | List + Board — minimal, no Calendar/Cycle in v1 |
+| Client association | Workspace-level | Project-level | Per-entry and per-task client_slug — matches existing FXL taxonomy |
+| Search | Notion AI + text | Global text | Supabase FTS + existing Cmd+K — unified search for operators |
+| Modular architecture | Monolithic DB | Issue-centric | Module registry pattern — FXL-specific, enables future module additions |
+| KB auto-capture | Manual | Manual | GSD hook integration (v2) — unique to FXL's Claude-first workflow |
 
-**Reference:** `bg-white p-6 rounded-xl border border-slate-200 hover:bg-slate-50 hover:shadow-md transition-all cursor-pointer group`
+**FXL Core's advantage is not breadth of features — it is depth of integration with the FXL process
+and Claude Code's GSD workflow.** Every feature decision should serve that integration.
 
-**Icon container:** `bg-primary/10 text-primary p-2 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors`
+---
 
-**Trend badge:** `flex items-center gap-1 text-[11px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full`
+## Data Model Sketch
 
-**Value:** `text-2xl font-extrabold text-slate-900`
+### `kb_entries` (Migration 005)
 
-**Sub-label:** `text-[10px] text-slate-400 mt-2`
+```sql
+create type kb_entry_type as enum ('bug', 'decision', 'pattern', 'lesson');
 
-**Maps to:** `KpiCard.tsx`, `KpiCardFull.tsx`
+create table kb_entries (
+  id          uuid primary key default gen_random_uuid(),
+  title       text not null,
+  body        text not null default '',         -- markdown
+  entry_type  kb_entry_type not null,
+  tags        text[] not null default '{}',
+  client_slug text,                             -- nullable, refs clients/[slug]/
+  created_by  text not null,                    -- Clerk user ID
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  search_vec  tsvector generated always as (
+    to_tsvector('portuguese', coalesce(title, '') || ' ' || coalesce(body, ''))
+  ) stored
+);
 
-### Pattern 2: Sidebar Dark with Section Groups
+create index kb_entries_search_idx on kb_entries using gin(search_vec);
+create index kb_entries_type_idx on kb_entries(entry_type);
+create index kb_entries_client_idx on kb_entries(client_slug);
+```
 
-**Reference:** `w-64 flex-shrink-0 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800`
+### `tasks` (Migration 006)
 
-**Nav item active:** `flex items-center gap-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium transition-all group`
+```sql
+create type task_status as enum ('todo', 'in_progress', 'done', 'blocked');
+create type task_priority as enum ('low', 'medium', 'high');
 
-**Nav item default:** `flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 hover:text-white rounded-lg transition-all text-slate-400`
+create table tasks (
+  id           uuid primary key default gen_random_uuid(),
+  title        text not null,
+  description  text,                            -- markdown
+  status       task_status not null default 'todo',
+  priority     task_priority not null default 'medium',
+  client_slug  text,                            -- nullable
+  created_by   text not null,                   -- Clerk user ID
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+  due_date     date
+);
 
-**Section group label:** `text-[10px] font-bold uppercase tracking-wider text-slate-500`
+create index tasks_status_idx on tasks(status);
+create index tasks_client_idx on tasks(client_slug);
+```
 
-**Footer block:** `bg-slate-800/50 p-4 rounded-xl border border-slate-700/50` + green pulse dot
-
-**Maps to:** `WireframeSidebar.tsx`
-
-### Pattern 3: Header with Right-Side Controls
-
-**Reference height:** `h-14 flex-shrink-0 bg-white border-b border-slate-200`
-
-**Search:** `bg-slate-100 border-none rounded-lg pl-10 pr-4 py-1.5 text-xs w-64`
-
-**Icons:** `text-slate-500 hover:text-primary transition-colors`
-
-**Divider:** `h-8 w-[1px] bg-slate-200 mx-2`
-
-**User name:** `text-xs font-bold text-slate-900`
-
-**User role:** `text-[10px] text-slate-500 font-medium`
-
-**Avatar:** `size-8 rounded-lg object-cover ring-2 ring-transparent group-hover:ring-primary transition-all`
-
-**Maps to:** `WireframeHeader.tsx`
-
-### Pattern 4: Sticky Filter Bar with Backdrop Blur
-
-**Reference:** `sticky top-0 z-20 bg-background-light/95 backdrop-blur-sm border-b border-slate-200 px-8 py-3`
-
-**Filter label:** `text-[10px] font-bold uppercase text-slate-500 whitespace-nowrap`
-
-**Select:** `bg-transparent border-none text-xs font-bold text-primary focus:ring-0 p-0 pr-6 cursor-pointer`
-
-**Toggle:** `peer-checked:bg-primary` on checkbox with custom div track
-
-**Action button (primary):** `px-3 py-1 bg-primary text-white rounded-lg text-[11px] font-bold shadow-sm hover:brightness-110`
-
-**Action button (ghost):** `border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 hover:border-primary`
-
-**Maps to:** `WireframeFilterBar.tsx`
-
-### Pattern 5: Table Headers `tracking-widest`
-
-**Reference th:** `px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500`
-
-**Reference tfoot:** `bg-slate-900 text-white` with last column `bg-white text-primary font-black`
-
-**Body row hover:** `hover:bg-slate-100 transition-colors cursor-pointer group`
-
-**Body cell value:** `text-sm font-semibold text-slate-900` (label col) / `text-sm font-bold text-right text-slate-900` (value col)
-
-**Deviation positive:** `font-bold text-emerald-500`
-
-**Deviation negative:** `font-bold text-rose-500`
-
-**Maps to:** `DataTable.tsx`, `ClickableTable.tsx`, `DrillDownTable.tsx`, `ConfigTable.tsx`
-
-### Pattern 6: Composition Bar (New Component)
-
-**Reference:** `w-full h-12 bg-slate-100 rounded-lg overflow-hidden flex cursor-pointer group`
-
-**Segment:** CSS `div` with `width: [pct]%`, `bg-primary` / `bg-indigo-500` / `bg-blue-400` / `bg-slate-400`, `hover:brightness-90 transition-all border-r border-white/20`
-
-**Legend row:** `flex items-center justify-between` with `w-3 h-3 rounded-sm [color]` swatch + `text-[11px] font-semibold text-slate-600` label + `text-[11px] font-bold text-slate-900` percentage
-
-**Maps to:** New `CompositionBar.tsx` component
-
-### Pattern 7: CSS Sparkline (KPI Card Variant)
-
-**Reference:** `w-16 h-8 bg-slate-50 rounded flex items-end gap-0.5 px-1 py-1` container with inner divs:
-`w-2 bg-primary/40 h-2 rounded-t-[1px]`, `w-2 bg-primary/60 h-3`, `w-2 bg-primary/80 h-4`, `w-2 bg-primary h-6`
-
-**Maps to:** `KpiCard.tsx` optional `sparkline?: number[]` prop (4 values max, relative heights)
-
-### Pattern 8: Micro Label Typography System
-
-**Rule:** Secondary labels are ALWAYS `text-[10px] font-bold uppercase tracking-wider text-wf-muted`
-
-**Used in:** Sidebar section groups, filter bar labels, table sub-labels, card footer context
-
-**Current inconsistency in codebase:**
-- `WireframeSidebar`: `text-[10px] font-semibold uppercase tracking-widest` — close but `font-semibold` not `font-bold`
-- `WireframeFilterBar` labels: `fontSize: 11, fontWeight: 500` — wrong on both size and weight
-- `DataTable` headers: `text-[11px] font-medium uppercase tracking-wide` — wrong on size, weight, and tracking
-
-**Target:** Consolidate to single pattern. `tracking-widest` for table th specifically (matches reference exactly). `tracking-wider` for secondary labels.
+**No RLS in v1.5** — consistent with existing pattern (comments, blueprints, briefings all operate
+without RLS, using Clerk auth at the application layer). RLS is deferred to v2 (SEC-01 in out-of-scope).
 
 ---
 
 ## Sources
 
-- `dummy.html` (`.planning/research/visual-redesign-reference.html`) — primary reference, direct analysis of HTML/CSS patterns
-- [Tabular Editor: KPI card best practices for BI dashboards](https://tabulareditor.com/blog/kpi-card-best-practices-dashboard-design) — confirms icon slot + trend badge as table stakes in financial BI
-- [Metabase BI Dashboard Best Practices](https://www.metabase.com/learn/metabase-basics/querying-and-dashboards/dashboards/bi-dashboard-best-practices) — confirms dark sidebar + grouped nav as standard pattern
-- [Design Tokens specification (W3C Community Group)](https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/) — confirms token-first approach as industry standard for design system redesigns
-- [Martin Fowler: Design Token-Based UI Architecture](https://martinfowler.com/articles/design-token-based-ui-architecture.html) — confirms tokens-first dependency order (tokens → components → gallery)
+- [Architecture Decision Records — adr.github.io](https://adr.github.io/) — confirms structure for `decision` entry type: Context, Decision, Consequences (HIGH confidence — official ADR specification)
+- [MADR format — adr.github.io/madr](https://adr.github.io/madr/) — Markdown ADR template validates the "decision" KB entry type format
+- [AWS: Master Architecture Decision Records best practices](https://aws.amazon.com/blogs/architecture/master-architecture-decision-records-adrs-best-practices-for-effective-decision-making/) — confirms one decision per record, full sentences, team review (MEDIUM confidence — official AWS blog)
+- [Martin Fowler: Modularizing React Applications](https://martinfowler.com/articles/modularizing-react-apps.html) — validates feature-based module structure with own components/hooks/types per module (HIGH confidence — official Fowler article)
+- [Supabase Row Level Security docs](https://supabase.com/docs/guides/database/postgres/row-level-security) — confirms pattern: no RLS = consistent with existing FXL Core tables (HIGH confidence — official Supabase docs)
+- [BoldDesk: Internal Knowledge Base guide](https://www.bolddesk.com/learn/internal-knowledge-base) — confirms expected features: typed entries, tags, search, team creation (MEDIUM confidence — industry guide)
+- [GetStream: Activity Feed Design guide](https://getstream.io/blog/activity-feed-design/) — validates activity feed as standard hub component: chronological mixed-type events (MEDIUM confidence — verified source)
+- Existing FXL Core codebase analysis: `Sidebar.tsx`, `App.tsx`, `supabase/migrations/`, `src/pages/clients/` — direct inspection of existing patterns for integration (HIGH confidence — primary source)
 
 ---
-*Feature research for: v1.4 Wireframe Visual Redesign (BI Dashboard — Professional Financial Dashboard Aesthetic)*
-*Researched: 2026-03-11*
+
+*Feature research for: v1.5 Modular Foundation & Knowledge Base (Internal Operational Platform)*
+*Researched: 2026-03-12*

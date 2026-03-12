@@ -1,193 +1,258 @@
 # Project Research Summary
 
-**Project:** FXL Core v1.4 — Wireframe Visual Redesign
-**Domain:** CSS token migration + BI dashboard component visual redesign (financial dashboard aesthetic)
-**Researched:** 2026-03-11
+**Project:** FXL Core v1.5 — Modular Foundation & Knowledge Base
+**Domain:** Internal Operational Platform — React SPA with modular architecture, auto-fed knowledge base, and task management
+**Researched:** 2026-03-12
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The v1.4 milestone is a visual redesign of the existing wireframe component library — replacing the warm stone + gold palette with a professional financial dashboard aesthetic (primary blue `#1152d4`, slate neutrals, dark slate-950 sidebar). All four research areas converge on the same conclusion: the underlying architecture is already well-suited to this change. The CSS token system (`wireframe-tokens.css` scoped to `[data-wf-theme]`) means the vast majority of components (approximately 75 of 85) update automatically when token values change. Only 10 files require structural JSX edits. The stack change required is exactly one new dev dependency: `@tailwindcss/container-queries@0.1.1`.
+FXL Core v1.5 is a modular upgrade to an existing React 18 + TypeScript + Supabase SPA. The project is not a greenfield build — it is layering three new capabilities (module registry, knowledge base, task management) onto 28 phases of accumulated production code. The validated approach is feature-based directory modules with a static manifest registry pattern: each new area of the platform lives under `src/modules/[name]/` and exports a typed `ModuleManifest` that drives routing, sidebar navigation, and the home page — replacing hardcoded arrays with a single source of truth. This pattern adds zero new npm dependencies and integrates directly with the existing Vite + React Router setup.
 
-The recommended execution strategy is token-first and incremental. Phase 1 updates only `wireframe-tokens.css` and `tailwind.config.ts`, which immediately propagates the new palette to ~55 auto-updating components. Subsequent phases handle the 7 components requiring structural JSX changes (sidebar, header, filter bar, KPI cards, tables) independently of each other. This approach yields visible progress after a single small commit, reduces regression surface at each step, and makes the work reviewable in isolation. The alternative — a big-bang simultaneous redesign — turns a low-risk CSS migration into a high-risk 86-file PR.
+The recommended implementation path is strictly ordered: the module registry scaffold and boundary enforcement must come first (before any feature code), followed by Supabase migrations, then the Knowledge Base module, then Tasks. The knowledge base uses Supabase Postgres full-text search (tsvector generated columns + GIN index) via the existing `@supabase/supabase-js` client — no vector database, no external search service, no new packages. The task management scope is intentionally minimal (one table, one status workflow, no dependencies or notifications) to avoid the well-documented scope creep trap that turns simple task lists into Jira.
 
-The primary risks are not in implementation complexity but in discipline: renaming existing `--wf-*` tokens (breaks 240 usages silently, no TypeScript enforcement), updating light-mode tokens without updating their dark-mode counterparts, and introducing hardcoded hex values or Radix portal-based components during JSX restructures. All of these are entirely avoidable with explicit checklists. The secondary risk is ensuring client branding (`financeiro-conta-azul`, `primaryColor: '#1B6B93'`) still overrides the new `--wf-primary` token correctly after the redesign.
+The highest-risk moment in this milestone is the module extraction phase itself. Without ESLint boundary rules installed before any file moves, cross-module imports will silently reappear within two sprints and the modular directory structure will be cosmetic only. The second critical risk is `import.meta.glob`'s requirement for string literal arguments — the knowledge base indexer cannot be parameterized and must use top-level static glob patterns per directory. Both risks are fully preventable with the tooling identified in research and must be addressed in Phase 1, not retrofitted later.
+
+---
 
 ## Key Findings
 
 ### Recommended Stack
 
-The existing stack requires no version upgrades. One new plugin is needed: `@tailwindcss/container-queries@0.1.1`, which enables `@container` + `@sm:`/`@md:` responsive utilities for KPI cards that appear in 1-column, 2-column, and 3-column grid layouts at the same viewport width. All other CSS patterns used in the HTML reference (backdrop-blur, color-mix, group-hover, Inter extrabold) are already supported by Tailwind 3.4 and the existing browser baseline. The icon library stays as lucide-react — the HTML reference uses Material Symbols only because it is a static prototype; switching would touch 86 component files and add a bundle dependency with no capability gap.
+The v1.5 milestone requires zero new runtime npm dependencies. The entire feature set — module system, knowledge base, task management — is implementable with the existing stack. The module system uses React's built-in `lazy` + `Suspense` with Vite's automatic code splitting. State management stays with React Context + useReducer (Zustand is not needed at this scale; TanStack Query is deferred to v2 per existing PROJECT.md decision AGEN-02). New infrastructure is limited to two Supabase migrations and one optional Claude Code hook script.
 
-**Core technologies:**
-- `@tailwindcss/container-queries@0.1.1` (new devDep): KPI card responsive layout at container level, not viewport — peerDep compatible with Tailwind 3.4.15, verified on npm registry
-- `--wf-* CSS token system` (existing, primary change surface): update values in `wireframe-tokens.css`, zero component file renames
-- `lucide-react@0.460` (existing, keep): 86 files import it; icon fill/strokeWidth props replicate the filled/outlined icon variants from the reference design
-- `color-mix(in srgb, ...)` (existing): all semi-transparent badge fills, already 92%+ browser support baseline
-- `backdrop-filter: blur` via Tailwind `backdrop-blur-sm` (existing): sticky filter bar blur, 95.75% browser support, already used in app shell header
+**Core technologies (existing — no changes):**
+- React 18.3 + TypeScript 5.6 strict — module manifests as typed constants, `ComponentType` references in route descriptors
+- Vite 5.4 — automatic code splitting on `React.lazy()` dynamic imports, zero config change
+- `@supabase/supabase-js` 2.x — tsvector full-text search via `.textSearch()` and `.contains()` already supported
+- shadcn/ui (Card, Badge, Select, Dialog, Popover) — sufficient for all new UI without new component installs
+- `@dnd-kit` (already installed) — available for kanban drag-and-drop if needed in v1.5.x
 
-**Critical constraint:** Do NOT upgrade Tailwind v4, Recharts 3.x, or add Material Symbols/Framer Motion — all explicitly excluded.
+**New infrastructure (not packages):**
+- Supabase migration 005: `knowledge_entries` table with tsvector generated column + GIN indexes
+- Supabase migration 006: `tasks` table (and optional `projects` table) with text CHECK constraints
+- Optional: `.claude/hooks/kb-auto-feed.js` — Node.js hook using native `fetch()` to Supabase REST API
+
+**What NOT to add:** Zustand, TanStack Query, pgvector, Algolia, Meilisearch, node-fetch, micro-frontends, nx/turborepo, react-beautiful-dnd, Supabase Realtime.
 
 ### Expected Features
 
-The HTML reference (`dummy.html`) is the ground truth for all feature decisions. Features fall into a strict dependency order: token system must be done before any component changes; gallery update must be done last.
+**Must have — table stakes (P1, ship in v1.5 core):**
+- Module registry (`src/registry/modules.ts`) with typed `ModuleManifest` — architectural foundation, drives sidebar and home page dynamically
+- Per-module folder structure: `src/modules/knowledge-base/`, `src/modules/tasks/`, wrapper manifests for `docs/` and `wireframe-builder/`
+- Sidebar extended to render from `MODULE_REGISTRY` (replaces hardcoded navigation array)
+- Migration 005: `knowledge_entries` table (entry_type/title/body/tags/client_slug/tsvector)
+- KB list page, detail page, and new/edit form at `/knowledge-base/*`
+- Migration 006: `tasks` table (title/description/status/priority/client_slug/due_date)
+- Task list page and create/edit form at `/tasks/*`
+- Home page redesign: module hub grid from registry + basic activity feed (last 10 updates across kb_entries + tasks)
 
-**Must have (table stakes — core redesign):**
-- CSS token update: primary blue `#1152d4`, background-light `#f6f6f8`, background-dark `#101622`, slate chart palette — all other visual changes flow from this
-- KpiCard: icon slot with `bg-primary/10` container, `rounded-full` trend badge, `font-extrabold` value text, `group`/`group-hover:` card hover effects
-- DataTable: `tracking-widest font-black` th headers + dark `<tfoot>` row with totals (`--wf-table-footer-bg`/`fg` tokens)
-- WireframeSidebar: icon rendering per nav item, section group micro-labels (`text-[10px] font-bold uppercase tracking-wider`), footer status block with green pulse dot
-- WireframeHeader: right-side search input + notification bell + user chip with avatar `ring-primary hover`
-- WireframeFilterBar: `backdrop-blur-sm` sticky container + 10px bold uppercase filter labels
-- Chart palette: update `--wf-chart-1` through `--wf-chart-5` from gold/amber to blue/slate/indigo scale
-- Table audit: apply same `tracking-widest font-black` header treatment to ClickableTable, DrillDownTable, ConfigTable
-- Inter `font-extrabold` pass: card titles, KPI values, page h1
-
-**Should have (polish pass, P2):**
-- KpiCard sparkline: 4-column pure-CSS mini bar chart as `sparkline?: number[]` prop — zero Recharts dependency
-- CompositionBar: new component for multi-segment stacked horizontal bar + color legend
-- Custom chart header legend: replaces Recharts default `<Legend>` with header-aligned custom rendering
-- Table status dot column: `type: 'status'` on Column definition renders `h-2 w-2 rounded-full` with ring
-- DetailViewSwitcher audit: verify existing component matches the pill-tab reference pattern
+**Should have — differentiators (P2, ship in v1.5.x after validation):**
+- Task kanban view (`/tasks/kanban`) — 4-column board, no drag-and-drop required
+- KB search integrated into existing Cmd+K (`SearchCommand.tsx`) — async KB results as a separate cmdk Group
+- Task to KB entry linkage — "Document this" button on completed tasks
+- Client workspace KB section — additive "Conhecimento" section in `/clients/:slug`
 
 **Defer to v2+:**
-- CSS-only animated charts (keyframe animations distract from wireframe UX review)
-- Custom WebKit scrollbar styling (cross-browser risk for cosmetic gain)
-- Replace Recharts with CSS-only charts (regression risk across 14 chart types)
-- Full dark-first mode redesign (light is primary; dark inherits via `[data-wf-theme="dark"]` block)
+- KB auto-capture from GSD hooks (full automation requires hook infrastructure maturity)
+- Task drag-and-drop kanban
+- KB entry versioning/history
+- KB AI summary generation
+- Task dependencies / blocking graph
+- Email notifications
+- Bi-directional sync with external tools
 
 ### Architecture Approach
 
-The token architecture enforces a strict four-layer hierarchy: CSS token definition (`wireframe-tokens.css`) → theme provider (sets `data-wf-theme` attribute) → Tailwind alias layer (`tailwind.config.ts` `wf:` block) → component layer (85 files using Pattern A Tailwind classes, Pattern B inline `var()`, or Pattern C `color-mix()`). The key architectural insight: ALL token changes are purely CSS-side — zero component file edits required for value-only updates. Only structural JSX changes (new search input, icon slots, group hover classes) touch component files. Three new CSS tokens must be added (`--wf-header-search-bg`, `--wf-table-footer-bg`, `--wf-table-footer-fg`) and two hardcoded values must be converted to tokens (`--wf-accent-muted` from static `rgba()` to `color-mix()`, `GaugeChartComponent` `#f59e0b` to `--wf-warning`).
+The architecture is a single React SPA with feature-based module directories. The key structural addition is `src/registry/modules.ts` — a static constant that all three consumer points (App.tsx routes, Sidebar.tsx nav, Home.tsx cards) read from. Each module exports a `ModuleManifest` (plain TypeScript object with `id`, `displayName`, `icon`, `navItems`, `routes`, `homeCard`). Module pages access Supabase only through a module-scoped service layer (`src/modules/[name]/lib/[name]-service.ts`), never importing the Supabase client directly in components. Existing code (DocRenderer, WireframeViewer, client pages) is NOT moved during v1.5 — wrapper manifests bridge the registry without refactoring risk.
 
-**Major components by migration category:**
-1. `wireframe-tokens.css` + `tailwind.config.ts` — Phase 1 sole targets; 75 components auto-update
-2. `WireframeSidebar`, `WireframeHeader`, `WireframeFilterBar` — structural JSX expansion, new sub-elements
-3. `KpiCard`, `KpiCardFull` — JSX restructure for hover group pattern (cannot use inline styles for `group-hover:`)
-4. `DataTable`, `DrillDownTable` — additive `<tfoot>` rendering with new footer tokens
-5. `ScreenManager` — cosmetic sync with WireframeSidebar, behavior unchanged
-6. Component gallery — smoke test only, no development; auto-reflects component changes
+**Major components:**
+1. `src/registry/modules.ts` — ModuleManifest type + MODULE_REGISTRY array, single import point for App.tsx / Sidebar.tsx / Home.tsx
+2. `src/modules/knowledge-base/` — KB pages, components, service layer (`kb-service.ts`), types
+3. `src/modules/tasks/` — Task pages, components, service layer (`tasks-service.ts`), types
+4. Supabase migrations 005 + 006 — `knowledge_entries` (tsvector FTS) and `tasks` tables with anon-permissive RLS (same pattern as `blueprint_configs` and `briefing_configs`)
+5. Modified `Sidebar.tsx` — reads `MODULE_REGISTRY.flatMap(m => m.navItems)` instead of hardcoded array
+6. Modified `Home.tsx` — renders `MODULE_REGISTRY.map(m => m.homeCard)` for the module hub grid
+
+**Critical patterns:**
+- Module boundaries enforced by `eslint-plugin-boundaries` before any file moves
+- Routes as `ComponentType` references in manifests (not strings) — preserves TypeScript safety and tree-shaking
+- Anon-permissive RLS on new tables + Clerk auth at application layer (`useAuth().isSignedIn` gating writes) — same as existing tables
+- `import.meta.glob` with string literals only — separate top-level glob constants per directory, never parameterized
 
 ### Critical Pitfalls
 
-1. **Renaming or removing existing `--wf-*` tokens** — 240 usages across 31 files fail silently (CSS custom properties have no TypeScript enforcement). Prevention: change values only, never names. Add aliases for backward compat. Run `grep -r 'wf-[token-name]'` before any removal.
+1. **Module boundaries without enforcement** — Directory structure alone is cosmetic. Install `eslint-plugin-boundaries` and define allowed dependency directions before moving a single file. Cross-module needs go through `src/modules/shared/`. Run `npx madge --circular --extensions ts,tsx src/` before extraction to find existing cycles. Recovery after the fact costs 1-3 days.
 
-2. **Recharts legend/tooltip ignoring CSS var updates** — `fill="var(--wf-chart-1)"` works for SVG bars but Recharts Legend renders HTML spans where color may not re-resolve after token changes. Prevention: implement `useWireframeChartPalette()` hook that calls `getComputedStyle` to resolve tokens to hex strings at runtime, re-executed on theme change.
+2. **`import.meta.glob` with variable paths** — Vite transforms `import.meta.glob` at build time; arguments must be string literals. Parameterizing the directory path silently fails or returns empty results in production. Each directory that needs globbing requires its own top-level literal call.
 
-3. **Dark mode breakage from light-only token updates** — `[data-wf-theme="light"]` and `[data-wf-theme="dark"]` blocks are independent. Updating one without the other produces visible inconsistency. Prevention: always update both blocks in the same file edit; visual gallery dark-mode pass after every component phase.
+3. **Supabase migration breaks existing RLS** — Never mix `CREATE TABLE` for new tables and `ALTER TABLE` on existing tables in the same migration file. Column additions to existing tables must include a `DEFAULT` or be declared nullable. After every migration, immediately test the affected existing operations (blueprint save, wireframe comment).
 
-4. **WireframeThemeProvider boundary violations** — All `var(--wf-*)` tokens only resolve inside the `data-wf-theme` container div. Radix UI portals (shadcn `Select`, `Dialog`, `Tooltip`) render into `document.body`, outside the boundary. Prevention: never introduce shadcn portal-based components in wireframe components; use absolutely-positioned divs for dropdowns as current components do.
+4. **App.tsx route explosion** — Each module should export its own routes array; App.tsx composes them. Establish this composition pattern before modules ship pages. Target: App.tsx stays under 60 lines after all modules are added.
 
-5. **Client branding break via new `--wf-primary` token** — The `financeiro-conta-azul` client has `primaryColor: '#1B6B93'`. If redesigned components use `--wf-primary` for interactive elements but `generateBrandCssVars()` does not map `--brand-primary` to override `--wf-primary`, the client's teal is ignored. Prevention: decide branding overridability for each new token in Phase 1; update `generateBrandCssVars()` accordingly; test with the pilot client after every phase.
+5. **Task management scope creep** — Pin the v1.5 schema to exactly one table (`tasks`). Write the "out of scope" list as a contract in the phase plan before writing any code. If a feature requires a second table, it is v1.6.
+
+---
 
 ## Implications for Roadmap
 
-Based on the dependency graph validated by all four research files, the phase structure is clear and non-negotiable in terms of ordering. Phase 1 is the only strict blocker for everything else. Phases 2-6 are independent of each other once Phase 1 is committed.
+Based on the dependency graph across all four research files, the natural phase structure is:
 
-### Phase 1: Token Foundation
-**Rationale:** Every subsequent visual change depends on the token system being correct first. This phase touches 0 component files — only 2 files (`wireframe-tokens.css`, `tailwind.config.ts`) — yet immediately updates ~55 components automatically via CSS cascade. Highest leverage-to-risk ratio of any commit in the milestone.
-**Delivers:** New slate neutral scale, primary blue `#1152d4` replacing gold `#d4a017`, updated chart palette (5 tokens per theme), 3 new tokens (`--wf-header-search-bg`, `--wf-table-footer-*`), `--wf-warning` token for GaugeChartComponent, `--wf-accent-muted` converted from static `rgba()` to `color-mix()`, `@tailwindcss/container-queries` installed, branding overridability decision documented.
-**Addresses:** Token table stakes from FEATURES.md; chart palette; Pitfalls 1, 2, 3, 5, 8.
-**Avoids:** Any token rename — values only; both light AND dark blocks updated in the same edit.
+### Phase 1: Module Foundation & Registry
 
-### Phase 2: Sidebar + Header Chrome
-**Rationale:** Sidebar and header are visible on every wireframe screen. Wrong aesthetic on chrome breaks the overall design impression regardless of content quality. These are independent of each other (sidebar first — simpler, no state management; header second — has period selector state).
-**Delivers:** WireframeSidebar with icon rendering per nav item, section group micro-labels, status footer block with green pulse dot. WireframeHeader with right-side search pill, notification bell, dark mode toggle, divider, user chip with avatar.
-**Uses:** `--wf-header-search-bg` new token from Phase 1; lucide-react icon mapping for sidebar items.
-**Avoids:** No shadcn portal components; all chrome inside `data-wf-theme` div (Pitfall 7). Dark mode visual pass after each component (Pitfall 3).
+**Rationale:** The module registry is the prerequisite for everything else. Nothing else can be built with module boundaries until the registry type, boundary enforcement, and route composition pattern are in place. This is the highest-leverage phase — getting it wrong means every subsequent phase inherits the technical debt.
 
-### Phase 3: KPI Cards
-**Rationale:** KPI cards are the first content section on any financial dashboard and have the highest impact on the "premium" feeling of the new design. The `group`/`group-hover:` hover pattern is a known conflict with the existing inline style approach and must be addressed explicitly.
-**Delivers:** `KpiCard` and `KpiCardFull` with icon slot, `rounded-full` trend badge, `font-extrabold` values, `group` hover effects (icon transitions from `bg-primary/10 text-primary` to `bg-primary text-white`), optional `sparkline?: number[]` pure-CSS mini bars. `@container` applied for grid-responsive layout.
-**Avoids:** Do not use inline styles for `group-hover:` variants — must be Tailwind class strings only.
+**Delivers:**
+- `src/registry/modules.ts` with `ModuleManifest` type and initial MODULE_REGISTRY
+- `eslint-plugin-boundaries` configured and passing in CI
+- Pre-extraction circular dependency audit (`madge --circular`)
+- Route composition pattern in App.tsx (module routes exported from modules, composed in App.tsx)
+- `Sidebar.tsx` reads nav from MODULE_REGISTRY
+- Wrapper manifests for existing `docs/` and `wireframe-builder/` modules
+- `.planning/codebase/ARCHITECTURE.md` updated to reflect new structure
 
-### Phase 4: Table Components
-**Rationale:** Tables are the most-used section type in financial dashboards. The `<tfoot>` addition is purely additive — zero risk of breaking existing `<tbody>` rendering. All four table components must be updated together to maintain visual consistency.
-**Delivers:** `DataTable`, `ClickableTable`, `DrillDownTable`, `ConfigTable` with `tracking-widest font-black` th headers. `DataTable` and `DrillDownTable` with dark `<tfoot>` totals row using `--wf-table-footer-bg`/`fg` tokens. Optional `status` column type with `h-2 w-2 rounded-full` status dots.
-**Avoids:** Test dark mode table footer contrast after implementation (Pitfall 3). Audit `galleryMockData.ts` for hardcoded hex colors before finalizing (Pitfall 6).
+**Features addressed:** Module registry, per-module folder structure, sidebar integration (all P1 table stakes)
 
-### Phase 5: Filter Bar Enhancement
-**Rationale:** Filter bar is sticky and always visible, making its styling prominent. It also has the highest inline style density in the codebase (46 `--wf-*` references in WireframeFilterBar alone). Deserves its own phase to audit and eliminate hardcoded values before adding `backdrop-blur`.
-**Delivers:** `WireframeFilterBar` with `backdrop-blur-sm` on sticky container, 10px bold uppercase filter labels, action buttons (primary and ghost variants). All hardcoded `fontFamily: 'Inter, sans-serif'` strings removed in favor of Tailwind `font-sans`. All `rgba(0,0,0,N)` shadow values replaced with `--wf-shadow-sm`/`md` tokens (added to Phase 1 if possible, else Phase 5).
-**Avoids:** `backdrop-blur` must be a Tailwind className, not inline `backdropFilter` style (Pitfall 4). Maintain non-portal dropdown approach for filters (Pitfall 7).
+**Pitfalls avoided:** Module boundaries eroding, App.tsx route explosion, circular dependencies, GSD paths going stale, home page hardcoding
 
-### Phase 6: ScreenManager Sync
-**Rationale:** ScreenManager uses `wf-sidebar-*` Tailwind classes and should visually match the redesigned WireframeSidebar to avoid the admin UI looking out-of-sync with the wireframe preview. Cosmetic-only change — behavior unchanged. Must follow Phase 2 (sidebar).
-**Delivers:** `ScreenManager.tsx` updated with Phase 2 sidebar visual: correct spacing, icon sizing, typography. Zero behavior changes.
+### Phase 2: Supabase Migrations & Data Layer
 
-### Phase 7: Gallery Validation + Final Verification
-**Rationale:** Gallery auto-reflects component changes because previews render inside `WireframeThemeProvider`. This phase is smoke-testing only — no development. Structured checklist from PITFALLS.md governs what must pass.
-**Delivers:** Confirmation that all 86 wireframe components render correctly in light and dark mode. Client branding verified with `financeiro-conta-azul` (`#1B6B93` teal in interactive elements). `npx tsc --noEmit` zero errors. Gallery mock data audited for hardcoded hex colors.
-**Avoids:** Do not change `--primary` in `globals.css` in the same commit as any wireframe token change (Pitfall 6).
+**Rationale:** Migrations must precede any UI that reads from new tables. Running migrations as a dedicated phase (not mixed with feature code) isolates the risk of production RLS issues to a single, reviewable changeset.
+
+**Delivers:**
+- `supabase/migrations/005_knowledge_entries.sql` — `knowledge_entries` table with tsvector generated column, GIN indexes, anon-permissive RLS
+- `supabase/migrations/006_tasks.sql` — `tasks` table with text CHECK constraints, indexes, anon-permissive RLS
+- Service layer stubs: `kb-service.ts` and `tasks-service.ts` (typed wrappers, no UI yet)
+- Zod schemas for KB entry and task input validation
+
+**Pitfalls avoided:** Migrations breaking existing RLS, anon RLS applied without review
+
+### Phase 3: Knowledge Base Module
+
+**Rationale:** KB is the more architecturally novel feature (full-text search, markdown body, typed entry kinds) and should be validated before the simpler task management. The KB also establishes the service layer pattern that the task module will follow.
+
+**Delivers:**
+- Full `src/modules/knowledge-base/` module: types, service, pages (KBIndex, KBEntry, KBEntryForm), components (KBEntryCard)
+- Routes registered via manifest: `/knowledge-base`, `/knowledge-base/new`, `/knowledge-base/:id`
+- Supabase full-text search on title + body via `.textSearch('search_vec', query, { type: 'websearch' })`
+- Static `import.meta.glob` indexer using literal path pattern (not parameterized)
+- Active/archived directory split defined before first entry (retention policy)
+
+**Features addressed:** KB list + detail + form, KB full-text search, KB entry types (all P1)
+
+**Pitfalls avoided:** `import.meta.glob` variable path, KB unbounded growth
+
+### Phase 4: Task Management Module
+
+**Rationale:** Tasks follow the same service layer pattern established by the KB module. Scope must be explicitly bounded before this phase begins — the "out of scope" list is a phase plan prerequisite.
+
+**Delivers:**
+- Full `src/modules/tasks/` module: types, service, pages (TasksIndex, TaskDetail), components (TaskCard, TaskForm, TaskStatusBadge)
+- Routes registered via manifest: `/tasks`, `/tasks/new`, `/tasks/:id`
+- List view with filter by status/client/priority
+- Status workflow: todo → in_progress → done / blocked (status badge + dropdown)
+- Scope hard stop: one table, no due dates/assignees/notifications in v1.5
+
+**Features addressed:** Task entity, task status workflow, task list view, task create/edit form (all P1)
+
+**Pitfalls avoided:** Task scope creep
+
+### Phase 5: Home Page Modular Hub
+
+**Rationale:** The home page redesign depends on the registry having its final shape (all modules registered). Building it last means the module grid accurately reflects what exists. The activity feed requires both new tables to be populated.
+
+**Delivers:**
+- `Home.tsx` redesigned to render `MODULE_REGISTRY.map(m => m.homeCard)` — module hub grid
+- Activity feed: Supabase query across `knowledge_entries` + `tasks` ordered by `updated_at`, last 10 items
+- Module cards reflect activity (entry count, last modified) — empty modules de-emphasized
+- `isActive` flag per module to hide zero-content modules
+
+**Features addressed:** Home page module hub, activity feed on home (P1)
+
+**Pitfalls avoided:** Static home page requiring manual updates
+
+### Phase 6: Cross-Module Integration (v1.5.x)
+
+**Rationale:** These features depend on both KB and Tasks being live and validated by real usage. They modify existing components (SearchCommand.tsx, client pages) and should not be bundled with the primary module delivery to limit regression risk.
+
+**Delivers:**
+- KB search in Cmd+K: extend `SearchCommand.tsx` with async KB results as separate cmdk Group (`shouldFilter={false}`)
+- Task to KB entry link: "Document this" button on completed tasks
+- Client workspace KB section: additive "Conhecimento" section in `/clients/:slug` page
+- Task kanban view: `/tasks/kanban` 4-column board (click to change status, no drag-and-drop)
+
+**Features addressed:** KB Cmd+K integration, task kanban, task-to-KB link, client workspace KB section (all P2)
 
 ### Phase Ordering Rationale
 
-- Phase 1 is the only strict prerequisite — Phases 2-6 are fully independent of each other and can be committed in any order after Phase 1. Phase 7 is always last.
-- Sidebar + header grouped in Phase 2 because they share the same visual context and are simultaneously visible on every screen.
-- KPI cards (Phase 3) before tables (Phase 4) follows visual hierarchy: cards are above-the-fold, tables are scrolled content.
-- Filter bar (Phase 5) after KPI cards because the `group-hover:` pattern conflict resolution in Phase 3 informs how to handle similar Tailwind-vs-inline-style tensions in the filter bar.
-- ScreenManager (Phase 6) strictly after sidebar Phase 2 since it mirrors the sidebar visually.
-- Token-first approach eliminates Pitfall 1 risk entirely; phase isolation enables targeted dark-mode verification after each commit (Pitfall 3); additive-only changes minimize regression surface (Pitfalls 6, 7).
+- Registry must precede all module code — `ModuleManifest` type must exist before any module can export one; boundary rules must be in place before files move.
+- Migrations must precede service layer tests — cannot test `kb-service.ts` against a table that does not exist.
+- KB before Tasks — KB establishes the service layer and module structure pattern that Tasks will follow. Debugging two modules simultaneously is harder than validating one first.
+- Home page last — depends on registry having final shape; home page module grid is only accurate when all modules are registered.
+- Cross-module integrations in v1.5.x — these touch existing stable components; isolating them reduces regression risk on the core delivery.
 
 ### Research Flags
 
-All phases have well-documented patterns. No phase requires a dedicated research-phase during planning.
+Phases requiring careful execution (well-documented patterns, but execution-sensitive):
 
-Standard patterns (skip research-phase):
-- **Phase 1 (Token Foundation):** Pure mechanical value substitution on a fully inventoried token system. Zero implementation ambiguity.
-- **Phase 2 (Chrome):** Lucide icon mapping to sidebar items is a naming exercise, not a structural problem. Standard JSX restructure.
-- **Phase 3 (KPI Cards):** `group`/`group-hover:` is documented Tailwind pattern. Container queries plugin is verified and installed.
-- **Phase 4 (Tables):** Additive `<tfoot>` with pre-defined tokens. No complex patterns.
-- **Phase 5 (Filter Bar):** `backdrop-blur-sm` via Tailwind class is straightforward. Token cleanup is grep-driven.
-- **Phase 6 (ScreenManager):** Cosmetic sync only.
-- **Phase 7 (Gallery):** Verification only.
+- **Phase 1 (Module Foundation):** ESLint boundary configuration requires exact syntax — verify against current `eslint-plugin-boundaries` npm docs during execution. Circular dependency audit may reveal unexpected existing cycles that need resolution before proceeding.
+- **Phase 3 (Knowledge Base):** `import.meta.glob` literal constraint needs explicit verification in the codebase before the indexer is built. Supabase tsvector generated column syntax should be tested in a migration dry-run.
 
-One implementation decision to make explicitly in Phase 1 planning (not a research gap):
-- **`useWireframeChartPalette()` hook** (Pitfall 2): Decide whether to implement the `getComputedStyle`-based hook in Phase 1 or defer. Recommendation: implement in Phase 1 — small code, high long-term value for Recharts legend/tooltip color consistency.
+Phases with standard, well-documented patterns (lower risk):
+- **Phase 2 (Migrations):** Migration pattern is identical to existing migrations 003 and 004. Anon RLS policy is copy-paste verified.
+- **Phase 4 (Tasks):** Task UI uses only existing shadcn/ui components already installed. No new patterns beyond what KB established.
+- **Phase 5 (Home):** Pure read-from-registry rendering. No new Supabase calls beyond what modules already established.
+- **Phase 6 (Cross-Module):** All integrations are additive — no existing behavior is changed, only extended.
+
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | npm registry verified, official docs consulted, existing codebase directly inspected. One new package with confirmed peer dependency compatibility. |
-| Features | HIGH | HTML reference (`dummy.html`) is ground truth — patterns extracted directly from source, not inferred. Table stakes confirmed against Metabase/Power BI conventions. |
-| Architecture | HIGH | All findings code-verified via direct codebase inspection (grep counts, line references, file counts). Token inventory is exhaustive — 240 usages across 31 files accounted for. |
-| Pitfalls | HIGH | All 8 critical pitfalls grounded in direct file inspection (hardcoded hex locations, inline style counts, provider boundary analysis, specific line numbers). No speculative pitfalls. |
+| Stack | HIGH | Zero new packages — all decisions grounded in existing installed versions and official docs. Supabase textSearch() and React.lazy() both verified against official documentation. |
+| Features | HIGH | Table stakes and differentiators clearly separated. P1/P2/P3 prioritization grounded in operator workflow analysis and existing codebase patterns. ADR format for decision entries validated against official adr.github.io spec. |
+| Architecture | HIGH | Based on direct codebase reading (App.tsx, Sidebar.tsx, supabase/migrations/). Module manifest pattern directly derived from Martin Fowler's modularizing React apps article and existing wireframe-builder structure. |
+| Pitfalls | HIGH | All 9 pitfalls grounded in codebase analysis (existing App.tsx route count, docs-parser.ts glob pattern, migration RLS patterns) plus verified external sources (Vite issue #15926 for glob constraint). |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **`useWireframeChartPalette()` hook — implement or defer:** The Recharts CSS var resolution issue (Pitfall 2) is confirmed but the fix adds implementation work to Phase 1. Decide in Phase 1 planning whether to implement proactively or do a manual visual verification pass of all 14 chart types post token-update. Recommendation: implement — it is a small hook with outsized long-term value.
+- **`knowledge_entries` column naming inconsistency across research files:** STACK.md uses `kind`, FEATURES.md uses `entry_type`, ARCHITECTURE.md uses `category`. The canonical decision: use `entry_type` as the column name with values `('bug', 'decision', 'pattern', 'lesson')` — FEATURES.md rationale is most complete (ADR format validated for 'decision', retrospective insight validated for 'lesson'). Resolve in Phase 2 migration.
 
-- **`--wf-accent` alias strategy must be explicit:** STACK.md and ARCHITECTURE.md both confirm that keeping `--wf-accent: var(--wf-primary)` as a transitional alias (rather than renaming 240 usages) is the correct approach for v1.4. This must be stated explicitly in Phase 1 implementation notes so no one attempts a direct rename.
+- **tsvector language config:** STACK.md specifies `to_tsvector('english', ...)`, FEATURES.md specifies `to_tsvector('portuguese', ...)`. FXL's KB content is in Portuguese. Use `'portuguese'` — FEATURES.md is correct. Resolve in Phase 2 migration.
 
-- **Branding overridability for `--wf-primary` must be decided in Phase 1:** Should `generateBrandCssVars()` map `--brand-primary` to also override `--wf-primary`? Research says yes (Pitfall 5). This is a one-line addition to `branding.ts` but must be done alongside the token addition, not discovered afterward.
+- **RLS policy for `tasks` table:** Both ARCHITECTURE.md and FEATURES.md default to anon-permissive RLS (consistent with existing tables). PITFALLS.md correctly flags that this is appropriate for wireframes (public) but potentially not for internal tasks. For v1.5 (single operator), anon-permissive is acceptable. Document the assumption explicitly in migration 006: "anon-permissive intentional for single-operator v1; upgrade to Clerk JWT integration in v2 (SEC-01)."
+
+- **Activity feed polling interval:** No research source validates the 60-second polling interval for the home page activity feed. This is a reasonable assumption for a one-operator tool but needs a conscious implementation decision in Phase 5 (polling vs. manual refresh on navigate).
+
+---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- `tools/wireframe-builder/styles/wireframe-tokens.css` — 124 lines, 45 token definitions, complete inventory confirmed
-- `tailwind.config.ts` — `wf:` extension block, 18 registered aliases, app theme tokens
-- `src/styles/globals.css` — app theme root, wireframe-tokens.css import confirmed
-- `tools/wireframe-builder/lib/wireframe-theme.tsx` — WireframeThemeProvider scope boundary
-- `tools/wireframe-builder/lib/branding.ts` — generateBrandCssVars, chartColors prop chain, brandingToWfOverrides no-op
-- `tools/wireframe-builder/components/GaugeChartComponent.tsx` — hardcoded `#f59e0b` line 45 confirmed
-- `tools/wireframe-builder/components/WireframeFilterBar.tsx` — 46 inline style token references confirmed
-- `clients/financeiro-conta-azul/wireframe/branding.config.ts` — `primaryColor: '#1B6B93'` confirmed
-- `.planning/research/visual-redesign-reference.html` — HTML reference design, all CSS patterns extracted directly
-- [npm: @tailwindcss/container-queries](https://www.npmjs.com/package/@tailwindcss/container-queries) — version 0.1.1, peerDep tailwindcss >= 3.2.0, verified
-- [GitHub: tailwindlabs/tailwindcss-container-queries](https://github.com/tailwindlabs/tailwindcss-container-queries) — official plugin, Tailwind 3.2+ compatible
-- [Can I use: CSS backdrop-filter](https://caniuse.com/css-backdrop-filter) — 95.75% global support
-- [Can I use: color-mix()](https://caniuse.com/mdn-css_types_color_color-mix) — 92%+ global support, Baseline Widely Available
+- Official React docs — `React.lazy()` and Suspense pattern
+- Official Vite docs — automatic code splitting on dynamic imports
+- Supabase full-text search docs — tsvector generated columns, GIN index, `textSearch()` JS client method
+- Claude Code hooks reference — PostToolUse, Stop hooks, `stop_hook_active` field
+- adr.github.io + MADR — ADR format for decision KB entry type
+- Vite GitHub issue #15926 — `import.meta.glob` literal-only constraint
+- Direct codebase analysis — `src/App.tsx`, `src/components/layout/Sidebar.tsx`, `src/lib/docs-parser.ts`, `supabase/migrations/001-004`, `.planning/PROJECT.md`
 
 ### Secondary (MEDIUM confidence)
-- [Tailwind CSS v3 docs: hover-focus-and-other-states](https://v3.tailwindcss.com/docs/hover-focus-and-other-states) — group-hover pattern and limitations
-- [Lucide: lucide-react guide](https://lucide.dev/guide/packages/lucide-react) — fill/strokeWidth props for icon variants
-- [Metabase BI Dashboard Best Practices](https://www.metabase.com/learn/metabase-basics/querying-and-dashboards/dashboards/bi-dashboard-best-practices) — dark sidebar as industry standard
-- [Design Tokens specification (W3C Community Group)](https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/) — token-first approach confirmed as standard
-- Recharts GitHub issue #2239 — CSS variables in `fill` prop, Legend color swatch inconsistency pattern
+- Martin Fowler — Modularizing React Applications (feature-based module structure)
+- developer-way.com — React project structure and state management decisions
+- getstream.io — Activity feed design patterns
+- BoldDesk — Internal knowledge base expected features
+- AWS blog — ADR best practices
+- eslint-plugin-boundaries (npm) — boundary enforcement without Nx
+- madge (npm) — circular dependency detection for TypeScript projects
+
+### Tertiary (LOW confidence / needs validation during execution)
+- 60-second polling interval for activity feed — reasonable assumption, not from a sourced reference
+- eslint-plugin-boundaries exact configuration syntax — verify against current npm docs during Phase 1
 
 ---
-*Research completed: 2026-03-11*
+*Research completed: 2026-03-12*
 *Ready for roadmap: yes*
