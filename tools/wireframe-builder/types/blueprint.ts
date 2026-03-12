@@ -286,6 +286,11 @@ export type GaugeChartSection = {
   height?: number
 }
 
+export type BrandingEditorSection = {
+  type: 'branding-editor'
+  title?: string
+}
+
 export type BlueprintSection =
   | KpiGridSection
   | BarLineChartSection
@@ -309,6 +314,7 @@ export type BlueprintSection =
   | ProgressBarSection
   | DividerSection
   | GaugeChartSection
+  | BrandingEditorSection
 
 export type BlueprintScreen = {
   id: string

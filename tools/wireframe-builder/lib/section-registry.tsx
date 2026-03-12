@@ -22,6 +22,7 @@ import {
   BarChart2,
   Minus,
   Gauge,
+  Palette,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -43,6 +44,7 @@ import StatCardRenderer from '../components/sections/StatCardRenderer'
 import ProgressBarRenderer from '../components/sections/ProgressBarRenderer'
 import DividerRenderer from '../components/sections/DividerRenderer'
 import GaugeChartRenderer from '../components/sections/GaugeChartRenderer'
+import BrandingEditorRenderer from '../components/sections/BrandingEditorRenderer'
 
 // ---------------------------------------------------------------------------
 // Property forms (existing)
@@ -70,6 +72,7 @@ import StatCardForm from '../components/editor/property-forms/StatCardForm'
 import ProgressBarForm from '../components/editor/property-forms/ProgressBarForm'
 import DividerForm from '../components/editor/property-forms/DividerForm'
 import GaugeChartForm from '../components/editor/property-forms/GaugeChartForm'
+import BrandingEditorForm from '../components/editor/property-forms/BrandingEditorForm'
 
 // ---------------------------------------------------------------------------
 // Zod schemas (individual)
@@ -97,6 +100,7 @@ import {
   ProgressBarSectionSchema,
   DividerSectionSchema,
   GaugeChartSectionSchema,
+  BrandingEditorSectionSchema,
   BlueprintSectionSchema,
 } from './blueprint-schema'
 
@@ -569,6 +573,25 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     }),
     schema: GaugeChartSectionSchema,
     label: 'Gauge',
+  },
+
+  // === Branding ===
+  'branding-editor': {
+    renderer: BrandingEditorRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: BrandingEditorForm as unknown as ComponentType<PropertyFormProps>,
+    catalogEntry: {
+      type: 'branding-editor',
+      label: 'Identidade Visual',
+      description: 'Color pickers para personalizar cores do dashboard',
+      icon: Palette,
+      category: 'Formularios',
+    },
+    defaultProps: () => ({
+      type: 'branding-editor' as const,
+      title: 'Identidade Visual',
+    }),
+    schema: BrandingEditorSectionSchema,
+    label: 'Editor de Identidade Visual',
   },
 }
 

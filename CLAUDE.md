@@ -282,6 +282,20 @@ npx tsc --noEmit
 Zero erros TypeScript e condicao de aceite.
 Nunca usar `any` como solucao para erros de tipo.
 
+### Validacao visual obrigatoria
+
+Toda alteracao em componentes visuais (src/components/, src/pages/, tools/*/components/,
+clients/*/wireframe/) DEVE incluir verificacao visual no browser antes de considerar
+a tarefa concluida. Isso se aplica a TODOS os contextos de execucao, incluindo
+`/gsd:execute-phase`, quick tasks, e edits manuais.
+
+- Abrir a pagina/tela afetada no browser (`make dev` + localhost)
+- Verificar que a alteracao renderiza corretamente em light e dark mode (quando aplicavel)
+- Verificar que nao houve regressao visual em componentes adjacentes
+- Se a alteracao envolve interacao (hover, click, toggle), testar cada interacao
+
+Nunca assumir que "compila = funciona". TypeScript garante tipos, nao comportamento visual.
+
 ### Makefile targets
 
 - `make dev` — inicia servidor de desenvolvimento (npm run dev)

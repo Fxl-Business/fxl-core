@@ -18,6 +18,8 @@
 - [ ] Optimistic UI
 - [ ] Progress Bar illusions
 
+
+
 # Utils
 - [ ] Analisar utiliade do "Debug/BugBot" do Cursor ou Code Review do Codex
 - [x] Testar utilização do "Whisperflow"

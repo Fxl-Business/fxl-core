@@ -23,7 +23,7 @@ export default function WireframeSidebar({ screens, onSelect }: Props) {
               'flex w-full items-center rounded-md px-2 py-1.5 text-left text-xs transition-colors',
               screen.active
                 ? 'bg-wf-accent-muted font-medium text-wf-accent'
-                : 'text-wf-sidebar-muted hover:bg-slate-800 hover:text-white',
+                : 'text-wf-sidebar-muted hover:bg-white/10 hover:text-white',
             )}
           >
             {screen.label}

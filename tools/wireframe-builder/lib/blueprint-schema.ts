@@ -361,14 +361,18 @@ export const GaugeChartSectionSchema = z.object({
   height: z.number().optional(),
 })
 
+export const BrandingEditorSectionSchema = z.object({
+  type: z.literal('branding-editor'),
+  title: z.string().optional(),
+})
+
 // ---------------------------------------------------------------------------
-// Discriminated union of all 22 section types (15 existing + 7 new)
+// Discriminated union of all section types
 // Note: ChartGridSection has recursive items: BlueprintSection[]
-// We define the non-recursive schemas first (21 types), then build
+// We define the non-recursive schemas first, then build
 // the union with ChartGrid inline using z.lazy() for the recursive reference.
 // ---------------------------------------------------------------------------
 
-// Non-recursive section schemas (21 types: 14 existing + 7 new)
 const nonRecursiveSections = [
   KpiGridSectionSchema,
   BarLineChartSectionSchema,
@@ -391,6 +395,7 @@ const nonRecursiveSections = [
   ProgressBarSectionSchema,
   DividerSectionSchema,
   GaugeChartSectionSchema,
+  BrandingEditorSectionSchema,
 ] as const
 
 // ChartGridSection is defined inline to avoid circular const reference.

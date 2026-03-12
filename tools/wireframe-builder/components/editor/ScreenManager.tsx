@@ -109,7 +109,7 @@ function SortableScreenItem({
           'flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer text-xs transition-colors',
           isActive
             ? 'bg-wf-accent-muted text-wf-accent font-medium'
-            : 'text-wf-sidebar-muted hover:bg-slate-800 hover:text-white'
+            : 'text-wf-sidebar-muted hover:bg-white/10 hover:text-white'
         )}
         onClick={() => {
           if (!renaming && !confirmDelete) onSelect()
@@ -167,7 +167,7 @@ function SortableScreenItem({
         <div className="absolute right-0 top-full z-10 mt-1 w-36 rounded-md border border-wf-sidebar-border bg-wf-sidebar py-1" style={{ boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)' }}>
           <button
             type="button"
-            className="w-full px-3 py-1.5 text-left text-xs text-wf-sidebar-muted hover:bg-slate-800"
+            className="w-full px-3 py-1.5 text-left text-xs text-wf-sidebar-muted hover:bg-white/10"
             onClick={(e) => {
               e.stopPropagation()
               setRenameValue(screen.title)
@@ -179,7 +179,7 @@ function SortableScreenItem({
           </button>
           <button
             type="button"
-            className="w-full px-3 py-1.5 text-left text-xs text-red-400 hover:bg-slate-800"
+            className="w-full px-3 py-1.5 text-left text-xs text-red-400 hover:bg-white/10"
             onClick={(e) => {
               e.stopPropagation()
               setConfirmDelete(true)
@@ -387,7 +387,7 @@ export default function ScreenManager({
                 'flex w-full items-center gap-2 px-2 py-1.5 rounded-md text-xs transition-colors',
                 index === activeIndex
                   ? 'bg-wf-accent-muted text-wf-accent font-medium'
-                  : 'text-wf-sidebar-muted hover:bg-slate-800 hover:text-white'
+                  : 'text-wf-sidebar-muted hover:bg-white/10 hover:text-white'
               )}
               onClick={() => onSelectScreen(index)}
             >
@@ -419,7 +419,7 @@ export default function ScreenManager({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2 text-wf-sidebar-muted hover:text-white hover:bg-slate-800 mt-2"
+          className="w-full justify-start gap-2 text-wf-sidebar-muted hover:text-white hover:bg-white/10 mt-2"
           onClick={() => setAddDialogOpen(true)}
         >
           <Plus className="h-3.5 w-3.5" />

@@ -43,13 +43,13 @@ export default function AdminToolbar({
           onClick={onToggleCollapse}
           className="absolute left-1/2 top-0 z-30 -translate-x-1/2 rounded-b-md px-4 py-0.5 transition-colors"
           style={{
-            background: 'var(--wf-header-bg)',
-            border: '1px solid var(--wf-header-border)',
+            background: 'var(--wf-toolbar-bg)',
+            border: '1px solid var(--wf-toolbar-border)',
             borderTop: 'none',
-            color: 'var(--wf-muted)',
+            color: 'var(--wf-toolbar-muted)',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-fg)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-muted)' }}
         >
           <ChevronDown className="h-3.5 w-3.5" />
         </button>
@@ -62,13 +62,13 @@ export default function AdminToolbar({
       className="flex items-center gap-3 px-6 shrink-0"
       style={{
         height: 40,
-        background: 'var(--wf-header-bg)',
-        borderBottom: '1px solid var(--wf-header-border)',
+        background: 'var(--wf-toolbar-bg)',
+        borderBottom: '1px solid var(--wf-toolbar-border)',
       }}
     >
       <span
         className="text-sm font-medium"
-        style={{ color: 'var(--wf-heading)' }}
+        style={{ color: 'var(--wf-toolbar-fg)' }}
       >
         Wireframe Builder
       </span>
@@ -77,9 +77,9 @@ export default function AdminToolbar({
         type="button"
         onClick={onToggleCollapse}
         className="inline-flex items-center justify-center rounded-md p-1 transition-colors"
-        style={{ color: 'var(--wf-muted)' }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)' }}
-        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-muted)' }}
+        style={{ color: 'var(--wf-toolbar-muted)' }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-fg)' }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-muted)' }}
         title="Retrair toolbar"
       >
         <ChevronUp className="h-3.5 w-3.5" />
@@ -90,13 +90,13 @@ export default function AdminToolbar({
           <div
             className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs"
             style={{
-              background: 'var(--wf-card-bg)',
-              border: '1px solid var(--wf-card-border)',
-              color: 'var(--wf-body)',
+              background: 'var(--wf-toolbar-hover)',
+              border: '1px solid var(--wf-toolbar-border)',
+              color: 'var(--wf-toolbar-fg)',
             }}
           >
-            <span className="font-semibold" style={{ color: 'var(--wf-heading)' }}>{userDisplayName}</span>
-            <span style={{ color: 'var(--wf-muted)' }}>{userRole ?? 'Operador'}</span>
+            <span className="font-semibold" style={{ color: 'var(--wf-toolbar-fg)' }}>{userDisplayName}</span>
+            <span style={{ color: 'var(--wf-toolbar-muted)' }}>{userRole ?? 'Operador'}</span>
           </div>
         )}
 
@@ -106,11 +106,11 @@ export default function AdminToolbar({
               type="button"
               onClick={() => setBrandingOpen((prev) => !prev)}
               className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-              style={{ color: brandingOpen ? 'var(--wf-heading)' : 'var(--wf-muted)', background: brandingOpen ? 'var(--wf-accent-muted)' : 'transparent' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)'; e.currentTarget.style.background = 'var(--wf-accent-muted)' }}
+              style={{ color: brandingOpen ? 'var(--wf-toolbar-fg)' : 'var(--wf-toolbar-muted)', background: brandingOpen ? 'var(--wf-toolbar-hover)' : 'transparent' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-fg)'; e.currentTarget.style.background = 'var(--wf-toolbar-hover)' }}
               onMouseLeave={(e) => {
                 if (!brandingOpen) {
-                  e.currentTarget.style.color = 'var(--wf-muted)'
+                  e.currentTarget.style.color = 'var(--wf-toolbar-muted)'
                   e.currentTarget.style.background = 'transparent'
                 }
               }}
@@ -126,9 +126,9 @@ export default function AdminToolbar({
           type="button"
           onClick={onOpenShare}
           className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-          style={{ color: 'var(--wf-muted)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)'; e.currentTarget.style.background = 'var(--wf-accent-muted)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-muted)'; e.currentTarget.style.background = 'transparent' }}
+          style={{ color: 'var(--wf-toolbar-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-fg)'; e.currentTarget.style.background = 'var(--wf-toolbar-hover)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-muted)'; e.currentTarget.style.background = 'transparent' }}
         >
           <Share2 className="h-3.5 w-3.5" />
           Compartilhar
@@ -138,9 +138,9 @@ export default function AdminToolbar({
           type="button"
           onClick={onOpenComments}
           className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-          style={{ color: 'var(--wf-muted)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)'; e.currentTarget.style.background = 'var(--wf-accent-muted)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-muted)'; e.currentTarget.style.background = 'transparent' }}
+          style={{ color: 'var(--wf-toolbar-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-fg)'; e.currentTarget.style.background = 'var(--wf-toolbar-hover)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-muted)'; e.currentTarget.style.background = 'transparent' }}
         >
           <MessageSquare className="h-3.5 w-3.5" />
           Comentarios
@@ -150,9 +150,9 @@ export default function AdminToolbar({
           type="button"
           onClick={toggle}
           className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors"
-          style={{ color: 'var(--wf-muted)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-heading)'; e.currentTarget.style.background = 'var(--wf-accent-muted)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-muted)'; e.currentTarget.style.background = 'transparent' }}
+          style={{ color: 'var(--wf-toolbar-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-fg)'; e.currentTarget.style.background = 'var(--wf-toolbar-hover)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-muted)'; e.currentTarget.style.background = 'transparent' }}
         >
           {theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
         </button>

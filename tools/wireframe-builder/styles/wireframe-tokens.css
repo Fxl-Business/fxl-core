@@ -3,27 +3,27 @@
  * Scoped via [data-wf-theme] attribute on the wireframe container.
  * These tokens are fully independent of the app theme (--primary, --accent, etc.).
  *
- * Neutral scale: slate grays
- * Accent: primary blue (#1152d4 light, #4d7ce8 dark)
+ * Neutral scale: charcoal grays (no blue tint)
+ * Accent: gold (#c99920 light, #d4a82e dark)
  * Cards: thin borders, no box-shadows
  */
 
 /* Light mode wireframe tokens */
 [data-wf-theme="light"] {
-  /* Neutral scale (slate grays) — identical in both themes */
-  --wf-neutral-50: #f8fafc;
-  --wf-neutral-100: #f1f5f9;
-  --wf-neutral-200: #e2e8f0;
-  --wf-neutral-300: #cbd5e1;
-  --wf-neutral-400: #94a3b8;
-  --wf-neutral-500: #64748b;
-  --wf-neutral-600: #475569;
-  --wf-neutral-700: #334155;
-  --wf-neutral-800: #1e293b;
-  --wf-neutral-900: #0f172a;
+  /* Neutral scale (charcoal grays — no blue undertone) */
+  --wf-neutral-50: #f9fafb;
+  --wf-neutral-100: #f3f4f6;
+  --wf-neutral-200: #e5e7eb;
+  --wf-neutral-300: #d1d5db;
+  --wf-neutral-400: #9ca3af;
+  --wf-neutral-500: #6b7280;
+  --wf-neutral-600: #4b5563;
+  --wf-neutral-700: #374151;
+  --wf-neutral-800: #1f2937;
+  --wf-neutral-900: #1c2026;
 
-  /* Primary blue */
-  --wf-primary: #1152d4;
+  /* Primary gold */
+  --wf-primary: #c99920;
 
   /* Semantic mapping */
   --wf-canvas: #f6f6f8;
@@ -34,7 +34,7 @@
   --wf-body: var(--wf-neutral-600);
   --wf-muted: var(--wf-neutral-400);
 
-  /* Primary blue accent */
+  /* Gold accent */
   --wf-accent: var(--wf-primary);
   --wf-accent-muted: color-mix(in srgb, var(--wf-accent) 12%, transparent);
   --wf-accent-fg: #ffffff;
@@ -43,8 +43,8 @@
   --wf-positive: #16a34a;
   --wf-negative: #dc2626;
 
-  /* Sidebar (part of wireframe chrome) */
-  --wf-sidebar-bg: #0f172a;
+  /* Sidebar (charcoal dark) */
+  --wf-sidebar-bg: #1c2026;
   --wf-sidebar-fg: var(--wf-neutral-200);
   --wf-sidebar-active: var(--wf-accent);
   --wf-sidebar-muted: var(--wf-neutral-300);
@@ -54,63 +54,70 @@
   --wf-header-bg: var(--wf-card);
   --wf-header-border: var(--wf-card-border);
 
-  /* New tokens (TOK-04) */
-  --wf-header-search-bg: #f1f5f9;
-  --wf-table-footer-bg: #0f172a;
+  /* Admin toolbar (dark chrome bar) */
+  --wf-toolbar-bg: #1c2026;
+  --wf-toolbar-fg: var(--wf-neutral-200);
+  --wf-toolbar-muted: var(--wf-neutral-400);
+  --wf-toolbar-border: #2a2f37;
+  --wf-toolbar-hover: rgba(255, 255, 255, 0.08);
+
+  /* Search & table footer */
+  --wf-header-search-bg: #f3f4f6;
+  --wf-table-footer-bg: #1c2026;
   --wf-table-footer-fg: #ffffff;
 
-  /* Table — clean, light headers (matches modern SaaS reference) */
+  /* Table — clean, light headers */
   --wf-table-header-bg: var(--wf-neutral-100);
   --wf-table-header-fg: var(--wf-neutral-500);
   --wf-table-row-alt: var(--wf-neutral-50);
   --wf-table-border: var(--wf-neutral-200);
 
-  /* Chart palette */
+  /* Chart palette (gold-derived) */
   --wf-chart-warn: #f59e0b;
-  --wf-chart-1: #1152d4;  /* primary blue */
-  --wf-chart-2: #4f46e5;  /* indigo-600 */
-  --wf-chart-3: #60a5fa;  /* blue-400 */
-  --wf-chart-4: #94a3b8;  /* slate-400 */
-  --wf-chart-5: #475569;  /* slate-600 */
+  --wf-chart-1: #c99920;  /* primary gold */
+  --wf-chart-2: #a67c1a;  /* darker gold */
+  --wf-chart-3: #e0b840;  /* lighter gold */
+  --wf-chart-4: #9ca3af;  /* neutral-400 */
+  --wf-chart-5: #4b5563;  /* neutral-600 */
 }
 
 /* Dark mode wireframe tokens */
 [data-wf-theme="dark"] {
-  /* Neutral scale (slate grays) — identical in both themes */
-  --wf-neutral-50: #f8fafc;
-  --wf-neutral-100: #f1f5f9;
-  --wf-neutral-200: #e2e8f0;
-  --wf-neutral-300: #cbd5e1;
-  --wf-neutral-400: #94a3b8;
-  --wf-neutral-500: #64748b;
-  --wf-neutral-600: #475569;
-  --wf-neutral-700: #334155;
-  --wf-neutral-800: #1e293b;
-  --wf-neutral-900: #0f172a;
+  /* Neutral scale (charcoal grays — no blue undertone) */
+  --wf-neutral-50: #f9fafb;
+  --wf-neutral-100: #f3f4f6;
+  --wf-neutral-200: #e5e7eb;
+  --wf-neutral-300: #d1d5db;
+  --wf-neutral-400: #9ca3af;
+  --wf-neutral-500: #6b7280;
+  --wf-neutral-600: #4b5563;
+  --wf-neutral-700: #374151;
+  --wf-neutral-800: #1f2937;
+  --wf-neutral-900: #1c2026;
 
-  /* Primary blue (lighter for dark bg contrast) */
-  --wf-primary: #4d7ce8;
+  /* Primary gold (slightly brighter for dark bg) */
+  --wf-primary: #d4a82e;
 
-  /* Dark mode semantic mapping (inverted) */
-  --wf-canvas: #101622;
-  --wf-card: #1a2235;
+  /* Dark mode semantic mapping */
+  --wf-canvas: #14171c;
+  --wf-card: #1c2026;
   --wf-card-border: var(--wf-neutral-700);
   --wf-border: var(--wf-card-border);
   --wf-heading: var(--wf-neutral-200);
   --wf-body: var(--wf-neutral-300);
   --wf-muted: var(--wf-neutral-500);
 
-  /* Primary blue accent (lighter for dark bg) */
+  /* Gold accent (brighter for dark bg) */
   --wf-accent: var(--wf-primary);
   --wf-accent-muted: color-mix(in srgb, var(--wf-accent) 15%, transparent);
-  --wf-accent-fg: #e0eaff;
+  --wf-accent-fg: #fef3cd;
 
   /* Semantic colors (brighter for dark bg) */
   --wf-positive: #22c55e;
   --wf-negative: #f87171;
 
-  /* Sidebar */
-  --wf-sidebar-bg: #0f172a;
+  /* Sidebar (darker charcoal) */
+  --wf-sidebar-bg: #161a1f;
   --wf-sidebar-fg: var(--wf-neutral-200);
   --wf-sidebar-active: var(--wf-accent);
   --wf-sidebar-muted: var(--wf-neutral-400);
@@ -120,10 +127,17 @@
   --wf-header-bg: var(--wf-card);
   --wf-header-border: var(--wf-card-border);
 
-  /* New tokens (TOK-04) */
-  --wf-header-search-bg: #1e293b;
-  --wf-table-footer-bg: #0f172a;
-  --wf-table-footer-fg: #f8fafc;
+  /* Admin toolbar (dark chrome bar) */
+  --wf-toolbar-bg: #14171c;
+  --wf-toolbar-fg: var(--wf-neutral-200);
+  --wf-toolbar-muted: var(--wf-neutral-500);
+  --wf-toolbar-border: #1c2026;
+  --wf-toolbar-hover: rgba(255, 255, 255, 0.1);
+
+  /* Search & table footer */
+  --wf-header-search-bg: #262c33;
+  --wf-table-footer-bg: #14171c;
+  --wf-table-footer-fg: #f9fafb;
 
   /* Table — subtle dark headers */
   --wf-table-header-bg: var(--wf-neutral-800);
@@ -131,11 +145,11 @@
   --wf-table-row-alt: var(--wf-neutral-800);
   --wf-table-border: var(--wf-neutral-700);
 
-  /* Chart palette (brighter for dark bg) */
+  /* Chart palette (brighter gold for dark bg) */
   --wf-chart-warn: #fbbf24;
-  --wf-chart-1: #4d7ce8;  /* primary blue (lighter) */
-  --wf-chart-2: #818cf8;  /* indigo-400 */
-  --wf-chart-3: #93c5fd;  /* blue-300 */
-  --wf-chart-4: #94a3b8;  /* slate-400 */
-  --wf-chart-5: #64748b;  /* slate-500 */
+  --wf-chart-1: #d4a82e;  /* primary gold (brighter) */
+  --wf-chart-2: #e0b840;  /* lighter gold */
+  --wf-chart-3: #f0d060;  /* pale gold */
+  --wf-chart-4: #9ca3af;  /* neutral-400 */
+  --wf-chart-5: #6b7280;  /* neutral-500 */
 }

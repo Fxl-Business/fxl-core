@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import { MessageSquare, Loader2, PanelLeft } from 'lucide-react'
 import { useUser } from '@clerk/react'
@@ -27,6 +27,7 @@ import {
 import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'
 import type { BrandingConfig } from '@tools/wireframe-builder/types/branding'
 import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
+import { BrandingProvider } from '@tools/wireframe-builder/lib/branding-context'
 import { sectionsToRows, getCellCount } from '@tools/wireframe-builder/lib/grid-layouts'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
@@ -146,6 +147,24 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     label: string
   } | null>(null)
   const [managerOpen, setManagerOpen] = useState(false)
+
+  // AdminToolbar collapse state
+  const [toolbarCollapsed, setToolbarCollapsed] = useState(false)
+
+  // Branding update handler (must be before early returns)
+  const handleBrandingUpdate = useCallback((partial: Partial<BrandingConfig>) => {
+    setBranding((prev) => {
+      if (!prev) return prev
+      const next = { ...prev, ...partial }
+      setChartPalette(getChartPalette(next))
+      return next
+    })
+  }, [])
+
+  const brandingCtx = useMemo(() => branding ? {
+    branding,
+    updateBranding: handleBrandingUpdate,
+  } : null, [branding, handleBrandingUpdate])
 
   // --- Dynamic branding resolution ---
 
@@ -708,15 +727,13 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     )
   }
 
-  // AdminToolbar collapse state
-  const [toolbarCollapsed, setToolbarCollapsed] = useState(false)
-
   // Layout height constants — only app header is above sidebar
   const appHeaderH = user && !toolbarCollapsed ? 40 : 0
 
   return (
     <>
       <WireframeThemeProvider wfOverrides={branding ? brandingToWfOverrides(branding) : undefined}>
+      <BrandingProvider value={brandingCtx}>
         <div
           style={{
             display: 'flex',
@@ -987,6 +1004,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
           </main>
           </div>
         </div>
+      </BrandingProvider>
       </WireframeThemeProvider>
 
       {/* App-level overlays -- outside wireframe theme */}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MessageSquare, Loader2 } from 'lucide-react'
 import { useUser } from '@clerk/react'
 import { arrayMove } from '@dnd-kit/sortable'
@@ -24,6 +24,8 @@ import {
   brandingToWfOverrides,
 } from '@tools/wireframe-builder/lib/branding'
 import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
+import { BrandingProvider } from '@tools/wireframe-builder/lib/branding-context'
+import type { BrandingConfig } from '@tools/wireframe-builder/types/branding'
 import { sectionsToRows, getCellCount } from '@tools/wireframe-builder/lib/grid-layouts'
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
@@ -37,12 +39,15 @@ import type { EditModeState, GridLayout, ScreenRow } from '@tools/wireframe-buil
 
 const CLIENT_SLUG = 'financeiro-conta-azul'
 
-// Resolve branding once at module level (static import, no async needed)
-const branding = resolveBranding(brandingConfigSeed)
-const chartPalette = getChartPalette(branding)
+// Resolve branding seed at module level (static import, no async needed)
+const brandingSeed = resolveBranding(brandingConfigSeed)
 
 export default function FinanceiroWireframeViewer() {
   const { user } = useUser()
+
+  // Branding state (starts from seed, editable via BrandingEditor)
+  const [branding, setBranding] = useState<BrandingConfig>(brandingSeed)
+  const [chartPalette, setChartPalette] = useState<string[]>(() => getChartPalette(brandingSeed))
 
   // Data loading
   const [config, setConfig] = useState<BlueprintConfig | null>(null)
@@ -612,9 +617,24 @@ export default function FinanceiroWireframeViewer() {
     )
   }
 
+  // Branding update handler
+  const handleBrandingUpdate = useCallback((partial: Partial<BrandingConfig>) => {
+    setBranding((prev) => {
+      const next = { ...prev, ...partial }
+      setChartPalette(getChartPalette(next))
+      return next
+    })
+  }, [])
+
+  const brandingCtx = useMemo(() => ({
+    branding,
+    updateBranding: handleBrandingUpdate,
+  }), [branding, handleBrandingUpdate])
+
   return (
     <>
       <WireframeThemeProvider wfOverrides={brandingToWfOverrides(branding)}>
+      <BrandingProvider value={brandingCtx}>
         <div
           style={{
             display: 'flex',
@@ -779,6 +799,7 @@ export default function FinanceiroWireframeViewer() {
             </div>
           </main>
         </div>
+      </BrandingProvider>
       </WireframeThemeProvider>
 
       {/* App-level overlays -- outside wireframe theme */}

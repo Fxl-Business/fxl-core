@@ -3,18 +3,14 @@ import { brandingToWfOverrides, hexToHsl, darken } from './branding'
 import { DEFAULT_BRANDING } from '../types/branding'
 
 describe('brandingToWfOverrides', () => {
-  it('returns --wf-primary from branding.primaryColor', () => {
+  it('returns undefined when branding matches defaults', () => {
     const overrides = brandingToWfOverrides(DEFAULT_BRANDING)
-    expect((overrides as Record<string, string>)['--wf-primary']).toBe(DEFAULT_BRANDING.primaryColor)
+    expect(overrides).toBeUndefined()
   })
 
-  it('returns exactly one override key', () => {
-    const overrides = brandingToWfOverrides(DEFAULT_BRANDING)
-    expect(Object.keys(overrides)).toHaveLength(1)
-  })
-
-  it('uses custom primaryColor when provided', () => {
+  it('returns --wf-primary override when primaryColor differs from default', () => {
     const overrides = brandingToWfOverrides({ ...DEFAULT_BRANDING, primaryColor: '#1B6B93' })
+    expect(overrides).toBeDefined()
     expect((overrides as Record<string, string>)['--wf-primary']).toBe('#1B6B93')
   })
 })
