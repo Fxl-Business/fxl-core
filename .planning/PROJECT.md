@@ -82,20 +82,15 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
-## Current Milestone: v1.4 Wireframe Visual Redesign
+## Current Milestone: v1.5 Modular Foundation & Knowledge Base
 
-**Goal:** Reformular o visual de todos os componentes de wireframe baseado em novo design system (primary blue #1152d4, slate palette, Inter extrabold typography, hover group effects, dark sidebar, professional dashboard aesthetic).
+**Goal:** Transformar o FXL Core de um sistema monolitico em uma plataforma modular com fronteiras claras entre areas (docs, wireframe-builder, knowledge-base, projetos), preparada para expansao futura (modulo financeiro, instancias para outros clientes). Introduzir base de conhecimento autoalimentada que aprende com bugs, decisoes e padroes.
 
 **Target features:**
-- Novo design token system: primary #1152d4, background-light #f6f6f8, background-dark #101622, escala slate
-- Sidebar dark (slate-900/950) com nav items, section groups, status footer
-- Header com search input, notifications, dark mode toggle, user chip com avatar
-- KPI cards com hover group effects, trend badges (rounded-full), sparklines
-- Tabelas com uppercase tracking-widest headers, dark footer row, hover transitions
-- Charts com nova paleta (primary blue + slate + indigo scale)
-- Sticky filter bar com backdrop-blur, selects, toggles, action buttons
-- Tipografia Inter com pesos variados (extrabold headings, bold labels, 10px-11px micro labels)
-- Galeria atualizada com novo visual em todos os previews
+- Modularizacao do codebase: cada area com seus proprios componentes, paginas, tipos e manifesto
+- Knowledge Base autoalimentada: registro estruturado de bugs, decisoes, padroes — consultada pelo Claude antes de investigar problemas
+- Home page modular: hub com cards/links para cada modulo ativo (Docs, Ferramentas, Clientes, KB)
+- Controle de projetos e tarefas: MVP de gestao por cliente e do proprio FXL Core, ligado a entidades existentes
 
 ### Out of Scope
 
@@ -193,4 +188,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Visual language**: Slate + indigo palette, Inter body / JetBrains Mono code, border-l rail nav pattern
 
 ---
-*Last updated: 2026-03-11 after v1.4 milestone start*
+*Last updated: 2026-03-12 after v1.5 milestone start*
