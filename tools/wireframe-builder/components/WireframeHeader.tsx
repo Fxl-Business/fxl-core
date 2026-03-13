@@ -1,6 +1,7 @@
-import { Search, Bell, Moon, Sun, Settings, Share2, Download, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, Bell, Moon, Sun, Settings, Share2, Download, Calendar, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
 import type { PeriodType } from '@tools/wireframe-builder/types/blueprint'
+import type { HeaderElementType } from '@tools/wireframe-builder/types/editor'
 
 type Props = {
   title: string
@@ -19,6 +20,66 @@ type Props = {
     share?: boolean     // defaults true
     export?: boolean    // defaults false
   }
+  // Edit mode
+  editMode?: boolean
+  selectedElement?: HeaderElementType | null
+  onSelectElement?: (element: HeaderElementType) => void
+}
+
+function ZoneWrapper({
+  elementType,
+  editMode,
+  selected,
+  onSelect,
+  visible,
+  placeholderLabel,
+  children,
+}: {
+  elementType: HeaderElementType
+  editMode?: boolean
+  selected?: boolean
+  onSelect?: (element: HeaderElementType) => void
+  visible: boolean
+  placeholderLabel: string
+  children: React.ReactNode
+}) {
+  if (!editMode) {
+    return visible ? <>{children}</> : null
+  }
+
+  const borderClass = selected
+    ? 'border-primary ring-2 ring-primary/20'
+    : 'border-transparent hover:border-muted-foreground/30'
+
+  return (
+    <div
+      className={`border-2 border-dashed rounded-md cursor-pointer transition-all ${borderClass}`}
+      style={{ display: 'flex', alignItems: 'center' }}
+      onClick={(e) => {
+        e.stopPropagation()
+        onSelect?.(elementType)
+      }}
+    >
+      {visible ? (
+        children
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            padding: '4px 8px',
+            fontSize: 10,
+            color: 'var(--wf-muted)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <Plus style={{ width: 12, height: 12 }} />
+          <span>{placeholderLabel}</span>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function WireframeHeader({
@@ -30,8 +91,127 @@ export default function WireframeHeader({
   periodType,
   showUserIndicator,
   actions,
+  editMode,
+  selectedElement,
+  onSelectElement,
 }: Props) {
   const { theme, toggle } = useWireframeTheme()
+
+  const brandContent = (
+    <div style={{ flex: '0 0 auto', minWidth: 160, display: 'flex', alignItems: 'center' }}>
+      {(showLogo !== false) && logoUrl ? (
+        <img
+          src={logoUrl}
+          alt={brandLabel ?? 'Logo'}
+          style={{ maxHeight: 28, maxWidth: 100, objectFit: 'contain' }}
+        />
+      ) : (showLogo !== false) && brandLabel ? (
+        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--wf-heading)', letterSpacing: 0.5 }}>
+          {brandLabel}
+        </span>
+      ) : (
+        <h1 style={{ fontSize: 15, fontWeight: 600, color: 'var(--wf-heading)', margin: 0 }}>{title}</h1>
+      )}
+    </div>
+  )
+
+  const periodContent = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginRight: 4 }}>
+      <button
+        type="button"
+        style={{
+          padding: 4, borderRadius: 6, border: 'none', background: 'transparent',
+          color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        <ChevronLeft style={{ width: 14, height: 14 }} />
+      </button>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
+        borderRadius: 6, background: 'var(--wf-header-search-bg)',
+        fontSize: 11, fontWeight: 600, color: 'var(--wf-heading)', whiteSpace: 'nowrap',
+      }}>
+        <Calendar style={{ width: 12, height: 12, color: 'var(--wf-muted)' }} />
+        <span>{periodType === 'anual' ? '2026' : 'Jan / 26'}</span>
+      </div>
+      <button
+        type="button"
+        style={{
+          padding: 4, borderRadius: 6, border: 'none', background: 'transparent',
+          color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        <ChevronRight style={{ width: 14, height: 14 }} />
+      </button>
+    </div>
+  )
+
+  const actionsContent = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+      {actions?.manage !== false && (
+        <button
+          type="button"
+          style={{
+            padding: '4px 8px', borderRadius: 6, border: 'none', background: 'transparent',
+            color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+            fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap',
+          }}
+        >
+          <Settings style={{ width: 14, height: 14 }} />
+          <span>Gerenciar</span>
+        </button>
+      )}
+      {actions?.share !== false && (
+        <button
+          type="button"
+          style={{
+            padding: '4px 8px', borderRadius: 6, border: 'none', background: 'transparent',
+            color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+            fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap',
+          }}
+        >
+          <Share2 style={{ width: 14, height: 14 }} />
+          <span>Compartilhar</span>
+        </button>
+      )}
+      {actions?.export === true && (
+        <button
+          type="button"
+          style={{
+            padding: '4px 8px', borderRadius: 6, border: 'none', background: 'transparent',
+            color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+            fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap',
+          }}
+        >
+          <Download style={{ width: 14, height: 14 }} />
+          <span>Exportar</span>
+        </button>
+      )}
+    </div>
+  )
+
+  const hasAnyAction = actions?.manage !== false || actions?.share !== false || actions?.export === true
+
+  const userContent = (
+    <>
+      {/* Divider */}
+      <div style={{ height: 20, width: 1, background: 'var(--wf-border)', margin: '0 4px' }} />
+
+      {/* User chip — static mock data */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--wf-heading)', lineHeight: 1.3, margin: 0 }}>Operador FXL</p>
+          <p style={{ fontSize: 10, color: 'var(--wf-muted)', lineHeight: 1.3, margin: 0 }}>Analista</p>
+        </div>
+        <div style={{
+          height: 32, width: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          background: 'var(--wf-accent)', color: 'var(--wf-accent-fg)',
+        }}>
+          <span style={{ fontSize: 12, fontWeight: 700 }}>OF</span>
+        </div>
+      </div>
+    </>
+  )
 
   return (
     <header
@@ -48,25 +228,19 @@ export default function WireframeHeader({
         flexShrink: 0,
       }}
     >
-      {/* Left: logo or brand label or screen title */}
-      <div style={{ flex: '0 0 auto', minWidth: 160, display: 'flex', alignItems: 'center' }}>
-        {(showLogo !== false) && logoUrl ? (
-          <img
-            src={logoUrl}
-            alt={brandLabel ?? 'Logo'}
-            style={{ maxHeight: 28, maxWidth: 100, objectFit: 'contain' }}
-          />
-        ) : (showLogo !== false) && brandLabel ? (
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--wf-heading)', letterSpacing: 0.5 }}>
-            {brandLabel}
-          </span>
-        ) : (
-          // showLogo=false: show screen title as fallback (original behavior)
-          <h1 style={{ fontSize: 15, fontWeight: 600, color: 'var(--wf-heading)', margin: 0 }}>{title}</h1>
-        )}
-      </div>
+      {/* Left: brand zone */}
+      <ZoneWrapper
+        elementType="header-brand"
+        editMode={editMode}
+        selected={selectedElement === 'header-brand'}
+        onSelect={onSelectElement}
+        visible={true}
+        placeholderLabel="Marca"
+      >
+        {brandContent}
+      </ZoneWrapper>
 
-      {/* Center: search input (decorative) */}
+      {/* Center: search input (decorative — not editable) */}
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
         <div style={{ position: 'relative', width: '100%', maxWidth: 280, margin: '0 32px' }}>
           <Search
@@ -93,82 +267,33 @@ export default function WireframeHeader({
         </div>
       </div>
 
-      {/* Right: actions — period selector, action buttons, bell, theme toggle, divider, user chip */}
+      {/* Right: actions area */}
       <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* Period selector pill — decorative (HDR-01) */}
-        {showPeriodSelector !== false && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginRight: 4 }}>
-            <button
-              type="button"
-              style={{
-                padding: 4, borderRadius: 6, border: 'none', background: 'transparent',
-                color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <ChevronLeft style={{ width: 14, height: 14 }} />
-            </button>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
-              borderRadius: 6, background: 'var(--wf-header-search-bg)',
-              fontSize: 11, fontWeight: 600, color: 'var(--wf-heading)', whiteSpace: 'nowrap',
-            }}>
-              <Calendar style={{ width: 12, height: 12, color: 'var(--wf-muted)' }} />
-              <span>{periodType === 'anual' ? '2026' : 'Jan / 26'}</span>
-            </div>
-            <button
-              type="button"
-              style={{
-                padding: 4, borderRadius: 6, border: 'none', background: 'transparent',
-                color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <ChevronRight style={{ width: 14, height: 14 }} />
-            </button>
-          </div>
-        )}
+        {/* Period selector zone */}
+        <ZoneWrapper
+          elementType="header-period"
+          editMode={editMode}
+          selected={selectedElement === 'header-period'}
+          onSelect={onSelectElement}
+          visible={showPeriodSelector !== false}
+          placeholderLabel="Periodo"
+        >
+          {periodContent}
+        </ZoneWrapper>
 
-        {/* Action buttons — decorative (HDR-03) */}
-        {actions?.manage !== false && (
-          <button
-            type="button"
-            style={{
-              padding: '4px 8px', borderRadius: 6, border: 'none', background: 'transparent',
-              color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
-              fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap',
-            }}
-          >
-            <Settings style={{ width: 14, height: 14 }} />
-            <span>Gerenciar</span>
-          </button>
-        )}
-        {actions?.share !== false && (
-          <button
-            type="button"
-            style={{
-              padding: '4px 8px', borderRadius: 6, border: 'none', background: 'transparent',
-              color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
-              fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap',
-            }}
-          >
-            <Share2 style={{ width: 14, height: 14 }} />
-            <span>Compartilhar</span>
-          </button>
-        )}
-        {actions?.export === true && (
-          <button
-            type="button"
-            style={{
-              padding: '4px 8px', borderRadius: 6, border: 'none', background: 'transparent',
-              color: 'var(--wf-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
-              fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap',
-            }}
-          >
-            <Download style={{ width: 14, height: 14 }} />
-            <span>Exportar</span>
-          </button>
-        )}
+        {/* Actions zone */}
+        <ZoneWrapper
+          elementType="header-actions"
+          editMode={editMode}
+          selected={selectedElement === 'header-actions'}
+          onSelect={onSelectElement}
+          visible={hasAnyAction}
+          placeholderLabel="Acoes"
+        >
+          {actionsContent}
+        </ZoneWrapper>
 
-        {/* Notification bell — decorative */}
+        {/* Notification bell — decorative (not editable) */}
         <button
           type="button"
           style={{
@@ -179,7 +304,7 @@ export default function WireframeHeader({
           <Bell style={{ width: 16, height: 16 }} />
         </button>
 
-        {/* Dark mode toggle — functional */}
+        {/* Dark mode toggle — functional (not editable) */}
         <button
           type="button"
           onClick={toggle}
@@ -191,27 +316,17 @@ export default function WireframeHeader({
           {theme === 'light' ? <Moon style={{ width: 16, height: 16 }} /> : <Sun style={{ width: 16, height: 16 }} />}
         </button>
 
-        {/* Divider + User chip — conditional (HDR-02) */}
-        {showUserIndicator !== false && (
-          <>
-            {/* Divider */}
-            <div style={{ height: 20, width: 1, background: 'var(--wf-border)', margin: '0 4px' }} />
-
-            {/* User chip — static mock data */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ textAlign: 'right' }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--wf-heading)', lineHeight: 1.3, margin: 0 }}>Operador FXL</p>
-                <p style={{ fontSize: 10, color: 'var(--wf-muted)', lineHeight: 1.3, margin: 0 }}>Analista</p>
-              </div>
-              <div style={{
-                height: 32, width: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                background: 'var(--wf-accent)', color: 'var(--wf-accent-fg)',
-              }}>
-                <span style={{ fontSize: 12, fontWeight: 700 }}>OF</span>
-              </div>
-            </div>
-          </>
-        )}
+        {/* User indicator zone */}
+        <ZoneWrapper
+          elementType="header-user"
+          editMode={editMode}
+          selected={selectedElement === 'header-user'}
+          onSelect={onSelectElement}
+          visible={showUserIndicator !== false}
+          placeholderLabel="Usuario"
+        >
+          {userContent}
+        </ZoneWrapper>
       </div>
     </header>
   )

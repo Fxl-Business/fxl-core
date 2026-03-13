@@ -10,6 +10,7 @@ import BlueprintRenderer from '@tools/wireframe-builder/components/BlueprintRend
 import AdminToolbar from '@tools/wireframe-builder/components/editor/AdminToolbar'
 import ShareModal from '@tools/wireframe-builder/components/editor/ShareModal'
 import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPanel'
+import HeaderPropertyPanel from '@tools/wireframe-builder/components/editor/HeaderPropertyPanel'
 import SidebarConfigPanel from '@tools/wireframe-builder/components/editor/SidebarConfigPanel'
 import HeaderConfigPanel from '@tools/wireframe-builder/components/editor/HeaderConfigPanel'
 import FilterBarEditor from '@tools/wireframe-builder/components/editor/FilterBarEditor'
@@ -46,7 +47,7 @@ import type {
   SidebarGroup,
   SidebarWidget,
 } from '@tools/wireframe-builder/types/blueprint'
-import type { EditModeState, GridLayout, ScreenRow } from '@tools/wireframe-builder/types/editor'
+import type { EditModeState, GridLayout, HeaderElementType, ScreenRow } from '@tools/wireframe-builder/types/editor'
 
 // Dynamic branding import map (extend as clients are added)
 const brandingMap: Record<string, () => Promise<{ default: BrandingConfig }>> = {
@@ -129,6 +130,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     dirty: false,
     saving: false,
     selectedSection: null,
+    selectedHeaderElement: null,
   })
   const [workingConfig, setWorkingConfig] = useState<BlueprintConfig | null>(null)
   const [pendingExitEdit, setPendingExitEdit] = useState(false)
@@ -372,6 +374,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
         dirty: false,
         saving: false,
         selectedSection: null,
+        selectedHeaderElement: null,
       })
     }
   }
@@ -385,6 +388,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       dirty: false,
       saving: false,
       selectedSection: null,
+      selectedHeaderElement: null,
     })
     setPendingExitEdit(false)
   }
@@ -529,6 +533,15 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     setEditMode((prev) => ({
       ...prev,
       selectedSection: { rowIndex, cellIndex },
+      selectedHeaderElement: null,
+    }))
+  }
+
+  function handleSelectHeaderElement(element: HeaderElementType) {
+    setEditMode((prev) => ({
+      ...prev,
+      selectedSection: null,
+      selectedHeaderElement: element,
     }))
   }
 
@@ -555,7 +568,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       editMode.selectedSection?.rowIndex === rowIndex &&
       editMode.selectedSection?.cellIndex === cellIndex
     ) {
-      setEditMode((prev) => ({ ...prev, selectedSection: null }))
+      setEditMode((prev) => ({ ...prev, selectedSection: null, selectedHeaderElement: null }))
     }
   }
 
@@ -652,7 +665,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
   function handleScreenSelect(index: number) {
     setActiveIndex(index)
-    setEditMode((prev) => ({ ...prev, selectedSection: null }))
+    setEditMode((prev) => ({ ...prev, selectedSection: null, selectedHeaderElement: null }))
   }
 
   function handleAddScreen(screen: BlueprintScreen) {
@@ -676,6 +689,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       ...prev,
       dirty: true,
       selectedSection: null,
+      selectedHeaderElement: null,
     }))
   }
 
@@ -1062,6 +1076,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               showUserIndicator={activeConfig?.header?.showUserIndicator}
               periodType={activeConfig?.header?.periodType}
               actions={activeConfig?.header?.actions}
+              editMode={editMode.active}
+              selectedElement={editMode.selectedHeaderElement}
+              onSelectElement={handleSelectHeaderElement}
             />
             {staleWarning && (
               <div className="mx-4 mt-2 flex items-center justify-between rounded-md border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm text-yellow-800">
@@ -1119,6 +1136,17 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
           setEditMode((prev) => ({ ...prev, selectedSection: null }))
         }
         onChange={handlePropertyChange}
+      />
+
+      <HeaderPropertyPanel
+        open={editMode.selectedHeaderElement !== null}
+        elementType={editMode.selectedHeaderElement}
+        headerConfig={activeConfig?.header ?? {}}
+        configLabel={activeConfig?.label ?? 'Dashboard'}
+        onUpdate={handleHeaderUpdate}
+        onClose={() =>
+          setEditMode((prev) => ({ ...prev, selectedHeaderElement: null }))
+        }
       />
 
       <SidebarConfigPanel

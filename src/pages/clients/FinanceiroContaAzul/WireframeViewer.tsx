@@ -69,6 +69,7 @@ export default function FinanceiroWireframeViewer() {
     dirty: false,
     saving: false,
     selectedSection: null,
+    selectedHeaderElement: null,
   })
   const [workingConfig, setWorkingConfig] = useState<BlueprintConfig | null>(null)
   const [pendingExitEdit, setPendingExitEdit] = useState(false)
@@ -251,6 +252,7 @@ export default function FinanceiroWireframeViewer() {
         dirty: false,
         saving: false,
         selectedSection: null,
+        selectedHeaderElement: null,
       })
     }
   }
@@ -263,6 +265,7 @@ export default function FinanceiroWireframeViewer() {
       dirty: false,
       saving: false,
       selectedSection: null,
+      selectedHeaderElement: null,
     })
     setPendingExitEdit(false)
   }
@@ -537,6 +540,7 @@ export default function FinanceiroWireframeViewer() {
       ...prev,
       dirty: true,
       selectedSection: null,
+      selectedHeaderElement: null,
     }))
   }
 
