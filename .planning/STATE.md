@@ -67,9 +67,10 @@ None — all resolved.
 |---|-------------|------|--------|-----------|
 | 11 | Reestruturar sidebar Ferramentas como nivel acima do Wireframe Builder | 2026-03-13 | d2b4475 | [11-reestruturar-sidebar-ferramentas-como-ni](./quick/11-reestruturar-sidebar-ferramentas-como-ni/) |
 | 12 | Pagina principal de Clientes (/clientes) e verificar sidebar Ferramentas | 2026-03-13 | ffc02a1 | [12-pagina-principal-de-clientes-e-corrigir-](./quick/12-pagina-principal-de-clientes-e-corrigir-/) |
+| 13 | Remove light mode toggle local da tela de componentes (ComponentGallery) | 2026-03-13 | 258c064 | [13-fix-remove-light-mode-toggle-local-da-te](./quick/13-fix-remove-light-mode-toggle-local-da-te/) |
 
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: Milestone v1.6 complete
+Stopped at: Quick task 13 complete — GalleryThemeToggle removed from ComponentGallery
 Next: Define next milestone (v1.7) or run /gsd:new-milestone
