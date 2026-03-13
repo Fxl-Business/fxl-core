@@ -1,469 +1,484 @@
 # Architecture Research
 
-**Domain:** Modular Framework Shell — React SPA extension registry + slot injection
+**Domain:** Configurable wireframe layout components — sidebar widgets, header config, filter bar editor
 **Researched:** 2026-03-13
-**Confidence:** HIGH (based on direct codebase analysis + established React patterns)
+**Confidence:** HIGH (all findings derived from direct codebase analysis, not training data)
 
 ## Standard Architecture
 
 ### System Overview
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│                         App.tsx (Router)                              │
-│  BrowserRouter → ExtensionProvider → ProtectedRoute → Layout          │
-├──────────────────────────────────────────────────────────────────────┤
-│                        Layout.tsx (Shell)                             │
-│  ┌──────────────┐  ┌───────────────────────────────────────────────┐ │
-│  │   Sidebar     │  │                  <Outlet />                   │ │
-│  │ (ModuleDef)   │  │  ┌─────────────────────────────────────────┐ │ │
-│  └──────────────┘  │  │   Page (owns max-w, content)             │ │ │
-│                    │  │  ┌───────────────────────────────────┐   │ │ │
-│  ┌──────────────┐  │  │  │   <ModuleSlot id="..." />         │   │ │ │
-│  │   TopNav      │  │  │  └───────────────────────────────────┘   │ │ │
-│  └──────────────┘  │  └─────────────────────────────────────────┘ │ │
-│                    └───────────────────────────────────────────────┘ │
-├──────────────────────────────────────────────────────────────────────┤
-│                      Module Registry Layer                            │
-│  ┌──────────────┐ ┌────────────────┐ ┌───────────┐ ┌─────────────┐ │
-│  │ MODULE_REG   │ │ ExtensionReg   │ │   Slots   │ │ useActive   │ │
-│  │ (const [])   │ │ resolveExts()  │ │ Context   │ │ Extensions  │ │
-│  └──────────────┘ └────────────────┘ └───────────┘ └─────────────┘ │
-├──────────────────────────────────────────────────────────────────────┤
-│                        Module Manifests                               │
-│  ┌──────┐ ┌──────────┐ ┌─────────┐ ┌──────────────┐ ┌───────────┐ │
-│  │ docs │ │ferrament.│ │ clients │ │ knowledge-  │ │   tasks   │ │
-│  │      │ │          │ │         │ │    base     │ │           │ │
-│  └──────┘ └──────────┘ └─────────┘ └──────────────┘ └───────────┘ │
-├──────────────────────────────────────────────────────────────────────┤
-│                       Persistence Layer                               │
-│  ┌──────────────────────┐        ┌──────────────────────────────┐   │
-│  │   Supabase Client    │        │        Clerk Auth            │   │
-│  └──────────────────────┘        └──────────────────────────────┘   │
-└──────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          WireframeViewer.tsx                             │
+│  (orchestrator: BlueprintConfig state, editMode, workingConfig, save)    │
+├───────────────────────────────┬─────────────────────────────────────────┤
+│          AdminToolbar         │  edit mode toggle, save, branding, share │
+├───────────────┬───────────────┴──────────────────────────┬──────────────┤
+│  <aside>      │          <main>                          │  PropertyPanel│
+│  sidebar      │  WireframeHeader      BlueprintRenderer  │  (Sheet right)│
+│  (inline)     │  WireframeFilterBar   (per-screen rows)  │               │
+│               │                                          │               │
+│  ScreenManager│  FilterBar: activeScreen.filters[]       │  section forms│
+│  (screens[])  │  Header: activeConfig.header (partial)   │  via registry │
+└───────────────┴──────────────────────────────────────────┴──────────────┘
+                              ↓
+                   Supabase (blueprints table)
+                   BlueprintConfig (Zod-validated JSONB)
 ```
 
 ### Component Responsibilities
 
-| Component | Responsibility | Current State |
-|-----------|----------------|---------------|
-| `MODULE_REGISTRY` | Typed array of module definitions, drives sidebar + routing + home | Exists in `src/modules/registry.ts` |
-| `ModuleManifest` | Per-module declaration: id, label, route, icon, status, navChildren, routeConfig | Exists in `registry.ts` |
-| `ModuleDefinition` | Enhanced manifest: extends ModuleManifest with description, badge, enabled, extensions[] | NEW type — extends existing interface |
-| `ModuleExtension` | Cross-module contribution: sourceModuleId, requires[], injects map of slotId→Component | NEW type |
-| `ExtensionRegistry` | Pure function: resolveExtensions(registry, enabledIds) → ExtensionMap | NEW module file |
-| `ExtensionProvider` | React context provider: mounts above Layout, provides ExtensionMap to tree | NEW component |
-| `ModuleSlot` | Declarative injection point: reads ExtensionContext, renders injected components | NEW component |
-| `useActiveExtensions` | Hook: returns active extensions for a given moduleId from context | NEW hook |
-| `App.tsx` | Centralized router, wraps routes with ExtensionProvider | Modified: add provider wrap |
-| `Sidebar` | Navigation tree from MODULE_REGISTRY navChildren | Modified: add enabled filter + badge |
-| `Home.tsx` | Module grid + activity feed | Replaced with Home 2.0 |
-| `Layout.tsx` | Shell: TopNav + Sidebar + Outlet | Unchanged |
-| `ModulesPanel` | /admin/modules UI: module grid with enable/disable toggles | NEW page |
+| Component | Responsibility | Existing State |
+|-----------|----------------|----------------|
+| `WireframeViewer.tsx` | Orchestrates all state: config, editMode, workingConfig, save | Existing — central orchestrator |
+| `AdminToolbar` | Edit mode toggle, save button, branding popover, share | Existing |
+| `<aside>` (inline in Viewer) | Sidebar chrome, collapse, screen nav via ScreenManager | Existing (inline JSX, not WireframeSidebar.tsx) |
+| `WireframeHeader` | Header chrome: logo, search (decorative), user chip | Existing — only consumes `showLogo` |
+| `WireframeFilterBar` | Filter bar for active screen; driven by `activeScreen.filters` | Existing |
+| `ScreenManager` | Screen list, add/delete/rename/reorder in edit mode | Existing |
+| `PropertyPanel` | Right-side Sheet; delegates to per-type forms via section-registry | Existing |
+| `SECTION_REGISTRY` | Single source of truth: renderer + propertyForm + schema + defaultProps per section type | Existing in `section-registry.tsx` |
+| `BlueprintConfig` | Top-level schema: `sidebar?`, `header?`, `screens[]` | Existing |
+| `SidebarConfig` | `footer?: string`, `groups?: SidebarGroup[]` | Existing — minimal |
+| `HeaderConfig` | `showLogo`, `showPeriodSelector`, `showUserIndicator`, `actions.*` | Existing — schema only, not fully rendered |
 
----
+## Critical Existing Gaps
 
-## Recommended Project Structure
+These gaps are what v2.2 must close. Understanding them drives the build order.
+
+### Gap 1: WireframeHeader only reads `showLogo`
+
+`WireframeViewer.tsx` lines 957–961 pass only `logoUrl` and `showLogo` to `WireframeHeader`.
+The `HeaderConfig` fields `showPeriodSelector`, `showUserIndicator`, and `actions.*` are stored in
+the schema and in Supabase, but have zero effect on render. The period selector, user chip, and
+action buttons are hardcoded in `WireframeHeader.tsx` — they never consult `config.header`.
+
+### Gap 2: WireframeSidebar.tsx is an unused component
+
+`WireframeSidebar.tsx` exists as a standalone preview component (used in ComponentGallery) but is
+never imported by `WireframeViewer.tsx`. The actual sidebar in the Viewer is inline JSX. These
+are two separate concerns and should remain separate.
+
+### Gap 3: No editor entry points for sidebar, header, or filter
+
+AdminToolbar has no buttons for "Edit Sidebar", "Edit Header", or "Edit Filtros". ScreenManager
+is the only editor surface. `SidebarConfig` and `HeaderConfig` have no property panels and no
+visual editor access.
+
+### Gap 4: Filter editing is view-only
+
+`WireframeFilterBar` renders `activeScreen.filters[]` correctly but there is no mechanism
+to add, remove, or reconfigure `FilterOption` items through the visual editor.
+
+### Gap 5: No widget concept in SidebarConfig
+
+The v2.2 milestone targets compound widgets (workspace switcher, account selector, user menu)
+in the sidebar. `SidebarConfig` today only has `footer` and `groups[]`. A typed `widgets[]`
+array does not exist yet.
+
+## Recommended Architecture for v2.2
+
+### Data Model Changes
+
+Three schema extensions are needed. All must be backward-compatible (optional fields only).
+
+**1. SidebarConfig — add `widgets[]`**
+
+```typescript
+// tools/wireframe-builder/types/blueprint.ts
+
+export type SidebarWidgetType =
+  | 'workspace-switcher'
+  | 'account-selector'
+  | 'user-menu'
+  | 'search'
+
+export type SidebarWidget = {
+  type: SidebarWidgetType
+  position: 'top' | 'bottom'    // placement relative to nav items
+  label?: string                  // display label override
+  options?: string[]              // workspace names, account names, etc.
+}
+
+export type SidebarConfig = {
+  footer?: string
+  groups?: SidebarGroup[]
+  widgets?: SidebarWidget[]       // NEW — compound widgets
+}
+```
+
+The Zod schema in `blueprint-schema.ts` must mirror this with a new `SidebarWidgetSchema`
+and update `SidebarConfigSchema`. The `HeaderConfigSchema` already uses `.passthrough()`
+for forward-compat. Apply the same to `SidebarConfigSchema`.
+
+**2. HeaderConfig — no new fields needed**
+
+All needed fields already exist in the schema. The work is purely in the render layer
+and property panel — `WireframeHeader` must consume all existing `HeaderConfig` fields.
+
+**3. FilterOption — no new schema fields needed**
+
+`FilterOption` already has `filterType` discriminator with five variants. The work is
+a new editor UI surface to add/remove/edit `filters[]` per screen.
+
+### Component Boundaries — New vs Modified
+
+| Component | Action | Rationale |
+|-----------|--------|-----------|
+| `types/blueprint.ts` | MODIFY — add `SidebarWidget`, `SidebarWidgetType`, extend `SidebarConfig.widgets` | Schema source of truth |
+| `lib/blueprint-schema.ts` | MODIFY — add `SidebarWidgetSchema`, update `SidebarConfigSchema` | Runtime Zod validation |
+| `WireframeHeader.tsx` | MODIFY — accept and render all `HeaderConfig` fields | Close Gap 1 |
+| `WireframeViewer.tsx` | MODIFY — pass full `HeaderConfig`; add `openPanel` state; add `updateWorkingDashboard` helper; render widget zones in sidebar | Close Gaps 1, 3, 5 |
+| `AdminToolbar.tsx` | MODIFY — add "Layout" button group in edit mode: Sidebar, Header, Filtros buttons | Close Gap 3 |
+| `editor/SidebarConfigPanel.tsx` | NEW — Sheet for editing `SidebarConfig` (groups, footer, widgets) | Gap 3 — sidebar editor |
+| `editor/HeaderConfigPanel.tsx` | NEW — Sheet for editing `HeaderConfig` (boolean toggles, action flags) | Gap 3 — header editor |
+| `editor/FilterBarEditor.tsx` | NEW — Sheet for editing `activeScreen.filters[]` (add/remove/reorder `FilterOption`) | Gap 4 — filter editor |
+| `editor/SidebarWidgetPicker.tsx` | NEW — sub-component inside SidebarConfigPanel for adding widget types | Supports compound widgets |
+| `lib/sidebar-widget-registry.tsx` | NEW — `SIDEBAR_WIDGET_REGISTRY` with renderer + defaultProps per widget type | Separate registry for layout widgets |
+| `components/sidebar-widgets/` | NEW FOLDER — four widget renderer components | Render compound sidebar widgets |
+
+### Editor Entry Point Pattern
+
+AdminToolbar currently shows in edit mode: `Cores | Compartilhar | Comentarios | Theme | Salvar | Editar`.
+
+In edit mode, add a "Layout" button group:
 
 ```
-src/
-├── modules/
-│   ├── registry.ts                   # ModuleManifest + ModuleDefinition + ModuleExtension + MODULE_REGISTRY
-│   ├── extension-registry.ts         # resolveExtensions() pure function + ExtensionMap type
-│   ├── slots.tsx                     # ExtensionProvider + ModuleSlot + ExtensionContext
-│   ├── hooks/
-│   │   └── useActiveExtensions.ts    # useActiveExtensions(moduleId) convenience hook
-│   ├── docs/
-│   │   └── manifest.tsx              # unchanged
-│   ├── ferramentas/
-│   │   └── manifest.tsx              # unchanged
-│   ├── clients/
-│   │   └── manifest.tsx              # unchanged
-│   ├── knowledge-base/
-│   │   └── manifest.ts               # optional: add description, badge, extensions[]
-│   └── tasks/
-│       └── manifest.ts               # optional: add description, badge, extensions[]
-│
-├── pages/
-│   ├── Home.tsx                      # REPLACED with Home 2.0 (same route /)
-│   ├── admin/
-│   │   └── ModulesPanel.tsx          # NEW: /admin/modules
-│   └── ...                           # existing pages unchanged
-│
-└── components/
-    └── layout/
-        ├── Sidebar.tsx               # Modified: enabled filter + badge rendering
-        └── ...                       # TopNav, Layout unchanged
+[Sidebar] [Header] [Filtros]   (visible only when editMode.active)
 ```
 
-### Structure Rationale
+Each button sets `openPanel` state. Only one panel can be open at a time (exclusive).
+`WireframeViewer` manages `openPanel: 'sidebar' | 'header' | 'filter' | null`.
 
-- `extension-registry.ts` is separated from `registry.ts` to keep the registry file focused on types and the static constant. The resolver is pure business logic with no React dependency.
-- `slots.tsx` is separated from both files above because it owns React context + JSX. Keeping it separate avoids circular imports with manifests that import `ModuleManifest`.
-- `modules/hooks/` follows the established pattern from `modules/knowledge-base/hooks/` and `modules/tasks/hooks/`.
-- `pages/admin/` is a new subdirectory under pages (not a module manifest entry) because admin routes are internal tooling, not operator-facing modules with navChildren or sidebar presence.
-- ESLint boundaries pattern `src/modules/!(registry)*` must be updated to also exclude `extension-registry`, `slots`, and `hooks`.
+AdminToolbar receives three new callbacks: `onOpenSidebarPanel`, `onOpenHeaderPanel`, `onOpenFilterPanel`.
+This is consistent with how `onOpenShare` and `onOpenComments` already work — callbacks, not shared state.
 
----
+### Property Panel Taxonomy
+
+The existing `PropertyPanel` handles per-section editing via `SECTION_REGISTRY`. It is triggered by
+selecting a section cell (rowIndex + cellIndex).
+
+New layout panels are NOT section types. They edit dashboard-level config (`SidebarConfig`, `HeaderConfig`)
+or screen-level config (`filters[]`). They must NOT go through `SECTION_REGISTRY`.
+
+Use three separate Sheet components with their own forms:
+
+```typescript
+// In WireframeViewer.tsx render — outside WireframeThemeProvider, like PropertyPanel
+
+<SidebarConfigPanel
+  open={openPanel === 'sidebar'}
+  config={workingConfig?.sidebar ?? {}}
+  screens={screens}
+  onChange={(updated) => updateWorkingDashboard('sidebar', updated)}
+  onClose={() => setOpenPanel(null)}
+/>
+
+<HeaderConfigPanel
+  open={openPanel === 'header'}
+  config={workingConfig?.header ?? {}}
+  onChange={(updated) => updateWorkingDashboard('header', updated)}
+  onClose={() => setOpenPanel(null)}
+/>
+
+<FilterBarEditor
+  open={openPanel === 'filter'}
+  filters={activeScreen?.filters ?? []}
+  onChange={(filters) => updateWorkingScreen(s => ({ ...s, filters }))}
+  onClose={() => setOpenPanel(null)}
+/>
+```
+
+### Widget Registry Pattern
+
+Sidebar widgets are typed compound components — distinct from section types.
+They do NOT go through `SECTION_REGISTRY` (which is for content sections inside screen rows).
+
+A separate `SIDEBAR_WIDGET_REGISTRY` is appropriate:
+
+```typescript
+// tools/wireframe-builder/lib/sidebar-widget-registry.tsx
+
+export type SidebarWidgetRendererProps = {
+  widget: SidebarWidget
+  collapsed: boolean
+}
+
+export type SidebarWidgetRegistration = {
+  type: SidebarWidgetType
+  label: string
+  icon: ComponentType<{ className?: string }>
+  renderer: ComponentType<SidebarWidgetRendererProps>
+  defaultProps: () => SidebarWidget
+}
+
+export const SIDEBAR_WIDGET_REGISTRY: Record<
+  SidebarWidgetType,
+  SidebarWidgetRegistration
+> = {
+  'workspace-switcher': { ... },
+  'account-selector': { ... },
+  'user-menu': { ... },
+  'search': { ... },
+}
+```
+
+Widget renderers live in `tools/wireframe-builder/components/sidebar-widgets/`.
+In collapsed rail mode, each widget renders as an icon-only button — the `collapsed` prop
+controls this condensed rendering, matching the existing collapsed icon behavior of screen items.
+
+### Data Flow for Layout Config Edits
+
+```
+[AdminToolbar "Sidebar" / "Header" / "Filtros" button click]
+         ↓
+[WireframeViewer: setOpenPanel('sidebar' | 'header' | 'filter')]
+         ↓
+[Panel component opens as Sheet]
+         ↓
+[User edits fields in panel form]
+         ↓
+[onChange callback fires with updated config fragment]
+         ↓
+[WireframeViewer: updateWorkingDashboard() or updateWorkingScreen()]
+         ↓
+[editMode.dirty = true]
+         ↓
+[User clicks Save — handleSave() → saveBlueprintToDb() → Supabase]
+```
+
+The key insight: `updateWorkingScreen` already exists for per-screen mutations.
+Dashboard-level mutations need the same pattern targeting `workingConfig.sidebar` or
+`workingConfig.header` directly:
+
+```typescript
+function updateWorkingDashboard<K extends 'sidebar' | 'header'>(
+  key: K,
+  value: BlueprintConfig[K],
+) {
+  setWorkingConfig((prev) => {
+    if (!prev) return prev
+    return { ...prev, [key]: value }
+  })
+  setEditMode((prev) => ({ ...prev, dirty: true }))
+}
+```
+
+### WireframeHeader Props Extension
+
+`WireframeHeader.tsx` must accept and render all `HeaderConfig` fields:
+
+```typescript
+type Props = {
+  title: string
+  logoUrl?: string
+  brandLabel?: string
+  // Extended — previously all hardcoded/ignored
+  showLogo?: boolean
+  showPeriodSelector?: boolean    // NEW — was always rendered
+  showUserIndicator?: boolean     // NEW — was always rendered
+  actions?: {
+    manage?: boolean
+    share?: boolean
+    export?: boolean
+  }
+}
+```
+
+The caller in `WireframeViewer.tsx` spreads `activeConfig?.header` into these props.
+Default behavior (all true) is preserved when `header` is undefined.
+
+### Sidebar Widget Rendering Zones
+
+Widgets with `position: 'top'` render above the nav items; `position: 'bottom'` render above the footer.
+The sidebar `<aside>` in WireframeViewer has three content zones:
+
+```
+[sidebar header: label + collapse toggle]
+[top widgets]          ← NEW zone: SidebarWidget[] where position === 'top'
+[nav: ScreenManager or grouped screen list]
+[bottom widgets]       ← NEW zone: SidebarWidget[] where position === 'bottom'
+[footer]
+```
+
+Widget renderers receive `collapsed: boolean` and handle their own icon-only condensed rendering.
+
+## Recommended File Structure
+
+```
+tools/wireframe-builder/
+├── types/
+│   └── blueprint.ts                  MODIFY — SidebarWidget, SidebarWidgetType, SidebarConfig.widgets
+├── lib/
+│   ├── blueprint-schema.ts           MODIFY — SidebarWidgetSchema, update SidebarConfigSchema
+│   ├── section-registry.tsx          NO CHANGE — sections only
+│   └── sidebar-widget-registry.tsx   NEW — SIDEBAR_WIDGET_REGISTRY
+├── components/
+│   ├── WireframeHeader.tsx           MODIFY — consume full HeaderConfig
+│   ├── sidebar-widgets/              NEW FOLDER
+│   │   ├── WorkspaceSwitcherWidget.tsx
+│   │   ├── AccountSelectorWidget.tsx
+│   │   ├── UserMenuWidget.tsx
+│   │   └── SearchWidget.tsx
+│   └── editor/
+│       ├── AdminToolbar.tsx          MODIFY — Layout button group in edit mode
+│       ├── SidebarConfigPanel.tsx    NEW — Sheet for SidebarConfig editing
+│       ├── HeaderConfigPanel.tsx     NEW — Sheet for HeaderConfig editing
+│       ├── FilterBarEditor.tsx       NEW — Sheet for filters[] editing
+│       └── SidebarWidgetPicker.tsx   NEW — widget type picker (child of SidebarConfigPanel)
+│
+src/pages/clients/
+└── WireframeViewer.tsx               MODIFY — openPanel state, pass full HeaderConfig,
+                                               updateWorkingDashboard helper, widget zone rendering
+```
 
 ## Architectural Patterns
 
-### Pattern 1: ModuleDefinition as backward-compatible extension of ModuleManifest
-
-**What:** `ModuleDefinition extends ModuleManifest` with optional new fields. The MODULE_REGISTRY const becomes `ModuleDefinition[]`. All existing consumers that only read `ModuleManifest` fields (Sidebar, Home, App.tsx route derivation) continue to work without modification.
-
-**When to use:** Every new module-level capability is added to `ModuleDefinition` first. Existing consumers are untouched unless they need the new fields.
-
-**Trade-offs:** The type grows over time. Acceptable for ~5-10 modules. At 20+ modules, split into sub-interfaces with intersection types.
-
-**Example:**
-```typescript
-// src/modules/registry.ts
-
-export interface ModuleExtension {
-  id: string
-  sourceModuleId: string
-  requires: string[]                               // module IDs that must be active
-  injects: Record<string, React.ComponentType>     // slotId → component
-}
-
-export interface ModuleDefinition extends ModuleManifest {
-  description?: string
-  badge?: string              // "Beta", "Novo", "Preview"
-  enabled?: boolean           // undefined = enabled by default
-  extensions?: ModuleExtension[]
-}
-
-// MODULE_REGISTRY type changes from ModuleManifest[] to ModuleDefinition[]
-export const MODULE_REGISTRY: ModuleDefinition[] = [
-  docsManifest,
-  ferramentasManifest,
-  clientsManifest,
-  knowledgeBaseManifest,
-  tasksManifest,
-]
-```
+### Pattern 1: Registry-per-concern
 
-### Pattern 2: ExtensionRegistry as pure function (no React)
+**What:** Separate registries for section types (content) vs sidebar widget types (layout).
+**When to use:** When two taxonomies have different props interfaces and different editor surfaces.
+**Trade-offs:** More files, but no registry pollution. Section registry stays clean.
 
-**What:** `resolveExtensions(registry, enabledIds)` takes the static registry and a Set of enabled module IDs, returns an `ExtensionMap` (Map<slotId, ComponentType[]>). Zero side effects, zero React.
+`SECTION_REGISTRY` handles: `renderer | propertyForm | schema | defaultProps | catalogEntry | label`.
+`SIDEBAR_WIDGET_REGISTRY` handles: `renderer | label | icon | defaultProps` (no propertyForm — editing is inline inside `SidebarConfigPanel`, not in a separate Sheet per widget).
 
-**When to use:** Call once in `ExtensionProvider`, wrapped in `useMemo` with `enabledIds` as dependency.
+### Pattern 2: Exclusive-panel state via union type
 
-**Trade-offs:** Requires a React context layer to distribute the result. Extremely testable — unit tests need no DOM or React renderer.
+**What:** `openPanel: 'sidebar' | 'header' | 'filter' | null` controls which layout config panel is open. Only one panel open at a time.
+**When to use:** Panels target different data; double-open causes confusion and conflicting saves.
+**Trade-offs:** Slightly more state in Viewer, prevents double-open UX issues.
 
-**Example:**
-```typescript
-// src/modules/extension-registry.ts
+This mirrors how `shareOpen` and `managerOpen` are boolean per-panel. The union here is appropriate because these three panels are mutually exclusive — unlike comments/share which can coexist.
 
-export type ExtensionMap = Map<string, React.ComponentType[]>
+### Pattern 3: Config fragment updater (dashboard-level)
 
-export function resolveExtensions(
-  registry: ModuleDefinition[],
-  enabledIds: Set<string>,
-): ExtensionMap {
-  const map: ExtensionMap = new Map()
+**What:** `updateWorkingDashboard(key, value)` mirrors `updateWorkingScreen` for dashboard-level config.
+**When to use:** Any mutation to `workingConfig.sidebar` or `workingConfig.header`.
+**Trade-offs:** Adds a new helper in WireframeViewer but keeps the mutation pattern consistent.
 
-  for (const mod of registry) {
-    if (!enabledIds.has(mod.id)) continue
-    for (const ext of mod.extensions ?? []) {
-      const satisfied = ext.requires.every(id => enabledIds.has(id))
-      if (!satisfied) continue
-      for (const [slotId, Component] of Object.entries(ext.injects)) {
-        const existing = map.get(slotId) ?? []
-        map.set(slotId, [...existing, Component])
-      }
-    }
-  }
+The function is generic over the key to preserve type safety without `any`.
 
-  return map
-}
-```
-
-### Pattern 3: Slot system via React context
-
-**What:** `ExtensionProvider` wraps the app above `Layout`. `ModuleSlot` reads the context map and renders injected components in order, keyed by array index.
-
-**When to use:** Any page or component that accepts cross-module UI without importing the contributing module.
-
-**Trade-offs:** Context re-renders when `ExtensionMap` reference changes — memoize in provider. Currently 0 slot consumers exist so perf impact is nil until slots are used.
-
-**Example:**
-```typescript
-// src/modules/slots.tsx
-
-const ExtensionContext = React.createContext<ExtensionMap>(new Map())
-
-function useEnabledModuleIds(): string[] {
-  // Read from localStorage or MODULE_REGISTRY defaults
-  const saved = localStorage.getItem('fxl-enabled-modules')
-  if (saved) return JSON.parse(saved) as string[]
-  return MODULE_REGISTRY
-    .filter(m => m.enabled !== false)
-    .map(m => m.id)
-}
-
-export function ExtensionProvider({ children }: { children: React.ReactNode }) {
-  const enabledIds = useEnabledModuleIds()
-  const map = React.useMemo(
-    () => resolveExtensions(MODULE_REGISTRY, new Set(enabledIds)),
-    [enabledIds],
-  )
-  return <ExtensionContext.Provider value={map}>{children}</ExtensionContext.Provider>
-}
-
-export function ModuleSlot({ id }: { id: string }) {
-  const map = React.useContext(ExtensionContext)
-  const components = map.get(id) ?? []
-  return <>{components.map((C, i) => <C key={i} />)}</>
-}
-```
-
-### Pattern 4: Slot IDs as typed constants (not magic strings)
-
-**What:** Export a const object of known slot IDs from `registry.ts`. Manifests reference `SLOT_IDS.HOME_DASHBOARD` instead of `"home.dashboard"`.
-
-**When to use:** Required from the first slot registration. Typos in string IDs produce silent failures (slot just renders nothing).
-
-**Trade-offs:** Requires all slot IDs to be declared centrally before use. Minor coordination overhead, significant safety gain.
-
-**Example:**
-```typescript
-// src/modules/registry.ts
-
-export const SLOT_IDS = {
-  HOME_DASHBOARD: 'home.dashboard',
-  HOME_QUICK_ACTIONS: 'home.quick-actions',
-  TASK_CARD_FOOTER: 'tasks.task-card.footer',
-} as const
-
-export type SlotId = typeof SLOT_IDS[keyof typeof SLOT_IDS]
-```
-
-### Pattern 5: Routing refactor — minimal change approach
-
-**What:** Keep all existing route paths unchanged (`/processo/*`, `/ferramentas/*`, etc.). Only `/` changes: it now renders Home 2.0 instead of the current `Home.tsx`. No sidebar hrefs change, no Supabase search index needs updating.
-
-**When to use:** This is the recommended approach for v2.0 to minimize blast radius. A full `/docs/` prefix consolidation is a separate future milestone.
-
-**Trade-offs:** Leaves the `/docs` path unused (docs remain at `/processo`, `/ferramentas`, etc.). Slightly inconsistent naming persists. Acceptable given zero href changes required.
-
----
-
-## Data Flow
-
-### Extension Resolution Flow
-
-```
-App.tsx boot
-    ↓
-<ExtensionProvider> mounts
-    ↓
-useEnabledModuleIds() → localStorage or MODULE_REGISTRY defaults
-    ↓
-resolveExtensions(MODULE_REGISTRY, new Set(enabledIds))
-    ↓
-ExtensionMap = Map<slotId, ComponentType[]>
-    ↓
-ExtensionContext.Provider value={map}
-    ↓
-<ModuleSlot id="home.dashboard" />
-    → reads map.get("home.dashboard") → ComponentType[]
-    → renders each component in order
-```
-
-### Module Enable/Disable Flow
-
-```
-/admin/modules page
-    ↓
-User toggles module enabled state
-    ↓
-localStorage.setItem('fxl-enabled-modules', JSON.stringify(newIds))
-    ↓
-useEnabledModuleIds() re-reads → triggers ExtensionProvider re-render
-    ↓
-resolveExtensions() recalculates → new ExtensionMap
-    ↓
-All <ModuleSlot /> consumers re-render with updated injections
-    ↓
-Sidebar re-reads MODULE_REGISTRY with updated enabled state
-    → filters out disabled modules from nav
-```
-
-### Home 2.0 Data Flow
-
-```
-Home 2.0 (route /)
-    ↓
-MODULE_REGISTRY.map() → module grid cards
-    ↓
-useActivityFeed() → Promise.all([supabase kb_entries, supabase tasks])
-    ↓
-mergeAndSortActivityItems() → ActivityItem[]
-    ↓
-renders: module grid + activity feed + client shortcuts + <ModuleSlot id="home.dashboard" />
-```
-
-### Key State Boundaries
-
-- `ExtensionContext` — derived at render time, memoized. No Supabase needed.
-- `localStorage('fxl-enabled-modules')` — persisted enabled state. Per-browser.
-- Module pages own their own state (KB, Tasks hooks remain in their own modules).
-- Home 2.0 activity feed is the only cross-module data fetch — continues existing pattern from current Home.tsx.
-
----
-
-## Integration Points
-
-### Existing Files: What Changes
-
-| File | Change Type | Details |
-|------|-------------|---------|
-| `src/modules/registry.ts` | Modified | Add `ModuleDefinition`, `ModuleExtension`, `SLOT_IDS` types; MODULE_REGISTRY becomes `ModuleDefinition[]`; existing `ModuleManifest` interface stays |
-| `src/App.tsx` | Modified | Wrap existing route tree with `<ExtensionProvider>`; add `/admin/modules` route; routing otherwise unchanged |
-| `src/pages/Home.tsx` | Replaced | Home 2.0 replaces file content; route `/` stays; same module grid + activity feed + new slots |
-| `src/components/layout/Sidebar.tsx` | Modified | Add `enabled !== false` filter alongside existing `status !== 'coming-soon'`; add badge pill rendering |
-| `eslint.config.js` | Modified | Expand exclusion pattern to cover `extension-registry`, `slots`, `hooks` |
-
-### New Files Required
-
-| File | Depends On | Purpose |
-|------|-----------|---------|
-| `src/modules/extension-registry.ts` | `ModuleDefinition`, `ModuleExtension` types | `resolveExtensions()` pure function |
-| `src/modules/slots.tsx` | `extension-registry.ts`, React context | `ExtensionProvider` + `ModuleSlot` |
-| `src/modules/hooks/useActiveExtensions.ts` | `ExtensionContext` from `slots.tsx` | Per-module hook: which extensions are active for this moduleId |
-| `src/pages/admin/ModulesPanel.tsx` | `MODULE_REGISTRY`, `ModuleDefinition` | `/admin/modules` admin UI |
-
-### ESLint Boundaries: Safe Zone
-
-The extension system respects module isolation because:
-- Module A declares `injects: { [SLOT_IDS.TASK_CARD_FOOTER]: MyComponent }` — no import of Module B
-- Module B has `<ModuleSlot id={SLOT_IDS.TASK_CARD_FOOTER} />` — no import of Module A
-- Wiring happens only in `ExtensionProvider` which lives in the registry layer (excluded from boundaries rule)
-
-Required `eslint.config.js` update:
-```javascript
-// Before
-{ type: 'module', pattern: 'src/modules/!(registry)*' }
-
-// After
-{ type: 'module', pattern: 'src/modules/!(registry|extension-registry|slots|hooks)*' }
-```
-
-### Internal Boundary Map
-
-| Boundary | Pattern | Status |
-|----------|---------|--------|
-| Module manifest → registry.ts | Import `ModuleDefinition` type | Allowed (one-directional) |
-| Module A → Module B component | Direct import | BLOCKED by ESLint boundaries |
-| Module A → Module B via slot | String key injection | Allowed (no import coupling) |
-| Page → Module pages | Direct import in App.tsx | Allowed (pages layer above modules) |
-| Admin panel → MODULE_REGISTRY | Direct import | Allowed (pages layer) |
-| Sidebar → MODULE_REGISTRY | Direct import | Allowed (components layer) |
-
----
-
-## Scaling Considerations
-
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| 5 modules (current) | Static MODULE_REGISTRY; localStorage for enabled state; works as-is |
-| 10-15 modules | Same static registry; add categories to ModuleDefinition for grouping in admin panel |
-| 20+ modules | Consider lazy-loaded manifests; Supabase `user_preferences` for multi-operator enabled state |
-
-### Scaling Priorities
-
-1. **First: Slot render performance** — if many slots render many components simultaneously, add `React.memo` to injected components at the manifest level.
-2. **Second: Enabled state multi-operator consistency** — if operators need synchronized module state, replace localStorage with Supabase `user_preferences` table (already in existing Supabase pattern).
-
----
+### Pattern 4: Backward-compatible schema extension
+
+**What:** All new fields on `SidebarConfig` are optional. Existing blueprints without `widgets`
+still parse and render correctly.
+**When to use:** Any schema addition to Supabase-stored JSONB data.
+**Trade-offs:** No migration needed. Old data reads as `{ widgets: undefined }` and renders without widgets.
+
+`HeaderConfigSchema` already uses `.passthrough()` for forward-compat. Apply same to `SidebarConfigSchema`.
+
+## Integration Points with Existing Architecture
+
+### Internal Boundaries
+
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| `WireframeViewer` ↔ `AdminToolbar` | New props: `onOpenSidebarPanel`, `onOpenHeaderPanel`, `onOpenFilterPanel` callbacks | Consistent with existing `onOpenShare`, `onOpenComments` pattern |
+| `WireframeViewer` ↔ `SidebarConfigPanel` | Props: `open`, `config`, `screens`, `onChange`, `onClose` | Same interface as PropertyPanel |
+| `WireframeViewer` ↔ `HeaderConfigPanel` | Props: `open`, `config`, `onChange`, `onClose` | Same interface |
+| `WireframeViewer` ↔ `FilterBarEditor` | Props: `open`, `filters`, `onChange`, `onClose` | Per-screen; `onChange` → `updateWorkingScreen` |
+| `WireframeViewer` ↔ `WireframeHeader` | Extended props from `activeConfig?.header` spread | No breaking change — all new props optional |
+| `<aside>` (Viewer) ↔ `SIDEBAR_WIDGET_REGISTRY` | Direct import in Viewer; render widget.type lookup | No new context needed |
+| `SidebarConfigPanel` ↔ `SidebarWidgetPicker` | Child component rendered inline in panel | Picker returns `SidebarWidget` via callback |
+
+### Supabase Impact
+
+No new tables required. `SidebarWidget[]` is stored as part of `BlueprintConfig.sidebar.widgets`
+in the existing `blueprints.config` JSONB column. The Zod schema ensures valid shape on read.
+
+The `blueprint-migrations.ts` utility handles forward-compatibility if needed, but since all
+new fields are optional additions, no migration script is required for v2.2.
+
+### What Does Not Change
+
+- `SECTION_REGISTRY` — no new section types needed for this milestone
+- `BlueprintScreen` shape — only `filters[]` editing, no new screen fields
+- `ScreenManager` — no changes needed
+- `PropertyPanel` — no changes needed; it is for section-level editing only
+- Supabase schema (`blueprints` table) — JSONB column absorbs new fields transparently
+- `WireframeSidebar.tsx` — remains as gallery preview component, untouched
+
+## Suggested Build Order
+
+Build order follows schema-first, then render, then editor — matching the dependency graph.
+
+**Phase A: Schema extension (foundation)**
+1. `types/blueprint.ts` — add `SidebarWidget`, `SidebarWidgetType`, extend `SidebarConfig`
+2. `lib/blueprint-schema.ts` — add `SidebarWidgetSchema`, update `SidebarConfigSchema`
+3. `tsc --noEmit` — confirm zero type errors before proceeding
+
+**Phase B: Render layer — header config functional**
+4. `WireframeHeader.tsx` — consume all `HeaderConfig` fields (showPeriodSelector, showUserIndicator, actions)
+5. `WireframeViewer.tsx` — pass full `header` config to `WireframeHeader`
+6. Visual validation: `financeiro-conta-azul` wireframe renders same as before (no regressions)
+
+**Phase C: Sidebar widget render layer**
+7. `lib/sidebar-widget-registry.tsx` — create registry with four widget types
+8. `components/sidebar-widgets/` — four widget renderer components
+9. `WireframeViewer.tsx` `<aside>` — add top/bottom widget zones, render from registry by position
+10. Visual validation: sidebar renders correctly with and without `widgets` in config
+
+**Phase D: Editor panels**
+11. `AdminToolbar.tsx` — add Layout button group (Sidebar, Header, Filtros) visible only in edit mode
+12. `WireframeViewer.tsx` — add `openPanel` state + `updateWorkingDashboard` helper
+13. `editor/HeaderConfigPanel.tsx` — toggle form for all `HeaderConfig` boolean fields
+14. `editor/SidebarConfigPanel.tsx` — groups editor + footer field + widget list management
+15. `editor/SidebarWidgetPicker.tsx` — sub-component used inside SidebarConfigPanel
+16. `editor/FilterBarEditor.tsx` — add/remove/reorder `FilterOption[]` with filterType discriminator
+17. Wire all panels via `openPanel` state in WireframeViewer
+
+**Phase E: Integration validation**
+18. Manual test: HeaderConfigPanel toggles → header re-renders → save → reload persists
+19. Manual test: add workspace-switcher widget → renders in sidebar → save → reload
+20. Manual test: add/remove filter option per screen → FilterBar updates immediately
+21. `tsc --noEmit` — zero errors required before task close
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Module imports another module's components directly
+### Anti-Pattern 1: Adding layout widgets to SECTION_REGISTRY
 
-**What people do:** `tasks` module imports a component from `knowledge-base`. TypeScript allows it, ESLint boundaries blocks it at lint time.
+**What people do:** Make sidebar widgets follow the same path as kpi-grid or bar-line-chart.
+**Why it's wrong:** Sidebar widgets are layout concerns rendered outside the main content area. They have different props, different lifecycles, and no `rows[]` placement. Forcing them through SECTION_REGISTRY pollutes the content/section taxonomy.
+**Do this instead:** Use a separate `SIDEBAR_WIDGET_REGISTRY` with its own type hierarchy.
 
-**Why it's wrong:** Creates hard coupling. Removing one module breaks the other. Module isolation is the entire point of the registry architecture.
+### Anti-Pattern 2: Making FilterBarEditor a section type
 
-**Do this instead:** Module A declares a `ModuleExtension` with an `injects` entry pointing to a slot ID. Module B renders `<ModuleSlot id={SLOT_IDS.RELEVANT_SLOT} />`. Zero import coupling. Note: string-based navigation (hrefs) between modules is acceptable — only component import coupling is blocked.
+**What people do:** Treat filter editing as a PropertyPanel triggered by clicking the filter bar in edit mode.
+**Why it's wrong:** Filters are per-screen config (`BlueprintScreen.filters[]`), not a section inside `rows[]`. There is no rowIndex/cellIndex for a filter bar — it belongs to the screen, not a row.
+**Do this instead:** Open FilterBarEditor via the AdminToolbar "Filtros" button. It reads `activeScreen.filters` and writes back via `updateWorkingScreen`.
 
-### Anti-Pattern 2: Slot IDs as magic strings at call sites
+### Anti-Pattern 3: Merging WireframeSidebar.tsx with the Viewer sidebar
 
-**What people do:** `<ModuleSlot id="task-card.footer" />` in one file, `injects: { 'tasks.task-card.footer': C }` in another. Typo, nothing renders, no error.
+**What people do:** Add widget support to the existing `WireframeSidebar.tsx` component.
+**Why it's wrong:** `WireframeSidebar.tsx` is the standalone gallery preview component with a minimal prop interface (`screens[]`). The actual Viewer sidebar is inline JSX with full state access. They serve different purposes.
+**Do this instead:** Enhance the inline `<aside>` in `WireframeViewer.tsx` directly. `WireframeSidebar.tsx` can remain as the gallery component.
 
-**Do this instead:** Always reference `SLOT_IDS.TASK_CARD_FOOTER`. TypeScript catches mismatches at compile time. The `SLOT_IDS` const object in registry.ts is the single source of truth.
+### Anti-Pattern 4: Moving openPanel to a context
 
-### Anti-Pattern 3: ExtensionProvider inside Layout only
+**What people do:** Create a `LayoutEditorContext` to share panel open state across components.
+**Why it's wrong:** Only `WireframeViewer.tsx` consumes this state — AdminToolbar receives callbacks, panels receive open/onClose props. No deep subscribers exist.
+**Do this instead:** Keep `openPanel` as a `useState` in `WireframeViewer.tsx`, pass callbacks as props. This is consistent with how `editMode`, `shareOpen`, and `managerOpen` are handled today.
 
-**What people do:** Place `<ExtensionProvider>` inside Layout.tsx to co-locate it with slot consumers.
+### Anti-Pattern 5: Per-widget property Sheet panels
 
-**Why it's wrong:** The `/admin/modules` page lives outside `Layout`. If the admin panel needs to read the ExtensionMap (to show accurate state), it would be outside the context boundary.
-
-**Do this instead:** Place `ExtensionProvider` in `App.tsx` wrapping the entire `<BrowserRouter>` subtree, above `ProtectedRoute` and `Layout`.
-
-### Anti-Pattern 4: useEnabledModuleIds returns empty on first render
-
-**What people do:** Hook returns `[]` initially before localStorage is read, causing a flash where all extensions disappear.
-
-**Do this instead:** Initialize synchronously from `localStorage.getItem()` (sync API, no loading state needed). Default to `MODULE_REGISTRY.filter(m => m.enabled !== false).map(m => m.id)` when key is absent. Treat `enabled: undefined` as enabled — consistent with the existing `status !== 'coming-soon'` filter in Sidebar.
-
-### Anti-Pattern 5: Renaming all doc routes to /docs/* in this milestone
-
-**What people do:** Refactor all `docsManifest` routeConfig paths from `/processo/*` to `/docs/processo/*` as part of the routing milestone.
-
-**Why it's wrong:** The Sidebar has ~40 hardcoded hrefs in `docsManifest.navChildren`. The search index uses these paths. Every existing browser bookmark and shared link breaks. This is a large blast radius for a rename with no user value.
-
-**Do this instead:** Only change `/` to Home 2.0. Leave all existing doc paths unchanged. Consolidating under `/docs/` is a separate future milestone if ever needed.
-
----
-
-## Build Order for v2.0
-
-Based on integration dependencies between the new components:
-
-**Step 1 — Types (registry.ts)**
-Add `ModuleDefinition`, `ModuleExtension`, `SLOT_IDS` to `registry.ts`. Change `MODULE_REGISTRY` type to `ModuleDefinition[]`. Backward-compatible: all existing consumers read only `ModuleManifest` fields, which are still present.
-
-**Step 2 — Extension registry (extension-registry.ts)**
-Pure function `resolveExtensions()`. No React, no DOM. Unit-testable immediately. Depends on Step 1 types only.
-
-**Step 3 — Slot system (slots.tsx)**
-`ExtensionProvider` + `ModuleSlot` + `ExtensionContext`. Depends on Steps 1-2. Wire into `App.tsx` (one-line change: wrap existing routes with `<ExtensionProvider>`).
-
-**Step 4 — useActiveExtensions hook**
-Thin wrapper over `ExtensionContext`. Depends on Step 3. One file.
-
-**Step 5 — Routing refactor (App.tsx)**
-Add `/admin/modules` route stub. Update `path="/"` to point to new Home 2.0 file. The old Home.tsx can be renamed or replaced in this step.
-
-**Step 6 — Home 2.0 (Home.tsx)**
-Replace current `src/pages/Home.tsx`. Reuses existing module grid + activity feed logic. Adds `<ModuleSlot id={SLOT_IDS.HOME_DASHBOARD} />` for extensibility. Depends on Step 5 (route must exist) and Step 3 (slot must exist).
-
-**Step 7 — Admin panel (pages/admin/ModulesPanel.tsx)**
-`/admin/modules` UI. Reads `MODULE_REGISTRY`, renders toggles, writes to localStorage. Depends on Steps 1-3.
-
-**Step 8 — Sidebar update**
-Add `enabled !== false` filter. Add badge pill rendering for `mod.badge`. Small additive change to existing file.
-
-Each step is independently deployable. Steps 1-4 are pure logic/infra with no visible UI change. Steps 5-8 produce user-visible changes.
-
----
+**What people do:** Create a separate Sheet panel per widget type (WorkspaceSwitcherPanel, AccountSelectorPanel, etc.) opened by clicking the widget in the sidebar.
+**Why it's wrong:** Widgets are few (4 types), their config is simple (position, label, options), and they are always edited as part of the sidebar's config. A dedicated Sheet per widget type over-engineers the editor surface.
+**Do this instead:** Edit all widgets inline within `SidebarConfigPanel`. The panel shows a list of added widgets with inline controls for each widget's fields.
 
 ## Sources
 
-- Direct codebase analysis: `src/modules/registry.ts` — HIGH confidence
-- Direct codebase analysis: `src/App.tsx` — HIGH confidence
-- Direct codebase analysis: `src/pages/Home.tsx` — HIGH confidence
-- Direct codebase analysis: `src/components/layout/Sidebar.tsx` — HIGH confidence
-- Direct codebase analysis: `src/components/layout/Layout.tsx` — HIGH confidence
-- Direct codebase analysis: all module manifests (docs, ferramentas, clients, knowledge-base, tasks) — HIGH confidence
-- Direct codebase analysis: `eslint.config.js` — HIGH confidence
-- Direct codebase analysis: `.planning/PROJECT.md` — HIGH confidence
-- React context + memoized provider pattern: HIGH confidence (established React pattern, no library needed)
-- Slot injection as Map<slotId, ComponentType[]>: HIGH confidence (standard micro-frontend composition pattern adapted for single-SPA scale)
+- Direct analysis: `tools/wireframe-builder/types/blueprint.ts` (SidebarConfig, HeaderConfig, FilterOption types) — HIGH confidence
+- Direct analysis: `tools/wireframe-builder/lib/blueprint-schema.ts` (Zod schemas, .passthrough() on HeaderConfigSchema) — HIGH confidence
+- Direct analysis: `src/pages/clients/WireframeViewer.tsx` (inline sidebar, header usage lines 957–961, updateWorkingScreen pattern) — HIGH confidence
+- Direct analysis: `tools/wireframe-builder/components/WireframeHeader.tsx` (showLogo only consumed) — HIGH confidence
+- Direct analysis: `tools/wireframe-builder/lib/section-registry.tsx` (SectionRegistration type, SECTION_REGISTRY pattern) — HIGH confidence
+- Direct analysis: `tools/wireframe-builder/components/editor/PropertyPanel.tsx` (Sheet pattern, registry delegation) — HIGH confidence
+- Direct analysis: `tools/wireframe-builder/components/editor/AdminToolbar.tsx` (edit mode button layout, callback props) — HIGH confidence
+- Direct analysis: `tools/wireframe-builder/components/editor/ScreenManager.tsx` (DnD reorder, dialog add pattern) — HIGH confidence
+- `.planning/PROJECT.md` — v2.2 milestone goals and constraints — HIGH confidence
 
 ---
-*Architecture research for: FXL Core v2.0 — Modular Framework Shell*
+*Architecture research for: FXL Core v2.2 — Configurable Layout Components (Sidebar Widgets, Header Config, Filter Bar Editor)*
 *Researched: 2026-03-13*

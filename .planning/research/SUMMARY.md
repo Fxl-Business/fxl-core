@@ -1,17 +1,17 @@
 # Project Research Summary
 
-**Project:** FXL Core v2.0 — Framework Shell + Modular Architecture
-**Domain:** Modular React SPA extension system — slot-based UI injection, contract architecture, admin panel
+**Project:** FXL Core v2.2 — Wireframe Builder Configurable Layout Components
+**Domain:** Wireframe builder editor extension — sidebar widgets, header config panels, filter bar editor
 **Researched:** 2026-03-13
 **Confidence:** HIGH
 
 ## Executive Summary
 
-FXL Core v2.0 evolves the platform from a docs-viewer SPA into a modular framework shell. The existing v1.5 infrastructure — `MODULE_REGISTRY`, `ModuleManifest`, ESLint boundary enforcement, sidebar-derived navigation, and Clerk-gated routing — is a solid foundation that needs extension, not replacement. The recommended approach is additive and purely TypeScript/React: extend `ModuleManifest` to `ModuleDefinition` with optional fields (`description`, `badge`, `enabled`, `extensions[]`), implement a pure-function extension resolver, add a React Context slot system (~80 LOC), rebuild the Home page as a control center, and create an admin panel at `/admin/modules`. Zero new npm dependencies are required — all Radix UI primitives, Tailwind, shadcn/ui, and Supabase are already installed and sufficient.
+This milestone extends an existing, working visual editor (AdminToolbar, PropertyPanel, ScreenManager, 28 section types) to cover layout-level configuration: the sidebar chrome, the header chrome, and the per-screen filter bar. The base stack is fully validated — React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, @dnd-kit, Zod 4.x. No new npm packages are required; the only additions are two shadcn/ui component files (`tooltip.tsx` and `sidebar.tsx`) that wrap Radix packages already installed. Zero new Supabase tables are needed — all new config is stored as optional JSONB fields in the existing `blueprints.config` column.
 
-The critical implementation constraint is preserving ESLint module boundary isolation. The slot architecture is specifically designed so Module A never imports from Module B: extensions are declared in each module's own manifest and wired at the registry layer. This keeps the `module → module: disallow` rule intact. The build order must start with types (registry types), then the pure resolver function, then the React context slot system, before any page or admin work begins — because Home 2.0 and the admin panel both consume the slot context. Skipping ahead violates this dependency chain.
+The recommended approach follows the existing architectural pattern throughout: schema extension first (Zod and TypeScript in lockstep), then render wiring, then editor panels. New layout panels use the established Sheet pattern but are NOT routed through `SECTION_REGISTRY` — they operate at config-root level (`workingConfig.sidebar`, `workingConfig.header`) or screen level (`screen.filters[]`), requiring a new `updateWorkingDashboard` helper alongside the existing `updateWorkingScreen`. Critically, `WireframeHeader` must have its render layer wired to the full `HeaderConfig` schema before any header property panel is built, because `showPeriodSelector`, `showUserIndicator`, and `actions.*` already exist in the schema and in Supabase but are currently ignored by the component.
 
-The two highest-risk areas are: (1) type safety at slot boundaries — without a defined `SlotComponentProps` interface, teams reach for `ComponentType<any>`, silently breaking TypeScript strict mode; and (2) circular manifest imports — the moment any manifest imports a runtime value from `registry.ts`, Vite resolves the cycle silently but `MODULE_REGISTRY` may be `undefined` at boot. Both risks are preventable with upfront decisions: define `SlotComponentProps` before writing any slot component, and create `src/modules/module-ids.ts` as a constants-only file before any `requires[]` declaration is written.
+The key risks center on two silent failure modes: Zod stripping new sidebar fields on save because `SidebarConfigSchema` lacks `.passthrough()` (data disappears after reload with no error), and confusion between two filter taxonomies (`FilterOption` for the sticky bar with 5 filterType variants vs `FilterConfigSection` for the section block with 3 variants). Both risks have clear prevention strategies: always update TypeScript type and Zod schema in the same commit, and build a dedicated `FilterBarEditor` that never touches `filter-config` section data. The build order is deterministic and dependency-verified — this is an extension of known patterns, not a new domain.
 
 ---
 
@@ -19,140 +19,153 @@ The two highest-risk areas are: (1) type safety at slot boundaries — without a
 
 ### Recommended Stack
 
-No new dependencies are needed for any v2.0 feature. The base stack (React 18.3.1, TypeScript 5.6.3 strict, Tailwind CSS 3.4.x, Vite 5, Radix UI, shadcn/ui, Supabase, Clerk, Recharts 2.13.3, lucide-react) fully covers all four milestone areas. Zustand 5.x was evaluated for registry state management and rejected — registry state is flat, rarely mutated, and consumed by only ~3 components, making React Context the correct tool. A hand-rolled `SlotRegistry` (~80 LOC) replaces candidate libraries (`@grlt-hub/react-slots` brings Effector as peer dep; `react-slot-fill` is abandoned). React 19, Tailwind v4, and Recharts 3.x upgrades are explicitly deferred per `PROJECT.md` constraints.
+The base stack is unchanged and fully sufficient for v2.2. Two shadcn/ui component files need to be installed (`npx shadcn add tooltip` and `npx shadcn add sidebar`) — but their underlying Radix packages are already in `package.json`. The shadcn `sidebar` component is used only as a visual reference for compound widget patterns (workspace switcher, user menu); it must NOT be used as structural infrastructure in `WireframeViewer` due to CSS variable collision risk between `--sidebar-*` (shadcn) and `--wf-sidebar-*` (wireframe).
 
-**Core technologies:**
-- React Context: module enable/disable state + slot registry — sufficient at 5-module scale, re-evaluate with Zustand only if hot subscription paths emerge in v2.1+
-- TypeScript string literal union (`SlotId`): contract enforcement between modules — compile-time safety via `tsc --noEmit`, no runtime validation library needed
-- `@radix-ui/react-switch` (already installed v1.2.6): enable/disable toggles in admin panel
-- `sonner` (already installed): toast confirmation for module toggle actions
-- `localStorage('fxl-enabled-modules')`: enabled state persistence — per-browser, synchronous read, no loading states
+**Core technologies relevant to v2.2:**
+- `shadcn/ui sidebar.tsx`: Compound widget visual reference (team-switcher, nav-user patterns) — install as component file, use as visual reference only
+- `shadcn/ui tooltip.tsx`: Required internally by sidebar for collapsed-state icon labels — wrapper file missing, Radix package already installed
+- `Zod 4.3.6`: Discriminated union for `SidebarWidget` type narrowing — no upgrade needed
+- `@dnd-kit/sortable`: Filter option reordering in editor — already installed and used in `BlueprintRenderer`
+- `@radix-ui/react-switch`: Boolean toggles in header and sidebar config panels — already installed
 
-**Explicitly rejected additions:**
-- Zustand, Jotai, Recoil: overkill for flat registry state at 5-module scale
-- `@grlt-hub/react-slots`: Effector peer dep, 80 LOC hand-rolled is sufficient
-- Any feature-flag SaaS (LaunchDarkly, PostHog): admin panel is internal operator tool, not remote rollout infrastructure
-- `react-admin` / `refine`: full frameworks for one internal page
+**Explicitly rejected additions:** `cookies-next` (Next.js only), `react-beautiful-dnd` (archived), shadcn Sidebar as app shell infrastructure, Recharts 3.x, React 19, Tailwind v4 — all explicitly deferred per `PROJECT.md`.
 
 ### Expected Features
 
-The six feature areas break into a clear P1/P2/P3 priority structure. The Enhanced Module Registry is the undisputed foundation — all five other features read from it and it must be implemented first.
+**Must have (table stakes — v2.2 core):**
+- Wire `showPeriodSelector`, `showUserIndicator`, `actions.*` in `WireframeHeader` render — prerequisite for header editor to have any visible effect; these fields exist in schema but are ignored by the component
+- `updateWorkingDashboard()` helper for config-root mutations — prerequisite for sidebar and header panels to commit changes
+- Header Config Panel (Sheet, boolean toggles for all `HeaderConfig` fields) — opened from AdminToolbar in edit mode
+- Sidebar Config Panel (Sheet, groups editor + footer text field + widget list manager) — opened from AdminToolbar in edit mode
+- Filter Bar Editor Panel (Sheet, add/remove/configure `FilterOption[]` per screen) — opened via AdminToolbar "Filtros" button
+- `SidebarConfig` schema extension: `widgets?: SidebarWidget[]` (Zod + TypeScript, additive, backward-compatible)
+- Workspace Switcher widget renderer in sidebar header zone (decorative dropdown chip)
+- User Menu widget renderer in sidebar footer zone (avatar + name/role, replaces status chip as a toggle option)
 
-**Must have (P1 — v2.0 required):**
-- Enhanced Module Registry: `description`, `badge`, `enabled`, `extensions[]` fields on `ModuleDefinition`; `module-ids.ts` constants file; optional Zod validation at app init
-- Routing Refactor: audit all hardcoded hrefs before touching routes; add `/admin/*` namespace; sidebar filters by `enabled`; `/` remains Home, doc routes unchanged
-- Home 2.0 Control Center: per-module status + aggregate summary + quick actions + activity feed preserved; `description` from manifest, not hardcoded in Home.tsx
-- Contract Architecture types: `ModuleExtension` type, `SLOT_IDS` const object, `extensions[]` populated in all 5 manifests
-- Slot-Based UI Injection: `<ModuleSlot>` runtime component; `ExtensionProvider` wrapping App; 2-3 real cross-module extensions validating the pattern end-to-end
-- Admin Panel `/admin/modules`: module list, enable/disable toggle (localStorage), extension map visualization; NOT in sidebar nav; hardcoded static route in App.tsx
+**Should have (differentiators — v2.2 polish):**
+- Search widget in sidebar nav area (decorative disabled input, `showSearch: boolean`)
+- Account Selector widget in sidebar header (secondary slot below workspace switcher)
+- Filter "add from library" presets (hardcoded `FilterOption` templates: Período, Empresa, Produto, Status, Responsável)
+- Header `brandLabel` override field in Header Config Panel
+- Explicit AdminToolbar "Layout" button group (Sidebar, Header, Filtros) visible only in edit mode
 
-**Should have (P2 — add when P1 ships):**
-- Extension error boundaries: prevents one broken extension from crashing its host slot
-- Slot inspector dev mode: `?debug=slots` URL param outlines all active slots during development
-- Breadcrumb module identity: shows module context in DocBreadcrumb
+**Defer to v2.3+:**
+- Header `periodType` at dashboard level
+- Sidebar icon assignment via config panel (currently only via ScreenManager per-screen)
+- Sidebar badge count configuration per screen
+- Mobile sidebar drawer mode (explicitly out of scope per `PROJECT.md`)
 
-**Defer (v2.x / v3+):**
-- Dynamic module loading / lazy manifests: all 5 modules always compiled; lazy-loading adds Suspense complexity with zero bundle benefit at current scale
-- Per-user module access control (Clerk roles + module intersection): requires Clerk org setup
-- Supabase-persisted module toggle: localStorage sufficient for single-operator context
-- Visual dependency graph: requires graph rendering library, disproportionate complexity for v2.0
+**Anti-features (do not build):**
+- Drag-and-drop screens between sidebar groups — DnD context conflict with ScreenManager's existing sortable context
+- Replace custom WireframeViewer sidebar with shadcn `SidebarProvider` — breaking layout restructure with CSS var collision
+- Per-screen header config overrides — scope creep; header is intentionally global chrome
+- Live filter logic dispatching across 28 section types — product-level scope, not wireframe tool scope
 
 ### Architecture Approach
 
-The architecture is a 4-layer composition: App.tsx (router) wraps `<ExtensionProvider>` which wraps `<Layout>` which renders `<Outlet>` with `<ModuleSlot>` injection points. The extension system is deliberately decoupled: `extension-registry.ts` is a pure function (no React) that takes the static registry and a set of enabled IDs and returns `Map<slotId, ComponentType[]>`; `slots.tsx` wraps that result in a React context; pages render `<ModuleSlot id={SLOT_IDS.X} />` without knowing which module fills it. This preserves the ESLint `module → module: disallow` boundary at every layer.
+`WireframeViewer.tsx` remains the single state orchestrator. The critical addition is `openPanel: 'sidebar' | 'header' | 'filter' | null` exclusive panel state, plus three new panel components rendered as sibling Sheets alongside the existing `PropertyPanel`. Layout widgets (sidebar compound components) get their own `SIDEBAR_WIDGET_REGISTRY` separate from `SECTION_REGISTRY` — correct taxonomy separation since widgets are layout-level concerns, not content-row elements. All mutations flow through `workingConfig` to a single `handleSave` / `saveBlueprint` call site — no parallel save paths.
 
-**Major components and responsibilities:**
-
-| Component | Responsibility | Status |
-|-----------|----------------|--------|
-| `ModuleDefinition` + `ModuleExtension` types + `SLOT_IDS` | Contract types; single source of truth | New additions to `src/modules/registry.ts` |
-| `module-ids.ts` | Module ID string constants, zero imports — prevents circular dependency | New file |
-| `resolveExtensions()` | Pure function: registry + enabled set → ExtensionMap; fully unit-testable | New `src/modules/extension-registry.ts` |
-| `ExtensionProvider` + `ModuleSlot` | Context provider + slot render primitive; ~80 LOC total | New `src/modules/slots.tsx` |
-| `useActiveExtensions` hook | Per-module hook for programmatic extension access | New `src/modules/hooks/useActiveExtensions.ts` |
-| `Home.tsx` (v2) | Control center: reads registry only; no per-module hardcoding; renders slots | Replace `src/pages/Home.tsx` |
-| `ModulesPanel` | `/admin/modules` UI: module grid + toggles; reads MODULE_REGISTRY directly | New `src/pages/admin/ModulesPanel.tsx` |
-| `Sidebar.tsx` | Add `enabled !== false` filter + badge pill rendering | Modify existing |
-| `App.tsx` | Add `<ExtensionProvider>` wrap + static `/admin/modules` route | Modify existing |
-| `eslint.config.js` | Expand exclusion pattern for `extension-registry`, `slots`, `hooks` | Modify existing |
+**Major components — new and modified:**
+1. `WireframeViewer.tsx` (MODIFY) — `openPanel` state, `updateWorkingDashboard` helper, sidebar widget zones, full `HeaderConfig` prop pass-through
+2. `WireframeHeader.tsx` (MODIFY) — consume all `HeaderConfig` fields (currently only `showLogo` is wired)
+3. `AdminToolbar.tsx` (MODIFY) — "Layout" button group (Sidebar, Header, Filtros) in edit mode
+4. `editor/HeaderConfigPanel.tsx` (NEW) — Sheet with boolean toggles for all `HeaderConfig` fields
+5. `editor/SidebarConfigPanel.tsx` (NEW) — Sheet with groups editor, footer input, widget list manager
+6. `editor/FilterBarEditor.tsx` (NEW) — Sheet with `FilterOption[]` CRUD for the active screen
+7. `editor/SidebarWidgetPicker.tsx` (NEW) — widget type picker sub-component inside `SidebarConfigPanel`
+8. `lib/sidebar-widget-registry.tsx` (NEW) — `SIDEBAR_WIDGET_REGISTRY` with renderer + defaultProps per widget type
+9. `components/sidebar-widgets/` (NEW FOLDER) — four widget renderer components (WorkspaceSwitcher, AccountSelector, UserMenu, Search)
+10. `types/blueprint.ts` + `lib/blueprint-schema.ts` (MODIFY) — `SidebarWidget` type, `SidebarWidgetSchema`, extended `SidebarConfig`
 
 ### Critical Pitfalls
 
-1. **Circular manifest imports** — The moment any manifest imports a runtime value from `registry.ts`, Vite resolves the cycle silently but `MODULE_REGISTRY` may be `undefined` at boot. Prevention: create `src/modules/module-ids.ts` as a constants-only file (no imports) before any `requires[]` declaration is written. Manifests import only types from `registry.ts` (erased at compile time); runtime module IDs come from `module-ids.ts` exclusively. Warning sign: Vite build prints a "circular dependency" warning.
+1. **FilterType enum divergence** — `FilterOptionSchema` (screen-level sticky bar) has 5 filterType variants; `FilterConfigSectionSchema` (section block) has 3. Never reuse `FilterConfigForm.tsx` for the screen-level filter bar. Build a dedicated `FilterBarEditor` targeting `screen.filters[]` (5-variant set) exclusively.
 
-2. **Type safety lost at slot boundaries** — `ComponentType<any>` in the slot registry silently breaks TypeScript strict mode; prop mismatches become invisible at slot render sites. Prevention: define `SlotComponentProps { context?: Record<string, string | number | boolean>; className?: string }` before any slot component is written. Every registered component must satisfy this interface. `npx tsc --noEmit` is the gate. Warning sign: `grep -r "ComponentType<any>"` returns results.
+2. **WireframeSidebar.tsx is a ghost component** — `WireframeSidebar.tsx` exists but is never imported by `WireframeViewer`. All sidebar widget work must be done in the inline `<aside>` block in `WireframeViewer.tsx` (lines 764–944). Widget code added to `WireframeSidebar.tsx` has zero effect on the actual viewer.
 
-3. **ESLint boundary violations from extension imports** — Module A's manifest importing Module B's component directly triggers the `module → module: disallow` rule. Prevention: slot-registered components live in the providing module's own component directory; the registry layer aggregates. Never add `eslint-disable` comments or weaken the rule from `error` to `warn`. Warning sign: `// eslint-disable` appears inside `src/modules/[name]/`.
+3. **Zod silent stripping of new sidebar fields** — `SidebarConfigSchema` lacks `.passthrough()`. New widget fields not added to Zod are silently stripped on save — no error, data disappears on reload. Always update `types/blueprint.ts` AND `lib/blueprint-schema.ts` in the same commit. Add `.passthrough()` to `SidebarConfigSchema`.
 
-4. **Admin panel appearing in sidebar navigation** — Adding the `/admin/modules` route to `MODULE_REGISTRY` causes it to render in the sidebar automatically via `navigationFromRegistry`. Prevention: hardcode the admin route as a static `<Route>` in `App.tsx` under a clearly labeled comment; never add it to `MODULE_REGISTRY`. Warning sign: "Admin" or any admin label appears as a primary sidebar nav item.
+4. **Header props are schema-present but render-absent** — `showPeriodSelector`, `showUserIndicator`, `actions.*` exist in `HeaderConfig` schema but `WireframeHeader.tsx` ignores them (only `showLogo` is consumed). Wire the render before building the header editor panel or the panel will produce no visible effect — a misleading "done" state.
 
-5. **Home 2.0 becomes a god-component** — The existing `Home.tsx` already hardcodes `MODULE_DESCRIPTIONS`. Without discipline, Home 2.0 accumulates per-module knowledge (metrics, quick actions, client lists) and grows to 500+ lines importing from every module directory. Prevention: `description` field must be on `ModuleDefinition` before Home is rebuilt; modules contribute widgets via slots; `Home.tsx` imports only from `@/modules/registry`. Warning sign: ESLint boundary rule fires on a Home 2.0 PR.
+5. **No mutation helpers for dashboard-level config** — `updateWorkingScreen` exists but sidebar/header mutations need a new `updateWorkingDashboard(key, value)` helper. Using `handlePropertyChange` for dashboard-level edits will no-op or silently corrupt screen data.
+
+6. **Schema version risk** — `CURRENT_SCHEMA_VERSION = 1`. All new fields must be `.optional()`. Run `BlueprintConfigSchema.safeParse` against the actual stored `financeiro-conta-azul` blueprint JSON before any schema change is merged. A non-optional field on an existing blueprint causes `loadBlueprint` to return `null` for every client.
 
 ---
 
 ## Implications for Roadmap
 
-### Phase 1: Module Registry Foundation
+The build order is deterministic and dependency-driven. Schema must precede render; render must precede editor; prerequisite helpers must precede panels. All 7 phases follow the dependency chain directly.
 
-**Rationale:** Every other feature depends on the enhanced `ModuleDefinition` type, `SLOT_IDS` const, and the `module-ids.ts` constants file. This is infrastructure that must exist before any slot, admin panel, or Home 2.0 code is written. It is also the safest starting point — purely additive to `registry.ts`, backward-compatible (all new fields are optional), and immediately verifiable with `tsc --noEmit` after each change.
-**Delivers:** `ModuleDefinition` interface extending `ModuleManifest`; `ModuleExtension` type; `SLOT_IDS` const object; `module-ids.ts` constants file; `MODULE_REGISTRY` typed as `ModuleDefinition[]`; optional Zod validation schema on app init; all 5 module manifests updated with `description`, `badge`, and empty `extensions: []`.
-**Features addressed:** Enhanced Module Registry (all table stakes); Contract Architecture types (partial — type declarations without runtime).
-**Pitfalls avoided:** Circular manifest import (prevented by `module-ids.ts` at phase start); god-component Home.tsx (descriptions in manifests from day one).
+### Phase 1: Schema Foundation
 
-### Phase 2: Slot Architecture
+**Rationale:** All subsequent phases depend on TypeScript types and Zod schemas being in sync. `SidebarWidget` type and `SidebarConfigSchema` update cannot happen after components try to use them. This is the hardest dependency in the chain — nothing compiles correctly without it.
+**Delivers:** `SidebarWidget`, `SidebarWidgetType` types in `blueprint.ts`; `SidebarConfigSchema` updated with `SidebarWidgetSchema` discriminated union and `.passthrough()`; `tsc --noEmit` at zero errors; round-trip test confirming new fields survive `BlueprintConfigSchema.parse()`.
+**Addresses:** Schema extension prerequisite for all other phases
+**Avoids:** Pitfalls 3 (Zod stripping) and 6 (schema version risk)
 
-**Rationale:** The slot system is the runtime backbone for the contract architecture. It must exist before any module can register extensions and before Home 2.0 or the admin panel can render slot content. This phase produces no user-visible changes — it is pure infrastructure with high internal leverage.
-**Delivers:** `extension-registry.ts` with `resolveExtensions()` pure function; `slots.tsx` with `ExtensionProvider` and `ModuleSlot`; `SlotComponentProps` interface; `useActiveExtensions` hook; `ExtensionProvider` wired into `App.tsx`; `eslint.config.js` updated to exclude new module-layer files from boundary rule.
-**Features addressed:** Slot-Based UI Injection (all table stakes); Contract Architecture (runtime enforcement layer).
-**Pitfalls avoided:** `ComponentType<any>` in slot registry (prevented by `SlotComponentProps` definition first); ESLint boundary violations (registry-layer aggregation pattern established before any extension is written); `ExtensionProvider` inside Layout anti-pattern (placed in `App.tsx` above all routes including admin).
+### Phase 2: Header Render Wiring
 
-### Phase 3: Routing Refactor
+**Rationale:** `showPeriodSelector`, `showUserIndicator`, and `actions.*` are dead schema — they exist but `WireframeHeader` ignores them. Building the header editor before this wiring produces a panel with no visible effect. This phase is low-effort (3-4 prop additions + conditional renders) with high payoff and zero risk of regression when fields are undefined.
+**Delivers:** `WireframeHeader.tsx` accepting and conditionally rendering all `HeaderConfig` fields; `WireframeViewer.tsx` passing full `activeConfig.header` as props; browser visual regression test confirming existing render is unchanged when fields are undefined.
+**Addresses:** Table stakes prerequisite — render before editor
+**Avoids:** Pitfall 4 (header render-absent)
 
-**Rationale:** Clean routing must precede Home 2.0 and admin panel work. The `/admin/*` namespace, `enabled` filtering in the sidebar, and route audit are low-complexity changes with outsized structural payoff. This phase starts with a link audit, not code — explicitly preventing the Vercel direct-link regression pitfall.
-**Delivers:** Link audit of all hrefs pointing to `/` and doc paths; `enabled !== false` filter in `Sidebar.tsx`; badge pill rendering in sidebar; `/admin/modules` route stub (static `<Route>`, not registry-derived); Sidebar Home NavLink verified with `end` prop; existing doc routes (`/processo/*`, `/ferramentas/*`) unchanged.
-**Features addressed:** Routing Refactor (all table stakes + admin namespace differentiator).
-**Pitfalls avoided:** Route migration breaking Vercel direct-link visits (link audit first); admin panel appearing in sidebar (static hardcoded route, not registry-derived); broken Sidebar active state after routing changes.
+### Phase 3: Dashboard Mutation Infrastructure + Editor Entry Points
 
-### Phase 4: Home 2.0 — Control Center
+**Rationale:** `updateWorkingDashboard` helper and `openPanel` exclusive state must exist before any layout config panel can commit changes. AdminToolbar Layout button group provides the UX surface. These are isolated changes but are hard blockers for all panel phases.
+**Delivers:** `updateWorkingDashboard<K extends 'sidebar' | 'header'>` helper in `WireframeViewer`; `openPanel: 'sidebar' | 'header' | 'filter' | null` state; AdminToolbar "Layout" button group visible only in edit mode; `onOpenSidebarPanel`, `onOpenHeaderPanel`, `onOpenFilterPanel` callbacks wired to Viewer.
+**Addresses:** Table stakes prerequisite — mutation helpers and entry points before panels
+**Avoids:** Pitfall 5 (wrong mutation helper for dashboard-level edits)
 
-**Rationale:** Home 2.0 replaces the current generic card grid. It requires Phase 1 (module descriptions in manifests) and Phase 2 (slot infrastructure) to be complete. This phase can include `<ModuleSlot id={SLOT_IDS.HOME_DASHBOARD} />` injection points even before any module fills them — graceful empty-slot behavior is built into the `ModuleSlot` component (returns null when empty).
-**Delivers:** Rebuilt `src/pages/Home.tsx` reading exclusively from `MODULE_REGISTRY`; per-module status + badge rendering; preserved and enhanced activity feed (`useActivityFeed`); quick action shortcuts; pinned/recent clients section (localStorage or last-visited pattern); `<ModuleSlot>` injection points for future module contributions; no hardcoded `MODULE_DESCRIPTIONS` constant.
-**Features addressed:** Home 2.0 Control Center (all table stakes + pinned clients differentiator).
-**Pitfalls avoided:** God-component anti-pattern (descriptions from manifests; per-module data via slots); ESLint boundary violations from Home importing module internals.
+### Phase 4: Header Config Panel
 
-### Phase 5: Contract Population — Module Extensions
+**Rationale:** Simplest editor panel — boolean toggles only, no CRUD lists. With render wiring done in Phase 2 and mutation infrastructure in Phase 3, this phase is a straightforward form composition. Good confidence-building phase before the more complex sidebar and filter panels.
+**Delivers:** `editor/HeaderConfigPanel.tsx` Sheet with Switch toggles for `showLogo`, `showPeriodSelector`, `showUserIndicator`, `actions.manage/share/export`; wired to `updateWorkingDashboard('header', ...)` on change; opened from AdminToolbar.
+**Uses:** `switch.tsx` (already installed), existing Sheet pattern as established by 28 section property forms
+**Avoids:** Pitfall 4 (header toggles would have no visual effect without Phase 2)
 
-**Rationale:** With the type system (Phase 1) and slot runtime (Phase 2) in place, this phase populates real cross-module extensions across the 5 existing modules. At least 2-3 genuine extensions must be registered and rendered to validate the architecture end-to-end before the admin panel visualizes them.
-**Delivers:** `extensions[]` array populated in all relevant module manifests; `requires[]` dependencies declared using `MODULE_IDS` constants from `module-ids.ts`; 2-3 real cross-module extensions rendering via `<ModuleSlot>`; zero ESLint boundary violations; TypeScript confirming all extension components satisfy `SlotComponentProps`.
-**Features addressed:** Contract Architecture (all table stakes + extension priority differentiator); Slot-Based UI Injection (real-world validation with actual cross-module extensions).
-**Pitfalls avoided:** ESLint boundary violations (slot-registered components in providing module's directory only); circular imports (all `requires[]` values from `module-ids.ts`); over-engineering the extension system (flat `requires[]` array, no async resolution, no activation callbacks).
+### Phase 5: Sidebar Widget Renderers
 
-### Phase 6: Admin Panel `/admin/modules`
+**Rationale:** Widget rendering must exist before the sidebar config panel can show meaningful visual feedback. Building renderers first validates the `SIDEBAR_WIDGET_REGISTRY` pattern and confirms the inline sidebar widget zones in `WireframeViewer` work correctly before an editor surface can add or remove widgets.
+**Delivers:** `lib/sidebar-widget-registry.tsx` with 4 widget type registrations; `components/sidebar-widgets/` with WorkspaceSwitcherWidget, UserMenuWidget, SearchWidget, AccountSelectorWidget; top/bottom widget zones added to WireframeViewer inline `<aside>`; collapsed icon-only rendering per widget when sidebar is in rail mode.
+**Uses:** `SidebarWidget` type from Phase 1; `SIDEBAR_WIDGET_REGISTRY` separate from `SECTION_REGISTRY`
+**Avoids:** Pitfall 2 (widget code in `WireframeSidebar.tsx` ghost component — all work in inline `<aside>`)
 
-**Rationale:** The admin panel is the last feature because it visualizes what the previous phases built. Its extension map view only has content to display once modules have populated `extensions[]` (Phase 5). The enable/disable toggle writes to `localStorage` and triggers `ExtensionProvider` re-resolution, so the slot runtime (Phase 2) must be functional. Routing for the admin namespace was already established in Phase 3.
-**Delivers:** `src/pages/admin/ModulesPanel.tsx` with module grid, status badges, enable/disable toggles (localStorage), extension map per module, active module count summary; route `/admin/modules` protected via `<ProtectedRoute>`; panel accessible by direct URL but absent from sidebar navigation in all states.
-**Features addressed:** Admin Panel (all table stakes + extension slot coverage audit differentiator).
-**Pitfalls avoided:** Admin panel in sidebar navigation (static route, not in `MODULE_REGISTRY`); admin routing collision with registry-derived routes; unauthenticated admin access.
+### Phase 6: Sidebar Config Panel
+
+**Rationale:** With schema (Phase 1), mutation helpers (Phase 3), and widget renderers (Phase 5) complete, the sidebar editor panel has immediate visual feedback. This is the most complex editor panel in the milestone due to group CRUD + screen assignment + widget list management.
+**Delivers:** `editor/SidebarConfigPanel.tsx` Sheet with footer text input, group create/rename/delete with screen assignment (checkbox per screen), widget list manager (add/remove via type picker); `editor/SidebarWidgetPicker.tsx` sub-component; all changes routed through `updateWorkingDashboard('sidebar', ...)`.
+**Implements:** SidebarConfigPanel, SidebarWidgetPicker architecture components
+**Avoids:** Pitfall 3 (Zod stripping — schema already updated in Phase 1 with `.passthrough()`)
+
+### Phase 7: Filter Bar Editor
+
+**Rationale:** Filter bar editing targets `screen.filters[]` via the existing `updateWorkingScreen` — entirely independent from the dashboard-level mutation path. Isolated by design, can run after Phase 3 (entry point) without depending on Phases 4-6. The filterType taxonomy risk must be addressed here with a purpose-built `FilterBarEditor` that never touches `filter-config` section data.
+**Delivers:** `editor/FilterBarEditor.tsx` Sheet with `FilterOption[]` CRUD for the active screen (add/remove rows, label input, filterType select covering all 5 variants, options configuration); "add from library" presets; wired to `updateWorkingScreen(s => ({ ...s, filters }))` exclusively.
+**Uses:** `FilterOptionSchema` 5-variant filterType set; `@dnd-kit/sortable` for filter reorder if needed
+**Avoids:** Pitfall 1 (FilterType enum divergence — dedicated form for screen-level path only)
 
 ### Phase Ordering Rationale
 
-- **Foundation before consumers:** Phase 1 (types) must precede every other phase. Phase 2 (slot runtime) must precede any phase that renders slots. This is a hard dependency chain, not a soft preference.
-- **Infrastructure before UX:** Phases 1-2 produce no visible UI changes — they are the stable base that Phases 3-6 build on. Skipping them to get visible results faster creates the god-component and type safety pitfalls.
-- **Routing before new pages:** Phase 3 creates the `/admin/*` namespace and enables sidebar filtering before Phase 6 tries to use those routes.
-- **Home before contract population:** Phase 4 builds the slot injection points. Phase 5 fills them with real extensions. This means Home 2.0 ships with functional but empty slots — a graceful incremental delivery state.
-- **Contract population before admin visualization:** The admin panel's extension map (Phase 6) only has content to display once Phase 5 has populated `extensions[]` across modules.
+- Schema first: Phase 1 is a hard dependency for all subsequent phases. No component can import `SidebarWidget` type or validate `SidebarWidget` objects before it.
+- Render before editor: Phase 2 must precede Phase 4. Building a settings panel for a field that the component ignores is the single most common mistake in this domain.
+- Infrastructure before panels: Phase 3 (mutation helpers + entry points) must precede Phases 4, 6, and 7. Panel forms without a mutation path do nothing.
+- Renderers before panel: Phase 5 (widget renderers) before Phase 6 (sidebar config panel) enables immediate visual validation of widget add/remove during development.
+- Filter bar is independent: Phase 7 depends only on Phase 3 (entry point) and uses `updateWorkingScreen` — it can be parallelized with Phases 4-6 if needed.
 
 ### Research Flags
 
-Phases requiring deeper investigation during planning:
-- **Phase 5 (Contract Population):** Identifying which cross-module extension slots are operationally valuable requires domain knowledge about FXL Core's actual workflows. The types and runtime are clear (HIGH confidence) but the business use cases for specific slot placements (e.g., Tasks widget in Clients detail, KB shortcut in Tasks) are not fully mapped. Recommend a quick planning session to enumerate 3-5 high-value cross-module touchpoints before writing `extensions[]` in any manifest.
-- **Phase 4 (Home 2.0):** Per-module aggregate counts (tasks pending, KB entries this week, active clients) need scoping against the actual Supabase schema before building queries. `useActivityFeed` is a proven pattern but new per-module KPI queries are not yet specified.
+Phases with standard patterns — skip additional research during planning:
+- **Phase 1 (Schema):** Standard Zod extension + TypeScript type addition. Fully analyzed, implementation is mechanical.
+- **Phase 2 (Header render):** 3-4 prop additions + conditional renders in a single component. Fully analyzed.
+- **Phase 3 (Mutation infrastructure):** Copy of existing `updateWorkingScreen` pattern. No unknowns.
+- **Phase 4 (Header Config Panel):** Established Sheet + Switch toggle form pattern; 28 existing section forms as reference.
+- **Phase 7 (Filter Bar Editor):** Data path fully analyzed; `FilterOptionSchema` verified; `FilterConfigForm` identified as negative reference (do not reuse).
 
-Phases with well-documented patterns (skip research-phase):
-- **Phase 1 (Registry Foundation):** Pure TypeScript interface extension. HIGH confidence from direct codebase analysis. Implementation is mechanical — add optional fields to an existing interface.
-- **Phase 2 (Slot Architecture):** Standard React Context pattern, ~80 LOC total. The implementation is fully specified in ARCHITECTURE.md with working code examples. No unknowns.
-- **Phase 3 (Routing Refactor):** Primarily cleanup + 1 new route stub. All patterns are v1.5 precedents. The link audit is the only non-trivial step.
-- **Phase 6 (Admin Panel):** Data display page reading from a Context. All UI primitives (Radix Switch, Tooltip, Dialog, Tailwind, lucide-react, sonner) are already installed.
+Phases that may benefit from brief planning review:
+- **Phase 5 (Sidebar Widget Renderers):** Widget collapsed/expanded rendering in rail mode has UX nuance. Review shadcn sidebar-07 visual reference before deciding collapsed icon treatment per widget type.
+- **Phase 6 (Sidebar Config Panel):** Group-to-screen assignment UX (radio buttons per screen vs checkboxes per group) needs a design decision during phase planning. Recommendation: radio buttons to enforce single-group membership structurally.
 
 ---
 
@@ -160,50 +173,44 @@ Phases with well-documented patterns (skip research-phase):
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All stack decisions based on direct `package.json` inspection + confirmed installed packages. Zero new dependencies required — all alternatives evaluated against real constraints and rejected with specific rationale. |
-| Features | HIGH for table stakes; MEDIUM for differentiators | Table stakes derived from direct codebase analysis and well-established React module patterns. Differentiators (extension priority, conditional rendering, slot inspector) synthesized from multiple community sources — validated patterns, not speculative. Admin panel visual UX rated LOW by the feature researcher (no direct analogue found); low risk given shadcn/ui covers all needed primitives. |
-| Architecture | HIGH | Entirely based on direct codebase file reads (App.tsx, registry.ts, Sidebar.tsx, all 5 manifests, eslint.config.js). Implementation patterns are established React idioms. Build order (8 steps) is dependency-verified with working code examples provided for each new file. |
-| Pitfalls | HIGH | 7 critical pitfalls identified from direct codebase inspection with specific file/line references. Warning signs and recovery steps are concrete. The circular import and ESLint boundary pitfalls are especially well-grounded in the actual current codebase state. |
+| Stack | HIGH | All packages verified against live `package.json`; Radix versions confirmed; zero new npm packages needed; two shadcn component file paths verified |
+| Features | HIGH | Table stakes derived from direct schema and component analysis; UX conventions (widget collapsed states, group assignment UX) rated MEDIUM |
+| Architecture | HIGH | All findings from direct source analysis: `blueprint-schema.ts`, `types/blueprint.ts`, `WireframeViewer.tsx` line numbers cited; `SIDEBAR_WIDGET_REGISTRY` pattern derived from existing `SECTION_REGISTRY` precedent |
+| Pitfalls | HIGH | All 7 pitfalls identified from live codebase gaps with specific file/line references; warning signs and recovery steps concrete; Zod stripping confirmed by direct `blueprint-store.ts` read |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Cross-module extension business cases (Phase 5):** The architecture supports any extension, but which specific slot placements are operationally valuable has not been enumerated. Address during Phase 5 planning by reviewing FXL's active modules (Clients, Tasks, KB, Ferramentas, Docs) and identifying the 2-3 highest-value cross-module touchpoints before writing `extensions[]`.
+- **Sidebar collapsed icon rendering per widget type:** The collapsed sidebar rail renders screen items as icon-only buttons. Exactly which icon represents each widget type (workspace switcher, user menu, search, account selector) in the collapsed state is not specified. Recommend resolving during Phase 5 planning — use the widget's registered `icon` from `SIDEBAR_WIDGET_REGISTRY` (e.g., `LayoutGrid` for workspace switcher, `CircleUser` for user menu, `Search` for search, `Building2` for account selector).
 
-- **Supabase schema for Home 2.0 KPIs (Phase 4):** Per-module aggregate counts require verified Supabase table structure. Current `useActivityFeed` fetches KB entries and tasks; new per-module KPI queries (counts, last action timestamp) need scoping against the actual schema. Not a blocker for Phase 4 planning but must be resolved before Home 2.0 implementation starts.
+- **Group-to-screen assignment interaction in Sidebar Config Panel:** A screen can currently be in at most one group. The interaction model for assigning/unassigning screens to groups needs a design decision before Phase 6 implementation: radio buttons per screen (enforces single-group), or checkboxes per group (allows multi-group assignment). Single-group is the current schema behavior; recommend radio buttons.
 
-- **`homeWidget` slot vs. static per-module card (Phase 4):** PITFALLS.md warns that Home.tsx can grow into a god-component and recommends adding a `homeWidget` field to `ModuleDefinition`. FEATURES.md defers `homeWidget` to v2.x. This tension needs a final decision at Phase 1 plan time: either add `homeWidget?: React.ComponentType<SlotComponentProps>` to `ModuleDefinition` in Phase 1 (enabling clean slot-driven Home 2.0), or accept static per-module cards in Home 2.0 with a documented plan to migrate to slots in v2.1.
+- **`partitionScreensByGroups` called twice per render (minor performance):** PITFALLS.md flags this (WireframeViewer lines 897–898) — doubled computation on every re-render. Not a v2.2 blocker at current blueprint scale, but should be noted as a quick-win cleanup opportunity.
 
 ---
 
 ## Sources
 
 ### Primary (HIGH confidence — direct codebase inspection)
-- `src/modules/registry.ts` — current `ModuleManifest` type, `MODULE_REGISTRY` constant
-- `src/App.tsx` — current routing structure, `moduleRoutes` flatMap derivation
-- `src/pages/Home.tsx` — `MODULE_DESCRIPTIONS` hardcoding, `useActivityFeed` cross-module fetch
-- `src/components/layout/Sidebar.tsx` — `navigationFromRegistry`, hardcoded Home NavLink
-- `src/components/layout/Layout.tsx` — shell structure
-- All 5 module manifests — current route config, nav structure
-- `eslint.config.js` — `boundaries/element-types` rule: `{ from: 'module', disallow: ['module'] }`
-- `vercel.json` — `/(.*) → /index.html` SPA rewrite confirmed
-- `package.json` — all Radix UI primitives confirmed installed
+- `tools/wireframe-builder/types/blueprint.ts` — `SidebarConfig`, `HeaderConfig`, `FilterOption`, `BlueprintScreen` types (direct read)
+- `tools/wireframe-builder/lib/blueprint-schema.ts` — Zod schemas, `.passthrough()` on `HeaderConfigSchema` only, 3-variant vs 5-variant filterType divergence (direct read)
+- `src/pages/clients/WireframeViewer.tsx` — inline sidebar block lines 764–944, `updateWorkingScreen` pattern, `WireframeHeader` call site lines 957–961 (direct read)
+- `tools/wireframe-builder/components/WireframeHeader.tsx` — confirmed only `showLogo` consumed; remaining `HeaderConfig` fields absent from props (direct read)
+- `tools/wireframe-builder/lib/blueprint-store.ts` — `BlueprintConfigSchema.parse()` strips unknown fields; `safeParse` failure returns `null` (direct read)
+- `tools/wireframe-builder/lib/blueprint-migrations.ts` — `CURRENT_SCHEMA_VERSION = 1`, single `v0 → v1` migrator (direct read)
+- `package.json` — all Radix packages confirmed present, zero new npm packages needed (direct read)
+- `src/components/ui/` directory listing — `tooltip.tsx` confirmed absent, `sheet.tsx` confirmed present (direct ls)
+- `tools/wireframe-builder/components/editor/PropertyPanel.tsx` — Sheet pattern for section property panels (direct read)
+- `tools/wireframe-builder/components/editor/property-forms/FilterConfigForm.tsx` — operates on `FilterConfigSection.filters[]`, 3-variant filterType (direct read)
 
-### Secondary (MEDIUM confidence — multiple community sources)
-- [WordPress Gutenberg SlotFill pattern](https://developer.wordpress.org/block-editor/reference-guides/components/slot-fill/) — Slot/Fill as Publish-Subscribe UI pattern; basis for hand-rolled implementation
-- [Martin Fowler — Modularizing React Applications](https://martinfowler.com/articles/modularizing-react-apps.html) — authoritative reference for module boundary patterns
-- [OpenMRS O3 Extension System](https://o3-docs.openmrs.org/docs/extension-system) — named slot + module registration pattern at production scale
-- [React Router v6 Navigate component — official docs](https://reactrouter.com/en/main/components/navigate) — `replace` prop behavior for SPA route migration
-- [State Management comparison 2025](https://dev.to/hijazi313/state-management-in-2025-when-to-use-context-redux-zustand-or-jotai-2d2k) — Context vs. Zustand decision basis
-- [Circular dependencies in TypeScript — Michel Weststrate](https://medium.com/visual-development/how-to-fix-nasty-circular-dependency-issues-once-and-for-all-in-javascript-typescript-a04c987cf0de) — circular import resolution strategies
-- [ESLint boundaries + Nx module enforcement](https://nx.dev/docs/technologies/eslint/eslint-plugin/guides/enforce-module-boundaries) — boundary rule patterns
-
-### Tertiary (LOW confidence — single source or pattern inference)
-- `@grlt-hub/react-slots` GitHub — evaluated and rejected; useful only as pattern reference
-- [Building a Plugin System in React](https://dev.to/hexshift/building-a-plugin-system-in-react-using-dynamic-imports-and-context-api-3j6e) — plugin contract pattern, partial reference
+### Secondary (MEDIUM confidence)
+- [shadcn/ui Sidebar blocks — sidebar-07](https://ui.shadcn.com/blocks/sidebar) — team-switcher and nav-user compound widget visual patterns as reference
+- [shadcn/ui Sidebar docs](https://ui.shadcn.com/docs/components/sidebar) — SidebarProvider, useSidebar hook structure
+- [Achromatic: Using the new Shadcn Sidebar](https://www.achromatic.dev/blog/shadcn-sidebar) — no `cookies-next` for Vite, internal deps confirmed against installed packages
+- [shadcn/ui Sidebar Vite issue #7696](https://github.com/shadcn-ui/ui/issues/7696) — `class-variance-authority` import Vite gotcha (already resolved in project)
+- `.planning/PROJECT.md` — v2.2 milestone goals, out-of-scope constraints, existing validated requirements
 
 ---
-
 *Research completed: 2026-03-13*
 *Ready for roadmap: yes*

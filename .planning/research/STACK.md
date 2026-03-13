@@ -1,179 +1,178 @@
-# Stack Research
+# Stack Research — v2.2 Configurable Layout Components
 
-**Domain:** Modular Framework Shell — Module Registry, Slot Injection, Contract Architecture, Admin Panel (v2.0)
+**Domain:** Wireframe Builder — compound sidebar widgets, header property panels, filter bar editor
 **Researched:** 2026-03-13
-**Confidence:** HIGH
+**Confidence:** HIGH (validated against installed packages, live shadcn/ui docs, and existing codebase patterns)
 
-> This is an additive research document for v2.0. The base stack (React 18, TypeScript strict,
-> Tailwind CSS 3, Vite 5, Supabase, Clerk, Recharts 2.x, lucide-react) is validated and unchanged.
-> This document covers ONLY what is new or changed for the modular framework shell features.
+> This is an additive research document for v2.2. The base stack (React 18, TypeScript strict,
+> Tailwind CSS 3, Vite 5, Supabase, Clerk, Recharts 2.x, @dnd-kit, Zod 4.x, lucide-react)
+> is validated and unchanged. This document covers ONLY what is new or changed for v2.2.
 
 ---
 
-## Executive Decision: Zero New Dependencies
+## Executive Decision: Two shadcn/ui Component Installs, Zero New npm Packages
 
-All four v2.0 features — dynamic Module Registry, slot-based UI injection, contract architecture,
-and admin panel — can be implemented using **only what is already installed**.
-
-No new npm packages are required. The rationale for each is below.
+All three v2.2 features — compound sidebar widgets, header config property panels, filter bar
+editor — require adding only two shadcn/ui component files that are missing from
+`src/components/ui/`. The underlying Radix UI packages they depend on are already installed.
+No new npm packages are needed.
 
 ---
 
 ## Feature-by-Feature Analysis
 
-### 1. Dynamic Module Registry with Extensions
+### 1. Compound Sidebar Widgets (workspace switcher, account selector, user menu)
 
-**Current state (v1.5):** `MODULE_REGISTRY` is a static `ModuleManifest[]` constant in
-`src/modules/registry.ts`. Manifests are imported at compile time. Extensions and runtime
-toggling are not possible.
+**Target pattern:** shadcn/ui sidebar-07 — the "sidebar that collapses to icons" block, which
+ships with `nav-user.tsx` (user menu in footer) and `team-switcher.tsx` (workspace switcher
+in header). These are compound components built from `SidebarMenuButton`, `SidebarHeader`,
+`SidebarFooter`, and a Popover-based dropdown.
 
-**v2.0 requirement:** Registry must support `ModuleExtension` types, inter-module contracts
-(module A declares it can extend module B's slots when both are active), and enable/disable
-state visible to the admin panel.
+**Install needed:**
+```bash
+npx shadcn add tooltip   # tooltip.tsx — used by sidebar for icon tooltips in collapsed state
+npx shadcn add sidebar   # sidebar.tsx — SidebarProvider, SidebarMenu, useSidebar, etc.
+```
 
-**Decision: Pure TypeScript type augmentation + React Context.**
+**Why tooltip is the only missing piece:** `@radix-ui/react-tooltip ^1.1.0` is already in
+`package.json`. The Radix package is installed; only the shadcn wrapper `tooltip.tsx` is
+absent from `src/components/ui/`. Sidebar uses Tooltip internally when collapsed to show
+icon labels.
 
-The registry can evolve to a richer type system (`ModuleDefinition` replacing `ModuleManifest`,
-`ModuleExtension` as a sibling type) while the runtime state (which modules are enabled) lives
-in a React Context provider wrapping the app. No state management library is needed because:
+**All other sidebar dependencies are already installed:**
 
-- The registry itself is still a static constant (no async loading of module code)
-- "Enable/disable" state is a flat `Record<moduleId, boolean>` — minimal state, no derived
-  computations across many subscribers
-- React Context re-render scope is controlled: the provider sits high, but consumers that
-  call `useModuleRegistry()` only re-render when registry state changes (infrequent, operator
-  admin action)
-- The existing `MODULE_REGISTRY` → sidebar → routing pattern already works via Context
-  (Sidebar reads the manifest array, no fine-grained per-field subscriptions)
+| Dependency | Already Present | Notes |
+|------------|----------------|-------|
+| `@radix-ui/react-slot` ^1.2.4 | Yes | SidebarMenuButton uses asChild pattern |
+| `@radix-ui/react-separator` ^1.1.8 | Yes | SidebarSeparator |
+| `@radix-ui/react-dialog` ^1.1.15 | Yes | Mobile Sheet drawer |
+| `@radix-ui/react-tooltip` ^1.1.0 | Yes | Icon tooltips (package only, .tsx missing) |
+| `sheet.tsx` | Yes | Mobile sidebar drawer |
+| `separator.tsx` | Yes | Visual dividers |
+| `button.tsx` | Yes | Trigger buttons |
+| `input.tsx` | Yes | Search widget in sidebar |
+| `class-variance-authority` ^0.7.1 | Yes | Sidebar variant management |
 
-**Zustand 5.x considered and rejected for this feature.** Zustand 5.0.11 (current stable,
-released ~2024, now on 5.0.11 as of early 2026) dropped React < 18 support, uses
-`useSyncExternalStore` natively, and would be a clean fit technically. However, adding a new
-state management library to solve a problem that React Context handles correctly at this scale
-is unjustified. The registry state is: (a) rarely mutated, (b) consumed by ~3 components
-(Sidebar, App router, Home), (c) not shared across module boundaries in a way that creates
-re-render cascades. Context is the correct tool. If registry state grows to 10+ derived
-computations with hot subscription paths, Zustand becomes the right choice.
+**Important scoping constraint:** The shadcn `sidebar` component MUST be used only inside
+`tools/wireframe-builder/`. The FXL Core app shell has its own sidebar at
+`src/components/layout/Sidebar.tsx`. These are separate systems with no overlap.
 
-**Confidence:** HIGH — React Context for module enable/disable is a well-validated pattern at
-this scale.
+**Rendering approach inside wireframe:** The `WireframeSidebar.tsx` component will import
+from the newly installed `src/components/ui/sidebar` (same import path as all other shadcn
+components). The sidebar widgets (workspace-switcher, user-menu, etc.) become sub-components
+inside `tools/wireframe-builder/components/` following the existing pattern.
 
----
-
-### 2. Slot-Based UI Injection System
-
-**Requirement:** A module must be able to declare "I inject UI into slot X of module Y" without
-module Y importing from module X (the ESLint boundaries rule `module → module: disallow` must
-be preserved).
-
-**Decision: Pure React Context slot registry, no external library.**
-
-The pattern is: a `SlotRegistry` context holds `Record<slotId, React.ReactNode[]>`. A `<SlotFill>` component (or `useSlotFill` hook) lets a module register a `ReactNode` into a named slot. A `<Slot id="slot-id">` component renders whatever is registered for that slot.
-
-This is the same pattern WordPress Gutenberg uses (`SlotFillProvider`, `Slot`, `Fill`), but
-reimplemented in ~80 lines of pure TypeScript/React without the Gutenberg dependency.
-
-The `@grlt-hub/react-slots` library (Effector-powered) and `react-slot-fill` (abandoned 2018)
-were evaluated. Neither adds value over a hand-rolled implementation:
-
-- `@grlt-hub/react-slots` introduces `Effector` as a peer dependency — a reactive state library
-  adding ~10kb. Not justified for a fixed set of ~5 slots.
-- `react-slot-fill` is unmaintained.
-- `@radix-ui/react-slot` solves a different problem (asChild prop polymorphism, already installed).
-
-The hand-rolled Context + `Record<string, React.ReactNode[]>` approach is 80 lines, fully
-typed, and requires zero new dependencies.
-
-**Confidence:** HIGH — standard React pattern, widely documented, matches existing codebase style.
+**Cookie-based state persistence in shadcn sidebar:** The shadcn sidebar uses a cookie
+(`SIDEBAR_COOKIE_NAME = 'sidebar:state'`) for Next.js projects. For this Vite project, the
+open/closed state can be managed via the `defaultOpen` prop or localStorage. No cookies-next
+package is needed — the sidebar state in the wireframe viewer is ephemeral (resets on page
+load is acceptable for a wireframe tool).
 
 ---
 
-### 3. Contract Architecture Between Modules
+### 2. Header Property Panels (showPeriodSelector, showUserIndicator, actions.*)
 
-**Requirement:** Type-safe contracts — a module declares "I provide slot `'tasks.sidebar-widget'`"
-and another declares "I inject into `'tasks.sidebar-widget'`". TypeScript must catch a module
-referencing a slot that doesn't exist.
+**Current state:** `HeaderConfig` schema is already defined in `types/blueprint.ts` with all
+boolean fields. `WireframeHeader.tsx` already reads `showLogo`. The editor has no panel for
+these fields.
 
-**Decision: TypeScript discriminated union + string literal types, no library.**
+**What's needed:** A `HeaderConfigForm` component following the exact pattern of existing
+property forms. All UI primitives required are already installed:
 
-The contract is expressed entirely in types:
+| Field Type | Component | Already Installed |
+|------------|-----------|------------------|
+| Boolean toggles (showLogo, showPeriodSelector, showUserIndicator) | `switch.tsx` → `@radix-ui/react-switch` ^1.2.6 | Yes |
+| Boolean toggles (actions.manage, share, export) | Same `switch.tsx` | Yes |
+| Panel container | `sheet.tsx` (PropertyPanel pattern) | Yes |
 
+**Entry point in editor:** New "Header" button or section in `AdminToolbar`, triggering a
+Sheet panel with `HeaderConfigForm` — identical flow to how branding is edited via
+`BrandingPopover`. The change propagates through the same `onSave` → Supabase pipeline.
+
+**WireframeHeader.tsx extension:** Currently only `showLogo` is wired. Props for
+`showPeriodSelector`, `showUserIndicator`, and `actions.*` need to be added to the component
+and passed from `WireframeViewer.tsx`. No new packages — pure TypeScript prop addition.
+
+---
+
+### 3. Filter Bar Editor (per-screen FilterOption[] editor)
+
+**Current state:** `WireframeFilterBar.tsx` renders `FilterOption[]` from
+`BlueprintScreen.filters`. The visual editor has no way to add/remove/edit filter options
+per screen. A separate section type `filter-config` exists but is a section-level component,
+not the screen-level filter bar.
+
+**What's needed:** A `FilterBarEditorPanel` triggered from within the edit mode UI that edits
+`screen.filters[]`. All primitives required are already installed.
+
+**Key distinction:** This is NOT adding to the section registry. The filter bar is a
+screen-level config (not a section), so it gets its own edit flow separate from `PropertyPanel`.
+
+The existing `FilterConfigForm.tsx` (for the `filter-config` section type) uses the exact
+same list-edit pattern needed here — add/remove filters, label input, filterType select. The
+`FilterBarEditorPanel` will reuse this form structure with a minor adaptation to target
+`BlueprintScreen.filters` instead of `FilterConfigSection.filters`.
+
+**Already in `FilterOption` type:** `filterType` supports `'select' | 'date-range' |
+'multi-select' | 'search' | 'toggle'`. The editor needs to expose all five variants.
+
+---
+
+### 4. Schema Extension for SidebarWidget (Zod — No Upgrade)
+
+**The `SidebarConfig` type in `types/blueprint.ts` currently has:**
 ```typescript
-// In src/modules/registry.ts (central contracts)
-export type SlotId =
-  | 'home.activity-feed'
-  | 'home.quick-actions'
-  | 'sidebar.module-actions'
-  | 'tasks.sidebar-widget'
-
-export interface ModuleDefinition {
-  id: string
-  label: string
-  // ...existing fields...
-  slots?: SlotId[]           // slots this module provides
-  extensions?: ModuleExtension[]  // slots this module fills
-}
-
-export interface ModuleExtension {
-  targetSlot: SlotId         // must be a declared slot
-  targetModule: string       // id of the module that owns the slot
-  component: React.ComponentType // the UI to inject
-  condition?: (registry: ModuleDefinition[]) => boolean // auto-activate when condition met
+export type SidebarConfig = {
+  footer?: string
+  groups?: SidebarGroup[]
 }
 ```
 
-`SlotId` as a string literal union means TypeScript catches any reference to an undeclared slot
-at compile time. No runtime validation library needed — `tsc --noEmit` is the gate.
+**Extension needed** (additive, backward-compatible):
+```typescript
+export type SidebarWidget =
+  | { type: 'workspace-switcher'; workspaces?: string[] }
+  | { type: 'account-selector'; accounts?: string[] }
+  | { type: 'user-menu'; showRole?: boolean }
+  | { type: 'search'; placeholder?: string }
 
-**Confidence:** HIGH — this is idiomatic TypeScript. The existing `ModuleManifest` type uses the
-same pattern (string literal `ModuleStatus`), so the team is already familiar.
+export type SidebarConfig = {
+  footer?: string
+  groups?: SidebarGroup[]
+  widgets?: {
+    top?: SidebarWidget[]    // renders in SidebarHeader area
+    bottom?: SidebarWidget[] // renders in SidebarFooter area
+  }
+}
+```
 
----
+Zod 4.3.6 (already installed) handles `z.discriminatedUnion('type', [...])` for
+`SidebarWidget`. The `SidebarConfigSchema` currently has no `.passthrough()` but adding
+`widgets` is a backward-compatible Zod schema addition — old blueprints without `widgets`
+parse fine with `z.optional()`.
 
-### 4. Admin Panel for Module Management (/admin/modules)
-
-**Requirement:** An internal UI page for visualizing modules, their status, slots they provide,
-extensions they declare, and toggle enable/disable.
-
-**Decision: shadcn/ui components already installed, zero new dependencies.**
-
-The admin panel is a data display page with toggles. Everything needed is already present:
-
-- `@radix-ui/react-switch` (installed `^1.2.6`) — enable/disable toggle per module
-- `@radix-ui/react-tooltip` (installed `^1.1.0`) — slot documentation on hover
-- `@radix-ui/react-dialog` (installed `^1.1.15`) — module detail drawer
-- `lucide-react` — status icons, module icons
-- Tailwind CSS — layout, status badges (using existing design tokens)
-- `sonner` (installed) — toast confirmation for enable/disable actions
-
-The admin panel reads from the `useModuleRegistry()` hook and dispatches enable/disable actions
-to the registry context. No table library, no form library, no new UI primitives.
-
-**Confidence:** HIGH — all UI primitives confirmed installed in package.json.
+`HeaderConfigSchema` already has `.passthrough()` (line 76 of `blueprint-schema.ts`),
+so any new `HeaderConfig` fields added in v2.2 will survive existing DB round-trips without
+a migration.
 
 ---
 
 ## Recommended Stack (Additions Only)
 
-### Core Technologies
+### New shadcn/ui Components to Install
 
-No changes to core framework.
+| Component | Command | What It Adds | Why Needed |
+|-----------|---------|-------------|-----------|
+| `tooltip` | `npx shadcn add tooltip` | `src/components/ui/tooltip.tsx` (wraps `@radix-ui/react-tooltip`) | sidebar.tsx imports Tooltip for collapsed icon labels |
+| `sidebar` | `npx shadcn add sidebar` | `src/components/ui/sidebar.tsx` (~600 lines, composable sidebar system) | SidebarProvider, SidebarMenu, SidebarHeader, SidebarFooter, SidebarContent, useSidebar hook |
 
-### Supporting Libraries
-
-No new packages required.
-
-### Development Tools
-
-No changes to dev tooling.
-
----
-
-## Installation
+### No New npm Packages
 
 ```bash
-# No new packages needed.
-# All v2.0 features are implementable with the existing dependency set.
+# Zero new packages in package.json
+# Only two shadcn component files to add:
+npx shadcn add tooltip
+npx shadcn add sidebar
 ```
 
 ---
@@ -182,102 +181,76 @@ No changes to dev tooling.
 
 | Recommended | Alternative | Why Not |
 |-------------|-------------|---------|
-| React Context for registry state | Zustand 5.0.11 | Registry state is flat, rarely mutated, consumed by ~3 components. Context is correct at this scale. Zustand adds a new dependency without solving a real problem here. If hot subscription paths emerge in v2.1+, Zustand becomes justified. |
-| Hand-rolled SlotRegistry (~80 LOC) | `@grlt-hub/react-slots` | Introduces Effector as peer dep (~10kb). Overkill for a fixed slot set. The pattern is simple enough to own. |
-| Hand-rolled SlotRegistry (~80 LOC) | `react-slot-fill` | Abandoned since 2018. Last commit is 7 years old. |
-| TypeScript string literal `SlotId` union | JSON schema + Zod validation | Slots are declared at compile time, not runtime. TypeScript catches violations at `tsc` time, which is already the project's acceptance gate. Adding Zod validation would add runtime overhead for a compile-time concern. |
-| `@radix-ui/react-switch` (installed) | Custom toggle implementation | Radix Switch is already installed, accessible, and used elsewhere in the app. No reason to reimplement. |
-| shadcn/ui + Tailwind for admin panel | `react-admin`, `refine`, or similar | These are full frameworks requiring complete adoption. For one internal page, they are massive overkill. |
+| shadcn `sidebar` component | Custom sidebar from scratch | sidebar-07 compound widget patterns (team-switcher, nav-user) match the target exactly. Building from scratch adds 3-4x effort with identical output |
+| shadcn `sidebar` component | Headless UI sidebar | Headless UI has no sidebar primitive |
+| Extend `PropertyPanel` Sheet for header/filter config | Separate dialog component | Sheet is the established pattern for all property editing (28 section types use it). Consistency outweighs novelty |
+| `z.discriminatedUnion` for SidebarWidget | `widgetType: string` flat field | TypeScript strict mode and Zod runtime validation require typed union; string field loses narrowing in the render switch |
+| @dnd-kit/sortable for filter reorder in editor | react-beautiful-dnd | react-beautiful-dnd is archived. @dnd-kit is already in the project and used in `BlueprintRenderer` |
+| ephemeral sidebar open state (no persistence) | `localStorage` persistence | Wireframe sidebar is decorative/preview, not a functional app sidebar. State reset on reload is acceptable and avoids complexity |
 
 ---
 
-## What NOT to Add
+## What NOT to Use
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| `zustand` | Overkill for registry state at this scale. Re-evaluate only if the registry develops hot subscription paths across many component trees. | React Context with `useModuleRegistry()` hook |
-| `@grlt-hub/react-slots` | Pulls Effector as peer dep. The slot pattern is 80 lines of plain React/TypeScript. | Hand-rolled `SlotRegistry` context |
-| `immer` | Module registry mutations (enable/disable) are simple object spreads. Immer's immutable update DX is not needed for flat `Record<string, boolean>` state. | `useState` with object spread in context reducer |
-| `jotai` or `recoil` | Atomic state models add conceptual overhead for what is single-store registry state. | React Context |
-| Any feature-flag SaaS (LaunchDarkly, PostHog, etc.) | These are external services for customer-facing rollout management. The admin panel is an internal operator tool with no need for remote flag servers. | `Record<moduleId, boolean>` in Context |
-| `react-admin` / `refine` | Admin framework libraries designed for CRUD over REST/GraphQL. The module admin panel is a single page reading from a local Context, not an API. | shadcn/ui components already installed |
-| Recharts 3.x | Breaking API changes. PROJECT.md explicitly defers this upgrade. | Stay on 2.13.3 |
-| React 19 | PROJECT.md explicitly defers this upgrade (stability constraint). | Stay on React 18.3.1 |
-| Tailwind v4 | PROJECT.md explicitly defers this upgrade. | Stay on Tailwind CSS 3.4.x |
+| `cookies-next` | Next.js only. Vite project has no cookie middleware layer | No sidebar state persistence, or `localStorage` via a custom hook if needed |
+| shadcn `sidebar` in `src/components/layout/` | The FXL app shell has its own sidebar. Using shadcn sidebar there would be a breaking architectural change | Keep app shell sidebar as-is; use shadcn sidebar only in wireframe-builder |
+| New `filter-bar` section type | Filter bar is a screen-level config (`screen.filters[]`), not a section. Adding it to the section registry would break the data model | Edit `screen.filters[]` directly via `FilterBarEditorPanel` |
+| `react-beautiful-dnd` | Archived project, React 18 issues | `@dnd-kit/sortable` already installed |
+| `@radix-ui/react-collapsible` | Not in package.json. Filter bar accordion is a flat list, not a tree | Plain div + CSS for any collapsible behavior |
+| Recharts 3.x upgrade | Breaking API changes, PROJECT.md defers explicitly | Stay on 2.13.3 |
+| React 19 | PROJECT.md defers (stability) | Stay on React 18.3.1 |
+| Tailwind v4 | PROJECT.md defers (stability) | Stay on Tailwind CSS 3.4.x |
 
 ---
 
-## Stack Patterns by Feature
+## Integration Points with Existing Visual Editor
 
-**For Module Registry evolution (static → dynamic with extensions):**
-- Keep `MODULE_REGISTRY` as the static array of `ModuleDefinition` objects (compile-time source of truth)
-- Add a `ModuleRegistryContext` that holds `{ modules: ModuleDefinition[], enabled: Record<string, boolean>, toggleModule: (id: string) => void }`
-- Wrap `<App>` with `<ModuleRegistryProvider>` — single provider, no nesting complexity
-- All consumers (`Sidebar`, `Home`, `App` router) switch from direct import of `MODULE_REGISTRY` to `useModuleRegistry()`
+Three new edit surfaces are needed. All follow the established pattern:
 
-**For Slot injection:**
-- `SlotRegistry` is a separate context from `ModuleRegistry` — different concerns, different mutation rates
-- `SlotRegistry` stores `Record<SlotId, { component: React.ComponentType, sourceModule: string }[]>`
-- On app boot, each `ModuleDefinition.extensions` array is iterated and fills slots automatically
-- `<Slot id="home.activity-feed" />` in a module's JSX renders all registered fills for that slot
-- Module that provides a slot does NOT need to know which other modules will fill it — this preserves the ESLint `module → module: disallow` boundary
+**Pattern:** `AdminToolbar button → Sheet panel → Form component → onChange callback → BlueprintConfig mutation → Supabase save`
 
-**For Contract architecture:**
-- All `SlotId` values live in `src/modules/registry.ts` as the central contract file
-- ESLint boundaries rule already enforces that modules cannot import each other
-- The contract is enforced by TypeScript: `ModuleExtension.targetSlot` must be a valid `SlotId`
-- Adding a new slot = adding one string literal to `SlotId` in `registry.ts`
+| Surface | Entry Point | Panel Component | Form Component | Mutates |
+|---------|-------------|----------------|----------------|---------|
+| Sidebar config | "Sidebar" button in AdminToolbar (edit mode) | `SidebarConfigPanel` (Sheet) | `SidebarConfigForm` | `config.sidebar` |
+| Header config | "Header" button in AdminToolbar (edit mode) | `HeaderConfigPanel` (Sheet) | `HeaderConfigForm` | `config.header` |
+| Filter bar | "Editar Filtros" button in filter bar (edit mode) | `FilterBarEditorPanel` (Sheet) | Adapts `FilterConfigForm` pattern | `screen.filters[]` |
 
-**For Admin panel (/admin/modules):**
-- New module `src/modules/admin/` following existing module structure (manifest + pages + components + types)
-- Route `/admin/modules` added to `AdminManifest.routeConfig`
-- Page reads from `useModuleRegistry()`, renders module cards with `Switch` toggles and slot diagrams
-- Module is `status: 'active'` but only visually accessible to operators (Clerk auth already gates the whole app)
-
----
-
-## ESLint Boundaries Compatibility
-
-The existing ESLint flat config enforces `module → module: disallow`. The slot injection
-architecture is designed to remain compatible:
-
-- Module A's `ModuleDefinition` declares `extensions: [{ targetSlot: 'home.activity-feed', component: ActivityWidget }]`
-- Module A imports its own component (`ActivityWidget`) — intra-module import, allowed
-- The `SlotRegistryProvider` reads `extensions` from all `ModuleDefinition` objects and registers them — this happens in `src/modules/registry.ts` (type `lib`) or the provider, NOT inside module A's code
-- Module B (home) renders `<Slot id="home.activity-feed" />` — reads from `SlotRegistry` context, no direct import from module A
-
-Result: no cross-module imports are introduced. The boundary rule is preserved.
+The `SidebarConfigForm` adds a widget list editor (add/remove SidebarWidget items with type
+selector and string array inputs for workspaces/accounts). It also retains the existing
+`groups` and `footer` fields already in `SidebarConfig`.
 
 ---
 
 ## Version Compatibility
 
-| Package | Version | Compatible With | Notes |
-|---------|---------|-----------------|-------|
-| `react` | 18.3.1 | React Context (built-in) | SlotRegistry and ModuleRegistry use standard `createContext`/`useContext` |
-| `react-router-dom` | 6.27.0 | Dynamic route registration from manifests | Existing `m.routeConfig` flat-map pattern continues to work |
-| `@radix-ui/react-switch` | 1.2.6 | React 18 | Admin panel module toggles |
-| `@radix-ui/react-tooltip` | 1.1.0 | React 18 | Slot documentation on hover |
-| `@radix-ui/react-dialog` | 1.1.15 | React 18 | Module detail drawer |
-| `eslint-plugin-boundaries` | 5.4.0 | ESLint v9 flat config | Slot architecture designed to preserve existing `module → module: disallow` rule |
-| `typescript` | 5.6.3 | String literal union `SlotId` | Full discriminant narrowing and type safety on contract architecture |
-| `zod` | 4.3.6 | Not needed for slot/registry types | Slot contracts are compile-time TypeScript, not runtime-validated data |
+| Package | Current Version | Compatible With v2.2 | Notes |
+|---------|----------------|---------------------|-------|
+| `@radix-ui/react-tooltip` | `^1.1.0` | shadcn sidebar | Already installed; tooltip.tsx wrapper file is missing |
+| `@radix-ui/react-separator` | `^1.1.8` | shadcn sidebar | Already installed |
+| `@radix-ui/react-slot` | `^1.2.4` | shadcn sidebar asChild | Already installed |
+| `@radix-ui/react-dialog` | `^1.1.15` | shadcn sidebar mobile Sheet | Already installed |
+| `@radix-ui/react-switch` | `^1.2.6` | HeaderConfigForm toggles | Already installed |
+| `zod` | `^4.3.6` | SidebarWidget discriminated union | No upgrade needed |
+| `@dnd-kit/sortable` | `^10.0.0` | Filter bar reorder in editor | Already used in BlueprintRenderer |
 
 ---
 
 ## Sources
 
-- [Zustand v5 announcement — pmnd.rs](https://pmnd.rs/blog/announcing-zustand-v5) — Confirmed v5 stable, React 18 `useSyncExternalStore` native. Rejected for this milestone because React Context sufficient.
-- [Zustand npm](https://www.npmjs.com/package/zustand) — Current version 5.0.11 (MEDIUM — WebSearch confirmed)
-- [WordPress SlotFill pattern](https://developer.wordpress.org/block-editor/reference-guides/components/slot-fill/) — Slot/Fill as Publish-Subscribe UI pattern. Hand-rolled equivalent used here (HIGH — official docs)
-- [React Context for module management — kentcdodds.com](https://kentcdodds.com/blog/how-to-use-react-context-effectively) — Context is correct tool for shared state with infrequent mutations (HIGH — authoritative React patterns source)
-- [State Management comparison 2025 — DEV Community](https://dev.to/hijazi313/state-management-in-2025-when-to-use-context-redux-zustand-or-jotai-2d2k) — Context best for small-medium apps, Zustand for medium-large with hot paths (MEDIUM — WebSearch verified)
-- [Slot-Based Component Architecture — rishandigital.com](https://rishandigital.com/reactjs/slot-based-component-architecture/) — `Record<string, React.ReactNode>` Context pattern for named slots (MEDIUM — WebSearch)
-- ESLint boundaries plugin config at `/Users/cauetpinciara/Documents/fxl/Projetos/fxl-core/eslint.config.js` — Confirmed `module → module: disallow` rule in place (HIGH — direct code read)
-- `package.json` at project root — All Radix UI primitives confirmed installed for admin panel (HIGH — direct code read)
-- `src/modules/registry.ts` — Current `ModuleManifest` type and `MODULE_REGISTRY` constant (HIGH — direct code read)
+- [shadcn/ui Sidebar blocks](https://ui.shadcn.com/blocks/sidebar) — sidebar-07 includes nav-user and team-switcher compound widgets (HIGH — direct doc verification)
+- [shadcn/ui Sidebar docs](https://ui.shadcn.com/docs/components/sidebar) — SidebarProvider, useSidebar hook, component structure (MEDIUM — page loaded, full source not accessible)
+- [Achromatic: Using the new Shadcn Sidebar](https://www.achromatic.dev/blog/shadcn-sidebar) — confirmed Sheet, Separator, Tooltip as internal deps; no cookies-next for Vite (MEDIUM — verified against installed packages)
+- [shadcn/ui Sidebar Vite issue #7696](https://github.com/shadcn-ui/ui/issues/7696) — class-variance-authority import is the known Vite gotcha; already in project (MEDIUM — GitHub issue)
+- Project `package.json` at `/Users/cauetpinciara/Documents/fxl/Projetos/fxl-core/package.json` — all Radix packages confirmed installed (HIGH — direct read)
+- `src/components/ui/` directory listing — tooltip.tsx confirmed missing, sheet.tsx confirmed present (HIGH — direct ls)
+- `tools/wireframe-builder/types/blueprint.ts` — SidebarConfig, HeaderConfig, FilterOption types confirmed (HIGH — direct read)
+- `tools/wireframe-builder/lib/blueprint-schema.ts` — HeaderConfigSchema has `.passthrough()` for forward-compat (HIGH — direct read)
+- `tools/wireframe-builder/components/editor/PropertyPanel.tsx` — Sheet-based property panel pattern confirmed (HIGH — direct read)
+- `tools/wireframe-builder/components/editor/property-forms/FilterConfigForm.tsx` — list-edit pattern for filter options confirmed (HIGH — direct read)
 
 ---
 
-*Stack research for: FXL Core v2.0 — Framework Shell + Modular Architecture*
+*Stack research for: FXL Core v2.2 — Wireframe Builder Configurable Layout Components*
 *Researched: 2026-03-13*

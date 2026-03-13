@@ -1,209 +1,184 @@
 # Pitfalls Research
 
-**Domain:** Adding modular extension architecture to an existing React 18 SPA (FXL Core v2.0)
+**Domain:** Configurable layout components in existing wireframe builder (sidebar widgets, header editor panels, filter bar editing)
 **Researched:** 2026-03-13
-**Confidence:** HIGH (based on direct codebase inspection of App.tsx, registry.ts, Sidebar.tsx, all 5 module manifests, eslint.config.js, vercel.json + verified patterns from react-router-dom v6 official docs and community post-mortems)
+**Confidence:** HIGH — based on direct codebase analysis of WireframeViewer.tsx, blueprint-schema.ts, types/blueprint.ts, WireframeSidebar.tsx, WireframeHeader.tsx, WireframeFilterBar.tsx, blueprint-store.ts, blueprint-migrations.ts, editor property-forms, and the FilterConfigRenderer/Form pair
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Route / to /docs Migration Breaks Vercel Direct-Link Visits
+### Pitfall 1: FilterType Enum Divergence Between Schema Layers
 
 **What goes wrong:**
-The current `vercel.json` rewrites all traffic to `index.html` via `"source": "/(.*)"`. When the route `/` is redirected to `/docs` client-side (via `<Navigate to="/docs" replace />`), users who have bookmarked `/` will land correctly. But any server-level tool (Slack unfurl, Notion embed, health-check bots) that hits `/` gets `index.html` which delivers a redirect, not a page — the Open Graph metadata, canonical URL, and any crawlers that don't execute JavaScript receive no useful content. More critically, if the Home component is moved to `/` and the docs moved to `/docs`, there is an ordering risk: if the `<Route path="/" ...>` entry renders `<Navigate>` instead of a component, any route that previously relied on `/` as the catch-all (e.g., stale bookmarks, old Cmd+K results pointing to the docs root) will silently redirect to the new location with no 301 equivalent at the server level.
+`FilterConfigSectionSchema` (blueprint-schema.ts line 306) uses `filterType: z.enum(['period', 'select', 'date-range'])` — 3 variants. `FilterOptionSchema` (blueprint-schema.ts line 50), which drives `BlueprintScreen.filters[]` and `WireframeFilterBar`, uses `filterType: z.enum(['select', 'date-range', 'multi-select', 'search', 'toggle'])` — 5 variants. When building the sticky filter bar editor (edits `screen.filters[]`), these two enums look similar but serve different data paths. If a developer builds a property panel that lets users pick `multi-select` or `search` filter types, then accidentally writes the result into a `filter-config` section instead of `screen.filters[]`, Zod validation will reject the save. The error message mentions a path like `screens[0].sections[N].filters[0].filterType` — leading the developer to chase the wrong bug.
 
 **Why it happens:**
-Developers treat `<Navigate replace>` as equivalent to an HTTP 301. It is not — it is a client-side JS push that only fires after React mounts. If the user refreshes at `/docs` and the Vercel rewrite config has not been updated to ensure `/docs/*` rewrites correctly (currently it catches everything via `/(.*)`), there is no breakage, but any hardcoded reference to `/` as the docs entry point (Cmd+K search index, Sidebar hard-coded Home link, shared links users may have sent) will silently redirect instead of rendering the expected content.
+Both schemas use the word "filter" and share the same field name `filterType`. `FilterOption` (component-level, used by WireframeFilterBar) and `filter-config` (a section block, used by FilterConfigRenderer) were built at different milestones for different purposes. The naming collision causes developers to conflate them, especially when building the filter bar editor for the first time.
 
 **How to avoid:**
-1. Before changing any route, audit all places that link to `/` or assume `/` is the docs entry point: `Sidebar.tsx` Home link (currently hardcoded `to="/"`), `SearchCommand` result hrefs, any `href="/"` in client docs markdown files.
-2. Implement the routing change as a two-step: first add `<Route path="/docs" element={<Navigate to="/processo/index" replace />} />` so the new path works before removing the old binding; then move the docs module's `route` field to `/processo/index` in `docsManifest`.
-3. Add a `<Navigate from="/" to="/docs" replace />` only as a temporary bridge if needed — remove it once all links are updated. Never leave it permanently, because it means `Home` at `/` is unreachable.
-4. Test by opening an incognito tab and typing `yourdomain.com/docs` directly — Vercel will serve `index.html`, React Router will match `/docs` and render correctly since the rewrite covers it.
+The sticky filter bar editor must operate exclusively on `screen.filters: FilterOption[]` using `FilterOptionSchema` (5-variant set). Never write filter bar edits into a `filter-config` section block. Any property panel for the filter bar must produce `FilterOption` objects (`key`, `label`, `options?`, `filterType` from the 5-variant set). The existing `FilterConfigForm.tsx` is for `filter-config` section blocks only — do not reuse it for the screen-level filter bar. Build a separate `FilterBarForm` or equivalent that knows it targets `screen.filters[]`.
 
 **Warning signs:**
-- Sidebar "Home" link still points to `/` after the docs module route has moved to `/docs`
-- Cmd+K search results for doc pages return hrefs starting with `/` instead of `/docs/`
-- `docsManifest.route` still reads `/processo/index` but sidebar navigation shows "Home" as active when on the docs page
-- The `moduleRoutes` derivation in `App.tsx` produces a route for `/processo/*` but not for `/docs/*` — docs are unreachable from direct URL
+- A form allows picking `multi-select` or `search` but save fails with Zod error mentioning `filter-config.filters[N].filterType`
+- The property panel in focus reads `section.type === 'filter-config'` when the goal is to edit the sticky filter bar
+- `BlueprintConfigSchema.parse()` throwing on configs that contain valid `FilterOption` filterType values written to the wrong path
 
 **Phase to address:**
-Phase: Routing Refactor (the dedicated phase for moving `/` to Home 2.0 and docs to `/docs`). This phase must begin with a link audit, not code changes.
+Filter bar editor phase — the first task must be a comment or ADR clarifying which data path the editor targets.
 
 ---
 
-### Pitfall 2: ESLint Module Boundary Rule Will Block Cross-Module Extension Imports
+### Pitfall 2: WireframeSidebar Component Is a Ghost — Sidebar Renders Inline in WireframeViewer
 
 **What goes wrong:**
-The existing `eslint.config.js` enforces `{ from: 'module', disallow: ['module'] }` — modules cannot import each other. The new extension architecture requires Module A to declare `requires: ['knowledge-base']` and inject components into Module B's slots. If that injection is implemented as a direct import (`import { SomeComponent } from '@/modules/knowledge-base/...'`), ESLint will flag it as an error at the boundary. The natural fix developers reach for is adding an ESLint disable comment or weakening the boundary rule — both destroy the isolation that v1.5 carefully established.
+`WireframeSidebar.tsx` exists with a simple `screens: Screen[]` prop API. However, `WireframeViewer.tsx` renders the sidebar entirely inline (lines 764–944) with full logic: collapse state, icon rail, `partitionScreensByGroups()`, footer from `activeConfig.sidebar.footer`, and fixed positioning. `WireframeSidebar.tsx` is not imported anywhere in `WireframeViewer`. Any sidebar widget code (workspace switcher, account selector, user menu) built inside or against `WireframeSidebar.tsx` will have zero effect on the actual rendered viewer.
 
 **Why it happens:**
-The extension system is designed exactly to enable cross-module data flow. The ESLint boundary rule was designed to prevent exactly that. They are in direct conflict if the extension wires up at the import level rather than through a runtime registry.
+`WireframeSidebar.tsx` was an early prototype. As the sidebar grew complex, it was implemented directly in `WireframeViewer` because the component's API was too limited. The file was never removed or deprecated, creating an apparent (but unused) implementation target.
 
 **How to avoid:**
-All cross-module extensions must be mediated through the `MODULE_REGISTRY` at runtime, not via static imports. The pattern is:
-1. Module A registers an extension object in its own manifest: `extensions: [{ slotId: 'kb-sidebar-widget', component: MyWidget }]`
-2. `MODULE_REGISTRY` (or a new `ExtensionRegistry`) aggregates all extensions at the registry level — this is the one place allowed to import across modules
-3. `<ModuleSlot id="kb-sidebar-widget" />` renders whatever is registered for that slot ID — it never imports from the providing module directly
-4. The ESLint rule remains unchanged: modules still cannot import each other. Only `registry.ts` (type: `lib`) can aggregate from all modules.
-
-If the `boundaries/element-types` rule needs to be updated, the only acceptable change is making `registry.ts` an exception: `{ from: 'lib', allow: ['module'] }` scoped specifically to `src/modules/registry.ts`.
+All sidebar widget additions must be made inside the inline sidebar block in `WireframeViewer.tsx` (lines 764–944). Before writing any sidebar widget code, confirm the rendering site by checking what `WireframeViewer` actually renders. If the inline sidebar block is extracted to a `WireframeViewerSidebar` component during this milestone, that extraction must happen as its own discrete step before any widget additions — not interwoven with them.
 
 **Warning signs:**
-- An `// eslint-disable` comment appears in any file inside `src/modules/[name]/`
-- A module manifest file imports from another module's directory: `import X from '@/modules/other-module/...'`
-- The ESLint boundary rule is weakened from `'error'` to `'warn'` as a "temporary" measure
-- `eslint.config.js` has a new `files` override that exempts a specific module from the boundary check
+- `WireframeSidebar` import appears in `WireframeViewer.tsx` (it is currently absent — any new import is a red flag)
+- A sidebar widget renders correctly in isolation (Storybook / component gallery) but never appears in the wireframe viewer
+- New props added to `WireframeSidebar.tsx` that `WireframeViewer` never passes
 
 **Phase to address:**
-Phase: Module Registry Enhancement (where `ModuleDefinition` type and extension declaration are introduced). Lock down the approved cross-module communication pattern before any slot implementations start.
+Sidebar widgets phase, day one — audit the rendering site before writing a single line of widget code.
 
 ---
 
-### Pitfall 3: Circular Dependency Through Extension Declarations in Manifests
+### Pitfall 3: No Mutation Helpers Exist for Dashboard-Level Config (sidebar, header)
 
 **What goes wrong:**
-When Module A's manifest declares `requires: ['tasks']` and imports the tasks manifest to validate the dependency ID at compile time, and the tasks manifest imports from `MODULE_REGISTRY` to derive nav items — a circular import chain can form: `registry.ts` → `tasks/manifest.ts` → `registry.ts`. This does not always throw an error. JavaScript module loading handles many circular imports silently by substituting `undefined` for the unresolved export at the point of the cycle. The result is that `MODULE_REGISTRY` is `undefined` in the tasks manifest during initialization, causing `navigationFromRegistry` in `Sidebar.tsx` to throw or produce an empty sidebar.
+All existing edit-mode mutation helpers in `WireframeViewer` (`updateWorkingScreen`, `handlePropertyChange`, `handleAddSection`, `handleReorderRows`, etc.) operate on `workingConfig.screens[safeActiveIndex]`. There are zero helpers for mutating `workingConfig.sidebar` or `workingConfig.header`. When adding sidebar and header property panels, the developer must either (a) build new mutation helpers that touch the top-level config, or (b) misuse `updateWorkingScreen` / `handlePropertyChange` for top-level mutations — which will target the wrong path and no-op or corrupt screen data.
 
 **Why it happens:**
-Manifest files currently import `ModuleManifest` type from `registry.ts` (type-only import, safe). The risk appears when manifests start importing _values_ from `registry.ts` — for example, to look up another module's ID string for type-safe `requires` declarations, or when a manifest computes its `navChildren` based on other registered modules.
-
-The existing codebase is currently safe: manifests only import the `ModuleManifest` type (erased at compile time). The danger is introduced the moment any manifest imports a runtime value from `registry.ts`.
+The editor was built exclusively for section-level editing. Dashboard-level config (`sidebar`, `header`) was added to the BlueprintConfig schema in v1.3 but no editor UI or mutation path was wired up — those fields are schema-present but editor-absent.
 
 **How to avoid:**
-Module IDs used in `requires: []` declarations must be string literals defined in a separate constants file, not looked up from `MODULE_REGISTRY`. Create `src/modules/module-ids.ts` with `export const MODULE_IDS = { docs: 'docs', tasks: 'tasks', ... } as const`. Manifests import from `module-ids.ts` (which has no imports) — never from `registry.ts`.
+Add dedicated helpers before building any property panels:
 
-`registry.ts` imports from manifests (one-directional). Manifests import from `module-ids.ts` (one-directional). No cycle.
-
-**Warning signs:**
-- Any manifest file has `import { ... } from '@/modules/registry'` importing a non-type value
-- `MODULE_REGISTRY` is `undefined` at runtime despite being a valid `const` — symptom of circular import resolution
-- Sidebar renders with zero items despite the registry being non-empty in the source
-- Vite build prints a "circular dependency" warning in the console
-
-**Phase to address:**
-Phase: Module Registry Enhancement. The `module-ids.ts` constants file should be created at the start of this phase, before any `requires[]` declarations are written.
-
----
-
-### Pitfall 4: Type Safety Lost When Injecting Components Through Slots
-
-**What goes wrong:**
-`<ModuleSlot id="some-slot" />` needs to render a component registered by another module. The registered component has its own prop types. At the slot render site, those prop types are unknown — the slot system must accept either `React.ComponentType<unknown>` or `React.ComponentType<Record<string, unknown>>`, both of which allow passing any props and accepting any props, defeating TypeScript's strict mode. Teams commonly resolve this by using `any` in the slot renderer, which propagates through the system and silently breaks type checking for cross-module components.
-
-**Why it happens:**
-TypeScript cannot express "a component whose props are determined at registration time and must be satisfied at render time" without generic parameters that propagate through the registry. The straightforward implementation reaches for `ComponentType<any>` or `React.FC<any>` as the registry value type.
-
-**How to avoid:**
-Define a constrained `SlotComponentProps` interface that all slot-registered components must satisfy:
 ```typescript
-// All components registered into slots must accept at minimum these props
-export interface SlotComponentProps {
-  context?: Record<string, string | number | boolean>
-  className?: string
+function updateWorkingConfig(updater: (config: BlueprintConfig) => BlueprintConfig) {
+  setWorkingConfig((prev) => {
+    if (!prev) return prev
+    return updater(prev)
+  })
+  setEditMode((prev) => ({ ...prev, dirty: true }))
+}
+
+function updateWorkingSidebar(patch: Partial<SidebarConfig>) {
+  updateWorkingConfig((cfg) => ({ ...cfg, sidebar: { ...cfg.sidebar, ...patch } }))
+}
+
+function updateWorkingHeader(patch: Partial<HeaderConfig>) {
+  updateWorkingConfig((cfg) => ({ ...cfg, header: { ...cfg.header, ...patch } }))
 }
 ```
-Register components as `React.ComponentType<SlotComponentProps>` (not `any`). Slot-rendering code passes only the props defined in `SlotComponentProps`. If a slot component needs module-specific data, it fetches it internally using its own hooks — the slot only provides the context surface (e.g., `clientSlug`, `moduleId`).
 
-This is the correct trade-off: you lose per-component prop inference at slot boundaries, but you maintain `no any` compliance and a documented contract for what a slot component receives.
+Follow the same pattern as `updateWorkingScreen`: functional update, always sets `dirty: true`.
 
 **Warning signs:**
-- `ComponentType<any>` or `React.FC<any>` appears in `registry.ts` or any slot-related type
-- `npx tsc --noEmit` passes but a slot-registered component silently receives zero props at runtime
-- A slot component file has `props: any` in its function signature
-- ESLint `@typescript-eslint/no-explicit-any` is disabled in a module's component file
+- A sidebar property panel that calls `handlePropertyChange` — that function expects `editMode.selectedSection.rowIndex/cellIndex` and will no-op or throw for dashboard-level changes
+- `dirty` flag not set after a sidebar/header edit
+- Config saved to Supabase shows `sidebar: undefined` or `header: undefined` despite edits
 
 **Phase to address:**
-Phase: Slot Architecture. The `SlotComponentProps` interface and the `ModuleSlot` component implementation must be written before any module registers a component into a slot.
+Header editor phase and sidebar editor phase — add the missing mutation helpers as the first task, before building any property panels.
 
 ---
 
-### Pitfall 5: Over-Engineering the Extension System for a 5-Module App
+### Pitfall 4: Zod Schema Strips Unknown Fields Silently — New Config Fields Lost on Save
 
 **What goes wrong:**
-Building a full extension system with `requires[]` dependency resolution, version checks, activation order, slot lifecycle hooks, and a runtime dependency graph is appropriate for a public plugin marketplace. For 5 in-house modules where all code is in the same repo and all modules are always active, this machinery adds complexity without benefit. The maintenance cost is real: every new module must understand the extension contract, circular dependency analysis becomes a required step, and the admin panel must accurately reflect activation state when there is no meaningful activation to control.
+`saveBlueprint` calls `BlueprintConfigSchema.parse(config)` (blueprint-store.ts line 85) before writing to Supabase. Zod strips unknown keys by default. `HeaderConfigSchema` has `.passthrough()` to preserve forward-compat fields (line 76 of blueprint-schema.ts), but `SidebarConfigSchema` does not. If any new sidebar widget field (e.g., `widgets`, `showSearch`, `showWorkspaceSwitcher`) is added to the `SidebarConfig` TypeScript type but not to `SidebarConfigSchema`, the field will be silently stripped during save — the user configures the sidebar, clicks Salvar, and the data disappears on the next page load.
 
 **Why it happens:**
-The v2.0 goal is described as a "modular framework shell" — a description that invites patterns from extension-heavy frameworks (VS Code, Backstage, Webpack). Those frameworks solve the problem of untrusted third-party plugins loading at runtime. FXL Core does not have that problem.
+`types/blueprint.ts` (TypeScript types) and `lib/blueprint-schema.ts` (Zod validation) are maintained separately. It is easy to update the TypeScript type for autocomplete and forget to update the Zod schema. Zod strips silently — there is no warning, no error, and the save returns `{ success: true }`.
 
 **How to avoid:**
-Implement the minimum viable extension system for the actual use case:
-- `requires[]`: static string array on `ModuleDefinition` — declares intent, no runtime resolution needed
-- Slots: a simple registry (`Map<slotId, ComponentType<SlotComponentProps>[]>`) initialized once at app boot from the static `MODULE_REGISTRY` — no lazy loading, no activation callbacks
-- Admin panel: displays `MODULE_REGISTRY` as a read-only list with status badges — no enable/disable toggles that change application behavior (since all modules are always compiled in)
-- Contracts: enforced by TypeScript type checks at build time, not runtime validation
-
-Add runtime complexity only if the use case actually appears: if a module needs to be toggled by a feature flag, introduce that mechanism for that specific module only.
+Every new field added to `SidebarConfig`, `HeaderConfig`, or any nested config type must be added to both `types/blueprint.ts` and `lib/blueprint-schema.ts` in the same commit. Use a task checklist: "Updated TypeScript type? Updated Zod schema? Added round-trip test?". If adding optional dashboard-level config fields that may grow, add `.passthrough()` to `SidebarConfigSchema`. Write a test in `blueprint-schema.test.ts` that round-trips the new field: `expect(BlueprintConfigSchema.parse({ ...config, sidebar: { footer: 'v1', widgets: [...] } })).toMatchObject({ sidebar: { widgets: [...] } })`.
 
 **Warning signs:**
-- The extension system requires more than 3 new files in `src/` to implement
-- Any slot/extension logic contains `async` resolution, `Promise`, or conditional `await`
-- A `ModuleActivationService` or `DependencyResolver` class is being designed
-- The implementation requires reading from Supabase to determine which modules are "active"
+- New sidebar widget config saves successfully (no error, no toast) but fields are `undefined` after reload
+- `console.log(validated)` inside `saveBlueprint` shows missing fields that existed in the input `config` argument
+- A TypeScript type has a field with no corresponding Zod schema entry
 
 **Phase to address:**
-Phase: Module Registry Enhancement. The type definitions for `ModuleDefinition` and `ModuleExtension` should be reviewed for complexity before any implementation starts. Use the rule: if the type cannot be explained in 5 lines, it is over-engineered for this codebase.
+Any phase that extends the schema. Run `blueprint-schema.test.ts` after every schema change before considering the phase complete.
 
 ---
 
-### Pitfall 6: Home 2.0 Component Hardcodes Module State That Belongs in the Registry
+### Pitfall 5: Header Props Are Schema-Present But Render-Absent in WireframeHeader
 
 **What goes wrong:**
-The current `Home.tsx` already has two hardcoded structures: `MODULE_DESCRIPTIONS` (a `Record<string, string>` mapping module IDs to descriptions not present in `ModuleManifest`) and `clients` (a hardcoded array of client data that belongs in the clients module). The v2.0 Home 2.0 will expand this pattern — adding more hardcoded statistics, quick-action lists, or module-specific widgets directly in `Home.tsx` — because it is simpler than defining a formal contract.
-
-The result is a `Home.tsx` that grows into a 500+ line file with knowledge of every module's internals, contradicting the modular architecture it is supposed to demonstrate.
+`HeaderConfig` has `showPeriodSelector`, `showUserIndicator`, and `actions.{manage, share, export}` in both the TypeScript type and the Zod schema. However, `WireframeHeader.tsx` currently only reads `showLogo` from props. `showPeriodSelector`, `showUserIndicator`, and all `actions.*` fields are passed through to `WireframeViewer` and read from `activeConfig.header`, but `WireframeViewer` passes only `showLogo` to `WireframeHeader` (line 958–961). If a header property panel is built that lets operators toggle `showPeriodSelector: false`, the change will persist to Supabase correctly — but nothing will change visually, because the header never reads that field.
 
 **Why it happens:**
-Cross-cutting concerns (like "what are this module's key metrics?") do not have a clean home until the registry provides a formal contract for it. The easiest path is to add it directly to the file that needs it.
+`SidebarConfig` and `HeaderConfig` were added to the schema as stubs in v1.3 with the intent of wiring them up in a future milestone. The schema was designed ahead of the render implementation. The fields are present in the data layer but the presentation layer has not caught up.
 
 **How to avoid:**
-Extend `ModuleManifest` (or the new `ModuleDefinition` type) with optional metadata fields that modules can populate:
-```typescript
-interface ModuleDefinition {
-  // ... existing fields
-  description?: string          // moves MODULE_DESCRIPTIONS into manifests
-  homeWidget?: React.ComponentType<SlotComponentProps>  // module-contributed home widget
-  quickActions?: QuickAction[]  // module-contributed action buttons for home
-}
-```
-`Home.tsx` reads only from `MODULE_REGISTRY` — it knows nothing about individual modules. Each module's manifest declares what it contributes to the home page.
+Before building the header property panel, wire up all header fields in `WireframeHeader.tsx`. Specifically:
+- `showPeriodSelector` should show/hide the period selector in the center column
+- `showUserIndicator` should show/hide the user chip on the right
+- `actions.manage` / `actions.share` / `actions.export` should show/hide the corresponding action buttons
 
-If a module (like `clients`) needs to show dynamic data (active client count), it contributes a `homeWidget` component that fetches its own data — `Home.tsx` renders the slot but does not own the data fetching.
+Only after the render is wired should a property panel be built — otherwise the header editor "works" but has no visible effect, which is misleading.
 
 **Warning signs:**
-- `Home.tsx` imports from any specific module directory: `import { ... } from '@/modules/clients/...'`
-- `Home.tsx` grows beyond 150 lines of JSX
-- A new `const MODULE_X_DATA: Record<string, Y>` constant appears at the top of `Home.tsx`
-- The ESLint boundary rule fires during a Home 2.0 PR because `Home.tsx` is a `page` type importing from `module` type
+- A header property panel ships but toggling `showPeriodSelector` produces no visual change
+- `WireframeHeader` props only include `title`, `logoUrl`, `brandLabel`, `showLogo` — the other HeaderConfig fields are never passed as props
+- Header editor is "completed" without a browser visual test confirming each toggle affects the render
 
 **Phase to address:**
-Phase: Home 2.0. The `description` and `homeWidget` fields in `ModuleManifest` must be defined before the Home component is rebuilt, not after.
+Header editor phase — wire render before building the editor.
 
 ---
 
-### Pitfall 7: Admin Panel Routing Collides With Module Registry Derived Routes
+### Pitfall 6: Schema Version Not Bumped for Structurally Breaking Changes
 
 **What goes wrong:**
-`App.tsx` currently derives routes from `MODULE_REGISTRY` via `moduleRoutes = MODULE_REGISTRY.flatMap(m => m.routeConfig ?? [])`. The admin panel at `/admin/modules` could be registered as a route in a future `adminManifest`, or hardcoded directly in `App.tsx` as a static route. If it is added to the registry, it appears in the sidebar navigation (undesirable for an admin tool). If it is hardcoded in `App.tsx`, it breaks the invariant that all routes come from the registry, creating two competing sources of truth for routing.
-
-Additionally, `/admin/*` routes must not be accessible to unauthenticated users — they need the `<ProtectedRoute>` wrapper. If the admin routes are derived from the registry and the registry does not carry auth metadata, all module-derived routes have the same auth level (which is currently `<ProtectedRoute>` for all).
+`CURRENT_SCHEMA_VERSION = 1` (blueprint-migrations.ts). The migration chain has a single `v0 → v1` migrator. If new sidebar widget fields are added as non-optional (`z.string()` instead of `z.string().optional()`), all existing blueprints stored in Supabase — including the pilot `financeiro-conta-azul` — will fail `BlueprintConfigSchema.safeParse()` on load. `loadBlueprint` returns `null` when safeParse fails (line 67–69 of blueprint-store.ts). The wireframe viewer shows "Nenhum blueprint encontrado para este cliente" for every existing client immediately after the change is deployed.
 
 **Why it happens:**
-The registry-driven routing pattern in `App.tsx` is clean for the 5 existing modules. The admin panel is a new kind of route: it requires auth, should not appear in sidebar nav, and is "meta" to the module system itself. There is no precedent in the current codebase for a route that is protected but hidden.
+Adding schema fields feels like a safe additive change. The risk is invisible until the stored record is validated against the new schema. There is no CI test that validates the actual stored blueprint shape against the schema before deployment.
 
 **How to avoid:**
-Add an `adminOnly?: boolean` flag to `ModuleManifest` (or create a separate `ADMIN_REGISTRY` constant for admin routes). In `Sidebar.tsx`, filter out `adminOnly` manifests from navigation. In `App.tsx`, render admin routes inside `<ProtectedRoute>` like all other module routes (they already are), but ensure the `AdminModulesPanel` page is gated to operator accounts only if non-operator access ever becomes a concern.
-
-For v2.0 specifically: hardcode the `/admin/modules` route as a static `<Route>` in `App.tsx` under a comment `{/* Admin routes — not registry-derived */}`. Do not add it to MODULE_REGISTRY. If more admin routes appear in future milestones, introduce the `ADMIN_REGISTRY` pattern then.
+Two rules:
+1. Every new schema field must be `.optional()` unless a migrator is written and `CURRENT_SCHEMA_VERSION` is bumped.
+2. Before merging any schema change, run `BlueprintConfigSchema.safeParse(existingBlueprint)` against the actual shape of the stored `financeiro-conta-azul` blueprint. The easiest way: copy the stored JSON from Supabase and add a test case in `blueprint-schema.test.ts`.
 
 **Warning signs:**
-- The admin module panel appears in the Sidebar navigation under "Modulos" or any section
-- `App.tsx` contains a `<Route path="/admin/*" ...>` that is NOT wrapped in `<ProtectedRoute>`
-- A new `adminManifest` is created and added to `MODULE_REGISTRY` — the admin panel is not a module, it is a system tool
+- `loadBlueprint` returning `null` for `financeiro-conta-azul` after a schema change
+- Zod error messages mentioning a new field as `Required` at a path in a stored config
+- `blueprint-schema.test.ts` passes on newly constructed test objects but no test covers the stored shape
 
 **Phase to address:**
-Phase: Admin Panel. The routing strategy for `/admin/modules` must be decided before the component is built.
+Any phase that extends `BlueprintConfigSchema`, `SidebarConfigSchema`, or `HeaderConfigSchema`.
+
+---
+
+### Pitfall 7: Filter Bar Sticky Positioning Broken by Container Overflow Changes
+
+**What goes wrong:**
+`WireframeFilterBar` uses `position: sticky, top: 0, zIndex: 9` to stick inside the scrolling area. Its `top: 0` is relative to the nearest ancestor with `overflow-y: auto` — currently the `<div style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}` wrapping `BlueprintRenderer` in `WireframeViewer` (line 984–986). If the filter bar editor adds a new wrapping element around `BlueprintRenderer` (e.g., a container div for the editor overlay, a panel wrapper), and that wrapper has any `overflow` property set, the sticky context breaks: the filter bar either stops sticking or sticks to the wrong ancestor.
+
+**Why it happens:**
+CSS sticky positioning is context-sensitive. Any intermediate `overflow` value (including `overflow: hidden` set as part of a layout fix) creates a new scroll container, invalidating the sticky behavior of descendants. This is a known CSS gotcha that is easy to introduce accidentally when adding layout chrome.
+
+**How to avoid:**
+When adding editor overlay elements around `BlueprintRenderer`, verify that no new ancestor gains `overflow: hidden`, `overflow: auto`, or `overflow: scroll`. If an editor panel wrapper is needed, use `position: absolute` or `position: fixed` layering rather than a block-level wrapper with overflow. After any layout change, test the filter bar by scrolling the content area and confirming the bar sticks.
+
+**Warning signs:**
+- Filter bar scrolls away with content after adding a wrapper element
+- `position: sticky` visually stops working after a layout change
+- A wrapper element has `overflow: hidden` added as part of a layout constraint fix
+
+**Phase to address:**
+Filter bar editor phase — after any layout changes, visual sticky test before considering the phase done.
 
 ---
 
@@ -211,12 +186,11 @@ Phase: Admin Panel. The routing strategy for `/admin/modules` must be decided be
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Using `any` for slot component props | Avoids designing `SlotComponentProps` interface | Every slot-registered component loses type checking; `tsc --noEmit` cannot catch prop mismatches at slot boundaries | Never — use `SlotComponentProps` with explicit fields |
-| Leaving `MODULE_DESCRIPTIONS` in `Home.tsx` instead of moving it to manifests | Home 2.0 ships faster | Home.tsx has module-specific knowledge that must be updated every time a manifest changes, in a different file | Acceptable only if `description` field is added to manifests within the same milestone |
-| Adding the `/admin/modules` route to `MODULE_REGISTRY` | Single source for all routes | Admin panel appears in sidebar; no precedent for "hidden module" pattern creates confusion | Never — hardcode admin routes as static `<Route>` entries in `App.tsx` |
-| Weakening the ESLint boundary rule from `error` to `warn` | Stops CI failures from blocking the PR | Module isolation is advisory, not enforced; developers ignore warnings; cross-module imports accumulate | Never — if a legitimate cross-module communication need exists, solve it via the registry |
-| Implementing `requires[]` as runtime resolution (dynamically loading module code on demand) | Theoretically enables tree-shaking inactive modules | All 5 modules are always compiled in and always active; lazy-loading them adds Suspense complexity and ChunkLoadError risk with zero bundle-size benefit | Never for this codebase — `requires[]` is metadata only |
-| Building the Home 2.0 as a full-page component with Supabase fetches for all module data | Simpler than the slot system | Home.tsx becomes the god-component for all module state; every new module adds fetches to Home | Acceptable for initial Home 2.0 if homeWidget slots are added in the next milestone |
+| Updating TypeScript type for new sidebar field but not Zod schema | Autocomplete works, no tsc errors | Zod strips the field on save; silent data loss; discovered only after a reload | Never — always update both files in the same commit |
+| Reusing `FilterConfigForm` for the screen-level filter bar editor | Single form, less code | filterType enums diverge; users can set invalid filterType values; Zod rejects the save | Never — these are distinct data paths, build a separate form |
+| Sidebar widget state kept in local component state (not in workingConfig) | Faster to build | Widget config lost on screen navigation or page reload; not persisted to Supabase | Never — all persistent widget config must round-trip through workingConfig → save → load |
+| Adding sidebar widget rendering inline to WireframeViewer without extracting to a component | Avoids refactor complexity | WireframeViewer grows past 1200 LOC; sidebar logic is impossible to test in isolation | Acceptable for v2.2 if scope is limited; plan extraction in next milestone |
+| Not wiring header fields to render before building header property panel | Editor ships faster | Header property panel "works" but produces no visible change; misleading to operators | Never — wire render before building editor |
 
 ---
 
@@ -224,12 +198,11 @@ Phase: Admin Panel. The routing strategy for `/admin/modules` must be decided be
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| `react-router-dom v6` + route migration | Using `<Navigate>` without `replace` — adds a history entry so the browser back button returns to `/` and immediately redirects again (redirect loop) | Always use `<Navigate to="/docs" replace />` when moving a canonical route |
-| `react-router-dom v6` + `moduleRoutes` flatMap | Adding a `/admin/modules` route to a manifest's `routeConfig` — it gets added to the sidebar navigation automatically via `navigationFromRegistry` | Admin routes must NOT be in `MODULE_REGISTRY`; hardcode them as static `<Route>` entries |
-| ESLint `boundaries` plugin + extension imports | Module A importing Module B's component directly to register it as a slot extension | Slot-registered components must be in the _providing_ module's own manifest; the registry aggregates them — never direct cross-module imports |
-| Vercel SPA rewrite + new `/docs` base path | The existing `vercel.json` `/(.*) → /index.html` rewrite already handles `/docs/*` correctly — no change needed | Verify by direct URL access: `yourdomain.com/docs/processo/index` should load React then route to docs |
-| `Sidebar.tsx` hardcoded Home link | The `<NavLink to="/">` in Sidebar will still be "active" when on any route if `end` prop is missing | Add `end` prop to the Home NavLink: `<NavLink to="/" end ...>` — this is already present in current code; ensure it remains after the Home 2.0 migration |
-| `MODULE_REGISTRY` static evaluation + circular manifest imports | A manifest that imports a value from `registry.ts` creates a cycle; Vite resolves it but `MODULE_REGISTRY` may be `undefined` at the import point | Manifests import only types from `registry.ts` (erased at build time); runtime values (module IDs for `requires[]`) come from a separate constants file |
+| Supabase blueprint save | New TypeScript type field not in Zod schema; Zod strips it silently | Update both `types/blueprint.ts` and `lib/blueprint-schema.ts` in same commit; add round-trip test |
+| Optimistic locking | Adding a secondary "save sidebar" button that calls `saveBlueprint` independently | All edits flow into `workingConfig` via mutation helpers; single AdminToolbar save button |
+| WireframeHeader | Assuming `showPeriodSelector`, `showUserIndicator`, `actions.*` are wired to render | They are not — only `showLogo` is read; wire the remaining fields before building the header editor |
+| FilterOption vs FilterConfigSection | Building the sticky filter bar editor using `FilterConfigForm` or targeting `filter-config` section | Screen-level filter bar edits `screen.filters[]` (FilterOption type, 5-variant filterType); section-level `filter-config` blocks are separate |
+| Zod schema + .passthrough() | Forgetting `.passthrough()` on new schema objects for forward-compat | `HeaderConfigSchema` already uses `.passthrough()`; add it to `SidebarConfigSchema` if new widget fields may grow beyond v2.2 |
 
 ---
 
@@ -237,20 +210,10 @@ Phase: Admin Panel. The routing strategy for `/admin/modules` must be decided be
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| `ModuleSlot` re-resolving registered components on every render | Slot renders cause micro-stutters; React DevTools shows excessive re-renders in slot tree | Build the slot registry as a module-level `Map` initialized once at app boot — no `useState`, no `useEffect`, no dynamic `import()` inside slot rendering | Visible immediately if slot registry is rebuilt on every render cycle |
-| Lazy-loading slot-registered components with `React.lazy` | Components registered into slots have a loading state on first render; ChunkLoadError if network drops mid-load | For internal module slots (always-available modules), register the component directly — no `React.lazy` needed since the code is always bundled | Visible on first slot render in production with a slow network |
-| Home 2.0 firing parallel Supabase queries for every active module's activity data | Home page loads slowly; multiple waterfall fetches visible in network tab | Use `Promise.all` for parallel fetches (already done in current Home.tsx); if home widgets fetch independently, each should have its own Suspense boundary | With 5 modules each fetching 10 rows, load time doubles from current baseline |
-| Admin panel re-fetching full `MODULE_REGISTRY` on every visit | Unnecessary re-computation since registry is static | Admin panel reads `MODULE_REGISTRY` directly as a constant — no async fetching, no state | Not a scaling issue since registry is static; main risk is incorrect implementation using `useState` + `useEffect` for static data |
-
----
-
-## Security Mistakes
-
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Rendering slot-registered component output without React's XSS protection | A malicious module (impossible in this closed codebase but poor pattern) injects `dangerouslySetInnerHTML` | Slot components render as normal React elements — React's escaping applies automatically. Never use `dangerouslySetInnerHTML` in slot-registered components |
-| Admin panel at `/admin/modules` accessible without auth | Any unauthenticated visitor can view module configuration and status | Admin routes must be inside `<ProtectedRoute>` — this is already the case for all routes in the Layout wrapper; verify explicitly for admin routes if they are added outside the main protected route tree |
-| Extension `context` prop passing sensitive data to slot components | A slot provides `{ userId, orgSecret }` and the component inadvertently logs it | Define `SlotComponentProps.context` as `Record<string, string | number | boolean>` — no object nesting, no callback functions, no sensitive tokens |
+| `partitionScreensByGroups` called twice per render | Doubled computation on every re-render | Call once, store in a local const; memoize with `useMemo` | Already present at WireframeViewer lines 897–898; visible above ~20 screens |
+| Full `structuredClone(config)` on every `workingConfig` mutation | Slow edit mode with large blueprints | Accept for v2.2 (blueprint is small); plan for incremental patch approach if blueprints grow | Noticeable above ~50 screens with deep section data |
+| Sidebar widget with per-widget local state that resets on screen navigation | Widget config disappears when user navigates between screens | Lift widget state into `workingConfig.sidebar` or `WireframeViewer` state; never keep persistent config in component-local `useState` | Immediately visible on first screen navigation after configuring a widget |
+| Filter bar editor opening a PropertyPanel drawer for a non-section entity | Right-sheet panel appears, user configures filter bar, PropertyPanel's `section` prop is null causing the form to render nothing | Render filter bar editor through a dedicated panel component, not through `PropertyPanel` which expects a `BlueprintSection | null` | Immediately visible — PropertyPanel only renders when `section` is non-null |
 
 ---
 
@@ -258,28 +221,23 @@ Phase: Admin Panel. The routing strategy for `/admin/modules` must be decided be
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Sidebar active state broken after `/` moves to Home 2.0 | Operator sees no active item in sidebar when on the home page, or the wrong item is highlighted | The Home NavLink in Sidebar uses `end` prop — verify this after routing migration; the docs module's sidebar section should not be active when on `/` |
-| Admin panel in sidebar navigation | Operators are confused by an "Admin" item in the main nav alongside Processo, Clientes, etc. | Admin panel is accessed via a URL or a link from the Home 2.0 control center — not a primary sidebar nav item |
-| Home 2.0 duplicates module information already visible in sidebar | Home feels redundant — operators skip it and go directly to sidebar links | Home 2.0 must show _actionable_ information not available in the sidebar: recent activity, quick actions, module health status — not just a list of links to modules |
-| Module slot content has different visual style from host page | Injected widgets feel like foreign elements — different border radius, font size, spacing | `SlotComponentProps` must include `className?: string`; slot components use the app's existing Tailwind utility classes and design tokens, not their own isolated styles |
+| Filter bar not selectable in edit mode (no EditableSectionWrapper around it) | Operator in edit mode cannot click the filter bar to open an editor | Add an explicit "Edit Filter Bar" affordance in edit mode — either a click target on the filter bar itself, or a dedicated button in AdminToolbar |
+| Sidebar editor opening in the right-side PropertyPanel drawer | Spatial dissonance — user edits left sidebar from a right panel | Prefer inline sidebar editing or a top/centered modal for sidebar config; right-sheet works for section properties that appear in the main content area |
+| Saving a header change also discards unsaved section property panel edits | User thinks they only toggled `showLogo` but any section panel edits are bundled into the same save | This is actually correct behavior with the single-save pattern; becomes a problem only if parallel save paths are introduced |
+| Sidebar footer hardcoded to "Desenvolvido por FXL" when `sidebar.footer` is undefined | Operators who want to customize the footer text have no editor for it | Include `footer` text field in the sidebar config editor; it is already read from `activeConfig.sidebar.footer` (line 939 of WireframeViewer) |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-For the v2.0 routing refactor and extension architecture, verify all of the following before considering each phase complete:
-
-- [ ] **Route `/` renders Home 2.0:** Direct URL `yourdomain.com/` loads the new Home component, not the docs module
-- [ ] **Route `/docs` renders docs:** Direct URL `yourdomain.com/docs` routes to the documentation module entry point; no 404, no infinite redirect
-- [ ] **Old doc links work:** URLs like `yourdomain.com/processo/visao-geral` still resolve correctly — the docs module's wildcard routes (`/processo/*`) are unchanged
-- [ ] **Sidebar Home link is active only on `/`:** Navigating to `/docs` does not mark the Home sidebar link as active; `end` prop is present on the Home NavLink
-- [ ] **No ESLint boundary violations:** `npx eslint src/ --max-warnings 0` passes with zero boundary errors after any cross-module slot registration is added
-- [ ] **No circular import warnings in Vite build:** `npm run build` produces no "circular dependency" warnings in the console
-- [ ] **Admin panel not in sidebar:** `/admin/modules` is accessible by URL but does not appear in the sidebar navigation under any section
-- [ ] **Admin panel protected:** Navigating to `/admin/modules` without being logged in redirects to `/login`
-- [ ] **`tsc --noEmit` passes:** Zero TypeScript errors, zero uses of `any` in any new registry, slot, or extension type
-- [ ] **Slot components satisfy `SlotComponentProps`:** Every component registered into a slot passes TypeScript type checking without `@ts-ignore` or type casts to `any`
-- [ ] **Vercel deploy:** After routing migration, manually test direct URL access in the deployed Vercel environment (not just local dev) — Vite dev server handles all routes; Vercel rewrite behavior may differ
+- [ ] **Header fields wired to render:** After header editor phase, toggle each field (`showPeriodSelector: false`, `showUserIndicator: false`, `actions.export: true`) and confirm the change is visible in `WireframeHeader` in the browser — not just stored in the schema.
+- [ ] **Sidebar footer editable:** A sidebar config editor that omits the `footer` field will leave it permanently showing the hardcoded fallback. Verify `footer` is included in the sidebar editor form.
+- [ ] **FilterOption round-trip through Zod:** After saving a screen with `filterType: 'multi-select'` in `screen.filters[]`, reload the page and confirm the filter bar still shows the multi-select control. Silent Zod stripping is invisible until reload.
+- [ ] **Sidebar groups editor affects render:** If a sidebar groups editor writes to `workingConfig.sidebar.groups`, reload and confirm `partitionScreensByGroups` renders the correct group headings and screen assignments.
+- [ ] **WireframeSidebar.tsx not confused with inline sidebar:** After the sidebar widgets phase, search for any new imports of `WireframeSidebar` in `WireframeViewer.tsx` — there must be none.
+- [ ] **Schema migration coverage:** After any `BlueprintConfigSchema` change, run `blueprint-schema.test.ts` with the actual stored `financeiro-conta-azul` blueprint shape as a test case. The parse must succeed without a migration.
+- [ ] **Filter bar editor targets `screen.filters[]`:** After implementing the filter bar editor, inspect `workingConfig.screens[0].filters` in React DevTools — must show updated `FilterOption[]`, not updated `BlueprintSection[]`.
+- [ ] **No new parallel save paths:** After all editor phases, search for `saveBlueprint` call sites in the codebase — must be exactly one call site in `WireframeViewer.handleSave`.
 
 ---
 
@@ -287,13 +245,13 @@ For the v2.0 routing refactor and extension architecture, verify all of the foll
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Route `/` broken — Home 2.0 redirect loops | LOW | Add `replace` to `<Navigate>` component; clear browser history in dev tools; verify in incognito |
-| `/docs` route missing — docs module unreachable | LOW | Add explicit `<Route path="/docs" element={<Navigate to="/processo/index" replace />} />` in App.tsx as a bridge route |
-| ESLint boundary violation from cross-module slot import | LOW | Move the registered component reference into `registry.ts`; remove the direct cross-module import from the manifest |
-| Circular manifest import — `MODULE_REGISTRY` is `undefined` at runtime | MEDIUM | Create `src/modules/module-ids.ts` constants file; replace all value imports from `registry.ts` in manifests with imports from the constants file |
-| `ComponentType<any>` in slot registry — TypeScript silent failures | MEDIUM | Define `SlotComponentProps`; replace `any` with it; fix any component files that do not satisfy the interface — likely requires adding `context?: Record<string, string \| number \| boolean>` to slot component props |
-| Home 2.0 is a god-component importing from all modules | HIGH | Introduce `homeWidget` slot field in `ModuleManifest`; each module moves its home content into its own widget component; Home.tsx renders slots only — requires refactoring each module's home contribution |
-| Admin panel accessible without auth | LOW | Wrap admin route in `<ProtectedRoute>`; verify in incognito |
+| Zod strips new sidebar widget fields on save | HIGH | Add field to `SidebarConfigSchema` with `.optional()`; re-enter data manually (no recovery from Supabase after a save stripped it) |
+| Schema version not bumped — existing blueprints return null on load | MEDIUM | Add migrator `v1 → v2` that sets new fields to defaults; bump `CURRENT_SCHEMA_VERSION`; test against the stored `financeiro-conta-azul` shape |
+| Sidebar widget code in `WireframeSidebar.tsx` (wrong rendering site) | LOW | Move code to the inline sidebar block in `WireframeViewer` or to an extracted component; no data impact |
+| Parallel save path introduced — optimistic locking conflicts appear within same session | MEDIUM | Remove secondary save button; redirect all mutations through `workingConfig`; confirm single `saveBlueprint` call site |
+| FilterType enum mismatch causes save failures for screen-level filters | MEDIUM | Confirm `FilterOptionSchema` already has the 5-variant set (it does); ensure filter bar editor writes to `screen.filters[]`, not `filter-config.filters[]` |
+| Header props not wired to render — editor has no visible effect | LOW | Wire missing props in `WireframeHeader.tsx`; visual-only fix, no data migration needed |
+| Sticky filter bar stops sticking after layout change | LOW | Remove `overflow` property from any new ancestor wrapper element; test sticky behavior in the scroll container |
 
 ---
 
@@ -301,37 +259,30 @@ For the v2.0 routing refactor and extension architecture, verify all of the foll
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Route migration breaks bookmarks and Cmd+K links | Routing Refactor phase — link audit before first commit | Direct URL access to `/`, `/docs`, `/processo/visao-geral` in deployed Vercel environment |
-| ESLint boundary violation from extension imports | Module Registry Enhancement — approve cross-module communication pattern before slot code | `npx eslint src/ --max-warnings 0` in CI |
-| Circular manifest import via registry.ts | Module Registry Enhancement — create `module-ids.ts` at phase start | `npm run build` with no circular dependency warnings |
-| Type safety lost in slot system | Slot Architecture phase — define `SlotComponentProps` before any slot is implemented | `npx tsc --noEmit` passes; grep for `ComponentType<any>` returns zero results |
-| Over-engineering extension system | Module Registry Enhancement — complexity review of `ModuleDefinition` type | Type definition fits in 20 lines; no async resolution logic |
-| Home 2.0 god-component | Home 2.0 phase — require `description` field in manifests before rebuilding Home | Home.tsx imports only from `@/modules/registry`; ESLint boundary rule does not fire |
-| Admin panel in sidebar navigation | Admin Panel phase — routing strategy decided before component is built | Admin URL accessible by direct navigation; absent from sidebar in all states |
-| Vercel routing regression | End of Routing Refactor phase | Manual test in deployed Vercel preview: direct URL access for 5 distinct routes |
+| FilterType enum divergence | Filter bar editor phase | Save a `screen.filters[]` entry with `filterType: 'multi-select'`; confirm Zod accepts it and filter bar renders a multi-select control after reload |
+| WireframeSidebar ghost component | Sidebar widgets phase — day one | Grep for `WireframeSidebar` imports in `WireframeViewer.tsx`; must be zero |
+| Missing workingConfig mutation helpers | Header editor phase + sidebar editor phase | Trace an edit from property panel `onChange` through `updateWorkingSidebar` or `updateWorkingHeader` to `dirty: true` in React DevTools |
+| Zod schema/TypeScript type divergence | Any schema extension phase | Round-trip test: config with new fields → `BlueprintConfigSchema.parse()` → confirm fields survive; run before and after each schema extension |
+| Header fields dead (schema present, render absent) | Header editor phase | Browser visual test: set `showPeriodSelector: false`, reload, confirm period selector absent in `WireframeHeader` |
+| Optimistic locking conflict from parallel saves | All editor phases | Single search for `saveBlueprint` call sites — exactly one must exist |
+| Schema version not bumped for breaking changes | Any schema extension phase | Run `BlueprintConfigSchema.safeParse` against the stored `financeiro-conta-azul` JSON before and after each schema change |
+| Filter bar sticky positioning broken | Filter bar editor phase | Scroll test in the main content area after any layout changes — confirm filter bar sticks at top |
+| Filter bar editor targeting wrong data path | Filter bar editor phase | React DevTools inspection of `workingConfig.screens[0].filters` after using the editor — must show updated `FilterOption[]` |
 
 ---
 
 ## Sources
 
-- Direct codebase inspection: `src/App.tsx` — current routing structure, `moduleRoutes` derivation pattern, static vs. registry-derived routes
-- Direct codebase inspection: `src/modules/registry.ts` — `ModuleManifest` type, `MODULE_REGISTRY` static constant
-- Direct codebase inspection: `src/components/layout/Sidebar.tsx` — `navigationFromRegistry` derivation, hardcoded Home NavLink
-- Direct codebase inspection: `src/pages/Home.tsx` — `MODULE_DESCRIPTIONS` hardcoding pattern, `useActivityFeed` cross-module Supabase fetch
-- Direct codebase inspection: `src/modules/docs/manifest.tsx`, `src/modules/clients/manifest.tsx` — current route config and nav structure
-- Direct codebase inspection: `eslint.config.js` — `boundaries/element-types` rule with `{ from: 'module', disallow: ['module'] }` enforcement
-- Direct codebase inspection: `vercel.json` — `/(.*) → /index.html` rewrite confirms all routes already handled
-- [React Router v6 Navigate component — official docs](https://reactrouter.com/en/main/components/navigate)
-- [React Router v6 redirect handling — Michael Jackson gist](https://gist.github.com/mjackson/b5748add2795ce7448a366ae8f8ae3bb)
-- [Vercel SPA routing 404 fix — Vercel Knowledge Base](https://vercel.com/kb/guide/why-is-my-deployed-project-giving-404)
-- [Vercel Vite SPA rewrite issue — community thread](https://community.vercel.com/t/rewrite-to-index-html-ignored-for-react-vite-spa-404-on-routes/8412)
-- [Slot-Based APIs in React — DEV Community](https://dev.to/talissoncosta/slot-based-apis-in-react-designing-flexible-and-composable-components-7pj)
-- [Martin Fowler — Modularizing React Applications](https://martinfowler.com/articles/modularizing-react-apps.html)
-- [Circular dependencies in JavaScript/TypeScript — Michel Weststrate](https://medium.com/visual-development/how-to-fix-nasty-circular-dependency-issues-once-and-for-all-in-javascript-typescript-a04c987cf0de)
-- [ESLint boundaries plugin + Nx module enforcement — Nx docs](https://nx.dev/docs/technologies/eslint/eslint-plugin/guides/enforce-module-boundaries)
-- [React TypeScript generic component type safety — Total TypeScript](https://www.totaltypescript.com/tips/use-generics-in-react-to-make-dynamic-and-flexible-components)
-- `.planning/PROJECT.md` — v2.0 milestone target features, key decisions, constraints
+- Direct codebase analysis: `tools/wireframe-builder/lib/blueprint-schema.ts` — `FilterOptionSchema` (line 50, 5-variant filterType) vs `FilterConfigSectionSchema` (line 306, 3-variant filterType); `HeaderConfigSchema.passthrough()` (line 76); `SidebarConfigSchema` lacks passthrough
+- Direct codebase analysis: `src/pages/clients/WireframeViewer.tsx` — sidebar rendered inline (lines 764–944); `WireframeSidebar` not imported; `WireframeHeader` called with only `title`, `logoUrl`, `showLogo` (lines 957–961); `partitionScreensByGroups` called twice in same render expression (lines 897–898); `saveBlueprint` called from a single site (`handleSave`)
+- Direct codebase analysis: `tools/wireframe-builder/components/WireframeSidebar.tsx` — minimal 2-prop API (`screens`, `onSelect`), not used in viewer
+- Direct codebase analysis: `tools/wireframe-builder/components/WireframeHeader.tsx` — only `showLogo` prop read; `showPeriodSelector`, `showUserIndicator`, `actions.*` absent from component props and render
+- Direct codebase analysis: `tools/wireframe-builder/lib/blueprint-store.ts` — `BlueprintConfigSchema.parse(config)` (line 85) strips unknown fields; `safeParse` failure returns `null` (lines 67–69)
+- Direct codebase analysis: `tools/wireframe-builder/lib/blueprint-migrations.ts` — `CURRENT_SCHEMA_VERSION = 1`, single `v0 → v1` migrator
+- Direct codebase analysis: `tools/wireframe-builder/components/editor/PropertyPanel.tsx` — renders only when `section: BlueprintSection | null` is non-null; not suitable for non-section editors
+- Direct codebase analysis: `tools/wireframe-builder/components/editor/property-forms/FilterConfigForm.tsx` — operates on `FilterConfigSection.filters[]` (3-variant filterType), separate from screen-level `FilterOption[]`
+- Direct codebase analysis: `tools/wireframe-builder/components/BlueprintRenderer.tsx` — filter bar rendered via `WireframeFilterBar` before the row grid (lines 146–156); filter bar has no `EditableSectionWrapper` equivalent in edit mode
 
 ---
-*Pitfalls research for: v2.0 — modular extension architecture added to existing React 18 SPA*
+*Pitfalls research for: v2.2 — Configurable Layout Components (sidebar widgets, header editor, filter bar editing)*
 *Researched: 2026-03-13*

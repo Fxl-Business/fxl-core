@@ -1,387 +1,268 @@
-# Feature Research: v2.0 — Framework Shell + Modular Architecture
+# Feature Research
 
-**Domain:** Modular React SPA framework shell — extension system, slot-based UI injection, admin panel
+**Domain:** Wireframe builder — configurable layout components (sidebar widgets, header configurator, filter bar editor)
 **Researched:** 2026-03-13
-**Confidence:** HIGH for patterns backed by both existing codebase inspection and verified community references. MEDIUM for contract/extension architecture (no single authoritative React source — synthesized from OpenMRS O3, UI Composition Architecture, and Plugin Registry patterns). LOW for admin panel visual UX (no directly analogous internal tool found).
+**Confidence:** HIGH (based on direct codebase analysis) / MEDIUM (for UX pattern conventions)
 
 ---
 
-## Scope
+## Context: What Already Exists vs What Is New
 
-This research covers ONLY the new features for v2.0. It answers:
+This research is scoped to **v2.2 additions only**. The visual editor already exists and works
+(AdminToolbar, PropertyPanel via Sheet, ScreenManager, EditableSectionWrapper, 28 property forms).
+The goal is to extend it to cover layout-level config: sidebar, header, and filter bar.
 
-- What are **table stakes** for each of the six feature areas?
-- What are **differentiators** — enhancements worth having but not blocking?
-- What are **anti-features** — things that seem good but create disproportionate complexity?
-- What are the **feature dependencies** — what must exist before what?
-- What is the **complexity** given the existing MODULE_REGISTRY + ModuleManifest infrastructure?
+### Already built (not in scope)
 
-The existing MODULE_REGISTRY, ModuleManifest type, ESLint boundary enforcement, and module-driven sidebar/routing are treated as **fixed infrastructure** (already built in v1.5).
+- PropertyPanel system (Sheet, section-registry-driven property forms)
+- ScreenManager (add/rename/delete/reorder screens in sidebar)
+- AdminToolbar (edit mode toggle, save, share, comments)
+- SidebarConfig schema: `footer?: string`, `groups?: SidebarGroup[]`
+- HeaderConfig schema: `showLogo`, `showPeriodSelector`, `showUserIndicator`, `actions.*`
+- FilterOption[] per screen (rendered by WireframeFilterBar — select, date-range, multi-select, search, toggle)
+- filter-config section block (editable via PropertyPanel)
+- WireframeViewer renders sidebar groups and footer from `config.sidebar`
+- WireframeHeader renders logo from `config.header.showLogo` + branding.logoUrl
 
----
+### Not yet built (v2.2 scope)
 
-## Architecture Context
-
-The existing module registry in `src/modules/registry.ts` has:
-
-```typescript
-interface ModuleManifest {
-  id: string
-  label: string
-  route: string
-  icon: LucideIcon
-  status: ModuleStatus      // 'active' | 'beta' | 'coming-soon'
-  navChildren?: NavItem[]
-  routeConfig?: RouteObject[]
-}
-```
-
-The v2.0 milestone needs to extend this with: extensions, slots, badges, contracts, and admin visualization. The research maps the new features against this existing foundation.
+- Compound sidebar widgets (workspace switcher, account selector, user menu, search)
+- SidebarConfig schema extensions for widget fields
+- Visual editor panels to edit SidebarConfig (footer text, groups, widgets)
+- Visual editor panels to edit HeaderConfig (all fields as toggles/inputs)
+- Visual editor to add/remove/configure FilterOption[] per screen (sticky bar filters)
+- WireframeHeader wired to respect showPeriodSelector and showUserIndicator (schema exists, render ignores them)
 
 ---
 
 ## Feature Landscape
 
-### Feature Area 1: Home 2.0 — Control Center
+### Table Stakes (Users Expect These)
 
-**What it is:** Replace the current generic card grid (module tiles + activity feed + clients list) with a purpose-built operational control center. The Home page becomes the primary navigation surface and situational awareness panel for operators.
-
-#### Table Stakes
-
-Features users expect from an operational home page. Missing these = the page is just a fancier menu.
+Features a wireframe builder operator expects when "configuring the sidebar/header/filter bar."
+Missing any of these means the config feels incomplete or read-only.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Status summary of all active modules | Operators need at-a-glance health of what's active | LOW | Read from enhanced MODULE_REGISTRY; render per-module status badges |
-| Quick action shortcuts to most-used flows | Home should reduce clicks to critical tasks | LOW | Static configured per-module in manifest or derived from usage patterns |
-| Recent activity feed cross-module | Already exists in v1.5; must be preserved and enhanced | LOW | Existing `useActivityFeed` hook fetches KB + Tasks; extend to include new event types |
-| Per-module state summary (count of items, last action) | Context before navigating | MEDIUM | Requires Supabase queries per module at page load; aggregate KPIs |
-| Navigation that reflects module status (disabled = grayed, beta = badged) | Visual affordance for module state | LOW | Extend existing module card with badge rendering from `ModuleManifest.status` |
+| Toggle header fields on/off (showLogo, showPeriodSelector, showUserIndicator) | HeaderConfig already has these booleans — they should be editable, not dead schema | LOW | Schema exists. Needs: Sheet panel with toggle switches per field. WireframeHeader already reads `showLogo`. `showPeriodSelector` and `showUserIndicator` are schema-only today — render doesn't use them. Need render wiring before editor panel is useful. |
+| Toggle header action buttons (manage, share, export) | `actions.*` already in schema — operators want to control which buttons appear in the demo header | LOW | Same gap: schema exists, WireframeHeader render ignores `actions.*`. Need: render wiring + editor panel. |
+| Edit sidebar footer text | `footer?: string` is in SidebarConfig and already rendered in WireframeViewer. Operator needs to change it without editing the config file. | LOW | Single text input in sidebar config panel. Already rendered at line 939 of WireframeViewer. |
+| Edit sidebar group labels and membership | `groups?: SidebarGroup[]` is in schema and rendered. Needs a visual editor to create/rename groups and assign screens. | MEDIUM | Create/delete group. Rename group label. Assign screens by checkbox or select (no drag-and-drop required — a multi-select per group is sufficient). |
+| Add/remove filter controls per screen | FilterOption[] lives on each BlueprintScreen. Operators should be able to add a new filter (select type, key, label, options) and remove existing ones for the currently active screen. | MEDIUM | Panel opens for current screen. "Add filter" button adds a new row. Delete per item. Existing WireframeFilterBar already renders all filterTypes correctly — no render changes needed. |
+| Configure filter label and options | Each FilterOption has label, options[], filterType. These need to be editable inline. | MEDIUM | Inline editable rows in filter bar panel. Label text input, filterType select, options as comma-separated or add-one-at-a-time tags. |
+| Workspace switcher widget in sidebar header | shadcn sidebar-07 (team-switcher.tsx) pattern: a dropdown chip in the sidebar header showing org/workspace name. For wireframes this is decorative — operator sets the label text. | LOW-MEDIUM | Schema: new `headerWidget?: 'workspace-switcher' \| 'none'` + `workspaceName?: string` in SidebarConfig. Renderer: static mock dropdown chip in sidebar header. Editor: toggle + label input. |
+| User menu widget in sidebar footer | shadcn sidebar-07 (nav-user.tsx) pattern: avatar + name + role + dropdown chevron in sidebar footer. For wireframes uses mock data or config-level label. | LOW | Schema: `footerWidget?: 'user-menu' \| 'status' \| 'none'`. Currently footer renders a "Sistema Ativo" status chip (line 931-944 of WireframeViewer). Operator should toggle between status chip and user menu. |
 
-#### Differentiators
+### Differentiators (Competitive Advantage)
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Pinned/recent clients section | Operators work with one or two active clients; fast return | LOW | Read from last-visited localStorage or from Supabase recent sessions |
-| In-context system health indicators | Know at a glance if Supabase is reachable, auth is OK | MEDIUM | Lightweight heartbeat check on mount; show indicator per service |
-| Cross-module quick task creation | Create a task or KB entry from Home without navigating | MEDIUM | Modal/command palette integration; already have cmdk infrastructure |
-| Priority notifications or alerts | Outstanding tasks, unresolved comments, pending actions | HIGH | Requires a notifications system; deferred — not in v2.0 scope |
-
-#### Anti-Features
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Fully customizable dashboard (drag layout) | "Make it my own" | Heavy complexity for one internal user; layout drift creates maintenance burden | Fixed purposeful layout; use priority and recent sections instead |
-| Real-time data feeds (live updates) | Fresh data = better decisions | Adds WebSocket/polling infrastructure for minimal gain in single-user context | On-demand refresh button; accept ~5min staleness |
-| Module usage analytics charts | Meta-insight into tool adoption | Premature optimization before product is stable; adds instrumentation complexity | Note usage manually in retrospectives |
-
----
-
-### Feature Area 2: Module Registry Enhancement
-
-**What it is:** Extend `ModuleManifest` type with new fields: `description`, `badge` (visual tag like "NEW" or "BETA"), `extensions` (contributions to other modules' slots), and `enabled` (runtime toggle). This makes the registry the single source of truth for everything about a module.
-
-#### Table Stakes
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| `description` field on ModuleManifest | Home 2.0 needs module descriptions; currently a separate `MODULE_DESCRIPTIONS` constant in Home.tsx | LOW | Add field to interface, migrate Home.tsx constant to manifest |
-| `badge` field (`'new' \| 'beta' \| 'alpha' \| null`) | Visual badge in sidebar and Home cards | LOW | Replace current `status` field semantics or augment it; render in Sidebar and Home |
-| `enabled` boolean field | Foundation for module toggle in admin panel | LOW | Already implicit via `status !== 'coming-soon'`; make explicit for admin control |
-| `extensions` field (array of extension definitions) | Contract architecture requires modules to declare their contributions | MEDIUM | New `ModuleExtension` type; modules declare what they inject and where |
-| Typed `ModuleExtension` shape | TypeScript enforcement of extension contracts | MEDIUM | Define interface with `slotId`, `component`, `priority`, optional `condition` |
-
-#### Differentiators
+Features beyond table stakes that improve the operator's iteration speed or expand wireframe fidelity.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| `requiredModules` field (dependency declaration) | Auto-disable extension if required module is not active | MEDIUM | Array of module IDs; admin panel shows dependency graph |
-| `version` field | Versioning for future migration tooling | LOW | Cosmetic for now; enables future upgrade paths |
-| Module metadata validation at startup | Catch misconfigured manifests early | LOW | Zod schema over `MODULE_REGISTRY` entries; validated on app init |
+| Account selector widget (sidebar secondary slot) | Lets operators mock a "client/account" switcher below the workspace switcher — common in SaaS BI products that support multi-tenant views. Useful for demos. | MEDIUM | Schema: `accountSelector?: { label: string; options?: string[] }` in SidebarConfig. Renderer: a compact dropdown chip in sidebar header, stacked below workspace switcher. Editor: toggle + label + options list. |
+| Search widget in sidebar nav | A disabled search box inside the sidebar nav area (above screens list). shadcn sidebar-07 includes this. Purely decorative in wireframe context but signals "this is a real product." | LOW | Schema: `showSearch?: boolean` in SidebarConfig. Renderer: a disabled input with Search icon above the nav list. No state needed. |
+| Filter "add from library" presets | Quick-add common BI filter presets: "Período Mensal", "Empresa", "Produto", "Status", "Responsável". Saves operator time vs configuring from scratch. | LOW | Just hardcoded FilterOption templates in the filter editor panel. One-click adds pre-filled rows. No schema change. |
+| Header brandLabel override | Currently brandLabel shown in WireframeHeader comes from `config.label`. Operator may want a shorter display name without renaming the whole blueprint. | LOW | Schema: `header.brandLabel?: string`. Editor: text input that falls back to config.label. WireframeHeader already accepts `brandLabel` prop — needs to read from config instead of always using config.label. |
+| Period selector type at dashboard level | `hasCompareSwitch` and `periodType` are per-screen. A dashboard-level `header.periodType` lets the header period selector match the default without per-screen override. | LOW | Schema: `header.periodType?: 'mensal' \| 'anual'`. Editor: radio/select in header panel. Improves wireframe coherence for demos. |
 
-#### Anti-Features
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Dynamic/lazy module loading (code splitting by module) | Faster initial load | Requires complex async registry resolution at runtime; breaks static type safety | Keep all modules eager; bundle is small enough at current scale |
-| Remote module configuration (fetch from Supabase) | Operator-configurable without code deploy | Introduces async bootstrapping, race conditions, potential unavailability | Static registry in code; admin panel toggles are persisted in localStorage or Supabase for UX only |
-| Plugin marketplace / third-party modules | Extensibility for external teams | Far beyond scope; no authentication, no sandboxing | Internal modules only in v2.0 |
-
----
-
-### Feature Area 3: Contract Architecture — Module Extensions
-
-**What it is:** A typed system where modules declare extensions — UI contributions to named slots owned by other modules. When both the contributing module and the slot-owning module are active, the contribution appears automatically. Example: the Tasks module declares an extension for the `client-detail-actions` slot owned by the Clients module; when both are enabled, a "Create Task" button appears in client detail pages.
-
-#### Table Stakes
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Named slot concept (`slotId: string`) | A slot must have a stable identity for extensions to target | LOW | String enum or literal type; defined by the slot-owning module |
-| Extension declaration in manifest | Modules declare contributions at registration time, not at render time | MEDIUM | `extensions: ModuleExtension[]` field added to `ModuleManifest` |
-| Automatic activation when both modules are active | The "contract" — no wiring code needed when both enabled | MEDIUM | `SlotRenderer` checks registry for extensions targeting its `slotId` from active modules |
-| TypeScript-typed extension component signature | Extensions must match the slot's expected props | MEDIUM | Each slot defines a `SlotProps` type; extension components must conform |
-| No direct cross-module imports | Extensions are wired through the registry, not via import | MEDIUM | ESLint boundary rules already exist; reinforce via registry-only access |
-
-#### Differentiators
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Extension priority ordering | Multiple extensions in same slot appear in predictable order | LOW | `priority?: number` field on `ModuleExtension`; `SlotRenderer` sorts by priority |
-| Conditional extension rendering | Extension only appears when data conditions are met | MEDIUM | `condition?: (context: SlotContext) => boolean` on `ModuleExtension` |
-| Slot fallback content | When no extensions are registered for a slot, show a default | LOW | `<ExtensionSlot slotId="x" fallback={<DefaultContent />}>` |
-
-#### Anti-Features
+### Anti-Features (Commonly Requested, Often Problematic)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Event bus / pub-sub between modules | "Loose coupling" | Harder to trace than registry-declared contracts; TypeScript loses track of event shapes | Use direct slot injection for UI, Supabase for shared data; no event bus |
-| Async extension loading (import()) | Code splitting | Introduces loading states in every slot; over-engineering for 5 modules | All extensions are synchronous components; lazy loading at route level is sufficient |
-| Extension override (one module replaces another's extension) | Maximum flexibility | Complex precedence rules, hard to debug | Use priority ordering; if conflict arises, treat as architecture smell |
-| Context/state sharing between extensions in the same slot | Rich interactions between injected components | Creates tight coupling through shared context; defeats isolation | Extensions communicate through shared Supabase data or URL state |
-
----
-
-### Feature Area 4: Slot-Based UI Injection System
-
-**What it is:** The runtime mechanism that powers contracts. A `<ExtensionSlot slotId="x" context={...}>` component that looks up registered extensions for `slotId` from currently active modules and renders them. The complement to extension declarations in manifests.
-
-#### Table Stakes
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| `<ExtensionSlot slotId="..." context={...}>` component | The rendering primitive for all slot-based injection | MEDIUM | Reads `MODULE_REGISTRY`, filters active modules, collects their extensions for `slotId`, renders components |
-| Context passing to extensions | Extensions need data from the host page/module | LOW | `context` prop passed through to each extension component |
-| Renders nothing (not even a wrapper div) when no extensions | Slots must be zero-cost when unused | LOW | Return `null` or a Fragment when extension array is empty |
-| Type-safe context per slot | Each slot's context type is defined by the owning module | MEDIUM | Generic `ExtensionSlot<TContext>` or typed slot registry |
-| Active module filtering | Extensions from disabled/coming-soon modules are silently ignored | LOW | Filter `MODULE_REGISTRY` by `enabled === true` before collecting extensions |
-
-#### Differentiators
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| `useExtensions(slotId)` hook variant | For programmatic extension access (non-UI slots like data transforms) | LOW | Simple hook wrapping the same registry lookup |
-| Error boundary per extension | One broken extension does not crash the slot | LOW | Wrap each extension render in a React error boundary |
-| Dev-mode slot inspector (outline + label when `?debug=slots`) | Debugging tool for slot layout during development | LOW | CSS outline + label on each ExtensionSlot when URL param present |
-
-#### Anti-Features
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| CSS-in-JS slot styling from extension component | Extension controls its own layout within the slot | Creates visual inconsistency; extensions should adapt to host context | Extensions receive layout classes via context; host defines the container |
-| Slot registry separate from module registry | "Cleaner separation" | Adds a second registry to keep in sync with the module registry | Slots are implicitly defined by `slotId` strings used in `<ExtensionSlot>`; no explicit slot registry needed |
-| Lazy-loaded extension components | Performance optimization | Adds loading spinners inside slots; disruptive for small UI contributions | All extension components are eagerly loaded with their module |
-
----
-
-### Feature Area 5: Admin Panel — Module Visualization and Control
-
-**What it is:** An internal page at `/admin/modules` that provides a visual overview of the module registry: what modules exist, their status, their extensions, their slot contributions, and the ability to toggle modules on/off for the current session.
-
-#### Table Stakes
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| List/grid of all modules with status indicators | Operators need an overview of what's installed | LOW | Read `MODULE_REGISTRY`; render per-module card with status badge |
-| Enable/disable toggle per module | Control which modules are active | MEDIUM | Toggle state persisted in localStorage or Supabase; `enabled` field in manifest is the static default |
-| Extension map per module (what it contributes, where) | Debugging and understanding cross-module wiring | MEDIUM | Read `extensions` array from manifest; render as expandable section |
-| Which slots each module owns | Complement to extensions — shows both sides of the contract | MEDIUM | Derive from `<ExtensionSlot>` usage (static analysis at build time or documentation in manifest) |
-| Active module count summary | At-a-glance system state | LOW | Count `MODULE_REGISTRY.filter(m => m.enabled)` |
-| Navigation to `/admin/modules` protected (operator-only) | Internal tool should not be accessible to external clients | LOW | Wrap in `<ProtectedRoute>` like other operator routes |
-
-#### Differentiators
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Visual extension dependency graph | See which modules depend on each other | HIGH | Requires graph rendering (force-directed or tree); disproportionate complexity for v2.0 |
-| Extension slot coverage audit (slots with/without extensions) | Identify unregistered slots | MEDIUM | Cross-reference defined `<ExtensionSlot>` usages with registered extensions |
-| Module configuration viewer | Show full manifest for each module | LOW | Pretty-print manifest as JSON in expandable section |
-| Module health check (route resolves, component renders) | Smoke test each module | HIGH | Would require rendering each module in a test harness; out of scope |
-
-#### Anti-Features
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Persistent module toggle (Supabase storage) | Survive page reloads | Creates split between static manifest (`enabled: true`) and runtime override (Supabase); source of truth confusion | Use localStorage for session-level toggle; treat static manifest as the authoritative default |
-| Per-user module access control | Role-based feature access | Requires auth-level feature flags (Clerk roles + module intersection); too complex for v2.0 | All authenticated operators see all modules; access control is future work |
-| Module install/uninstall UI | Dynamic module lifecycle | Modules are code, not packages; install = deploy | Admin panel is read/control only, not package management |
-| Drag-to-reorder modules | Customize sidebar order | Sidebar order follows MODULE_REGISTRY array order; change in code | Accept static order; document it as intentional |
-
----
-
-### Feature Area 6: Routing Refactoring
-
-**What it is:** Change the top-level routes so that `/` maps to the new Home 2.0 page and `/docs` (or `/processo`) maps to the docs module entry point. The Sidebar also reflects the new structure. This is a prerequisite for Home 2.0 being a true first-class destination.
-
-#### Table Stakes
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| `/` → Home 2.0 (already true in v1.5; must remain) | Home is the entry point | LOW | Already implemented; ensure it survives the refactoring |
-| `/docs` or `/processo/index` as docs module entry | Docs should have a clean entry URL | LOW | `docsManifest.route` currently points to `/processo/index`; evaluate if `/docs` is cleaner |
-| Sidebar Home link always visible | Home is always reachable | LOW | Already implemented; preserve across refactoring |
-| Module routes derived entirely from `ModuleManifest.routeConfig` | No hardcoded routes in App.tsx outside of auth/wireframe exceptions | LOW | Already mostly true in v1.5; audit for any remaining hardcoded module routes |
-| Sidebar module section reflects `enabled` state | Disabled modules disappear from nav | LOW | Extend the `filter(m => m.status !== 'coming-soon')` logic to also check `enabled` |
-| Clean redirect for any legacy `/` routes | No broken links after refactoring | LOW | Add `<Navigate>` redirect where needed |
-
-#### Differentiators
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Route-level breadcrumb reflecting module → section → page | Better orientation in nested navigation | MEDIUM | Requires `DocBreadcrumb` integration with module identity; currently only shows doc path |
-| Sidebar active-module section auto-expand | The active module's nav tree opens on page load | LOW | Already implemented via `hasActiveChild`; verify it works with new routing |
-| Admin routes group (`/admin/*`) | Clean namespace for internal tooling | LOW | Add `/admin/modules` route; protect with `<ProtectedRoute>` |
-
-#### Anti-Features
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Hash-based routing (`/#/modules`) | Simpler SPA routing | Already using `BrowserRouter` with Vercel rewrite; hash routing would be a regression | Keep `BrowserRouter` |
-| Module-specific route prefixes (`/tasks/*`, `/kb/*`) | Namespace clarity | Routes are already structured this way in v1.5; further abstraction not needed | Accept current pattern |
-| Client-facing public routes for modules | External access to internal modules | Out of scope; external clients access only wireframe share links | Keep all module routes operator-only |
+| Drag-and-drop screens between sidebar groups | Intuitive visual reorganization | Requires a second @dnd-kit context inside the sidebar config panel, layered on top of the existing ScreenManager DnD. Adds interaction complexity, testing surface, and conflicts with the existing DnD sortable context in ScreenManager. | Multi-select assign: a simple "Grupo" select or checkbox per screen in the group editor. Same end state, zero DnD complexity. |
+| Replace custom sidebar with shadcn SidebarProvider | Code consistency with shadcn sidebar-07 | WireframeViewer sidebar is intentionally a custom fixed-position layout outside the app theme. Switching would require restructuring the entire WireframeViewer layout tree and break the `--wf-sidebar-*` CSS var system and dark chrome. | Use shadcn sidebar-07 as a visual widget reference only, not as structural infrastructure. |
+| Full shadcn Sidebar component integration | "Use the component we already have" | The app uses one sidebar (the FXL Core navigation); the wireframe uses a second custom sidebar. Two Sidebar infrastructure systems in the same app creates CSS var collision between `--sidebar-*` (shadcn) and `--wf-sidebar-*` (wireframe). | Design reference only: adopt the visual widget patterns (workspace switcher appearance, user menu appearance) without adopting shadcn Sidebar primitives. |
+| Per-screen header config overrides | Flexibility | Adds schema complexity (array of per-screen overrides vs single dashboard-level config), increases PropertyPanel surface area, and the wireframe header is intentionally global chrome. | Dashboard-level HeaderConfig is the right boundary. Screen-level variation belongs in the filter bar, not the header. |
+| Live filter logic (filtering actual section content) | Looks "real" | Wireframes use mock data. Implementing real filter dispatch across 28 section types would require connecting all components to a filter context, which is product-level scope (the generated dashboard, not the wireframe tool). | Keep filters as interactive UI decorations: correct visual states (toggles toggle, selects open) without affecting mock data. |
+| Sidebar widget drag reordering between zones | Power-user flexibility | The sidebar has three fixed zones (header widget, nav, footer widget). Allowing free zone reorder adds complex config with no meaningful wireframe fidelity gain. | Fixed zone positions (header / nav / footer) with per-zone configuration options. Simple and sufficient for dashboard wireframe demonstrations. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Home 2.0 (Feature Area 1)
-    └──requires──> Enhanced Module Registry (Feature Area 2)
-                       [description, badge, enabled fields]
+[Header Config Panel]
+    └──requires──> [WireframeHeader wires showPeriodSelector + showUserIndicator + actions.* to render]
+                       (currently schema only — renderer ignores these fields entirely)
+                       (without this wiring, the panel edits fields with no visual effect)
 
-Contract Architecture (Feature Area 3)
-    └──requires──> Enhanced Module Registry (Feature Area 2)
-                       [extensions field on ModuleManifest]
-    └──enables──>  Slot-Based UI Injection (Feature Area 4)
+[Filter Bar Editor Panel]
+    └──requires──> [updateWorkingScreen() — already exists in WireframeViewer]
+                       (same mutation pattern as section operations, just mutates screen.filters instead)
+    └──requires──> [Editor entry point in edit mode]
+                       (how does the operator open the panel? most natural: click on WireframeFilterBar
+                        area in edit mode shows "Configure filtros desta tela" Sheet)
 
-Slot-Based UI Injection (Feature Area 4)
-    └──requires──> Contract Architecture (Feature Area 3)
-                       [ExtensionSlot reads from extensions registry]
-    └──enhances──> Home 2.0 (Feature Area 1)
-                       [slots on Home page accept cross-module contributions]
+[Sidebar Config Panel]
+    └──requires──> [updateWorkingConfig() helper for top-level (non-screen) mutations]
+                       (currently only updateWorkingScreen() exists — need a config-root patcher)
+    └──requires──> [SidebarConfig schema extension for widget fields]
 
-Admin Panel (Feature Area 5)
-    └──requires──> Enhanced Module Registry (Feature Area 2)
-                       [must read description, badge, extensions, enabled]
-    └──requires──> Contract Architecture (Feature Area 3)
-                       [must display extension → slot mapping]
-    └──enhances──> Slot-Based UI Injection (Feature Area 4)
-                       [admin toggle reflects in slot rendering]
+[SidebarConfig schema extension]
+    └──requires──> [Zod schema update in blueprint-schema.ts + TypeScript type update in blueprint.ts]
+                       (additive — no breaking change to existing fields)
 
-Routing Refactoring (Feature Area 6)
-    └──requires──> Enhanced Module Registry (Feature Area 2)
-                       [enabled field drives sidebar filtering]
-    └──enhances──> Home 2.0 (Feature Area 1)
-                       [clean `/` route is prerequisite for Home as control center]
-    └──enhances──> Admin Panel (Feature Area 5)
-                       [admin routes under `/admin/*` namespace]
+[Sidebar widget renderers]
+    └──requires──> [SidebarConfig schema extension for widgets]
+    └──requires──> [WireframeViewer sidebar inline render updated to conditionally show widget slots]
+
+[Account Selector widget]
+    └──enhances──> [Workspace Switcher widget]
+                       (they occupy different sidebar header slots — stacked vertically, same panel)
+
+[Filter "add from library" presets]
+    └──enhances──> [Filter Bar Editor Panel]
+                       (preset templates — convenience layer, no schema dependency)
 ```
 
 ### Dependency Notes
 
-- **Enhanced Module Registry is the foundation:** Features 1, 3, 4, 5, and 6 all read from the registry. It must be implemented first in any phase plan.
-- **Contract Architecture enables but does not require Slot Injection:** The types and manifest declarations (Feature 3) can be defined and populated before the `<ExtensionSlot>` runtime component (Feature 4) exists. This allows parallel development.
-- **Admin Panel depends on contracts being defined:** The panel's extension map visualization only has content once modules have declared their extensions. Build the panel UI before extensions are populated, then populate.
-- **Routing Refactoring is mostly already done:** The `/ → Home` and `routeConfig → App.tsx` patterns are in place from v1.5. This feature area is primarily cleanup + adding `/admin/*` namespace.
-- **Home 2.0 does not require slots:** The control center layout can be built with a static structure. Slots are an enhancement layer that can be added after the core layout ships.
-
----
-
-## Complexity Assessment per Feature Area
-
-| Feature Area | Complexity | Why | Depends On |
-|-------------|------------|-----|------------|
-| Home 2.0 | MEDIUM | New UI layout + per-module aggregate Supabase queries | Enhanced Registry |
-| Module Registry Enhancement | LOW-MEDIUM | TypeScript interface extension + migration of existing fields | None (foundation) |
-| Contract Architecture | MEDIUM | New types + manifest population across 5 modules | Enhanced Registry |
-| Slot-Based UI Injection | MEDIUM | New `ExtensionSlot` component + registry lookup + TypeScript generics | Contracts |
-| Admin Panel | MEDIUM | New page + manifest visualization; no heavy data fetching | Registry + Contracts |
-| Routing Refactoring | LOW | Mostly already done; add `/admin/*` + audit leftover hardcoded routes | Enhanced Registry |
+- **WireframeHeader render wiring is the critical first step for header config:** `showPeriodSelector` and `showUserIndicator` exist in HeaderConfig schema but WireframeHeader currently only reads `showLogo`. The header config panel has zero visual effect until the renderer is wired. This is a prerequisite, not an assumption.
+- **updateWorkingConfig() is the critical first step for sidebar/header panels:** Currently only `updateWorkingScreen()` mutates the working config. Header and sidebar config live at the config root level, not inside a screen. A new helper patching `workingConfig.sidebar` / `workingConfig.header` follows the identical pattern and must exist before any panel can commit changes.
+- **Filter Bar Editor uses existing updateWorkingScreen:** Unlike sidebar/header, filters live on each BlueprintScreen (`screen.filters: FilterOption[]`). The existing `updateWorkingScreen()` can mutate this directly — no new helper needed.
+- **Schema extension must precede all new renderers and editor panels:** Any new field on SidebarConfig or HeaderConfig must first be added to blueprint-schema.ts (Zod) and blueprint.ts (TypeScript type). Only then can renderers read it and panels write it. This is a single-file change per schema file — low cost, but the order matters.
+- **shadcn sidebar-07 is a visual reference, not a code dependency:** The compound widget patterns (workspace switcher = team-switcher.tsx, user menu = nav-user.tsx) inform what the wireframe widgets should look like, but their code should not be imported — the wireframe uses custom components with `--wf-*` tokens.
 
 ---
 
 ## MVP Definition
 
-### Launch With (v2.0)
+### Launch With (v2.2 core)
 
-Minimum viable feature set to deliver the milestone goal: "transform FXL Core from a docs app into a modular framework shell."
+Minimum viable — makes sidebar, header, and filter bar feel actually configurable, not hardcoded schema.
 
-- [ ] **Enhanced Module Registry** — `description`, `badge`, `enabled`, `extensions` fields; Zod validation. Foundation everything else builds on.
-- [ ] **Routing Refactoring** — Audit and clean routes; add `/admin/*` namespace; sidebar filters by `enabled`. Low effort, high payoff.
-- [ ] **Home 2.0** — Per-module status + aggregate summary + quick actions. Makes the platform feel like an operational control center rather than a nav page.
-- [ ] **Contract Architecture types** — `ModuleExtension` type, `slotId` definitions per module, `extensions` populated in manifests. Declares the contracts even before runtime enforcement.
-- [ ] **Slot-Based UI Injection** — `<ExtensionSlot>` runtime component; at least 2-3 real cross-module extensions to validate the pattern works.
-- [ ] **Admin Panel `/admin/modules`** — Module list, enable/disable toggle (localStorage), extension map. Operator debugging surface.
+- [ ] Wire `showPeriodSelector` and `showUserIndicator` in WireframeHeader render — prerequisite for header config panel to have any visual effect
+- [ ] Wire `actions.*` in WireframeHeader render — actions.manage/share/export toggle visibility
+- [ ] `updateWorkingConfig()` helper in WireframeViewer for config-level (sidebar/header) mutations
+- [ ] SidebarConfig schema extension: `headerWidget`, `workspaceName`, `footerWidget`, `showSearch` fields (Zod + TypeScript)
+- [ ] Header Config Panel (Sheet) — toggles for showLogo, showPeriodSelector, showUserIndicator, actions.manage/share/export — opened from AdminToolbar in edit mode
+- [ ] Sidebar Config Panel (Sheet) — text input for footer, group editor (create/rename/delete groups, assign screens by checkbox)
+- [ ] Filter Bar Editor Panel (Sheet) — add/remove FilterOption rows per screen, configure key/label/filterType/options — opened by clicking WireframeFilterBar in edit mode
+- [ ] Workspace Switcher widget renderer in sidebar header (decorative — dropdown chip with label + chevron)
+- [ ] User Menu widget renderer in sidebar footer (alternate to status chip — shows avatar initials + name/role)
 
-### Add After Validation (v2.x)
+### Add After Core Is Working (v2.2 polish)
 
-Features to add once the core framework shell is working and operators are using it.
+- [ ] Search widget in sidebar nav top (showSearch: boolean, decorative disabled input above nav)
+- [ ] Account Selector widget in sidebar header (secondary slot below workspace switcher)
+- [ ] Filter "add from library" presets (Período, Empresa, Produto, Status, Responsável templates)
+- [ ] Header brandLabel override field in Header Config Panel
+- [ ] AdminToolbar explicit buttons for sidebar and header panels (visible in edit mode alongside "Editar")
 
-- [ ] **Extension error boundaries** — Wrap each extension render; prevents slot crashes from taking down host pages.
-- [ ] **Slot inspector dev mode** — `?debug=slots` URL param outlines all active slots; aids development of new extensions.
-- [ ] **Breadcrumb module identity** — Breadcrumb shows "Tasks > [client] > Create Task" instead of just the URL path.
-- [ ] **Supabase-persisted module toggle** — Move from localStorage to Supabase for cross-device consistency.
+### Future Consideration (v2.3+)
 
-### Future Consideration (v3+)
-
-Features to defer until the framework shell pattern is proven across multiple milestones.
-
-- [ ] **Dynamic module loading** — Lazy-load module code bundles; requires async registry and Suspense boundaries everywhere.
-- [ ] **Per-user module access control** — Clerk roles + module `requiredRole` field; requires Clerk organization setup.
-- [ ] **Visual dependency graph** — Force-directed graph of module relationships; requires a graph library.
-- [ ] **Extension registry UI** — Visual editor for declaring new extensions; meta-tooling.
+- [ ] Header periodType at dashboard level (header.periodType: 'mensal' | 'anual')
+- [ ] Sidebar icon assignment via sidebar config panel (currently only via ScreenManager per-screen)
+- [ ] Sidebar badge count configuration per screen (currently schema-only, not editable)
+- [ ] Mobile sidebar drawer mode (responsive — explicitly out of scope per PROJECT.md)
 
 ---
 
 ## Feature Prioritization Matrix
 
-| Feature | Operator Value | Implementation Cost | Priority |
-|---------|---------------|---------------------|----------|
-| Enhanced Module Registry | HIGH — enables everything else | LOW-MEDIUM | P1 |
-| Routing Refactoring | HIGH — /admin namespace + clean routes | LOW | P1 |
-| Home 2.0 | HIGH — control center replaces generic card grid | MEDIUM | P1 |
-| Contract Architecture types | HIGH — typed cross-module wiring | MEDIUM | P1 |
-| Admin Panel `/admin/modules` | HIGH — debugging + control surface | MEDIUM | P1 |
-| Slot-Based UI Injection | MEDIUM — runtime for contracts; few real extensions at v2.0 | MEDIUM | P1 |
-| Home 2.0 slots | LOW — extensions on Home are nice-to-have | MEDIUM | P2 |
-| Extension error boundaries | MEDIUM — resilience; needed before heavy extension usage | LOW | P2 |
-| Slot inspector dev mode | LOW — developer experience; not user-facing | LOW | P3 |
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| Wire showPeriodSelector / showUserIndicator / actions.* in WireframeHeader | HIGH — blocks all header config having any visual effect | LOW (3-4 conditional renders in WireframeHeader.tsx) | P1 |
+| updateWorkingConfig() for top-level mutations | HIGH — blocks sidebar + header panels from working | LOW (copy updateWorkingScreen pattern, targets config root) | P1 |
+| Filter Bar Editor Panel | HIGH — filter bar is the most per-screen-variable element | MEDIUM (list CRUD + filterType dispatch in Sheet) | P1 |
+| SidebarConfig schema extension for widget fields | HIGH — blocks widget renderers from compiling | LOW (additive Zod + TypeScript fields) | P1 |
+| Header Config Panel | HIGH — operators need to control logo/period/user/actions visibility | LOW (4-6 toggles in Sheet) | P1 |
+| Sidebar Config Panel (footer + groups) | HIGH — groups and footer text are schema-only today | MEDIUM (group CRUD with screen assignment checkboxes) | P1 |
+| Workspace Switcher widget renderer | MEDIUM — visible sidebar widget for demos | LOW (static dropdown mock in sidebar header zone) | P2 |
+| User Menu widget renderer | MEDIUM — sidebar footer alt to status chip | LOW (static avatar chip, replaces status chip) | P2 |
+| Search widget in sidebar | LOW — decorative, purely visual | LOW (disabled input) | P2 |
+| Filter "add from library" presets | MEDIUM — saves operator time | LOW (hardcoded templates, no schema change) | P2 |
+| Account Selector widget | LOW — secondary sidebar slot, niche use | MEDIUM (new schema slot + renderer) | P3 |
+| Header brandLabel override | LOW — rarely needed separately from config.label | LOW | P3 |
+| Header periodType at dashboard level | LOW — per-screen periodType is sufficient | LOW | P3 |
 
 **Priority key:**
-- P1: Must have for v2.0 to deliver the milestone goal
-- P2: Should have; add when P1 is complete and time permits
-- P3: Nice to have; future milestone
+- P1: Must have for v2.2 — milestone is incomplete without these
+- P2: Should have — improves operator experience noticeably
+- P3: Nice to have — defer to v2.3 if time-constrained
 
 ---
 
-## Existing Infrastructure Inventory (What v2.0 Can Reuse)
+## Existing Editor Architecture (Dependency Context)
 
-| Existing Asset | How v2.0 Uses It | Notes |
-|---------------|-----------------|-------|
-| `ModuleManifest` type in `registry.ts` | Extend with new fields | Non-breaking if new fields are optional |
-| `MODULE_REGISTRY` array | Core registry; enhanced in-place | No structural change |
-| `Sidebar.tsx` active module filter | Extend to also filter by `enabled` field | Minor change |
-| ESLint boundary enforcement | Already prevents cross-module imports | Reinforce the rule: extensions registered via registry, not imported |
-| `src/modules/*/manifest.tsx` per-module files | Add `extensions: []` array | 5 files to update |
-| Clerk `<ProtectedRoute>` | Protect `/admin/modules` route | Reuse existing pattern |
-| `useActivityFeed` hook in Home.tsx | Enhance with new event types | Small extension |
-| `cmdk` command palette | Potential surface for cross-module quick actions on Home | Reuse existing infrastructure |
-| Supabase client | Activity aggregation queries for Home 2.0 | Existing Supabase integration |
+Understanding the existing patterns is critical — new features must follow them exactly to maintain consistency.
+
+### Pattern: Sheet-based property panels
+
+PropertyPanel uses shadcn `<Sheet side="right">`. New sidebar/header/filter panels follow the
+same pattern: a `<Sheet>` opened by a trigger in AdminToolbar or by clicking the respective chrome
+area in edit mode. Each Sheet renders a form that calls an `onChange`/`onUpdate` callback with the
+updated config object. All existing 28 property forms follow this contract.
+
+### Pattern: updateWorkingScreen for screen-level mutations
+
+```typescript
+// Existing (in WireframeViewer.tsx line ~458)
+function updateWorkingScreen(updater: (screen: BlueprintScreen) => BlueprintScreen) {
+  setWorkingConfig(prev => {
+    if (!prev) return prev
+    const newScreens = [...prev.screens]
+    newScreens[safeActiveIndex] = updater(newScreens[safeActiveIndex])
+    return { ...prev, screens: newScreens }
+  })
+  setEditMode(prev => ({ ...prev, dirty: true }))
+}
+
+// New: updateWorkingConfig for root-level mutations (sidebar, header)
+function updateWorkingConfig(updater: (config: BlueprintConfig) => BlueprintConfig) {
+  setWorkingConfig(prev => prev ? updater(prev) : prev)
+  setEditMode(prev => ({ ...prev, dirty: true }))
+}
+```
+
+### Pattern: section-registry for section property forms
+
+Section-level edit forms live in `components/editor/property-forms/`. Each is a standalone
+component accepting `section` and `onChange` props. The section-registry maps `section.type →
+form component`.
+
+New config panels (header, sidebar, filter bar) operate at config or screen level, not section
+level. They are **not** routed through section-registry. They are separate Sheet components opened
+from AdminToolbar buttons or chrome click targets in edit mode.
+
+### Pattern: SidebarConfig rendering in WireframeViewer
+
+The sidebar is inline in WireframeViewer, not a separate component. Key zones:
+- Line ~783: sidebar header (label + collapse toggle) — workspace switcher widget goes here
+- Line ~839: nav area with ScreenManager / partitionScreensByGroups — search widget goes above this
+- Line ~930: footer block showing status chip — user menu widget replaces/alternates this
+
+New widget slots are added inline in the same sidebar `<aside>` block, conditionally rendered
+based on `activeConfig.sidebar.headerWidget`, `activeConfig.sidebar.showSearch`, and
+`activeConfig.sidebar.footerWidget`.
+
+### Pattern: WireframeHeader props gap
+
+Currently WireframeHeader accepts: `title`, `logoUrl`, `brandLabel`, `showLogo`.
+The fields `showPeriodSelector`, `showUserIndicator`, and `actions.*` exist in HeaderConfig
+schema but are never passed to WireframeHeader. The fix:
+1. Add these as optional props to WireframeHeader
+2. Pass them from WireframeViewer (`activeConfig.header.showPeriodSelector` etc.)
+3. Apply conditional renders inside WireframeHeader
+
+This is a small change (3-4 prop additions + conditional wraps) but it must happen before
+building the Header Config Panel or the panel's toggles have no visible effect.
 
 ---
 
 ## Sources
 
-- Existing codebase analysis: `src/modules/registry.ts`, `src/pages/Home.tsx`, `src/App.tsx`, `src/components/layout/Sidebar.tsx`
-- [OpenMRS O3 Extension System — extension + slot pattern with named slots and module registration](https://o3-docs.openmrs.org/docs/extension-system) — MEDIUM confidence (different scale/context but well-documented slot + extension pattern)
-- [UI Composition Architecture for React — slot registry, widget registration pattern](https://dev.to/riturathin/rethinking-frontend-scalability-the-ui-composition-architecture-pattern-for-large-react-3mpn) — MEDIUM confidence
-- [Building a Plugin System in React Using Dynamic Imports and Context API](https://dev.to/hexshift/building-a-plugin-system-in-react-using-dynamic-imports-and-context-api-3j6e) — MEDIUM confidence (plugin contract pattern)
-- [Building a Component Registry in React](https://medium.com/front-end-weekly/building-a-component-registry-in-react-4504ca271e56) — MEDIUM confidence
-- [Modularizing React Applications — Martin Fowler](https://martinfowler.com/articles/modularizing-react-apps.html) — HIGH confidence (authoritative reference for module boundary patterns)
-- [@grlt-hub/react-slots — declarative slot system for React](https://github.com/grlt-hub/react-slots) — LOW confidence for direct adoption (Effector dependency); useful as pattern reference
-- `.planning/codebase/ARCHITECTURE.md` — analysis of existing data flow and module boundaries
+- Codebase analysis: `tools/wireframe-builder/lib/blueprint-schema.ts` — SidebarConfigSchema, HeaderConfigSchema, FilterOptionSchema (lines 50–76)
+- Codebase analysis: `tools/wireframe-builder/types/blueprint.ts` — SidebarConfig, HeaderConfig, BlueprintScreen types (lines 397–425)
+- Codebase analysis: `src/pages/clients/WireframeViewer.tsx` — updateWorkingScreen pattern (line ~458), sidebar render zones (lines 764–944), WireframeHeader invocation (line 957-961)
+- Codebase analysis: `tools/wireframe-builder/components/WireframeHeader.tsx` — current props accepted vs schema fields (props: title, logoUrl, brandLabel, showLogo only)
+- Codebase analysis: `tools/wireframe-builder/components/WireframeFilterBar.tsx` — FilterOption rendering, 5 filter sub-components
+- Codebase analysis: `tools/wireframe-builder/components/editor/PropertyPanel.tsx` — Sheet pattern for property panels
+- Codebase analysis: `tools/wireframe-builder/components/editor/AdminToolbar.tsx` — existing edit mode entry points
+- [shadcn/ui sidebar blocks — sidebar-07 compound widget reference (team-switcher.tsx, nav-user.tsx)](https://ui.shadcn.com/blocks/sidebar)
+- .planning/PROJECT.md — milestone scope, out-of-scope constraints, existing validated requirements
 
 ---
 
-*Feature research for: v2.0 Framework Shell + Modular Architecture*
+*Feature research for: v2.2 Wireframe Builder — Configurable Layout Components*
 *Researched: 2026-03-13*
