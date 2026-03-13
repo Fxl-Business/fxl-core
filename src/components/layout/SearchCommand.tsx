@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText, Search } from 'lucide-react'
+import { BookOpen, FileText, Search } from 'lucide-react'
 import {
   CommandDialog,
   CommandEmpty,
@@ -10,18 +10,34 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { buildSearchIndex, type SearchEntry } from '@/lib/search-index'
+import { listKnowledgeEntries, type KnowledgeEntry } from '@/lib/kb-service'
 
 export default function SearchCommand() {
   const [open, setOpen] = useState(false)
+  const [kbEntries, setKbEntries] = useState<KnowledgeEntry[]>([])
+  const [query, setQuery] = useState('')
   const navigate = useNavigate()
+  const openRef = useRef(open)
+
+  openRef.current = open
 
   const index = useMemo(() => buildSearchIndex(), [])
+
+  function handleOpenChange(next: boolean) {
+    setOpen(next)
+    if (next === true && kbEntries.length === 0) {
+      listKnowledgeEntries({}).then(setKbEntries).catch(() => {})
+    }
+    if (next === false) {
+      setQuery('')
+    }
+  }
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
-        setOpen((prev) => !prev)
+        handleOpenChange(!openRef.current)
       }
     }
     document.addEventListener('keydown', onKeyDown)
@@ -46,7 +62,7 @@ export default function SearchCommand() {
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => handleOpenChange(true)}
         className="relative flex w-full max-w-sm items-center rounded-md border border-slate-200 bg-slate-50 py-1.5 pl-10 pr-12 text-sm text-slate-400 transition-colors hover:bg-slate-100 dark:border-border dark:bg-muted/50 dark:text-muted-foreground"
       >
         <Search className="pointer-events-none absolute left-3 h-4 w-4 text-slate-400 dark:text-muted-foreground" />
@@ -56,8 +72,12 @@ export default function SearchCommand() {
         </kbd>
       </button>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Pesquisar documentacao..." />
+      <CommandDialog open={open} onOpenChange={handleOpenChange}>
+        <CommandInput
+          placeholder="Pesquisar documentacao e conhecimento..."
+          value={query}
+          onValueChange={setQuery}
+        />
         <CommandList>
           <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
           {Object.entries(grouped).map(([group, entries]) => (
@@ -79,6 +99,23 @@ export default function SearchCommand() {
               ))}
             </CommandGroup>
           ))}
+          {query.length > 0 && kbEntries.length > 0 && (
+            <CommandGroup heading="Base de Conhecimento">
+              {kbEntries.map((entry) => (
+                <CommandItem
+                  key={entry.id}
+                  value={`${entry.title} ${entry.entry_type} ${entry.tags.join(' ')}`}
+                  onSelect={() => handleSelect(`/knowledge-base/${entry.id}`)}
+                >
+                  <BookOpen className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <div className="flex flex-col">
+                    <span className="text-sm">{entry.title}</span>
+                    <span className="text-xs text-muted-foreground">{entry.entry_type}</span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
         </CommandList>
       </CommandDialog>
     </>
