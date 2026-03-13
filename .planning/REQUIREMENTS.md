@@ -18,17 +18,17 @@ Requirements for Wireframe Builder — Configurable Layout Components.
 - [x] **HDR-01**: Operator can toggle showPeriodSelector in header and see period selector appear/disappear in the wireframe header
 - [x] **HDR-02**: Operator can toggle showUserIndicator in header and see user/role chip appear/disappear in the wireframe header
 - [x] **HDR-03**: Operator can toggle actions (manage, share, export) individually in header and see action buttons appear/disappear
-- [ ] **HDR-04**: Operator can open Header Config Panel (Sheet) from AdminToolbar and configure all header toggles visually
-- [ ] **HDR-05**: Operator can set a custom brandLabel in header that overrides the default config.label
-- [ ] **HDR-06**: Operator can set a dashboard-level periodType (mensal/anual) in header config that the period selector respects
+- [x] **HDR-04**: Operator can open Header Config Panel (Sheet) from AdminToolbar and configure all header toggles visually
+- [x] **HDR-05**: Operator can set a custom brandLabel in header that overrides the default config.label
+- [x] **HDR-06**: Operator can set a dashboard-level periodType (mensal/anual) in header config that the period selector respects
 
 ### Sidebar
 
 - [ ] **SIDE-01**: Operator can edit sidebar footer text via Sidebar Config Panel
 - [ ] **SIDE-02**: Operator can create, rename, and delete sidebar groups via Sidebar Config Panel
 - [ ] **SIDE-03**: Operator can assign screens to groups via checkbox selection in Sidebar Config Panel
-- [ ] **SIDE-04**: Operator can enable Workspace Switcher widget in sidebar header — renders as dropdown chip with label + chevron (decorative, shadcn sidebar-07 style)
-- [ ] **SIDE-05**: Operator can enable User Menu widget in sidebar footer — renders as avatar initials + name/role chip (alternate to status footer)
+- [x] **SIDE-04**: Operator can enable Workspace Switcher widget in sidebar header — renders as dropdown chip with label + chevron (decorative, shadcn sidebar-07 style)
+- [x] **SIDE-05**: Operator can enable User Menu widget in sidebar footer — renders as avatar initials + name/role chip (alternate to status footer)
 
 ### Filter Bar
 
@@ -72,14 +72,14 @@ Requirements for Wireframe Builder — Configurable Layout Components.
 | HDR-01 | Phase 48 | Complete |
 | HDR-02 | Phase 48 | Complete |
 | HDR-03 | Phase 48 | Complete |
-| HDR-04 | Phase 50 | Pending |
-| HDR-05 | Phase 50 | Pending |
-| HDR-06 | Phase 50 | Pending |
+| HDR-04 | Phase 50 | Complete |
+| HDR-05 | Phase 50 | Complete |
+| HDR-06 | Phase 50 | Complete |
 | SIDE-01 | Phase 52 | Pending |
 | SIDE-02 | Phase 52 | Pending |
 | SIDE-03 | Phase 52 | Pending |
-| SIDE-04 | Phase 51 | Pending |
-| SIDE-05 | Phase 51 | Pending |
+| SIDE-04 | Phase 51 | Complete |
+| SIDE-05 | Phase 51 | Complete |
 | FILT-01 | Phase 53 | Pending |
 | FILT-02 | Phase 53 | Pending |
 | FILT-03 | Phase 53 | Pending |
