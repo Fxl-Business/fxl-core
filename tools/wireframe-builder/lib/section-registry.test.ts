@@ -11,7 +11,7 @@ import {
 import { BlueprintSectionSchema } from './blueprint-schema'
 import type { BlueprintSection } from '../types/blueprint'
 
-// All 23 section types expected in the registry
+// All 27 section types expected in the registry
 const ALL_SECTION_TYPES: BlueprintSection['type'][] = [
   'kpi-grid',
   'bar-line-chart',
@@ -36,6 +36,10 @@ const ALL_SECTION_TYPES: BlueprintSection['type'][] = [
   'divider',
   'gauge-chart',
   'branding-editor',
+  'pie-chart',
+  'progress-grid',
+  'heatmap',
+  'sparkline-grid',
 ]
 
 describe('SECTION_REGISTRY', () => {
@@ -44,8 +48,8 @@ describe('SECTION_REGISTRY', () => {
     expect(registryKeys).toEqual([...ALL_SECTION_TYPES].sort())
   })
 
-  it('has exactly 23 entries', () => {
-    expect(Object.keys(SECTION_REGISTRY)).toHaveLength(23)
+  it('has exactly 27 entries', () => {
+    expect(Object.keys(SECTION_REGISTRY)).toHaveLength(27)
   })
 })
 

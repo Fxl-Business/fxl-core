@@ -25,6 +25,8 @@ import {
   Palette,
   CircleDot,
   Target,
+  Grid3X3,
+  TrendingUp,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -49,6 +51,8 @@ import GaugeChartRenderer from '../components/sections/GaugeChartRenderer'
 import BrandingEditorRenderer from '../components/sections/BrandingEditorRenderer'
 import PieChartRenderer from '../components/sections/PieChartRenderer'
 import ProgressGridRenderer from '../components/sections/ProgressGridRenderer'
+import HeatmapRenderer from '../components/sections/HeatmapRenderer'
+import SparklineGridRenderer from '../components/sections/SparklineGridRenderer'
 
 // ---------------------------------------------------------------------------
 // Property forms (existing)
@@ -79,6 +83,8 @@ import GaugeChartForm from '../components/editor/property-forms/GaugeChartForm'
 import BrandingEditorForm from '../components/editor/property-forms/BrandingEditorForm'
 import PieChartForm from '../components/editor/property-forms/PieChartForm'
 import ProgressGridForm from '../components/editor/property-forms/ProgressGridForm'
+import HeatmapForm from '../components/editor/property-forms/HeatmapForm'
+import SparklineGridForm from '../components/editor/property-forms/SparklineGridForm'
 
 // ---------------------------------------------------------------------------
 // Zod schemas (individual)
@@ -109,6 +115,8 @@ import {
   BrandingEditorSectionSchema,
   PieChartSectionSchema,
   ProgressGridSectionSchema,
+  HeatmapSectionSchema,
+  SparklineGridSectionSchema,
   BlueprintSectionSchema,
 } from './blueprint-schema'
 
@@ -649,6 +657,60 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     }),
     schema: ProgressGridSectionSchema,
     label: 'Grid de Progresso',
+  },
+
+  // === Heatmap (standalone) ===
+  'heatmap': {
+    renderer: HeatmapRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: HeatmapForm as unknown as ComponentType<PropertyFormProps>,
+    catalogEntry: {
+      type: 'heatmap',
+      label: 'Mapa de Calor',
+      description: 'Matriz com intensidade de cor por valor',
+      icon: Grid3X3,
+      category: 'Graficos',
+    },
+    defaultProps: () => ({
+      type: 'heatmap' as const,
+      title: 'Vendas por Produto x Mes',
+      colLabels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+      rows: [
+        { label: 'Produto A', cells: [120, 150, 180, 90, 200, 170] },
+        { label: 'Produto B', cells: [80, 110, 95, 130, 140, 160] },
+        { label: 'Produto C', cells: [200, 180, 160, 140, 120, 100] },
+        { label: 'Produto D', cells: [50, 70, 90, 110, 130, 150] },
+      ],
+    }),
+    schema: HeatmapSectionSchema,
+    label: 'Mapa de Calor',
+  },
+
+  // === Sparkline Grid (standalone) ===
+  'sparkline-grid': {
+    renderer: SparklineGridRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: SparklineGridForm as unknown as ComponentType<PropertyFormProps>,
+    catalogEntry: {
+      type: 'sparkline-grid',
+      label: 'Sparkline Grid',
+      description: 'Grid de mini-graficos com metrica e tendencia',
+      icon: TrendingUp,
+      category: 'KPIs',
+    },
+    defaultProps: () => ({
+      type: 'sparkline-grid' as const,
+      title: 'Visao Geral',
+      columns: 3,
+      items: [
+        { label: 'Receita', value: 'R$ 125k', data: [30, 45, 38, 52, 48, 60, 55, 70] },
+        { label: 'Margem', value: '32%', data: [28, 30, 27, 32, 35, 31, 33, 32] },
+        { label: 'Clientes', value: '1.240', data: [800, 900, 950, 1000, 1050, 1100, 1180, 1240] },
+        { label: 'NPS', value: '72', data: [65, 68, 70, 67, 72, 75, 71, 72] },
+        { label: 'Tickets', value: '45', data: [60, 55, 50, 48, 52, 47, 44, 45] },
+        { label: 'Conversao', value: '18%', data: [12, 14, 15, 16, 17, 16, 18, 18] },
+      ],
+    }),
+    schema: SparklineGridSectionSchema,
+    label: 'Grid de Sparklines',
   },
 }
 

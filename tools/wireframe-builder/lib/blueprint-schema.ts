@@ -387,6 +387,32 @@ export const ProgressGridSectionSchema = z.object({
   items: z.array(ProgressGridItemSchema),
 })
 
+const HeatmapRowSchema = z.object({
+  label: z.string(),
+  cells: z.array(z.number()),
+})
+
+export const HeatmapSectionSchema = z.object({
+  type: z.literal('heatmap'),
+  title: z.string(),
+  rows: z.array(HeatmapRowSchema),
+  colLabels: z.array(z.string()).optional(),
+  height: z.number().optional(),
+})
+
+const SparklineGridItemSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+  data: z.array(z.number()),
+})
+
+export const SparklineGridSectionSchema = z.object({
+  type: z.literal('sparkline-grid'),
+  title: z.string(),
+  columns: z.number().optional(),
+  items: z.array(SparklineGridItemSchema),
+})
+
 // ---------------------------------------------------------------------------
 // Discriminated union of all section types
 // Note: ChartGridSection has recursive items: BlueprintSection[]
@@ -419,6 +445,8 @@ const nonRecursiveSections = [
   BrandingEditorSectionSchema,
   PieChartSectionSchema,
   ProgressGridSectionSchema,
+  HeatmapSectionSchema,
+  SparklineGridSectionSchema,
 ] as const
 
 // ChartGridSection is defined inline to avoid circular const reference.

@@ -318,6 +318,32 @@ export type ProgressGridSection = {
   items: ProgressGridItem[]
 }
 
+export type HeatmapRow = {
+  label: string
+  cells: number[]
+}
+
+export type HeatmapSection = {
+  type: 'heatmap'
+  title: string
+  rows: HeatmapRow[]
+  colLabels?: string[]
+  height?: number
+}
+
+export type SparklineGridItem = {
+  label: string
+  value: string
+  data: number[]
+}
+
+export type SparklineGridSection = {
+  type: 'sparkline-grid'
+  title: string
+  columns?: number
+  items: SparklineGridItem[]
+}
+
 export type BlueprintSection =
   | KpiGridSection
   | BarLineChartSection
@@ -344,6 +370,8 @@ export type BlueprintSection =
   | BrandingEditorSection
   | PieChartSection
   | ProgressGridSection
+  | HeatmapSection
+  | SparklineGridSection
 
 export type BlueprintScreen = {
   id: string
