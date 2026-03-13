@@ -1,4 +1,4 @@
-import { getAllDocPaths, getDoc } from './docs-parser'
+import { getAllDocuments, type DocumentRow } from './docs-service'
 
 export type SearchEntry = {
   title: string
@@ -7,17 +7,12 @@ export type SearchEntry = {
   href: string
 }
 
-export function buildSearchIndex(): SearchEntry[] {
-  const entries: SearchEntry[] = []
-  for (const path of getAllDocPaths()) {
-    const doc = getDoc(path)
-    if (!doc) continue
-    entries.push({
-      title: doc.frontmatter.title,
-      description: doc.frontmatter.description,
-      badge: doc.frontmatter.badge,
-      href: path,
-    })
-  }
-  return entries
+export async function buildSearchIndex(): Promise<SearchEntry[]> {
+  const docs = await getAllDocuments()
+  return docs.map((doc: DocumentRow) => ({
+    title: doc.title,
+    description: doc.description ?? undefined,
+    badge: doc.badge ?? undefined,
+    href: `/${doc.slug}`,
+  }))
 }

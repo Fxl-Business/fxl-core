@@ -14,6 +14,8 @@ import { listKnowledgeEntries, type KnowledgeEntry } from '@/lib/kb-service'
 
 export default function SearchCommand() {
   const [open, setOpen] = useState(false)
+  const [index, setIndex] = useState<SearchEntry[]>([])
+  const [indexLoaded, setIndexLoaded] = useState(false)
   const [kbEntries, setKbEntries] = useState<KnowledgeEntry[]>([])
   const [query, setQuery] = useState('')
   const navigate = useNavigate()
@@ -21,12 +23,18 @@ export default function SearchCommand() {
 
   openRef.current = open
 
-  const index = useMemo(() => buildSearchIndex(), [])
-
   function handleOpenChange(next: boolean) {
     setOpen(next)
-    if (next === true && kbEntries.length === 0) {
-      listKnowledgeEntries({}).then(setKbEntries).catch(() => {})
+    if (next === true) {
+      if (!indexLoaded) {
+        buildSearchIndex().then((entries) => {
+          setIndex(entries)
+          setIndexLoaded(true)
+        }).catch(() => {})
+      }
+      if (kbEntries.length === 0) {
+        listKnowledgeEntries({}).then(setKbEntries).catch(() => {})
+      }
     }
     if (next === false) {
       setQuery('')

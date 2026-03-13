@@ -160,12 +160,3 @@ export function parseRawMarkdown(raw: string): ParsedDoc {
   return { frontmatter, sections, headings, rawBody: body }
 }
 
-/** @deprecated Use useDoc hook instead. Returns null — glob removed in v2.1. */
-export function getDoc(_urlPath: string): ParsedDoc | null {
-  return null
-}
-
-/** @deprecated Use getAllDocuments from docs-service instead. Returns [] — glob removed in v2.1. */
-export function getAllDocPaths(): string[] {
-  return []
-}
