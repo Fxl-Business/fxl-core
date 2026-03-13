@@ -325,6 +325,53 @@
 
 ---
 
+## Milestone: v2.0 — Framework Shell + Arquitetura Modular
+
+**Shipped:** 2026-03-13
+**Phases:** 5 | **Plans:** 8 | **Timeline:** 1 session
+
+### What Was Built
+- Module Registry Foundation: zero-import module-ids.ts constants, ModuleDefinition type extending ModuleManifest, useModuleEnabled hook with localStorage persistence
+- Slot Architecture: SlotComponentProps, SLOT_IDS, resolveExtensions() pure function, ExtensionProvider/ExtensionSlot React runtime
+- Routing Refactor: sidebar driven by enabled modules via useModuleEnabled context, Home NavLink end prop exact-match fix
+- Home 2.0: asymmetric 2/3+1/3 layout with featured module card, FXL identity card, Supabase-backed activity feed and module stats
+- Contract Population: RecentTasksWidget and RecentKBWidget rendering via slot injection end-to-end
+- Admin Panel: /admin/modules with enable/disable toggles, extension visibility, and toast feedback
+
+### What Worked
+- **Zero-import constants pattern:** module-ids.ts with zero import statements prevents circular dependency — all manifests safely import MODULE_IDS
+- **Type-first approach:** SlotComponentProps defined before any extension widget prevented ComponentType<any> in entire slot pipeline
+- **Pure function reuse:** resolveExtensions() follows same pattern as Config Resolver (v1.0), generateBlueprint (v1.1) — zero React runtime, fully testable
+- **Provider nesting order:** BrowserRouter > ModuleEnabledProvider > ExtensionProvider > Routes — single source of truth, no localStorage duplication
+- **Parallel execution of plans 42-01 and 42-02:** Independent file sets (widgets vs admin panel) ran in parallel without conflicts
+- **All 5 phase verifications passed:** 38 (7/7), 39 (8/8), 40 (5/5), 41 (10/10), 42 (8/8) — 38/38 must-haves verified
+
+### What Was Inefficient
+- **No milestone audit:** Seventh consecutive skip, but all phase-level verifications passed
+- **STATE.md drift during parallel execution:** STATE.md showed 75% while all phases were actually complete — parallel agents updated concurrently
+- **Summary one_liner fields missing:** summary-extract couldn't find one_liners because executor agents used different summary format
+
+### Patterns Established
+- Zero-import constants file for preventing circular dependencies in registry architectures
+- Provider nesting order for React context chains: outermost = router, then state, then derived state
+- ExtensionSlot returning null (not empty fragment) when no extensions registered — allows conditional layout
+- Static admin routes outside MODULE_REGISTRY for internal tooling pages
+- localStorage synchronous initializer in useState for zero-flash module toggle state
+
+### Key Lessons
+1. **Type contracts before implementations** — defining SlotComponentProps and ModuleExtension types before building widgets ensured zero any in the entire extension pipeline
+2. **Pure function pattern confirmed for 4th time** — resolveExtensions, Config Resolver, generateBlueprint, mergeAndSort all benefit from zero side effects
+3. **Provider nesting order matters** — getting it right once (Phase 39) avoided refactoring in Phases 40-42
+4. **Parallel plan execution works when file sets are independent** — 42-01 (widgets + manifests) and 42-02 (admin page + App.tsx) ran clean
+5. **Phase-level verification is sufficient** — 38/38 must-haves verified across 5 phases without a formal milestone audit
+
+### Cost Observations
+- Model mix: ~30% opus (orchestrator), ~70% sonnet (executors + verifiers)
+- Sessions: 1 session, all 5 phases executed sequentially with auto-continue
+- Notable: 8 plans, 26 commits, 3,089 LOC added in single continuous session (~52 min)
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -338,6 +385,7 @@
 | v1.4 | 2 days | 7 | 12 | Token cascade, independent phases, HTML reference-driven |
 | v1.5 | 1 day | 5 | 14 | Module registry, migration-first, formal REQUIREMENTS.md return |
 | v1.6 | 1 day | 4 | 7 | Extension Point A/B patterns, wave-based grouping, 12 new types |
+| v2.0 | 1 session | 5 | 8 | Framework shell, slot architecture, cross-module extensions, admin panel |
 
 ### Cumulative Quality
 
@@ -350,6 +398,7 @@
 | v1.4 | 237 tests | no new tests (CSS + visual) | 0 |
 | v1.5 | ~270 tests | KB hooks, home merge/sort, search cmd | 0 |
 | v1.6 | ~270 tests | section-registry count assertion (28) | 0 |
+| v2.0 | ~270 tests | no new tests (types + UI) | 0 |
 
 ### Velocity
 
@@ -362,6 +411,7 @@
 | v1.4 | 12 | ~180 min | ~15 min |
 | v1.5 | 14 | ~210 min | ~15 min |
 | v1.6 | 7 | ~60 min | ~8.5 min |
+| v2.0 | 8 | ~52 min | ~6.5 min |
 
 ### Top Lessons (Verified Across Milestones)
 

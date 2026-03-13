@@ -95,29 +95,20 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ Sankey diagram as standalone section type — v1.6
 - ✓ ComponentGallery with all 28 section types and Brazilian Portuguese mock data — v1.6
 - ✓ Section registry at 28 types (5-file checklist for standalone, 4-point sync for chartType) — v1.6
+- ✓ ModuleDefinition extending ModuleManifest with extensions[], badge?, enabled, description — v2.0
+- ✓ Zero-import module-ids.ts constants preventing circular imports — v2.0
+- ✓ SlotComponentProps, SLOT_IDS, ExtensionSlot cross-module injection architecture — v2.0
+- ✓ resolveExtensions() pure function + ExtensionProvider/ExtensionSlot React runtime — v2.0
+- ✓ Home 2.0 control center with asymmetric layout, activity feed, module stats — v2.0
+- ✓ Sidebar driven by enabled modules via useModuleEnabled context — v2.0
+- ✓ /admin/modules panel with enable/disable toggles and extension visibility — v2.0
+- ✓ 2 real cross-module extension widgets (RecentTasksWidget, RecentKBWidget) via slot injection — v2.0
 
 ### Active
 
-<!-- Current milestone: v2.0 Framework Shell + Arquitetura Modular -->
+<!-- Next milestone: v2.1 Dynamic Data Layer -->
 
-- [ ] Module Registry declarativo com tipos centrais (ModuleDefinition, ModuleExtension)
-- [ ] Home 2.0 como centro de controle da empresa (rota /)
-- [ ] Arquitetura de contratos e extensoes entre modulos (slots, hooks)
-- [ ] Painel interno de controle de modulos (/admin/modules)
-- [ ] Refatoracao de roteamento: / → Home, /docs → Documentacao
-- [ ] Sidebar/navbar refletindo nova estrutura modular
-
-## Current Milestone: v2.0 Framework Shell + Arquitetura Modular
-
-**Goal:** Transformar o FxL Core de app de documentacao em framework shell modular com Home verdadeira, Module Registry declarativo, arquitetura de contratos entre modulos e roteamento refatorado.
-
-**Target features:**
-- Home 2.0: centro de controle como ponto de entrada do app
-- Module Registry: configuracao declarativa de modulos com tipos tipados
-- Arquitetura de contratos: extensoes automaticas quando modulos compativeis estao ativos
-- Sistema de slots: injecao de UI cross-modulo
-- Painel de modulos: admin interno para visualizar e controlar modulos
-- Refatoracao de roteamento: / → Home, /docs → Documentacao
+(To be defined in next milestone)
 
 ### Out of Scope
 
@@ -155,9 +146,10 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ## Context
 
-Shipped v1.6 12 Novos Graficos. All 7 milestones complete (v1.0-v1.6).
+Shipped v2.0 Framework Shell + Arquitetura Modular. All 8 milestones complete (v1.0-v2.0).
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
-~33,583 LOC TypeScript. 6 Supabase migrations (001-006). 5 active modules in MODULE_REGISTRY.
+~36,600 LOC TypeScript. 6 Supabase migrations (001-006). 5 active modules in MODULE_REGISTRY.
+Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
 
 The platform covers the full operator workflow:
 1. **Documentation** — 4-section taxonomy, onboarding, Claude Code + GSD workflow
@@ -223,6 +215,15 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Pie Chart as new standalone (not donut variant) | Preserves discriminated union semantics, different data shape | ✓ Good — clean type separation |
 | Range Bar with CSS-flex (not Recharts) | Consistent with ProgressBar and CompositionBar patterns | ✓ Good — no Recharts workarounds needed |
 | Sankey: verify Recharts export before coding | Prevent wasted work if named export missing | ✓ Good — Boolean(r.Sankey) === true confirmed |
+| module-ids.ts zero-import constants file | Prevent circular dependency when manifests reference IDs | ✓ Good — all manifests safely import |
+| ModuleDefinition extends ModuleManifest | Backward compatible, incremental upgrade | ✓ Good — smooth migration |
+| SlotComponentProps defined before any slot component | Prevent ComponentType<any> in extension chain | ✓ Good — zero any in entire slot pipeline |
+| resolveExtensions() as pure function (zero React) | Unit-testable without jsdom | ✓ Good — clean data layer |
+| Provider nesting: Router > ModuleEnabled > Extension > Routes | Single source of truth for enabled state | ✓ Good — no localStorage duplication |
+| localStorage for module toggle (not Supabase) | Single-operator scale, no network overhead | ✓ Good — instant toggle UX |
+| /admin/modules as static hardcoded route | Never in MODULE_REGISTRY or sidebar | ✓ Good — clean separation |
+| Home 2.0 asymmetric 2/3+1/3 layout | Control center identity, not generic card grid | ✓ Good — professional feel |
+| Extension constants inlined in widgets | No coupling to module internals | ✓ Good — self-contained components |
 
 ## Constraints
 
@@ -236,4 +237,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-13 after v2.0 milestone start*
+*Last updated: 2026-03-13 after v2.0 milestone completion*

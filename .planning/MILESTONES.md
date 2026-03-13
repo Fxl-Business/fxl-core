@@ -1,5 +1,24 @@
 # Milestones
 
+## v2.0 Framework Shell + Arquitetura Modular (Shipped: 2026-03-13)
+
+**Phases:** 5 (38, 39, 40, 41, 42) | **Plans:** 8 | **Tasks:** ~16
+**Timeline:** 1 session (2026-03-13) | **Commits:** 26 | **LOC delta:** +3,089 / -381
+**Git range:** 4177548 → 98634e8
+
+**Delivered:** Transformed FXL Core from monolithic app into modular framework shell with typed ModuleDefinition registry, cross-module extension architecture (slots + contracts), runtime module enable/disable, Home 2.0 control center, and admin panel for module management.
+
+**Key accomplishments:**
+1. Module Registry Foundation: zero-import `module-ids.ts` constants, `ModuleDefinition` extending `ModuleManifest` with extensions/badge/enabled, `useModuleEnabled` hook with localStorage persistence
+2. Slot Architecture & Contract Types: `SlotComponentProps`, `SLOT_IDS`, pure `resolveExtensions()` function, `ExtensionProvider`/`ExtensionSlot` React runtime wired into App.tsx provider stack
+3. Routing Refactor: sidebar driven by enabled modules via `useModuleEnabled` context, Home NavLink `end` prop exact-match fix
+4. Home 2.0 Control Center: asymmetric 2/3+1/3 layout with featured module card, FXL identity card, Supabase-backed activity feed and module stats
+5. Contract Population & Admin Panel: 2 real cross-module extension widgets (RecentTasksWidget, RecentKBWidget) rendering via slot injection, `/admin/modules` panel with enable/disable toggles and extension visibility
+
+**Archive:** [v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md) | [v2.0-REQUIREMENTS.md](milestones/v2.0-REQUIREMENTS.md)
+
+---
+
 ## v1.6 12 Novos Graficos (Shipped: 2026-03-13)
 
 **Phases:** 4 (34, 35, 36, 37) | **Plans:** 7 | **Tasks:** ~17

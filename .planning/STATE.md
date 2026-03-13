@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Framework Shell + Arquitetura Modular
-status: planning
-stopped_at: Completed 42-01-PLAN.md — Phase 42 Plan 01 complete
-last_updated: "2026-03-13T05:15:16.606Z"
-last_activity: 2026-03-13 — Phase 41 complete (Home 2.0 control center, visual verification approved)
+status: complete
+stopped_at: "Milestone v2.0 complete — all 5 phases shipped"
+last_updated: "2026-03-13T06:00:00.000Z"
+last_activity: "2026-03-13 — Milestone v2.0 complete (5 phases, 8 plans, 19/19 requirements)"
 progress:
   total_phases: 5
   completed_phases: 5
   total_plans: 8
   completed_plans: 8
-  percent: 75
+  percent: 100
 ---
 
 # Project State
@@ -21,17 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Milestone v2.0 — Phase 42: Contract Population & Admin Panel
+**Current focus:** Planning next milestone (v2.1)
 
 ## Current Position
 
-Milestone: v2.0 — Framework Shell + Arquitetura Modular
-Phase: 42 of 42 (Contract Population & Admin Panel)
-Plan: —
-Status: Ready to plan
-Last activity: 2026-03-13 — Phase 41 complete (Home 2.0 control center, visual verification approved)
+Milestone: v2.0 — Framework Shell + Arquitetura Modular — COMPLETE
+Phase: All complete (38-42)
+Status: Between milestones — ready for /gsd:new-milestone
 
-Progress: [████████░░] 75%
+Progress: [██████████] 100%
 
 ## Accumulated Context
 
@@ -39,43 +37,16 @@ Progress: [████████░░] 75%
 
 All decisions logged in PROJECT.md Key Decisions table.
 
-Key decisions for v2.0:
-- module-ids.ts must be created first (constants-only, zero imports) to prevent circular dependency
-- SlotComponentProps must be defined before any slot component is written (prevents ComponentType<any>)
-- Admin panel at /admin/modules is a static hardcoded route — never added to MODULE_REGISTRY
-- localStorage('fxl-enabled-modules') for module toggle persistence — Supabase overkill at single-operator scale
-- No new npm dependencies required — all Radix UI, Tailwind, shadcn/ui already installed
-- [Phase 38-01]: module-ids.ts zero-import pattern established — manifests can safely import constants without circular risk
-- [Phase 38-01]: ModuleExtension.injects deferred to Phase 39 when SlotComponentProps is defined
-- [Phase 38-01]: MODULE_REGISTRY kept as ModuleManifest[] for backward compat — Plan 02 updates all manifests
-- [Phase 38-module-registry-foundation]: ModuleEnabledProvider not wired to App.tsx in Plan 02 — Phase 39/40 is the integration point when sidebar filtering is built
-- [Phase 38-module-registry-foundation]: description is a required field on ModuleDefinition — no conditional guard needed in consuming components
-- [Phase 39-01]: SLOT_IDS co-located in registry.ts — anchors ModuleExtension and SlotComponentProps type definitions
-- [Phase 39-01]: ModuleExtension.injects completed in Phase 39 with SlotComponentProps — no ComponentType<any> anywhere in extension chain
-- [Phase 39-01]: resolveExtensions() pure function (zero React runtime) — fully unit-testable without jsdom
-- [Phase 39-slot-architecture-contract-types]: ExtensionProvider consumes useModuleEnabled() — no localStorage duplication, single source of truth
-- [Phase 39-slot-architecture-contract-types]: ModuleEnabledProvider wired into App.tsx in Plan 02 (Phase 38 deferred this integration point)
-- [Phase 39-slot-architecture-contract-types]: Provider nesting: BrowserRouter > ModuleEnabledProvider > ExtensionProvider > Routes
-- [Phase 40-routing-refactor]: useModuleEnabled hook used for sidebar filtering (not static enabled field) — sidebar reacts to runtime module toggles
-- [Phase 40-routing-refactor]: NavLink end prop required for exact-path active state on / — prevents Home being highlighted on all routes in React Router v6
-- [Phase 41-home-2.0-control-center]: activity-feed hooks extracted to src/lib/ for multi-page reuse without page coupling
-- [Phase 41-home-2.0-control-center]: useModuleStats uses Supabase head:true count pattern for aggregate queries (no rows fetched)
-- [Phase 42-contract-population-admin-panel]: Admin panel at /admin/modules uses static hardcoded route (not MODULE_REGISTRY) — accessible only by direct URL, invisible to sidebar
-- [Phase 42-contract-population-admin-panel]: localStorage('fxl-enabled-modules') read synchronously in useState initializer — zero loading flash
-- [Phase 42-01]: Extension constants inlined in extension components (STATUS_COLORS, TYPE_COLORS) — no coupling to module internals
-- [Phase 42-01]: SLOT_IDS sourced from @/modules/registry in manifests — registry layer is the canonical source; module-ids.ts is only for ModuleId constants
-- [Phase 42-01]: ExtensionSlot wrapped in 2-column grid div in Home.tsx — slot renders null gracefully when no extensions registered
-
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-- Phase 42 (Contract Population): specific high-value cross-module slot placements need enumeration during planning (research flagged this gap)
+None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T05:10:48.539Z
-Stopped at: Completed 42-01-PLAN.md — Phase 42 Plan 01 complete
-Next: /gsd:plan-phase 42
+Last session: 2026-03-13
+Stopped at: Milestone v2.0 complete
+Next: /gsd:new-milestone
