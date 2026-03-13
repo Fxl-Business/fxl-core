@@ -155,6 +155,7 @@ export default function Sidebar() {
         {/* Home link with icon — hardcoded, not a module */}
         <NavLink
           to="/"
+          end
           className={({ isActive }) =>
             cn(
               'flex items-center gap-2 text-sm font-medium transition-colors',
