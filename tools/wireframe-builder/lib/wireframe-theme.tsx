@@ -26,23 +26,30 @@ function readStoredTheme(fallback: WireframeTheme): WireframeTheme {
 export function WireframeThemeProvider({
   children,
   defaultTheme = 'light',
+  externalTheme,
   wfOverrides,
 }: {
   children: ReactNode
   defaultTheme?: WireframeTheme
+  /** When provided, overrides internal state and skips localStorage persistence. */
+  externalTheme?: WireframeTheme
   wfOverrides?: React.CSSProperties
 }) {
-  const [theme, setThemeState] = useState<WireframeTheme>(() =>
+  const [internalTheme, setThemeState] = useState<WireframeTheme>(() =>
     readStoredTheme(defaultTheme),
   )
 
+  const theme = externalTheme ?? internalTheme
+
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, theme)
-    } catch {
-      // localStorage unavailable — silent fail
+    if (!externalTheme) {
+      try {
+        localStorage.setItem(STORAGE_KEY, theme)
+      } catch {
+        // localStorage unavailable — silent fail
+      }
     }
-  }, [theme])
+  }, [theme, externalTheme])
 
   const toggle = () => setThemeState((t) => (t === 'light' ? 'dark' : 'light'))
 

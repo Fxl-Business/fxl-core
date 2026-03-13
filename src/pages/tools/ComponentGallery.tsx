@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CheckCircle2, Clock, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
@@ -931,14 +931,29 @@ function GalleryContent({ showBranding, setShowBranding }: { showBranding: boole
   )
 }
 
+function useGlobalTheme(): 'light' | 'dark' {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setDark(document.documentElement.classList.contains('dark'))
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
+  return dark ? 'dark' : 'light'
+}
+
 export default function ComponentGallery() {
   const [showBranding, setShowBranding] = useState(false)
+  const globalTheme = useGlobalTheme()
   const wfOverrides = showBranding
     ? brandingToWfOverrides({ ...DEFAULT_BRANDING, primaryColor: '#1B6B93' })
     : undefined
 
   return (
-    <WireframeThemeProvider wfOverrides={wfOverrides}>
+    <WireframeThemeProvider externalTheme={globalTheme} wfOverrides={wfOverrides}>
       <GalleryContent showBranding={showBranding} setShowBranding={setShowBranding} />
     </WireframeThemeProvider>
   )
