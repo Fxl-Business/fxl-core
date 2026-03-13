@@ -18,6 +18,11 @@ const KBDetailPage = lazy(() => import('@/modules/knowledge-base/pages/KBDetailP
 const KBFormPage = lazy(() => import('@/modules/knowledge-base/pages/KBFormPage'))
 const KBSearchPage = lazy(() => import('@/modules/knowledge-base/pages/KBSearchPage'))
 
+// Tasks pages — TaskList is non-lazy (lightweight); KanbanBoard and TaskForm are lazy (Plan 02/03)
+import TaskList from '@/modules/tasks/pages/TaskList'
+const KanbanBoard = lazy(() => import('@/modules/tasks/pages/KanbanBoard'))
+const TaskForm = lazy(() => import('@/modules/tasks/pages/TaskForm'))
+
 const moduleRoutes = MODULE_REGISTRY
   .flatMap(m => m.routeConfig ?? [])
   .filter((cfg): cfg is RouteObject & { path: string } => cfg.path !== undefined)
@@ -42,6 +47,12 @@ export default function App() {
           <Route path="/knowledge-base/new" element={<Suspense fallback={<div>Carregando...</div>}><KBFormPage /></Suspense>} />
           <Route path="/knowledge-base/:id/edit" element={<Suspense fallback={<div>Carregando...</div>}><KBFormPage /></Suspense>} />
           <Route path="/knowledge-base/:id" element={<Suspense fallback={<div>Carregando...</div>}><KBDetailPage /></Suspense>} />
+
+          {/* Tasks — static routes before parametric */}
+          <Route path="/tarefas" element={<TaskList />} />
+          <Route path="/tarefas/kanban" element={<Suspense fallback={<div>Carregando...</div>}><KanbanBoard /></Suspense>} />
+          <Route path="/tarefas/new" element={<Suspense fallback={<div>Carregando...</div>}><TaskForm /></Suspense>} />
+          <Route path="/tarefas/:id/edit" element={<Suspense fallback={<div>Carregando...</div>}><TaskForm /></Suspense>} />
         </Route>
 
         {/* Auth pages — public, full screen */}
