@@ -109,6 +109,14 @@ None - no external service configuration required.
 - Phase 41 (Home 2.0) can place `<ExtensionSlot>` in the Home dashboard to receive injected KPI widgets
 - Phase 42 (Contract Population) can inject cross-module content into defined slots
 
+## Self-Check: PASSED
+
+- FOUND: src/modules/slots.tsx
+- FOUND: src/modules/hooks/useActiveExtensions.ts
+- FOUND: .planning/phases/39-slot-architecture-contract-types/39-02-SUMMARY.md
+- FOUND: commit 2381fdb (Task 1)
+- FOUND: commit 92448ac (Task 2)
+
 ---
 *Phase: 39-slot-architecture-contract-types*
 *Completed: 2026-03-13*
