@@ -12,9 +12,6 @@ import ShareModal from '@tools/wireframe-builder/components/editor/ShareModal'
 import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPanel'
 import HeaderPropertyPanel from '@tools/wireframe-builder/components/editor/HeaderPropertyPanel'
 import SidebarPropertyPanel from '@tools/wireframe-builder/components/editor/SidebarPropertyPanel'
-import SidebarConfigPanel from '@tools/wireframe-builder/components/editor/SidebarConfigPanel'
-import HeaderConfigPanel from '@tools/wireframe-builder/components/editor/HeaderConfigPanel'
-import FilterBarEditor from '@tools/wireframe-builder/components/editor/FilterBarEditor'
 import FilterPropertyPanel from '@tools/wireframe-builder/components/editor/FilterPropertyPanel'
 import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
 import { getIconComponent } from '@tools/wireframe-builder/components/editor/IconPicker'
@@ -164,9 +161,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
   // AdminToolbar collapse state
   const [toolbarCollapsed, setToolbarCollapsed] = useState(false)
-
-  // Layout panel open state -- at most one panel open at a time, null = closed
-  const [layoutPanel, setLayoutPanel] = useState<'sidebar' | 'header' | 'filters' | null>(null)
 
   // Filter inline editing
   const [selectedFilterIndex, setSelectedFilterIndex] = useState<number | null>(null)
@@ -390,7 +384,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
   function exitEditMode() {
     setWorkingConfig(null)
     setStaleWarning(false)
-    setLayoutPanel(null)
     setSelectedFilterIndex(null)
     setEditMode({
       active: false,
@@ -881,7 +874,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               onSave={handleSave}
               onOpenComments={handleOpenScreenComments}
               onOpenShare={() => setShareOpen(true)}
-              onOpenLayoutPanel={(panel) => setLayoutPanel(panel)}
               userDisplayName={user.fullName ?? user.firstName ?? undefined}
               userRole="Operador"
             />
@@ -1621,32 +1613,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
         onDelete={() => {
           if (selectedFilterIndex !== null) handleFilterDelete(selectedFilterIndex)
         }}
-      />
-
-      <SidebarConfigPanel
-        open={layoutPanel === 'sidebar'}
-        config={workingConfig?.sidebar ?? {}}
-        screens={screens}
-        onChange={(updatedSidebar) => {
-          updateWorkingConfig((cfg) => ({
-            ...cfg,
-            sidebar: updatedSidebar,
-          }))
-        }}
-        onClose={() => setLayoutPanel(null)}
-      />
-      <HeaderConfigPanel
-        open={layoutPanel === 'header'}
-        headerConfig={activeConfig?.header ?? {}}
-        configLabel={activeConfig?.label ?? 'Dashboard'}
-        onUpdate={handleHeaderUpdate}
-        onClose={() => setLayoutPanel(null)}
-      />
-      <FilterBarEditor
-        open={layoutPanel === 'filters'}
-        filters={activeScreen?.filters ?? []}
-        onChange={(filters) => updateWorkingScreen((s) => ({ ...s, filters }))}
-        onClose={() => setLayoutPanel(null)}
       />
 
       {pendingExitEdit && (
