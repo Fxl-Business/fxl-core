@@ -21,7 +21,7 @@
 **Milestone Goal:** Replace Sheet panels (Header, Sidebar, Filtros) with inline click-to-edit, where operators click directly on the component to edit it — same pattern used for content blocks.
 
 - [x] **Phase 54: Header Inline Editing** - Operator clicks header elements to open contextual PropertyPanel forms
-- [ ] **Phase 55: Sidebar Inline Editing** - Operator clicks sidebar groups, footer, and widgets to edit inline
+- [x] **Phase 55: Sidebar Inline Editing** - Operator clicks sidebar groups, footer, and widgets to edit inline
 - [ ] **Phase 56: Filter Inline Editing** - Operator clicks filter chips to configure, and can add/remove filters in edit mode
 - [ ] **Phase 57: Cleanup & Consolidation** - Remove Sheet panels and AdminToolbar Layout buttons, leaving only click-to-edit
 
@@ -54,8 +54,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 55-01-PLAN.md — Sidebar property forms + SidebarPropertyPanel infrastructure
-- [ ] 55-02-PLAN.md — Wire clickable sidebar elements + inline add/delete controls in WireframeViewer
+- [x] 55-01-PLAN.md — Sidebar property forms + SidebarPropertyPanel infrastructure
+- [x] 55-02-PLAN.md — Wire clickable sidebar elements + inline add/delete controls in WireframeViewer
 
 ### Phase 56: Filter Inline Editing
 **Goal**: Operators can click on filter chips to configure them, and can add/remove filters directly from the filter bar in edit mode
@@ -91,6 +91,6 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | All phases 1-53 shipped | v1.0-v2.2 | 100% | Complete | 2026-03-13 |
 | 54. Header Inline Editing | v2.3 | 2/2 | Complete | 2026-03-13 |
-| 55. Sidebar Inline Editing | v2.3 | 0/2 | Not started | - |
+| 55. Sidebar Inline Editing | v2.3 | 2/2 | Complete | 2026-03-13 |
 | 56. Filter Inline Editing | v2.3 | 0/2 | Not started | - |
 | 57. Cleanup & Consolidation | v2.3 | 0/1 | Not started | - |

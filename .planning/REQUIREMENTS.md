@@ -15,10 +15,10 @@ Requirements for Inline Editing UX — Click-to-Edit para Header, Sidebar e Filt
 
 ### Sidebar Inline Editing
 
-- [ ] **SIDE-10**: Operator can click on sidebar groups to rename them inline
-- [ ] **SIDE-11**: Operator can click on sidebar footer to edit footer text inline
-- [ ] **SIDE-12**: Operator can click on sidebar widgets (WorkspaceSwitcher, UserMenu) to configure them via contextual PropertyPanel
-- [ ] **SIDE-13**: Operator can add/remove sidebar widgets and groups via contextual controls (+ button, delete button) visible in edit mode
+- [x] **SIDE-10**: Operator can click on sidebar groups to rename them inline
+- [x] **SIDE-11**: Operator can click on sidebar footer to edit footer text inline
+- [x] **SIDE-12**: Operator can click on sidebar widgets (WorkspaceSwitcher, UserMenu) to configure them via contextual PropertyPanel
+- [x] **SIDE-13**: Operator can add/remove sidebar widgets and groups via contextual controls (+ button, delete button) visible in edit mode
 
 ### Filter Inline Editing
 
@@ -62,10 +62,10 @@ Requirements for Inline Editing UX — Click-to-Edit para Header, Sidebar e Filt
 | HDR-10 | Phase 54 | Complete |
 | HDR-11 | Phase 54 | Complete |
 | HDR-12 | Phase 54 | Complete |
-| SIDE-10 | Phase 55 | Pending |
-| SIDE-11 | Phase 55 | Pending |
-| SIDE-12 | Phase 55 | Pending |
-| SIDE-13 | Phase 55 | Pending |
+| SIDE-10 | Phase 55 | Complete |
+| SIDE-11 | Phase 55 | Complete |
+| SIDE-12 | Phase 55 | Complete |
+| SIDE-13 | Phase 55 | Complete |
 | FILT-10 | Phase 56 | Pending |
 | FILT-11 | Phase 56 | Pending |
 | FILT-12 | Phase 56 | Pending |
