@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, MessageSquare, Moon, Palette, Pencil, Save, Share2, Sun, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, Filter, LayoutTemplate, MessageSquare, Moon, Palette, PanelLeft, Pencil, Save, Share2, Sun, X } from 'lucide-react'
 import { useState } from 'react'
 import { useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
 import BrandingPopover from './BrandingPopover'
@@ -14,6 +14,7 @@ type Props = {
   onSave: () => void
   onOpenComments: () => void
   onOpenShare: () => void
+  onOpenLayoutPanel: (panel: 'sidebar' | 'header' | 'filters') => void
   userDisplayName?: string
   userRole?: string
 }
@@ -29,6 +30,7 @@ export default function AdminToolbar({
   onSave,
   onOpenComments,
   onOpenShare,
+  onOpenLayoutPanel,
   userDisplayName,
   userRole,
 }: Props) {
@@ -119,6 +121,51 @@ export default function AdminToolbar({
               Cores
             </button>
             <BrandingPopover open={brandingOpen} onClose={() => setBrandingOpen(false)} />
+          </div>
+        )}
+
+        {editMode && (
+          <div
+            className="flex items-center gap-1"
+            style={{
+              paddingLeft: 8,
+              marginLeft: 4,
+              borderLeft: '1px solid var(--wf-toolbar-border)',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => onOpenLayoutPanel('sidebar')}
+              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors"
+              style={{ color: 'var(--wf-toolbar-muted)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-fg)'; e.currentTarget.style.background = 'var(--wf-toolbar-hover)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-muted)'; e.currentTarget.style.background = 'transparent' }}
+            >
+              <PanelLeft className="h-3.5 w-3.5" />
+              Sidebar
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenLayoutPanel('header')}
+              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors"
+              style={{ color: 'var(--wf-toolbar-muted)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-fg)'; e.currentTarget.style.background = 'var(--wf-toolbar-hover)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-muted)'; e.currentTarget.style.background = 'transparent' }}
+            >
+              <LayoutTemplate className="h-3.5 w-3.5" />
+              Header
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenLayoutPanel('filters')}
+              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors"
+              style={{ color: 'var(--wf-toolbar-muted)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-fg)'; e.currentTarget.style.background = 'var(--wf-toolbar-hover)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--wf-toolbar-muted)'; e.currentTarget.style.background = 'transparent' }}
+            >
+              <Filter className="h-3.5 w-3.5" />
+              Filtros
+            </button>
           </div>
         )}
 

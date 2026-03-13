@@ -749,6 +749,7 @@ export default function FinanceiroWireframeViewer() {
                 onSave={handleSave}
                 onOpenComments={handleOpenScreenComments}
                 onOpenShare={() => setShareOpen(true)}
+                onOpenLayoutPanel={() => undefined}
               />
             )}
             {staleWarning && (
