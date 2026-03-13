@@ -14,6 +14,9 @@ import { ExtensionProvider } from '@/modules/slots'
 
 const SharedWireframeView = lazy(() => import('@/pages/SharedWireframeView'))
 
+// Admin pages (lazy for code splitting)
+const ModulesPanel = lazy(() => import('@/pages/admin/ModulesPanel'))
+
 // Knowledge Base pages (lazy for code splitting)
 const KBListPage = lazy(() => import('@/modules/knowledge-base/pages/KBListPage'))
 const KBDetailPage = lazy(() => import('@/modules/knowledge-base/pages/KBDetailPage'))
@@ -57,6 +60,12 @@ export default function App() {
               <Route path="/tarefas/kanban" element={<Suspense fallback={<div>Carregando...</div>}><KanbanBoard /></Suspense>} />
               <Route path="/tarefas/new" element={<Suspense fallback={<div>Carregando...</div>}><TaskForm /></Suspense>} />
               <Route path="/tarefas/:id/edit" element={<Suspense fallback={<div>Carregando...</div>}><TaskForm /></Suspense>} />
+
+              {/* Admin routes — static, not in MODULE_REGISTRY, not in sidebar */}
+              <Route
+                path="/admin/modules"
+                element={<Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense>}
+              />
             </Route>
 
             {/* Auth pages — public, full screen */}
