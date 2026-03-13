@@ -24,7 +24,7 @@
 - [x] **Phase 49: Dashboard Mutation Infrastructure** - updateWorkingConfig helper + AdminToolbar Layout button group (completed 2026-03-13)
 - [x] **Phase 50: Header Config Panel** - Sheet panel for all header toggles, brand label, and period type (completed 2026-03-13)
 - [x] **Phase 51: Sidebar Widget Renderers** - SIDEBAR_WIDGET_REGISTRY + WorkspaceSwitcher and UserMenu widget components (completed 2026-03-13)
-- [ ] **Phase 52: Sidebar Config Panel** - Sheet panel for groups, footer text, screen assignment, and widget management
+- [x] **Phase 52: Sidebar Config Panel** - Sheet panel for groups, footer text, screen assignment, and widget management (completed 2026-03-13)
 - [ ] **Phase 53: Filter Bar Editor** - Sheet panel for per-screen FilterOption[] CRUD with presets
 
 ## Phase Details
@@ -121,5 +121,5 @@ Phases execute in dependency order: 47 → 48 → 49 → 50 → 51 → 52 → 53
 | 49. Dashboard Mutation Infrastructure | 1/1 | Complete    | 2026-03-13 | - |
 | 50. Header Config Panel | 1/1 | Complete    | 2026-03-13 | - |
 | 51. Sidebar Widget Renderers | 1/1 | Complete    | 2026-03-13 | - |
-| 52. Sidebar Config Panel | v2.2 | 0/1 | Planned | - |
+| 52. Sidebar Config Panel | 1/1 | Complete   | 2026-03-13 | - |
 | 53. Filter Bar Editor | v2.2 | 0/1 | Planned | - |
