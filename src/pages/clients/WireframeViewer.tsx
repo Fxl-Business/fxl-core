@@ -43,7 +43,6 @@ import type {
   BlueprintScreen,
   BlueprintSection,
   HeaderConfig,
-  SidebarConfig,
   SidebarGroup,
   SidebarWidget,
 } from '@tools/wireframe-builder/types/blueprint'
@@ -500,13 +499,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       return updater(prev)
     })
     setEditMode((prev) => ({ ...prev, dirty: true }))
-  }
-
-  function updateWorkingSidebar(patch: Partial<SidebarConfig>) {
-    updateWorkingConfig((cfg) => ({
-      ...cfg,
-      sidebar: { ...cfg.sidebar, ...patch },
-    }))
   }
 
   function handleHeaderUpdate(updater: (header: HeaderConfig) => HeaderConfig) {
@@ -1131,8 +1123,15 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
       <SidebarConfigPanel
         open={layoutPanel === 'sidebar'}
+        config={workingConfig?.sidebar ?? {}}
+        screens={screens}
+        onChange={(updatedSidebar) => {
+          updateWorkingConfig((cfg) => ({
+            ...cfg,
+            sidebar: updatedSidebar,
+          }))
+        }}
         onClose={() => setLayoutPanel(null)}
-        onUpdate={updateWorkingSidebar}
       />
       <HeaderConfigPanel
         open={layoutPanel === 'header'}
