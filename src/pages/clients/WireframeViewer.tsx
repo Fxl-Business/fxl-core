@@ -394,6 +394,19 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeConfig?.sidebar?.widgets])
 
+  // Structured sidebar partition for edit mode (pinned + ungrouped + groups)
+  const sidebarPartition = useMemo(
+    () =>
+      partitionScreensForEdit(
+        screens,
+        activeConfig?.sidebar?.groups,
+        activeConfig?.sidebar?.pinnedTop,
+        activeConfig?.sidebar?.pinnedBottom,
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [screens, activeConfig?.sidebar?.groups, activeConfig?.sidebar?.pinnedTop, activeConfig?.sidebar?.pinnedBottom],
+  )
+
   // Compute rows for active screen
   const rows: ScreenRow[] = activeScreen
     ? activeScreen.rows ?? sectionsToRows(activeScreen.sections)
@@ -1294,12 +1307,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 // Expanded edit mode: structured rendering with pinned + ungrouped + groups
                 <>
                   {(() => {
-                    const partition = partitionScreensForEdit(
-                      screens,
-                      activeConfig?.sidebar?.groups,
-                      activeConfig?.sidebar?.pinnedTop,
-                      activeConfig?.sidebar?.pinnedBottom,
-                    )
+                    const partition = sidebarPartition
 
                     const renderScreenManager = (
                       entries: ScreenEntry[],
@@ -1432,28 +1440,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                             </div>
                           )
                         })}
-
-                        {/* Pinned bottom */}
-                        {partition.pinnedBottom.length > 0 && (
-                          <div style={{ marginTop: 4 }}>
-                            <div style={{
-                              padding: '4px 12px',
-                              fontSize: 9,
-                              fontWeight: 600,
-                              textTransform: 'uppercase' as const,
-                              letterSpacing: '0.08em',
-                              color: 'var(--wf-accent)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 4,
-                              opacity: 0.7,
-                            }}>
-                              <Pin style={{ width: 10, height: 10 }} />
-                              FIXADO NO RODAPE
-                            </div>
-                            {renderScreenManager(partition.pinnedBottom)}
-                          </div>
-                        )}
 
                         {/* Inline add buttons at the bottom of the nav */}
                         <div style={{ display: 'flex', gap: 4, paddingTop: 8, paddingBottom: 4 }}>
@@ -1664,6 +1650,44 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 </>
               )}
             </nav>
+
+            {/* Pinned bottom screens — between nav and footer */}
+            {editMode.active && !effectiveSidebarCollapsed && sidebarPartition.pinnedBottom.length > 0 && (
+              <div style={{
+                padding: '4px 8px',
+                borderTop: '1px solid var(--wf-sidebar-border)',
+                flexShrink: 0,
+              }}>
+                <div style={{
+                  padding: '4px 12px',
+                  fontSize: 9,
+                  fontWeight: 600,
+                  textTransform: 'uppercase' as const,
+                  letterSpacing: '0.08em',
+                  color: 'var(--wf-accent)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  opacity: 0.7,
+                }}>
+                  <Pin style={{ width: 10, height: 10 }} />
+                  FIXADO NO RODAPE
+                </div>
+                <ScreenManager
+                  screens={sidebarPartition.pinnedBottom.map((s) => s.screen)}
+                  activeIndex={sidebarPartition.pinnedBottom.findIndex((s) => s.originalIndex === safeActiveIndex)}
+                  editMode={true}
+                  onSelectScreen={(localIdx) => handleScreenSelect(sidebarPartition.pinnedBottom[localIdx].originalIndex)}
+                  onAddScreen={handleAddScreen}
+                  onDeleteScreen={(localIdx) => handleDeleteScreen(sidebarPartition.pinnedBottom[localIdx].originalIndex)}
+                  onRenameScreen={(localIdx, title) => handleRenameScreen(sidebarPartition.pinnedBottom[localIdx].originalIndex, title)}
+                  onReorderScreens={handleReorderScreens}
+                  getPinnedPosition={getScreenPinnedPosition}
+                  onPinScreen={handlePinScreen}
+                  onUnpinScreen={handleUnpinScreen}
+                />
+              </div>
+            )}
 
             {/* Footer */}
             {sidebarWidgets.footer.length > 0 ? (
