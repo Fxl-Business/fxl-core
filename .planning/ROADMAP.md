@@ -85,7 +85,7 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 
 - [x] **Phase 29: Module Foundation & Registry** - ModuleManifest type, MODULE_REGISTRY, ESLint boundary enforcement, sidebar and routing driven by registry (completed 2026-03-13)
 - [x] **Phase 30: Supabase Migrations & Data Layer** - knowledge_entries and tasks tables with tsvector FTS, anon-permissive RLS, and typed service stubs (completed 2026-03-13)
-- [ ] **Phase 31: Knowledge Base Module** - Full KB module: list, detail, form, full-text search, ADR format for decision entries
+- [x] **Phase 31: Knowledge Base Module** - Full KB module: list, detail, form, full-text search, ADR format for decision entries (completed 2026-03-13)
 - [ ] **Phase 32: Task Management Module** - Full tasks module: list, kanban, create/edit form, task-to-KB documentation link
 - [ ] **Phase 33: Home Page & Cross-Module Integration** - Module hub grid from registry, activity feed, KB section in client workspace, KB in Cmd+K
 
@@ -240,7 +240,7 @@ Plans:
   3. Creating or editing an entry via the form saves to Supabase and the entry immediately appears in the list
   4. Typing a query in the KB search page returns ranked results via Supabase full-text search (Portuguese stemming)
   5. Creating a Decision-type entry presents an ADR-structured template (Context, Decision, Consequences sections)
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 31-00-PLAN.md -- Wave 0: test stubs for KB hooks and form page (Nyquist compliance)
@@ -319,6 +319,6 @@ For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in seque
 | 28. Editor Sync & Gallery Validation | 2/2 | Complete    | 2026-03-13 | - |
 | 29. Module Foundation & Registry | 2/2 | Complete    | 2026-03-13 | - |
 | 30. Supabase Migrations & Data Layer | 2/2 | Complete    | 2026-03-13 | - |
-| 31. Knowledge Base Module | 2/3 | In Progress|  | - |
+| 31. Knowledge Base Module | 3/3 | Complete   | 2026-03-13 | - |
 | 32. Task Management Module | v1.5 | 0/3 | Not started | - |
 | 33. Home Page & Cross-Module Integration | v1.5 | 0/2 | Not started | - |

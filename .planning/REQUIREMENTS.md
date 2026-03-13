@@ -18,8 +18,8 @@ Requirements for Modular Foundation & Knowledge Base milestone. Each maps to roa
 
 - [x] **KB-01**: Tabela kb_entries no Supabase com 4 tipos (bug, decision, pattern, lesson), tags, client_slug
 - [x] **KB-02**: Pagina de listagem /knowledge-base com filtro por tipo, tags e cliente
-- [ ] **KB-03**: Pagina de detalhe /knowledge-base/:id com render markdown e metadados
-- [ ] **KB-04**: Formulario de criacao/edicao com type selector, markdown body, tags, client_slug
+- [x] **KB-03**: Pagina de detalhe /knowledge-base/:id com render markdown e metadados
+- [x] **KB-04**: Formulario de criacao/edicao com type selector, markdown body, tags, client_slug
 - [x] **KB-05**: Full-text search via tsvector/tsquery (portugues) com pagina de busca
 - [x] **KB-06**: Entries do tipo 'decision' seguem formato ADR (Context, Decision, Consequences)
 - [ ] **KB-07**: Resultados de KB integrados no Cmd+K (async fetch, grupo separado)
@@ -79,8 +79,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MOD-04 | Phase 29 | Complete |
 | KB-01 | Phase 30 | Complete |
 | KB-02 | Phase 31 | Complete |
-| KB-03 | Phase 31 | Pending |
-| KB-04 | Phase 31 | Pending |
+| KB-03 | Phase 31 | Complete |
+| KB-04 | Phase 31 | Complete |
 | KB-05 | Phase 31 | Complete |
 | KB-06 | Phase 31 | Complete |
 | KB-07 | Phase 33 | Pending |

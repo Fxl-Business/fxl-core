@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: planning
-stopped_at: Completed 31-knowledge-base-module/31-01-PLAN.md
-last_updated: "2026-03-13T00:55:34.914Z"
+stopped_at: Completed 31-knowledge-base-module/31-02-PLAN.md
+last_updated: "2026-03-13T01:01:18.057Z"
 last_activity: 2026-03-12 -- Roadmap written for v1.5 (Phases 29-33), 19 requirements mapped
 progress:
   total_phases: 12
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 25
-  completed_plans: 18
+  completed_plans: 19
   percent: 0
 ---
 
@@ -68,6 +68,8 @@ v1.5 decisions to track during execution:
 - [Phase 31-knowledge-base-module]: kb-service.ts uses KnowledgeEntry/KnowledgeEntryType (not KBEntry/KBEntryType) — hooks adapted to actual Phase 30 service names
 - [Phase 31-knowledge-base-module]: vi.hoisted() required for mock refs in vitest — const declarations before vi.mock cause temporal dead zone due to hoisting
 - [Phase 31-knowledge-base-module]: @vitest-environment jsdom directive added per-file for renderHook tests — global config remains node environment
+- [Phase 31-knowledge-base-module]: Submitted-query pattern in KBSearchPage: inputValue drives the controlled input, submittedQuery drives the hook
+- [Phase 31-knowledge-base-module]: KBFormPage ADR injection guard uses functional updater setFormData(prev => ...) to read latest state and avoid stale closure
 
 ### Pending Todos
 
@@ -81,6 +83,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T00:55:34.893Z
-Stopped at: Completed 31-knowledge-base-module/31-01-PLAN.md
+Last session: 2026-03-13T01:01:18.042Z
+Stopped at: Completed 31-knowledge-base-module/31-02-PLAN.md
 Next: Complete Phase 28 (v1.4), then plan Phase 29 via /gsd:plan-phase 29
