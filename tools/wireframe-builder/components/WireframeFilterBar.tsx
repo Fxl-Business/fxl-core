@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Search, Calendar, ChevronDown, Share2, Download, Trash2 } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Search, Calendar, ChevronDown, Share2, Download, Trash2, Plus } from 'lucide-react'
 
 export type FilterOption = {
   key: string
@@ -31,6 +31,14 @@ const MESES_MOCK = [
 ]
 
 const ANOS_MOCK = ['2025', '2024', '2023']
+
+const FILTER_PRESETS: FilterOption[] = [
+  { key: 'periodo', label: 'Periodo', filterType: 'date-range' },
+  { key: 'empresa', label: 'Empresa', filterType: 'multi-select', options: ['Empresa A', 'Empresa B'] },
+  { key: 'produto', label: 'Produto', filterType: 'multi-select', options: ['Produto A', 'Produto B'] },
+  { key: 'status', label: 'Status', filterType: 'multi-select', options: ['Ativo', 'Inativo', 'Pendente'] },
+  { key: 'responsavel', label: 'Responsavel', filterType: 'search' },
+]
 
 // ---------------------------------------------------------------------------
 // Filter sub-components (module-private)
@@ -254,9 +262,10 @@ export default function WireframeFilterBar({
   editMode,
   onFilterClick,
   onFilterDelete,
-  onAddFilter: _onAddFilter,
+  onAddFilter,
 }: Props) {
-  void _onAddFilter
+  const [showPresetPicker, setShowPresetPicker] = useState(false)
+  const presetPickerRef = useRef<HTMLDivElement>(null)
   const [internalCompareMode, setInternalCompareMode] = useState(false)
   const [internalPeriod, setInternalPeriod] = useState(
     comparePeriodType === 'anual' ? '2025' : 'Fev/2026'
@@ -277,6 +286,18 @@ export default function WireframeFilterBar({
   }
 
   const periodOptions = comparePeriodType === 'anual' ? ANOS_MOCK : MESES_MOCK
+
+  // Close preset picker on click outside
+  useEffect(() => {
+    if (!showPresetPicker) return
+    function handleClickOutside(e: MouseEvent) {
+      if (presetPickerRef.current && !presetPickerRef.current.contains(e.target as Node)) {
+        setShowPresetPicker(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showPresetPicker])
 
   return (
     <div
@@ -381,6 +402,141 @@ export default function WireframeFilterBar({
           <FilterControl key={filter.key} filter={filter} />
         )
       ))}
+
+      {/* Add filter button (edit mode only) */}
+      {editMode && onAddFilter && (
+        <div ref={presetPickerRef} style={{ position: 'relative' }}>
+          <button
+            type="button"
+            title="Adicionar filtro"
+            onClick={() => setShowPresetPicker((v) => !v)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+              border: '1px dashed var(--wf-card-border)',
+              background: 'transparent',
+              color: 'var(--wf-muted)',
+              cursor: 'pointer',
+              transition: 'border-color 150ms ease, color 150ms ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--wf-accent)'
+              e.currentTarget.style.color = 'var(--wf-accent)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--wf-card-border)'
+              e.currentTarget.style.color = 'var(--wf-muted)'
+            }}
+          >
+            <Plus style={{ width: 14, height: 14 }} />
+          </button>
+
+          {showPresetPicker && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              zIndex: 20,
+              marginTop: 4,
+              background: 'var(--wf-card)',
+              border: '1px solid var(--wf-card-border)',
+              borderRadius: 8,
+              padding: 6,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              minWidth: 180,
+            }}>
+              {FILTER_PRESETS.map((preset) => {
+                const exists = filters.some((f) => f.key === preset.key)
+                return (
+                  <button
+                    key={preset.key}
+                    type="button"
+                    disabled={exists}
+                    onClick={() => {
+                      onAddFilter(preset)
+                      setShowPresetPicker(false)
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      width: '100%',
+                      padding: '6px 10px',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      fontFamily: 'Inter, sans-serif',
+                      border: 'none',
+                      borderRadius: 6,
+                      background: 'transparent',
+                      color: exists ? 'var(--wf-muted)' : 'var(--wf-body)',
+                      cursor: exists ? 'not-allowed' : 'pointer',
+                      opacity: exists ? 0.5 : 1,
+                      transition: 'background 150ms ease',
+                      textAlign: 'left',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!exists) e.currentTarget.style.background = 'var(--wf-accent-muted)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent'
+                    }}
+                  >
+                    <Plus style={{ width: 12, height: 12, flexShrink: 0 }} />
+                    {preset.label}
+                  </button>
+                )
+              })}
+              <div style={{
+                height: 1,
+                background: 'var(--wf-card-border)',
+                margin: '4px 0',
+              }} />
+              <button
+                type="button"
+                onClick={() => {
+                  const key = `filtro-${filters.length + 1}`
+                  onAddFilter({
+                    key,
+                    label: 'Novo Filtro',
+                    filterType: 'select',
+                  })
+                  setShowPresetPicker(false)
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  width: '100%',
+                  padding: '6px 10px',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  fontFamily: 'Inter, sans-serif',
+                  border: 'none',
+                  borderRadius: 6,
+                  background: 'transparent',
+                  color: 'var(--wf-body)',
+                  cursor: 'pointer',
+                  transition: 'background 150ms ease',
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--wf-accent-muted)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent'
+                }}
+              >
+                <Plus style={{ width: 12, height: 12, flexShrink: 0 }} />
+                Filtro Personalizado
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {showCompareSwitch && (
         <>
