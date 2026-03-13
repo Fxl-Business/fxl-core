@@ -35,6 +35,9 @@ import { sectionsToRows, getCellCount } from '@tools/wireframe-builder/lib/grid-
 import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
 import type { Comment } from '@tools/wireframe-builder/types/comments'
+import { SIDEBAR_WIDGET_REGISTRY } from '@tools/wireframe-builder/lib/sidebar-widget-registry'
+import WorkspaceSwitcherWidget from '@tools/wireframe-builder/components/sidebar-widgets/WorkspaceSwitcherWidget'
+import UserMenuWidget from '@tools/wireframe-builder/components/sidebar-widgets/UserMenuWidget'
 import type {
   BlueprintConfig,
   BlueprintScreen,
@@ -42,6 +45,7 @@ import type {
   HeaderConfig,
   SidebarConfig,
   SidebarGroup,
+  SidebarWidget,
 } from '@tools/wireframe-builder/types/blueprint'
 import type { EditModeState, GridLayout, ScreenRow } from '@tools/wireframe-builder/types/editor'
 
@@ -280,6 +284,16 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
   const screens = activeConfig?.screens ?? []
   const safeActiveIndex = Math.min(activeIndex, Math.max(screens.length - 1, 0))
   const activeScreen: BlueprintScreen | undefined = screens[safeActiveIndex]
+
+  // Widget rendering — extract widgets by zone from sidebar config
+  const sidebarWidgets = useMemo(() => {
+    const widgets = activeConfig?.sidebar?.widgets ?? []
+    return {
+      header: widgets.filter((w: SidebarWidget) => SIDEBAR_WIDGET_REGISTRY[w.type]?.zone === 'header'),
+      footer: widgets.filter((w: SidebarWidget) => SIDEBAR_WIDGET_REGISTRY[w.type]?.zone === 'footer'),
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeConfig?.sidebar?.widgets])
 
   // Compute rows for active screen
   const rows: ScreenRow[] = activeScreen
@@ -813,19 +827,21 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               borderRight: '1px solid var(--wf-sidebar-border)',
             }}
           >
-            {/* Sidebar header: label + toggle */}
+            {/* Sidebar header: widget or label + toggle */}
             <div
               style={{
                 height: 44,
                 display: 'flex',
                 alignItems: 'center',
-                padding: effectiveSidebarCollapsed ? '0 8px' : '0 16px',
+                padding: effectiveSidebarCollapsed ? '0 8px' : '0 8px 0 12px',
                 justifyContent: effectiveSidebarCollapsed ? 'center' : 'space-between',
                 borderBottom: '1px solid var(--wf-sidebar-border)',
                 flexShrink: 0,
+                gap: 4,
               }}
             >
-              {!effectiveSidebarCollapsed && (
+              {/* Expanded: no widgets — show plain label */}
+              {!effectiveSidebarCollapsed && sidebarWidgets.header.length === 0 && (
                 <span style={{
                   fontSize: 11,
                   fontWeight: 600,
@@ -835,10 +851,52 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
+                  flex: 1,
                 }}>
                   {activeConfig?.label ?? 'Dashboard'}
                 </span>
               )}
+              {/* Expanded: workspace-switcher widget */}
+              {!effectiveSidebarCollapsed && sidebarWidgets.header.length > 0 && (
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {sidebarWidgets.header.map((widget, idx) => (
+                    widget.type === 'workspace-switcher' ? (
+                      <WorkspaceSwitcherWidget
+                        key={`header-widget-${idx}`}
+                        label={widget.label}
+                        collapsed={false}
+                      />
+                    ) : null
+                  ))}
+                </div>
+              )}
+              {/* Collapsed: header widget icon-only button */}
+              {effectiveSidebarCollapsed && sidebarWidgets.header.length > 0 && (() => {
+                const firstWidget = sidebarWidgets.header[0]
+                const reg = SIDEBAR_WIDGET_REGISTRY[firstWidget.type]
+                const Icon = reg?.icon
+                return Icon ? (
+                  <button
+                    type="button"
+                    title={reg.label}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 36,
+                      height: 36,
+                      borderRadius: 6,
+                      border: 'none',
+                      background: 'transparent',
+                      color: 'var(--wf-sidebar-muted)',
+                      cursor: 'default',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Icon style={{ width: 18, height: 18 }} />
+                  </button>
+                ) : null
+              })()}
               <button
                 type="button"
                 aria-label={effectiveSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
@@ -961,20 +1019,35 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
             </nav>
 
             {/* Footer */}
-            {!effectiveSidebarCollapsed && (
-              <div style={{ padding: 12, margin: '0 12px 12px', borderRadius: 8, border: '1px solid var(--wf-sidebar-border)', flexShrink: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ height: 8, width: 8, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--wf-sidebar-fg)', lineHeight: 1.3, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Sistema Ativo
-                    </p>
-                    <p style={{ fontSize: 10, color: 'var(--wf-sidebar-muted)', lineHeight: 1.3, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {activeConfig?.sidebar?.footer ?? 'Desenvolvido por FXL'}
-                    </p>
+            {sidebarWidgets.footer.length > 0 ? (
+              // User menu widget(s) in footer zone — handles collapsed rendering internally
+              sidebarWidgets.footer.map((widget, idx) => (
+                widget.type === 'user-menu' ? (
+                  <UserMenuWidget
+                    key={`footer-widget-${idx}`}
+                    label={widget.name}
+                    role={widget.role}
+                    collapsed={effectiveSidebarCollapsed}
+                  />
+                ) : null
+              ))
+            ) : (
+              // Default status footer (existing behavior — no change)
+              !effectiveSidebarCollapsed && (
+                <div style={{ padding: 12, margin: '0 12px 12px', borderRadius: 8, border: '1px solid var(--wf-sidebar-border)', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ height: 8, width: 8, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--wf-sidebar-fg)', lineHeight: 1.3, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        Sistema Ativo
+                      </p>
+                      <p style={{ fontSize: 10, color: 'var(--wf-sidebar-muted)', lineHeight: 1.3, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {activeConfig?.sidebar?.footer ?? 'Desenvolvido por FXL'}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )
             )}
           </aside>
 
