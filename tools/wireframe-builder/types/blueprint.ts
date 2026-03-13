@@ -399,9 +399,29 @@ export type SidebarGroup = {
   screenIds: string[] // screen IDs belonging to this group (matched by BlueprintScreen.id)
 }
 
+export type SidebarWidgetType = 'workspace-switcher' | 'user-menu'
+
+export type WorkspaceSwitcherWidget = {
+  type: 'workspace-switcher'
+  label?: string           // display label (e.g., "Acme Corp")
+  workspaces?: string[]    // list of workspace names for visual dropdown
+}
+
+export type UserMenuWidget = {
+  type: 'user-menu'
+  name?: string            // user display name (e.g., "Carlos Silva")
+  role?: string            // role label (e.g., "Admin")
+  showRole?: boolean       // whether to show role below name (defaults true)
+}
+
+export type SidebarWidget =
+  | WorkspaceSwitcherWidget
+  | UserMenuWidget
+
 export type SidebarConfig = {
   footer?: string          // version/environment text
   groups?: SidebarGroup[]  // optional grouping of screens with labeled headings
+  widgets?: SidebarWidget[]    // NEW — compound widgets (Phase 47 / INFRA-03)
 }
 
 export type HeaderConfig = {
