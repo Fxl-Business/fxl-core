@@ -59,10 +59,29 @@ const SidebarGroupSchema = z.object({
   screenIds: z.array(z.string()),
 })
 
+const WorkspaceSwitcherWidgetSchema = z.object({
+  type: z.literal('workspace-switcher'),
+  label: z.string().optional(),
+  workspaces: z.array(z.string()).optional(),
+}).passthrough()
+
+const UserMenuWidgetSchema = z.object({
+  type: z.literal('user-menu'),
+  name: z.string().optional(),
+  role: z.string().optional(),
+  showRole: z.boolean().optional(),
+}).passthrough()
+
+export const SidebarWidgetSchema = z.discriminatedUnion('type', [
+  WorkspaceSwitcherWidgetSchema,
+  UserMenuWidgetSchema,
+])
+
 export const SidebarConfigSchema = z.object({
   footer: z.string().optional(),
   groups: z.array(SidebarGroupSchema).optional(),
-})
+  widgets: z.array(SidebarWidgetSchema).optional(),
+}).passthrough()
 
 const HeaderConfigSchema = z.object({
   showLogo: z.boolean().optional(),
