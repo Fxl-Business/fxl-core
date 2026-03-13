@@ -418,6 +418,52 @@
 
 ---
 
+## Milestone: v2.2 — Wireframe Builder — Configurable Layout Components
+
+**Shipped:** 2026-03-13
+**Phases:** 7 | **Plans:** 7 | **Timeline:** 1 session
+
+### What Was Built
+- SidebarWidget discriminated union (TypeScript + Zod) with backward-compatible schema extension
+- All HeaderConfig fields wired to conditional rendering in WireframeHeader across 4 call sites
+- Dashboard-level mutation infrastructure: updateWorkingConfig() + AdminToolbar Layout button group
+- HeaderConfigPanel with live preview: toggles, brandLabel input, periodType select (mensal/anual)
+- SIDEBAR_WIDGET_REGISTRY + WorkspaceSwitcher + UserMenu widgets with rail mode degradation
+- SidebarConfigPanel: footer text, group CRUD, screen assignment, widget picker
+- FilterBarEditor: per-screen FilterOption[] CRUD with 5 BI presets
+
+### What Worked
+- **Schema-first confirmed again:** Phase 47 (types + Zod) enabled all downstream phases to compile against real types from day one
+- **1-plan-per-phase simplicity:** 7 phases × 1 plan each = clean sequential execution, zero wave complexity
+- **updateWorkingConfig pattern:** Reusing the same functional-update + dirty-flag pattern from updateWorkingScreen made all panels consistent
+- **Formal REQUIREMENTS.md:** 19/19 requirements tracked from roadmap creation, all traceability rows marked Complete
+- **Sequential execution with auto-continue:** 7 phases executed in one session without manual intervention
+
+### What Was Inefficient
+- **Sheet panel UX mismatch:** Built 3 Sheet panels (Header, Sidebar, Filters) that break the existing click-to-edit pattern — user feedback says inline editing is the right UX. These panels will be replaced in v2.3.
+- **AdminToolbar Layout buttons unnecessary:** Adding Sidebar/Header/Filtros buttons created a second interaction model when the codebase already has click-to-select
+- **No milestone audit:** Ninth consecutive skip — phase-level verification sufficient but cross-phase integration untested
+- **SUMMARY.md one_liner field missing:** summary-extract returned null for all 7 plans — executor agents used different summary format
+
+### Patterns Established
+- `updateWorkingConfig()` for dashboard-level mutations (sidebar, header) vs `updateWorkingScreen()` for screen-level (filters, rows)
+- `SIDEBAR_WIDGET_REGISTRY` with zone/icon/defaultProps() for extensible widget system
+- Functional updater pattern `onUpdate((prev) => ({...prev, field: value}))` for nested config mutations
+- `.passthrough()` on Zod schemas for forward-compatible config objects
+
+### Key Lessons
+1. **UX consistency beats feature completeness** — Sheet panels work functionally but break the click-to-edit pattern established for content blocks. v2.3 will replace them with inline editing.
+2. **Schema-first is now a verified pattern for 5th time** — Phase 47 types → all other phases compiled cleanly
+3. **1-plan-per-phase is optimal for sequential execution** — zero wave complexity, clean dependency chain
+4. **User feedback should come before building config UI** — the Sheet panel approach was architecturally clean but UX-wrong; should have validated the interaction model with the user first
+
+### Cost Observations
+- Model mix: ~20% opus (orchestrator), ~80% sonnet (executors + verifiers)
+- Sessions: 1 session, all 7 phases executed sequentially with auto-continue
+- Notable: 7 plans, 28 commits, 3,398 LOC added; ~43 min total execution across 7 phases
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -433,6 +479,7 @@
 | v1.6 | 1 day | 4 | 7 | Extension Point A/B patterns, wave-based grouping, 12 new types |
 | v2.0 | 1 session | 5 | 8 | Framework shell, slot architecture, cross-module extensions, admin panel |
 | v2.1 | 1 session | 4 | 8 | Dynamic data layer, Supabase-backed docs, bidirectional sync CLI |
+| v2.2 | 1 session | 7 | 7 | Configurable layout components, widget system, Sheet panels (to be replaced by inline editing) |
 
 ### Cumulative Quality
 
@@ -447,6 +494,7 @@
 | v1.6 | ~270 tests | section-registry count assertion (28) | 0 |
 | v2.0 | ~270 tests | no new tests (types + UI) | 0 |
 | v2.1 | ~270 tests | no new tests (data layer + CLI) | 0 |
+| v2.2 | ~283 tests | 13 new schema tests (SidebarWidget Zod) | 1 (@radix-ui/react-checkbox via shadcn) |
 
 ### Velocity
 
@@ -461,6 +509,7 @@
 | v1.6 | 7 | ~60 min | ~8.5 min |
 | v2.0 | 8 | ~52 min | ~6.5 min |
 | v2.1 | 8 | ~45 min | ~5.5 min |
+| v2.2 | 7 | ~43 min | ~6.1 min |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -474,3 +523,4 @@
 8. Token cascade is the most efficient visual migration — ~20 token changes propagate to ~55 components (v1.4)
 9. Migration-first (schema→data→UI→tooling) is the safest data layer approach — validated in v1.5, v2.0, v2.1 with zero data bugs
 10. Automated verification scripts beat manual checks — 15-point verify-seed.ts (v2.1) is reproducible, reliable, and fast
+11. UX consistency beats feature completeness — validate interaction model with user before building config UI (v2.2 Sheet panels will be replaced by inline editing in v2.3)

@@ -109,17 +109,17 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ DocRenderer, sidebar nav, and search index consuming Supabase data (zero Vite glob dependency) — v2.1
 - ✓ Bidirectional sync CLI: make sync-down (DB→.md) and make sync-up (.md→DB) — v2.1
 - ✓ In-memory prefetch cache for instant doc navigation — v2.1
+- ✓ SidebarWidget discriminated union (TypeScript + Zod) with backward-compatible .passthrough() schema — v2.2
+- ✓ All HeaderConfig fields wired to conditional rendering (showPeriodSelector, showUserIndicator, actions.*) — v2.2
+- ✓ Dashboard-level mutation helpers (updateWorkingConfig, updateWorkingSidebar, updateWorkingHeader) — v2.2
+- ✓ HeaderConfigPanel with live preview: toggles, brandLabel, periodType (mensal/anual) — v2.2
+- ✓ SIDEBAR_WIDGET_REGISTRY + WorkspaceSwitcher + UserMenu widgets with rail mode degradation — v2.2
+- ✓ SidebarConfigPanel: footer text, group CRUD, screen assignment, widget picker — v2.2
+- ✓ FilterBarEditor: per-screen FilterOption[] CRUD with 5 BI presets — v2.2
 
 ### Active
 
-## Current Milestone: v2.2 Wireframe Builder — Configurable Layout Components
-
-**Goal:** Tornar sidebar, header e filter bar do wireframe totalmente configuráveis via visual editor, com suporte a widgets compostos na sidebar (workspace switcher, account selector, user menu).
-
-**Target features:**
-- Sidebar com widgets compostos (workspace switcher, account selector, user menu, search) editáveis via visual editor — referência: sidebar-07 do shadcn/ui
-- Header com campos existentes (showPeriodSelector, showUserIndicator, actions.*) funcionais no render + property panels no editor visual
-- Filter bar sticky configurável via visual editor (add/remove/configurar FilterOption[] por tela)
+(No active requirements — next milestone pending)
 
 ### Out of Scope
 
@@ -157,13 +157,13 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ## Current State
 
-All 9 milestones shipped (v1.0 → v2.1). Starting v2.2 — Configurable Layout Components.
+All 10 milestones shipped (v1.0 → v2.2). Next: v2.3 — Inline Editing UX (replacing Sheet panels with click-to-edit pattern).
 
 ## Context
 
-Shipped v2.1 Dynamic Data Layer. All 9 milestones complete (v1.0-v2.1).
+Shipped v2.2 Configurable Layout Components. All 10 milestones complete (v1.0-v2.2).
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
-~37,600 LOC TypeScript. 7 Supabase migrations (001-007). 5 active modules in MODULE_REGISTRY.
+~41,000 LOC TypeScript. 7 Supabase migrations (001-007). 5 active modules in MODULE_REGISTRY.
 Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
 Dynamic data layer: docs content served from Supabase with bidirectional sync CLI for Claude Code workflow.
 
@@ -259,4 +259,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-13 after v2.2 milestone start*
+*Last updated: 2026-03-13 after v2.2 milestone completion*

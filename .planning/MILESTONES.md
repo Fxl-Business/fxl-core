@@ -1,5 +1,26 @@
 # Milestones
 
+## v2.2 Wireframe Builder — Configurable Layout Components (Shipped: 2026-03-13)
+
+**Phases:** 7 (47-53) | **Plans:** 7 | **Tasks:** 21
+**Timeline:** 1 session (2026-03-13) | **Commits:** 28 | **LOC delta:** +3,398 / -108
+**Git range:** dd235b3 → b7aee95
+
+**Delivered:** Made sidebar, header, and filter bar of the wireframe fully configurable via visual editor panels. Added widget system for sidebar (WorkspaceSwitcher, UserMenu), extended HeaderConfig with brandLabel/periodType, and built per-screen filter bar editor with BI presets.
+
+**Key accomplishments:**
+1. SidebarWidget discriminated union (TypeScript + Zod) with backward-compatible schema extension and .passthrough() for forward-compat
+2. All HeaderConfig fields wired to conditional rendering in WireframeHeader across 4 call sites (period selector, user indicator, action buttons)
+3. Dashboard-level mutation infrastructure: updateWorkingConfig() helper + AdminToolbar Layout button group + 3 Sheet panels
+4. HeaderConfigPanel with live preview: toggles, brandLabel input, periodType select (mensal/anual)
+5. SIDEBAR_WIDGET_REGISTRY + WorkspaceSwitcherWidget + UserMenuWidget with collapsed rail mode degradation
+6. SidebarConfigPanel: footer text, group CRUD with screen assignment, widget picker
+7. FilterBarEditor: per-screen FilterOption[] CRUD with 5 BI presets and inline editing of all 5 filter types
+
+**Archive:** [v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md) | [v2.2-REQUIREMENTS.md](milestones/v2.2-REQUIREMENTS.md)
+
+---
+
 ## v2.1 Dynamic Data Layer (Shipped: 2026-03-13)
 
 **Phases:** 4 (43, 44, 45, 46) | **Plans:** 8 | **Tasks:** ~16
