@@ -9,9 +9,9 @@ Requirements for Inline Editing UX — Click-to-Edit para Header, Sidebar e Filt
 
 ### Header Inline Editing
 
-- [ ] **HDR-10**: Operator can click on the header area in edit mode and see a visual selection indicator (matching block selection pattern)
-- [ ] **HDR-11**: Operator can click on individual header elements (logo, period selector, user indicator, action buttons) to open a contextual PropertyPanel with that element's config
-- [ ] **HDR-12**: Header inline editing reuses the existing PropertyPanel Sheet pattern (right-side drawer) with element-specific forms
+- [x] **HDR-10**: Operator can click on the header area in edit mode and see a visual selection indicator (matching block selection pattern)
+- [x] **HDR-11**: Operator can click on individual header elements (logo, period selector, user indicator, action buttons) to open a contextual PropertyPanel with that element's config
+- [x] **HDR-12**: Header inline editing reuses the existing PropertyPanel Sheet pattern (right-side drawer) with element-specific forms
 
 ### Sidebar Inline Editing
 
@@ -59,9 +59,9 @@ Requirements for Inline Editing UX — Click-to-Edit para Header, Sidebar e Filt
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HDR-10 | Phase 54 | Pending |
-| HDR-11 | Phase 54 | Pending |
-| HDR-12 | Phase 54 | Pending |
+| HDR-10 | Phase 54 | Complete |
+| HDR-11 | Phase 54 | Complete |
+| HDR-12 | Phase 54 | Complete |
 | SIDE-10 | Phase 55 | Pending |
 | SIDE-11 | Phase 55 | Pending |
 | SIDE-12 | Phase 55 | Pending |
