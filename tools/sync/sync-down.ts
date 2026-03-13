@@ -84,8 +84,8 @@ async function syncDown(): Promise<void> {
       frontmatter.description = doc.description
     }
 
-    // Build file content
-    const content = `---\n${yamlStringify(frontmatter).trim()}\n---\n${doc.body}`
+    // Build file content (lineWidth=0 prevents YAML line wrapping)
+    const content = `---\n${yamlStringify(frontmatter, { lineWidth: 0 }).trim()}\n---\n${doc.body}`
 
     // Write file
     fs.writeFileSync(filePath, content, 'utf-8')
