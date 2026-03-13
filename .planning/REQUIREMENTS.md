@@ -31,9 +31,9 @@ Requirements for milestone v2.0 — Framework Shell + Arquitetura Modular.
 
 ### Routing
 
-- [ ] **ROUT-01**: Route / renders Home 2.0 (not documentation)
-- [ ] **ROUT-02**: Documentation view accessible at /docs with all sub-routes preserved
-- [ ] **ROUT-03**: Sidebar navigation driven by enabled modules from registry
+- [x] **ROUT-01**: Route / renders Home 2.0 (not documentation)
+- [x] **ROUT-02**: Documentation view accessible at /docs with all sub-routes preserved
+- [x] **ROUT-03**: Sidebar navigation driven by enabled modules from registry
 - [ ] **ROUT-04**: Admin panel at /admin/modules shows all modules, extensions, and active status
 - [ ] **ROUT-05**: Admin panel allows enabling/disabling modules with immediate UI feedback
 - [x] **ROUT-06**: ESLint boundaries config updated to allow new registry-layer files
@@ -78,9 +78,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONT-03 | Phase 39 | Complete |
 | CONT-04 | Phase 39 | Complete |
 | ROUT-06 | Phase 39 | Complete |
-| ROUT-01 | Phase 40 | Pending |
-| ROUT-02 | Phase 40 | Pending |
-| ROUT-03 | Phase 40 | Pending |
+| ROUT-01 | Phase 40 | Complete |
+| ROUT-02 | Phase 40 | Complete |
+| ROUT-03 | Phase 40 | Complete |
 | HOME-01 | Phase 41 | Pending |
 | HOME-02 | Phase 41 | Pending |
 | HOME-03 | Phase 41 | Pending |

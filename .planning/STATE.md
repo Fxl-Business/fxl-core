@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Framework Shell + Arquitetura Modular
 status: planning
-stopped_at: Completed 39-02-PLAN.md
-last_updated: "2026-03-13T04:46:43.334Z"
+stopped_at: Completed 40-01-PLAN.md
+last_updated: "2026-03-13T04:50:42.303Z"
 last_activity: 2026-03-13 — Roadmap created, 5 phases (38-42), 19/19 requirements mapped
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 8
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -56,6 +56,8 @@ Key decisions for v2.0:
 - [Phase 39-slot-architecture-contract-types]: ExtensionProvider consumes useModuleEnabled() — no localStorage duplication, single source of truth
 - [Phase 39-slot-architecture-contract-types]: ModuleEnabledProvider wired into App.tsx in Plan 02 (Phase 38 deferred this integration point)
 - [Phase 39-slot-architecture-contract-types]: Provider nesting: BrowserRouter > ModuleEnabledProvider > ExtensionProvider > Routes
+- [Phase 40-routing-refactor]: useModuleEnabled hook used for sidebar filtering (not static enabled field) — sidebar reacts to runtime module toggles
+- [Phase 40-routing-refactor]: NavLink end prop required for exact-path active state on / — prevents Home being highlighted on all routes in React Router v6
 
 ### Pending Todos
 
@@ -68,6 +70,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T04:43:32.912Z
-Stopped at: Completed 39-02-PLAN.md
+Last session: 2026-03-13T04:50:42.301Z
+Stopped at: Completed 40-01-PLAN.md
 Next: /gsd:plan-phase 38

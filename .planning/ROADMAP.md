@@ -115,7 +115,7 @@ Full details: [milestones/v1.6-ROADMAP.md](milestones/v1.6-ROADMAP.md)
 
 - [x] **Phase 38: Module Registry Foundation** (2 plans) - Enhanced ModuleDefinition type, module-ids.ts constants, enabled/badge fields on all 5 manifests (completed 2026-03-13)
 - [x] **Phase 39: Slot Architecture & Contract Types** (2 plans) - Extension system runtime (ExtensionProvider, ExtensionSlot, resolveExtensions), contract type definitions, ESLint boundary update (completed 2026-03-13)
-- [ ] **Phase 40: Routing Refactor** - Route / confirmed as Home, /docs routes preserved, sidebar filters by enabled modules
+- [x] **Phase 40: Routing Refactor** - Route / confirmed as Home, /docs routes preserved, sidebar filters by enabled modules (completed 2026-03-13)
 - [ ] **Phase 41: Home 2.0 — Control Center** (1 plan) - Rebuilt Home page as app control center reading exclusively from MODULE_REGISTRY
 - [ ] **Phase 42: Contract Population & Admin Panel** (2 plans) - Real cross-module extensions end-to-end, /admin/modules panel with enable/disable toggles
 
@@ -200,6 +200,6 @@ Plans:
 | 34-37 | v1.6 | 7/7 | Complete | 2026-03-13 |
 | 38. Module Registry Foundation | 2/2 | Complete    | 2026-03-13 | - |
 | 39. Slot Architecture & Contract Types | 2/2 | Complete    | 2026-03-13 | - |
-| 40. Routing Refactor | v2.0 | 0/? | Not started | - |
+| 40. Routing Refactor | 1/1 | Complete   | 2026-03-13 | - |
 | 41. Home 2.0 — Control Center | v2.0 | 0/1 | Not started | - |
 | 42. Contract Population & Admin Panel | v2.0 | 0/2 | Not started | - |
