@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Framework Shell + Arquitetura Modular
 status: planning
-stopped_at: Completed 40-01-PLAN.md
-last_updated: "2026-03-13T04:53:46.450Z"
+stopped_at: "Checkpoint 41-01 Task 3: awaiting visual verification of Home 2.0"
+last_updated: "2026-03-13T04:58:15.860Z"
 last_activity: 2026-03-13 — Roadmap created, 5 phases (38-42), 19/19 requirements mapped
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -58,6 +58,8 @@ Key decisions for v2.0:
 - [Phase 39-slot-architecture-contract-types]: Provider nesting: BrowserRouter > ModuleEnabledProvider > ExtensionProvider > Routes
 - [Phase 40-routing-refactor]: useModuleEnabled hook used for sidebar filtering (not static enabled field) — sidebar reacts to runtime module toggles
 - [Phase 40-routing-refactor]: NavLink end prop required for exact-path active state on / — prevents Home being highlighted on all routes in React Router v6
+- [Phase 41-home-2.0-control-center]: activity-feed hooks extracted to src/lib/ for multi-page reuse without page coupling
+- [Phase 41-home-2.0-control-center]: useModuleStats uses Supabase head:true count pattern for aggregate queries (no rows fetched)
 
 ### Pending Todos
 
@@ -70,6 +72,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T04:50:42.301Z
-Stopped at: Completed 40-01-PLAN.md
+Last session: 2026-03-13T04:58:15.856Z
+Stopped at: Checkpoint 41-01 Task 3: awaiting visual verification of Home 2.0
 Next: /gsd:plan-phase 38

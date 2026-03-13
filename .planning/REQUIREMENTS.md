@@ -16,10 +16,10 @@ Requirements for milestone v2.0 — Framework Shell + Arquitetura Modular.
 
 ### Home
 
-- [ ] **HOME-01**: User sees Home 2.0 at route / as the app entry point (control center, not card grid)
-- [ ] **HOME-02**: Home displays each enabled module with name, description, icon, badge, and access link
-- [ ] **HOME-03**: Home has asymmetric/hierarchical layout communicating "control center" identity
-- [ ] **HOME-04**: Home shows secondary area with installation identity and recent activity info
+- [x] **HOME-01**: User sees Home 2.0 at route / as the app entry point (control center, not card grid)
+- [x] **HOME-02**: Home displays each enabled module with name, description, icon, badge, and access link
+- [x] **HOME-03**: Home has asymmetric/hierarchical layout communicating "control center" identity
+- [x] **HOME-04**: Home shows secondary area with installation identity and recent activity info
 
 ### Contracts
 
@@ -81,10 +81,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROUT-01 | Phase 40 | Complete |
 | ROUT-02 | Phase 40 | Complete |
 | ROUT-03 | Phase 40 | Complete |
-| HOME-01 | Phase 41 | Pending |
-| HOME-02 | Phase 41 | Pending |
-| HOME-03 | Phase 41 | Pending |
-| HOME-04 | Phase 41 | Pending |
+| HOME-01 | Phase 41 | Complete |
+| HOME-02 | Phase 41 | Complete |
+| HOME-03 | Phase 41 | Complete |
+| HOME-04 | Phase 41 | Complete |
 | CONT-05 | Phase 42 | Pending |
 | ROUT-04 | Phase 42 | Pending |
 | ROUT-05 | Phase 42 | Pending |
