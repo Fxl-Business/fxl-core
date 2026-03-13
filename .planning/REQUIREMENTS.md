@@ -1,0 +1,90 @@
+# Requirements: FXL Core
+
+**Defined:** 2026-03-13
+**Core Value:** FXL Core e o cerebro operacional da empresa — documentacao, processo e tooling juntos
+
+## v2.1 Requirements
+
+Requirements for milestone v2.1 — Dynamic Data Layer.
+
+### Database Schema
+
+- [ ] **DB-01**: Supabase `documents` table stores all doc content with title, badge, description, slug, parent_path, body (markdown), order, and timestamps
+- [ ] **DB-02**: Supabase migration creates indexes on slug and parent_path for efficient querying
+- [ ] **DB-03**: RLS policy allows anon read access (consistent with existing tables)
+
+### Data Migration
+
+- [ ] **MIG-01**: Seed script reads all 62 .md files from docs/, extracts frontmatter, and inserts into documents table
+- [ ] **MIG-02**: Seed script preserves custom tags (operational, callout, prompt, phase-card) as-is in body content
+- [ ] **MIG-03**: Seed script derives parent_path and ordering from filesystem structure
+
+### Dynamic Rendering
+
+- [ ] **DYN-01**: DocRenderer fetches document content from Supabase instead of Vite glob import
+- [ ] **DYN-02**: docs-parser functions work with Supabase-fetched content (parseBody, extractHeadings unchanged)
+- [ ] **DYN-03**: Search index builds from Supabase documents query instead of getAllDocPaths()
+- [ ] **DYN-04**: Sidebar navigation for docs module builds from documents table structure
+- [ ] **DYN-05**: Loading states shown while fetching documents (skeleton or spinner)
+
+### Sync CLI
+
+- [ ] **SYNC-01**: `make sync-down` exports all documents from Supabase to local docs/ as .md files with frontmatter
+- [ ] **SYNC-02**: `make sync-up` reads local docs/ .md files and upserts into Supabase documents table
+- [ ] **SYNC-03**: Sync scripts use same Supabase client pattern as existing CLI tools (process.env + npx tsx)
+- [ ] **SYNC-04**: Sync-down preserves exact filesystem structure (docs/processo/fases/fase1.md etc.)
+
+## Future Requirements
+
+### Content Management
+
+- **CMS-01**: Admin UI for creating/editing documents in-browser (WYSIWYG or markdown editor)
+- **CMS-02**: Document versioning and history
+- **CMS-03**: Multi-tenant document isolation (per-deployment content)
+
+### Advanced Sync
+
+- **ASYN-01**: Conflict detection when local and DB versions diverge
+- **ASYN-02**: Incremental sync (only changed files) via updated_at comparison
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| WYSIWYG in-browser editor | v2.1 focuses on data layer migration, not editing UX |
+| Multi-tenant document isolation | Single-operator tool, multi-tenant deferred |
+| Real-time content updates (websocket) | Static content changes infrequently, page refresh sufficient |
+| Removing docs/ folder from repo | Keep as sync cache for Claude Code — not deleted |
+| Migrating client/ docs to Supabase | Client workspace docs have different lifecycle, keep filesystem |
+| Full-text search via tsvector | Existing client-side fuzzy search sufficient for 62 docs |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| DB-01 | - | Pending |
+| DB-02 | - | Pending |
+| DB-03 | - | Pending |
+| MIG-01 | - | Pending |
+| MIG-02 | - | Pending |
+| MIG-03 | - | Pending |
+| DYN-01 | - | Pending |
+| DYN-02 | - | Pending |
+| DYN-03 | - | Pending |
+| DYN-04 | - | Pending |
+| DYN-05 | - | Pending |
+| SYNC-01 | - | Pending |
+| SYNC-02 | - | Pending |
+| SYNC-03 | - | Pending |
+| SYNC-04 | - | Pending |
+
+**Coverage:**
+- v2.1 requirements: 15 total
+- Mapped to phases: 0
+- Unmapped: 15
+
+---
+*Requirements defined: 2026-03-13*
+*Last updated: 2026-03-13 after initial definition*
