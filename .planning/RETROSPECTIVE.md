@@ -372,6 +372,52 @@
 
 ---
 
+## Milestone: v2.1 — Dynamic Data Layer
+
+**Shipped:** 2026-03-13
+**Phases:** 4 | **Plans:** 8 | **Timeline:** 1 session
+
+### What Was Built
+- Supabase `documents` table (migration 007) with B-tree indexes on parent_path/sort_order and anon-permissive RLS
+- Seed script migrating all 62 docs from filesystem to Supabase with YAML frontmatter extraction, custom tag preservation, and 15-point automated verification
+- DocRenderer + sidebar nav + search index all consuming Supabase data — zero Vite glob dependency remaining
+- Bidirectional sync CLI: `make sync-down` (DB→.md) and `make sync-up` (.md→DB) with YAML frontmatter reconstruction
+- In-memory prefetch cache (quick-14) for instant doc navigation after first load
+
+### What Worked
+- **Migration-first pattern continued:** Phase 43 (schema) → 44 (data) → 45 (UI) → 46 (CLI) — same pattern as v1.5, zero data layer bugs
+- **Verification scripts:** 15-point automated verification in verify-seed.ts replaced manual Supabase Dashboard checking
+- **Data access layer pattern:** docs-service.ts + useDoc hook + DocRenderer page — clean separation of concerns
+- **Formal REQUIREMENTS.md:** 15/15 requirements tracked with traceability table from roadmap creation
+- **Lazy search index:** Loading on first Cmd+K open avoided blocking page load
+- **Quick task for optimization:** Prefetch cache as quick-14 fit naturally after milestone phases completed
+
+### What Was Inefficient
+- **No milestone audit:** Eighth consecutive skip — all phase verifications passed but no cross-phase integration check
+- **Requirements traceability table never updated to Complete:** All 15 requirements show "Pending" despite all phases being complete — same drift pattern as v1.0/v1.2
+- **STATE.md showed 0% despite 100% completion:** GSD tooling calculated 0% because STATE.md progress wasn't updated during execution
+
+### Patterns Established
+- `docs-service.ts` + `useDoc.ts` hook — data access layer for Supabase-backed content
+- `useDocsNav.ts` — dynamic sidebar navigation override per module
+- `sync-down` additive-only approach (doesn't delete local files absent from DB)
+- `lineWidth: 0` in YAML stringify for consistent frontmatter output
+- In-memory prefetch cache for small, stable datasets (~62 docs)
+
+### Key Lessons
+1. **Migration-first is confirmed as the right approach** — 3rd time (v1.5, v2.0, v2.1) following schema→data→UI→tooling sequence with zero data layer issues
+2. **Requirements traceability needs automation** — 3 milestones now (v1.0, v1.2, v2.1) with unchecked requirements despite completion
+3. **Verification scripts > manual checks** — 15-point automated verification is more reliable and reproducible than Dashboard screenshots
+4. **Sync CLI is a reusable pattern** — DB→filesystem export + filesystem→DB upsert pattern applies to any Supabase-backed content
+5. **Quick tasks complement milestones** — prefetch cache (quick-14) was the right scope for post-milestone optimization
+
+### Cost Observations
+- Model mix: ~40% opus (orchestrator), ~60% sonnet (executors)
+- Sessions: 1 session, all 4 phases executed sequentially
+- Notable: 8 plans, 25 commits, 1,024 LOC added in single session; smallest LOC delta milestone but highest impact (data layer migration)
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -386,6 +432,7 @@
 | v1.5 | 1 day | 5 | 14 | Module registry, migration-first, formal REQUIREMENTS.md return |
 | v1.6 | 1 day | 4 | 7 | Extension Point A/B patterns, wave-based grouping, 12 new types |
 | v2.0 | 1 session | 5 | 8 | Framework shell, slot architecture, cross-module extensions, admin panel |
+| v2.1 | 1 session | 4 | 8 | Dynamic data layer, Supabase-backed docs, bidirectional sync CLI |
 
 ### Cumulative Quality
 
@@ -399,6 +446,7 @@
 | v1.5 | ~270 tests | KB hooks, home merge/sort, search cmd | 0 |
 | v1.6 | ~270 tests | section-registry count assertion (28) | 0 |
 | v2.0 | ~270 tests | no new tests (types + UI) | 0 |
+| v2.1 | ~270 tests | no new tests (data layer + CLI) | 0 |
 
 ### Velocity
 
@@ -412,6 +460,7 @@
 | v1.5 | 14 | ~210 min | ~15 min |
 | v1.6 | 7 | ~60 min | ~8.5 min |
 | v2.0 | 8 | ~52 min | ~6.5 min |
+| v2.1 | 8 | ~45 min | ~5.5 min |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -423,3 +472,5 @@
 6. CSS-only milestones are inherently safe — zero logic changes means zero regressions (v1.2, v1.4 token cascade)
 7. Schema-first / migration-first approach prevents rework — v1.3 (types first) and v1.5 (DB first) both shipped cleanly
 8. Token cascade is the most efficient visual migration — ~20 token changes propagate to ~55 components (v1.4)
+9. Migration-first (schema→data→UI→tooling) is the safest data layer approach — validated in v1.5, v2.0, v2.1 with zero data bugs
+10. Automated verification scripts beat manual checks — 15-point verify-seed.ts (v2.1) is reproducible, reliable, and fast

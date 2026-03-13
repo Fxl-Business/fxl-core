@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Dynamic Data Layer
-status: planning
-stopped_at: Phase 43 context gathered
-last_updated: "2026-03-13T06:19:57.973Z"
-last_activity: 2026-03-13 — Roadmap created, 4 phases covering 15 requirements
+status: complete
+stopped_at: Milestone v2.1 completed and archived
+last_updated: "2026-03-13"
+last_activity: "2026-03-13 - Milestone v2.1 Dynamic Data Layer completed and archived"
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 8
   completed_plans: 8
-  percent: 0
+  percent: 100
 ---
 
 # Project State
@@ -21,32 +21,32 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Milestone v2.1 — Dynamic Data Layer | Phase 43: Database Schema
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Milestone: v2.1 — Dynamic Data Layer
-Phase: 43 of 46 (Database Schema)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-03-13 - Completed quick task 14: Prefetch all docs on first load for instant navigation
+Milestone: v2.1 — Dynamic Data Layer (COMPLETE)
+Phase: All 4 phases complete (43-46)
+Status: Milestone archived, ready for next milestone
+Last activity: 2026-03-13 - Milestone v2.1 completed and archived
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [████████████████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: -
+- Total plans completed: 8
+- Commits: 25
+- LOC delta: +1,024 / -34
 
 **By Phase:**
 
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| - | - | - | - |
-
-*Updated after each plan completion*
+| Phase | Plans | Status |
+|-------|-------|--------|
+| 43. Database Schema | 1/1 | Complete |
+| 44. Data Migration | 2/2 | Complete |
+| 45. Dynamic Rendering | 3/3 | Complete |
+| 46. Sync CLI | 2/2 | Complete |
 
 ## Accumulated Context
 
@@ -60,6 +60,7 @@ Key decisions for v2.1:
 - Custom tags (operational, callout, prompt, phase-card) preservados literalmente no campo body
 - DocRenderer e search index adaptados para queries Supabase (getAllDocPaths() substituido)
 - Client workspace docs (clients/) permanecem no filesystem — fora do escopo do v2.1
+- In-memory prefetch cache para navegacao instantanea entre docs
 
 ### Pending Todos
 
@@ -77,6 +78,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T05:53:34.455Z
-Stopped at: Phase 43 context gathered
-Next: `make sync-up` para commit dos arquivos de planejamento, depois `/gsd:plan-phase 43`
+Last session: 2026-03-13
+Stopped at: Milestone v2.1 completed
+Next: `/gsd:new-milestone` to start next milestone

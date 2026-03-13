@@ -104,15 +104,15 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ /admin/modules panel with enable/disable toggles and extension visibility — v2.0
 - ✓ 2 real cross-module extension widgets (RecentTasksWidget, RecentKBWidget) via slot injection — v2.0
 
+- ✓ Supabase `documents` table with B-tree indexes and anon-permissive RLS — v2.1
+- ✓ Seed script migrating all 62 docs from filesystem to Supabase with custom tag preservation — v2.1
+- ✓ DocRenderer, sidebar nav, and search index consuming Supabase data (zero Vite glob dependency) — v2.1
+- ✓ Bidirectional sync CLI: make sync-down (DB→.md) and make sync-up (.md→DB) — v2.1
+- ✓ In-memory prefetch cache for instant doc navigation — v2.1
+
 ### Active
 
-<!-- Current milestone: v2.1 Dynamic Data Layer -->
-
-- [ ] Dados de processo/docs armazenados em Supabase (tabela documents)
-- [ ] App renderiza conteudo dinamicamente do banco (nao de arquivos estaticos)
-- [ ] Claude Code acessa dados via sync bidirecional (make sync-down / make sync-up)
-- [ ] Seed script migra conteudo existente de docs/ para Supabase
-- [ ] Search index funciona com dados do banco
+<!-- Ready for next milestone -->
 
 ### Out of Scope
 
@@ -148,24 +148,17 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - Task dependencies / blocking graph — v2 (TASK-07)
 - Email notifications de task assignments — v2 (TASK-08)
 
-## Current Milestone: v2.1 Dynamic Data Layer
+## Current State
 
-**Goal:** Migrar todos os dados de processo/documentacao de arquivos .md estaticos para Supabase, renderizando dinamicamente na app enquanto mantem acesso do Claude Code via sync bidirecional.
-
-**Target features:**
-- Tabela `documents` no Supabase com frontmatter como colunas
-- DocRenderer busca conteudo do banco em vez de Vite glob
-- Search index baseado em dados do banco
-- Seed script para migrar docs/ existentes para Supabase
-- CLI de sync bidirecional: `make sync-down` (DB -> .md) e `make sync-up` (.md -> DB)
-- Secoes operacionais (operational) preservadas na migracao
+All 9 milestones shipped (v1.0 → v2.1). Planning next milestone.
 
 ## Context
 
-Shipped v2.0 Framework Shell + Arquitetura Modular. All 8 milestones complete (v1.0-v2.0).
+Shipped v2.1 Dynamic Data Layer. All 9 milestones complete (v1.0-v2.1).
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
-~36,600 LOC TypeScript. 6 Supabase migrations (001-006). 5 active modules in MODULE_REGISTRY.
+~37,600 LOC TypeScript. 7 Supabase migrations (001-007). 5 active modules in MODULE_REGISTRY.
 Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
+Dynamic data layer: docs content served from Supabase with bidirectional sync CLI for Claude Code workflow.
 
 The platform covers the full operator workflow:
 1. **Documentation** — 4-section taxonomy, onboarding, Claude Code + GSD workflow
@@ -240,6 +233,12 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | /admin/modules as static hardcoded route | Never in MODULE_REGISTRY or sidebar | ✓ Good — clean separation |
 | Home 2.0 asymmetric 2/3+1/3 layout | Control center identity, not generic card grid | ✓ Good — professional feel |
 | Extension constants inlined in widgets | No coupling to module internals | ✓ Good — self-contained components |
+| Supabase as source of truth for docs/ content | docs/ becomes sync cache, not deleted | ✓ Good — Claude Code + app both have access |
+| Bidirectional sync via make targets | process.env + npx tsx pattern consistent with existing CLI | ✓ Good — simple, reliable |
+| Custom tags preserved as-is in body column | No parsing at DB level, rendered by react-markdown pipeline | ✓ Good — zero tag breakage |
+| Lazy search index on Cmd+K open | Avoid blocking page load with full document fetch | ✓ Good — fast initial load |
+| sync-down additive only (no file deletion) | Prevents accidental loss of local-only files | ✓ Good — safe default |
+| In-memory prefetch cache for all docs | First navigation triggers full fetch, subsequent instant | ✓ Good — 62 docs small enough for memory |
 
 ## Constraints
 
@@ -253,4 +252,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-13 after v2.0 milestone completion*
+*Last updated: 2026-03-13 after v2.1 milestone completion*

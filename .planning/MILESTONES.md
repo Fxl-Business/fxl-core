@@ -1,5 +1,25 @@
 # Milestones
 
+## v2.1 Dynamic Data Layer (Shipped: 2026-03-13)
+
+**Phases:** 4 (43, 44, 45, 46) | **Plans:** 8 | **Tasks:** ~16
+**Timeline:** 1 session (2026-03-13) | **Commits:** 25 | **LOC delta:** +1,024 / -34
+**Git range:** bc96816 → 722abe9
+
+**Delivered:** Migrated all process/documentation content from static .md files to Supabase, with dynamic rendering in the app (DocRenderer, sidebar nav, search index all consuming database), bidirectional sync CLI for Claude Code workflow, and in-memory prefetch cache for instant navigation.
+
+**Key accomplishments:**
+1. Supabase `documents` table with B-tree indexes on parent_path/sort_order, anon-permissive RLS, and migration 007
+2. Seed script migrating all 62 docs with frontmatter extraction, custom tag preservation, and 15-point automated verification
+3. DocRenderer fetching from Supabase with skeleton loading, docs-service data access layer, and useDoc hook
+4. Dynamic sidebar navigation via useDocsNav hook building NavItem tree from documents table
+5. Async search index loaded lazily on Cmd+K, fully decoupled from Vite glob imports
+6. Bidirectional sync CLI: `make sync-down` (DB→filesystem) and `make sync-up` (filesystem→DB) with YAML frontmatter reconstruction
+
+**Archive:** [v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md) | [v2.1-REQUIREMENTS.md](milestones/v2.1-REQUIREMENTS.md)
+
+---
+
 ## v2.0 Framework Shell + Arquitetura Modular (Shipped: 2026-03-13)
 
 **Phases:** 5 (38, 39, 40, 41, 42) | **Plans:** 8 | **Tasks:** ~16
