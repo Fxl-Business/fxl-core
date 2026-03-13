@@ -59,26 +59,26 @@ Requirements for Inline Editing UX — Click-to-Edit para Header, Sidebar e Filt
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HDR-10 | - | Pending |
-| HDR-11 | - | Pending |
-| HDR-12 | - | Pending |
-| SIDE-10 | - | Pending |
-| SIDE-11 | - | Pending |
-| SIDE-12 | - | Pending |
-| SIDE-13 | - | Pending |
-| FILT-10 | - | Pending |
-| FILT-11 | - | Pending |
-| FILT-12 | - | Pending |
-| FILT-13 | - | Pending |
-| CLN-01 | - | Pending |
-| CLN-02 | - | Pending |
-| CLN-03 | - | Pending |
+| HDR-10 | Phase 54 | Pending |
+| HDR-11 | Phase 54 | Pending |
+| HDR-12 | Phase 54 | Pending |
+| SIDE-10 | Phase 55 | Pending |
+| SIDE-11 | Phase 55 | Pending |
+| SIDE-12 | Phase 55 | Pending |
+| SIDE-13 | Phase 55 | Pending |
+| FILT-10 | Phase 56 | Pending |
+| FILT-11 | Phase 56 | Pending |
+| FILT-12 | Phase 56 | Pending |
+| FILT-13 | Phase 56 | Pending |
+| CLN-01 | Phase 57 | Pending |
+| CLN-02 | Phase 57 | Pending |
+| CLN-03 | Phase 57 | Pending |
 
 **Coverage:**
 - v2.3 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after initial definition*
+*Last updated: 2026-03-13 after roadmap creation (all 14 requirements mapped)*
