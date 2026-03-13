@@ -27,15 +27,15 @@ Requirements for milestone v2.0 — Framework Shell + Arquitetura Modular.
 - [x] **CONT-02**: SlotComponentProps interface provides type-safe props for slot-injected components
 - [x] **CONT-03**: ExtensionSlot component renders injected components for a given slot ID
 - [x] **CONT-04**: useActiveExtensions(moduleId) hook returns active extensions based on enabled modules
-- [ ] **CONT-05**: At least 2 real cross-module extensions are implemented and rendering end-to-end
+- [x] **CONT-05**: At least 2 real cross-module extensions are implemented and rendering end-to-end
 
 ### Routing
 
 - [x] **ROUT-01**: Route / renders Home 2.0 (not documentation)
 - [x] **ROUT-02**: Documentation view accessible at /docs with all sub-routes preserved
 - [x] **ROUT-03**: Sidebar navigation driven by enabled modules from registry
-- [ ] **ROUT-04**: Admin panel at /admin/modules shows all modules, extensions, and active status
-- [ ] **ROUT-05**: Admin panel allows enabling/disabling modules with immediate UI feedback
+- [x] **ROUT-04**: Admin panel at /admin/modules shows all modules, extensions, and active status
+- [x] **ROUT-05**: Admin panel allows enabling/disabling modules with immediate UI feedback
 - [x] **ROUT-06**: ESLint boundaries config updated to allow new registry-layer files
 
 ## Future Requirements
@@ -85,9 +85,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HOME-02 | Phase 41 | Complete |
 | HOME-03 | Phase 41 | Complete |
 | HOME-04 | Phase 41 | Complete |
-| CONT-05 | Phase 42 | Pending |
-| ROUT-04 | Phase 42 | Pending |
-| ROUT-05 | Phase 42 | Pending |
+| CONT-05 | Phase 42 | Complete |
+| ROUT-04 | Phase 42 | Complete |
+| ROUT-05 | Phase 42 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 19 total

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Framework Shell + Arquitetura Modular
 status: planning
-stopped_at: "Completed 42-02-PLAN.md — checkpoint:human-verify awaiting"
-last_updated: "2026-03-13T05:09:10.727Z"
+stopped_at: Completed 42-01-PLAN.md — Phase 42 Plan 01 complete
+last_updated: "2026-03-13T05:10:48.542Z"
 last_activity: 2026-03-13 — Phase 41 complete (Home 2.0 control center, visual verification approved)
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
   percent: 75
 ---
 
@@ -62,6 +62,9 @@ Key decisions for v2.0:
 - [Phase 41-home-2.0-control-center]: useModuleStats uses Supabase head:true count pattern for aggregate queries (no rows fetched)
 - [Phase 42-contract-population-admin-panel]: Admin panel at /admin/modules uses static hardcoded route (not MODULE_REGISTRY) — accessible only by direct URL, invisible to sidebar
 - [Phase 42-contract-population-admin-panel]: localStorage('fxl-enabled-modules') read synchronously in useState initializer — zero loading flash
+- [Phase 42-01]: Extension constants inlined in extension components (STATUS_COLORS, TYPE_COLORS) — no coupling to module internals
+- [Phase 42-01]: SLOT_IDS sourced from @/modules/registry in manifests — registry layer is the canonical source; module-ids.ts is only for ModuleId constants
+- [Phase 42-01]: ExtensionSlot wrapped in 2-column grid div in Home.tsx — slot renders null gracefully when no extensions registered
 
 ### Pending Todos
 
@@ -73,6 +76,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T05:09:10.724Z
-Stopped at: Completed 42-02-PLAN.md — checkpoint:human-verify awaiting
+Last session: 2026-03-13T05:10:48.539Z
+Stopped at: Completed 42-01-PLAN.md — Phase 42 Plan 01 complete
 Next: /gsd:plan-phase 42
