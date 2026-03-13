@@ -119,7 +119,15 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
-(No active requirements — next milestone pending)
+## Current Milestone: v2.3 Inline Editing UX
+
+**Goal:** Substituir os Sheet panels (Header, Sidebar, Filtros) por edição inline click-to-edit, onde o operador clica diretamente no componente para editá-lo — mesmo padrão usado para blocos de conteúdo.
+
+**Target features:**
+- Header: cada elemento (logo, period selector, user indicator, actions) clicável como "bloco" individual com PropertyPanel contextual
+- Sidebar: elementos clicáveis para edição inline (grupos, widgets, footer)
+- Filtros: chips clicáveis para edição inline, add/remove como config da página
+- Remover botões Layout (Sidebar/Header/Filtros) do AdminToolbar — edição acionada por click direto no componente
 
 ### Out of Scope
 
@@ -157,7 +165,7 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ## Current State
 
-All 10 milestones shipped (v1.0 → v2.2). Next: v2.3 — Inline Editing UX (replacing Sheet panels with click-to-edit pattern).
+All 10 milestones shipped (v1.0 → v2.2). Starting v2.3 — Inline Editing UX.
 
 ## Context
 
@@ -259,4 +267,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-13 after v2.2 milestone completion*
+*Last updated: 2026-03-13 after v2.3 milestone start*
