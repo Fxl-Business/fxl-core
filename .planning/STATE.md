@@ -29,7 +29,7 @@ Milestone: v2.1 — Dynamic Data Layer
 Phase: 43 of 46 (Database Schema)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-03-13 — Roadmap created, 4 phases covering 15 requirements
+Last activity: 2026-03-13 - Completed quick task 14: Prefetch all docs on first load for instant navigation
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -68,6 +68,12 @@ None.
 ### Blockers/Concerns
 
 None.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 14 | Prefetch all docs on first load for instant navigation | 2026-03-13 | 2f06186 | [14-prefetch-all-docs-on-first-load-for-inst](./quick/14-prefetch-all-docs-on-first-load-for-inst/) |
 
 ## Session Continuity
 
