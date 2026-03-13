@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: Modular Foundation & Knowledge Base
-status: roadmap_ready
-stopped_at: null
-last_updated: "2026-03-12"
-last_activity: "2026-03-12 -- Roadmap created for v1.5 (Phases 29-33)"
+milestone: v1.4
+milestone_name: Wireframe Visual Redesign
+status: planning
+stopped_at: "Completed 28-02: Gallery validation, v1.4 milestone closed"
+last_updated: "2026-03-13T00:25:20.189Z"
+last_activity: 2026-03-12 -- Roadmap written for v1.5 (Phases 29-33), 19 requirements mapped
 progress:
-  total_phases: 5
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 12
+  completed_phases: 7
+  total_plans: 25
+  completed_plans: 12
   percent: 0
 ---
 
@@ -53,6 +53,7 @@ v1.5 decisions to track during execution:
 - RLS: anon-permissive on new tables (same as existing), Clerk auth at application layer
 - tsvector language: 'portuguese' (KB content is in Portuguese)
 - knowledge_entries column: entry_type (not kind/category)
+- [Phase 28-02]: Gallery visual validation approved + TS audit clean: v1.4 milestone gate satisfied, advancing to v1.5
 
 ### Pending Todos
 
@@ -66,6 +67,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-12
-Stopped at: Roadmap created for v1.5, all 19 requirements mapped to Phases 29-33
+Last session: 2026-03-13T00:25:17.365Z
+Stopped at: Completed 28-02: Gallery validation, v1.4 milestone closed
 Next: Complete Phase 28 (v1.4), then plan Phase 29 via /gsd:plan-phase 29
