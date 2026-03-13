@@ -1,5 +1,25 @@
 # Milestones
 
+## v1.6 12 Novos Graficos (Shipped: 2026-03-13)
+
+**Phases:** 4 (34, 35, 36, 37) | **Plans:** 7 | **Tasks:** ~17
+**Timeline:** 1 day (2026-03-12 → 2026-03-13) | **Commits:** 10 | **LOC:** 33,583 TypeScript
+**Git range:** c738499 → b9522bd
+
+**Delivered:** Expanded wireframe builder component library with 12 new chart/section types — 7 chartType sub-variants via Extension Point A, 4 standalone sections via Extension Point B, and 1 Sankey diagram — all with ComponentGallery entries, mock data, and light/dark mode validation.
+
+**Key accomplishments:**
+1. Extended ChartType union with 7 new literals (grouped-bar, bullet, step-line, lollipop, range-bar, bump, polar) and implemented all with ChartRenderer wiring
+2. Added 4 standalone section types (Pie Chart, Progress Grid, Heatmap, Sparkline Grid) via 5-file checklist pattern (type, schema, component, renderer, form, registry)
+3. Added Sankey diagram as 28th section type with Recharts Sankey export verification
+4. Updated ComponentGallery with all 12 new types and realistic Brazilian Portuguese financial mock data
+5. Visual validation of all 12 types in light/dark mode; synced gallery wireframe theme with global app theme
+6. Section registry grew from 23 to 28 types; 34 files changed, +2,363 lines
+
+**Archive:** [v1.6-ROADMAP.md](milestones/v1.6-ROADMAP.md) | [v1.6-REQUIREMENTS.md](milestones/v1.6-REQUIREMENTS.md)
+
+---
+
 ## v1.5 Modular Foundation & Knowledge Base (Shipped: 2026-03-13)
 
 **Phases:** 5 (29, 30, 31, 32, 33) | **Plans:** 14 | **Tasks:** ~28

@@ -281,6 +281,50 @@
 
 ---
 
+## Milestone: v1.6 — 12 Novos Graficos
+
+**Shipped:** 2026-03-13
+**Phases:** 4 | **Plans:** 7 | **Timeline:** 1 day
+
+### What Was Built
+- 7 chartType sub-variants via Extension Point A: Grouped Bar, Bullet, Step Line, Lollipop, Range Bar, Bump, Polar
+- 4 standalone section types via Extension Point B: Pie Chart, Progress Grid, Heatmap, Sparkline Grid
+- Sankey diagram as 28th standalone section type with Recharts Sankey export verification
+- ComponentGallery updated with all 12 new types and realistic Brazilian Portuguese mock data
+- Visual validation of all 12 types in light/dark mode
+
+### What Worked
+- **Extension Point A/B pattern:** Clear distinction between chartType sub-variants (4-point sync) and standalone sections (5-file checklist) enabled parallel agent execution
+- **Wave-based grouping:** Waves 1-3 organized by complexity and dependency, enabling clean sequential execution
+- **Recharts export verification:** Verifying Sankey named export before writing component prevented wasted effort
+- **Registry count as gate:** section-registry.test.ts count assertion (23→28) served as automatic verification
+- **CSS-flex for Range Bar:** Avoided Recharts workaround for non-zero-start bars, consistent with existing CompositionBar pattern
+- **Formal REQUIREMENTS.md:** 18/18 requirements tracked with traceability table
+
+### What Was Inefficient
+- **SUMMARY.md files not created during execution:** All 7 plans executed successfully but no SUMMARY.md files were written — had to be backfilled during milestone completion
+- **No milestone audit:** Sixth consecutive skip
+- **STATE.md / ROADMAP.md already marked complete but GSD tooling showed 0%:** Disconnect between manual status updates and GSD's file-based completion detection (summaries)
+
+### Patterns Established
+- Extension Point A: 4-point atomic sync (type union, Zod enum, ChartRenderer case, leaf component)
+- Extension Point B: 5-file checklist (type, Zod schema, renderer, property form, registry entry)
+- Recharts export verification before component implementation
+- CSS-flex for chart-like components that don't fit Recharts paradigm (Range Bar, CompositionBar, Progress Grid)
+
+### Key Lessons
+1. **SUMMARY.md is the completion signal** — GSD tooling uses SUMMARY.md existence to track progress, not ROADMAP.md checkboxes or STATE.md fields
+2. **Extension Point patterns reduce cognitive load** — once established, adding a new chart is mechanical (follow the checklist)
+3. **CSS-flex is valid for non-standard charts** — Range Bar and Progress Grid work better without Recharts overhead
+4. **Mock data quality matters** — Brazilian Portuguese financial data in the gallery makes components feel real and production-ready
+
+### Cost Observations
+- Model mix: ~50% opus, ~50% sonnet (balanced profile)
+- Sessions: 1 main session
+- Notable: 7 plans, 12 new chart/section types, 2,363 lines added in 1 day
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -293,6 +337,7 @@
 | v1.3 | 1 day | 5 | 14 | Schema-first approach, filterType discriminator, gallery as validation |
 | v1.4 | 2 days | 7 | 12 | Token cascade, independent phases, HTML reference-driven |
 | v1.5 | 1 day | 5 | 14 | Module registry, migration-first, formal REQUIREMENTS.md return |
+| v1.6 | 1 day | 4 | 7 | Extension Point A/B patterns, wave-based grouping, 12 new types |
 
 ### Cumulative Quality
 
@@ -304,6 +349,7 @@
 | v1.3 | 237 tests | no new tests (schema + UI) | 0 |
 | v1.4 | 237 tests | no new tests (CSS + visual) | 0 |
 | v1.5 | ~270 tests | KB hooks, home merge/sort, search cmd | 0 |
+| v1.6 | ~270 tests | section-registry count assertion (28) | 0 |
 
 ### Velocity
 
@@ -315,6 +361,7 @@
 | v1.3 | 14 | ~210 min | ~15 min |
 | v1.4 | 12 | ~180 min | ~15 min |
 | v1.5 | 14 | ~210 min | ~15 min |
+| v1.6 | 7 | ~60 min | ~8.5 min |
 
 ### Top Lessons (Verified Across Milestones)
 

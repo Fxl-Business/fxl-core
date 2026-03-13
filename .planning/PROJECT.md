@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Plataforma operacional interna da FXL (BI para PMEs). Combina documentacao de processo, knowledge de clientes, ferramentas AI-first (wireframe-builder com editor visual, design system semantico, 21 tipos de secao, briefing estruturado), pipeline completo Briefing → Blueprint → Wireframe → Spec Generation, base de conhecimento com full-text search, e gestao de tarefas por cliente com kanban board. Arquitetura modular com MODULE_REGISTRY tipado driving sidebar, routing e home page. Interface visual com paleta primary blue #1152d4 + slate, tipografia Inter/JetBrains Mono, dark sidebar, backdrop-blur filter bar, e group-hover effects em todos os componentes de wireframe. O objetivo e ter um processo capaz de entender qualquer negocio e, a partir de perguntas e respostas estruturadas, gerar qualquer produto digital de forma progressivamente automatizada.
+Plataforma operacional interna da FXL (BI para PMEs). Combina documentacao de processo, knowledge de clientes, ferramentas AI-first (wireframe-builder com editor visual, design system semantico, 28 tipos de secao, briefing estruturado), pipeline completo Briefing → Blueprint → Wireframe → Spec Generation, base de conhecimento com full-text search, e gestao de tarefas por cliente com kanban board. Arquitetura modular com MODULE_REGISTRY tipado driving sidebar, routing e home page. Interface visual com paleta primary blue #1152d4 + slate, tipografia Inter/JetBrains Mono, dark sidebar, backdrop-blur filter bar, e group-hover effects em todos os componentes de wireframe. O objetivo e ter um processo capaz de entender qualquer negocio e, a partir de perguntas e respostas estruturadas, gerar qualquer produto digital de forma progressivamente automatizada.
 
 ## Core Value
 
@@ -90,17 +90,15 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ Task Management: list, kanban, create/edit, DocumentarButton cross-module link to KB — v1.5
 - ✓ Home page: MODULE_REGISTRY grid + activity feed cross-module — v1.5
 - ✓ Supabase migrations: knowledge_entries (tsvector/GIN) + tasks (status/priority CHECK) — v1.5
+- ✓ 7 chartType sub-variants (grouped-bar, bullet, step-line, lollipop, range-bar, bump, polar) — v1.6
+- ✓ 4 standalone section types (pie-chart, progress-grid, heatmap, sparkline-grid) — v1.6
+- ✓ Sankey diagram as standalone section type — v1.6
+- ✓ ComponentGallery with all 28 section types and Brazilian Portuguese mock data — v1.6
+- ✓ Section registry at 28 types (5-file checklist for standalone, 4-point sync for chartType) — v1.6
 
 ### Active
 
-## Current Milestone: v1.6 12 Novos Graficos
-
-**Goal:** Expandir a biblioteca de componentes do wireframe builder com 12 novos tipos de grafico/secao para cobrir mais cenarios de BI financeiro/operacional.
-
-**Target features:**
-- Onda 1 (chart sub-variants): Grouped Bar, Bullet Chart, Step Line, Pie Chart
-- Onda 2 (standalone sections): Heatmap, Sparkline Grid, Progress Grid
-- Onda 3 (advanced charts): Sankey, Bump Chart, Range Bar, Lollipop, Polar
+_(No active milestone — run /gsd:new-milestone to start v1.7)_
 
 ### Out of Scope
 
@@ -118,7 +116,7 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - Real-time streaming de dados — v2 (ADV-02)
 - Row Level Security em todas as tabelas Supabase — v2 (SEC-01)
 - Multi-tenant no Supabase — v2 (SEC-02)
-- Recharts 3.x upgrade — breaking changes, 2.x tem todos os charts necessarios
+- Recharts 3.x upgrade — breaking changes, 2.x tem todos os 28 chart/section types necessarios
 - React 19 / Tailwind v4 — estabilidade da stack, upgrade futuro
 - Blueprint diff/merge visual — v2 (ADVW-01)
 - Edicao colaborativa em tempo real (CRDT) — v2 (ADVW-03)
@@ -138,9 +136,9 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ## Context
 
-Shipped v1.5 Modular Foundation & Knowledge Base. All 6 milestones complete (v1.0-v1.5).
+Shipped v1.6 12 Novos Graficos. All 7 milestones complete (v1.0-v1.6).
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
-~30,289 LOC TypeScript. 6 Supabase migrations (001-006). 5 active modules in MODULE_REGISTRY.
+~33,583 LOC TypeScript. 6 Supabase migrations (001-006). 5 active modules in MODULE_REGISTRY.
 
 The platform covers the full operator workflow:
 1. **Documentation** — 4-section taxonomy, onboarding, Claude Code + GSD workflow
@@ -149,9 +147,9 @@ The platform covers the full operator workflow:
 4. **Branding** — structured collection, automatic application via CSS vars and chart colors
 5. **Config pipeline** — TechnicalConfig + Config Resolver → GenerationManifest
 6. **System generation** — 6-file product spec ready for Claude Code to generate in separate repo
-7. **Blueprint infrastructure** — DB-only storage, Zod validation (21 section types), schema migration, optimistic locking
+7. **Blueprint infrastructure** — DB-only storage, Zod validation (28 section types), schema migration, optimistic locking
 8. **Design system** — Wireframe-specific --wf-* semantic tokens with professional financial dashboard aesthetic
-9. **Component library** — Section registry with 21 types, 15 chart variants, generic parametric viewer
+9. **Component library** — Section registry with 28 types, 22 chart variants, generic parametric viewer
 10. **Briefing & views** — Structured briefing form, blueprint text view, MD export, share link management
 11. **AI generation** — Screen recipes + vertical templates + pure generation engine with CLI bridge
 12. **Visual identity** — Primary blue #1152d4 + slate palette, dark sidebar, backdrop-blur filter bar, group-hover effects
@@ -202,6 +200,10 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Anon-permissive RLS on new tables | Consistent with existing tables, Clerk auth at app layer | ✓ Good — simple, works |
 | Optimistic kanban updates with local state | Immediate UI feedback, refetch rollback on error | ✓ Good — responsive kanban |
 | DocumentarButton outside TaskCard | Cross-module navigation decoupled from card component | ✓ Good — clean separation |
+| Polar as chartType sub-variant (not standalone) | Follows categories[]+chartColors[] contract, uses Extension Point A | ✓ Good — consistent with other chart variants |
+| Pie Chart as new standalone (not donut variant) | Preserves discriminated union semantics, different data shape | ✓ Good — clean type separation |
+| Range Bar with CSS-flex (not Recharts) | Consistent with ProgressBar and CompositionBar patterns | ✓ Good — no Recharts workarounds needed |
+| Sankey: verify Recharts export before coding | Prevent wasted work if named export missing | ✓ Good — Boolean(r.Sankey) === true confirmed |
 
 ## Constraints
 
@@ -215,4 +217,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-12 after v1.6 milestone start*
+*Last updated: 2026-03-13 after v1.6 milestone completion*
