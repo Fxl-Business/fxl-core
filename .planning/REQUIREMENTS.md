@@ -64,27 +64,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DB-01 | - | Pending |
-| DB-02 | - | Pending |
-| DB-03 | - | Pending |
-| MIG-01 | - | Pending |
-| MIG-02 | - | Pending |
-| MIG-03 | - | Pending |
-| DYN-01 | - | Pending |
-| DYN-02 | - | Pending |
-| DYN-03 | - | Pending |
-| DYN-04 | - | Pending |
-| DYN-05 | - | Pending |
-| SYNC-01 | - | Pending |
-| SYNC-02 | - | Pending |
-| SYNC-03 | - | Pending |
-| SYNC-04 | - | Pending |
+| DB-01 | Phase 43 | Pending |
+| DB-02 | Phase 43 | Pending |
+| DB-03 | Phase 43 | Pending |
+| MIG-01 | Phase 44 | Pending |
+| MIG-02 | Phase 44 | Pending |
+| MIG-03 | Phase 44 | Pending |
+| DYN-01 | Phase 45 | Pending |
+| DYN-02 | Phase 45 | Pending |
+| DYN-03 | Phase 45 | Pending |
+| DYN-04 | Phase 45 | Pending |
+| DYN-05 | Phase 45 | Pending |
+| SYNC-01 | Phase 46 | Pending |
+| SYNC-02 | Phase 46 | Pending |
+| SYNC-03 | Phase 46 | Pending |
+| SYNC-04 | Phase 46 | Pending |
 
 **Coverage:**
 - v2.1 requirements: 15 total
-- Mapped to phases: 0
-- Unmapped: 15
+- Mapped to phases: 15
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after initial definition*
+*Last updated: 2026-03-13 — traceability filled after roadmap creation (phases 43-46)*
