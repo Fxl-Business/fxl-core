@@ -29,9 +29,9 @@ Requirements for Inline Editing UX — Click-to-Edit para Header, Sidebar e Filt
 
 ### Cleanup
 
-- [ ] **CLN-01**: AdminToolbar Layout button group (Sidebar/Header/Filtros) removed — editing triggered by click on component
-- [ ] **CLN-02**: Sheet panel components (HeaderConfigPanel, SidebarConfigPanel, FilterBarEditor as standalone panels) replaced by inline PropertyPanel forms
-- [ ] **CLN-03**: layoutPanel state variable removed from WireframeViewer (no longer needed)
+- [x] **CLN-01**: AdminToolbar Layout button group (Sidebar/Header/Filtros) removed — editing triggered by click on component
+- [x] **CLN-02**: Sheet panel components (HeaderConfigPanel, SidebarConfigPanel, FilterBarEditor as standalone panels) replaced by inline PropertyPanel forms
+- [x] **CLN-03**: layoutPanel state variable removed from WireframeViewer (no longer needed)
 
 ## Future Requirements
 
@@ -70,9 +70,9 @@ Requirements for Inline Editing UX — Click-to-Edit para Header, Sidebar e Filt
 | FILT-11 | Phase 56 | Complete |
 | FILT-12 | Phase 56 | Complete |
 | FILT-13 | Phase 56 | Complete |
-| CLN-01 | Phase 57 | Pending |
-| CLN-02 | Phase 57 | Pending |
-| CLN-03 | Phase 57 | Pending |
+| CLN-01 | Phase 57 | Complete |
+| CLN-02 | Phase 57 | Complete |
+| CLN-03 | Phase 57 | Complete |
 
 **Coverage:**
 - v2.3 requirements: 14 total
