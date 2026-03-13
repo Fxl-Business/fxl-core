@@ -1,5 +1,7 @@
 import type { BlueprintSection } from './blueprint'
 
+export type HeaderElementType = 'header-brand' | 'header-period' | 'header-user' | 'header-actions'
+
 export type GridLayout = '1' | '2' | '3' | '2-1' | '1-2'
 
 export type ScreenRow = {
@@ -13,4 +15,5 @@ export type EditModeState = {
   dirty: boolean // unsaved changes exist
   saving: boolean // save in progress
   selectedSection: { rowIndex: number; cellIndex: number } | null
+  selectedHeaderElement: HeaderElementType | null
 }
