@@ -83,7 +83,7 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 
 **Milestone Goal:** Transformar o FXL Core de um sistema monolitico em uma plataforma modular com fronteiras claras entre areas, preparada para expansao futura. Introduzir base de conhecimento autoalimentada e gestao de tarefas por cliente.
 
-- [ ] **Phase 29: Module Foundation & Registry** - ModuleManifest type, MODULE_REGISTRY, ESLint boundary enforcement, sidebar and routing driven by registry
+- [x] **Phase 29: Module Foundation & Registry** - ModuleManifest type, MODULE_REGISTRY, ESLint boundary enforcement, sidebar and routing driven by registry (completed 2026-03-13)
 - [ ] **Phase 30: Supabase Migrations & Data Layer** - knowledge_entries and tasks tables with tsvector FTS, anon-permissive RLS, and typed service stubs
 - [ ] **Phase 31: Knowledge Base Module** - Full KB module: list, detail, form, full-text search, ADR format for decision entries
 - [ ] **Phase 32: Task Management Module** - Full tasks module: list, kanban, create/edit form, task-to-KB documentation link
@@ -209,7 +209,7 @@ Plans:
   2. App.tsx composes routes from module manifests and stays under 60 lines of route definitions
   3. ESLint boundary rules are configured and `npm run lint` passes with cross-module import violations reported as errors
   4. Existing docs and wireframe-builder areas continue working via wrapper manifests without any code being moved
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 29-01-PLAN.md -- ModuleManifest type, MODULE_REGISTRY, wrapper manifests (docs, clients), ESLint boundaries
@@ -317,7 +317,7 @@ For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in seque
 | 26. Filter Bar Enhancement | v1.4 | 1/1 | Complete | 2026-03-11 |
 | 27. Chart Palette & Composition | v1.4 | 2/2 | Complete | 2026-03-11 |
 | 28. Editor Sync & Gallery Validation | 2/2 | Complete    | 2026-03-13 | - |
-| 29. Module Foundation & Registry | 1/2 | In Progress|  | - |
+| 29. Module Foundation & Registry | 2/2 | Complete   | 2026-03-13 | - |
 | 30. Supabase Migrations & Data Layer | v1.5 | 0/2 | Not started | - |
 | 31. Knowledge Base Module | v1.5 | 0/2 | Not started | - |
 | 32. Task Management Module | v1.5 | 0/3 | Not started | - |
