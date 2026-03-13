@@ -298,6 +298,26 @@ export type BrandingEditorSection = {
   title?: string
 }
 
+export type PieChartSection = {
+  type: 'pie-chart'
+  title: string
+  height?: number
+  slices?: { label: string; value: number }[]
+}
+
+export type ProgressGridItem = {
+  label: string
+  current: number
+  target: number
+  max: number
+}
+
+export type ProgressGridSection = {
+  type: 'progress-grid'
+  title: string
+  items: ProgressGridItem[]
+}
+
 export type BlueprintSection =
   | KpiGridSection
   | BarLineChartSection
@@ -322,6 +342,8 @@ export type BlueprintSection =
   | DividerSection
   | GaugeChartSection
   | BrandingEditorSection
+  | PieChartSection
+  | ProgressGridSection
 
 export type BlueprintScreen = {
   id: string

@@ -367,6 +367,26 @@ export const BrandingEditorSectionSchema = z.object({
   title: z.string().optional(),
 })
 
+export const PieChartSectionSchema = z.object({
+  type: z.literal('pie-chart'),
+  title: z.string(),
+  height: z.number().optional(),
+  slices: z.array(z.object({ label: z.string(), value: z.number() })).optional(),
+})
+
+const ProgressGridItemSchema = z.object({
+  label: z.string(),
+  current: z.number(),
+  target: z.number(),
+  max: z.number(),
+})
+
+export const ProgressGridSectionSchema = z.object({
+  type: z.literal('progress-grid'),
+  title: z.string(),
+  items: z.array(ProgressGridItemSchema),
+})
+
 // ---------------------------------------------------------------------------
 // Discriminated union of all section types
 // Note: ChartGridSection has recursive items: BlueprintSection[]
@@ -397,6 +417,8 @@ const nonRecursiveSections = [
   DividerSectionSchema,
   GaugeChartSectionSchema,
   BrandingEditorSectionSchema,
+  PieChartSectionSchema,
+  ProgressGridSectionSchema,
 ] as const
 
 // ChartGridSection is defined inline to avoid circular const reference.

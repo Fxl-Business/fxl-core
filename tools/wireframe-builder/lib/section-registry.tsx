@@ -23,6 +23,8 @@ import {
   Minus,
   Gauge,
   Palette,
+  CircleDot,
+  Target,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -45,6 +47,8 @@ import ProgressBarRenderer from '../components/sections/ProgressBarRenderer'
 import DividerRenderer from '../components/sections/DividerRenderer'
 import GaugeChartRenderer from '../components/sections/GaugeChartRenderer'
 import BrandingEditorRenderer from '../components/sections/BrandingEditorRenderer'
+import PieChartRenderer from '../components/sections/PieChartRenderer'
+import ProgressGridRenderer from '../components/sections/ProgressGridRenderer'
 
 // ---------------------------------------------------------------------------
 // Property forms (existing)
@@ -73,6 +77,8 @@ import ProgressBarForm from '../components/editor/property-forms/ProgressBarForm
 import DividerForm from '../components/editor/property-forms/DividerForm'
 import GaugeChartForm from '../components/editor/property-forms/GaugeChartForm'
 import BrandingEditorForm from '../components/editor/property-forms/BrandingEditorForm'
+import PieChartForm from '../components/editor/property-forms/PieChartForm'
+import ProgressGridForm from '../components/editor/property-forms/ProgressGridForm'
 
 // ---------------------------------------------------------------------------
 // Zod schemas (individual)
@@ -101,6 +107,8 @@ import {
   DividerSectionSchema,
   GaugeChartSectionSchema,
   BrandingEditorSectionSchema,
+  PieChartSectionSchema,
+  ProgressGridSectionSchema,
   BlueprintSectionSchema,
 } from './blueprint-schema'
 
@@ -592,6 +600,55 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     }),
     schema: BrandingEditorSectionSchema,
     label: 'Editor de Identidade Visual',
+  },
+
+  // === Pie Chart (standalone) ===
+  'pie-chart': {
+    renderer: PieChartRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: PieChartForm as unknown as ComponentType<PropertyFormProps>,
+    catalogEntry: {
+      type: 'pie-chart',
+      label: 'Pizza',
+      description: 'Grafico de pizza com fatias e legenda',
+      icon: CircleDot,
+      category: 'Graficos',
+    },
+    defaultProps: () => ({
+      type: 'pie-chart' as const,
+      title: 'Novo Grafico de Pizza',
+      slices: [
+        { label: 'Produto A', value: 400 },
+        { label: 'Produto B', value: 300 },
+        { label: 'Produto C', value: 200 },
+        { label: 'Outros', value: 100 },
+      ],
+    }),
+    schema: PieChartSectionSchema,
+    label: 'Grafico de Pizza',
+  },
+
+  // === Progress Grid (standalone) ===
+  'progress-grid': {
+    renderer: ProgressGridRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: ProgressGridForm as unknown as ComponentType<PropertyFormProps>,
+    catalogEntry: {
+      type: 'progress-grid',
+      label: 'Grid de Progresso',
+      description: 'Metricas com barra de progresso, valor atual e meta',
+      icon: Target,
+      category: 'Metricas',
+    },
+    defaultProps: () => ({
+      type: 'progress-grid' as const,
+      title: 'Metas do Trimestre',
+      items: [
+        { label: 'Receita', current: 85000, target: 100000, max: 120000 },
+        { label: 'Novos Clientes', current: 42, target: 50, max: 60 },
+        { label: 'NPS', current: 72, target: 80, max: 100 },
+      ],
+    }),
+    schema: ProgressGridSectionSchema,
+    label: 'Grid de Progresso',
   },
 }
 
