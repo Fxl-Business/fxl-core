@@ -209,7 +209,7 @@ Plans:
   2. App.tsx composes routes from module manifests and stays under 60 lines of route definitions
   3. ESLint boundary rules are configured and `npm run lint` passes with cross-module import violations reported as errors
   4. Existing docs and wireframe-builder areas continue working via wrapper manifests without any code being moved
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 Plans:
 - [ ] 29-01-PLAN.md -- ModuleManifest type, MODULE_REGISTRY, wrapper manifests (docs, clients), ESLint boundaries
@@ -224,7 +224,7 @@ Plans:
   2. Migration 006 applies cleanly and `tasks` table exists with status CHECK constraint accepting todo/in_progress/done/blocked
   3. Existing operations (blueprint save, wireframe comment, briefing submit) continue working after both migrations
   4. kb-service.ts and tasks-service.ts export typed CRUD functions that TypeScript compiles without errors
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 Plans:
 - [ ] 30-01-PLAN.md -- Supabase migrations: knowledge_entries (005) and tasks (006) tables with RLS, FTS, CHECK constraints
@@ -240,9 +240,10 @@ Plans:
   3. Creating or editing an entry via the form saves to Supabase and the entry immediately appears in the list
   4. Typing a query in the KB search page returns ranked results via Supabase full-text search (Portuguese stemming)
   5. Creating a Decision-type entry presents an ADR-structured template (Context, Decision, Consequences sections)
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 Plans:
+- [ ] 31-00-PLAN.md -- Wave 0: test stubs for KB hooks and form page (Nyquist compliance)
 - [ ] 31-01-PLAN.md -- KB module scaffold: types, hooks (useKBEntries, useKBEntry, useKBSearch), and shared components (KBEntryCard, KBTypeFilter, KBMetaPanel)
 - [ ] 31-02-PLAN.md -- KB pages (list, detail, form, search) and App.tsx route wiring
 
@@ -271,7 +272,11 @@ Plans:
   2. An activity feed below the module grid shows the last 10 updates across kb_entries and tasks ordered by recency
   3. Visiting a client page (/clients/:slug) shows a "Conhecimento" section listing KB entries for that client_slug
   4. Opening Cmd+K and typing a query returns KB entries as a separate result group alongside docs results
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 33-01-PLAN.md -- Home page rewrite: MODULE_REGISTRY grid + activity feed
+- [ ] 33-02-PLAN.md -- KB integration: Conhecimento section in client page + KB in Cmd+K
 
 ## Progress
 
@@ -316,4 +321,4 @@ For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in seque
 | 30. Supabase Migrations & Data Layer | v1.5 | 0/2 | Not started | - |
 | 31. Knowledge Base Module | v1.5 | 0/2 | Not started | - |
 | 32. Task Management Module | v1.5 | 0/3 | Not started | - |
-| 33. Home Page & Cross-Module Integration | v1.5 | TBD | Not started | - |
+| 33. Home Page & Cross-Module Integration | v1.5 | 0/2 | Not started | - |
