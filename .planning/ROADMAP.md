@@ -240,7 +240,7 @@ Plans:
   3. Creating or editing an entry via the form saves to Supabase and the entry immediately appears in the list
   4. Typing a query in the KB search page returns ranked results via Supabase full-text search (Portuguese stemming)
   5. Creating a Decision-type entry presents an ADR-structured template (Context, Decision, Consequences sections)
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 31-00-PLAN.md -- Wave 0: test stubs for KB hooks and form page (Nyquist compliance)
@@ -319,6 +319,6 @@ For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in seque
 | 28. Editor Sync & Gallery Validation | 2/2 | Complete    | 2026-03-13 | - |
 | 29. Module Foundation & Registry | 2/2 | Complete    | 2026-03-13 | - |
 | 30. Supabase Migrations & Data Layer | 2/2 | Complete    | 2026-03-13 | - |
-| 31. Knowledge Base Module | 1/3 | In Progress|  | - |
+| 31. Knowledge Base Module | 2/3 | In Progress|  | - |
 | 32. Task Management Module | v1.5 | 0/3 | Not started | - |
 | 33. Home Page & Cross-Module Integration | v1.5 | 0/2 | Not started | - |
