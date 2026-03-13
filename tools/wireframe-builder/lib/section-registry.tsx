@@ -293,8 +293,16 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     defaultProps: () => ({
       type: 'drill-down-table' as const,
       title: 'Nova Tabela Drill',
-      columns: [{ key: 'col1', label: 'Coluna 1' }],
-      rows: [],
+      columns: [
+        { key: 'categoria', label: 'Categoria' },
+        { key: 'valor', label: 'Valor' },
+        { key: 'percentual', label: '%' },
+      ],
+      rows: [
+        { id: 'r1', data: { categoria: 'Produto A', valor: 'R$ 12.500', percentual: '45%' } },
+        { id: 'r2', data: { categoria: 'Produto B', valor: 'R$ 8.300', percentual: '30%' } },
+        { id: 'r3', data: { categoria: 'Produto C', valor: 'R$ 6.900', percentual: '25%' } },
+      ],
     }),
     schema: DrillDownTableSectionSchema,
     label: 'Tabela Drill-Down',
@@ -313,8 +321,16 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     defaultProps: () => ({
       type: 'clickable-table' as const,
       title: 'Nova Tabela Clicavel',
-      columns: [{ key: 'col1', label: 'Coluna 1' }],
-      rows: [],
+      columns: [
+        { key: 'nome', label: 'Nome' },
+        { key: 'status', label: 'Status' },
+        { key: 'valor', label: 'Valor' },
+      ],
+      rows: [
+        { id: 'r1', data: { nome: 'Item A', status: 'Ativo', valor: 'R$ 1.200' } },
+        { id: 'r2', data: { nome: 'Item B', status: 'Pendente', valor: 'R$ 850' } },
+        { id: 'r3', data: { nome: 'Item C', status: 'Ativo', valor: 'R$ 2.100' } },
+      ],
     }),
     schema: ClickableTableSectionSchema,
     label: 'Tabela Clicavel',
@@ -333,8 +349,14 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     defaultProps: () => ({
       type: 'config-table' as const,
       title: 'Nova Config',
-      columns: [],
-      rows: [],
+      columns: [
+        { key: 'parametro', label: 'Parametro' },
+        { key: 'valor', label: 'Valor' },
+      ],
+      rows: [
+        { parametro: 'Taxa Base', valor: '12%' },
+        { parametro: 'Limite', valor: 'R$ 50.000' },
+      ],
     }),
     schema: ConfigTableSectionSchema,
     label: 'Tabela de Configuracao',
@@ -353,8 +375,12 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     },
     defaultProps: () => ({
       type: 'saldo-banco' as const,
-      banks: [],
-      total: 'R$ 0',
+      banks: [
+        { label: 'Banco do Brasil', value: 'R$ 45.000' },
+        { label: 'Itau', value: 'R$ 32.000' },
+        { label: 'Bradesco', value: 'R$ 18.500' },
+      ],
+      total: 'R$ 95.500',
     }),
     schema: SaldoBancoSectionSchema,
     label: 'Saldo Banco',
@@ -410,7 +436,12 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     defaultProps: () => ({
       type: 'calculo-card' as const,
       title: 'Novo Calculo',
-      rows: [],
+      rows: [
+        { label: 'Receita Bruta', value: 'R$ 100.000', operator: '(+)' as const },
+        { label: '(-) Impostos', value: 'R$ 15.000', operator: '(-)' as const },
+        { label: '(-) Custos', value: 'R$ 35.000', operator: '(-)' as const },
+        { label: 'Lucro Liquido', value: 'R$ 50.000', operator: '(=)' as const, highlight: true },
+      ],
     }),
     schema: CalculoCardSectionSchema,
     label: 'Card de Calculo',
@@ -429,7 +460,17 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     defaultProps: () => ({
       type: 'chart-grid' as const,
       columns: 2,
-      items: [],
+      items: [
+        {
+          type: 'bar-line-chart' as const,
+          title: 'Vendas por Mes',
+          chartType: 'bar' as const,
+        },
+        {
+          type: 'donut-chart' as const,
+          title: 'Distribuicao',
+        },
+      ],
     }),
     schema: BlueprintSectionSchema, // ChartGrid uses recursive schema
     label: 'Grade de Graficos',

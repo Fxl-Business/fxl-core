@@ -148,3 +148,86 @@ describe('getCatalog', () => {
     }
   })
 })
+
+describe('defaultProps renderability', () => {
+  const typesWithItems = [
+    'kpi-grid', 'progress-bar', 'sparkline-grid', 'progress-grid',
+  ] as const
+
+  const typesWithRows = [
+    'drill-down-table', 'clickable-table',
+    'config-table', 'calculo-card', 'heatmap',
+  ] as const
+
+  const typesWithChartData = [
+    'chart-grid',
+  ] as const
+
+  for (const type of typesWithItems) {
+    it(`${type}: defaultProps has non-empty items array`, () => {
+      const defaults = getDefaultSection(type) as Record<string, unknown>
+      expect(Array.isArray(defaults.items)).toBe(true)
+      expect((defaults.items as unknown[]).length).toBeGreaterThan(0)
+    })
+  }
+
+  for (const type of typesWithRows) {
+    it(`${type}: defaultProps has non-empty rows array`, () => {
+      const defaults = getDefaultSection(type) as Record<string, unknown>
+      expect(Array.isArray(defaults.rows)).toBe(true)
+      expect((defaults.rows as unknown[]).length).toBeGreaterThan(0)
+    })
+  }
+
+  for (const type of typesWithChartData) {
+    it(`${type}: defaultProps has non-empty items array`, () => {
+      const defaults = getDefaultSection(type) as Record<string, unknown>
+      expect(Array.isArray(defaults.items)).toBe(true)
+      expect((defaults.items as unknown[]).length).toBeGreaterThan(0)
+    })
+  }
+
+  it('saldo-banco: defaultProps has non-empty banks array', () => {
+    const defaults = getDefaultSection('saldo-banco') as Record<string, unknown>
+    expect(Array.isArray(defaults.banks)).toBe(true)
+    expect((defaults.banks as unknown[]).length).toBeGreaterThan(0)
+  })
+
+  it('pie-chart: defaultProps has non-empty slices array', () => {
+    const defaults = getDefaultSection('pie-chart') as Record<string, unknown>
+    expect(Array.isArray(defaults.slices)).toBe(true)
+    expect((defaults.slices as unknown[]).length).toBeGreaterThan(0)
+  })
+
+  it('sankey: defaultProps has non-empty nodes and links arrays', () => {
+    const defaults = getDefaultSection('sankey') as Record<string, unknown>
+    expect(Array.isArray(defaults.nodes)).toBe(true)
+    expect((defaults.nodes as unknown[]).length).toBeGreaterThan(0)
+    expect(Array.isArray(defaults.links)).toBe(true)
+    expect((defaults.links as unknown[]).length).toBeGreaterThan(0)
+  })
+
+  it('waterfall-chart: defaultProps has non-empty bars array', () => {
+    const defaults = getDefaultSection('waterfall-chart') as Record<string, unknown>
+    expect(Array.isArray(defaults.bars)).toBe(true)
+    expect((defaults.bars as unknown[]).length).toBeGreaterThan(0)
+  })
+
+  it('settings-page: defaultProps has non-empty groups array', () => {
+    const defaults = getDefaultSection('settings-page') as Record<string, unknown>
+    expect(Array.isArray(defaults.groups)).toBe(true)
+    expect((defaults.groups as unknown[]).length).toBeGreaterThan(0)
+  })
+
+  it('form-section: defaultProps has non-empty fields array', () => {
+    const defaults = getDefaultSection('form-section') as Record<string, unknown>
+    expect(Array.isArray(defaults.fields)).toBe(true)
+    expect((defaults.fields as unknown[]).length).toBeGreaterThan(0)
+  })
+
+  it('filter-config: defaultProps has non-empty filters array', () => {
+    const defaults = getDefaultSection('filter-config') as Record<string, unknown>
+    expect(Array.isArray(defaults.filters)).toBe(true)
+    expect((defaults.filters as unknown[]).length).toBeGreaterThan(0)
+  })
+})
