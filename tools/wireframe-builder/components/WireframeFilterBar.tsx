@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Calendar, ChevronDown, Share2, Download } from 'lucide-react'
+import { Search, Calendar, ChevronDown, Share2, Download, Trash2 } from 'lucide-react'
 
 export type FilterOption = {
   key: string
@@ -18,6 +18,10 @@ type Props = {
   comparePeriodType?: 'mensal' | 'anual'
   comparePeriod?: string
   onComparePeriodChange?: (period: string) => void
+  editMode?: boolean
+  onFilterClick?: (filterIndex: number) => void
+  onFilterDelete?: (filterIndex: number) => void
+  onAddFilter?: (filter: FilterOption) => void
 }
 
 const MESES_MOCK = [
@@ -247,7 +251,12 @@ export default function WireframeFilterBar({
   comparePeriodType = 'mensal',
   comparePeriod,
   onComparePeriodChange,
+  editMode,
+  onFilterClick,
+  onFilterDelete,
+  onAddFilter: _onAddFilter,
 }: Props) {
+  void _onAddFilter
   const [internalCompareMode, setInternalCompareMode] = useState(false)
   const [internalPeriod, setInternalPeriod] = useState(
     comparePeriodType === 'anual' ? '2025' : 'Fev/2026'
@@ -310,8 +319,67 @@ export default function WireframeFilterBar({
         <div style={{ width: 1, height: 20, background: 'var(--wf-card-border)', margin: '0 4px' }} />
       )}
 
-      {filters.map((filter) => (
-        <FilterControl key={filter.key} filter={filter} />
+      {filters.map((filter, index) => (
+        editMode ? (
+          <div
+            key={filter.key}
+            style={{
+              position: 'relative',
+              borderRadius: 8,
+              border: '1px dashed var(--wf-card-border)',
+              padding: '2px 4px',
+              cursor: 'pointer',
+              transition: 'border-color 150ms ease',
+            }}
+            onClick={() => onFilterClick?.(index)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--wf-accent)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--wf-card-border)'
+            }}
+          >
+            <FilterControl filter={filter} />
+            <button
+              type="button"
+              title="Remover filtro"
+              onClick={(e) => {
+                e.stopPropagation()
+                onFilterDelete?.(index)
+              }}
+              style={{
+                position: 'absolute',
+                top: -6,
+                right: -6,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 20,
+                height: 20,
+                borderRadius: '50%',
+                border: '1px solid var(--wf-card-border)',
+                background: 'var(--wf-card)',
+                color: 'var(--wf-muted)',
+                cursor: 'pointer',
+                transition: 'color 150ms ease, background 150ms ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#ef4444'
+                e.currentTarget.style.background = 'rgba(239,68,68,0.1)'
+                e.currentTarget.style.borderColor = '#ef4444'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--wf-muted)'
+                e.currentTarget.style.background = 'var(--wf-card)'
+                e.currentTarget.style.borderColor = 'var(--wf-card-border)'
+              }}
+            >
+              <Trash2 style={{ width: 10, height: 10 }} />
+            </button>
+          </div>
+        ) : (
+          <FilterControl key={filter.key} filter={filter} />
+        )
       ))}
 
       {showCompareSwitch && (

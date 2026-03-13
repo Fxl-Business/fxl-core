@@ -15,6 +15,7 @@ import SidebarPropertyPanel from '@tools/wireframe-builder/components/editor/Sid
 import SidebarConfigPanel from '@tools/wireframe-builder/components/editor/SidebarConfigPanel'
 import HeaderConfigPanel from '@tools/wireframe-builder/components/editor/HeaderConfigPanel'
 import FilterBarEditor from '@tools/wireframe-builder/components/editor/FilterBarEditor'
+import FilterPropertyPanel from '@tools/wireframe-builder/components/editor/FilterPropertyPanel'
 import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
 import { getIconComponent } from '@tools/wireframe-builder/components/editor/IconPicker'
 import { toast } from 'sonner'
@@ -49,6 +50,7 @@ import type {
   SidebarWidget,
 } from '@tools/wireframe-builder/types/blueprint'
 import type { EditModeState, GridLayout, HeaderElementType, ScreenRow, SidebarElementSelection } from '@tools/wireframe-builder/types/editor'
+import type { FilterOption } from '@tools/wireframe-builder/components/WireframeFilterBar'
 
 // Dynamic branding import map (extend as clients are added)
 const brandingMap: Record<string, () => Promise<{ default: BrandingConfig }>> = {
@@ -165,6 +167,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
   // Layout panel open state -- at most one panel open at a time, null = closed
   const [layoutPanel, setLayoutPanel] = useState<'sidebar' | 'header' | 'filters' | null>(null)
+
+  // Filter inline editing
+  const [selectedFilterIndex, setSelectedFilterIndex] = useState<number | null>(null)
 
   // Branding update handler (must be before early returns)
   const handleBrandingUpdate = useCallback((partial: Partial<BrandingConfig>) => {
@@ -386,6 +391,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     setWorkingConfig(null)
     setStaleWarning(false)
     setLayoutPanel(null)
+    setSelectedFilterIndex(null)
     setEditMode({
       active: false,
       dirty: false,
@@ -540,6 +546,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       selectedHeaderElement: null,
       selectedSidebarElement: null,
     }))
+    setSelectedFilterIndex(null)
   }
 
   function handleSelectHeaderElement(element: HeaderElementType) {
@@ -549,6 +556,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       selectedHeaderElement: element,
       selectedSidebarElement: null,
     }))
+    setSelectedFilterIndex(null)
   }
 
   function handleSelectSidebarElement(selection: SidebarElementSelection) {
@@ -557,6 +565,53 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       selectedSection: null,
       selectedHeaderElement: null,
       selectedSidebarElement: selection,
+    }))
+    setSelectedFilterIndex(null)
+  }
+
+  function handleFilterClick(filterIndex: number) {
+    setSelectedFilterIndex(filterIndex)
+    setEditMode((prev) => ({
+      ...prev,
+      selectedSection: null,
+      selectedHeaderElement: null,
+      selectedSidebarElement: null,
+    }))
+  }
+
+  function handleFilterDelete(filterIndex: number) {
+    updateWorkingScreen((screen) => ({
+      ...screen,
+      filters: screen.filters.filter((_, i) => i !== filterIndex),
+    }))
+    if (selectedFilterIndex === filterIndex) {
+      setSelectedFilterIndex(null)
+    } else if (selectedFilterIndex !== null && filterIndex < selectedFilterIndex) {
+      setSelectedFilterIndex(selectedFilterIndex - 1)
+    }
+  }
+
+  function handleFilterPropertyChange(updated: FilterOption) {
+    if (selectedFilterIndex === null) return
+    updateWorkingScreen((screen) => ({
+      ...screen,
+      filters: screen.filters.map((f, i) => i === selectedFilterIndex ? updated : f),
+    }))
+  }
+
+  function handleAddFilter(filter: FilterOption) {
+    updateWorkingScreen((screen) => {
+      if (screen.filters.some((f) => f.key === filter.key)) return screen
+      return { ...screen, filters: [...screen.filters, { ...filter }] }
+    })
+    // Auto-select the newly added filter for immediate editing
+    const currentLength = activeScreen?.filters?.length ?? 0
+    setSelectedFilterIndex(currentLength)
+    setEditMode((prev) => ({
+      ...prev,
+      selectedSection: null,
+      selectedHeaderElement: null,
+      selectedSidebarElement: null,
     }))
   }
 
@@ -681,6 +736,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
   function handleScreenSelect(index: number) {
     setActiveIndex(index)
     setEditMode((prev) => ({ ...prev, selectedSection: null, selectedHeaderElement: null, selectedSidebarElement: null }))
+    setSelectedFilterIndex(null)
   }
 
   function handleAddScreen(screen: BlueprintScreen) {
@@ -1509,6 +1565,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 onReorderRows={handleReorderRows}
                 onChangeLayout={handleChangeLayout}
                 rows={rows}
+                onFilterClick={handleFilterClick}
+                onFilterDelete={handleFilterDelete}
+                onAddFilter={handleAddFilter}
               />
             </div>
           </main>
@@ -1551,6 +1610,16 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
             ...cfg,
             sidebar: updater(cfg.sidebar ?? {}),
           }))
+        }}
+      />
+
+      <FilterPropertyPanel
+        open={selectedFilterIndex !== null}
+        filter={selectedFilterIndex !== null ? (activeScreen?.filters?.[selectedFilterIndex] ?? null) : null}
+        onClose={() => setSelectedFilterIndex(null)}
+        onChange={handleFilterPropertyChange}
+        onDelete={() => {
+          if (selectedFilterIndex !== null) handleFilterDelete(selectedFilterIndex)
         }}
       />
 

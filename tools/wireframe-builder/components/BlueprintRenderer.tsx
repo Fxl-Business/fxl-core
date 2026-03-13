@@ -19,7 +19,7 @@ import type { BlueprintScreen, BlueprintSection } from '../types/blueprint'
 import type { GridLayout, ScreenRow } from '../types/editor'
 import type { Comment } from '../types/comments'
 import { GRID_LAYOUTS, getCellCount, sectionsToRows } from '../lib/grid-layouts'
-import WireframeFilterBar from './WireframeFilterBar'
+import WireframeFilterBar, { type FilterOption } from './WireframeFilterBar'
 import SectionRenderer from './sections/SectionRenderer'
 import SectionWrapper from './SectionWrapper'
 import EditableSectionWrapper from './editor/EditableSectionWrapper'
@@ -43,6 +43,9 @@ type Props = {
   onReorderRows?: (oldIndex: number, newIndex: number) => void
   onChangeLayout?: (rowIndex: number, layout: GridLayout) => void
   rows?: ScreenRow[]
+  onFilterClick?: (filterIndex: number) => void
+  onFilterDelete?: (filterIndex: number) => void
+  onAddFilter?: (filter: FilterOption) => void
 }
 
 // Sortable row wrapper for drag-and-drop reordering
@@ -106,6 +109,9 @@ export default function BlueprintRenderer({
   onReorderRows,
   onChangeLayout,
   rows: rowsProp,
+  onFilterClick,
+  onFilterDelete,
+  onAddFilter,
 }: Props) {
   const [compareMode, setCompareMode] = useState(false)
   const [comparePeriod, setComparePeriod] = useState(
@@ -152,6 +158,10 @@ export default function BlueprintRenderer({
           comparePeriodType={screen.periodType === 'anual' ? 'anual' : 'mensal'}
           comparePeriod={comparePeriod}
           onComparePeriodChange={setComparePeriod}
+          editMode={editMode}
+          onFilterClick={onFilterClick}
+          onFilterDelete={onFilterDelete}
+          onAddFilter={onAddFilter}
         />
       )}
 
