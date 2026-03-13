@@ -1,5 +1,65 @@
 # Milestones
 
+## v1.5 Modular Foundation & Knowledge Base (Shipped: 2026-03-13)
+
+**Phases:** 5 (29, 30, 31, 32, 33) | **Plans:** 14 | **Tasks:** ~28
+**Timeline:** 1 day (2026-03-12 → 2026-03-13) | **Commits:** 53 | **LOC:** 30,289 TypeScript
+**Git range:** 294d3a7 → 7c5250f
+
+**Delivered:** Transformed FXL Core from monolithic system into modular platform with typed module registry, knowledge base with full-text search (Portuguese), task management with kanban board, and operational home page hub with cross-module activity feed.
+
+**Key accomplishments:**
+1. Module registry pattern: ModuleManifest type + MODULE_REGISTRY driving sidebar, routing, and home page — replaced 126-line hardcoded nav array
+2. Supabase migrations for knowledge_entries (tsvector/GIN FTS) and tasks (status/priority CHECK constraints) with anon-permissive RLS
+3. Knowledge Base module: list/detail/form/search pages with 4 entry types, ADR template for decisions, full-text search in Portuguese
+4. Task Management module: list/kanban/form pages with optimistic status updates and DocumentarButton cross-module link to KB
+5. Home page rewrite: MODULE_REGISTRY grid + useActivityFeed hook with parallel Supabase queries
+6. KB integration: Conhecimento section in client workspace + KB entries in Cmd+K search dialog
+
+**Archive:** [v1.5-ROADMAP.md](milestones/v1.5-ROADMAP.md) | [v1.5-REQUIREMENTS.md](milestones/v1.5-REQUIREMENTS.md)
+
+---
+
+## v1.4 Wireframe Visual Redesign (Shipped: 2026-03-13)
+
+**Phases:** 7 (22, 23, 24, 25, 26, 27, 28) | **Plans:** 12 | **Tasks:** ~24
+**Timeline:** 2 days (2026-03-11 → 2026-03-13) | **Commits:** 44 | **LOC delta:** +6,878 / -430
+**Git range:** 2b3ed25 → 87d9ac5
+
+**Delivered:** Complete visual overhaul of all wireframe components with professional financial dashboard aesthetic — primary blue #1152d4, slate palette, Inter extrabold typography, dark sidebar, group-hover effects, backdrop-blur filter bar, and new CompositionBar chart type.
+
+**Key accomplishments:**
+1. Token foundation: slate + blue palette replacing stone/gold, --wf-primary as canonical accent, branding override pipeline with WireframeThemeProvider
+2. Sidebar & header chrome: dark slate sidebar with active/hover states, 3-column header with search/notifications/user chip
+3. KPI cards: icon slot with group-hover color inversion, rounded-full trend badges, extrabold values
+4. Table components: text-[10px] font-black uppercase tracking-widest headers, dark footer totals row
+5. Filter bar: sticky backdrop-blur-sm container, vertical stacked labels, action button hierarchy
+6. Chart palette: blue-slate chart colors across all 15 components, activeBar opacity hover, new CompositionBar component
+
+**Archive:** [v1.4-ROADMAP.md](milestones/v1.4-ROADMAP.md) | [v1.4-REQUIREMENTS.md](milestones/v1.4-REQUIREMENTS.md)
+
+---
+
+## v1.3 Builder & Components (Shipped: 2026-03-11)
+
+**Phases:** 5 (17, 18, 19, 20, 21) | **Plans:** 14 | **Tasks:** ~28
+**Timeline:** 1 day (2026-03-11) | **Commits:** 39 | **LOC delta:** +7,874 / -184
+**Git range:** eaadf76 → f1f1af4
+
+**Delivered:** Expanded wireframe builder with configurable sidebar/header driven by BlueprintConfig data, typed filter dispatch with 5 sub-components, 6 new chart variants (stacked-bar, stacked-area, horizontal-bar, bubble, gauge, composed), and gallery reorganized into 6 thematic sections.
+
+**Key accomplishments:**
+1. Schema foundation: SidebarConfig and HeaderConfig at dashboard level in BlueprintConfig, FilterOption.filterType discriminator
+2. Configurable sidebar: collapse rail, grouped sections with icons, badge counts, footer from config
+3. Configurable header: logo/brand slot, period selector, user/role indicator, action buttons
+4. Filter bar expansion: 5 filter sub-components (Select, DateRange, MultiSelect, Search, Toggle) with compare toggle
+5. Chart type expansion: 6 new variants including GaugeChart with PieChart arcs + SVG needle
+6. Gallery reorganized into 6 thematic sections with all new component previews
+
+**Archive:** [v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md) | [v1.3-REQUIREMENTS.md](milestones/v1.3-REQUIREMENTS.md)
+
+---
+
 ## v1.2 Visual Redesign (Shipped: 2026-03-11)
 
 **Phases:** 5 (12, 13, 14, 15, 16) | **Plans:** 7 | **Tasks:** ~14

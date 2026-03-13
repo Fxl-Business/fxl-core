@@ -151,6 +151,136 @@
 
 ---
 
+## Milestone: v1.3 — Builder & Components
+
+**Shipped:** 2026-03-11
+**Phases:** 5 | **Plans:** 14 | **Timeline:** 1 day
+
+### What Was Built
+- Schema foundation: SidebarConfig/HeaderConfig at dashboard level in BlueprintConfig, FilterOption.filterType discriminator
+- Configurable sidebar: collapse rail, grouped sections with icons, badge counts, footer driven by config
+- Configurable header: logo/brand slot, period selector, user/role indicator, action buttons
+- Filter bar expansion: 5 filter sub-components (Select, DateRange, MultiSelect, Search, Toggle)
+- Chart type expansion: 6 new variants (stacked-bar, stacked-area, horizontal-bar, bubble, gauge, composed)
+- Gallery reorganized into 6 thematic sections with all new component previews
+
+### What Worked
+- **Schema-first approach:** Defining types and Zod schemas before UI components prevented rework
+- **Discriminated union for filters:** filterType dispatch cleanly separates 5 filter behaviors
+- **GaugeChart creative solution:** PieChart arcs for zones + absolute SVG needle — avoided custom SVG path math
+- **Gallery as validation:** Reorganized gallery served as visual smoke test for all new components
+
+### What Was Inefficient
+- **No formal REQUIREMENTS.md:** Requirements tracked inline in ROADMAP phase goals, no traceability table
+- **No milestone audit:** Third consecutive milestone without audit
+- **14 plans in 1 day:** Very fast execution but no verification pause between phases
+
+### Patterns Established
+- `filterType` discriminator pattern: union type → dispatch → specialized sub-component
+- Zod `.passthrough()` for forward-compatible schema evolution
+- Gallery sections as visual validation surface for new components
+
+### Key Lessons
+1. **Schema-first pays off** — v1.3 was the fastest milestone (14 plans, 1 day) because types were defined first
+2. **Discriminated unions scale** — filterType + section type registries both follow the same pattern
+3. **Gallery is a validation tool** — reorganizing the gallery caught visual issues before shipping
+
+### Cost Observations
+- Model mix: ~60% opus, ~40% sonnet (balanced profile)
+- Sessions: 1 main session
+- Notable: 14 plans in 1 day — fastest milestone by calendar time
+
+---
+
+## Milestone: v1.4 — Wireframe Visual Redesign
+
+**Shipped:** 2026-03-13
+**Phases:** 7 | **Plans:** 12 | **Timeline:** 2 days
+
+### What Was Built
+- Token foundation: slate + blue palette replacing stone/gold, --wf-primary as canonical accent, branding override pipeline with WireframeThemeProvider
+- Dark sidebar chrome with active/hover states, group labels, status footer
+- White 3-column header with search, notifications, and user chip
+- KPI cards with icon slot, group-hover color inversion, rounded-full trend badges
+- Table headers with text-[10px] font-black uppercase tracking-widest, dark footer totals row
+- Filter bar with backdrop-blur-sm sticky container, vertical stacked labels, action button hierarchy
+- Chart palette blue-slate across all 15 components, activeBar opacity hover, CompositionBar
+
+### What Worked
+- **Token cascade:** Changing ~20 CSS tokens in Phase 22 propagated to ~55 components automatically
+- **Independent phases:** Phases 23-27 all depended only on Phase 22, enabling parallel planning
+- **HTML reference:** Same reference-driven approach as v1.2, eliminating visual design decisions
+- **CompositionBar as pure HTML/CSS:** No Recharts dependency for horizontal stacked bar — simpler, lighter
+- **Gallery validation as milestone gate:** Phase 28 visual check + TS audit confirmed everything before v1.5
+
+### What Was Inefficient
+- **No formal REQUIREMENTS.md:** Like v1.3, requirements inline in ROADMAP success criteria only
+- **ROADMAP plan checkbox drift continued:** Some plans showed [ ] unchecked despite being complete
+- **No milestone audit:** Fourth consecutive skip
+
+### Patterns Established
+- `brandingToWfOverrides()` → `WireframeThemeProvider wfOverrides` — clean injection point for client branding
+- `color-mix(in srgb, var(--wf-token), transparent)` for all semi-transparent fills
+- Dark sidebar always (`#0f172a` in both light and dark themes)
+- `group-hover` for card icon color inversion (primary/10 → solid primary)
+
+### Key Lessons
+1. **Token cascade is powerful** — investing in Phase 22 foundation made Phases 23-27 almost mechanical
+2. **Independent phases enable fast parallel execution** — 5 phases sharing only Phase 22 dependency
+3. **Gallery-as-gate works** — Phase 28 visual validation caught no issues, but the confidence it provides justifies the phase
+
+### Cost Observations
+- Model mix: ~60% opus, ~40% sonnet (balanced profile)
+- Sessions: 2 sessions
+- Notable: 12 plans in 2 days, token cascade approach saved significant per-component effort
+
+---
+
+## Milestone: v1.5 — Modular Foundation & Knowledge Base
+
+**Shipped:** 2026-03-13
+**Phases:** 5 | **Plans:** 14 | **Timeline:** 1 day
+
+### What Was Built
+- Module registry: ModuleManifest type + MODULE_REGISTRY driving sidebar, routing, and home page — eliminated 126-line hardcoded nav array
+- Supabase migrations: knowledge_entries (tsvector/GIN FTS, Portuguese) and tasks (status/priority CHECK)
+- Knowledge Base module: list/detail/form/search pages, 4 entry types, ADR template for decisions, Cmd+K integration
+- Task Management module: list/kanban/form, optimistic status updates, DocumentarButton cross-module KB link
+- Home page rewrite: MODULE_REGISTRY grid + useActivityFeed hook with parallel Supabase queries
+
+### What Worked
+- **Module manifest pattern:** Static typed constant scales cleanly — sidebar, routing, home all read from one source
+- **Migration-first approach:** Phases 30 (DB) → 31/32 (UI) ensured stable data layer before building UI
+- **Service layer isolation:** Each module uses its own service file — no cross-module Supabase imports
+- **Cross-module linking:** DocumentarButton (tasks → KB) and Conhecimento section (client → KB) work via URL navigation, not component imports
+- **Wave 0 test stubs:** Establishing test structure before implementation kept testing top-of-mind
+- **Formal REQUIREMENTS.md:** First milestone since v1.2 with proper requirements doc — 19/19 tracked and shipped
+
+### What Was Inefficient
+- **No milestone audit:** Fifth consecutive skip — at this point it's a conscious tradeoff (speed vs verification)
+- **Service file placement:** Files placed in src/lib/ in Phase 30, moved to module folders in Phases 31/32 — could have placed correctly from start
+- **vi.hoisted() discovery:** Required investigation; should be documented for future vitest mock patterns
+
+### Patterns Established
+- `ModuleManifest` type: { id, label, icon, route, navChildren, status }
+- Service layer per module: `src/lib/[name]-service.ts` with typed CRUD exports
+- Optimistic updates: local useState synced from hook, immediate update, refetch on error
+- Cross-module navigation via URL params (not component imports)
+- `it.todo()` wave 0 stubs for early test structure
+
+### Key Lessons
+1. **Module registry eliminates hardcoded nav** — single source of truth for 5 modules scales to N
+2. **Migration-first is correct for new features** — v1.5 had zero data layer bugs because DB was proven before UI
+3. **Formal REQUIREMENTS.md matters** — 19/19 requirements tracked made milestone completion unambiguous
+4. **Cross-module links via URL** — decoupled modules can reference each other without import dependencies
+
+### Cost Observations
+- Model mix: ~50% opus, ~50% sonnet (balanced profile, more sonnet for executor agents)
+- Sessions: 1 main session
+- Notable: 14 plans in 1 day — matched v1.3's pace but with formal requirements and more complex features
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -160,6 +290,9 @@
 | v1.0 | 4 days | 9 | 27 | First milestone — established GSD workflow, decimal phases, audit process |
 | v1.1 | 2 days | 5 | 15 | Parallel phase execution, TDD for engine, quick tasks for post-phase polish |
 | v1.2 | 4 days | 5 | 7 | CSS-only milestone, sequential dependency chain, reference-driven design |
+| v1.3 | 1 day | 5 | 14 | Schema-first approach, filterType discriminator, gallery as validation |
+| v1.4 | 2 days | 7 | 12 | Token cascade, independent phases, HTML reference-driven |
+| v1.5 | 1 day | 5 | 14 | Module registry, migration-first, formal REQUIREMENTS.md return |
 
 ### Cumulative Quality
 
@@ -168,6 +301,9 @@
 | v1.0 | Vitest (Phase 06) | spec-generator only | 3 (recharts, @supabase/supabase-js, @clerk/react) |
 | v1.1 | 237 tests | generation engine + schemas + recipes | 1 (zod v4) |
 | v1.2 | 237 tests | no new tests (CSS-only) | 3 (@fontsource-variable/inter, @fontsource-variable/jetbrains-mono, rehype-highlight) |
+| v1.3 | 237 tests | no new tests (schema + UI) | 0 |
+| v1.4 | 237 tests | no new tests (CSS + visual) | 0 |
+| v1.5 | ~270 tests | KB hooks, home merge/sort, search cmd | 0 |
 
 ### Velocity
 
@@ -176,12 +312,17 @@
 | v1.0 | 27 | ~95 min | ~3.5 min |
 | v1.1 | 15 | ~51 min | ~3.4 min |
 | v1.2 | 7 | ~105 min | ~15 min |
+| v1.3 | 14 | ~210 min | ~15 min |
+| v1.4 | 12 | ~180 min | ~15 min |
+| v1.5 | 14 | ~210 min | ~15 min |
 
 ### Top Lessons (Verified Across Milestones)
 
-1. Run `/gsd:audit-milestone` before completing — catches gaps that session-level verification misses (v1.0 proved it, v1.1 + v1.2 skipped it)
-2. Traceability maintenance is as important as code execution — requirements checkboxes drifted in v1.0 and v1.2
-3. Pure functions are the right default for data transformations — validated in Config Resolver (v1.0), generation engine (v1.1)
-4. Registry/single-source-of-truth patterns scale well — semantic tokens (v1.0), section registry (v1.1)
-5. Reference-driven design eliminates decision fatigue — v1.2 shipped faster per-plan because visual decisions were pre-made
-6. CSS-only milestones are inherently safe — zero logic changes means zero regressions, zero test failures
+1. Run `/gsd:audit-milestone` before completing — catches gaps that session-level verification misses (v1.0 proved it, v1.1-v1.5 skipped it)
+2. Traceability maintenance is as important as code execution — requirements checkboxes drifted in v1.0 and v1.2; formal REQUIREMENTS.md in v1.5 was unambiguous
+3. Pure functions are the right default for data transformations — validated in Config Resolver (v1.0), generation engine (v1.1), activity feed merge (v1.5)
+4. Registry/single-source-of-truth patterns scale well — semantic tokens (v1.0), section registry (v1.1), filterType (v1.3), MODULE_REGISTRY (v1.5)
+5. Reference-driven design eliminates decision fatigue — v1.2 and v1.4 shipped faster because visual decisions were pre-made
+6. CSS-only milestones are inherently safe — zero logic changes means zero regressions (v1.2, v1.4 token cascade)
+7. Schema-first / migration-first approach prevents rework — v1.3 (types first) and v1.5 (DB first) both shipped cleanly
+8. Token cascade is the most efficient visual migration — ~20 token changes propagate to ~55 components (v1.4)

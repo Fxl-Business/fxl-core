@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Plataforma operacional interna da FXL (BI para PMEs). Combina documentacao de processo, knowledge de clientes, ferramentas AI-first (wireframe-builder com editor visual, design system semantico, 21 tipos de secao, briefing estruturado) e pipeline completo Briefing → Blueprint → Wireframe → Spec Generation. Interface visual redesenhada com paleta slate + indigo, tipografia Inter/JetBrains Mono, e componentes consistentes (frosted glass header, border-l rail navigation, dark code blocks com syntax highlighting, TOC com scroll tracking). O objetivo e ter um processo capaz de entender qualquer negocio e, a partir de perguntas e respostas estruturadas, gerar qualquer produto digital de forma progressivamente automatizada.
+Plataforma operacional interna da FXL (BI para PMEs). Combina documentacao de processo, knowledge de clientes, ferramentas AI-first (wireframe-builder com editor visual, design system semantico, 21 tipos de secao, briefing estruturado), pipeline completo Briefing → Blueprint → Wireframe → Spec Generation, base de conhecimento com full-text search, e gestao de tarefas por cliente com kanban board. Arquitetura modular com MODULE_REGISTRY tipado driving sidebar, routing e home page. Interface visual com paleta primary blue #1152d4 + slate, tipografia Inter/JetBrains Mono, dark sidebar, backdrop-blur filter bar, e group-hover effects em todos os componentes de wireframe. O objetivo e ter um processo capaz de entender qualquer negocio e, a partir de perguntas e respostas estruturadas, gerar qualquer produto digital de forma progressivamente automatizada.
 
 ## Core Value
 
@@ -70,7 +70,6 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ Dark code blocks com rehype-highlight syntax highlighting e terminal dots — v1.2
 - ✓ Right-side TOC com IntersectionObserver scroll tracking e border-l rail — v1.2
 - ✓ Consistency pass: Home, client pages, auth pages, shared components em nova linguagem visual — v1.2
-
 - ✓ Softer wireframe palette (no harsh blacks), --wf-border alias — v1.3
 - ✓ Header full-width above sidebar, Gerenciar action in header — v1.3
 - ✓ SidebarConfig and HeaderConfig at dashboard level in BlueprintConfig schema — v1.3
@@ -79,18 +78,22 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ Header logo/brand, period selector, user/role indicator, action buttons — v1.3
 - ✓ 6 new chart variants (stacked-bar, stacked-area, horizontal-bar, bubble, gauge, composed) — v1.3
 - ✓ Gallery reorganized into 6 thematic sections with all new components — v1.3
+- ✓ Wireframe token palette: primary blue #1152d4, slate scale, branding override pipeline — v1.4
+- ✓ Dark sidebar chrome with active/hover states, group labels, status footer — v1.4
+- ✓ White header with 3-column layout (brand | search | actions), user chip — v1.4
+- ✓ KPI cards with icon slot, group-hover color inversion, rounded-full trend badges — v1.4
+- ✓ Table headers text-[10px] font-black uppercase tracking-widest, dark footer row — v1.4
+- ✓ Filter bar with backdrop-blur-sm sticky container, vertical stacked labels — v1.4
+- ✓ Chart palette blue-slate across 15 components, activeBar hover, CompositionBar — v1.4
+- ✓ Module registry: ModuleManifest type + MODULE_REGISTRY driving sidebar, routing, home — v1.5
+- ✓ Knowledge Base: 4 entry types, ADR template, full-text search (Portuguese), Cmd+K integration — v1.5
+- ✓ Task Management: list, kanban, create/edit, DocumentarButton cross-module link to KB — v1.5
+- ✓ Home page: MODULE_REGISTRY grid + activity feed cross-module — v1.5
+- ✓ Supabase migrations: knowledge_entries (tsvector/GIN) + tasks (status/priority CHECK) — v1.5
 
 ### Active
 
-## Current Milestone: v1.5 Modular Foundation & Knowledge Base
-
-**Goal:** Transformar o FXL Core de um sistema monolitico em uma plataforma modular com fronteiras claras entre areas (docs, wireframe-builder, knowledge-base, projetos), preparada para expansao futura (modulo financeiro, instancias para outros clientes). Introduzir base de conhecimento autoalimentada que aprende com bugs, decisoes e padroes.
-
-**Target features:**
-- Modularizacao do codebase: cada area com seus proprios componentes, paginas, tipos e manifesto
-- Knowledge Base autoalimentada: registro estruturado de bugs, decisoes, padroes — consultada pelo Claude antes de investigar problemas
-- Home page modular: hub com cards/links para cada modulo ativo (Docs, Ferramentas, Clientes, KB)
-- Controle de projetos e tarefas: MVP de gestao por cliente e do proprio FXL Core, ligado a entidades existentes
+(No active requirements — planning next milestone)
 
 ### Out of Scope
 
@@ -119,14 +122,18 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - @tailwindcss/typography plugin — custom prose styles sufficient
 - Copy button / language label on code blocks — future (ADOC-01/02/03)
 - Mobile hamburger menu — future (ADOC-04)
+- KB auto-capture via GSD hooks — v2 (KB-08)
+- KB entry versioning/history — v2 (KB-09)
+- AI summary generation de KB entries — v2 (KB-10)
+- Kanban drag-and-drop via @dnd-kit — v2 (TASK-06)
+- Task dependencies / blocking graph — v2 (TASK-07)
+- Email notifications de task assignments — v2 (TASK-08)
 
 ## Context
 
-Shipped v1.3 Builder & Components with expanded wireframe system.
+Shipped v1.5 Modular Foundation & Knowledge Base. All 6 milestones complete (v1.0-v1.5).
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
-270 tests passing (vitest). ~86 wireframe component files (39 root + 14 renderers + 33 editor-related).
-CSS token system: wireframe-tokens.css with ~45 --wf-* variables. Theme via WireframeThemeProvider context.
-HTML reference design provided as v1.4 target — professional financial dashboard with specific design patterns.
+~30,289 LOC TypeScript. 6 Supabase migrations (001-006). 5 active modules in MODULE_REGISTRY.
 
 The platform covers the full operator workflow:
 1. **Documentation** — 4-section taxonomy, onboarding, Claude Code + GSD workflow
@@ -136,11 +143,15 @@ The platform covers the full operator workflow:
 5. **Config pipeline** — TechnicalConfig + Config Resolver → GenerationManifest
 6. **System generation** — 6-file product spec ready for Claude Code to generate in separate repo
 7. **Blueprint infrastructure** — DB-only storage, Zod validation (21 section types), schema migration, optimistic locking
-8. **Design system** — Wireframe-specific --wf-* semantic tokens with dark/light mode and client branding overrides
-9. **Component library** — Section registry with 21 types, 9 chart variants, generic parametric viewer
+8. **Design system** — Wireframe-specific --wf-* semantic tokens with professional financial dashboard aesthetic
+9. **Component library** — Section registry with 21 types, 15 chart variants, generic parametric viewer
 10. **Briefing & views** — Structured briefing form, blueprint text view, MD export, share link management
 11. **AI generation** — Screen recipes + vertical templates + pure generation engine with CLI bridge
-12. **Visual identity** — Slate + indigo palette, Inter/JetBrains Mono fonts, frosted glass header, border-l rail nav, dark code blocks with syntax highlighting, right-side TOC
+12. **Visual identity** — Primary blue #1152d4 + slate palette, dark sidebar, backdrop-blur filter bar, group-hover effects
+13. **Modular architecture** — MODULE_REGISTRY with typed manifests, ESLint boundary enforcement
+14. **Knowledge Base** — 4 entry types (bug/decision/pattern/lesson), ADR template, Portuguese FTS, Cmd+K integration
+15. **Task Management** — List/kanban/form, optimistic updates, DocumentarButton cross-module KB link
+16. **Home page** — Module hub grid + cross-module activity feed
 
 Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint + branding + TechnicalConfig).
 
@@ -176,16 +187,25 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Viewport-level scrolling | Remove nested overflow containers for proper sticky | ✓ Good — sidebar, header, TOC all stick correctly |
 | CSS-only sidebar restyle (zero logic changes) | -ml-px border-l overlap trick for active indicator | ✓ Good — minimal risk, clean result |
 | Explicit color tokens (not semantic) | text-indigo-600 instead of text-primary for active states | ✓ Good — clear intent, easy to audit |
+| Primary blue #1152d4 replacing gold #d4a017 | Professional financial dashboard aesthetic from HTML reference | ✓ Good — cohesive wireframe identity |
+| CompositionBar with pure HTML/CSS flex (no Recharts) | Simpler, no dependency for horizontal stacked bar | ✓ Good — lightweight component |
+| MODULE_REGISTRY static typed constant | Predictable, tree-shakeable, no runtime overhead | ✓ Good — drives sidebar + routing + home |
+| ESLint v9 flat config with boundaries plugin | Cross-module import violations caught at lint time | ✓ Good — enforced module isolation |
+| tsvector 'portuguese' for KB FTS | Content is in Portuguese, needs proper stemming | ✓ Good — accurate search results |
+| Anon-permissive RLS on new tables | Consistent with existing tables, Clerk auth at app layer | ✓ Good — simple, works |
+| Optimistic kanban updates with local state | Immediate UI feedback, refetch rollback on error | ✓ Good — responsive kanban |
+| DocumentarButton outside TaskCard | Cross-module navigation decoupled from card component | ✓ Good — clean separation |
 
 ## Constraints
 
 - **Stack FXL Core**: React 18 + TypeScript strict + Tailwind + Vite + Vercel — nao muda
 - **Zero `any`**: TypeScript strict com `tsc --noEmit` como gate de aceite
-- **Sem backend pesado no Core**: Supabase apenas para features interativas (comentarios, blueprints, briefings)
+- **Sem backend pesado no Core**: Supabase apenas para features interativas (comentarios, blueprints, briefings, KB, tasks)
 - **Blueprint prevalece**: Se blueprint e wireframe divergirem, blueprint e a fonte da verdade
 - **Componentes compartilhados**: Nunca criar componentes locais em clients/ — tudo em tools/
 - **Section registry**: All new section types must go through the registry (no direct switch statements)
-- **Visual language**: Slate + indigo palette, Inter body / JetBrains Mono code, border-l rail nav pattern
+- **Visual language**: Primary blue #1152d4 + slate palette, Inter body / JetBrains Mono code, dark sidebar chrome
+- **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-12 after v1.5 milestone start*
+*Last updated: 2026-03-13 after v1.5 milestone completion*
