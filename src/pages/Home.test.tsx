@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mergeAndSortActivityItems, type ActivityItem } from './Home'
+import { mergeAndSortActivityItems, type ActivityItem } from '@/lib/activity-feed'
 
 describe('Home page', () => {
   describe('MODULE_REGISTRY grid (HOME-01)', () => {
