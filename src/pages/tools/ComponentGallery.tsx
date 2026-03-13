@@ -18,6 +18,18 @@ import BubbleChartComponent from '@tools/wireframe-builder/components/BubbleChar
 import ComposedChartComponent from '@tools/wireframe-builder/components/ComposedChartComponent'
 import GaugeChartComponent from '@tools/wireframe-builder/components/GaugeChartComponent'
 import CompositionBar from '@tools/wireframe-builder/components/CompositionBar'
+import GroupedBarChartComponent from '@tools/wireframe-builder/components/GroupedBarChartComponent'
+import BulletChartComponent from '@tools/wireframe-builder/components/BulletChartComponent'
+import StepLineChartComponent from '@tools/wireframe-builder/components/StepLineChartComponent'
+import LollipopChartComponent from '@tools/wireframe-builder/components/LollipopChartComponent'
+import RangeBarChartComponent from '@tools/wireframe-builder/components/RangeBarChartComponent'
+import BumpChartComponent from '@tools/wireframe-builder/components/BumpChartComponent'
+import PolarAreaChartComponent from '@tools/wireframe-builder/components/PolarAreaChartComponent'
+import PieChartComponent from '@tools/wireframe-builder/components/PieChartComponent'
+import HeatmapComponent from '@tools/wireframe-builder/components/HeatmapComponent'
+import SparklineGridComponent from '@tools/wireframe-builder/components/SparklineGridComponent'
+import ProgressGridComponent from '@tools/wireframe-builder/components/ProgressGridComponent'
+import SankeyComponent from '@tools/wireframe-builder/components/SankeyComponent'
 import DataTable from '@tools/wireframe-builder/components/DataTable'
 import DrillDownTable from '@tools/wireframe-builder/components/DrillDownTable'
 import ClickableTable from '@tools/wireframe-builder/components/ClickableTable'
@@ -67,6 +79,18 @@ import {
   composedChartMock,
   gaugeChartMock,
   compositionBarMock,
+  groupedBarChartMock,
+  bulletChartMock,
+  stepLineChartMock,
+  lollipopChartMock,
+  rangeBarChartMock,
+  bumpChartMock,
+  polarChartMock,
+  pieChartMock,
+  heatmapMock,
+  sparklineGridMock,
+  progressGridMock,
+  sankeyMock,
 } from './galleryMockData'
 
 type ComponentStatus = 'available' | 'pending'
@@ -480,6 +504,129 @@ const categories: Category[] = [
         render: () => (
           <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
             <CompositionBar {...compositionBarMock} />
+          </div>
+        ),
+      },
+      // --- v1.6 Wave 1: ChartType Sub-Variants ---
+      {
+        name: 'GroupedBarChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <GroupedBarChartComponent {...groupedBarChartMock} />
+          </div>
+        ),
+      },
+      {
+        name: 'BulletChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <BulletChartComponent {...bulletChartMock} />
+          </div>
+        ),
+      },
+      {
+        name: 'StepLineChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <StepLineChartComponent {...stepLineChartMock} />
+          </div>
+        ),
+      },
+      {
+        name: 'LollipopChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <LollipopChartComponent {...lollipopChartMock} />
+          </div>
+        ),
+      },
+      {
+        name: 'RangeBarChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <RangeBarChartComponent {...rangeBarChartMock} />
+          </div>
+        ),
+      },
+      {
+        name: 'BumpChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <BumpChartComponent {...bumpChartMock} />
+          </div>
+        ),
+      },
+      {
+        name: 'PolarAreaChart',
+        status: 'available',
+        props: ['title', 'height?', 'categories?', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <PolarAreaChartComponent {...polarChartMock} />
+          </div>
+        ),
+      },
+      // --- v1.6 Wave 2: Standalone Section Types ---
+      {
+        name: 'PieChart',
+        status: 'available',
+        props: ['title', 'height?', 'slices?: Slice[]', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <PieChartComponent {...pieChartMock} />
+          </div>
+        ),
+      },
+      {
+        name: 'Heatmap',
+        status: 'available',
+        props: ['title', 'rows: HeatmapRow[]', 'colLabels?', 'height?', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <HeatmapComponent {...heatmapMock} />
+          </div>
+        ),
+      },
+      {
+        name: 'SparklineGrid',
+        status: 'available',
+        props: ['title', 'items: SparklineGridItem[]', 'columns?', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <SparklineGridComponent {...sparklineGridMock} />
+          </div>
+        ),
+      },
+      {
+        name: 'ProgressGrid',
+        status: 'available',
+        props: ['title', 'items: ProgressGridItem[]', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <ProgressGridComponent {...progressGridMock} />
+          </div>
+        ),
+      },
+      // --- v1.6 Wave 3: Sankey ---
+      {
+        name: 'Sankey',
+        status: 'available',
+        props: ['title', 'nodes?: Node[]', 'links?: Link[]', 'height?', 'chartColors?'],
+        render: () => (
+          <div className="rounded-lg border border-dashed border-border bg-wf-canvas p-4">
+            <SankeyComponent {...sankeyMock} />
           </div>
         ),
       },

@@ -316,6 +316,127 @@ export const compositionBarMock = {
   formatValue: (v: number) => `${v}%`,
 }
 
+// === v1.6 — Wave 1: ChartType Sub-Variants ===
+
+// GroupedBarChart
+export const groupedBarChartMock = {
+  title: 'Receita: Realizado vs Meta',
+}
+
+// BulletChart
+export const bulletChartMock = {
+  title: 'Meta de Vendas Q1',
+}
+
+// StepLineChart
+export const stepLineChartMock = {
+  title: 'Evolucao de Preco do Produto',
+}
+
+// LollipopChart
+export const lollipopChartMock = {
+  title: 'Top Produtos por Receita',
+}
+
+// RangeBarChart
+export const rangeBarChartMock = {
+  title: 'Cronograma de Projetos',
+}
+
+// BumpChart
+export const bumpChartMock = {
+  title: 'Ranking de Vendedores',
+}
+
+// PolarAreaChart
+export const polarChartMock = {
+  title: 'Performance por Regiao',
+}
+
+// === v1.6 — Wave 2: Standalone Section Types ===
+
+// PieChart
+export const pieChartMock = {
+  title: 'Distribuicao de Receita por Produto',
+  slices: [
+    { label: 'Software', value: 450 },
+    { label: 'Consultoria', value: 280 },
+    { label: 'Treinamento', value: 150 },
+    { label: 'Suporte', value: 80 },
+    { label: 'Outros', value: 40 },
+  ],
+}
+
+// Heatmap
+import type { HeatmapRow } from '@tools/wireframe-builder/types/blueprint'
+
+export const heatmapMock = {
+  title: 'Vendas por Produto x Mes',
+  colLabels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+  rows: [
+    { label: 'Produto A', cells: [120, 150, 180, 90, 200, 170] },
+    { label: 'Produto B', cells: [80, 110, 95, 130, 140, 160] },
+    { label: 'Produto C', cells: [200, 180, 160, 140, 120, 100] },
+    { label: 'Produto D', cells: [50, 70, 90, 110, 130, 150] },
+    { label: 'Produto E', cells: [160, 140, 120, 180, 190, 210] },
+  ] as HeatmapRow[],
+}
+
+// SparklineGrid
+import type { SparklineGridItem } from '@tools/wireframe-builder/types/blueprint'
+
+export const sparklineGridMock = {
+  title: 'Tendencias Executivas',
+  columns: 3,
+  items: [
+    { label: 'Receita', value: 'R$ 125k', data: [30, 45, 38, 52, 48, 60, 55, 70, 65, 80, 75, 90] },
+    { label: 'Margem', value: '32%', data: [28, 30, 27, 32, 35, 31, 33, 32, 34, 36, 35, 38] },
+    { label: 'Clientes', value: '1.240', data: [800, 900, 950, 1000, 1050, 1100, 1180, 1240, 1300, 1350, 1380, 1400] },
+    { label: 'NPS', value: '72', data: [65, 68, 70, 67, 72, 75, 71, 72, 74, 76, 73, 78] },
+    { label: 'Tickets', value: '45', data: [60, 55, 50, 48, 52, 47, 44, 45, 42, 40, 38, 35] },
+    { label: 'Conversao', value: '18%', data: [12, 14, 15, 16, 17, 16, 18, 18, 19, 20, 19, 21] },
+  ] as SparklineGridItem[],
+}
+
+// ProgressGrid
+import type { ProgressGridItem } from '@tools/wireframe-builder/types/blueprint'
+
+export const progressGridMock = {
+  title: 'Metas do Trimestre',
+  items: [
+    { label: 'Receita Mensal', current: 85000, target: 100000, max: 120000 },
+    { label: 'Novos Clientes', current: 42, target: 50, max: 60 },
+    { label: 'NPS', current: 72, target: 80, max: 100 },
+    { label: 'Churn', current: 3, target: 5, max: 10 },
+    { label: 'Ticket Medio', current: 1800, target: 2000, max: 2500 },
+  ] as ProgressGridItem[],
+}
+
+// === v1.6 — Wave 3: Sankey ===
+
+export const sankeyMock = {
+  title: 'Fluxo de Receita',
+  // links use integer array indices into nodes[], not string names
+  nodes: [
+    { name: 'Vendas Diretas' },
+    { name: 'Parceiros' },
+    { name: 'Online' },
+    { name: 'Produto A' },
+    { name: 'Produto B' },
+    { name: 'Servicos' },
+  ],
+  links: [
+    { source: 0, target: 3, value: 40 },
+    { source: 0, target: 4, value: 20 },
+    { source: 0, target: 5, value: 10 },
+    { source: 1, target: 3, value: 15 },
+    { source: 1, target: 5, value: 25 },
+    { source: 2, target: 4, value: 30 },
+    { source: 2, target: 5, value: 10 },
+    { source: 2, target: 3, value: 5 },
+  ],
+}
+
 // WaterfallChart — compareBars (periodo anterior)
 export const waterfallCompareBars: WaterfallBar[] = [
   { label: 'Receita', value: 135000, type: 'positive' },
