@@ -66,30 +66,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHART-01 | — | Pending |
-| CHART-02 | — | Pending |
-| CHART-03 | — | Pending |
-| CHART-04 | — | Pending |
-| CHART-05 | — | Pending |
-| CHART-06 | — | Pending |
-| CHART-07 | — | Pending |
-| SECT-01 | — | Pending |
-| SECT-02 | — | Pending |
-| SECT-03 | — | Pending |
-| SECT-04 | — | Pending |
-| SECT-05 | — | Pending |
-| XCUT-01 | — | Pending |
-| XCUT-02 | — | Pending |
-| XCUT-03 | — | Pending |
-| XCUT-04 | — | Pending |
-| XCUT-05 | — | Pending |
-| XCUT-06 | — | Pending |
+| CHART-01 | Phase 34 | Pending |
+| CHART-02 | Phase 34 | Pending |
+| CHART-03 | Phase 34 | Pending |
+| CHART-04 | Phase 34 | Pending |
+| CHART-05 | Phase 34 | Pending |
+| CHART-06 | Phase 34 | Pending |
+| CHART-07 | Phase 34 | Pending |
+| SECT-01 | Phase 35 | Pending |
+| SECT-02 | Phase 35 | Pending |
+| SECT-03 | Phase 35 | Pending |
+| SECT-04 | Phase 35 | Pending |
+| SECT-05 | Phase 36 | Pending |
+| XCUT-01 | Phase 34 | Pending |
+| XCUT-02 | Phase 34 | Pending |
+| XCUT-03 | Phase 34 | Pending |
+| XCUT-04 | Phase 37 | Pending |
+| XCUT-05 | Phase 34 | Pending |
+| XCUT-06 | Phase 35 | Pending |
 
 **Coverage:**
 - v1.6 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-12*
-*Last updated: 2026-03-12 after initial definition*
+*Last updated: 2026-03-12 — traceability mapped after roadmap creation*
