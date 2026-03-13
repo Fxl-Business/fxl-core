@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { CheckCircle2, Clock, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { WireframeThemeProvider, useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
+import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
 import { brandingToWfOverrides } from '@tools/wireframe-builder/lib/branding'
 import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'
 
@@ -842,22 +842,6 @@ function ComponentCard({ entry }: { entry: ComponentEntry }) {
   )
 }
 
-function GalleryThemeToggle() {
-  const { theme, toggle } = useWireframeTheme()
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      className={cn(
-        'rounded-full px-4 py-1.5 text-xs font-medium transition-colors',
-        'bg-muted text-muted-foreground hover:bg-muted/80',
-      )}
-    >
-      {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-    </button>
-  )
-}
-
 function GalleryContent({ showBranding, setShowBranding }: { showBranding: boolean; setShowBranding: (v: boolean) => void }) {
   const [activeCategory, setActiveCategory] = useState('all')
 
@@ -916,7 +900,6 @@ function GalleryContent({ showBranding, setShowBranding }: { showBranding: boole
         ))}
 
         <div className="ml-auto flex items-center gap-2">
-          <GalleryThemeToggle />
           <button
             type="button"
             onClick={() => setShowBranding(!showBranding)}
