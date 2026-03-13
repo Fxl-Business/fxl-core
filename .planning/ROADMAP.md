@@ -51,7 +51,11 @@ Plans:
   2. Operator in edit mode can click on the sidebar footer area and edit footer text via a contextual PropertyPanel
   3. Operator in edit mode can click on a sidebar widget (WorkspaceSwitcher, UserMenu) to open its config in a contextual PropertyPanel
   4. Operator in edit mode sees + and delete controls for adding/removing widgets and groups without opening a separate panel
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 55-01-PLAN.md — Sidebar property forms + SidebarPropertyPanel infrastructure
+- [ ] 55-02-PLAN.md — Wire clickable sidebar elements + inline add/delete controls in WireframeViewer
 
 ### Phase 56: Filter Inline Editing
 **Goal**: Operators can click on filter chips to configure them, and can add/remove filters directly from the filter bar in edit mode
@@ -87,6 +91,6 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | All phases 1-53 shipped | v1.0-v2.2 | 100% | Complete | 2026-03-13 |
 | 54. Header Inline Editing | v2.3 | 0/2 | Not started | - |
-| 55. Sidebar Inline Editing | v2.3 | 0/? | Not started | - |
+| 55. Sidebar Inline Editing | v2.3 | 0/2 | Not started | - |
 | 56. Filter Inline Editing | v2.3 | 0/2 | Not started | - |
 | 57. Cleanup & Consolidation | v2.3 | 0/1 | Not started | - |
