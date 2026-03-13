@@ -1,624 +1,387 @@
-# Feature Research: v1.6 — 12 New Chart/Section Types
+# Feature Research: v2.0 — Framework Shell + Modular Architecture
 
-**Domain:** Wireframe Builder — BI Dashboard Chart Library Expansion
-**Researched:** 2026-03-12
-**Confidence:** HIGH for Recharts-native charts (documented API verified). MEDIUM for non-native charts requiring custom implementation (Range Bar, Bump Chart — no built-in Recharts support confirmed). LOW for Heatmap pattern without external library.
+**Domain:** Modular React SPA framework shell — extension system, slot-based UI injection, admin panel
+**Researched:** 2026-03-13
+**Confidence:** HIGH for patterns backed by both existing codebase inspection and verified community references. MEDIUM for contract/extension architecture (no single authoritative React source — synthesized from OpenMRS O3, UI Composition Architecture, and Plugin Registry patterns). LOW for admin panel visual UX (no directly analogous internal tool found).
 
 ---
 
 ## Scope
 
-This research covers ONLY the 12 new chart/section types for v1.6. It answers:
+This research covers ONLY the new features for v2.0. It answers:
 
-- What are the **table stakes** features each chart type must have in a BI wireframe context?
+- What are **table stakes** for each of the six feature areas?
 - What are **differentiators** — enhancements worth having but not blocking?
-- What are **anti-features** — commonly requested things that add complexity without proportional value?
-- What are the **expected interactions** (tooltip, hover, click, drill-down)?
-- What is the **implementation path** in the existing Recharts 2.x + section registry architecture?
+- What are **anti-features** — things that seem good but create disproportionate complexity?
+- What are the **feature dependencies** — what must exist before what?
+- What is the **complexity** given the existing MODULE_REGISTRY + ModuleManifest infrastructure?
 
-The existing 22 section types, `--wf-*` tokens, `chartColors?: string[]` prop, and section registry pattern are treated as **fixed infrastructure**.
+The existing MODULE_REGISTRY, ModuleManifest type, ESLint boundary enforcement, and module-driven sidebar/routing are treated as **fixed infrastructure** (already built in v1.5).
 
 ---
 
 ## Architecture Context
 
-All 12 new types plug into the existing pattern:
+The existing module registry in `src/modules/registry.ts` has:
 
-1. **New `ChartType` union member** OR **new `BlueprintSection` type** — depends on whether the chart is a sub-variant of `bar-line-chart` (dispatched in `ChartRenderer`) or a standalone section type (registered directly in `SECTION_REGISTRY`).
-2. **New renderer component** in `tools/wireframe-builder/components/`
-3. **New property form** in `tools/wireframe-builder/components/editor/property-forms/`
-4. **New `SECTION_REGISTRY` entry** in `lib/section-registry.tsx`
-5. **Zod schema** in `lib/blueprint-schema.ts`
-6. **`BlueprintSection` union member** in `types/blueprint.ts`
+```typescript
+interface ModuleManifest {
+  id: string
+  label: string
+  route: string
+  icon: LucideIcon
+  status: ModuleStatus      // 'active' | 'beta' | 'coming-soon'
+  navChildren?: NavItem[]
+  routeConfig?: RouteObject[]
+}
+```
 
-Wave classification from PROJECT.md:
-- **Wave 1 (chart sub-variants):** Grouped Bar, Bullet Chart, Step Line, Pie Chart — these are new `chartType` values under `BarLineChartSection`
-- **Wave 2 (standalone sections):** Heatmap, Sparkline Grid, Progress Grid — these are new `BlueprintSection` types
-- **Wave 3 (advanced charts):** Sankey, Bump Chart, Range Bar, Lollipop, Polar — these are new `BlueprintSection` types
-
----
-
-## Feature Landscape by Chart Type
-
-### 1. Grouped Bar (Wave 1 — `chartType: 'grouped-bar'`)
-
-**What it is:** Multiple data series rendered as bars side-by-side per category (not stacked). Standard for comparing two or three metrics across the same X categories.
-
-**BI use cases:** Receita vs Meta por mês, Realizado vs Orçado por categoria, Vendas por canal por período.
-
-**Table Stakes**
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Multiple bars side-by-side per category | Core definition of grouped bar | LOW | Recharts BarChart with multiple `<Bar>` components, each with a different `dataKey` |
-| Tooltip showing all series on hover | Users expect all values per category in one tooltip | LOW | Recharts default Tooltip handles multi-bar automatically |
-| Legend with series labels | Users need to distinguish series | LOW | Recharts `<Legend>` component |
-| X and Y axis with proper tick labels | Orientation and scale comprehension | LOW | Same as existing BarLineChart pattern |
-| `chartColors` palette applied per series | Consistent branding | LOW | Map `chartColors[i]` to each `<Bar fill>` |
-
-**Differentiators**
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| `barGap` and `barCategoryGap` config props | Fine-tune visual density | LOW | Recharts BarChart accepts these props directly |
-| Optional value labels on top of bars | Quick reading without tooltip | MEDIUM | Recharts `<LabelList>` inside `<Bar>` |
-
-**Anti-Features**
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| More than 3 series side-by-side | More data is better | Bars become too narrow to read; defeats purpose | Use stacked-bar or separate charts for >3 series |
-| Click-to-filter behavior | Interactivity | Out of scope for wireframe context (wireframes show intent, not behavior) | Document the interaction intent in blueprint description field |
-
-**Recharts path:** Recharts `BarChart` with multiple `<Bar>` elements. Set `barCategoryGap="20%"` and `barGap={4}` on the chart. Each `<Bar>` gets `fill={chartColors[i]}`. This is a native, well-supported pattern.
-
-**Confidence:** HIGH — verified against Recharts BarChart API docs.
+The v2.0 milestone needs to extend this with: extensions, slots, badges, contracts, and admin visualization. The research maps the new features against this existing foundation.
 
 ---
 
-### 2. Bullet Chart (Wave 1 — `chartType: 'bullet'`)
+## Feature Landscape
 
-**What it is:** A horizontal bar showing current value against a target marker, with optional background reference bands (poor / satisfactory / good zones). Stephen Few's design for replacing gauge charts with less visual noise.
+### Feature Area 1: Home 2.0 — Control Center
 
-**BI use cases:** Vendas realizadas vs meta, Taxa de conversão vs benchmark, NPS vs target, Margem vs objetivo.
+**What it is:** Replace the current generic card grid (module tiles + activity feed + clients list) with a purpose-built operational control center. The Home page becomes the primary navigation surface and situational awareness panel for operators.
 
-**Table Stakes**
+#### Table Stakes
+
+Features users expect from an operational home page. Missing these = the page is just a fancier menu.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Horizontal bar showing current value | Core visual | MEDIUM | Recharts `BarChart` layout="vertical" with a single `<Bar>` |
-| Target marker line at the goal value | The distinguishing element of bullet chart | MEDIUM | Recharts `<ReferenceLine>` on the bar axis |
-| Tooltip on hover showing current and target | Data comprehension | LOW | Custom Tooltip formatter |
-| Label with metric name and unit | Context | LOW | Config prop |
+| Status summary of all active modules | Operators need at-a-glance health of what's active | LOW | Read from enhanced MODULE_REGISTRY; render per-module status badges |
+| Quick action shortcuts to most-used flows | Home should reduce clicks to critical tasks | LOW | Static configured per-module in manifest or derived from usage patterns |
+| Recent activity feed cross-module | Already exists in v1.5; must be preserved and enhanced | LOW | Existing `useActivityFeed` hook fetches KB + Tasks; extend to include new event types |
+| Per-module state summary (count of items, last action) | Context before navigating | MEDIUM | Requires Supabase queries per module at page load; aggregate KPIs |
+| Navigation that reflects module status (disabled = grayed, beta = badged) | Visual affordance for module state | LOW | Extend existing module card with badge rendering from `ModuleManifest.status` |
 
-**Differentiators**
+#### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Reference bands (background zones) | Visual encoding of performance zones | HIGH | Stack multiple transparent `<Bar>` components behind the main bar to fake reference bands — Recharts has no native band support |
-| Multiple bullet rows in one component | Compare several metrics at once | MEDIUM | Iterate `items` array, render one horizontal BarChart per row |
+| Pinned/recent clients section | Operators work with one or two active clients; fast return | LOW | Read from last-visited localStorage or from Supabase recent sessions |
+| In-context system health indicators | Know at a glance if Supabase is reachable, auth is OK | MEDIUM | Lightweight heartbeat check on mount; show indicator per service |
+| Cross-module quick task creation | Create a task or KB entry from Home without navigating | MEDIUM | Modal/command palette integration; already have cmdk infrastructure |
+| Priority notifications or alerts | Outstanding tasks, unresolved comments, pending actions | HIGH | Requires a notifications system; deferred — not in v2.0 scope |
 
-**Anti-Features**
+#### Anti-Features
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Animated fill on load | Looks polished | Adds complexity, conflicts with `isAnimationActive={false}` used for consistency in wireframe context | Keep static like other components |
-| Vertical orientation | "Different layout" | Loses the key advantage of bullet chart (dense horizontal layout compares multiple KPIs at once) | Use GaugeChart for vertical single-value display |
-
-**Recharts path:** Recharts does NOT have a native bullet chart. Implementation: `BarChart` with `layout="vertical"`, single `<Bar>` for the value, `<ReferenceLine>` for target. Reference bands require stacking transparent background bars — HIGH complexity. For Wave 1, build without reference bands (LOW complexity) and treat bands as a differentiator for a future micro-iteration.
-
-**Confidence:** MEDIUM — Recharts `<ReferenceLine>` confirmed, reference band hack is community-proven but not documented officially.
+| Fully customizable dashboard (drag layout) | "Make it my own" | Heavy complexity for one internal user; layout drift creates maintenance burden | Fixed purposeful layout; use priority and recent sections instead |
+| Real-time data feeds (live updates) | Fresh data = better decisions | Adds WebSocket/polling infrastructure for minimal gain in single-user context | On-demand refresh button; accept ~5min staleness |
+| Module usage analytics charts | Meta-insight into tool adoption | Premature optimization before product is stable; adds instrumentation complexity | Note usage manually in retrospectives |
 
 ---
 
-### 3. Step Line (Wave 1 — `chartType: 'step-line'`)
+### Feature Area 2: Module Registry Enhancement
 
-**What it is:** A line chart where segments between data points are horizontal-then-vertical (steps) rather than interpolated curves. Used for data that changes at discrete moments (pricing changes, policy changes, tier changes).
+**What it is:** Extend `ModuleManifest` type with new fields: `description`, `badge` (visual tag like "NEW" or "BETA"), `extensions` (contributions to other modules' slots), and `enabled` (runtime toggle). This makes the registry the single source of truth for everything about a module.
 
-**BI use cases:** Histórico de preço de produto, Evolução de limite de crédito, Plano de taxa contratada, Regras de desconto por faixa.
-
-**Table Stakes**
+#### Table Stakes
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Step interpolation (no curve) | Core definition | LOW | Recharts `<Line type="stepAfter">` — native, confirmed |
-| Tooltip on hover with value | Standard expectation | LOW | Recharts default Tooltip |
-| X axis (time/categories) | Orientation | LOW | Same as existing line chart |
-| Y axis with value scale | Scale comprehension | LOW | Same as existing line chart |
+| `description` field on ModuleManifest | Home 2.0 needs module descriptions; currently a separate `MODULE_DESCRIPTIONS` constant in Home.tsx | LOW | Add field to interface, migrate Home.tsx constant to manifest |
+| `badge` field (`'new' \| 'beta' \| 'alpha' \| null`) | Visual badge in sidebar and Home cards | LOW | Replace current `status` field semantics or augment it; render in Sidebar and Home |
+| `enabled` boolean field | Foundation for module toggle in admin panel | LOW | Already implicit via `status !== 'coming-soon'`; make explicit for admin control |
+| `extensions` field (array of extension definitions) | Contract architecture requires modules to declare their contributions | MEDIUM | New `ModuleExtension` type; modules declare what they inject and where |
+| Typed `ModuleExtension` shape | TypeScript enforcement of extension contracts | MEDIUM | Define interface with `slotId`, `component`, `priority`, optional `condition` |
 
-**Differentiators**
+#### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| `stepBefore` vs `stepAfter` config | Semantic accuracy (does change happen before or after the tick?) | LOW | Single prop `type` on `<Line>` — `stepBefore` or `stepAfter` |
-| Area fill below step line | Visual weight for emphasis | LOW | Use `<AreaChart>` with `type="stepAfter"` instead of `LineChart` |
+| `requiredModules` field (dependency declaration) | Auto-disable extension if required module is not active | MEDIUM | Array of module IDs; admin panel shows dependency graph |
+| `version` field | Versioning for future migration tooling | LOW | Cosmetic for now; enables future upgrade paths |
+| Module metadata validation at startup | Catch misconfigured manifests early | LOW | Zod schema over `MODULE_REGISTRY` entries; validated on app init |
 
-**Anti-Features**
+#### Anti-Features
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Smooth curve option | "Flexibility" | Defeats the semantic purpose of step line (smooth means continuous change) | Use existing `line` chartType for smooth lines |
-
-**Recharts path:** Near-zero complexity. In `ChartRenderer`, add `case 'step-line'` dispatching to `AreaChartComponent` (or a new `StepLineChartComponent`) with `type="stepAfter"` on the Line/Area element. Reuses existing patterns entirely.
-
-**Confidence:** HIGH — `type="stepAfter"` on Recharts `<Line>` is documented and confirmed.
+| Dynamic/lazy module loading (code splitting by module) | Faster initial load | Requires complex async registry resolution at runtime; breaks static type safety | Keep all modules eager; bundle is small enough at current scale |
+| Remote module configuration (fetch from Supabase) | Operator-configurable without code deploy | Introduces async bootstrapping, race conditions, potential unavailability | Static registry in code; admin panel toggles are persisted in localStorage or Supabase for UX only |
+| Plugin marketplace / third-party modules | Extensibility for external teams | Far beyond scope; no authentication, no sandboxing | Internal modules only in v2.0 |
 
 ---
 
-### 4. Pie Chart (Wave 1 — `chartType: 'pie'` or new section type)
+### Feature Area 3: Contract Architecture — Module Extensions
 
-**What it is:** Classic pizza-style pie chart (full circle, unlike the existing donut). Slices fill the full circle. Legend shows slice labels and values.
+**What it is:** A typed system where modules declare extensions — UI contributions to named slots owned by other modules. When both the contributing module and the slot-owning module are active, the contribution appears automatically. Example: the Tasks module declares an extension for the `client-detail-actions` slot owned by the Clients module; when both are enabled, a "Create Task" button appears in client detail pages.
 
-**Note:** The existing `donut-chart` section type uses `<Pie innerRadius="40%" outerRadius="70%">`. A pie chart is the same with `innerRadius={0}`. This is a sub-variant of donut, NOT a new section type.
-
-**BI use cases:** Distribuição de receita por produto, Participação de mercado, Composição de carteira.
-
-**Table Stakes**
+#### Table Stakes
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Full circle (no hole) | Distinction from donut | LOW | `innerRadius={0}` on the existing `<Pie>` component |
-| Slice labels showing percentage | Standard comprehension | LOW | Recharts `<LabelList>` or custom `label` prop on `<Pie>` |
-| Legend with slice names | Identification | LOW | Recharts `<Legend>` |
-| Tooltip on hover showing name and value | Standard | LOW | Recharts default Tooltip |
-| `slices` data array with label+value | Config interface | LOW | Same as existing `donut-chart` section |
+| Named slot concept (`slotId: string`) | A slot must have a stable identity for extensions to target | LOW | String enum or literal type; defined by the slot-owning module |
+| Extension declaration in manifest | Modules declare contributions at registration time, not at render time | MEDIUM | `extensions: ModuleExtension[]` field added to `ModuleManifest` |
+| Automatic activation when both modules are active | The "contract" — no wiring code needed when both enabled | MEDIUM | `SlotRenderer` checks registry for extensions targeting its `slotId` from active modules |
+| TypeScript-typed extension component signature | Extensions must match the slot's expected props | MEDIUM | Each slot defines a `SlotProps` type; extension components must conform |
+| No direct cross-module imports | Extensions are wired through the registry, not via import | MEDIUM | ESLint boundary rules already exist; reinforce via registry-only access |
 
-**Differentiators**
+#### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Custom label rendering (outside arc, with line) | Professional look | MEDIUM | Recharts custom `label` render prop on `<Pie>` |
+| Extension priority ordering | Multiple extensions in same slot appear in predictable order | LOW | `priority?: number` field on `ModuleExtension`; `SlotRenderer` sorts by priority |
+| Conditional extension rendering | Extension only appears when data conditions are met | MEDIUM | `condition?: (context: SlotContext) => boolean` on `ModuleExtension` |
+| Slot fallback content | When no extensions are registered for a slot, show a default | LOW | `<ExtensionSlot slotId="x" fallback={<DefaultContent />}>` |
 
-**Anti-Features**
+#### Anti-Features
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Exploded slices (one slice pulled out) | Emphasis on one slice | Implementation complexity disproportionate to wireframe value | Use a separate donut chart with that slice highlighted |
-| 3D effect | "Looks impressive" | Misrepresents data (skews area perception) | Never implement |
-
-**Recharts path:** This can be added as `chartType: 'pie'` to the existing `bar-line-chart` section and dispatched in `ChartRenderer` to a new `PieChartComponent` that wraps the existing `DonutChart` logic with `innerRadius={0}`. Alternatively, add a `variant: 'pie' | 'donut'` prop to `DonutChartSection` — this is cleaner and avoids duplicating the section type.
-
-**Recommendation:** Add `variant?: 'pie' | 'donut'` to `DonutChartSection` and handle in `DonutChart` component. No new section type needed. This is the lowest-complexity, highest-consistency path.
-
-**Confidence:** HIGH — Recharts `<Pie innerRadius={0}>` is trivially supported.
+| Event bus / pub-sub between modules | "Loose coupling" | Harder to trace than registry-declared contracts; TypeScript loses track of event shapes | Use direct slot injection for UI, Supabase for shared data; no event bus |
+| Async extension loading (import()) | Code splitting | Introduces loading states in every slot; over-engineering for 5 modules | All extensions are synchronous components; lazy loading at route level is sufficient |
+| Extension override (one module replaces another's extension) | Maximum flexibility | Complex precedence rules, hard to debug | Use priority ordering; if conflict arises, treat as architecture smell |
+| Context/state sharing between extensions in the same slot | Rich interactions between injected components | Creates tight coupling through shared context; defeats isolation | Extensions communicate through shared Supabase data or URL state |
 
 ---
 
-### 5. Heatmap (Wave 2 — new standalone section type)
+### Feature Area 4: Slot-Based UI Injection System
 
-**What it is:** A matrix of colored cells where color intensity encodes a numeric value. Rows are one dimension, columns are another. Used for finding patterns across two categorical dimensions.
+**What it is:** The runtime mechanism that powers contracts. A `<ExtensionSlot slotId="x" context={...}>` component that looks up registered extensions for `slotId` from currently active modules and renders them. The complement to extension declarations in manifests.
 
-**BI use cases:** Vendas por produto × mês, Chamados por tipo × dia da semana, NPS por região × trimestre, Performance por vendedor × produto.
-
-**Table Stakes**
+#### Table Stakes
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Grid of colored cells | Core visual | MEDIUM | Recharts has no native heatmap — must use pure CSS/SVG grid with `color-mix()` for intensity |
-| Color scale (low = light, high = dark) | Encoding convention | MEDIUM | Manual CSS interpolation between two CSS vars using inline `opacity` or `color-mix` |
-| Row labels (Y axis) and column headers (X axis) | Axis orientation | LOW | Regular div layout |
-| Tooltip on cell hover with exact value | Data reading | LOW | CSS title attribute or custom hover state |
-| `rows` × `columns` data structure in config | Config interface | LOW | `{ rowLabel: string, cells: { colLabel: string, value: number }[] }[]` |
+| `<ExtensionSlot slotId="..." context={...}>` component | The rendering primitive for all slot-based injection | MEDIUM | Reads `MODULE_REGISTRY`, filters active modules, collects their extensions for `slotId`, renders components |
+| Context passing to extensions | Extensions need data from the host page/module | LOW | `context` prop passed through to each extension component |
+| Renders nothing (not even a wrapper div) when no extensions | Slots must be zero-cost when unused | LOW | Return `null` or a Fragment when extension array is empty |
+| Type-safe context per slot | Each slot's context type is defined by the owning module | MEDIUM | Generic `ExtensionSlot<TContext>` or typed slot registry |
+| Active module filtering | Extensions from disabled/coming-soon modules are silently ignored | LOW | Filter `MODULE_REGISTRY` by `enabled === true` before collecting extensions |
 
-**Differentiators**
+#### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Color range configurable (e.g., blue-to-red) | Semantics for different data (heat vs cold, good vs bad) | MEDIUM | `colorScale: [lowColor, highColor]` config prop mapped to `color-mix` |
-| Cell value displayed inside cell | Reduces need to hover | LOW | Conditional rendering based on cell size |
+| `useExtensions(slotId)` hook variant | For programmatic extension access (non-UI slots like data transforms) | LOW | Simple hook wrapping the same registry lookup |
+| Error boundary per extension | One broken extension does not crash the slot | LOW | Wrap each extension render in a React error boundary |
+| Dev-mode slot inspector (outline + label when `?debug=slots`) | Debugging tool for slot layout during development | LOW | CSS outline + label on each ExtensionSlot when URL param present |
 
-**Anti-Features**
+#### Anti-Features
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| D3/visx/nivo dependency for heatmap | "More capable" | Adds a significant new dependency to the project for one chart type; stack policy is Recharts | Pure CSS grid with inline styles using `color-mix(in srgb, var(--wf-chart-1) X%, transparent)` |
-| Animated transitions between filter states | Polished feel | Wireframes are static by design; no real data transition happens | Accept static rendering |
-| Zoom/pan on large grids | Handles big datasets | Wireframe context doesn't need real data handling | Limit to 12×12 cells max in config schema |
-
-**Recharts path:** NOT a Recharts chart. Build as pure HTML/CSS grid using `display: grid`. Use `color-mix(in srgb, var(--wf-accent) ${pct}%, var(--wf-bg) 100%)` for intensity interpolation. This follows the same approach as `CompositionBar` (pure HTML/CSS, no Recharts). Medium complexity but clean implementation.
-
-**Confidence:** MEDIUM — CSS approach is well-established; confirmed `color-mix` is already used in existing components (`ProgressBarRenderer` uses it).
+| CSS-in-JS slot styling from extension component | Extension controls its own layout within the slot | Creates visual inconsistency; extensions should adapt to host context | Extensions receive layout classes via context; host defines the container |
+| Slot registry separate from module registry | "Cleaner separation" | Adds a second registry to keep in sync with the module registry | Slots are implicitly defined by `slotId` strings used in `<ExtensionSlot>`; no explicit slot registry needed |
+| Lazy-loaded extension components | Performance optimization | Adds loading spinners inside slots; disruptive for small UI contributions | All extension components are eagerly loaded with their module |
 
 ---
 
-### 6. Sparkline Grid (Wave 2 — new standalone section type)
+### Feature Area 5: Admin Panel — Module Visualization and Control
 
-**What it is:** A grid of small inline charts — each cell shows a mini line/bar chart (no axes, no labels) alongside a metric label and current value. Designed for scanning many metrics at once.
+**What it is:** An internal page at `/admin/modules` that provides a visual overview of the module registry: what modules exist, their status, their extensions, their slot contributions, and the ability to toggle modules on/off for the current session.
 
-**BI use cases:** Dashboard de tendências (receita, margem, tickets, NPS em uma grade), Resumo executivo com mini-gráficos, Visão geral de produtos/regiões.
-
-**Table Stakes**
+#### Table Stakes
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Grid of mini-charts (label + value + sparkline) | Core visual | MEDIUM | `display: grid` with configurable `columns` prop; each cell renders a mini Recharts chart without axes |
-| No axes, no grid lines, no tooltip on sparklines | Sparklines are ambient, not interactive | LOW | Omit `<XAxis>`, `<YAxis>`, `<CartesianGrid>` — Recharts supports this |
-| Label and primary value per cell | Context at a glance | LOW | Config: `{ label: string, value: string, data: number[] }[]` |
-| Configurable chart variant per cell (line, bar, area) | Different metrics suit different encodings | LOW | `sparkType?: 'line' | 'bar' | 'area'` per item |
-| `chartColors` respected for fill/stroke | Brand consistency | LOW | Pass first `chartColor` to each mini-chart |
+| List/grid of all modules with status indicators | Operators need an overview of what's installed | LOW | Read `MODULE_REGISTRY`; render per-module card with status badge |
+| Enable/disable toggle per module | Control which modules are active | MEDIUM | Toggle state persisted in localStorage or Supabase; `enabled` field in manifest is the static default |
+| Extension map per module (what it contributes, where) | Debugging and understanding cross-module wiring | MEDIUM | Read `extensions` array from manifest; render as expandable section |
+| Which slots each module owns | Complement to extensions — shows both sides of the contract | MEDIUM | Derive from `<ExtensionSlot>` usage (static analysis at build time or documentation in manifest) |
+| Active module count summary | At-a-glance system state | LOW | Count `MODULE_REGISTRY.filter(m => m.enabled)` |
+| Navigation to `/admin/modules` protected (operator-only) | Internal tool should not be accessible to external clients | LOW | Wrap in `<ProtectedRoute>` like other operator routes |
 
-**Differentiators**
+#### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Trend indicator badge (up/down arrow + %) | Instant reading without scanning the sparkline | LOW | Same as `KpiCard` variation/semaforo pattern — reuse existing logic |
-| Optional `sparkType` per item | Richer scanning patterns | LOW | Config field with enum |
+| Visual extension dependency graph | See which modules depend on each other | HIGH | Requires graph rendering (force-directed or tree); disproportionate complexity for v2.0 |
+| Extension slot coverage audit (slots with/without extensions) | Identify unregistered slots | MEDIUM | Cross-reference defined `<ExtensionSlot>` usages with registered extensions |
+| Module configuration viewer | Show full manifest for each module | LOW | Pretty-print manifest as JSON in expandable section |
+| Module health check (route resolves, component renders) | Smoke test each module | HIGH | Would require rendering each module in a test harness; out of scope |
 
-**Anti-Features**
+#### Anti-Features
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Interactive sparklines (click to expand) | Drill-down feel | Wireframe context is static; interactions are documented in intent, not implemented | Note interaction intent in blueprint description |
-| External sparkline library (`react-sparklines`, etc.) | Dedicated sparkline features | Adds dependency; Recharts `LineChart` without axes is sufficient and already available | Use minimal Recharts `LineChart` with axes hidden |
-
-**Recharts path:** Grid of `<LineChart height={40}>` (or `BarChart`) with no `<XAxis>`, `<YAxis>`, no `<CartesianGrid>`, `margin={{ top: 4, right: 4, bottom: 4, left: 4 }}`. Minimal Recharts usage that is already confirmed. Low friction.
-
-**Confidence:** HIGH — Recharts axes are optional and simply omitted. Pattern is standard.
+| Persistent module toggle (Supabase storage) | Survive page reloads | Creates split between static manifest (`enabled: true`) and runtime override (Supabase); source of truth confusion | Use localStorage for session-level toggle; treat static manifest as the authoritative default |
+| Per-user module access control | Role-based feature access | Requires auth-level feature flags (Clerk roles + module intersection); too complex for v2.0 | All authenticated operators see all modules; access control is future work |
+| Module install/uninstall UI | Dynamic module lifecycle | Modules are code, not packages; install = deploy | Admin panel is read/control only, not package management |
+| Drag-to-reorder modules | Customize sidebar order | Sidebar order follows MODULE_REGISTRY array order; change in code | Accept static order; document it as intentional |
 
 ---
 
-### 7. Progress Grid (Wave 2 — new standalone section type)
+### Feature Area 6: Routing Refactoring
 
-**What it is:** A vertical list of rows, each showing a metric name, current value, target value, and a horizontal progress bar. Like the existing `progress-bar` section but with explicit target tracking and current/target value display.
+**What it is:** Change the top-level routes so that `/` maps to the new Home 2.0 page and `/docs` (or `/processo`) maps to the docs module entry point. The Sidebar also reflects the new structure. This is a prerequisite for Home 2.0 being a true first-class destination.
 
-**Distinction from existing `progress-bar`:** The existing section shows `value/max` as percentage. Progress Grid adds a `target` separate from `max` (allowing "above target" visualization), shows numeric values explicitly, and is optimized for BI KPI tracking with named metrics and status coloring.
-
-**BI use cases:** Metas de vendas por representante, OKRs operacionais, Budget vs Realizado por centro de custo, Plano de ação com % de avanço.
-
-**Table Stakes**
+#### Table Stakes
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Metric label | Identification | LOW | Config `label` field |
-| Current value display (numeric + formatted) | Current state | LOW | Config `current` field |
-| Target value display | Goal context | LOW | Config `target` field |
-| Progress bar filled to `current/max` percentage | Visual progress | LOW | Same as `ProgressBarRenderer` — reuse the bar rendering pattern |
-| Target marker line on the bar | Shows where the goal sits | MEDIUM | Absolute-positioned thin vertical line at `(target/max)*100%` within the bar container |
-| Status color (red/yellow/green based on ratio) | At-a-glance health | LOW | Conditional color: `current >= target ? --wf-positive : current >= target*0.8 ? --wf-chart-warn : --wf-negative` |
+| `/` → Home 2.0 (already true in v1.5; must remain) | Home is the entry point | LOW | Already implemented; ensure it survives the refactoring |
+| `/docs` or `/processo/index` as docs module entry | Docs should have a clean entry URL | LOW | `docsManifest.route` currently points to `/processo/index`; evaluate if `/docs` is cleaner |
+| Sidebar Home link always visible | Home is always reachable | LOW | Already implemented; preserve across refactoring |
+| Module routes derived entirely from `ModuleManifest.routeConfig` | No hardcoded routes in App.tsx outside of auth/wireframe exceptions | LOW | Already mostly true in v1.5; audit for any remaining hardcoded module routes |
+| Sidebar module section reflects `enabled` state | Disabled modules disappear from nav | LOW | Extend the `filter(m => m.status !== 'coming-soon')` logic to also check `enabled` |
+| Clean redirect for any legacy `/` routes | No broken links after refactoring | LOW | Add `<Navigate>` redirect where needed |
 
-**Differentiators**
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Configurable status thresholds (e.g., 80%=yellow, 100%=green) | Business-specific definitions of "on track" | MEDIUM | `thresholds?: { warn: number, ok: number }` per item |
-| Row-level period label (e.g., "Q1 2026") | Multi-period comparison | LOW | Optional `period` config field |
-
-**Anti-Features**
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Animated fill on mount | Polished UX | Wireframe context is static; adds implementation noise | Static fill only |
-| Click to edit values inline | Interactive | Out of scope for wireframe; editing is via blueprint config | Document interaction intent |
-
-**Recharts path:** Pure HTML/CSS (no Recharts). Same pattern as existing `ProgressBarRenderer` with additions: target marker via absolute positioning, current/target values as text, status color computation. LOW complexity addition over existing patterns.
-
-**Confidence:** HIGH — extends proven `ProgressBarRenderer` pattern.
-
----
-
-### 8. Sankey Diagram (Wave 3 — new standalone section type)
-
-**What it is:** A flow diagram where nodes represent entities and links represent flows, with link width proportional to flow magnitude. Used for visualizing how quantities move between states.
-
-**BI use cases:** Fluxo de caixa (origens → destinos), Funil de conversão com percentuais, Distribuição de receita por canal → produto → cliente, Origem de leads por canal → estágio → fechamento.
-
-**Table Stakes**
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Nodes as labeled boxes | Core visual | LOW | Recharts `<Sankey>` component — confirmed native in Recharts 2.x |
-| Links with proportional width | Encoding magnitude | LOW | Native Recharts Sankey behavior |
-| Node and link coloring via `chartColors` | Brand consistency | MEDIUM | Recharts Sankey accepts `node` and `link` render props for custom coloring |
-| Tooltip on link hover showing flow value | Data reading | LOW | Recharts Sankey supports Tooltip |
-| Config data: `nodes: {name}[]` + `links: {source, target, value}[]` | Standard Sankey data format | LOW | Exact Recharts Sankey API format — no transformation needed |
-
-**Differentiators**
+#### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Node value labels (total flow in/out) | Reduce mental calculation | MEDIUM | Custom `node` render prop in Recharts Sankey |
-| Color nodes by index (first palette color per node) | Visual clarity | MEDIUM | Custom node render prop mapping `chartColors[i % chartColors.length]` |
+| Route-level breadcrumb reflecting module → section → page | Better orientation in nested navigation | MEDIUM | Requires `DocBreadcrumb` integration with module identity; currently only shows doc path |
+| Sidebar active-module section auto-expand | The active module's nav tree opens on page load | LOW | Already implemented via `hasActiveChild`; verify it works with new routing |
+| Admin routes group (`/admin/*`) | Clean namespace for internal tooling | LOW | Add `/admin/modules` route; protect with `<ProtectedRoute>` |
 
-**Anti-Features**
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Drag to reorder nodes | Interactive layout | Complex interaction outside wireframe scope | Accept default Recharts layout algorithm |
-| Animated flow particles | Looks impressive | Significant custom animation code; no native support | Static diagram |
-| D3-sankey dependency | More control over layout | Adds dependency; Recharts Sankey is sufficient for wireframe fidelity | Use Recharts native `<Sankey>` |
-
-**Recharts path:** Recharts 2.x has a `<Sankey>` component with `data={{ nodes: [...], links: [...] }}` API. CONFIRMED in official API docs. This is a standalone section type (not a `bar-line-chart` sub-variant) because it uses a completely different data shape. Medium complexity due to custom node/link rendering for colors.
-
-**Confidence:** HIGH for native Recharts Sankey existence. MEDIUM for color customization implementation.
-
----
-
-### 9. Range Bar / Gantt (Wave 3 — new standalone section type)
-
-**What it is:** Horizontal bars with explicit start and end values (not from zero). Used for time ranges, project phases, availability windows, or any interval data.
-
-**BI use cases:** Cronograma de projetos, Janelas de disponibilidade de recursos, Contratos com vigência, Faixas de metas por período.
-
-**Table Stakes**
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Bars with start and end (not from zero) | Core definition | HIGH | Recharts does NOT natively support range bars. Workaround: use two stacked bars (transparent base + visible top) via `stackId`. Community-confirmed but hacky |
-| Row labels (Y axis) | Task/entity identification | LOW | Recharts horizontal BarChart `<YAxis dataKey="label">` |
-| X axis as time/value scale | Orientation | LOW | Standard XAxis |
-| Tooltip showing label, start, end | Data reading | MEDIUM | Custom Tooltip formatter |
-| Color per row or category | Visual differentiation | LOW | `fill={chartColors[i % n]}` |
-
-**Differentiators**
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Today/reference line marker | Contextual anchor | LOW | Recharts `<ReferenceLine x={today}>` |
-| Category grouping by color | Visual grouping of task types | LOW | Assign `chartColors` index by category |
-
-**Anti-Features**
+#### Anti-Features
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| True Gantt with dependencies (arrows) | Full Gantt chart | Requires D3 or dedicated Gantt library — completely outside Recharts | Document as "schedule view" wireframe intent; implement in generated product |
-| Drag-to-resize bars | Interactive scheduling | Out of scope for wireframe | Note interaction intent |
-
-**Recharts path:** HIGH complexity. Recharts has no native range bar. Standard workaround: `BarChart layout="vertical"` with two `<Bar stackId="a">` — transparent bar fills the offset (start value), visible bar fills the duration (end - start). TypeScript types are tricky (data needs `[offset, end-offset]` tuple form). Issue #4038 on Recharts GitHub confirms this is the known workaround. Consider whether wireframe fidelity justifies this complexity vs. a simple pure-HTML Gantt row layout.
-
-**Recommendation:** Implement as pure HTML/CSS (not Recharts) — a flex row per task with `marginLeft: (start/max)*100%` and `width: ((end-start)/max)*100%`. This is the CompositionBar pattern adapted to multi-row. Much lower complexity, same visual output.
-
-**Confidence:** MEDIUM for the CSS-flex approach. LOW for the Recharts workaround approach.
-
----
-
-### 10. Bump Chart (Wave 3 — new standalone section type)
-
-**What it is:** A line chart where the Y axis shows rank position (1 = top) and X axis shows time periods. Lines connect each entity's rank across periods, showing whether things are rising or falling in relative standing.
-
-**BI use cases:** Ranking de produtos por receita ao longo do tempo, Posição de vendedores no ranking mensal, Evolução de categorias por participação.
-
-**Table Stakes**
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Multiple colored lines connecting rank positions | Core visual | MEDIUM | Recharts `<LineChart>` with multiple `<Line>` series — standard multi-line chart |
-| Y axis inverted (1 at top) | Rank convention — rank 1 is best, displayed at top | LOW | Recharts `<YAxis reversed={true}>` |
-| Y axis showing integer ranks | Clarity | LOW | `tickCount` set to number of entities; `<YAxis type="number">` |
-| End-of-line labels showing entity name | Reading rank at last period | MEDIUM | Custom `<Label>` on each `<Line>` or `dot` render at last data point |
-| Tooltip showing all ranks at a time period | Cross-entity comparison | LOW | Recharts default multi-line Tooltip |
-
-**Differentiators**
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Curved lines (monotone) vs straight | Aesthetic smoothness | LOW | `type="monotone"` on `<Line>` |
-| Highlighted entity (bold line, others muted) | Focus on specific | MEDIUM | Custom `strokeWidth` and `opacity` based on a `highlighted` config prop |
-
-**Anti-Features**
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Interactive hover to highlight one entity | Polished interaction | Complex state management in static wireframe context | Accept static rendering of all lines |
-| Dedicated bump chart library | Correct interpolation between ranks | Adds dependency; LineChart with `reversed` Y axis is functionally equivalent for wireframe | Use Recharts LineChart |
-
-**Recharts path:** Recharts `<LineChart>` with `<YAxis reversed>` is the correct approach. Data format: `{ period: 'Jan', entityA: 2, entityB: 1, entityC: 3 }[]` — standard multi-series line chart. Medium complexity due to end-of-line labeling and reversed Y axis. No new Recharts dependencies.
-
-**Confidence:** HIGH for the core implementation. MEDIUM for end-of-line labels (custom dot/label render).
-
----
-
-### 11. Lollipop (Wave 3 — new standalone section type or `chartType: 'lollipop'`)
-
-**What it is:** A bar chart alternative where each value is represented by a thin vertical line topped with a filled circle. Visually cleaner than bars for comparison with many categories.
-
-**BI use cases:** Top 10 produtos por receita, Comparação de métricas por região, Ranking de representantes, Distribuição de tickets por categoria.
-
-**Table Stakes**
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Vertical line from zero to value | Core visual (the "stick") | MEDIUM | Recharts `<LineChart>` with `dot` only at the value endpoint, OR a `<BarChart>` with very thin bars (`barSize={2}`) |
-| Circle at the top of each stick | Core visual (the "lollipop") | MEDIUM | Recharts custom `dot` render prop on `<Line>`, or `<Scatter>` overlay on the bar endpoint |
-| Category labels on X axis | Identification | LOW | Standard `<XAxis dataKey>` |
-| Y axis with value scale | Scale | LOW | Standard `<YAxis>` |
-| Tooltip on hover | Data reading | LOW | Recharts default |
-
-**Differentiators**
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Horizontal layout option | Better for many categories | LOW | `layout="horizontal"` with `<BarChart>` |
-| Color per lollipop | Visual variation across categories | MEDIUM | Map `chartColors` by index, or use single brand color |
-
-**Anti-Features**
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Interactive click-to-highlight | Polished UX | Not needed for wireframe | Note in description |
-| Multiple series as grouped lollipops | Richer data | Very complex to implement cleanly; defeats visual simplicity | Use grouped-bar for multi-series comparisons |
-
-**Recharts path:** Two viable approaches:
-1. `<BarChart barSize={2}>` with `<Bar>` for the stick + a `<Scatter>` component (from `<ComposedChart>`) for the circles — uses Recharts natively but requires ComposedChart.
-2. `<LineChart>` with `dot={customDot}` and `activeDot={false}`, where each "line" is a vertical segment from (category, 0) to (category, value) — requires unusual data shaping.
-
-**Recommendation:** Approach 1 (ComposedChart with Bar + Scatter) is cleaner and better-typed. Medium complexity.
-
-**Confidence:** MEDIUM — approach is community-proven (confirmed via react-graph-gallery.com). No single official Recharts example for lollipop.
-
----
-
-### 12. Polar / Rose (Wave 3 — new standalone section type)
-
-**What it is:** Bars radiating from a center in polar coordinates. Each category gets an angular slice; the bar extends outward proportional to its value. The Nightingale/Rose chart version uses equal angles with varying radius (value encodes radius). The Radial Bar chart version uses equal radii per track with varying arc length.
-
-**Recharts support:** Recharts has a native `<RadialBarChart>` component with `<RadialBar>` — this is the most accessible implementation. True Nightingale/Rose (equal angle, value = radius) requires custom SVG or is only partially achievable via Recharts `<PolarAngleAxis>` + `<RadialBarChart>`.
-
-**BI use cases:** Distribuição por dia da semana, Comparação de KPIs em formato radar-like, Performance por região em layout circular, Sazonalidade.
-
-**Table Stakes**
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Bars or arcs in polar coordinates | Core visual | LOW | Recharts `<RadialBarChart>` with `<RadialBar>` — native and documented |
-| Category labels around the circle | Identification | LOW | Recharts `<Legend>` or custom label at each arc |
-| Tooltip on hover | Data reading | LOW | Recharts default Tooltip on RadialBarChart |
-| Color per arc from `chartColors` | Brand | LOW | `fill={chartColors[i]}` per RadialBar Cell |
-| `items: { label, value }[]` config | Config interface | LOW | Same shape as DonutChart slices |
-
-**Differentiators**
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Inner radius config (rose vs ring) | Visual style variation | LOW | `innerRadius` prop on `<RadialBarChart>` |
-| Clockwise vs counter-clockwise start angle | Orientation preference | LOW | `startAngle` / `endAngle` on `<RadialBarChart>` |
-
-**Anti-Features**
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| True equal-angle sectors (Nightingale rose) | More "correct" rose chart | Not natively supported in Recharts 2.x — requires custom SVG path math | Use RadialBarChart with arcs, document as "radial bar / rose-style" |
-| 3D polar chart | Dramatic visual | Misrepresents data; no React charting library supports it without canvas hacks | Never implement |
-
-**Recharts path:** Recharts `<RadialBarChart>` is native and documented. Use `<RadialBar dataKey="value">` with multiple `<Cell>` for color. This is the same internal component used by some polar chart examples in the official Recharts docs. LOW complexity.
-
-**Confidence:** HIGH for RadialBarChart. Confirmed in official Recharts docs and shadcn/ui charts documentation.
+| Hash-based routing (`/#/modules`) | Simpler SPA routing | Already using `BrowserRouter` with Vercel rewrite; hash routing would be a regression | Keep `BrowserRouter` |
+| Module-specific route prefixes (`/tasks/*`, `/kb/*`) | Namespace clarity | Routes are already structured this way in v1.5; further abstraction not needed | Accept current pattern |
+| Client-facing public routes for modules | External access to internal modules | Out of scope; external clients access only wireframe share links | Keep all module routes operator-only |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Wave 1 charts (Grouped Bar, Bullet, Step Line, Pie)
-    └──require──> Existing BarLineChartSection schema + ChartType union
-                       └──require──> Existing ChartRenderer dispatch switch
+Home 2.0 (Feature Area 1)
+    └──requires──> Enhanced Module Registry (Feature Area 2)
+                       [description, badge, enabled fields]
 
-Wave 2 sections (Heatmap, Sparkline Grid, Progress Grid)
-    └──require──> New BlueprintSection union members
-    └──require──> New SECTION_REGISTRY entries
-    └──require──> New Zod schemas in blueprint-schema.ts
+Contract Architecture (Feature Area 3)
+    └──requires──> Enhanced Module Registry (Feature Area 2)
+                       [extensions field on ModuleManifest]
+    └──enables──>  Slot-Based UI Injection (Feature Area 4)
 
-Wave 3 charts (Sankey, Bump Chart, Range Bar, Lollipop, Polar)
-    └──require──> New BlueprintSection union members (each is standalone)
-    └──require──> New SECTION_REGISTRY entries
+Slot-Based UI Injection (Feature Area 4)
+    └──requires──> Contract Architecture (Feature Area 3)
+                       [ExtensionSlot reads from extensions registry]
+    └──enhances──> Home 2.0 (Feature Area 1)
+                       [slots on Home page accept cross-module contributions]
 
-Sparkline Grid ──enhances──> KPI Grid (similar scanning purpose, different data density)
-Progress Grid ──extends──> progress-bar section (reuses bar rendering logic)
-Bullet Chart ──shares target-marker pattern──> Progress Grid
-Pie Chart ──shares data shape──> DonutChartSection (variant prop, not new type)
+Admin Panel (Feature Area 5)
+    └──requires──> Enhanced Module Registry (Feature Area 2)
+                       [must read description, badge, extensions, enabled]
+    └──requires──> Contract Architecture (Feature Area 3)
+                       [must display extension → slot mapping]
+    └──enhances──> Slot-Based UI Injection (Feature Area 4)
+                       [admin toggle reflects in slot rendering]
+
+Routing Refactoring (Feature Area 6)
+    └──requires──> Enhanced Module Registry (Feature Area 2)
+                       [enabled field drives sidebar filtering]
+    └──enhances──> Home 2.0 (Feature Area 1)
+                       [clean `/` route is prerequisite for Home as control center]
+    └──enhances──> Admin Panel (Feature Area 5)
+                       [admin routes under `/admin/*` namespace]
 ```
 
 ### Dependency Notes
 
-- **Wave 1 charts require existing infrastructure:** They add new `ChartType` values and dispatch cases in `ChartRenderer`. No new section types needed for Grouped Bar, Bullet, Step Line. Pie Chart adds a `variant` to DonutChartSection.
-- **Wave 2 and 3 are standalone section types:** Each gets its own entry in `BlueprintSection` union, `SECTION_REGISTRY`, and Zod schema.
-- **Progress Grid extends progress-bar:** The existing `ProgressBarRenderer` rendering logic (CSS bar, color-mix) should be extracted into a shared utility or Progress Grid should be built referencing that pattern.
-- **Heatmap uses color-mix:** Already confirmed working in `ProgressBarRenderer` — reusable pattern.
+- **Enhanced Module Registry is the foundation:** Features 1, 3, 4, 5, and 6 all read from the registry. It must be implemented first in any phase plan.
+- **Contract Architecture enables but does not require Slot Injection:** The types and manifest declarations (Feature 3) can be defined and populated before the `<ExtensionSlot>` runtime component (Feature 4) exists. This allows parallel development.
+- **Admin Panel depends on contracts being defined:** The panel's extension map visualization only has content once modules have declared their extensions. Build the panel UI before extensions are populated, then populate.
+- **Routing Refactoring is mostly already done:** The `/ → Home` and `routeConfig → App.tsx` patterns are in place from v1.5. This feature area is primarily cleanup + adding `/admin/*` namespace.
+- **Home 2.0 does not require slots:** The control center layout can be built with a static structure. Slots are an enhancement layer that can be added after the core layout ships.
+
+---
+
+## Complexity Assessment per Feature Area
+
+| Feature Area | Complexity | Why | Depends On |
+|-------------|------------|-----|------------|
+| Home 2.0 | MEDIUM | New UI layout + per-module aggregate Supabase queries | Enhanced Registry |
+| Module Registry Enhancement | LOW-MEDIUM | TypeScript interface extension + migration of existing fields | None (foundation) |
+| Contract Architecture | MEDIUM | New types + manifest population across 5 modules | Enhanced Registry |
+| Slot-Based UI Injection | MEDIUM | New `ExtensionSlot` component + registry lookup + TypeScript generics | Contracts |
+| Admin Panel | MEDIUM | New page + manifest visualization; no heavy data fetching | Registry + Contracts |
+| Routing Refactoring | LOW | Mostly already done; add `/admin/*` + audit leftover hardcoded routes | Enhanced Registry |
 
 ---
 
 ## MVP Definition
 
-### Launch With (v1.6)
+### Launch With (v2.0)
 
-Minimum viable feature set to cover the milestone scope. All 12 chart types must be implemented to deliver the milestone.
+Minimum viable feature set to deliver the milestone goal: "transform FXL Core from a docs app into a modular framework shell."
 
-- [ ] **Grouped Bar** — Completes the "standard bar chart" family; HIGH business value for comparison use cases
-- [ ] **Step Line** — LOW complexity add, covers pricing/policy data patterns missing today
-- [ ] **Pie Chart** — Trivial add as DonutChartSection variant; rounds out the pie/donut family
-- [ ] **Sparkline Grid** — HIGH scan-density value for executive dashboards; medium complexity
-- [ ] **Progress Grid** — Extends proven pattern; HIGH use in goals/OKR screens
-- [ ] **Polar / Rose** — Native Recharts support; LOW complexity; covers circular comparison use cases
-- [ ] **Lollipop** — Medium complexity, clean visual alternative to bar for ranked data
-- [ ] **Bump Chart** — Medium complexity, specific use case for ranking/competitive analysis
-- [ ] **Sankey Diagram** — Native Recharts; covers flow/funnel use cases currently not served
-- [ ] **Heatmap** — Pure CSS approach; covers matrix analysis use cases
-- [ ] **Bullet Chart** — Medium complexity; HIGH value for KPI vs target display
-- [ ] **Range Bar** — HIGH complexity; covers timeline/Gantt use cases (recommend CSS-flex approach over Recharts workaround)
+- [ ] **Enhanced Module Registry** — `description`, `badge`, `enabled`, `extensions` fields; Zod validation. Foundation everything else builds on.
+- [ ] **Routing Refactoring** — Audit and clean routes; add `/admin/*` namespace; sidebar filters by `enabled`. Low effort, high payoff.
+- [ ] **Home 2.0** — Per-module status + aggregate summary + quick actions. Makes the platform feel like an operational control center rather than a nav page.
+- [ ] **Contract Architecture types** — `ModuleExtension` type, `slotId` definitions per module, `extensions` populated in manifests. Declares the contracts even before runtime enforcement.
+- [ ] **Slot-Based UI Injection** — `<ExtensionSlot>` runtime component; at least 2-3 real cross-module extensions to validate the pattern works.
+- [ ] **Admin Panel `/admin/modules`** — Module list, enable/disable toggle (localStorage), extension map. Operator debugging surface.
 
-### Sequencing Recommendation (within v1.6)
+### Add After Validation (v2.x)
 
-Wave 1 first (lowest complexity, builds on existing infrastructure):
-1. Step Line (lowest complexity — one `type` prop change)
-2. Pie Chart (one `variant` prop on DonutChartSection)
-3. Grouped Bar (multi-Bar in existing BarChart)
-4. Bullet Chart (ReferenceLine, horizontal BarChart)
+Features to add once the core framework shell is working and operators are using it.
 
-Wave 2 second (standalone sections, medium complexity):
-5. Progress Grid (extends progress-bar pattern)
-6. Sparkline Grid (minimal Recharts, grid layout)
-7. Heatmap (pure CSS, color-mix)
+- [ ] **Extension error boundaries** — Wrap each extension render; prevents slot crashes from taking down host pages.
+- [ ] **Slot inspector dev mode** — `?debug=slots` URL param outlines all active slots; aids development of new extensions.
+- [ ] **Breadcrumb module identity** — Breadcrumb shows "Tasks > [client] > Create Task" instead of just the URL path.
+- [ ] **Supabase-persisted module toggle** — Move from localStorage to Supabase for cross-device consistency.
 
-Wave 3 last (highest complexity or unique data shapes):
-8. Polar / Rose (native RadialBarChart — actually LOW)
-9. Lollipop (ComposedChart approach)
-10. Bump Chart (LineChart + reversed Y)
-11. Sankey (native Recharts, custom node colors)
-12. Range Bar (CSS-flex approach recommended)
+### Future Consideration (v3+)
+
+Features to defer until the framework shell pattern is proven across multiple milestones.
+
+- [ ] **Dynamic module loading** — Lazy-load module code bundles; requires async registry and Suspense boundaries everywhere.
+- [ ] **Per-user module access control** — Clerk roles + module `requiredRole` field; requires Clerk organization setup.
+- [ ] **Visual dependency graph** — Force-directed graph of module relationships; requires a graph library.
+- [ ] **Extension registry UI** — Visual editor for declaring new extensions; meta-tooling.
 
 ---
 
 ## Feature Prioritization Matrix
 
-| Chart Type | BI User Value | Implementation Cost | Priority | Wave |
-|------------|---------------|---------------------|----------|------|
-| Grouped Bar | HIGH — most common comparison chart | LOW | P1 | 1 |
-| Step Line | MEDIUM — niche but specific | LOW | P1 | 1 |
-| Pie Chart | MEDIUM — familiar, covers full-circle preference | LOW | P1 | 1 |
-| Bullet Chart | HIGH — KPI vs target is core BI use case | MEDIUM | P1 | 1 |
-| Sparkline Grid | HIGH — compact scanning for executives | MEDIUM | P1 | 2 |
-| Progress Grid | HIGH — OKR/goal tracking | LOW-MEDIUM | P1 | 2 |
-| Heatmap | HIGH — matrix analysis, no alternative today | MEDIUM | P1 | 2 |
-| Polar / Rose | MEDIUM — circular comparisons, niche | LOW | P2 | 3 |
-| Lollipop | MEDIUM — visual alternative to bar | MEDIUM | P2 | 3 |
-| Bump Chart | LOW-MEDIUM — ranking analysis | MEDIUM | P2 | 3 |
-| Sankey | MEDIUM — flow/funnel visualization | MEDIUM | P2 | 3 |
-| Range Bar | MEDIUM — timeline/schedule | HIGH | P2 | 3 |
+| Feature | Operator Value | Implementation Cost | Priority |
+|---------|---------------|---------------------|----------|
+| Enhanced Module Registry | HIGH — enables everything else | LOW-MEDIUM | P1 |
+| Routing Refactoring | HIGH — /admin namespace + clean routes | LOW | P1 |
+| Home 2.0 | HIGH — control center replaces generic card grid | MEDIUM | P1 |
+| Contract Architecture types | HIGH — typed cross-module wiring | MEDIUM | P1 |
+| Admin Panel `/admin/modules` | HIGH — debugging + control surface | MEDIUM | P1 |
+| Slot-Based UI Injection | MEDIUM — runtime for contracts; few real extensions at v2.0 | MEDIUM | P1 |
+| Home 2.0 slots | LOW — extensions on Home are nice-to-have | MEDIUM | P2 |
+| Extension error boundaries | MEDIUM — resilience; needed before heavy extension usage | LOW | P2 |
+| Slot inspector dev mode | LOW — developer experience; not user-facing | LOW | P3 |
+
+**Priority key:**
+- P1: Must have for v2.0 to deliver the milestone goal
+- P2: Should have; add when P1 is complete and time permits
+- P3: Nice to have; future milestone
 
 ---
 
-## Implementation Notes by Architecture Touchpoint
+## Existing Infrastructure Inventory (What v2.0 Can Reuse)
 
-### Wave 1: New `ChartType` union values → existing `bar-line-chart` section
-
-Touch points:
-- `types/blueprint.ts`: Add `'grouped-bar' | 'bullet' | 'step-line'` to `ChartType` union
-- `DonutChartSection`: Add `variant?: 'pie' | 'donut'` (no new section type)
-- `lib/blueprint-schema.ts`: Update `ChartTypeLiteral` enum in `BarLineChartSectionSchema`
-- `components/sections/ChartRenderer.tsx`: Add `case` for each new chartType
-- New component files: `GroupedBarChartComponent.tsx`, `BulletChartComponent.tsx`, `StepLineChartComponent.tsx`
-- `components/DonutChart.tsx`: Add `variant` prop handling
-- `components/editor/property-forms/BarLineChartForm.tsx`: Add new types to the chartType select
-- `components/editor/property-forms/DonutChartForm.tsx`: Add variant toggle
-
-### Wave 2: New standalone section types
-
-Touch points for each (Heatmap, Sparkline Grid, Progress Grid):
-- `types/blueprint.ts`: New section type interface + add to `BlueprintSection` union
-- `lib/blueprint-schema.ts`: New Zod schema
-- `lib/section-registry.tsx`: New `SECTION_REGISTRY` entry with renderer, propertyForm, catalogEntry, defaultProps, schema
-- New renderer: `components/sections/HeatmapRenderer.tsx`, `SparklineGridRenderer.tsx`, `ProgressGridRenderer.tsx`
-- New property form: `components/editor/property-forms/HeatmapForm.tsx`, etc.
-
-### Wave 3: New standalone section types (same touchpoints as Wave 2)
-
-Same pattern as Wave 2 for each of: Sankey, Bump Chart, Range Bar, Lollipop, Polar.
+| Existing Asset | How v2.0 Uses It | Notes |
+|---------------|-----------------|-------|
+| `ModuleManifest` type in `registry.ts` | Extend with new fields | Non-breaking if new fields are optional |
+| `MODULE_REGISTRY` array | Core registry; enhanced in-place | No structural change |
+| `Sidebar.tsx` active module filter | Extend to also filter by `enabled` field | Minor change |
+| ESLint boundary enforcement | Already prevents cross-module imports | Reinforce the rule: extensions registered via registry, not imported |
+| `src/modules/*/manifest.tsx` per-module files | Add `extensions: []` array | 5 files to update |
+| Clerk `<ProtectedRoute>` | Protect `/admin/modules` route | Reuse existing pattern |
+| `useActivityFeed` hook in Home.tsx | Enhance with new event types | Small extension |
+| `cmdk` command palette | Potential surface for cross-module quick actions on Home | Reuse existing infrastructure |
+| Supabase client | Activity aggregation queries for Home 2.0 | Existing Supabase integration |
 
 ---
 
 ## Sources
 
-- [Recharts BarChart API — barCategoryGap, barGap, multiple Bar components](https://recharts.github.io/en-US/api/BarChart/)
-- [Recharts Sankey API — nodes/links data format, node/link render props](https://recharts.github.io/en-US/api/Sankey/)
-- [Recharts Line type="stepAfter" — confirmed in API docs](https://recharts.github.io/en-US/api/Line/)
-- [Recharts RadialBarChart — polar/rose chart native support](https://recharts.github.io/en-US/api/)
-- [Recharts Gantt/Range Bar community issue #4038 — confirms no native support](https://github.com/recharts/recharts/issues/4038)
-- [Nightingale/Rose charts Recharts issue #2386 — confirms no native equal-angle support](https://github.com/recharts/recharts/issues/2386)
-- [Lollipop plot with React (react-graph-gallery) — confirms ComposedChart approach](https://www.react-graph-gallery.com/lollipop-plot)
-- [shadcn/ui Radial Charts — RadialBarChart usage examples](https://ui.shadcn.com/charts/radial)
-- [BI Dashboard best practices — tooltip and drill-down interaction patterns](https://www.domo.com/learn/article/bi-dashboards-building-and-designing-best-practices)
-- [Custom Dot Line Chart (recharts) — confirms customized dot for lollipop circle](https://recharts.github.io/en-US/examples/CustomizedDotLineChart/)
+- Existing codebase analysis: `src/modules/registry.ts`, `src/pages/Home.tsx`, `src/App.tsx`, `src/components/layout/Sidebar.tsx`
+- [OpenMRS O3 Extension System — extension + slot pattern with named slots and module registration](https://o3-docs.openmrs.org/docs/extension-system) — MEDIUM confidence (different scale/context but well-documented slot + extension pattern)
+- [UI Composition Architecture for React — slot registry, widget registration pattern](https://dev.to/riturathin/rethinking-frontend-scalability-the-ui-composition-architecture-pattern-for-large-react-3mpn) — MEDIUM confidence
+- [Building a Plugin System in React Using Dynamic Imports and Context API](https://dev.to/hexshift/building-a-plugin-system-in-react-using-dynamic-imports-and-context-api-3j6e) — MEDIUM confidence (plugin contract pattern)
+- [Building a Component Registry in React](https://medium.com/front-end-weekly/building-a-component-registry-in-react-4504ca271e56) — MEDIUM confidence
+- [Modularizing React Applications — Martin Fowler](https://martinfowler.com/articles/modularizing-react-apps.html) — HIGH confidence (authoritative reference for module boundary patterns)
+- [@grlt-hub/react-slots — declarative slot system for React](https://github.com/grlt-hub/react-slots) — LOW confidence for direct adoption (Effector dependency); useful as pattern reference
+- `.planning/codebase/ARCHITECTURE.md` — analysis of existing data flow and module boundaries
 
 ---
 
-*Feature research for: v1.6 Wireframe Builder Chart Expansion*
-*Researched: 2026-03-12*
+*Feature research for: v2.0 Framework Shell + Modular Architecture*
+*Researched: 2026-03-13*

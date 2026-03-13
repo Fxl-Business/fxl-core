@@ -1,191 +1,209 @@
 # Pitfalls Research
 
-**Domain:** Extending a Recharts 2.x wireframe builder with 12 new chart/section types
-**Researched:** 2026-03-12
-**Confidence:** HIGH (based on direct codebase inspection of all 5 integration points + verified Recharts 2.x GitHub issues + Zod v3 composability constraints)
+**Domain:** Adding modular extension architecture to an existing React 18 SPA (FXL Core v2.0)
+**Researched:** 2026-03-13
+**Confidence:** HIGH (based on direct codebase inspection of App.tsx, registry.ts, Sidebar.tsx, all 5 module manifests, eslint.config.js, vercel.json + verified patterns from react-router-dom v6 official docs and community post-mortems)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: ChartType Enum Has 4 Sync Points — Missing Any One Causes Silent Fallback
+### Pitfall 1: Route / to /docs Migration Breaks Vercel Direct-Link Visits
 
 **What goes wrong:**
-`ChartType` is maintained in 4 places simultaneously: the TypeScript union in `types/blueprint.ts`, the `z.enum([...])` in `BarLineChartSectionSchema` in `blueprint-schema.ts`, the inner `switch(section.chartType)` dispatch in `ChartRenderer.tsx`, and the `import` list at the top of `ChartRenderer.tsx`. The new sub-variants for Onda 1 (Grouped Bar, Bullet, Step Line, Pie as `chartType` values) require all 4 to be updated together. Missing the Zod enum causes Supabase round-trips to reject blueprints that use the new type. Missing the switch case causes the component to silently render a plain bar chart (the `default:` branch in `ChartRenderer` casts the value as `'bar' | 'line' | 'bar-line'`).
+The current `vercel.json` rewrites all traffic to `index.html` via `"source": "/(.*)"`. When the route `/` is redirected to `/docs` client-side (via `<Navigate to="/docs" replace />`), users who have bookmarked `/` will land correctly. But any server-level tool (Slack unfurl, Notion embed, health-check bots) that hits `/` gets `index.html` which delivers a redirect, not a page — the Open Graph metadata, canonical URL, and any crawlers that don't execute JavaScript receive no useful content. More critically, if the Home component is moved to `/` and the docs moved to `/docs`, there is an ordering risk: if the `<Route path="/" ...>` entry renders `<Navigate>` instead of a component, any route that previously relied on `/` as the catch-all (e.g., stale bookmarks, old Cmd+K results pointing to the docs root) will silently redirect to the new location with no 301 equivalent at the server level.
 
 **Why it happens:**
-TypeScript enforces the type annotation at compile time, but only where a variable is explicitly typed as `ChartType`. The `default:` cast in `ChartRenderer` masks the missing case without a compile error. The Zod schema is a manual mirror — no tooling flags when they diverge.
+Developers treat `<Navigate replace>` as equivalent to an HTTP 301. It is not — it is a client-side JS push that only fires after React mounts. If the user refreshes at `/docs` and the Vercel rewrite config has not been updated to ensure `/docs/*` rewrites correctly (currently it catches everything via `/(.*)`), there is no breakage, but any hardcoded reference to `/` as the docs entry point (Cmd+K search index, Sidebar hard-coded Home link, shared links users may have sent) will silently redirect instead of rendering the expected content.
 
 **How to avoid:**
-Extend all 4 sync points in one commit, in this order:
-1. `ChartType` union in `types/blueprint.ts`
-2. `z.enum([...])` in `BarLineChartSectionSchema` in `blueprint-schema.ts`
-3. New `case` branch inside `switch(section.chartType)` in `ChartRenderer.tsx`
-4. New component import at the top of `ChartRenderer.tsx`
-
-Extend `blueprint-schema.test.ts` with a fixture for each new `chartType` value. Run `npx tsc --noEmit` after each new case — the `default:` cast does NOT catch missing cases.
+1. Before changing any route, audit all places that link to `/` or assume `/` is the docs entry point: `Sidebar.tsx` Home link (currently hardcoded `to="/"`), `SearchCommand` result hrefs, any `href="/"` in client docs markdown files.
+2. Implement the routing change as a two-step: first add `<Route path="/docs" element={<Navigate to="/processo/index" replace />} />` so the new path works before removing the old binding; then move the docs module's `route` field to `/processo/index` in `docsManifest`.
+3. Add a `<Navigate from="/" to="/docs" replace />` only as a temporary bridge if needed — remove it once all links are updated. Never leave it permanently, because it means `Home` at `/` is unreachable.
+4. Test by opening an incognito tab and typing `yourdomain.com/docs` directly — Vercel will serve `index.html`, React Router will match `/docs` and render correctly since the rewrite covers it.
 
 **Warning signs:**
-- New chartType value displays as a plain bar chart instead of the intended visualization
-- No TypeScript error despite the missing case (the `as` cast swallows it)
-- `BlueprintConfigSchema.safeParse()` rejects a config with the new chartType value
+- Sidebar "Home" link still points to `/` after the docs module route has moved to `/docs`
+- Cmd+K search results for doc pages return hrefs starting with `/` instead of `/docs/`
+- `docsManifest.route` still reads `/processo/index` but sidebar navigation shows "Home" as active when on the docs page
+- The `moduleRoutes` derivation in `App.tsx` produces a route for `/processo/*` but not for `/docs/*` — docs are unreachable from direct URL
 
 **Phase to address:**
-Phase 1 (Onda 1 — sub-variant charts). Create a 4-point checklist as a phase acceptance criterion before implementation starts.
+Phase: Routing Refactor (the dedicated phase for moving `/` to Home 2.0 and docs to `/docs`). This phase must begin with a link audit, not code changes.
 
 ---
 
-### Pitfall 2: Sankey Requires Integer-Index Node References, Not String Names
+### Pitfall 2: ESLint Module Boundary Rule Will Block Cross-Module Extension Imports
 
 **What goes wrong:**
-Recharts `<Sankey>` requires `data.nodes` (array of `{ name: string }`) and `data.links` (array of `{ source: number, target: number, value: number }`) where `source` and `target` are **integer array indices** into `data.nodes`. All other Recharts charts accept named string keys. If `SankeySectionSchema` is designed with string-based node references in links (which feels more readable), the chart renders completely blank with no console error. Additionally, if a node is removed from `data.nodes`, all link indices must be re-calculated manually — a footgun for any future dynamic-data scenario.
+The existing `eslint.config.js` enforces `{ from: 'module', disallow: ['module'] }` — modules cannot import each other. The new extension architecture requires Module A to declare `requires: ['knowledge-base']` and inject components into Module B's slots. If that injection is implemented as a direct import (`import { SomeComponent } from '@/modules/knowledge-base/...'`), ESLint will flag it as an error at the boundary. The natural fix developers reach for is adding an ESLint disable comment or weakening the boundary rule — both destroy the isolation that v1.5 carefully established.
 
 **Why it happens:**
-The Recharts documentation shows the index-based format but does not prominently warn that string names cannot be used. Developers who are familiar with other Recharts charts (which accept `dataKey: 'revenue'`) assume the same naming pattern applies. The chart fails silently because Recharts renders an empty SVG rather than throwing when indices are invalid.
+The extension system is designed exactly to enable cross-module data flow. The ESLint boundary rule was designed to prevent exactly that. They are in direct conflict if the extension wires up at the import level rather than through a runtime registry.
 
 **How to avoid:**
-The `SankeySectionSchema` and `SankeySection` type must match Recharts' exact expected shape:
+All cross-module extensions must be mediated through the `MODULE_REGISTRY` at runtime, not via static imports. The pattern is:
+1. Module A registers an extension object in its own manifest: `extensions: [{ slotId: 'kb-sidebar-widget', component: MyWidget }]`
+2. `MODULE_REGISTRY` (or a new `ExtensionRegistry`) aggregates all extensions at the registry level — this is the one place allowed to import across modules
+3. `<ModuleSlot id="kb-sidebar-widget" />` renders whatever is registered for that slot ID — it never imports from the providing module directly
+4. The ESLint rule remains unchanged: modules still cannot import each other. Only `registry.ts` (type: `lib`) can aggregate from all modules.
+
+If the `boundaries/element-types` rule needs to be updated, the only acceptable change is making `registry.ts` an exception: `{ from: 'lib', allow: ['module'] }` scoped specifically to `src/modules/registry.ts`.
+
+**Warning signs:**
+- An `// eslint-disable` comment appears in any file inside `src/modules/[name]/`
+- A module manifest file imports from another module's directory: `import X from '@/modules/other-module/...'`
+- The ESLint boundary rule is weakened from `'error'` to `'warn'` as a "temporary" measure
+- `eslint.config.js` has a new `files` override that exempts a specific module from the boundary check
+
+**Phase to address:**
+Phase: Module Registry Enhancement (where `ModuleDefinition` type and extension declaration are introduced). Lock down the approved cross-module communication pattern before any slot implementations start.
+
+---
+
+### Pitfall 3: Circular Dependency Through Extension Declarations in Manifests
+
+**What goes wrong:**
+When Module A's manifest declares `requires: ['tasks']` and imports the tasks manifest to validate the dependency ID at compile time, and the tasks manifest imports from `MODULE_REGISTRY` to derive nav items — a circular import chain can form: `registry.ts` → `tasks/manifest.ts` → `registry.ts`. This does not always throw an error. JavaScript module loading handles many circular imports silently by substituting `undefined` for the unresolved export at the point of the cycle. The result is that `MODULE_REGISTRY` is `undefined` in the tasks manifest during initialization, causing `navigationFromRegistry` in `Sidebar.tsx` to throw or produce an empty sidebar.
+
+**Why it happens:**
+Manifest files currently import `ModuleManifest` type from `registry.ts` (type-only import, safe). The risk appears when manifests start importing _values_ from `registry.ts` — for example, to look up another module's ID string for type-safe `requires` declarations, or when a manifest computes its `navChildren` based on other registered modules.
+
+The existing codebase is currently safe: manifests only import the `ModuleManifest` type (erased at compile time). The danger is introduced the moment any manifest imports a runtime value from `registry.ts`.
+
+**How to avoid:**
+Module IDs used in `requires: []` declarations must be string literals defined in a separate constants file, not looked up from `MODULE_REGISTRY`. Create `src/modules/module-ids.ts` with `export const MODULE_IDS = { docs: 'docs', tasks: 'tasks', ... } as const`. Manifests import from `module-ids.ts` (which has no imports) — never from `registry.ts`.
+
+`registry.ts` imports from manifests (one-directional). Manifests import from `module-ids.ts` (one-directional). No cycle.
+
+**Warning signs:**
+- Any manifest file has `import { ... } from '@/modules/registry'` importing a non-type value
+- `MODULE_REGISTRY` is `undefined` at runtime despite being a valid `const` — symptom of circular import resolution
+- Sidebar renders with zero items despite the registry being non-empty in the source
+- Vite build prints a "circular dependency" warning in the console
+
+**Phase to address:**
+Phase: Module Registry Enhancement. The `module-ids.ts` constants file should be created at the start of this phase, before any `requires[]` declarations are written.
+
+---
+
+### Pitfall 4: Type Safety Lost When Injecting Components Through Slots
+
+**What goes wrong:**
+`<ModuleSlot id="some-slot" />` needs to render a component registered by another module. The registered component has its own prop types. At the slot render site, those prop types are unknown — the slot system must accept either `React.ComponentType<unknown>` or `React.ComponentType<Record<string, unknown>>`, both of which allow passing any props and accepting any props, defeating TypeScript's strict mode. Teams commonly resolve this by using `any` in the slot renderer, which propagates through the system and silently breaks type checking for cross-module components.
+
+**Why it happens:**
+TypeScript cannot express "a component whose props are determined at registration time and must be satisfied at render time" without generic parameters that propagate through the registry. The straightforward implementation reaches for `ComponentType<any>` or `React.FC<any>` as the registry value type.
+
+**How to avoid:**
+Define a constrained `SlotComponentProps` interface that all slot-registered components must satisfy:
 ```typescript
-type SankeySection = {
-  type: 'sankey'
-  title: string
-  nodes: { name: string }[]
-  links: { source: number; target: number; value: number }[]
-  height?: number
+// All components registered into slots must accept at minimum these props
+export interface SlotComponentProps {
+  context?: Record<string, string | number | boolean>
+  className?: string
 }
 ```
-Hardcode the indices in `defaultProps()` to match the `nodes` array. Add an inline comment documenting the index constraint in the component file.
+Register components as `React.ComponentType<SlotComponentProps>` (not `any`). Slot-rendering code passes only the props defined in `SlotComponentProps`. If a slot component needs module-specific data, it fetches it internally using its own hooks — the slot only provides the context surface (e.g., `clientSlug`, `moduleId`).
+
+This is the correct trade-off: you lose per-component prop inference at slot boundaries, but you maintain `no any` compliance and a documented contract for what a slot component receives.
 
 **Warning signs:**
-- Sankey chart area renders but is completely empty
-- No console error in development
-- `data.links` entries use string `source`/`target` instead of numbers
+- `ComponentType<any>` or `React.FC<any>` appears in `registry.ts` or any slot-related type
+- `npx tsc --noEmit` passes but a slot-registered component silently receives zero props at runtime
+- A slot component file has `props: any` in its function signature
+- ESLint `@typescript-eslint/no-explicit-any` is disabled in a module's component file
 
 **Phase to address:**
-Phase 3 (Onda 3 — advanced charts). Verify data shape against the official Recharts Sankey API before writing the component.
+Phase: Slot Architecture. The `SlotComponentProps` interface and the `ModuleSlot` component implementation must be written before any module registers a component into a slot.
 
 ---
 
-### Pitfall 3: Heatmap Has No Native Recharts Component — Cannot Be a `chartType` Sub-Variant
+### Pitfall 5: Over-Engineering the Extension System for a 5-Module App
 
 **What goes wrong:**
-Recharts 2.x has no `<Heatmap>` component (confirmed in recharts/recharts#237, no change since). A Heatmap must be built as a standalone section type using CSS grid or SVG rectangles — it is NOT a `chartType` value for `bar-line-chart`. If misclassified as a `chartType` sub-variant, `ChartRenderer`'s `default:` branch renders a plain bar chart. If classified as a standalone section but only the TypeScript type is added (without the matching Zod schema), `SectionRenderer` returns null silently because `SECTION_REGISTRY[type]` is undefined.
+Building a full extension system with `requires[]` dependency resolution, version checks, activation order, slot lifecycle hooks, and a runtime dependency graph is appropriate for a public plugin marketplace. For 5 in-house modules where all code is in the same repo and all modules are always active, this machinery adds complexity without benefit. The maintenance cost is real: every new module must understand the extension contract, circular dependency analysis becomes a required step, and the admin panel must accurately reflect activation state when there is no meaningful activation to control.
 
 **Why it happens:**
-The sub-variant path (adding a `chartType` string) is simpler than the standalone path (5-file checklist). Developers facing Heatmap, Sparkline Grid, and Progress Grid may attempt to reuse the sub-variant path to reduce the file count per chart.
+The v2.0 goal is described as a "modular framework shell" — a description that invites patterns from extension-heavy frameworks (VS Code, Backstage, Webpack). Those frameworks solve the problem of untrusted third-party plugins loading at runtime. FXL Core does not have that problem.
 
 **How to avoid:**
-Heatmap, Sparkline Grid, and Progress Grid are standalone section types. Each requires the full 5-file checklist:
-1. Type in `BlueprintSection` union (`types/blueprint.ts`)
-2. Zod schema in `nonRecursiveSections` array (`blueprint-schema.ts`)
-3. Renderer component (`HeatmapRenderer.tsx`, etc.)
-4. Property form component (`HeatmapForm.tsx`, etc.)
-5. Registry entry in `SECTION_REGISTRY` (`section-registry.tsx`)
+Implement the minimum viable extension system for the actual use case:
+- `requires[]`: static string array on `ModuleDefinition` — declares intent, no runtime resolution needed
+- Slots: a simple registry (`Map<slotId, ComponentType<SlotComponentProps>[]>`) initialized once at app boot from the static `MODULE_REGISTRY` — no lazy loading, no activation callbacks
+- Admin panel: displays `MODULE_REGISTRY` as a read-only list with status badges — no enable/disable toggles that change application behavior (since all modules are always compiled in)
+- Contracts: enforced by TypeScript type checks at build time, not runtime validation
 
-For Heatmap specifically: implement as a CSS grid with background colors derived from `color-mix(in srgb, var(--wf-chart-1) XX%, transparent)` — the same pattern used by the existing badge fills in the app.
+Add runtime complexity only if the use case actually appears: if a module needs to be toggled by a feature flag, introduce that mechanism for that specific module only.
 
 **Warning signs:**
-- `SectionRenderer` returns null for the new type (registry lookup fails silently)
-- Section does not appear in the `ComponentPicker` catalog
-- TypeScript passes even though the Zod schema was not added (the union type and schema are separate)
+- The extension system requires more than 3 new files in `src/` to implement
+- Any slot/extension logic contains `async` resolution, `Promise`, or conditional `await`
+- A `ModuleActivationService` or `DependencyResolver` class is being designed
+- The implementation requires reading from Supabase to determine which modules are "active"
 
 **Phase to address:**
-Phase 2 (Onda 2). The 5-file standalone checklist must be a phase acceptance criterion.
+Phase: Module Registry Enhancement. The type definitions for `ModuleDefinition` and `ModuleExtension` should be reviewed for complexity before any implementation starts. Use the rule: if the type cannot be explained in 5 lines, it is over-engineered for this codebase.
 
 ---
 
-### Pitfall 4: Zod `discriminatedUnion` Cannot Be Extended After Construction — Schema Must Be Edited In-Place
+### Pitfall 6: Home 2.0 Component Hardcodes Module State That Belongs in the Registry
 
 **What goes wrong:**
-`BlueprintSectionSchema` is assembled at module load time via `z.discriminatedUnion('type', [...nonRecursiveSections, <chart-grid>])`. Zod v3 `discriminatedUnion` validates that all members have unique `type` literals and is not composable — you cannot call `.or()` on a discriminated union or add new members by spreading. Attempting to extend by patching the array after-the-fact (e.g., by pushing to it outside `blueprint-schema.ts`) causes a TypeScript error because `nonRecursiveSections` is typed as `readonly [...] as const`. Using `z.union()` as an alternative breaks Zod's discriminated parse performance and removes the "unrecognized key" error that protects against typos.
+The current `Home.tsx` already has two hardcoded structures: `MODULE_DESCRIPTIONS` (a `Record<string, string>` mapping module IDs to descriptions not present in `ModuleManifest`) and `clients` (a hardcoded array of client data that belongs in the clients module). The v2.0 Home 2.0 will expand this pattern — adding more hardcoded statistics, quick-action lists, or module-specific widgets directly in `Home.tsx` — because it is simpler than defining a formal contract.
+
+The result is a `Home.tsx` that grows into a 500+ line file with knowledge of every module's internals, contradicting the modular architecture it is supposed to demonstrate.
 
 **Why it happens:**
-Zod's composability limitation (`colinhacks/zod#2567`) means developers who want to add schemas in separate files must bring them all back into `blueprint-schema.ts`. The temptation to define a new section's schema adjacent to its component is understandable but breaks the single assembly point.
+Cross-cutting concerns (like "what are this module's key metrics?") do not have a clean home until the registry provides a formal contract for it. The easiest path is to add it directly to the file that needs it.
 
 **How to avoid:**
-All section schemas must be defined inside `blueprint-schema.ts`. The addition pattern is:
-1. Define `const NewSectionSchema = z.object({ type: z.literal('new-type'), ... })` in `blueprint-schema.ts`
-2. Add it to `nonRecursiveSections`
-3. Export it at the bottom named exports block
-4. Import it in `section-registry.tsx`
+Extend `ModuleManifest` (or the new `ModuleDefinition` type) with optional metadata fields that modules can populate:
+```typescript
+interface ModuleDefinition {
+  // ... existing fields
+  description?: string          // moves MODULE_DESCRIPTIONS into manifests
+  homeWidget?: React.ComponentType<SlotComponentProps>  // module-contributed home widget
+  quickActions?: QuickAction[]  // module-contributed action buttons for home
+}
+```
+`Home.tsx` reads only from `MODULE_REGISTRY` — it knows nothing about individual modules. Each module's manifest declares what it contributes to the home page.
 
-Never define section schemas in component files or renderer files.
+If a module (like `clients`) needs to show dynamic data (active client count), it contributes a `homeWidget` component that fetches its own data — `Home.tsx` renders the slot but does not own the data fetching.
 
 **Warning signs:**
-- TypeScript error "Argument of type 'readonly [...]' is not assignable" when trying to extend the array
-- A developer defines a Zod schema inside a renderer or form component file
-- Runtime Zod error "ZodDiscriminatedUnion: Invalid discriminator value" after a new type is added
+- `Home.tsx` imports from any specific module directory: `import { ... } from '@/modules/clients/...'`
+- `Home.tsx` grows beyond 150 lines of JSX
+- A new `const MODULE_X_DATA: Record<string, Y>` constant appears at the top of `Home.tsx`
+- The ESLint boundary rule fires during a Home 2.0 PR because `Home.tsx` is a `page` type importing from `module` type
 
 **Phase to address:**
-All phases. Document this constraint in every phase plan's implementation notes.
+Phase: Home 2.0. The `description` and `homeWidget` fields in `ModuleManifest` must be defined before the Home component is rebuilt, not after.
 
 ---
 
-### Pitfall 5: CSS Custom Properties Cannot Resolve in Recharts `<Legend>` Background Colors
+### Pitfall 7: Admin Panel Routing Collides With Module Registry Derived Routes
 
 **What goes wrong:**
-Recharts `<Legend>` renders colored swatches as HTML `<li>` elements with inline `background-color`. SVG `fill="var(--wf-chart-1)"` works correctly inside chart paths (SVG attributes can resolve CSS custom properties via the cascade), but `background-color: var(--wf-chart-1)` set as an inline style by Recharts' Legend renderer resolves to an empty string in Chromium. Swatches appear grey in light mode and invisible in dark mode. This affects every new chart component that uses `<Legend>` if they pass CSS vars directly.
+`App.tsx` currently derives routes from `MODULE_REGISTRY` via `moduleRoutes = MODULE_REGISTRY.flatMap(m => m.routeConfig ?? [])`. The admin panel at `/admin/modules` could be registered as a route in a future `adminManifest`, or hardcoded directly in `App.tsx` as a static route. If it is added to the registry, it appears in the sidebar navigation (undesirable for an admin tool). If it is hardcoded in `App.tsx`, it breaks the invariant that all routes come from the registry, creating two competing sources of truth for routing.
+
+Additionally, `/admin/*` routes must not be accessible to unauthenticated users — they need the `<ProtectedRoute>` wrapper. If the admin routes are derived from the registry and the registry does not carry auth metadata, all module-derived routes have the same auth level (which is currently `<ProtectedRoute>` for all).
 
 **Why it happens:**
-This is a well-known Recharts limitation. The codebase already has `useWireframeChartPalette.ts` specifically to work around it — the hook reads resolved hex strings from `getComputedStyle`. New chart components that do not accept the `chartColors?: string[]` prop and use it for Legend payload colors will silently break the legend in dark mode.
+The registry-driven routing pattern in `App.tsx` is clean for the 5 existing modules. The admin panel is a new kind of route: it requires auth, should not appear in sidebar nav, and is "meta" to the module system itself. There is no precedent in the current codebase for a route that is protected but hidden.
 
 **How to avoid:**
-Every new chart component that renders a `<Legend>` must:
-1. Accept `chartColors?: string[]` prop
-2. Use `chartColors?.[i] ?? 'var(--wf-chart-N)'` for SVG `fill`/`stroke` attributes and Legend `color` values
-3. The parent renderer (`ChartRenderer` or standalone renderer) passes resolved colors from `useWireframeChartPalette`
+Add an `adminOnly?: boolean` flag to `ModuleManifest` (or create a separate `ADMIN_REGISTRY` constant for admin routes). In `Sidebar.tsx`, filter out `adminOnly` manifests from navigation. In `App.tsx`, render admin routes inside `<ProtectedRoute>` like all other module routes (they already are), but ensure the `AdminModulesPanel` page is gated to operator accounts only if non-operator access ever becomes a concern.
 
-For charts without `<Legend>` (Heatmap, Sparkline Grid, Lollipop), CSS vars used directly in SVG `fill` are safe.
-
-Copy the prop signature from `BarLineChart.tsx` — the existing pattern is correct.
+For v2.0 specifically: hardcode the `/admin/modules` route as a static `<Route>` in `App.tsx` under a comment `{/* Admin routes — not registry-derived */}`. Do not add it to MODULE_REGISTRY. If more admin routes appear in future milestones, introduce the `ADMIN_REGISTRY` pattern then.
 
 **Warning signs:**
-- Legend swatches appear grey or invisible when dark mode is toggled
-- New component does not accept `chartColors` prop
-- `fill="var(--wf-chart-1)"` appears directly in a `<Legend>` `payload` entry
+- The admin module panel appears in the Sidebar navigation under "Modulos" or any section
+- `App.tsx` contains a `<Route path="/admin/*" ...>` that is NOT wrapped in `<ProtectedRoute>`
+- A new `adminManifest` is created and added to `MODULE_REGISTRY` — the admin panel is not a module, it is a system tool
 
 **Phase to address:**
-All phases. Gate every new chart component on `chartColors` prop presence during the code review step.
-
----
-
-### Pitfall 6: Recharts `<Pie>` Cell Key Prop Misalignment Causes Stale Colors After Branding Override
-
-**What goes wrong:**
-Recharts `<Pie>` requires `<Cell>` child components to control per-slice colors. If `<Cell key={slice.label}>` uses the label string as a key, React's reconciler reuses cell DOM nodes when labels stay the same but colors change (e.g., after a branding override is applied). The chart visually appears to update but slice colors remain from the previous render cycle. The bug is only visible after switching a client's branding or toggling dark mode — not during initial load.
-
-**Why it happens:**
-Using semantic keys (label) is a standard React pattern for list items. The problem is specific to Recharts `<Cell>` because Recharts controls fill as a prop — React does not re-render the SVG element if the key matches.
-
-**How to avoid:**
-Always use `key={i}` (array index) for `<Cell>` inside `<Pie>`. The existing `GaugeChartComponent.tsx` and `DonutChart.tsx` follow this pattern. Copy them. Never use `key={slice.label}` or `key={slice.value}`.
-
-**Warning signs:**
-- Applying a branding override does not update Pie/Donut slice colors until page reload
-- Colors from one client's branding appear in another client's wireframe after switching
-
-**Phase to address:**
-Phase 1 (Onda 1 — Pie chart as sub-variant or standalone). Verify during the mandatory browser validation step.
-
----
-
-### Pitfall 7: `isAnimationActive={false}` Omitted — Visual Editor Re-Animations on Every Prop Change
-
-**What goes wrong:**
-Every existing chart in the codebase sets `isAnimationActive={false}` on all series components (`<Bar>`, `<Line>`, `<Area>`, `<Pie>`, etc.). New chart components that omit this prop will animate every time the visual editor's property panel changes a value — which happens on every keystroke in a text field. The chart re-animates from zero on each render, making the editor feel broken and causing layout jank.
-
-**Why it happens:**
-`isAnimationActive` defaults to `true` in Recharts. The existing charts disable it by convention but this is not enforced by TypeScript or any lint rule.
-
-**How to avoid:**
-Set `isAnimationActive={false}` on every series child of every new chart component. This is a mandatory implementation rule, not a performance optimization. Add it to the phase plan acceptance checklist.
-
-**Warning signs:**
-- Typing in a chart's title field causes the chart bars/lines to animate from zero
-- Chart looks visually "bouncy" while navigating properties in the editor
-
-**Phase to address:**
-All phases. Add `isAnimationActive={false}` to the "Looks Done But Isn't" checklist for every chart.
+Phase: Admin Panel. The routing strategy for `/admin/modules` must be decided before the component is built.
 
 ---
 
@@ -193,12 +211,12 @@ All phases. Add `isAnimationActive={false}` to the "Looks Done But Isn't" checkl
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Skipping the property form for a new chart type | Saves ~1h per chart | Section cannot be edited in the visual editor; must resort to raw JSON in Supabase | Never — all SECTION_REGISTRY entries require a propertyForm |
-| Reusing `BarLineChartForm` unchanged for new chartType sub-variants | Zero new code | Form shows irrelevant fields (categories, xLabel/yLabel) for charts like Pie or Polar that do not use them | Acceptable only if irrelevant fields are conditionally hidden by `chartType` value |
-| Hardcoding colors in chart components instead of using `chartColors` prop | Simpler component, faster to write | Dark mode broken, branding override ignored for that component | Never for chart fill/stroke; acceptable for structural SVG (axes, grid lines) |
-| Adding `type` to `BlueprintSection` union but not to Zod schema | TypeScript passes | Supabase round-trip drops the section during safeParse validation | Never — union and schema must be in sync |
-| Implementing Heatmap or Progress Grid with Recharts as a workaround | Stays within the chart library | Recharts has no native heatmap; workarounds are complex, token-incompatible, and unmaintainable | Never — use CSS grid for Heatmap, Progress Grid |
-| Using `z.unknown()` for chart-specific data fields to avoid schema design | Avoids upfront schema thinking | No runtime validation; malformed data reaches renderer silently | Acceptable for v1 wireframe mock data where types are controlled; never for production data ingestion |
+| Using `any` for slot component props | Avoids designing `SlotComponentProps` interface | Every slot-registered component loses type checking; `tsc --noEmit` cannot catch prop mismatches at slot boundaries | Never — use `SlotComponentProps` with explicit fields |
+| Leaving `MODULE_DESCRIPTIONS` in `Home.tsx` instead of moving it to manifests | Home 2.0 ships faster | Home.tsx has module-specific knowledge that must be updated every time a manifest changes, in a different file | Acceptable only if `description` field is added to manifests within the same milestone |
+| Adding the `/admin/modules` route to `MODULE_REGISTRY` | Single source for all routes | Admin panel appears in sidebar; no precedent for "hidden module" pattern creates confusion | Never — hardcode admin routes as static `<Route>` entries in `App.tsx` |
+| Weakening the ESLint boundary rule from `error` to `warn` | Stops CI failures from blocking the PR | Module isolation is advisory, not enforced; developers ignore warnings; cross-module imports accumulate | Never — if a legitimate cross-module communication need exists, solve it via the registry |
+| Implementing `requires[]` as runtime resolution (dynamically loading module code on demand) | Theoretically enables tree-shaking inactive modules | All 5 modules are always compiled in and always active; lazy-loading them adds Suspense complexity and ChunkLoadError risk with zero bundle-size benefit | Never for this codebase — `requires[]` is metadata only |
+| Building the Home 2.0 as a full-page component with Supabase fetches for all module data | Simpler than the slot system | Home.tsx becomes the god-component for all module state; every new module adds fetches to Home | Acceptable for initial Home 2.0 if homeWidget slots are added in the next milestone |
 
 ---
 
@@ -206,15 +224,12 @@ All phases. Add `isAnimationActive={false}` to the "Looks Done But Isn't" checkl
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Recharts `<Sankey>` | Passing string node names as `source`/`target` in links | Use integer array indices matching the position in `data.nodes` |
-| Recharts `<Pie>` (standalone Pie chart section) | Using `PieChart` component inside a `chart-grid` that already contains a `GaugeChartSection` (which also uses `PieChart`) | Each is independent; no conflict — they render in separate DOM subtrees. Ensure section type is `'pie-chart'` (standalone) not a `chartType` on `bar-line-chart` |
-| Recharts `<ResponsiveContainer>` | Parent container has `height: auto` or a flex parent without explicit height — container collapses to 0 | Always set explicit `style={{ height: N }}` on the direct parent `<div>` of `<ResponsiveContainer>`, or pass a numeric `height` prop |
-| Recharts `<Tooltip>` | Tooltip background hardcoded white — invisible in dark mode | Use `contentStyle={{ background: 'var(--wf-surface)', border: '1px solid var(--wf-card-border)', color: 'var(--wf-heading)' }}` on every `<Tooltip>` |
-| `section-registry.tsx` type cast | Forgetting the `as unknown as ComponentType<SectionRendererProps>` double cast on new renderer — TypeScript error in registry entry | Copy the cast pattern from existing entries; the cast exists because renderer prop types are narrower than the generic `SectionRendererProps` |
-| `blueprint-migrations.ts` | Adding a required (non-optional) field to an existing section type without writing a migrator | Mark new fields `.optional()` in Zod or provide a `DEFAULT`; write a migrator only when a field must be required for all existing data |
-| `screen-recipes.ts` / `vertical-templates.ts` | New chart types are never referenced — AI generation never suggests them | After each wave, add at least one recipe section using the new types; update keyword matching in `SCREEN_RECIPES` |
-| `ComponentGallery.tsx` | New component exists in `tools/` but not imported or rendered in the gallery page | Add import + render block with mock data; verify in browser — the gallery is the visual regression test for all components |
-| `z.lazy()` and recursive `chart-grid` | Concern that new types break the lazy reference | New types in `nonRecursiveSections` are automatically included; the lazy reference rebuilds the discriminated union correctly. No special handling needed. |
+| `react-router-dom v6` + route migration | Using `<Navigate>` without `replace` — adds a history entry so the browser back button returns to `/` and immediately redirects again (redirect loop) | Always use `<Navigate to="/docs" replace />` when moving a canonical route |
+| `react-router-dom v6` + `moduleRoutes` flatMap | Adding a `/admin/modules` route to a manifest's `routeConfig` — it gets added to the sidebar navigation automatically via `navigationFromRegistry` | Admin routes must NOT be in `MODULE_REGISTRY`; hardcode them as static `<Route>` entries |
+| ESLint `boundaries` plugin + extension imports | Module A importing Module B's component directly to register it as a slot extension | Slot-registered components must be in the _providing_ module's own manifest; the registry aggregates them — never direct cross-module imports |
+| Vercel SPA rewrite + new `/docs` base path | The existing `vercel.json` `/(.*) → /index.html` rewrite already handles `/docs/*` correctly — no change needed | Verify by direct URL access: `yourdomain.com/docs/processo/index` should load React then route to docs |
+| `Sidebar.tsx` hardcoded Home link | The `<NavLink to="/">` in Sidebar will still be "active" when on any route if `end` prop is missing | Add `end` prop to the Home NavLink: `<NavLink to="/" end ...>` — this is already present in current code; ensure it remains after the Home 2.0 migration |
+| `MODULE_REGISTRY` static evaluation + circular manifest imports | A manifest that imports a value from `registry.ts` creates a cycle; Vite resolves it but `MODULE_REGISTRY` may be `undefined` at the import point | Manifests import only types from `registry.ts` (erased at build time); runtime values (module IDs for `requires[]`) come from a separate constants file |
 
 ---
 
@@ -222,10 +237,20 @@ All phases. Add `isAnimationActive={false}` to the "Looks Done But Isn't" checkl
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Multiple `<ResponsiveContainer>` instances with `height="100%"` | Scroll janky on screens with 6+ charts; ResizeObserver triggers on every pixel | Use `width="100%"` + fixed numeric `height` prop instead of `height="100%"` | Noticeably at 8+ charts on a single screen |
-| Recharts animation enabled on all new charts | Visual editor blinks and re-animates on every property change keystroke | Set `isAnimationActive={false}` on every `<Bar>`, `<Line>`, `<Area>`, `<Pie>` | Immediately visible in the visual editor, regardless of chart count |
-| `useWireframeChartPalette` called per-chart inside `chart-grid` | 12 DOM reads per render cycle; excessive `getComputedStyle` calls | Hook is called once at `BlueprintRenderer` level; resolved array passed down as `chartColors` prop — existing pattern is correct | Noticeable when `chart-grid` nests 4+ charts |
-| New chart calling `getComputedStyle` directly at render time | Race condition: styles not available on first paint → empty string → chart renders colorless | Use the passed-in `chartColors` prop exclusively; never call `getComputedStyle` inside a chart component | On first mount; intermittent in test environments |
+| `ModuleSlot` re-resolving registered components on every render | Slot renders cause micro-stutters; React DevTools shows excessive re-renders in slot tree | Build the slot registry as a module-level `Map` initialized once at app boot — no `useState`, no `useEffect`, no dynamic `import()` inside slot rendering | Visible immediately if slot registry is rebuilt on every render cycle |
+| Lazy-loading slot-registered components with `React.lazy` | Components registered into slots have a loading state on first render; ChunkLoadError if network drops mid-load | For internal module slots (always-available modules), register the component directly — no `React.lazy` needed since the code is always bundled | Visible on first slot render in production with a slow network |
+| Home 2.0 firing parallel Supabase queries for every active module's activity data | Home page loads slowly; multiple waterfall fetches visible in network tab | Use `Promise.all` for parallel fetches (already done in current Home.tsx); if home widgets fetch independently, each should have its own Suspense boundary | With 5 modules each fetching 10 rows, load time doubles from current baseline |
+| Admin panel re-fetching full `MODULE_REGISTRY` on every visit | Unnecessary re-computation since registry is static | Admin panel reads `MODULE_REGISTRY` directly as a constant — no async fetching, no state | Not a scaling issue since registry is static; main risk is incorrect implementation using `useState` + `useEffect` for static data |
+
+---
+
+## Security Mistakes
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Rendering slot-registered component output without React's XSS protection | A malicious module (impossible in this closed codebase but poor pattern) injects `dangerouslySetInnerHTML` | Slot components render as normal React elements — React's escaping applies automatically. Never use `dangerouslySetInnerHTML` in slot-registered components |
+| Admin panel at `/admin/modules` accessible without auth | Any unauthenticated visitor can view module configuration and status | Admin routes must be inside `<ProtectedRoute>` — this is already the case for all routes in the Layout wrapper; verify explicitly for admin routes if they are added outside the main protected route tree |
+| Extension `context` prop passing sensitive data to slot components | A slot provides `{ userId, orgSecret }` and the component inadvertently logs it | Define `SlotComponentProps.context` as `Record<string, string | number | boolean>` — no object nesting, no callback functions, no sensitive tokens |
 
 ---
 
@@ -233,32 +258,28 @@ All phases. Add `isAnimationActive={false}` to the "Looks Done But Isn't" checkl
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Bump Chart mock data has flat or ascending rank (no crossing lines) | Users cannot understand the chart represents rankings; looks like a line chart | Mock data must show clear rank position changes: a series starting at position 3, dropping to 1, then recovering to 2 |
-| Lollipop Chart using same blue as bar charts in nearby sections | Visually indistinct from a BarChart in the component gallery and wireframe previews | Use `--wf-chart-1` for lollipop heads, `--wf-muted-foreground` for the stick/stem |
-| Polar/Radar-style chart with more than 8 spokes | Labels overlap and become unreadable; chart looks cluttered | Limit mock data to 5-6 categories; document maximum in the section's `description` field in `catalogEntry` |
-| Heatmap without `xLabels` and `yLabels` | Users cannot interpret what each axis represents | `HeatmapSection` type must include `xLabels: string[]`, `yLabels: string[]` as required fields, not optional |
-| Sankey without `nodePadding` configured | Nodes overlap visually when there are more than 6 nodes (known Recharts issue from v2.15.0) | Set `nodePadding={20}` as default in the component; expose it as an optional override |
-| Sparkline Grid showing all-zero arrays in `defaultProps()` | Grid renders as flat lines — indistinguishable from "no data" state | Default mock data must show a visible trend; never use all-zero arrays in `defaultProps()` |
-| Progress Grid without `max` defined per item | All bars render at 100% OR throw NaN if `max` is 0 | `max` should be a required numeric field in `ProgressGridItem`, not optional |
+| Sidebar active state broken after `/` moves to Home 2.0 | Operator sees no active item in sidebar when on the home page, or the wrong item is highlighted | The Home NavLink in Sidebar uses `end` prop — verify this after routing migration; the docs module's sidebar section should not be active when on `/` |
+| Admin panel in sidebar navigation | Operators are confused by an "Admin" item in the main nav alongside Processo, Clientes, etc. | Admin panel is accessed via a URL or a link from the Home 2.0 control center — not a primary sidebar nav item |
+| Home 2.0 duplicates module information already visible in sidebar | Home feels redundant — operators skip it and go directly to sidebar links | Home 2.0 must show _actionable_ information not available in the sidebar: recent activity, quick actions, module health status — not just a list of links to modules |
+| Module slot content has different visual style from host page | Injected widgets feel like foreign elements — different border radius, font size, spacing | `SlotComponentProps` must include `className?: string`; slot components use the app's existing Tailwind utility classes and design tokens, not their own isolated styles |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-For each new chart/section type, verify all of the following before considering it complete:
+For the v2.0 routing refactor and extension architecture, verify all of the following before considering each phase complete:
 
-- [ ] **TypeScript union updated:** `ChartType` (for sub-variants) or `BlueprintSection` union (for standalone types) includes the new type — `npx tsc --noEmit` passes with zero errors
-- [ ] **Zod schema added:** New schema in `nonRecursiveSections` array in `blueprint-schema.ts` — `BlueprintConfigSchema.safeParse()` accepts a minimal valid example of the new type
-- [ ] **Registry entry complete:** `SECTION_REGISTRY` entry has all 5 fields: `renderer`, `propertyForm`, `catalogEntry`, `defaultProps`, `schema`
-- [ ] **Dark mode verified:** Wireframe viewer dark mode toggle — chart renders correctly in both modes (no invisible elements, no hardcoded white backgrounds, legend swatches visible)
-- [ ] **`chartColors` prop wired:** If the component uses `<Legend>`, it accepts and uses `chartColors` prop — verified in browser with a branding override applied
-- [ ] **`isAnimationActive={false}`:** Set on every `<Bar>`, `<Line>`, `<Area>`, `<Pie>`, or equivalent series component
-- [ ] **Tooltip dark mode styled:** `<Tooltip>` uses `contentStyle` with `--wf-*` CSS vars (or the chart has no tooltip)
-- [ ] **`defaultProps()` is non-trivial:** The default section produces a visually meaningful chart — no empty arrays, no all-zero values, no blank titles
-- [ ] **Property form exists and works:** New section can be edited in the visual editor — open the property panel, change at least one field, confirm the chart updates
-- [ ] **ComponentGallery updated:** `src/pages/tools/ComponentGallery.tsx` imports and renders the new component with mock data
-- [ ] **Recipe updated:** At least one entry in `screen-recipes.ts` or `vertical-templates.ts` references the new section type
-- [ ] **Schema test added:** `blueprint-schema.test.ts` has a fixture for the new type with a `safeParse` assertion
+- [ ] **Route `/` renders Home 2.0:** Direct URL `yourdomain.com/` loads the new Home component, not the docs module
+- [ ] **Route `/docs` renders docs:** Direct URL `yourdomain.com/docs` routes to the documentation module entry point; no 404, no infinite redirect
+- [ ] **Old doc links work:** URLs like `yourdomain.com/processo/visao-geral` still resolve correctly — the docs module's wildcard routes (`/processo/*`) are unchanged
+- [ ] **Sidebar Home link is active only on `/`:** Navigating to `/docs` does not mark the Home sidebar link as active; `end` prop is present on the Home NavLink
+- [ ] **No ESLint boundary violations:** `npx eslint src/ --max-warnings 0` passes with zero boundary errors after any cross-module slot registration is added
+- [ ] **No circular import warnings in Vite build:** `npm run build` produces no "circular dependency" warnings in the console
+- [ ] **Admin panel not in sidebar:** `/admin/modules` is accessible by URL but does not appear in the sidebar navigation under any section
+- [ ] **Admin panel protected:** Navigating to `/admin/modules` without being logged in redirects to `/login`
+- [ ] **`tsc --noEmit` passes:** Zero TypeScript errors, zero uses of `any` in any new registry, slot, or extension type
+- [ ] **Slot components satisfy `SlotComponentProps`:** Every component registered into a slot passes TypeScript type checking without `@ts-ignore` or type casts to `any`
+- [ ] **Vercel deploy:** After routing migration, manually test direct URL access in the deployed Vercel environment (not just local dev) — Vite dev server handles all routes; Vercel rewrite behavior may differ
 
 ---
 
@@ -266,15 +287,13 @@ For each new chart/section type, verify all of the following before considering 
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| ChartType enum updated but Zod schema not — existing blueprints fail safeParse | LOW | Add the new value to `z.enum([...])` in `BarLineChartSectionSchema`; no data migration needed |
-| Standalone section added to union but not Zod schema — section silently dropped from DB | LOW | Add Zod schema; re-save any affected blueprints from the visual editor |
-| Sankey data shape wrong — chart renders blank | LOW | Update `SankeySection` type and schema to use integer indices; update `defaultProps()` with correct index values |
-| CSS var in Legend swatch — swatches grey or invisible in dark mode | LOW | Wire `chartColors` prop from parent; replace `fill="var(--wf-chart-1)"` with `fill={chartColors?.[0] ?? 'var(--wf-chart-1)'}` |
-| Section missing from `SECTION_REGISTRY` — `SectionRenderer` silently returns null | LOW | Add registry entry; no data migration needed |
-| ComponentGallery not updated — new component not visible | MEDIUM | Add import and render block; verify visually in browser; requires full dark/light mode check |
-| Screen recipe not updated — AI generation never uses new types | MEDIUM | Add recipe section; run `generation-engine.test.ts` to confirm new type appears in generated output |
-| Animation not disabled — visual editor feels broken | LOW | Add `isAnimationActive={false}` to all series elements; verify in editor with property panel open |
-| Required field added to existing section type without migrator | HIGH | Mark field `.optional()` in Zod; add a schema migration (`v1 → v2`) to `blueprint-migrations.ts` that fills the default value; bump `CURRENT_SCHEMA_VERSION`; test against the pilot client's existing blueprint in Supabase |
+| Route `/` broken — Home 2.0 redirect loops | LOW | Add `replace` to `<Navigate>` component; clear browser history in dev tools; verify in incognito |
+| `/docs` route missing — docs module unreachable | LOW | Add explicit `<Route path="/docs" element={<Navigate to="/processo/index" replace />} />` in App.tsx as a bridge route |
+| ESLint boundary violation from cross-module slot import | LOW | Move the registered component reference into `registry.ts`; remove the direct cross-module import from the manifest |
+| Circular manifest import — `MODULE_REGISTRY` is `undefined` at runtime | MEDIUM | Create `src/modules/module-ids.ts` constants file; replace all value imports from `registry.ts` in manifests with imports from the constants file |
+| `ComponentType<any>` in slot registry — TypeScript silent failures | MEDIUM | Define `SlotComponentProps`; replace `any` with it; fix any component files that do not satisfy the interface — likely requires adding `context?: Record<string, string \| number \| boolean>` to slot component props |
+| Home 2.0 is a god-component importing from all modules | HIGH | Introduce `homeWidget` slot field in `ModuleManifest`; each module moves its home content into its own widget component; Home.tsx renders slots only — requires refactoring each module's home contribution |
+| Admin panel accessible without auth | LOW | Wrap admin route in `<ProtectedRoute>`; verify in incognito |
 
 ---
 
@@ -282,57 +301,37 @@ For each new chart/section type, verify all of the following before considering 
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| ChartType 4-point sync | Phase 1 (Onda 1) | `npx tsc --noEmit` + `blueprint-schema.test.ts` green after each new `chartType` |
-| Pie chart `<Cell>` key | Phase 1 (Onda 1 — Pie) | Browser: apply branding override, verify slice colors update without page reload |
-| Heatmap misclassified as chartType | Phase 2 (Onda 2) | Heatmap appears in `ComponentPicker` under correct category; not in ChartRenderer switch |
-| Standalone section missing from Zod | Phase 2 (Onda 2) | `safeParse()` passes for each Onda 2 type in `blueprint-schema.test.ts` |
-| Zod schema non-extensibility | All phases | `npx tsc --noEmit` + Zod tests green after each section schema addition |
-| Sankey index-based data | Phase 3 (Onda 3) | Sankey renders with visible flow: nodes, links, and labels in browser |
-| CSS vars in Legend swatches | All phases (charts with Legend) | Dark mode toggle in browser; all legend swatches remain visible |
-| Tooltip dark mode | All phases (charts with Tooltip) | Dark mode in browser; tooltip background readable against chart |
-| Animation not disabled | All phases | Open visual editor; type in chart title field — no chart re-animation |
-| ComponentGallery out of sync | End of each wave | Gallery page shows every new component with correct light/dark styling |
-| Screen recipes not updated | End of each wave | `generation-engine.test.ts` passes; new type appears in at least one generated blueprint |
-| ResponsiveContainer height collapse | All phases | Resize browser window; no chart collapses to 0 height |
-
----
-
-## Per-Chart Warning Signs Quick Reference
-
-| Chart Type | Wave | Recharts Component | Primary Risk | Data Shape Gotcha |
-|------------|------|-------------------|--------------|-------------------|
-| Grouped Bar | 1 | `<BarChart>` with multiple `<Bar>` | Missing `barCategoryGap` — bars overlap | `data[i]` must have one numeric key per group |
-| Bullet Chart | 1 | Custom SVG (no Recharts analog) | Misclassifying as `chartType` | `{ label, actual, target, ranges[] }` per item |
-| Step Line | 1 | `<LineChart>` with `type="stepAfter"` on `<Line>` | Forgetting `type="stepAfter"` — renders as smooth curve | Same as standard line chart |
-| Pie Chart | 1 | `<PieChart>` + `<Pie>` + `<Cell>` | `<Cell key={index}>` — must use array index; label overlap for small slices | `data[i].value` must be numeric |
-| Heatmap | 2 | CSS grid (no Recharts) | Using Recharts ScatterChart hack — CSS vars not applied | `matrix[row][col]` numeric intensity; `xLabels`, `yLabels` required |
-| Sparkline Grid | 2 | `<LineChart>` without axes | Axes not hidden — padding steals sparkline height | `data[i]` must be `{ v: number }`; no empty arrays in defaultProps |
-| Progress Grid | 2 | CSS `<div>` bars (no Recharts) | `max` undefined → NaN → 0% bar | `{ label, value, max }` — `max` required |
-| Sankey | 3 | `<Sankey>` | Index-based links misunderstood as string names | `{ nodes: [{name}], links: [{source: idx, target: idx, value}] }` |
-| Bump Chart | 3 | `<LineChart>` inverted Y axis | Flat mock data — no visible rank crossings | `data[period]` has rank as y value; lower rank number = top |
-| Range Bar | 3 | `<BarChart>` with two stacked `<Bar>` | No native range bar — use invisible base + visible range | `{ category, start, end }` per item |
-| Lollipop | 3 | `<ComposedChart>` with `<Scatter>` + `<ErrorBar>` | `ErrorBar` direction must be `"y"` for vertical lollipop | `{ x: string, y: number }` per item |
-| Polar | 3 | `<RadarChart>` (type already exists) | Duplicate of existing `radar` chartType — only implement if distinct "polar area fill" style is needed | Same as Radar |
+| Route migration breaks bookmarks and Cmd+K links | Routing Refactor phase — link audit before first commit | Direct URL access to `/`, `/docs`, `/processo/visao-geral` in deployed Vercel environment |
+| ESLint boundary violation from extension imports | Module Registry Enhancement — approve cross-module communication pattern before slot code | `npx eslint src/ --max-warnings 0` in CI |
+| Circular manifest import via registry.ts | Module Registry Enhancement — create `module-ids.ts` at phase start | `npm run build` with no circular dependency warnings |
+| Type safety lost in slot system | Slot Architecture phase — define `SlotComponentProps` before any slot is implemented | `npx tsc --noEmit` passes; grep for `ComponentType<any>` returns zero results |
+| Over-engineering extension system | Module Registry Enhancement — complexity review of `ModuleDefinition` type | Type definition fits in 20 lines; no async resolution logic |
+| Home 2.0 god-component | Home 2.0 phase — require `description` field in manifests before rebuilding Home | Home.tsx imports only from `@/modules/registry`; ESLint boundary rule does not fire |
+| Admin panel in sidebar navigation | Admin Panel phase — routing strategy decided before component is built | Admin URL accessible by direct navigation; absent from sidebar in all states |
+| Vercel routing regression | End of Routing Refactor phase | Manual test in deployed Vercel preview: direct URL access for 5 distinct routes |
 
 ---
 
 ## Sources
 
-- Direct codebase inspection: `tools/wireframe-builder/lib/blueprint-schema.ts` — `nonRecursiveSections` pattern and `z.discriminatedUnion` assembly
-- Direct codebase inspection: `tools/wireframe-builder/lib/section-registry.tsx` — 5-field registry structure with `as unknown as ComponentType<SectionRendererProps>` cast pattern
-- Direct codebase inspection: `tools/wireframe-builder/components/sections/ChartRenderer.tsx` — 4-point sync issue and `default:` cast
-- Direct codebase inspection: `tools/wireframe-builder/lib/useWireframeChartPalette.ts` — documented rationale for CSS var → hex resolution
-- Direct codebase inspection: `tools/wireframe-builder/components/GaugeChartComponent.tsx` — correct `<Cell key={i}>` pattern
-- [Recharts Sankey API — recharts.github.io](https://recharts.github.io/en-US/api/Sankey/)
-- [Recharts Sankey index-based node references — GitHub Discussion #2771](https://github.com/recharts/recharts/discussions/2771)
-- [Recharts Sankey node visual overlap in v2.15.0 — GitHub Issue #5559](https://github.com/recharts/recharts/issues/5559)
-- [Recharts no native heatmap — GitHub Issue #237](https://github.com/recharts/recharts/issues/237)
-- [Recharts Pie chart label overlap — GitHub Issue #903](https://github.com/recharts/recharts/issues/903)
-- [Zod discriminatedUnion not composable — GitHub Issue #2567](https://github.com/colinhacks/zod/issues/2567)
-- [Recharts official performance guide — recharts.github.io/guide/performance](https://recharts.github.io/en-US/guide/performance/)
-- [Recharts CSS variables for dark mode — Reshaped docs](https://www.reshaped.so/docs/getting-started/guidelines/recharts)
-- `.planning/PROJECT.md` — v1.6 milestone target features, constraint list, and out-of-scope decisions
+- Direct codebase inspection: `src/App.tsx` — current routing structure, `moduleRoutes` derivation pattern, static vs. registry-derived routes
+- Direct codebase inspection: `src/modules/registry.ts` — `ModuleManifest` type, `MODULE_REGISTRY` static constant
+- Direct codebase inspection: `src/components/layout/Sidebar.tsx` — `navigationFromRegistry` derivation, hardcoded Home NavLink
+- Direct codebase inspection: `src/pages/Home.tsx` — `MODULE_DESCRIPTIONS` hardcoding pattern, `useActivityFeed` cross-module Supabase fetch
+- Direct codebase inspection: `src/modules/docs/manifest.tsx`, `src/modules/clients/manifest.tsx` — current route config and nav structure
+- Direct codebase inspection: `eslint.config.js` — `boundaries/element-types` rule with `{ from: 'module', disallow: ['module'] }` enforcement
+- Direct codebase inspection: `vercel.json` — `/(.*) → /index.html` rewrite confirms all routes already handled
+- [React Router v6 Navigate component — official docs](https://reactrouter.com/en/main/components/navigate)
+- [React Router v6 redirect handling — Michael Jackson gist](https://gist.github.com/mjackson/b5748add2795ce7448a366ae8f8ae3bb)
+- [Vercel SPA routing 404 fix — Vercel Knowledge Base](https://vercel.com/kb/guide/why-is-my-deployed-project-giving-404)
+- [Vercel Vite SPA rewrite issue — community thread](https://community.vercel.com/t/rewrite-to-index-html-ignored-for-react-vite-spa-404-on-routes/8412)
+- [Slot-Based APIs in React — DEV Community](https://dev.to/talissoncosta/slot-based-apis-in-react-designing-flexible-and-composable-components-7pj)
+- [Martin Fowler — Modularizing React Applications](https://martinfowler.com/articles/modularizing-react-apps.html)
+- [Circular dependencies in JavaScript/TypeScript — Michel Weststrate](https://medium.com/visual-development/how-to-fix-nasty-circular-dependency-issues-once-and-for-all-in-javascript-typescript-a04c987cf0de)
+- [ESLint boundaries plugin + Nx module enforcement — Nx docs](https://nx.dev/docs/technologies/eslint/eslint-plugin/guides/enforce-module-boundaries)
+- [React TypeScript generic component type safety — Total TypeScript](https://www.totaltypescript.com/tips/use-generics-in-react-to-make-dynamic-and-flexible-components)
+- `.planning/PROJECT.md` — v2.0 milestone target features, key decisions, constraints
 
 ---
-*Pitfalls research for: v1.6 — 12 new chart/section types in Recharts 2.x wireframe builder*
-*Researched: 2026-03-12*
+*Pitfalls research for: v2.0 — modular extension architecture added to existing React 18 SPA*
+*Researched: 2026-03-13*
