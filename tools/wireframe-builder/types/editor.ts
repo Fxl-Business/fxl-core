@@ -10,6 +10,11 @@ export type ScreenRow = {
   sections: BlueprintSection[] // length must match cell count for layout
 }
 
+export type SidebarElementSelection =
+  | { type: 'group'; groupIndex: number }
+  | { type: 'footer' }
+  | { type: 'widget'; widgetIndex: number }
+
 export type EditModeState = {
   active: boolean
   dirty: boolean // unsaved changes exist
