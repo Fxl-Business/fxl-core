@@ -21,7 +21,7 @@
 
 - [x] **Phase 47: Schema Foundation** - Extend SidebarConfig schema with SidebarWidget type in Zod and TypeScript (completed 2026-03-13)
 - [x] **Phase 48: Header Render Wiring** - Wire all HeaderConfig fields to WireframeHeader renderer (completed 2026-03-13)
-- [ ] **Phase 49: Dashboard Mutation Infrastructure** - updateWorkingConfig helper + AdminToolbar Layout button group
+- [x] **Phase 49: Dashboard Mutation Infrastructure** - updateWorkingConfig helper + AdminToolbar Layout button group (completed 2026-03-13)
 - [ ] **Phase 50: Header Config Panel** - Sheet panel for all header toggles, brand label, and period type
 - [ ] **Phase 51: Sidebar Widget Renderers** - SIDEBAR_WIDGET_REGISTRY + WorkspaceSwitcher and UserMenu widget components
 - [ ] **Phase 52: Sidebar Config Panel** - Sheet panel for groups, footer text, screen assignment, and widget management
@@ -118,7 +118,7 @@ Phases execute in dependency order: 47 → 48 → 49 → 50 → 51 → 52 → 53
 |-------|-----------|----------------|--------|-----------|
 | 47. Schema Foundation | 1/1 | Complete    | 2026-03-13 | - |
 | 48. Header Render Wiring | 1/1 | Complete    | 2026-03-13 | - |
-| 49. Dashboard Mutation Infrastructure | v2.2 | 0/1 | Planned | - |
+| 49. Dashboard Mutation Infrastructure | 1/1 | Complete   | 2026-03-13 | - |
 | 50. Header Config Panel | v2.2 | 0/1 | Planned | - |
 | 51. Sidebar Widget Renderers | v2.2 | 0/1 | Planned | - |
 | 52. Sidebar Config Panel | v2.2 | 0/1 | Planned | - |
