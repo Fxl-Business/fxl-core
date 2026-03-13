@@ -93,7 +93,14 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
-(No active requirements — planning next milestone)
+## Current Milestone: v1.6 12 Novos Graficos
+
+**Goal:** Expandir a biblioteca de componentes do wireframe builder com 12 novos tipos de grafico/secao para cobrir mais cenarios de BI financeiro/operacional.
+
+**Target features:**
+- Onda 1 (chart sub-variants): Grouped Bar, Bullet Chart, Step Line, Pie Chart
+- Onda 2 (standalone sections): Heatmap, Sparkline Grid, Progress Grid
+- Onda 3 (advanced charts): Sankey, Bump Chart, Range Bar, Lollipop, Polar
 
 ### Out of Scope
 
@@ -208,4 +215,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-13 after v1.5 milestone completion*
+*Last updated: 2026-03-12 after v1.6 milestone start*
