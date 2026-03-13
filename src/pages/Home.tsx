@@ -4,14 +4,6 @@ import { ArrowRight, BookOpen, CheckSquare } from 'lucide-react'
 import { MODULE_REGISTRY } from '@/modules/registry'
 import { supabase } from '@/lib/supabase'
 
-// Descriptions for each module (ModuleManifest does not include a description field)
-const MODULE_DESCRIPTIONS: Record<string, string> = {
-  docs: 'Processo, ferramentas e padroes tecnicos da FXL.',
-  'wireframe-builder': 'Crie e edite wireframes interativos para clientes.',
-  clients: 'Workspaces de clientes com docs, briefing e wireframe.',
-  'knowledge-base': 'Base de conhecimento cross-cliente e operacional.',
-  tasks: 'Gestao de tarefas e kanban por cliente e projeto.',
-}
 
 export type ActivityItem = {
   id: string
@@ -137,7 +129,6 @@ export default function Home() {
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {MODULE_REGISTRY.map((mod) => {
           const Icon = mod.icon
-          const description = MODULE_DESCRIPTIONS[mod.id]
           return (
             <Link key={mod.id} to={mod.route} className="h-full">
               <div className="flex h-full min-h-[120px] flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 transition-all hover:border-indigo-200 hover:shadow-sm dark:border-slate-700 dark:bg-card dark:hover:border-indigo-800">
@@ -149,11 +140,9 @@ export default function Home() {
                     <h3 className="text-sm font-semibold text-slate-900 dark:text-foreground">
                       {mod.label}
                     </h3>
-                    {description && (
-                      <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                        {description}
-                      </p>
-                    )}
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      {mod.description}
+                    </p>
                   </div>
                 </div>
                 <div className="mt-4 flex items-center justify-between">
