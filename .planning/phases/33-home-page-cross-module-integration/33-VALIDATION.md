@@ -2,7 +2,7 @@
 phase: 33
 slug: home-page-cross-module-integration
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-03-12
 ---
@@ -38,11 +38,12 @@ created: 2026-03-12
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 33-01-01 | 01 | 1 | HOME-01 | unit | `npx vitest run src/pages/Home.test.tsx` | ❌ W0 | ⬜ pending |
-| 33-01-02 | 01 | 1 | HOME-02 | unit | `npx vitest run src/pages/Home.test.tsx` | ❌ W0 | ⬜ pending |
-| 33-02-01 | 02 | 2 | HOME-03 | manual-only | Visual browser check (requires live Supabase) | N/A | ⬜ pending |
-| 33-02-02 | 02 | 2 | KB-07 | manual-only | Visual browser check (requires live Supabase) | N/A | ⬜ pending |
-| 33-02-03 | 02 | 2 | KB-07 | unit | `npx vitest run src/components/layout/SearchCommand.test.tsx` | ❌ W0 | ⬜ pending |
+| 33-00-01 | 00 | 0 | HOME-01, HOME-02, KB-07 | setup | `npx vitest run src/pages/Home.test.tsx src/components/layout/SearchCommand.test.tsx` | Created by W0 | ⬜ pending |
+| 33-01-01 | 01 | 1 | HOME-01, HOME-02 | unit | `npx tsc --noEmit && npx vitest run src/pages/Home.test.tsx` | ✅ W0 | ⬜ pending |
+| 33-01-02 | 01 | 1 | HOME-01, HOME-02 | manual | Visual browser check | N/A | ⬜ pending |
+| 33-02-01 | 02 | 1 | HOME-03 | auto + manual | `npx tsc --noEmit` + Visual browser check | N/A | ⬜ pending |
+| 33-02-02 | 02 | 1 | KB-07 | auto + manual | `npx tsc --noEmit` + Visual browser check | N/A | ⬜ pending |
+| 33-02-03 | 02 | 1 | HOME-03, KB-07 | manual | Visual browser check | N/A | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -50,10 +51,10 @@ created: 2026-03-12
 
 ## Wave 0 Requirements
 
-- [ ] `src/pages/Home.test.tsx` — stubs for HOME-01 (registry grid), HOME-02 (feed merge logic)
-- [ ] `src/components/layout/SearchCommand.test.tsx` — stubs for KB-07 empty-query guard
+- [x] `src/pages/Home.test.tsx` — stubs for HOME-01 (registry grid), HOME-02 (feed merge logic) → **Plan 33-00**
+- [x] `src/components/layout/SearchCommand.test.tsx` — stubs for KB-07 empty-query guard → **Plan 33-00**
 
-*Existing infrastructure covers vitest setup. Only test files need creation.*
+*Wave 0 plan (33-00-PLAN.md) creates both test files.*
 
 ---
 
@@ -68,11 +69,11 @@ created: 2026-03-12
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 10s
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 10s
 - [ ] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
