@@ -24,19 +24,19 @@ Requirements for Wireframe Builder — Configurable Layout Components.
 
 ### Sidebar
 
-- [ ] **SIDE-01**: Operator can edit sidebar footer text via Sidebar Config Panel
-- [ ] **SIDE-02**: Operator can create, rename, and delete sidebar groups via Sidebar Config Panel
-- [ ] **SIDE-03**: Operator can assign screens to groups via checkbox selection in Sidebar Config Panel
+- [x] **SIDE-01**: Operator can edit sidebar footer text via Sidebar Config Panel
+- [x] **SIDE-02**: Operator can create, rename, and delete sidebar groups via Sidebar Config Panel
+- [x] **SIDE-03**: Operator can assign screens to groups via checkbox selection in Sidebar Config Panel
 - [x] **SIDE-04**: Operator can enable Workspace Switcher widget in sidebar header — renders as dropdown chip with label + chevron (decorative, shadcn sidebar-07 style)
 - [x] **SIDE-05**: Operator can enable User Menu widget in sidebar footer — renders as avatar initials + name/role chip (alternate to status footer)
 
 ### Filter Bar
 
-- [ ] **FILT-01**: Operator can open Filter Bar Editor Panel for the current screen (Sheet) from edit mode
-- [ ] **FILT-02**: Operator can add a new filter to the current screen's sticky filter bar (key, label, filterType, options)
-- [ ] **FILT-03**: Operator can remove existing filters from the current screen's sticky filter bar
-- [ ] **FILT-04**: Operator can edit filter label, filterType, and options inline in the Filter Bar Editor
-- [ ] **FILT-05**: Operator can quick-add common BI filter presets (Período, Empresa, Produto, Status, Responsável) with one click
+- [x] **FILT-01**: Operator can open Filter Bar Editor Panel for the current screen (Sheet) from edit mode
+- [x] **FILT-02**: Operator can add a new filter to the current screen's sticky filter bar (key, label, filterType, options)
+- [x] **FILT-03**: Operator can remove existing filters from the current screen's sticky filter bar
+- [x] **FILT-04**: Operator can edit filter label, filterType, and options inline in the Filter Bar Editor
+- [x] **FILT-05**: Operator can quick-add common BI filter presets (Período, Empresa, Produto, Status, Responsável) with one click
 
 ## Future Requirements
 
@@ -75,16 +75,16 @@ Requirements for Wireframe Builder — Configurable Layout Components.
 | HDR-04 | Phase 50 | Complete |
 | HDR-05 | Phase 50 | Complete |
 | HDR-06 | Phase 50 | Complete |
-| SIDE-01 | Phase 52 | Pending |
-| SIDE-02 | Phase 52 | Pending |
-| SIDE-03 | Phase 52 | Pending |
+| SIDE-01 | Phase 52 | Complete |
+| SIDE-02 | Phase 52 | Complete |
+| SIDE-03 | Phase 52 | Complete |
 | SIDE-04 | Phase 51 | Complete |
 | SIDE-05 | Phase 51 | Complete |
-| FILT-01 | Phase 53 | Pending |
-| FILT-02 | Phase 53 | Pending |
-| FILT-03 | Phase 53 | Pending |
-| FILT-04 | Phase 53 | Pending |
-| FILT-05 | Phase 53 | Pending |
+| FILT-01 | Phase 53 | Complete |
+| FILT-02 | Phase 53 | Complete |
+| FILT-03 | Phase 53 | Complete |
+| FILT-04 | Phase 53 | Complete |
+| FILT-05 | Phase 53 | Complete |
 
 **Coverage:**
 - v2.2 requirements: 19 total
