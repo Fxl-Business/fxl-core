@@ -1,13 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, Home } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { MODULE_REGISTRY, type NavItem } from '@/modules/registry'
-
-const navigationFromRegistry: NavItem[] = MODULE_REGISTRY
-  .filter(m => m.status !== 'coming-soon')
-  .flatMap(m => m.navChildren ?? [])
+import { useModuleEnabled } from '@/modules/hooks/useModuleEnabled'
 
 function hasActiveChild(navItem: NavItem, pathname: string): boolean {
   if (navItem.href && pathname === navItem.href) {
@@ -149,6 +146,16 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
 }
 
 export default function Sidebar() {
+  const { isEnabled } = useModuleEnabled()
+
+  const navigationFromRegistry: NavItem[] = useMemo(() =>
+    MODULE_REGISTRY
+      .filter(m => m.status !== 'coming-soon')
+      .filter(m => isEnabled(m.id))
+      .flatMap(m => m.navChildren ?? []),
+    [isEnabled]
+  )
+
   return (
     <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50/50 p-6 md:block dark:border-sidebar-border dark:bg-sidebar">
       <nav className="space-y-8">
