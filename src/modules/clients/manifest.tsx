@@ -1,4 +1,5 @@
 import { Users } from 'lucide-react'
+import ClientsIndex from '@/pages/clients/ClientsIndex'
 import FinanceiroIndex from '@/pages/clients/FinanceiroContaAzul/Index'
 import FinanceiroDocViewer from '@/pages/clients/FinanceiroContaAzul/DocViewer'
 import BlueprintTextView from '@/pages/clients/BlueprintTextView'
@@ -8,12 +9,13 @@ import type { ModuleManifest } from '@/modules/registry'
 export const clientsManifest: ModuleManifest = {
   id: 'clients',
   label: 'Clientes',
-  route: '/clients/financeiro-conta-azul',
+  route: '/clientes',
   icon: Users,
   status: 'active',
   navChildren: [
     {
       label: 'Clientes',
+      href: '/clientes',
       children: [
         {
           label: 'Financeiro Conta Azul',
@@ -30,6 +32,7 @@ export const clientsManifest: ModuleManifest = {
     },
   ],
   routeConfig: [
+    { path: '/clientes', element: <ClientsIndex /> },
     { path: '/clients/financeiro-conta-azul', element: <FinanceiroIndex /> },
     { path: '/clients/:clientSlug/briefing', element: <BriefingForm /> },
     { path: '/clients/:clientSlug/blueprint', element: <BlueprintTextView /> },
