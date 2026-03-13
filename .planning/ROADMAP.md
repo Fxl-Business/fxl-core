@@ -20,7 +20,7 @@
 **Milestone Goal:** Tornar sidebar, header e filter bar do wireframe totalmente configuráveis via visual editor, com suporte a widgets compostos na sidebar (workspace switcher, user menu) e filter bar editor por tela.
 
 - [x] **Phase 47: Schema Foundation** - Extend SidebarConfig schema with SidebarWidget type in Zod and TypeScript (completed 2026-03-13)
-- [ ] **Phase 48: Header Render Wiring** - Wire all HeaderConfig fields to WireframeHeader renderer
+- [x] **Phase 48: Header Render Wiring** - Wire all HeaderConfig fields to WireframeHeader renderer (completed 2026-03-13)
 - [ ] **Phase 49: Dashboard Mutation Infrastructure** - updateWorkingConfig helper + AdminToolbar Layout button group
 - [ ] **Phase 50: Header Config Panel** - Sheet panel for all header toggles, brand label, and period type
 - [ ] **Phase 51: Sidebar Widget Renderers** - SIDEBAR_WIDGET_REGISTRY + WorkspaceSwitcher and UserMenu widget components
@@ -117,7 +117,7 @@ Phases execute in dependency order: 47 → 48 → 49 → 50 → 51 → 52 → 53
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 47. Schema Foundation | 1/1 | Complete    | 2026-03-13 | - |
-| 48. Header Render Wiring | v2.2 | 0/1 | Planned | - |
+| 48. Header Render Wiring | 1/1 | Complete   | 2026-03-13 | - |
 | 49. Dashboard Mutation Infrastructure | v2.2 | 0/1 | Planned | - |
 | 50. Header Config Panel | v2.2 | 0/1 | Planned | - |
 | 51. Sidebar Widget Renderers | v2.2 | 0/1 | Planned | - |

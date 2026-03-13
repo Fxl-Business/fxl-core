@@ -11,13 +11,13 @@ Requirements for Wireframe Builder — Configurable Layout Components.
 
 - [ ] **INFRA-01**: Operator can mutate dashboard-level config (sidebar, header) via updateWorkingConfig() helper following same pattern as updateWorkingScreen()
 - [ ] **INFRA-02**: Operator sees "Layout" button group in AdminToolbar (edit mode) with entry points for Sidebar, Header, and Filter panels
-- [ ] **INFRA-03**: SidebarConfig schema extended with widget fields (headerWidget, workspaceName, footerWidget, showSearch) in both Zod and TypeScript — backward compatible with existing blueprints
+- [x] **INFRA-03**: SidebarConfig schema extended with widget fields (headerWidget, workspaceName, footerWidget, showSearch) in both Zod and TypeScript — backward compatible with existing blueprints
 
 ### Header
 
-- [ ] **HDR-01**: Operator can toggle showPeriodSelector in header and see period selector appear/disappear in the wireframe header
-- [ ] **HDR-02**: Operator can toggle showUserIndicator in header and see user/role chip appear/disappear in the wireframe header
-- [ ] **HDR-03**: Operator can toggle actions (manage, share, export) individually in header and see action buttons appear/disappear
+- [x] **HDR-01**: Operator can toggle showPeriodSelector in header and see period selector appear/disappear in the wireframe header
+- [x] **HDR-02**: Operator can toggle showUserIndicator in header and see user/role chip appear/disappear in the wireframe header
+- [x] **HDR-03**: Operator can toggle actions (manage, share, export) individually in header and see action buttons appear/disappear
 - [ ] **HDR-04**: Operator can open Header Config Panel (Sheet) from AdminToolbar and configure all header toggles visually
 - [ ] **HDR-05**: Operator can set a custom brandLabel in header that overrides the default config.label
 - [ ] **HDR-06**: Operator can set a dashboard-level periodType (mensal/anual) in header config that the period selector respects
@@ -68,10 +68,10 @@ Requirements for Wireframe Builder — Configurable Layout Components.
 |-------------|-------|--------|
 | INFRA-01 | Phase 49 | Pending |
 | INFRA-02 | Phase 49 | Pending |
-| INFRA-03 | Phase 47 | Pending |
-| HDR-01 | Phase 48 | Pending |
-| HDR-02 | Phase 48 | Pending |
-| HDR-03 | Phase 48 | Pending |
+| INFRA-03 | Phase 47 | Complete |
+| HDR-01 | Phase 48 | Complete |
+| HDR-02 | Phase 48 | Complete |
+| HDR-03 | Phase 48 | Complete |
 | HDR-04 | Phase 50 | Pending |
 | HDR-05 | Phase 50 | Pending |
 | HDR-06 | Phase 50 | Pending |
