@@ -12,7 +12,7 @@ import ShareModal from '@tools/wireframe-builder/components/editor/ShareModal'
 import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPanel'
 import SidebarConfigPanel from '@tools/wireframe-builder/components/editor/SidebarConfigPanel'
 import HeaderConfigPanel from '@tools/wireframe-builder/components/editor/HeaderConfigPanel'
-import FilterBarPanel from '@tools/wireframe-builder/components/editor/FilterBarPanel'
+import FilterBarEditor from '@tools/wireframe-builder/components/editor/FilterBarEditor'
 import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
 import { getIconComponent } from '@tools/wireframe-builder/components/editor/IconPicker'
 import { toast } from 'sonner'
@@ -1140,8 +1140,10 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
         onUpdate={handleHeaderUpdate}
         onClose={() => setLayoutPanel(null)}
       />
-      <FilterBarPanel
+      <FilterBarEditor
         open={layoutPanel === 'filters'}
+        filters={activeScreen?.filters ?? []}
+        onChange={(filters) => updateWorkingScreen((s) => ({ ...s, filters }))}
         onClose={() => setLayoutPanel(null)}
       />
 
