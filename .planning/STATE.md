@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: planning
-stopped_at: "Completed 28-02: Gallery validation, v1.4 milestone closed"
-last_updated: "2026-03-13T00:25:46.701Z"
+stopped_at: Completed 29-module-foundation-registry/29-01-PLAN.md
+last_updated: "2026-03-13T00:33:03.915Z"
 last_activity: 2026-03-12 -- Roadmap written for v1.5 (Phases 29-33), 19 requirements mapped
 progress:
   total_phases: 12
   completed_phases: 7
   total_plans: 25
-  completed_plans: 12
+  completed_plans: 13
   percent: 0
 ---
 
@@ -54,6 +54,9 @@ v1.5 decisions to track during execution:
 - tsvector language: 'portuguese' (KB content is in Portuguese)
 - knowledge_entries column: entry_type (not kind/category)
 - [Phase 28-02]: Gallery visual validation approved + TS audit clean: v1.4 milestone gate satisfied, advancing to v1.5
+- [Phase 29-module-foundation-registry]: Module manifest pattern: static typed constant in src/modules/registry.ts, not dynamic
+- [Phase 29-module-foundation-registry]: ESLint v9 flat config with boundaries plugin: modules cannot import sibling module internals
+- [Phase 29-module-foundation-registry]: NavItem type exported from registry.ts ready for Sidebar.tsx import in Plan 02
 
 ### Pending Todos
 
@@ -67,6 +70,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T00:25:17.365Z
-Stopped at: Completed 28-02: Gallery validation, v1.4 milestone closed
+Last session: 2026-03-13T00:33:03.911Z
+Stopped at: Completed 29-module-foundation-registry/29-01-PLAN.md
 Next: Complete Phase 28 (v1.4), then plan Phase 29 via /gsd:plan-phase 29

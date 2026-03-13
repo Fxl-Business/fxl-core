@@ -9,10 +9,10 @@ Requirements for Modular Foundation & Knowledge Base milestone. Each maps to roa
 
 ### Modular Architecture
 
-- [ ] **MOD-01**: Module registry com ModuleManifest tipado (id, label, route, icon, status) em src/modules/registry.ts
-- [ ] **MOD-02**: Folder structure por modulo: src/modules/[name]/ com pages/, components/, hooks/, types/
+- [x] **MOD-01**: Module registry com ModuleManifest tipado (id, label, route, icon, status) em src/modules/registry.ts
+- [x] **MOD-02**: Folder structure por modulo: src/modules/[name]/ com pages/, components/, hooks/, types/
 - [ ] **MOD-03**: Sidebar e App.tsx consomem MODULE_REGISTRY para rotas e navegacao
-- [ ] **MOD-04**: Wrapper manifests para docs e wireframe-builder (registrados no registry sem mover codigo)
+- [x] **MOD-04**: Wrapper manifests para docs e wireframe-builder (registrados no registry sem mover codigo)
 
 ### Knowledge Base
 
@@ -73,10 +73,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MOD-01 | Phase 29 | Pending |
-| MOD-02 | Phase 29 | Pending |
+| MOD-01 | Phase 29 | Complete |
+| MOD-02 | Phase 29 | Complete |
 | MOD-03 | Phase 29 | Pending |
-| MOD-04 | Phase 29 | Pending |
+| MOD-04 | Phase 29 | Complete |
 | KB-01 | Phase 30 | Pending |
 | KB-02 | Phase 31 | Pending |
 | KB-03 | Phase 31 | Pending |

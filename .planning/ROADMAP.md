@@ -209,7 +209,7 @@ Plans:
   2. App.tsx composes routes from module manifests and stays under 60 lines of route definitions
   3. ESLint boundary rules are configured and `npm run lint` passes with cross-module import violations reported as errors
   4. Existing docs and wireframe-builder areas continue working via wrapper manifests without any code being moved
-**Plans:** 3 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 29-01-PLAN.md -- ModuleManifest type, MODULE_REGISTRY, wrapper manifests (docs, clients), ESLint boundaries
@@ -317,7 +317,7 @@ For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in seque
 | 26. Filter Bar Enhancement | v1.4 | 1/1 | Complete | 2026-03-11 |
 | 27. Chart Palette & Composition | v1.4 | 2/2 | Complete | 2026-03-11 |
 | 28. Editor Sync & Gallery Validation | 2/2 | Complete    | 2026-03-13 | - |
-| 29. Module Foundation & Registry | v1.5 | 0/2 | Not started | - |
+| 29. Module Foundation & Registry | 1/2 | In Progress|  | - |
 | 30. Supabase Migrations & Data Layer | v1.5 | 0/2 | Not started | - |
 | 31. Knowledge Base Module | v1.5 | 0/2 | Not started | - |
 | 32. Task Management Module | v1.5 | 0/3 | Not started | - |
