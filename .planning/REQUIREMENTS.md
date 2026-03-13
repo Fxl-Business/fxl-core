@@ -10,8 +10,8 @@ Requirements for milestone v2.0 — Framework Shell + Arquitetura Modular.
 ### Module Registry
 
 - [ ] **REG-01**: User can see enhanced module definitions with description, badge count, and enabled status
-- [ ] **REG-02**: System has module-ids.ts with string literal constants preventing circular imports
-- [ ] **REG-03**: ModuleDefinition type extends ModuleManifest with extensions[], badge?, enabled fields
+- [x] **REG-02**: System has module-ids.ts with string literal constants preventing circular imports
+- [x] **REG-03**: ModuleDefinition type extends ModuleManifest with extensions[], badge?, enabled fields
 - [ ] **REG-04**: User can enable/disable modules at runtime with state persisted to localStorage
 
 ### Home
@@ -70,8 +70,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | REG-01 | Phase 38 | Pending |
-| REG-02 | Phase 38 | Pending |
-| REG-03 | Phase 38 | Pending |
+| REG-02 | Phase 38 | Complete |
+| REG-03 | Phase 38 | Complete |
 | REG-04 | Phase 38 | Pending |
 | CONT-01 | Phase 39 | Pending |
 | CONT-02 | Phase 39 | Pending |

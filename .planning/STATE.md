@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Framework Shell + Arquitetura Modular
-status: ready_to_plan
-stopped_at: "Roadmap created — ready to plan Phase 38"
-last_updated: "2026-03-13T00:00:00.000Z"
-last_activity: "2026-03-13 — Roadmap created for v2.0 (5 phases, 38-42)"
+status: planning
+stopped_at: Completed 38-01-PLAN.md
+last_updated: "2026-03-13T04:25:41.835Z"
+last_activity: 2026-03-13 — Roadmap created, 5 phases (38-42), 19/19 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 8
+  completed_plans: 1
   percent: 0
 ---
 
@@ -45,6 +45,9 @@ Key decisions for v2.0:
 - Admin panel at /admin/modules is a static hardcoded route — never added to MODULE_REGISTRY
 - localStorage('fxl-enabled-modules') for module toggle persistence — Supabase overkill at single-operator scale
 - No new npm dependencies required — all Radix UI, Tailwind, shadcn/ui already installed
+- [Phase 38-01]: module-ids.ts zero-import pattern established — manifests can safely import constants without circular risk
+- [Phase 38-01]: ModuleExtension.injects deferred to Phase 39 when SlotComponentProps is defined
+- [Phase 38-01]: MODULE_REGISTRY kept as ModuleManifest[] for backward compat — Plan 02 updates all manifests
 
 ### Pending Todos
 
@@ -57,6 +60,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13
-Stopped at: Roadmap created for v2.0
+Last session: 2026-03-13T04:25:41.832Z
+Stopped at: Completed 38-01-PLAN.md
 Next: /gsd:plan-phase 38
