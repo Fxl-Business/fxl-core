@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: 12 Novos Graficos
-status: ready_to_plan
-stopped_at: "Roadmap created — ready to plan Phase 34"
-last_updated: "2026-03-12T00:00:00.000Z"
-last_activity: "2026-03-12 - Roadmap created for v1.6 (4 phases: 34-37)"
+status: complete
+stopped_at: "Milestone v1.6 complete — all 4 phases shipped"
+last_updated: "2026-03-13T00:00:00.000Z"
+last_activity: "2026-03-13 - Milestone v1.6 completed (12 new chart/section types)"
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 4
+  total_plans: 7
+  completed_plans: 7
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,25 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-12)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v1.6 Phase 34 — Wave 1 ChartType Sub-Variants
+**Current focus:** Milestone v1.6 complete — ready for next milestone
 
 ## Current Position
 
-Phase: 34 of 37 (Wave 1 — ChartType Sub-Variants)
-Plan: — (not yet planned)
-Status: Ready to plan
-Last activity: 2026-03-12 — Roadmap created for v1.6 (4 phases: 34-37)
+Milestone: v1.6 — 12 Novos Graficos (SHIPPED 2026-03-13)
+Status: Complete
+Last activity: 2026-03-13 — All plans executed and visually validated
 
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
+Progress: [████████████████████] 100%
+
+## Milestone v1.6 Summary
+
+12 new chart/section types added to the wireframe builder:
+- **Wave 1 (Phase 34):** Grouped Bar, Bullet, Step Line, Lollipop, Range Bar, Bump, Polar — 7 chartType sub-variants
+- **Wave 2 (Phase 35):** Pie Chart, Heatmap, Sparkline Grid, Progress Grid — 4 standalone section types
+- **Wave 3 (Phase 36):** Sankey Diagram — 1 standalone section type
+- **Phase 37:** ComponentGallery updated with all 12 types + mock data, visual validation passed
+
+Registry: 28 section types total (up from 23). Tests: 145 passing.
 
 ## Accumulated Context
 
@@ -42,7 +51,7 @@ Key decisions for v1.6:
 - Polar classified as chartType sub-variant (Extension Point A), not standalone section — follows categories[]+chartColors[] contract
 - Pie Chart implemented as new standalone "pie-chart" section type (not variant on existing donut-chart) — preserves discriminated union semantics
 - Range Bar uses CSS-flex approach, not Recharts stacked-bar workaround — consistent with ProgressBarRenderer and CompositionBar patterns
-- Sankey requires pre-build CLI verification of named export before writing component code
+- Sankey: Recharts named export verified before component code (Boolean(r.Sankey) === true)
 
 ### Pending Todos
 
@@ -50,8 +59,7 @@ None.
 
 ### Blockers/Concerns
 
-- Phase 36 (Sankey): Named export ambiguity between STACK.md and ARCHITECTURE.md. Resolve at phase start with: `node -e "const r = require('./node_modules/recharts'); console.log(!!r.Sankey)"`. Fallback: d3-sankey (~15KB) or pure SVG paths.
-- Phase 35 (Sparkline Grid): Verify ResponsiveContainer behavior inside CSS grid before building. Fixed numeric height may be required.
+None — all resolved.
 
 ### Quick Tasks Completed
 
@@ -62,6 +70,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-12
-Stopped at: Roadmap created for v1.6 — 4 phases (34-37), 18/18 requirements mapped
-Next: /gsd:plan-phase 34
+Last session: 2026-03-13
+Stopped at: Milestone v1.6 complete
+Next: Define next milestone (v1.7) or run /gsd:new-milestone
