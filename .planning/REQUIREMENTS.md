@@ -22,7 +22,7 @@ Requirements for Modular Foundation & Knowledge Base milestone. Each maps to roa
 - [x] **KB-04**: Formulario de criacao/edicao com type selector, markdown body, tags, client_slug
 - [x] **KB-05**: Full-text search via tsvector/tsquery (portugues) com pagina de busca
 - [x] **KB-06**: Entries do tipo 'decision' seguem formato ADR (Context, Decision, Consequences)
-- [ ] **KB-07**: Resultados de KB integrados no Cmd+K (async fetch, grupo separado)
+- [x] **KB-07**: Resultados de KB integrados no Cmd+K (async fetch, grupo separado)
 
 ### Tarefas
 
@@ -34,9 +34,9 @@ Requirements for Modular Foundation & Knowledge Base milestone. Each maps to roa
 
 ### Home Page
 
-- [ ] **HOME-01**: Module hub com grid de cards lendo MODULE_REGISTRY (Docs, WF Builder, Clientes, KB, Tarefas)
-- [ ] **HOME-02**: Activity feed com ultimas 10 atualizacoes cross-module (kb_entries, tasks, comments)
-- [ ] **HOME-03**: Secao "Conhecimento" na pagina do cliente mostrando KB entries daquele client_slug
+- [x] **HOME-01**: Module hub com grid de cards lendo MODULE_REGISTRY (Docs, WF Builder, Clientes, KB, Tarefas)
+- [x] **HOME-02**: Activity feed com ultimas 10 atualizacoes cross-module (kb_entries, tasks, comments)
+- [x] **HOME-03**: Secao "Conhecimento" na pagina do cliente mostrando KB entries daquele client_slug
 
 ## Future Requirements
 
@@ -83,15 +83,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | KB-04 | Phase 31 | Complete |
 | KB-05 | Phase 31 | Complete |
 | KB-06 | Phase 31 | Complete |
-| KB-07 | Phase 33 | Pending |
+| KB-07 | Phase 33 | Complete |
 | TASK-01 | Phase 30 | Complete |
 | TASK-02 | Phase 32 | Complete |
 | TASK-03 | Phase 32 | Complete |
 | TASK-04 | Phase 32 | Complete |
 | TASK-05 | Phase 32 | Complete |
-| HOME-01 | Phase 33 | Pending |
-| HOME-02 | Phase 33 | Pending |
-| HOME-03 | Phase 33 | Pending |
+| HOME-01 | Phase 33 | Complete |
+| HOME-02 | Phase 33 | Complete |
+| HOME-03 | Phase 33 | Complete |
 
 **Coverage:**
 - v1.5 requirements: 19 total
