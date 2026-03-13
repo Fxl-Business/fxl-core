@@ -96,9 +96,10 @@ None active.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 11 | Reestruturar sidebar Ferramentas como nivel acima do Wireframe Builder | 2026-03-13 | d2b4475 | [11-reestruturar-sidebar-ferramentas-como-ni](./quick/11-reestruturar-sidebar-ferramentas-como-ni/) |
+| 12 | Pagina principal de Clientes (/clientes) e verificar sidebar Ferramentas | 2026-03-13 | ffc02a1 | [12-pagina-principal-de-clientes-e-corrigir-](./quick/12-pagina-principal-de-clientes-e-corrigir-/) |
 
 ## Session Continuity
 
 Last session: 2026-03-13T01:34:19.313Z
-Stopped at: Completed quick-11: Reestruturar Sidebar Ferramentas como Nivel Superior
+Stopped at: Completed quick-12: Pagina Principal de Clientes e Corrigir Sidebar Ferramentas
 Next: Execute Plan 33-03 (Home page cross-module integration)
