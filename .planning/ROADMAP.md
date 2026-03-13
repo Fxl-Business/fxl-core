@@ -117,7 +117,7 @@ Full details: [milestones/v1.6-ROADMAP.md](milestones/v1.6-ROADMAP.md)
 - [ ] **Phase 39: Slot Architecture & Contract Types** (2 plans) - Extension system runtime (ExtensionProvider, ExtensionSlot, resolveExtensions), contract type definitions, ESLint boundary update
 - [ ] **Phase 40: Routing Refactor** - Route / confirmed as Home, /docs routes preserved, sidebar filters by enabled modules
 - [ ] **Phase 41: Home 2.0 — Control Center** - Rebuilt Home page as app control center reading exclusively from MODULE_REGISTRY
-- [ ] **Phase 42: Contract Population & Admin Panel** - Real cross-module extensions end-to-end, /admin/modules panel with enable/disable toggles
+- [ ] **Phase 42: Contract Population & Admin Panel** (2 plans) - Real cross-module extensions end-to-end, /admin/modules panel with enable/disable toggles
 
 ## Phase Details
 
@@ -180,7 +180,10 @@ Plans:
   2. Navigating to /admin/modules opens the modules admin panel — it is not listed in the sidebar navigation
   3. The admin panel shows all modules with their name, description, enabled status, and the extensions each module provides
   4. Operator can toggle a module enabled/disabled from the admin panel and sees immediate UI feedback (toast or badge update)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 42-01-PLAN.md — Cross-module extension population (Tasks + KB widgets for Home dashboard slot)
+- [ ] 42-02-PLAN.md — Admin panel at /admin/modules with enable/disable toggles
 
 ## Progress
 
@@ -197,4 +200,4 @@ Plans:
 | 39. Slot Architecture & Contract Types | v2.0 | 0/2 | Not started | - |
 | 40. Routing Refactor | v2.0 | 0/? | Not started | - |
 | 41. Home 2.0 — Control Center | v2.0 | 0/? | Not started | - |
-| 42. Contract Population & Admin Panel | v2.0 | 0/? | Not started | - |
+| 42. Contract Population & Admin Panel | v2.0 | 0/2 | Not started | - |
