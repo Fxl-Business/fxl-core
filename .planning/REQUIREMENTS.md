@@ -9,8 +9,8 @@ Requirements for Wireframe Builder — Configurable Layout Components.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Operator can mutate dashboard-level config (sidebar, header) via updateWorkingConfig() helper following same pattern as updateWorkingScreen()
-- [ ] **INFRA-02**: Operator sees "Layout" button group in AdminToolbar (edit mode) with entry points for Sidebar, Header, and Filter panels
+- [x] **INFRA-01**: Operator can mutate dashboard-level config (sidebar, header) via updateWorkingConfig() helper following same pattern as updateWorkingScreen()
+- [x] **INFRA-02**: Operator sees "Layout" button group in AdminToolbar (edit mode) with entry points for Sidebar, Header, and Filter panels
 - [x] **INFRA-03**: SidebarConfig schema extended with widget fields (headerWidget, workspaceName, footerWidget, showSearch) in both Zod and TypeScript — backward compatible with existing blueprints
 
 ### Header
@@ -66,8 +66,8 @@ Requirements for Wireframe Builder — Configurable Layout Components.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 49 | Pending |
-| INFRA-02 | Phase 49 | Pending |
+| INFRA-01 | Phase 49 | Complete |
+| INFRA-02 | Phase 49 | Complete |
 | INFRA-03 | Phase 47 | Complete |
 | HDR-01 | Phase 48 | Complete |
 | HDR-02 | Phase 48 | Complete |
