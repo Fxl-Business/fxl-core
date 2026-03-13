@@ -66,31 +66,31 @@ Requirements for Wireframe Builder — Configurable Layout Components.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| HDR-01 | — | Pending |
-| HDR-02 | — | Pending |
-| HDR-03 | — | Pending |
-| HDR-04 | — | Pending |
-| HDR-05 | — | Pending |
-| HDR-06 | — | Pending |
-| SIDE-01 | — | Pending |
-| SIDE-02 | — | Pending |
-| SIDE-03 | — | Pending |
-| SIDE-04 | — | Pending |
-| SIDE-05 | — | Pending |
-| FILT-01 | — | Pending |
-| FILT-02 | — | Pending |
-| FILT-03 | — | Pending |
-| FILT-04 | — | Pending |
-| FILT-05 | — | Pending |
+| INFRA-01 | Phase 49 | Pending |
+| INFRA-02 | Phase 49 | Pending |
+| INFRA-03 | Phase 47 | Pending |
+| HDR-01 | Phase 48 | Pending |
+| HDR-02 | Phase 48 | Pending |
+| HDR-03 | Phase 48 | Pending |
+| HDR-04 | Phase 50 | Pending |
+| HDR-05 | Phase 50 | Pending |
+| HDR-06 | Phase 50 | Pending |
+| SIDE-01 | Phase 52 | Pending |
+| SIDE-02 | Phase 52 | Pending |
+| SIDE-03 | Phase 52 | Pending |
+| SIDE-04 | Phase 51 | Pending |
+| SIDE-05 | Phase 51 | Pending |
+| FILT-01 | Phase 53 | Pending |
+| FILT-02 | Phase 53 | Pending |
+| FILT-03 | Phase 53 | Pending |
+| FILT-04 | Phase 53 | Pending |
+| FILT-05 | Phase 53 | Pending |
 
 **Coverage:**
 - v2.2 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19
+- Mapped to phases: 19
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after initial definition*
+*Last updated: 2026-03-13 after roadmap creation*

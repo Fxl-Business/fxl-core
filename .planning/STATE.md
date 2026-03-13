@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: Wireframe Builder — Configurable Layout Components
-status: defining-requirements
-stopped_at: Defining requirements for v2.2
+status: ready-to-plan
+stopped_at: Roadmap created — ready to plan Phase 47
 last_updated: "2026-03-13"
-last_activity: "2026-03-13 - Milestone v2.2 started"
+last_activity: "2026-03-13 - Roadmap v2.2 created (7 phases, 19 requirements mapped)"
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,15 +21,31 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** v2.2 — Configurable Layout Components
+**Current focus:** v2.2 — Configurable Layout Components (Phase 47 next)
 
 ## Current Position
 
-Milestone: v2.2 — Wireframe Builder: Configurable Layout Components
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-13 — Milestone v2.2 started
+Phase: 47 of 53 (Schema Foundation)
+Plan: — (not planned yet)
+Status: Ready to plan Phase 47
+Last activity: 2026-03-13 — Roadmap v2.2 created, 7 phases, 19/19 requirements mapped
+
+Progress: [░░░░░░░░░░] 0%
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 0
+- Average duration: —
+- Total execution time: —
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| - | - | - | - |
+
+*Updated after each plan completion*
 
 ## Accumulated Context
 
@@ -37,10 +53,12 @@ Last activity: 2026-03-13 — Milestone v2.2 started
 
 All decisions logged in PROJECT.md Key Decisions table.
 
-Key decisions for v2.1 (previous):
-- Supabase como fonte de verdade para docs/processo
-- Sync bidirecional (make sync-down / make sync-up) para Claude Code
-- In-memory prefetch cache para navegacao instantanea entre docs
+Key architectural constraints for v2.2:
+- INFRA-03 (schema extension) is Phase 47 — hard dependency for all other phases
+- WireframeHeader only consumes showLogo today; HDR-01/02/03 wire the remaining fields before any editor panel
+- updateWorkingConfig() helper (INFRA-01) must use same pattern as updateWorkingScreen() — never use handlePropertyChange for dashboard-level edits
+- All sidebar widget work goes in the inline aside block in WireframeViewer.tsx (lines 764-944) — WireframeSidebar.tsx is a ghost component (never imported)
+- FilterBarEditor targets screen.filters[] (5-variant filterType) — never reuse FilterConfigForm (3-variant)
 
 ### Pending Todos
 
@@ -58,5 +76,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: Defining requirements for v2.2
-Next: Define requirements → create roadmap
+Stopped at: Roadmap created for v2.2 — 7 phases (47-53), 19 requirements
+Next: /gsd:plan-phase 47
