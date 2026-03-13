@@ -1,5 +1,24 @@
 # Milestones
 
+## v2.3 Inline Editing UX (Shipped: 2026-03-13)
+
+**Phases:** 4 (54-57) | **Plans:** 7 | **Tasks:** ~14
+**Timeline:** 1 session (2026-03-13) | **Commits:** 11 | **LOC delta:** +2,557 / -1,218
+**Git range:** df3706c → 0725eef
+
+**Delivered:** Replaced Sheet panels (Header, Sidebar, Filtros) with inline click-to-edit UX. Operators now click directly on any wireframe component to edit it via contextual PropertyPanel — same pattern as content blocks. AdminToolbar Layout buttons removed, 903 lines of dead code eliminated.
+
+**Key accomplishments:**
+1. Header inline editing: 4 clickable zones (logo, period, user, actions) with ZoneWrapper pattern and per-element PropertyPanel forms
+2. Sidebar inline editing: clickable groups, footer, widgets with SidebarPropertyPanel routing to 3 specialized forms
+3. Filter inline editing: clickable filter chips with FilterPropertyPanel, "+" button with 5 BI preset picker
+4. Five-way selection mutex: header, sidebar, filter, filter-bar-action, and content selections are mutually exclusive
+5. Cleanup: deleted HeaderConfigPanel, SidebarConfigPanel, FilterBarEditor (903 lines), removed AdminToolbar Layout buttons and layoutPanel state
+
+**Archive:** [v2.3-ROADMAP.md](milestones/v2.3-ROADMAP.md) | [v2.3-REQUIREMENTS.md](milestones/v2.3-REQUIREMENTS.md) | [v2.3-MILESTONE-AUDIT.md](milestones/v2.3-MILESTONE-AUDIT.md)
+
+---
+
 ## v2.2 Wireframe Builder — Configurable Layout Components (Shipped: 2026-03-13)
 
 **Phases:** 7 (47-53) | **Plans:** 7 | **Tasks:** 21

@@ -464,6 +464,52 @@
 
 ---
 
+## Milestone: v2.3 — Inline Editing UX
+
+**Shipped:** 2026-03-13
+**Phases:** 4 | **Plans:** 7 | **Timeline:** 1 session
+
+### What Was Built
+- Header inline editing: 4 clickable zones (logo, period, user, actions) with ZoneWrapper pattern and per-element PropertyPanel forms via header form registry
+- Sidebar inline editing: clickable groups, footer, widgets with SidebarPropertyPanel routing to 3 specialized forms (SidebarGroupForm, SidebarFooterForm, SidebarWidgetForm)
+- Filter inline editing: clickable filter chips with FilterPropertyPanel, "+" button with 5 BI preset picker, delete buttons on chips
+- Five-way selection mutex: header, sidebar, filter, filter-bar-action, and content block selections are mutually exclusive
+- Cleanup: deleted HeaderConfigPanel, SidebarConfigPanel, FilterBarEditor (903 lines), removed AdminToolbar Layout buttons and layoutPanel state
+
+### What Worked
+- **Per-element form extraction pattern:** Each section of the old Sheet panel became a standalone form component → registry lookup → PropertyPanel renders the right form. Clean, extensible, reusable.
+- **Selection mutex progression:** Two-way (54) → three-way (55) → four-way (56) → five-way (final). Each phase extended the mutex without breaking previous selections.
+- **Cleanup as final phase:** Phase 57 was pure deletion — no new features, just removing the old code that was replaced. Clean separation of "build new" and "remove old."
+- **Formal REQUIREMENTS.md:** 14/14 requirements tracked with traceability table — all mapped, all checked, zero orphans.
+- **First milestone audit:** First time running `/gsd:audit-milestone` since v1.0. Integration checker verified cross-phase wiring and selection mutex completeness.
+
+### What Was Inefficient
+- **No VERIFICATION.md files:** All 4 phases lacked VERIFICATION.md — verified via SUMMARY + tsc only. Process gap.
+- **Phase 56 SUMMARY frontmatter incomplete:** `requirements-completed` field missing from 56-01 and 56-02 SUMMARY files.
+- **FILT-10 visual gap:** selectedFilterIndex not passed to WireframeFilterBar — filter chips lack selection ring when editing. Functional but inconsistent with header/sidebar patterns.
+- **Quick task 15 scope creep:** Post-milestone quick task (sidebar editor groups/context menus/pin support) was large enough to be a phase — 4 commits, 3 rounds of user feedback.
+
+### Patterns Established
+- `ZoneWrapper` component: reusable clickable zone with hover/selected/placeholder states for edit mode
+- Per-element form registry: `Record<ElementType, { form, label }>` with `getForm()` and `getLabel()` lookups
+- Selection mutex pattern: each new selection type clears all others, with screen navigation clearing all
+- Click-to-edit as only editing paradigm: no toolbar shortcuts, operators click directly on components
+- `SidebarElementSelection` discriminated union: `{ type: 'group' | 'footer' | 'widget', ...}` for sidebar element targeting
+
+### Key Lessons
+1. **Build new before removing old** — Phases 54-56 built inline editing alongside existing Sheet panels; Phase 57 removed old code only after new code was proven. Safe migration path.
+2. **Selection mutex is manageable at 5-way** — five independent selection types with symmetric clearing handlers works cleanly. Beyond 5 might need a different approach.
+3. **Audit milestone catches gaps** — the integration checker found the FILT-10 visual gap and the orphaned HEADER_ELEMENT_TYPES export that would have been missed otherwise.
+4. **Quick tasks can exceed scope** — Quick task 15 (sidebar editor improvements) was really a mini-phase; should have been planned as a phase or at least used `--full` flag.
+5. **Dual-state rendering is a must** — sidebar changes must work in both edit mode AND view mode. Bug found where pinned-bottom screens only showed in edit mode. Saved as feedback memory for future conversations.
+
+### Cost Observations
+- Model mix: ~30% opus (orchestrator), ~70% sonnet (executors)
+- Sessions: 1 session, all 4 phases executed sequentially with auto-continue + 1 quick task session
+- Notable: 7 plans, 11 commits, 2,557 LOC added / 1,218 removed; 19 min total execution (~2.7 min avg per plan — fastest milestone)
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -480,6 +526,7 @@
 | v2.0 | 1 session | 5 | 8 | Framework shell, slot architecture, cross-module extensions, admin panel |
 | v2.1 | 1 session | 4 | 8 | Dynamic data layer, Supabase-backed docs, bidirectional sync CLI |
 | v2.2 | 1 session | 7 | 7 | Configurable layout components, widget system, Sheet panels (to be replaced by inline editing) |
+| v2.3 | 1 session | 4 | 7 | Inline click-to-edit replacing Sheet panels, five-way selection mutex, per-element form registry |
 
 ### Cumulative Quality
 
@@ -495,6 +542,7 @@
 | v2.0 | ~270 tests | no new tests (types + UI) | 0 |
 | v2.1 | ~270 tests | no new tests (data layer + CLI) | 0 |
 | v2.2 | ~283 tests | 13 new schema tests (SidebarWidget Zod) | 1 (@radix-ui/react-checkbox via shadcn) |
+| v2.3 | ~283 tests | no new tests (UI refactor) | 1 (@radix-ui/react-context-menu via shadcn) |
 
 ### Velocity
 
@@ -510,6 +558,7 @@
 | v2.0 | 8 | ~52 min | ~6.5 min |
 | v2.1 | 8 | ~45 min | ~5.5 min |
 | v2.2 | 7 | ~43 min | ~6.1 min |
+| v2.3 | 7 | ~19 min | ~2.7 min |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -523,4 +572,6 @@
 8. Token cascade is the most efficient visual migration — ~20 token changes propagate to ~55 components (v1.4)
 9. Migration-first (schema→data→UI→tooling) is the safest data layer approach — validated in v1.5, v2.0, v2.1 with zero data bugs
 10. Automated verification scripts beat manual checks — 15-point verify-seed.ts (v2.1) is reproducible, reliable, and fast
-11. UX consistency beats feature completeness — validate interaction model with user before building config UI (v2.2 Sheet panels will be replaced by inline editing in v2.3)
+11. UX consistency beats feature completeness — validate interaction model with user before building config UI (v2.2 Sheet panels replaced by inline editing in v2.3)
+12. Build new before removing old — safe migration: v2.3 built inline editing alongside Sheet panels, then removed old code in cleanup phase
+13. Run milestone audit at least once — v2.3 was first audit since v1.0; integration checker found visual gap and orphaned export missed by phase-level verification

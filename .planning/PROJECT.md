@@ -116,18 +116,13 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ SIDEBAR_WIDGET_REGISTRY + WorkspaceSwitcher + UserMenu widgets with rail mode degradation — v2.2
 - ✓ SidebarConfigPanel: footer text, group CRUD, screen assignment, widget picker — v2.2
 - ✓ FilterBarEditor: per-screen FilterOption[] CRUD with 5 BI presets — v2.2
+- ✓ Header inline editing: clickable zones (logo, period, user, actions) with per-element PropertyPanel forms — v2.3
+- ✓ Sidebar inline editing: clickable groups, footer, widgets with SidebarPropertyPanel and 3 specialized forms — v2.3
+- ✓ Filter inline editing: clickable chips with FilterPropertyPanel, "+" button with 5 BI preset picker — v2.3
+- ✓ Five-way selection mutex across header, sidebar, filter, filter-bar-action, and content — v2.3
+- ✓ Sheet panels removed (HeaderConfigPanel, SidebarConfigPanel, FilterBarEditor), Layout buttons removed — v2.3
 
 ### Active
-
-## Current Milestone: v2.3 Inline Editing UX
-
-**Goal:** Substituir os Sheet panels (Header, Sidebar, Filtros) por edição inline click-to-edit, onde o operador clica diretamente no componente para editá-lo — mesmo padrão usado para blocos de conteúdo.
-
-**Target features:**
-- Header: cada elemento (logo, period selector, user indicator, actions) clicável como "bloco" individual com PropertyPanel contextual
-- Sidebar: elementos clicáveis para edição inline (grupos, widgets, footer)
-- Filtros: chips clicáveis para edição inline, add/remove como config da página
-- Remover botões Layout (Sidebar/Header/Filtros) do AdminToolbar — edição acionada por click direto no componente
 
 ### Out of Scope
 
@@ -165,11 +160,11 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ## Current State
 
-All 10 milestones shipped (v1.0 → v2.2). Starting v2.3 — Inline Editing UX.
+All 11 milestones shipped (v1.0 → v2.3). Planning next milestone.
 
 ## Context
 
-Shipped v2.2 Configurable Layout Components. All 10 milestones complete (v1.0-v2.2).
+Shipped v2.3 Inline Editing UX. All 11 milestones complete (v1.0-v2.3).
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
 ~41,000 LOC TypeScript. 7 Supabase migrations (001-007). 5 active modules in MODULE_REGISTRY.
 Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
@@ -192,6 +187,7 @@ The platform covers the full operator workflow:
 14. **Knowledge Base** — 4 entry types (bug/decision/pattern/lesson), ADR template, Portuguese FTS, Cmd+K integration
 15. **Task Management** — List/kanban/form, optimistic updates, DocumentarButton cross-module KB link
 16. **Home page** — Module hub grid + cross-module activity feed
+17. **Inline editing** — Click-to-edit for header, sidebar, and filter bar with contextual PropertyPanel forms and five-way selection mutex
 
 Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint + branding + TechnicalConfig).
 
@@ -254,6 +250,10 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Lazy search index on Cmd+K open | Avoid blocking page load with full document fetch | ✓ Good — fast initial load |
 | sync-down additive only (no file deletion) | Prevents accidental loss of local-only files | ✓ Good — safe default |
 | In-memory prefetch cache for all docs | First navigation triggers full fetch, subsequent instant | ✓ Good — 62 docs small enough for memory |
+| ZoneWrapper pattern for clickable edit zones | Reusable wrapper with hover/selected/placeholder states | ✓ Good — consistent UX across header elements |
+| Per-element form extraction pattern | Each config panel section → standalone form + registry | ✓ Good — forms reusable in PropertyPanel sheets |
+| Five-way selection mutex in WireframeViewer | Only one element type selected at a time | ✓ Good — clean, leak-free state management |
+| Click-to-edit as only editing paradigm | No toolbar shortcuts, operators click directly on component | ✓ Good — intuitive, consistent with block editing |
 
 ## Constraints
 
@@ -267,4 +267,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-13 after v2.3 milestone start*
+*Last updated: 2026-03-13 after v2.3 milestone completion*
