@@ -495,10 +495,10 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     }))
   }
 
-  function updateWorkingHeader(patch: Partial<HeaderConfig>) {
+  function handleHeaderUpdate(updater: (header: HeaderConfig) => HeaderConfig) {
     updateWorkingConfig((cfg) => ({
       ...cfg,
-      header: { ...cfg.header, ...patch },
+      header: updater(cfg.header ?? {}),
     }))
   }
 
@@ -991,9 +991,11 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
             <WireframeHeader
               title={activeScreen.title}
               logoUrl={branding.logoUrl}
+              brandLabel={activeConfig?.header?.brandLabel ?? activeConfig?.label}
               showLogo={activeConfig?.header?.showLogo}
               showPeriodSelector={activeConfig?.header?.showPeriodSelector}
               showUserIndicator={activeConfig?.header?.showUserIndicator}
+              periodType={activeConfig?.header?.periodType}
               actions={activeConfig?.header?.actions}
             />
             {staleWarning && (
@@ -1061,8 +1063,10 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       />
       <HeaderConfigPanel
         open={layoutPanel === 'header'}
+        headerConfig={activeConfig?.header ?? {}}
+        configLabel={activeConfig?.label ?? 'Dashboard'}
+        onUpdate={handleHeaderUpdate}
         onClose={() => setLayoutPanel(null)}
-        onUpdate={updateWorkingHeader}
       />
       <FilterBarPanel
         open={layoutPanel === 'filters'}

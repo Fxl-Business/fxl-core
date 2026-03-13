@@ -1,5 +1,6 @@
 import { Search, Bell, Moon, Sun, Settings, Share2, Download, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useWireframeTheme } from '@tools/wireframe-builder/lib/wireframe-theme'
+import type { PeriodType } from '@tools/wireframe-builder/types/blueprint'
 
 type Props = {
   title: string
@@ -9,6 +10,7 @@ type Props = {
   showLogo?: boolean        // from config.header?.showLogo — defaults true
   // Period selector
   showPeriodSelector?: boolean  // from config.header?.showPeriodSelector — defaults true
+  periodType?: PeriodType       // from config.header?.periodType — determines period label
   // User indicator
   showUserIndicator?: boolean   // from config.header?.showUserIndicator — defaults true
   // Action buttons
@@ -25,6 +27,7 @@ export default function WireframeHeader({
   brandLabel,
   showLogo,
   showPeriodSelector,
+  periodType,
   showUserIndicator,
   actions,
 }: Props) {
@@ -110,7 +113,7 @@ export default function WireframeHeader({
               fontSize: 11, fontWeight: 600, color: 'var(--wf-heading)', whiteSpace: 'nowrap',
             }}>
               <Calendar style={{ width: 12, height: 12, color: 'var(--wf-muted)' }} />
-              <span>Jan / 26</span>
+              <span>{periodType === 'anual' ? '2026' : 'Jan / 26'}</span>
             </div>
             <button
               type="button"
