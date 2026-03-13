@@ -10,6 +10,9 @@ import BlueprintRenderer from '@tools/wireframe-builder/components/BlueprintRend
 import AdminToolbar from '@tools/wireframe-builder/components/editor/AdminToolbar'
 import ShareModal from '@tools/wireframe-builder/components/editor/ShareModal'
 import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPanel'
+import SidebarConfigPanel from '@tools/wireframe-builder/components/editor/SidebarConfigPanel'
+import HeaderConfigPanel from '@tools/wireframe-builder/components/editor/HeaderConfigPanel'
+import FilterBarPanel from '@tools/wireframe-builder/components/editor/FilterBarPanel'
 import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
 import { getIconComponent } from '@tools/wireframe-builder/components/editor/IconPicker'
 import { toast } from 'sonner'
@@ -36,6 +39,8 @@ import type {
   BlueprintConfig,
   BlueprintScreen,
   BlueprintSection,
+  HeaderConfig,
+  SidebarConfig,
   SidebarGroup,
 } from '@tools/wireframe-builder/types/blueprint'
 import type { EditModeState, GridLayout, ScreenRow } from '@tools/wireframe-builder/types/editor'
@@ -150,6 +155,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
   // AdminToolbar collapse state
   const [toolbarCollapsed, setToolbarCollapsed] = useState(false)
+
+  // Layout panel open state -- at most one panel open at a time, null = closed
+  const [layoutPanel, setLayoutPanel] = useState<'sidebar' | 'header' | 'filters' | null>(null)
 
   // Branding update handler (must be before early returns)
   const handleBrandingUpdate = useCallback((partial: Partial<BrandingConfig>) => {
@@ -358,6 +366,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
   function exitEditMode() {
     setWorkingConfig(null)
     setStaleWarning(false)
+    setLayoutPanel(null)
     setEditMode({
       active: false,
       dirty: false,
@@ -467,6 +476,30 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       return { ...prev, screens: newScreens }
     })
     setEditMode((prev) => ({ ...prev, dirty: true }))
+  }
+
+  function updateWorkingConfig(
+    updater: (config: BlueprintConfig) => BlueprintConfig,
+  ) {
+    setWorkingConfig((prev) => {
+      if (!prev) return prev
+      return updater(prev)
+    })
+    setEditMode((prev) => ({ ...prev, dirty: true }))
+  }
+
+  function updateWorkingSidebar(patch: Partial<SidebarConfig>) {
+    updateWorkingConfig((cfg) => ({
+      ...cfg,
+      sidebar: { ...cfg.sidebar, ...patch },
+    }))
+  }
+
+  function updateWorkingHeader(patch: Partial<HeaderConfig>) {
+    updateWorkingConfig((cfg) => ({
+      ...cfg,
+      header: { ...cfg.header, ...patch },
+    }))
   }
 
   function getScreenRows(screen: BlueprintScreen): ScreenRow[] {
@@ -756,6 +789,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               onSave={handleSave}
               onOpenComments={handleOpenScreenComments}
               onOpenShare={() => setShareOpen(true)}
+              onOpenLayoutPanel={(panel) => setLayoutPanel(panel)}
               userDisplayName={user.fullName ?? user.firstName ?? undefined}
               userRole="Operador"
             />
@@ -1018,6 +1052,21 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
           setEditMode((prev) => ({ ...prev, selectedSection: null }))
         }
         onChange={handlePropertyChange}
+      />
+
+      <SidebarConfigPanel
+        open={layoutPanel === 'sidebar'}
+        onClose={() => setLayoutPanel(null)}
+        onUpdate={updateWorkingSidebar}
+      />
+      <HeaderConfigPanel
+        open={layoutPanel === 'header'}
+        onClose={() => setLayoutPanel(null)}
+        onUpdate={updateWorkingHeader}
+      />
+      <FilterBarPanel
+        open={layoutPanel === 'filters'}
+        onClose={() => setLayoutPanel(null)}
       />
 
       {pendingExitEdit && (
