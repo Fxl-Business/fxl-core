@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.3
-milestone_name: Inline Editing UX
-status: archived
-stopped_at: "v2.3 milestone archived and tagged"
+milestone: v2.4
+milestone_name: Component Picker Preview Mode
+status: active
+stopped_at: ""
 last_updated: "2026-03-13"
-last_activity: "2026-03-13 — v2.3 milestone completed and archived"
+last_activity: "2026-03-13 — Milestone v2.4 started"
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,25 +21,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** FXL Core e o cerebro operacional da empresa — documentacao, processo e tooling juntos
-**Current focus:** Planning next milestone (v2.4)
+**Current focus:** v2.4 Component Picker Preview Mode
 
 ## Current Position
 
-Milestone v2.3 archived. All 11 milestones shipped (v1.0 → v2.3).
-Next: `/gsd:new-milestone` to start v2.4.
-
-## Performance Metrics
-
-**v2.3 Velocity:**
-- Total plans completed: 7
-- Average duration: 3min
-- Total execution time: 19min
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-13 — Milestone v2.4 started
 
 ## Accumulated Context
 
 ### Decisions
 
-Cleared — full history in PROJECT.md Key Decisions table.
+None yet.
 
 ### Pending Todos
 
@@ -59,5 +54,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: v2.3 milestone archived and tagged
-Next: Plan next milestone (v2.4)
+Stopped at: Defining requirements for v2.4
+Next: Define requirements and create roadmap

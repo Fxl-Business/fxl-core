@@ -124,6 +124,10 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
+- [ ] Component Picker com modo preview (mini-render dos 28 tipos de seção em grid)
+- [ ] Toggle compact/preview no dialog de seleção de seção
+- [ ] Dialog responsivo maior para acomodar previews
+
 ### Out of Scope
 
 - Mobile apps — foco web-first, mobile e futuro
@@ -158,9 +162,19 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - Task dependencies / blocking graph — v2 (TASK-07)
 - Email notifications de task assignments — v2 (TASK-08)
 
+## Current Milestone: v2.4 Component Picker Preview Mode
+
+**Goal:** Adicionar modo preview ao ComponentPicker do Wireframe Builder, permitindo visualizar mini-renders de cada tipo de seção antes de adicionar.
+
+**Target features:**
+- Modo preview com grid 2-3 colunas de mini-renders
+- Toggle entre modo preview (default) e modo compacto (atual)
+- Categorias mantidas como separadores com scroll vertical
+- Dialog maior para acomodar previews
+
 ## Current State
 
-All 11 milestones shipped (v1.0 → v2.3). Planning next milestone.
+All 11 milestones shipped (v1.0 → v2.3). Building v2.4.
 
 ## Context
 
@@ -267,4 +281,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-13 after v2.3 milestone completion*
+*Last updated: 2026-03-13 after v2.4 milestone start*
