@@ -106,9 +106,13 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
-<!-- Next milestone: v2.1 Dynamic Data Layer -->
+<!-- Current milestone: v2.1 Dynamic Data Layer -->
 
-(To be defined in next milestone)
+- [ ] Dados de processo/docs armazenados em Supabase (tabela documents)
+- [ ] App renderiza conteudo dinamicamente do banco (nao de arquivos estaticos)
+- [ ] Claude Code acessa dados via sync bidirecional (make sync-down / make sync-up)
+- [ ] Seed script migra conteudo existente de docs/ para Supabase
+- [ ] Search index funciona com dados do banco
 
 ### Out of Scope
 
@@ -143,6 +147,18 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - Kanban drag-and-drop via @dnd-kit — v2 (TASK-06)
 - Task dependencies / blocking graph — v2 (TASK-07)
 - Email notifications de task assignments — v2 (TASK-08)
+
+## Current Milestone: v2.1 Dynamic Data Layer
+
+**Goal:** Migrar todos os dados de processo/documentacao de arquivos .md estaticos para Supabase, renderizando dinamicamente na app enquanto mantem acesso do Claude Code via sync bidirecional.
+
+**Target features:**
+- Tabela `documents` no Supabase com frontmatter como colunas
+- DocRenderer busca conteudo do banco em vez de Vite glob
+- Search index baseado em dados do banco
+- Seed script para migrar docs/ existentes para Supabase
+- CLI de sync bidirecional: `make sync-down` (DB -> .md) e `make sync-up` (.md -> DB)
+- Secoes operacionais (operational) preservadas na migracao
 
 ## Context
 
