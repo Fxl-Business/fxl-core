@@ -18,41 +18,74 @@ export type DocumentRow = {
 }
 
 // ---------------------------------------------------------------------------
+// In-memory cache
+// ---------------------------------------------------------------------------
+
+let docsCache: DocumentRow[] | null = null
+let docsCachePromise: Promise<DocumentRow[]> | null = null
+
+/**
+ * Ensures the full documents list is loaded exactly once.
+ * Concurrent callers share the same in-flight promise; subsequent calls
+ * resolve instantly from the populated cache.
+ */
+async function fetchAllDocs(): Promise<DocumentRow[]> {
+  try {
+    const { data, error } = await supabase
+      .from('documents')
+      .select('*')
+      .order('parent_path')
+      .order('sort_order')
+
+    if (error || !data) return []
+    docsCache = data as DocumentRow[]
+    return docsCache
+  } catch {
+    return []
+  } finally {
+    docsCachePromise = null
+  }
+}
+
+function ensureCache(): Promise<DocumentRow[]> {
+  if (docsCache !== null) {
+    return Promise.resolve(docsCache)
+  }
+
+  if (docsCachePromise !== null) {
+    return docsCachePromise
+  }
+
+  docsCachePromise = fetchAllDocs()
+  return docsCachePromise
+}
+
+/**
+ * Clears the in-memory cache so the next call triggers a fresh Supabase fetch.
+ * Use after a sync-up operation that may have changed the documents table.
+ */
+export function invalidateDocsCache(): void {
+  docsCache = null
+  docsCachePromise = null
+}
+
+// ---------------------------------------------------------------------------
 // Queries
 // ---------------------------------------------------------------------------
 
 /** Fetch a single document by its slug (e.g., "processo/fases/fase1"). */
 export async function getDocBySlug(slug: string): Promise<DocumentRow | null> {
-  const { data, error } = await supabase
-    .from('documents')
-    .select('*')
-    .eq('slug', slug)
-    .single()
-
-  if (error || !data) return null
-  return data as DocumentRow
+  const docs = await ensureCache()
+  return docs.find((d) => d.slug === slug) ?? null
 }
 
 /** Fetch all documents ordered by parent_path then sort_order. */
 export async function getAllDocuments(): Promise<DocumentRow[]> {
-  const { data, error } = await supabase
-    .from('documents')
-    .select('*')
-    .order('parent_path')
-    .order('sort_order')
-
-  if (error || !data) return []
-  return data as DocumentRow[]
+  return ensureCache()
 }
 
 /** Fetch documents under a specific parent path, ordered by sort_order. */
 export async function getDocsByParentPath(parentPath: string): Promise<DocumentRow[]> {
-  const { data, error } = await supabase
-    .from('documents')
-    .select('*')
-    .eq('parent_path', parentPath)
-    .order('sort_order')
-
-  if (error || !data) return []
-  return data as DocumentRow[]
+  const docs = await ensureCache()
+  return docs.filter((d) => d.parent_path === parentPath)
 }
