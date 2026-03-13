@@ -152,7 +152,9 @@ Full details: [milestones/v1.6-ROADMAP.md](milestones/v1.6-ROADMAP.md)
   1. Navigating to / in a fresh browser session opens the Home page, not the documentation index
   2. All existing /processo/*, /ferramentas/*, /padroes/* doc routes open correctly — no 404s and no redirect loops
   3. Sidebar navigation items change when modules are toggled enabled/disabled — disabled modules disappear from nav
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 40-01-PLAN.md — Route audit, Home NavLink fix, sidebar enabled filtering
 
 ### Phase 41: Home 2.0 — Control Center
 **Goal**: Home is the true entry point of the platform — it communicates the operator's control-center identity, displays all enabled modules with actionable status, and surfaces recent activity without hardcoding per-module knowledge
@@ -189,6 +191,6 @@ Full details: [milestones/v1.6-ROADMAP.md](milestones/v1.6-ROADMAP.md)
 | 34-37 | v1.6 | 7/7 | Complete | 2026-03-13 |
 | 38. Module Registry Foundation | v2.0 | 0/? | Not started | - |
 | 39. Slot Architecture & Contract Types | v2.0 | 0/? | Not started | - |
-| 40. Routing Refactor | v2.0 | 0/? | Not started | - |
+| 40. Routing Refactor | v2.0 | 0/1 | Not started | - |
 | 41. Home 2.0 — Control Center | v2.0 | 0/? | Not started | - |
 | 42. Contract Population & Admin Panel | v2.0 | 0/? | Not started | - |
