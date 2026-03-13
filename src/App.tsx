@@ -1,21 +1,20 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 import { SignUp } from '@clerk/react'
 import Layout from '@/components/layout/Layout'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import Home from '@/pages/Home'
-import DocRenderer from '@/pages/DocRenderer'
-import FinanceiroIndex from '@/pages/clients/FinanceiroContaAzul/Index'
-import FinanceiroDocViewer from '@/pages/clients/FinanceiroContaAzul/DocViewer'
-import BlueprintTextView from '@/pages/clients/BlueprintTextView'
-import BriefingForm from '@/pages/clients/BriefingForm'
 import WireframeViewer from '@/pages/clients/WireframeViewer'
-import ComponentGallery from '@/pages/tools/ComponentGallery'
 import Login from '@/pages/Login'
 import Profile from '@/pages/Profile'
 import { Toaster } from '@/components/ui/sonner'
+import { MODULE_REGISTRY } from '@/modules/registry'
 
 const SharedWireframeView = lazy(() => import('@/pages/SharedWireframeView'))
+
+const moduleRoutes = MODULE_REGISTRY
+  .flatMap(m => m.routeConfig ?? [])
+  .filter((cfg): cfg is RouteObject & { path: string } => cfg.path !== undefined)
 
 export default function App() {
   return (
@@ -26,18 +25,10 @@ export default function App() {
           {/* Home */}
           <Route path="/" element={<Home />} />
 
-          {/* Documentacao via Markdoc — catch-all para docs/ */}
-          <Route path="/processo/*" element={<DocRenderer />} />
-          <Route path="/referencias/*" element={<DocRenderer />} />
-          <Route path="/padroes/*" element={<DocRenderer />} />
-          <Route path="/ferramentas/wireframe-builder/galeria" element={<ComponentGallery />} />
-          <Route path="/ferramentas/*" element={<DocRenderer />} />
-
-          {/* Paginas interativas de clientes */}
-          <Route path="/clients/financeiro-conta-azul" element={<FinanceiroIndex />} />
-          <Route path="/clients/:clientSlug/briefing" element={<BriefingForm />} />
-          <Route path="/clients/:clientSlug/blueprint" element={<BlueprintTextView />} />
-          <Route path="/clients/financeiro-conta-azul/:doc" element={<FinanceiroDocViewer />} />
+          {/* Module routes — derived from MODULE_REGISTRY manifests */}
+          {moduleRoutes.map(cfg => (
+            <Route key={cfg.path} path={cfg.path} element={cfg.element} />
+          ))}
         </Route>
 
         {/* Auth pages — public, full screen */}
@@ -61,8 +52,7 @@ export default function App() {
           element={<ProtectedRoute><Profile /></ProtectedRoute>}
         />
 
-        {/* Wireframe viewer — protected, full screen */}
-        {/* Static route (score [3,3,3]) beats /clients/financeiro-conta-azul/:doc (score [3,3,2]) */}
+        {/* Wireframe viewer — protected, full screen (static route beats /:doc wildcard) */}
         <Route
           path="/clients/financeiro-conta-azul/wireframe"
           element={<ProtectedRoute><WireframeViewer clientSlug="financeiro-conta-azul" /></ProtectedRoute>}
