@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: planning
-stopped_at: Completed 32-task-management-module/32-02-PLAN.md
-last_updated: "2026-03-13T01:14:54.167Z"
+stopped_at: Completed 32-task-management-module/32-03-PLAN.md
+last_updated: "2026-03-13T01:15:26.103Z"
 last_activity: 2026-03-12 -- Roadmap written for v1.5 (Phases 29-33), 19 requirements mapped
 progress:
   total_phases: 12
@@ -73,6 +73,8 @@ v1.5 decisions to track during execution:
 - [Phase 32-task-management-module]: Sidebar Tarefas section via tasksManifest.navChildren — follows MODULE_REGISTRY pattern, not static nav array
 - [Phase 32-task-management-module]: KanbanBoard and TaskForm are lazy-imported placeholders — route definitions registered now, implementations deferred to Plans 02/03
 - [Phase 32-task-management-module]: TaskForm: client_slug passes as undefined (not null) to createTask; conditional loading spinner placed after all hook declarations per hooks-before-returns rule
+- [Phase 32-task-management-module]: [Phase 32-03]: DocumentarButton outside TaskCard — cross-module navigation decoupled from card component
+- [Phase 32-task-management-module]: [Phase 32-03]: Optimistic kanban updates via local useState synced from useTasks, refetch on error for rollback
 
 ### Pending Todos
 
@@ -86,6 +88,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T01:14:54.164Z
-Stopped at: Completed 32-task-management-module/32-02-PLAN.md
+Last session: 2026-03-13T01:15:26.100Z
+Stopped at: Completed 32-task-management-module/32-03-PLAN.md
 Next: Complete Phase 28 (v1.4), then plan Phase 29 via /gsd:plan-phase 29

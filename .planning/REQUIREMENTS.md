@@ -29,8 +29,8 @@ Requirements for Modular Foundation & Knowledge Base milestone. Each maps to roa
 - [x] **TASK-01**: Tabela tasks no Supabase com status enum, priority, client_slug, due_date
 - [x] **TASK-02**: Pagina de listagem /tarefas com filtro por status, cliente, prioridade
 - [x] **TASK-03**: Formulario de criacao/edicao com titulo, descricao, status, priority, due_date, client_slug
-- [ ] **TASK-04**: Kanban view /tarefas/kanban com 4 colunas (todo, in_progress, done, blocked), mudanca via click
-- [ ] **TASK-05**: Botao "Documentar" em tarefas done que pre-preenche KB entry (bug ou decision)
+- [x] **TASK-04**: Kanban view /tarefas/kanban com 4 colunas (todo, in_progress, done, blocked), mudanca via click
+- [x] **TASK-05**: Botao "Documentar" em tarefas done que pre-preenche KB entry (bug ou decision)
 
 ### Home Page
 
@@ -87,8 +87,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TASK-01 | Phase 30 | Complete |
 | TASK-02 | Phase 32 | Complete |
 | TASK-03 | Phase 32 | Complete |
-| TASK-04 | Phase 32 | Pending |
-| TASK-05 | Phase 32 | Pending |
+| TASK-04 | Phase 32 | Complete |
+| TASK-05 | Phase 32 | Complete |
 | HOME-01 | Phase 33 | Pending |
 | HOME-02 | Phase 33 | Pending |
 | HOME-03 | Phase 33 | Pending |
