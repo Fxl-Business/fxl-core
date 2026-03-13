@@ -14,7 +14,7 @@ export default [
     },
     settings: {
       'boundaries/elements': [
-        { type: 'module', pattern: 'src/modules/!(registry)*' },
+        { type: 'module', pattern: 'src/modules/!(registry|module-ids|extension-registry|slots|hooks)*' },
         { type: 'component', pattern: 'src/components/*' },
         { type: 'page', pattern: 'src/pages/*' },
         { type: 'lib', pattern: 'src/lib/*' },
