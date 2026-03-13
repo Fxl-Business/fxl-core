@@ -1,4 +1,4 @@
-.PHONY: dev build lint preview install migrate seed-docs seed-docs-force
+.PHONY: dev build lint preview install migrate seed-docs seed-docs-force sync-down sync-up
 
 dev:
 	npm run dev
@@ -25,3 +25,9 @@ seed-docs:
 
 seed-docs-force:
 	npx tsx --env-file .env.local scripts/seed-documents.ts --force
+
+sync-down:
+	npx tsx --env-file .env.local tools/sync/sync-down.ts
+
+sync-up:
+	npx tsx --env-file .env.local tools/sync/sync-up.ts
