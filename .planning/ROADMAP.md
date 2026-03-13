@@ -198,7 +198,7 @@ Plans:
 | 22-28 | v1.4 | 12/12 | Complete | 2026-03-13 |
 | 29-33 | v1.5 | 14/14 | Complete | 2026-03-13 |
 | 34-37 | v1.6 | 7/7 | Complete | 2026-03-13 |
-| 38. Module Registry Foundation | 2/2 | Complete   | 2026-03-13 | - |
+| 38. Module Registry Foundation | 2/2 | Complete    | 2026-03-13 | - |
 | 39. Slot Architecture & Contract Types | v2.0 | 0/2 | Not started | - |
 | 40. Routing Refactor | v2.0 | 0/? | Not started | - |
 | 41. Home 2.0 — Control Center | v2.0 | 0/1 | Not started | - |
