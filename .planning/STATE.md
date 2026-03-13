@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Framework Shell + Arquitetura Modular
 status: planning
-stopped_at: Completed 39-01-PLAN.md
-last_updated: "2026-03-13T04:38:24.514Z"
+stopped_at: Completed 39-02-PLAN.md
+last_updated: "2026-03-13T04:43:32.915Z"
 last_activity: 2026-03-13 — Roadmap created, 5 phases (38-42), 19/19 requirements mapped
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -53,6 +53,9 @@ Key decisions for v2.0:
 - [Phase 39-01]: SLOT_IDS co-located in registry.ts — anchors ModuleExtension and SlotComponentProps type definitions
 - [Phase 39-01]: ModuleExtension.injects completed in Phase 39 with SlotComponentProps — no ComponentType<any> anywhere in extension chain
 - [Phase 39-01]: resolveExtensions() pure function (zero React runtime) — fully unit-testable without jsdom
+- [Phase 39-slot-architecture-contract-types]: ExtensionProvider consumes useModuleEnabled() — no localStorage duplication, single source of truth
+- [Phase 39-slot-architecture-contract-types]: ModuleEnabledProvider wired into App.tsx in Plan 02 (Phase 38 deferred this integration point)
+- [Phase 39-slot-architecture-contract-types]: Provider nesting: BrowserRouter > ModuleEnabledProvider > ExtensionProvider > Routes
 
 ### Pending Todos
 
@@ -65,6 +68,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T04:38:24.509Z
-Stopped at: Completed 39-01-PLAN.md
+Last session: 2026-03-13T04:43:32.912Z
+Stopped at: Completed 39-02-PLAN.md
 Next: /gsd:plan-phase 38

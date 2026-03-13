@@ -114,7 +114,7 @@ Full details: [milestones/v1.6-ROADMAP.md](milestones/v1.6-ROADMAP.md)
 **Milestone Goal:** Transformar o FxL Core de app de documentacao em framework shell modular com Home verdadeira, Module Registry declarativo, arquitetura de contratos entre modulos e roteamento refatorado.
 
 - [x] **Phase 38: Module Registry Foundation** (2 plans) - Enhanced ModuleDefinition type, module-ids.ts constants, enabled/badge fields on all 5 manifests (completed 2026-03-13)
-- [ ] **Phase 39: Slot Architecture & Contract Types** (2 plans) - Extension system runtime (ExtensionProvider, ExtensionSlot, resolveExtensions), contract type definitions, ESLint boundary update
+- [x] **Phase 39: Slot Architecture & Contract Types** (2 plans) - Extension system runtime (ExtensionProvider, ExtensionSlot, resolveExtensions), contract type definitions, ESLint boundary update (completed 2026-03-13)
 - [ ] **Phase 40: Routing Refactor** - Route / confirmed as Home, /docs routes preserved, sidebar filters by enabled modules
 - [ ] **Phase 41: Home 2.0 — Control Center** (1 plan) - Rebuilt Home page as app control center reading exclusively from MODULE_REGISTRY
 - [ ] **Phase 42: Contract Population & Admin Panel** (2 plans) - Real cross-module extensions end-to-end, /admin/modules panel with enable/disable toggles
@@ -145,7 +145,7 @@ Plans:
   3. `<ExtensionSlot>` component renders injected components for a given slot ID, returning null gracefully when no extensions are registered for that slot
   4. `useActiveExtensions(moduleId)` hook returns the correct set of active extensions based on which modules are enabled
   5. ESLint boundary config is updated so extension-registry.ts, slots.tsx, and hooks files are not flagged as boundary violations
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 39-01-PLAN.md — Contract types (ModuleExtension, SlotComponentProps), resolveExtensions() pure function, ESLint boundary update
 - [ ] 39-02-PLAN.md — React context slot system (ExtensionProvider, ExtensionSlot), useActiveExtensions hook, App.tsx wiring
@@ -199,7 +199,7 @@ Plans:
 | 29-33 | v1.5 | 14/14 | Complete | 2026-03-13 |
 | 34-37 | v1.6 | 7/7 | Complete | 2026-03-13 |
 | 38. Module Registry Foundation | 2/2 | Complete    | 2026-03-13 | - |
-| 39. Slot Architecture & Contract Types | 1/2 | In Progress|  | - |
+| 39. Slot Architecture & Contract Types | 2/2 | Complete   | 2026-03-13 | - |
 | 40. Routing Refactor | v2.0 | 0/? | Not started | - |
 | 41. Home 2.0 — Control Center | v2.0 | 0/1 | Not started | - |
 | 42. Contract Population & Admin Panel | v2.0 | 0/2 | Not started | - |

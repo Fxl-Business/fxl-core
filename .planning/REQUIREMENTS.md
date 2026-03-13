@@ -25,8 +25,8 @@ Requirements for milestone v2.0 — Framework Shell + Arquitetura Modular.
 
 - [x] **CONT-01**: ModuleExtension type defines id, requires[], description, and injects map
 - [x] **CONT-02**: SlotComponentProps interface provides type-safe props for slot-injected components
-- [ ] **CONT-03**: ExtensionSlot component renders injected components for a given slot ID
-- [ ] **CONT-04**: useActiveExtensions(moduleId) hook returns active extensions based on enabled modules
+- [x] **CONT-03**: ExtensionSlot component renders injected components for a given slot ID
+- [x] **CONT-04**: useActiveExtensions(moduleId) hook returns active extensions based on enabled modules
 - [ ] **CONT-05**: At least 2 real cross-module extensions are implemented and rendering end-to-end
 
 ### Routing
@@ -75,8 +75,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REG-04 | Phase 38 | Complete |
 | CONT-01 | Phase 39 | Complete |
 | CONT-02 | Phase 39 | Complete |
-| CONT-03 | Phase 39 | Pending |
-| CONT-04 | Phase 39 | Pending |
+| CONT-03 | Phase 39 | Complete |
+| CONT-04 | Phase 39 | Complete |
 | ROUT-06 | Phase 39 | Complete |
 | ROUT-01 | Phase 40 | Pending |
 | ROUT-02 | Phase 40 | Pending |
