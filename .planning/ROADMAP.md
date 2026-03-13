@@ -18,7 +18,7 @@
 
 **Milestone Goal:** Migrar todos os dados de processo/documentacao de arquivos .md estaticos para Supabase, renderizando dinamicamente na app enquanto mantem acesso do Claude Code via sync bidirecional.
 
-- [ ] **Phase 43: Database Schema** - Criar tabela documents no Supabase com indexes e RLS
+- [x] **Phase 43: Database Schema** - Criar tabela documents no Supabase com indexes e RLS (completed 2026-03-13)
 - [ ] **Phase 44: Data Migration** - Seed script migra todos os 62 .md de docs/ para Supabase
 - [ ] **Phase 45: Dynamic Rendering** - DocRenderer, search index e sidebar consomem dados do banco
 - [ ] **Phase 46: Sync CLI** - make sync-down e make sync-up para fluxo bidirecional Claude Code
@@ -76,7 +76,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 43. Database Schema | 0/TBD | Not started | - |
+| 43. Database Schema | 1/1 | Complete    | 2026-03-13 |
 | 44. Data Migration | 0/TBD | Not started | - |
 | 45. Dynamic Rendering | 0/TBD | Not started | - |
 | 46. Sync CLI | 0/TBD | Not started | - |
