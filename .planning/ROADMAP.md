@@ -200,6 +200,6 @@ Plans:
 | 34-37 | v1.6 | 7/7 | Complete | 2026-03-13 |
 | 38. Module Registry Foundation | 2/2 | Complete    | 2026-03-13 | - |
 | 39. Slot Architecture & Contract Types | 2/2 | Complete    | 2026-03-13 | - |
-| 40. Routing Refactor | 1/1 | Complete   | 2026-03-13 | - |
+| 40. Routing Refactor | 1/1 | Complete    | 2026-03-13 | - |
 | 41. Home 2.0 — Control Center | v2.0 | 0/1 | Not started | - |
 | 42. Contract Population & Admin Panel | v2.0 | 0/2 | Not started | - |
