@@ -116,7 +116,7 @@ Full details: [milestones/v1.6-ROADMAP.md](milestones/v1.6-ROADMAP.md)
 - [ ] **Phase 38: Module Registry Foundation** (2 plans) - Enhanced ModuleDefinition type, module-ids.ts constants, enabled/badge fields on all 5 manifests
 - [ ] **Phase 39: Slot Architecture & Contract Types** (2 plans) - Extension system runtime (ExtensionProvider, ExtensionSlot, resolveExtensions), contract type definitions, ESLint boundary update
 - [ ] **Phase 40: Routing Refactor** - Route / confirmed as Home, /docs routes preserved, sidebar filters by enabled modules
-- [ ] **Phase 41: Home 2.0 — Control Center** - Rebuilt Home page as app control center reading exclusively from MODULE_REGISTRY
+- [ ] **Phase 41: Home 2.0 — Control Center** (1 plan) - Rebuilt Home page as app control center reading exclusively from MODULE_REGISTRY
 - [ ] **Phase 42: Contract Population & Admin Panel** (2 plans) - Real cross-module extensions end-to-end, /admin/modules panel with enable/disable toggles
 
 ## Phase Details
@@ -169,7 +169,9 @@ Plans:
   2. Each enabled module appears on Home with its name, description (from manifest), icon, badge count, and a direct access link
   3. Home has a secondary area showing FXL installation identity (name/logo) and a recent activity summary
   4. Home.tsx imports nothing from individual module directories — all data comes from MODULE_REGISTRY or shared lib/
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 41-01-PLAN.md — Extract shared hooks (activity-feed, module-stats) + rebuild Home.tsx as asymmetric control center
 
 ### Phase 42: Contract Population & Admin Panel
 **Goal**: The extension architecture is validated end-to-end with real cross-module extensions rendering in the running app, and the admin panel lets the operator visualize and control all modules from a single internal page
@@ -199,5 +201,5 @@ Plans:
 | 38. Module Registry Foundation | v2.0 | 0/2 | Not started | - |
 | 39. Slot Architecture & Contract Types | v2.0 | 0/2 | Not started | - |
 | 40. Routing Refactor | v2.0 | 0/? | Not started | - |
-| 41. Home 2.0 — Control Center | v2.0 | 0/? | Not started | - |
+| 41. Home 2.0 — Control Center | v2.0 | 0/1 | Not started | - |
 | 42. Contract Population & Admin Panel | v2.0 | 0/2 | Not started | - |
