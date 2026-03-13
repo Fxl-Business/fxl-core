@@ -41,20 +41,20 @@ Requirements for Component Picker Preview Mode milestone. Each maps to roadmap p
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PICK-01 | — | Pending |
-| PICK-02 | — | Pending |
-| PICK-03 | — | Pending |
-| PICK-04 | — | Pending |
-| PREV-01 | — | Pending |
-| PREV-02 | — | Pending |
-| PREV-03 | — | Pending |
-| PREV-04 | — | Pending |
+| PREV-01 | Phase 58 | Pending |
+| PREV-04 | Phase 58 | Pending |
+| PICK-01 | Phase 59 | Pending |
+| PICK-02 | Phase 59 | Pending |
+| PICK-03 | Phase 59 | Pending |
+| PICK-04 | Phase 59 | Pending |
+| PREV-02 | Phase 59 | Pending |
+| PREV-03 | Phase 59 | Pending |
 
 **Coverage:**
 - v2.4 requirements: 8 total
-- Mapped to phases: 0
-- Unmapped: 8
+- Mapped to phases: 8
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after initial definition*
+*Last updated: 2026-03-13 after roadmap creation — all 8 requirements mapped*
