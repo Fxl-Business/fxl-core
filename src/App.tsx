@@ -12,6 +12,12 @@ import { MODULE_REGISTRY } from '@/modules/registry'
 
 const SharedWireframeView = lazy(() => import('@/pages/SharedWireframeView'))
 
+// Knowledge Base pages (lazy for code splitting)
+const KBListPage = lazy(() => import('@/modules/knowledge-base/pages/KBListPage'))
+const KBDetailPage = lazy(() => import('@/modules/knowledge-base/pages/KBDetailPage'))
+const KBFormPage = lazy(() => import('@/modules/knowledge-base/pages/KBFormPage'))
+const KBSearchPage = lazy(() => import('@/modules/knowledge-base/pages/KBSearchPage'))
+
 const moduleRoutes = MODULE_REGISTRY
   .flatMap(m => m.routeConfig ?? [])
   .filter((cfg): cfg is RouteObject & { path: string } => cfg.path !== undefined)
@@ -29,6 +35,13 @@ export default function App() {
           {moduleRoutes.map(cfg => (
             <Route key={cfg.path} path={cfg.path} element={cfg.element} />
           ))}
+
+          {/* Knowledge Base — static routes before parametric (RESEARCH pitfall 3) */}
+          <Route path="/knowledge-base" element={<Suspense fallback={<div>Carregando...</div>}><KBListPage /></Suspense>} />
+          <Route path="/knowledge-base/search" element={<Suspense fallback={<div>Carregando...</div>}><KBSearchPage /></Suspense>} />
+          <Route path="/knowledge-base/new" element={<Suspense fallback={<div>Carregando...</div>}><KBFormPage /></Suspense>} />
+          <Route path="/knowledge-base/:id/edit" element={<Suspense fallback={<div>Carregando...</div>}><KBFormPage /></Suspense>} />
+          <Route path="/knowledge-base/:id" element={<Suspense fallback={<div>Carregando...</div>}><KBDetailPage /></Suspense>} />
         </Route>
 
         {/* Auth pages — public, full screen */}
