@@ -35,9 +35,19 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
+import {
   GripVertical,
-  MoreVertical,
   Plus,
+  Pin,
+  PinOff,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { BlueprintScreen, PeriodType } from '@tools/wireframe-builder/types/blueprint'
@@ -52,6 +62,12 @@ type Props = {
   onDeleteScreen: (index: number) => void
   onRenameScreen: (index: number, title: string) => void
   onReorderScreens: (screens: BlueprintScreen[]) => void
+  /** Pin position for each screen ('top' | 'bottom' | null) */
+  getPinnedPosition?: (screenId: string) => 'top' | 'bottom' | null
+  /** Pin a screen to top or bottom */
+  onPinScreen?: (screenId: string, position: 'top' | 'bottom') => void
+  /** Unpin a screen */
+  onUnpinScreen?: (screenId: string) => void
 }
 
 // -- Sortable screen item -------------------------------------------------
@@ -60,18 +76,25 @@ function SortableScreenItem({
   screen,
   isActive,
   editMode,
+  pinnedPosition,
   onSelect,
   onRename,
   onDelete,
+  onPinTop,
+  onPinBottom,
+  onUnpin,
 }: {
   screen: BlueprintScreen
   isActive: boolean
   editMode: boolean
+  pinnedPosition: 'top' | 'bottom' | null
   onSelect: () => void
   onRename: (title: string) => void
   onDelete: () => void
+  onPinTop?: () => void
+  onPinBottom?: () => void
+  onUnpin?: () => void
 }) {
-  const [menuOpen, setMenuOpen] = useState(false)
   const [renaming, setRenaming] = useState(false)
   const [renameValue, setRenameValue] = useState(screen.title)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -99,10 +122,9 @@ function SortableScreenItem({
       onRename(trimmed)
     }
     setRenaming(false)
-    setMenuOpen(false)
   }
 
-  return (
+  const itemContent = (
     <div ref={setNodeRef} style={style} className="relative">
       <div
         className={cn(
@@ -125,6 +147,9 @@ function SortableScreenItem({
             <GripVertical className="h-4 w-4" />
           </button>
         )}
+        {pinnedPosition && (
+          <Pin className="h-3 w-3 shrink-0 text-wf-accent" style={{ opacity: 0.7 }} />
+        )}
         {Icon && <Icon className="h-4 w-4 shrink-0" />}
 
         {renaming ? (
@@ -138,7 +163,6 @@ function SortableScreenItem({
               if (e.key === 'Escape') {
                 setRenameValue(screen.title)
                 setRenaming(false)
-                setMenuOpen(false)
               }
             }}
             autoFocus
@@ -147,49 +171,7 @@ function SortableScreenItem({
         ) : (
           <span className="truncate">{screen.title}</span>
         )}
-
-        {editMode && !renaming && !confirmDelete && (
-          <button
-            type="button"
-            className="ml-auto text-wf-sidebar-muted hover:text-wf-sidebar-fg shrink-0"
-            onClick={(e) => {
-              e.stopPropagation()
-              setMenuOpen(!menuOpen)
-            }}
-          >
-            <MoreVertical className="h-3.5 w-3.5" />
-          </button>
-        )}
       </div>
-
-      {/* Dropdown menu */}
-      {menuOpen && !renaming && !confirmDelete && (
-        <div className="absolute right-0 top-full z-10 mt-1 w-36 rounded-md border border-wf-sidebar-border bg-wf-sidebar py-1" style={{ boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)' }}>
-          <button
-            type="button"
-            className="w-full px-3 py-1.5 text-left text-xs text-wf-sidebar-muted hover:bg-white/10"
-            onClick={(e) => {
-              e.stopPropagation()
-              setRenameValue(screen.title)
-              setRenaming(true)
-              setMenuOpen(false)
-            }}
-          >
-            Renomear
-          </button>
-          <button
-            type="button"
-            className="w-full px-3 py-1.5 text-left text-xs text-red-400 hover:bg-white/10"
-            onClick={(e) => {
-              e.stopPropagation()
-              setConfirmDelete(true)
-              setMenuOpen(false)
-            }}
-          >
-            Excluir
-          </button>
-        </div>
-      )}
 
       {/* Delete confirmation */}
       {confirmDelete && (
@@ -225,6 +207,84 @@ function SortableScreenItem({
         </div>
       )}
     </div>
+  )
+
+  if (!editMode) return itemContent
+
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        {itemContent}
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-44 bg-[#0f172a] border-[var(--wf-sidebar-border)] text-white">
+        <ContextMenuItem
+          className="text-xs hover:bg-white/10 focus:bg-white/10 focus:text-white"
+          onClick={() => {
+            setRenameValue(screen.title)
+            setRenaming(true)
+          }}
+        >
+          Renomear
+        </ContextMenuItem>
+        {(onPinTop || onPinBottom || onUnpin) && (
+          <>
+            <ContextMenuSeparator className="bg-[var(--wf-sidebar-border)]" />
+            {pinnedPosition === null && onPinBottom && (
+              <ContextMenuItem
+                className="text-xs hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                onClick={() => onPinBottom()}
+              >
+                <ArrowDown className="h-3.5 w-3.5 mr-2" />
+                Fixar no Rodape
+              </ContextMenuItem>
+            )}
+            {pinnedPosition === null && onPinTop && (
+              <ContextMenuItem
+                className="text-xs hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                onClick={() => onPinTop()}
+              >
+                <ArrowUp className="h-3.5 w-3.5 mr-2" />
+                Fixar no Topo
+              </ContextMenuItem>
+            )}
+            {pinnedPosition === 'bottom' && onPinTop && (
+              <ContextMenuItem
+                className="text-xs hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                onClick={() => onPinTop()}
+              >
+                <ArrowUp className="h-3.5 w-3.5 mr-2" />
+                Mover para Topo
+              </ContextMenuItem>
+            )}
+            {pinnedPosition === 'top' && onPinBottom && (
+              <ContextMenuItem
+                className="text-xs hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                onClick={() => onPinBottom()}
+              >
+                <ArrowDown className="h-3.5 w-3.5 mr-2" />
+                Mover para Rodape
+              </ContextMenuItem>
+            )}
+            {pinnedPosition !== null && onUnpin && (
+              <ContextMenuItem
+                className="text-xs hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                onClick={() => onUnpin()}
+              >
+                <PinOff className="h-3.5 w-3.5 mr-2" />
+                Desfixar
+              </ContextMenuItem>
+            )}
+          </>
+        )}
+        <ContextMenuSeparator className="bg-[var(--wf-sidebar-border)]" />
+        <ContextMenuItem
+          className="text-xs text-red-400 hover:bg-white/10 focus:bg-white/10 focus:text-red-400"
+          onClick={() => setConfirmDelete(true)}
+        >
+          Excluir
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   )
 }
 
@@ -328,6 +388,9 @@ export default function ScreenManager({
   onDeleteScreen,
   onRenameScreen,
   onReorderScreens,
+  getPinnedPosition,
+  onPinScreen,
+  onUnpinScreen,
 }: Props) {
   const [addDialogOpen, setAddDialogOpen] = useState(false)
 
@@ -369,9 +432,13 @@ export default function ScreenManager({
                 screen={screen}
                 isActive={index === activeIndex}
                 editMode={editMode}
+                pinnedPosition={getPinnedPosition?.(screen.id) ?? null}
                 onSelect={() => onSelectScreen(index)}
                 onRename={(title) => onRenameScreen(index, title)}
                 onDelete={() => onDeleteScreen(index)}
+                onPinTop={onPinScreen ? () => onPinScreen(screen.id, 'top') : undefined}
+                onPinBottom={onPinScreen ? () => onPinScreen(screen.id, 'bottom') : undefined}
+                onUnpin={onUnpinScreen ? () => onUnpinScreen(screen.id) : undefined}
               />
             ))}
           </SortableContext>

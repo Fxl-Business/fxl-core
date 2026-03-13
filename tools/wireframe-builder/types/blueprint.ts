@@ -433,6 +433,8 @@ export type SidebarConfig = {
   footer?: string          // version/environment text
   groups?: SidebarGroup[]  // optional grouping of screens with labeled headings
   widgets?: SidebarWidget[]    // NEW — compound widgets (Phase 47 / INFRA-03)
+  pinnedTop?: string[]     // screen IDs pinned to top of sidebar nav
+  pinnedBottom?: string[]  // screen IDs pinned to bottom of sidebar nav
 }
 
 export type HeaderConfig = {

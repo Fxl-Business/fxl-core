@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
-import { MessageSquare, Loader2, PanelLeft, Plus, Trash2 } from 'lucide-react'
+import { MessageSquare, Loader2, PanelLeft, Plus, Pin } from 'lucide-react'
 import { useUser } from '@clerk/react'
 import { arrayMove } from '@dnd-kit/sortable'
 import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
@@ -38,6 +38,13 @@ import { toTargetId } from '@tools/wireframe-builder/types/comments'
 import type { Comment } from '@tools/wireframe-builder/types/comments'
 import { SIDEBAR_WIDGET_REGISTRY } from '@tools/wireframe-builder/lib/sidebar-widget-registry'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
 import WorkspaceSwitcherWidget from '@tools/wireframe-builder/components/sidebar-widgets/WorkspaceSwitcherWidget'
 import UserMenuWidget from '@tools/wireframe-builder/components/sidebar-widgets/UserMenuWidget'
 import type {
@@ -60,33 +67,115 @@ const brandingMap: Record<string, () => Promise<{ default: BrandingConfig }>> = 
 // partitionScreensByGroups -- module-level helper for group rendering
 // ---------------------------------------------------------------------------
 
+type ScreenEntry = { screen: BlueprintScreen; originalIndex: number }
+
 type ScreenGroup = {
   label: string | null
-  screens: { screen: BlueprintScreen; originalIndex: number }[]
+  screens: ScreenEntry[]
+}
+
+type SidebarPartition = {
+  pinnedTop: ScreenEntry[]
+  ungrouped: ScreenEntry[]
+  groups: (ScreenGroup & { label: string; groupIndex: number })[]
+  pinnedBottom: ScreenEntry[]
 }
 
 function partitionScreensByGroups(
   screens: BlueprintScreen[],
   groups?: SidebarGroup[],
+  pinnedTop?: string[],
+  pinnedBottom?: string[],
 ): ScreenGroup[] {
-  if (!groups || groups.length === 0) {
-    return [{ label: null, screens: screens.map((s, i) => ({ screen: s, originalIndex: i })) }]
-  }
-  const grouped: ScreenGroup[] = groups.map((g) => ({
+  const pinnedTopSet = new Set(pinnedTop ?? [])
+  const pinnedBottomSet = new Set(pinnedBottom ?? [])
+  const pinnedIds = new Set([...pinnedTopSet, ...pinnedBottomSet])
+
+  const allEntries = screens.map((s, i) => ({ screen: s, originalIndex: i }))
+
+  // Pinned screens at top
+  const topEntries = (pinnedTop ?? [])
+    .map((id) => allEntries.find((e) => e.screen.id === id))
+    .filter((x): x is ScreenEntry => x != null)
+
+  // Pinned screens at bottom
+  const bottomEntries = (pinnedBottom ?? [])
+    .map((id) => allEntries.find((e) => e.screen.id === id))
+    .filter((x): x is ScreenEntry => x != null)
+
+  const groupedIds = new Set((groups ?? []).flatMap((g) => g.screenIds))
+
+  // Ungrouped, non-pinned screens (appear FIRST, before groups)
+  const ungrouped = allEntries.filter(
+    ({ screen }) => !groupedIds.has(screen.id) && !pinnedIds.has(screen.id),
+  )
+
+  // Build groups (filtering out pinned screens from each group)
+  const groupEntries: ScreenGroup[] = (groups ?? []).map((g) => ({
     label: g.label,
     screens: g.screenIds
-      .map((id) => {
-        const idx = screens.findIndex((s) => s.id === id)
-        return idx !== -1 ? { screen: screens[idx], originalIndex: idx } : null
-      })
-      .filter((x): x is { screen: BlueprintScreen; originalIndex: number } => x !== null),
+      .filter((id) => !pinnedIds.has(id))
+      .map((id) => allEntries.find((e) => e.screen.id === id))
+      .filter((x): x is ScreenEntry => x != null),
   }))
-  const groupedIds = new Set(groups.flatMap((g) => g.screenIds))
-  const ungrouped = screens
-    .map((s, i) => ({ screen: s, originalIndex: i }))
-    .filter(({ screen }) => !groupedIds.has(screen.id))
-  if (ungrouped.length > 0) grouped.push({ label: null, screens: ungrouped })
-  return grouped.filter((g) => g.screens.length > 0)
+
+  // Assemble: pinned-top → ungrouped → groups → pinned-bottom
+  const result: ScreenGroup[] = []
+  if (topEntries.length > 0) result.push({ label: null, screens: topEntries })
+  if (ungrouped.length > 0) result.push({ label: null, screens: ungrouped })
+  for (const g of groupEntries) {
+    if (g.screens.length > 0) result.push(g)
+  }
+  if (bottomEntries.length > 0) result.push({ label: null, screens: bottomEntries })
+
+  if (result.length === 0 && allEntries.length > 0) {
+    return [{ label: null, screens: allEntries }]
+  }
+  return result
+}
+
+/** Structured partition for edit mode (knows pinned vs ungrouped vs grouped) */
+function partitionScreensForEdit(
+  screens: BlueprintScreen[],
+  groups?: SidebarGroup[],
+  pinnedTop?: string[],
+  pinnedBottom?: string[],
+): SidebarPartition {
+  const pinnedTopSet = new Set(pinnedTop ?? [])
+  const pinnedBottomSet = new Set(pinnedBottom ?? [])
+  const pinnedIds = new Set([...pinnedTopSet, ...pinnedBottomSet])
+
+  const allEntries = screens.map((s, i) => ({ screen: s, originalIndex: i }))
+
+  const topEntries = (pinnedTop ?? [])
+    .map((id) => allEntries.find((e) => e.screen.id === id))
+    .filter((x): x is ScreenEntry => x != null)
+
+  const bottomEntries = (pinnedBottom ?? [])
+    .map((id) => allEntries.find((e) => e.screen.id === id))
+    .filter((x): x is ScreenEntry => x != null)
+
+  const groupedIds = new Set((groups ?? []).flatMap((g) => g.screenIds))
+
+  const ungrouped = allEntries.filter(
+    ({ screen }) => !groupedIds.has(screen.id) && !pinnedIds.has(screen.id),
+  )
+
+  const groupList = (groups ?? []).map((g, i) => ({
+    label: g.label,
+    groupIndex: i,
+    screens: g.screenIds
+      .filter((id) => !pinnedIds.has(id))
+      .map((id) => allEntries.find((e) => e.screen.id === id))
+      .filter((x): x is ScreenEntry => x != null),
+  }))
+
+  return {
+    pinnedTop: topEntries,
+    ungrouped,
+    groups: groupList,
+    pinnedBottom: bottomEntries,
+  }
 }
 
 /**
@@ -574,6 +663,73 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     setSelectedFilterBarAction(null)
   }
 
+  function handlePinScreen(screenId: string, position: 'top' | 'bottom') {
+    updateWorkingConfig((cfg) => {
+      const topIds = (cfg.sidebar?.pinnedTop ?? []).filter((id) => id !== screenId)
+      const bottomIds = (cfg.sidebar?.pinnedBottom ?? []).filter((id) => id !== screenId)
+      if (position === 'top') topIds.push(screenId)
+      else bottomIds.push(screenId)
+      // Remove from any group
+      const groups = (cfg.sidebar?.groups ?? []).map((g) => ({
+        ...g,
+        screenIds: g.screenIds.filter((id) => id !== screenId),
+      }))
+      return {
+        ...cfg,
+        sidebar: { ...cfg.sidebar, pinnedTop: topIds, pinnedBottom: bottomIds, groups },
+      }
+    })
+  }
+
+  function handleUnpinScreen(screenId: string) {
+    updateWorkingConfig((cfg) => ({
+      ...cfg,
+      sidebar: {
+        ...cfg.sidebar,
+        pinnedTop: (cfg.sidebar?.pinnedTop ?? []).filter((id) => id !== screenId),
+        pinnedBottom: (cfg.sidebar?.pinnedBottom ?? []).filter((id) => id !== screenId),
+      },
+    }))
+  }
+
+  function getScreenPinnedPosition(screenId: string): 'top' | 'bottom' | null {
+    if (activeConfig?.sidebar?.pinnedTop?.includes(screenId)) return 'top'
+    if (activeConfig?.sidebar?.pinnedBottom?.includes(screenId)) return 'bottom'
+    return null
+  }
+
+  function handleDeleteWidget(actualIndex: number) {
+    updateWorkingConfig((cfg) => ({
+      ...cfg,
+      sidebar: {
+        ...cfg.sidebar,
+        widgets: (cfg.sidebar?.widgets ?? []).filter((_, i) => i !== actualIndex),
+      },
+    }))
+    if (
+      editMode.selectedSidebarElement?.type === 'widget' &&
+      editMode.selectedSidebarElement.widgetIndex === actualIndex
+    ) {
+      setEditMode((prev) => ({ ...prev, selectedSidebarElement: null }))
+    }
+  }
+
+  function handleDeleteGroup(groupIndex: number) {
+    updateWorkingConfig((cfg) => ({
+      ...cfg,
+      sidebar: {
+        ...cfg.sidebar,
+        groups: (cfg.sidebar?.groups ?? []).filter((_, i) => i !== groupIndex),
+      },
+    }))
+    if (
+      editMode.selectedSidebarElement?.type === 'group' &&
+      editMode.selectedSidebarElement.groupIndex === groupIndex
+    ) {
+      setEditMode((prev) => ({ ...prev, selectedSidebarElement: null }))
+    }
+  }
+
   function handleFilterClick(filterIndex: number) {
     setSelectedFilterIndex(filterIndex)
     setSelectedFilterBarAction(null)
@@ -969,7 +1125,8 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                     const isSelected =
                       editMode.selectedSidebarElement?.type === 'widget' &&
                       editMode.selectedSidebarElement.widgetIndex === actualIndex
-                    return widget.type === 'workspace-switcher' ? (
+                    if (widget.type !== 'workspace-switcher') return null
+                    const widgetContent = (
                       <div
                         key={`header-widget-${idx}`}
                         style={{
@@ -1003,54 +1160,30 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                           label={widget.label}
                           collapsed={false}
                         />
-                        {editMode.active && (
-                          <button
-                            type="button"
-                            title="Remover widget"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              updateWorkingConfig((cfg) => ({
-                                ...cfg,
-                                sidebar: {
-                                  ...cfg.sidebar,
-                                  widgets: (cfg.sidebar?.widgets ?? []).filter(
-                                    (_, i) => i !== actualIndex,
-                                  ),
-                                },
-                              }))
-                              if (isSelected) {
-                                setEditMode((prev) => ({ ...prev, selectedSidebarElement: null }))
-                              }
-                            }}
-                            style={{
-                              position: 'absolute',
-                              top: 2,
-                              right: 2,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: 20,
-                              height: 20,
-                              borderRadius: 4,
-                              border: 'none',
-                              background: 'transparent',
-                              color: 'var(--wf-sidebar-muted)',
-                              cursor: 'pointer',
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.color = '#ef4444'
-                              e.currentTarget.style.background = 'rgba(239,68,68,0.1)'
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
-                              e.currentTarget.style.background = 'transparent'
-                            }}
-                          >
-                            <Trash2 style={{ width: 12, height: 12 }} />
-                          </button>
-                        )}
                       </div>
-                    ) : null
+                    )
+                    return editMode.active ? (
+                      <ContextMenu key={`header-widget-${idx}`}>
+                        <ContextMenuTrigger asChild>
+                          {widgetContent}
+                        </ContextMenuTrigger>
+                        <ContextMenuContent className="w-40 bg-[#0f172a] border-[var(--wf-sidebar-border)] text-white">
+                          <ContextMenuItem
+                            className="text-xs hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                            onClick={() => handleSelectSidebarElement({ type: 'widget', widgetIndex: actualIndex })}
+                          >
+                            Editar
+                          </ContextMenuItem>
+                          <ContextMenuSeparator className="bg-[var(--wf-sidebar-border)]" />
+                          <ContextMenuItem
+                            className="text-xs text-red-400 hover:bg-white/10 focus:bg-white/10 focus:text-red-400"
+                            onClick={() => handleDeleteWidget(actualIndex)}
+                          >
+                            Excluir
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
+                    ) : widgetContent
                   })}
                 </div>
               )}
@@ -1158,124 +1291,170 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                   })}
                 </div>
               ) : editMode.active ? (
-                // Expanded edit mode: grouped rendering with inline add buttons at the bottom
+                // Expanded edit mode: structured rendering with pinned + ungrouped + groups
                 <>
                   {(() => {
-                    const editGroups = partitionScreensByGroups(screens, activeConfig?.sidebar?.groups)
+                    const partition = partitionScreensForEdit(
+                      screens,
+                      activeConfig?.sidebar?.groups,
+                      activeConfig?.sidebar?.pinnedTop,
+                      activeConfig?.sidebar?.pinnedBottom,
+                    )
+
+                    const renderScreenManager = (
+                      entries: ScreenEntry[],
+                      groupIndex?: number,
+                    ) => (
+                      <ScreenManager
+                        screens={entries.map((s) => s.screen)}
+                        activeIndex={entries.findIndex((s) => s.originalIndex === safeActiveIndex)}
+                        editMode={true}
+                        onSelectScreen={(localIdx) => handleScreenSelect(entries[localIdx].originalIndex)}
+                        onAddScreen={handleAddScreen}
+                        onDeleteScreen={(localIdx) => handleDeleteScreen(entries[localIdx].originalIndex)}
+                        onRenameScreen={(localIdx, title) => handleRenameScreen(entries[localIdx].originalIndex, title)}
+                        onReorderScreens={
+                          groupIndex !== undefined
+                            ? (reorderedLocalScreens) => {
+                                const newScreenIds = reorderedLocalScreens.map((s) => s.id)
+                                updateWorkingConfig((cfg) => ({
+                                  ...cfg,
+                                  sidebar: {
+                                    ...cfg.sidebar,
+                                    groups: (cfg.sidebar?.groups ?? []).map((g, i) =>
+                                      i === groupIndex ? { ...g, screenIds: newScreenIds } : g
+                                    ),
+                                  },
+                                }))
+                              }
+                            : handleReorderScreens
+                        }
+                        getPinnedPosition={getScreenPinnedPosition}
+                        onPinScreen={handlePinScreen}
+                        onUnpinScreen={handleUnpinScreen}
+                      />
+                    )
+
                     return (
                       <>
-                        {editGroups.map((group, gi) => {
+                        {/* Pinned top */}
+                        {partition.pinnedTop.length > 0 && (
+                          <div style={{ marginBottom: 8 }}>
+                            <div style={{
+                              padding: '4px 12px',
+                              fontSize: 9,
+                              fontWeight: 600,
+                              textTransform: 'uppercase' as const,
+                              letterSpacing: '0.08em',
+                              color: 'var(--wf-accent)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              opacity: 0.7,
+                            }}>
+                              <Pin style={{ width: 10, height: 10 }} />
+                              FIXADO NO TOPO
+                            </div>
+                            {renderScreenManager(partition.pinnedTop)}
+                          </div>
+                        )}
+
+                        {/* Ungrouped screens (default: on top, before groups) */}
+                        {partition.ungrouped.length > 0 && (
+                          <div style={{ marginBottom: 8 }}>
+                            {renderScreenManager(partition.ungrouped)}
+                          </div>
+                        )}
+
+                        {/* Groups with context menu */}
+                        {partition.groups.map((group) => {
+                          const gi = group.groupIndex
                           const isGroupSelected =
-                            group.label !== null &&
                             editMode.selectedSidebarElement?.type === 'group' &&
                             editMode.selectedSidebarElement.groupIndex === gi
                           return (
-                            <div key={gi} style={{ marginBottom: gi < editGroups.length - 1 ? 8 : 0 }}>
-                              {group.label && (
-                                <div
-                                  style={{
-                                    padding: '8px 12px 4px',
-                                    fontSize: 10,
-                                    fontWeight: 600,
-                                    textTransform: 'uppercase' as const,
-                                    letterSpacing: '0.08em',
-                                    color: 'var(--wf-sidebar-muted)',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    borderRadius: 4,
-                                    border: isGroupSelected
-                                      ? '2px solid var(--wf-accent)'
-                                      : '2px solid transparent',
-                                    cursor: 'pointer',
-                                    transition: 'border-color 150ms ease',
-                                  }}
-                                  onClick={() => handleSelectSidebarElement({ type: 'group', groupIndex: gi })}
-                                  onMouseEnter={(e) => {
-                                    if (!isGroupSelected) {
-                                      e.currentTarget.style.borderColor = 'var(--wf-sidebar-muted)'
-                                    }
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    if (!isGroupSelected) {
-                                      e.currentTarget.style.borderColor = 'transparent'
-                                    }
-                                  }}
-                                >
-                                  <span>{group.label}</span>
-                                  <button
-                                    type="button"
-                                    title="Remover grupo"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      updateWorkingConfig((cfg) => ({
-                                        ...cfg,
-                                        sidebar: {
-                                          ...cfg.sidebar,
-                                          groups: (cfg.sidebar?.groups ?? []).filter((_, i) => i !== gi),
-                                        },
-                                      }))
-                                      if (isGroupSelected) {
-                                        setEditMode((prev) => ({ ...prev, selectedSidebarElement: null }))
-                                      }
-                                    }}
+                            <div key={`group-${gi}`} style={{ marginBottom: 8 }}>
+                              <ContextMenu>
+                                <ContextMenuTrigger asChild>
+                                  <div
                                     style={{
+                                      padding: '8px 12px 4px',
+                                      fontSize: 10,
+                                      fontWeight: 600,
+                                      textTransform: 'uppercase' as const,
+                                      letterSpacing: '0.08em',
+                                      color: 'var(--wf-sidebar-muted)',
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
                                       display: 'flex',
                                       alignItems: 'center',
-                                      justifyContent: 'center',
-                                      width: 20,
-                                      height: 20,
+                                      justifyContent: 'space-between',
                                       borderRadius: 4,
-                                      border: 'none',
-                                      background: 'transparent',
-                                      color: 'var(--wf-sidebar-muted)',
+                                      border: isGroupSelected
+                                        ? '2px solid var(--wf-accent)'
+                                        : '2px solid transparent',
                                       cursor: 'pointer',
-                                      flexShrink: 0,
+                                      transition: 'border-color 150ms ease',
                                     }}
+                                    onClick={() => handleSelectSidebarElement({ type: 'group', groupIndex: gi })}
                                     onMouseEnter={(e) => {
-                                      e.currentTarget.style.color = '#ef4444'
-                                      e.currentTarget.style.background = 'rgba(239,68,68,0.1)'
+                                      if (!isGroupSelected) {
+                                        e.currentTarget.style.borderColor = 'var(--wf-sidebar-muted)'
+                                      }
                                     }}
                                     onMouseLeave={(e) => {
-                                      e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
-                                      e.currentTarget.style.background = 'transparent'
+                                      if (!isGroupSelected) {
+                                        e.currentTarget.style.borderColor = 'transparent'
+                                      }
                                     }}
                                   >
-                                    <Trash2 style={{ width: 12, height: 12 }} />
-                                  </button>
-                                </div>
-                              )}
-                              <ScreenManager
-                                screens={group.screens.map((s) => s.screen)}
-                                activeIndex={group.screens.findIndex((s) => s.originalIndex === safeActiveIndex)}
-                                editMode={true}
-                                onSelectScreen={(localIdx) => handleScreenSelect(group.screens[localIdx].originalIndex)}
-                                onAddScreen={handleAddScreen}
-                                onDeleteScreen={(localIdx) => handleDeleteScreen(group.screens[localIdx].originalIndex)}
-                                onRenameScreen={(localIdx, title) => handleRenameScreen(group.screens[localIdx].originalIndex, title)}
-                                onReorderScreens={
-                                  group.label !== null
-                                    ? (reorderedLocalScreens) => {
-                                        const newScreenIds = reorderedLocalScreens.map((s) => s.id)
-                                        updateWorkingConfig((cfg) => ({
-                                          ...cfg,
-                                          sidebar: {
-                                            ...cfg.sidebar,
-                                            groups: (cfg.sidebar?.groups ?? []).map((g, i) =>
-                                              i === gi ? { ...g, screenIds: newScreenIds } : g
-                                            ),
-                                          },
-                                        }))
-                                      }
-                                    : handleReorderScreens
-                                }
-                              />
+                                    <span>{group.label}</span>
+                                  </div>
+                                </ContextMenuTrigger>
+                                <ContextMenuContent className="w-40 bg-[#0f172a] border-[var(--wf-sidebar-border)] text-white">
+                                  <ContextMenuItem
+                                    className="text-xs hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                                    onClick={() => handleSelectSidebarElement({ type: 'group', groupIndex: gi })}
+                                  >
+                                    Renomear
+                                  </ContextMenuItem>
+                                  <ContextMenuSeparator className="bg-[var(--wf-sidebar-border)]" />
+                                  <ContextMenuItem
+                                    className="text-xs text-red-400 hover:bg-white/10 focus:bg-white/10 focus:text-red-400"
+                                    onClick={() => handleDeleteGroup(gi)}
+                                  >
+                                    Excluir
+                                  </ContextMenuItem>
+                                </ContextMenuContent>
+                              </ContextMenu>
+                              {group.screens.length > 0 && renderScreenManager(group.screens, gi)}
                             </div>
                           )
                         })}
+
+                        {/* Pinned bottom */}
+                        {partition.pinnedBottom.length > 0 && (
+                          <div style={{ marginTop: 4 }}>
+                            <div style={{
+                              padding: '4px 12px',
+                              fontSize: 9,
+                              fontWeight: 600,
+                              textTransform: 'uppercase' as const,
+                              letterSpacing: '0.08em',
+                              color: 'var(--wf-accent)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              opacity: 0.7,
+                            }}>
+                              <Pin style={{ width: 10, height: 10 }} />
+                              FIXADO NO RODAPE
+                            </div>
+                            {renderScreenManager(partition.pinnedBottom)}
+                          </div>
+                        )}
+
                         {/* Inline add buttons at the bottom of the nav */}
                         <div style={{ display: 'flex', gap: 4, paddingTop: 8, paddingBottom: 4 }}>
                           {/* + Grupo */}
@@ -1443,9 +1622,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               ) : (
                 // Expanded view mode: grouped rendering with headings
                 <>
-                  {partitionScreensByGroups(screens, activeConfig?.sidebar?.groups).map((group, gi) => {
+                  {partitionScreensByGroups(screens, activeConfig?.sidebar?.groups, activeConfig?.sidebar?.pinnedTop, activeConfig?.sidebar?.pinnedBottom).map((group, gi, allGroups) => {
                     return (
-                      <div key={gi} style={{ marginBottom: gi < partitionScreensByGroups(screens, activeConfig?.sidebar?.groups).length - 1 ? 8 : 0 }}>
+                      <div key={gi} style={{ marginBottom: gi < allGroups.length - 1 ? 8 : 0 }}>
                         {group.label && (
                           <div
                             style={{
@@ -1496,7 +1675,8 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 const isWidgetSelected =
                   editMode.selectedSidebarElement?.type === 'widget' &&
                   editMode.selectedSidebarElement.widgetIndex === actualIndex
-                return widget.type === 'user-menu' ? (
+                if (widget.type !== 'user-menu') return null
+                const footerWidgetContent = (
                   <div
                     key={`footer-widget-${idx}`}
                     style={{
@@ -1532,54 +1712,30 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                       role={widget.role}
                       collapsed={effectiveSidebarCollapsed}
                     />
-                    {editMode.active && !effectiveSidebarCollapsed && (
-                      <button
-                        type="button"
-                        title="Remover widget"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          updateWorkingConfig((cfg) => ({
-                            ...cfg,
-                            sidebar: {
-                              ...cfg.sidebar,
-                              widgets: (cfg.sidebar?.widgets ?? []).filter(
-                                (_, i) => i !== actualIndex,
-                              ),
-                            },
-                          }))
-                          if (isWidgetSelected) {
-                            setEditMode((prev) => ({ ...prev, selectedSidebarElement: null }))
-                          }
-                        }}
-                        style={{
-                          position: 'absolute',
-                          top: 4,
-                          right: 4,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: 20,
-                          height: 20,
-                          borderRadius: 4,
-                          border: 'none',
-                          background: 'transparent',
-                          color: 'var(--wf-sidebar-muted)',
-                          cursor: 'pointer',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#ef4444'
-                          e.currentTarget.style.background = 'rgba(239,68,68,0.1)'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
-                          e.currentTarget.style.background = 'transparent'
-                        }}
-                      >
-                        <Trash2 style={{ width: 12, height: 12 }} />
-                      </button>
-                    )}
                   </div>
-                ) : null
+                )
+                return editMode.active && !effectiveSidebarCollapsed ? (
+                  <ContextMenu key={`footer-widget-${idx}`}>
+                    <ContextMenuTrigger asChild>
+                      {footerWidgetContent}
+                    </ContextMenuTrigger>
+                    <ContextMenuContent className="w-40 bg-[#0f172a] border-[var(--wf-sidebar-border)] text-white">
+                      <ContextMenuItem
+                        className="text-xs hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                        onClick={() => handleSelectSidebarElement({ type: 'widget', widgetIndex: actualIndex })}
+                      >
+                        Editar
+                      </ContextMenuItem>
+                      <ContextMenuSeparator className="bg-[var(--wf-sidebar-border)]" />
+                      <ContextMenuItem
+                        className="text-xs text-red-400 hover:bg-white/10 focus:bg-white/10 focus:text-red-400"
+                        onClick={() => handleDeleteWidget(actualIndex)}
+                      >
+                        Excluir
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
+                ) : footerWidgetContent
               })
             ) : (
               // Default status footer (existing behavior) — clickable in edit mode
