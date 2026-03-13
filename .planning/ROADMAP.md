@@ -256,7 +256,7 @@ Plans:
   2. Creating or editing a task via the form saves title, description, status, priority, due date, and client slug to Supabase
   3. Visiting /tarefas/kanban shows 4 columns (todo, in_progress, done, blocked); clicking a task status badge moves it to the next state
   4. A "Documentar" button appears on tasks with status done and pre-fills the KB entry form with the task title and a bug or decision type selector
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 32-01-PLAN.md -- Module scaffold (types, hooks, shared components) + TaskList page + routes + sidebar wiring
@@ -320,5 +320,5 @@ For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in seque
 | 29. Module Foundation & Registry | 2/2 | Complete    | 2026-03-13 | - |
 | 30. Supabase Migrations & Data Layer | 2/2 | Complete    | 2026-03-13 | - |
 | 31. Knowledge Base Module | 3/3 | Complete    | 2026-03-13 | - |
-| 32. Task Management Module | v1.5 | 0/3 | Not started | - |
+| 32. Task Management Module | 1/3 | In Progress|  | - |
 | 33. Home Page & Cross-Module Integration | v1.5 | 0/2 | Not started | - |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: planning
-stopped_at: Completed 31-knowledge-base-module/31-02-PLAN.md
-last_updated: "2026-03-13T01:04:10.689Z"
+stopped_at: Completed 32-task-management-module/32-01-PLAN.md
+last_updated: "2026-03-13T01:10:14.538Z"
 last_activity: 2026-03-12 -- Roadmap written for v1.5 (Phases 29-33), 19 requirements mapped
 progress:
   total_phases: 12
   completed_phases: 10
   total_plans: 25
-  completed_plans: 19
+  completed_plans: 20
   percent: 0
 ---
 
@@ -70,6 +70,8 @@ v1.5 decisions to track during execution:
 - [Phase 31-knowledge-base-module]: @vitest-environment jsdom directive added per-file for renderHook tests — global config remains node environment
 - [Phase 31-knowledge-base-module]: Submitted-query pattern in KBSearchPage: inputValue drives the controlled input, submittedQuery drives the hook
 - [Phase 31-knowledge-base-module]: KBFormPage ADR injection guard uses functional updater setFormData(prev => ...) to read latest state and avoid stale closure
+- [Phase 32-task-management-module]: Sidebar Tarefas section via tasksManifest.navChildren — follows MODULE_REGISTRY pattern, not static nav array
+- [Phase 32-task-management-module]: KanbanBoard and TaskForm are lazy-imported placeholders — route definitions registered now, implementations deferred to Plans 02/03
 
 ### Pending Todos
 
@@ -83,6 +85,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T01:01:18.042Z
-Stopped at: Completed 31-knowledge-base-module/31-02-PLAN.md
+Last session: 2026-03-13T01:10:14.535Z
+Stopped at: Completed 32-task-management-module/32-01-PLAN.md
 Next: Complete Phase 28 (v1.4), then plan Phase 29 via /gsd:plan-phase 29
