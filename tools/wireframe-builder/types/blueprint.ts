@@ -428,6 +428,8 @@ export type HeaderConfig = {
   showLogo?: boolean              // defaults true — shows branding.logoUrl in header left
   showPeriodSelector?: boolean    // defaults true — shows period navigation in center
   showUserIndicator?: boolean     // defaults true — shows user name/role chip on right
+  brandLabel?: string             // custom display name — overrides config.label in header
+  periodType?: PeriodType         // dashboard-level period type (mensal/anual) for header selector
   actions?: {
     manage?: boolean   // defaults true — shows Gerenciar button
     share?: boolean    // defaults true — shows Share button

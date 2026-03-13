@@ -87,12 +87,14 @@ const HeaderConfigSchema = z.object({
   showLogo: z.boolean().optional(),
   showPeriodSelector: z.boolean().optional(),
   showUserIndicator: z.boolean().optional(),
+  brandLabel: z.string().optional(),
+  periodType: PeriodTypeSchema.optional(),
   actions: z.object({
     manage: z.boolean().optional(),
     share: z.boolean().optional(),
     export: z.boolean().optional(),
   }).optional(),
-}).passthrough() // keep passthrough for forward-compat (Phase 19/20 may add fields)
+}).passthrough() // keep passthrough for forward-compat
 
 // Component types -- mirrored for runtime DB validation
 // Note: DrilRow.data and ClickRow.data use Record<string, React.ReactNode>
