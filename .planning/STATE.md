@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Framework Shell + Arquitetura Modular
 status: planning
-stopped_at: Completed 41-01-PLAN.md — Phase 42 is next
-last_updated: "2026-03-13T05:05:18.154Z"
+stopped_at: "Completed 42-02-PLAN.md — checkpoint:human-verify awaiting"
+last_updated: "2026-03-13T05:09:10.727Z"
 last_activity: 2026-03-13 — Phase 41 complete (Home 2.0 control center, visual verification approved)
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 75
 ---
 
@@ -60,6 +60,8 @@ Key decisions for v2.0:
 - [Phase 40-routing-refactor]: NavLink end prop required for exact-path active state on / — prevents Home being highlighted on all routes in React Router v6
 - [Phase 41-home-2.0-control-center]: activity-feed hooks extracted to src/lib/ for multi-page reuse without page coupling
 - [Phase 41-home-2.0-control-center]: useModuleStats uses Supabase head:true count pattern for aggregate queries (no rows fetched)
+- [Phase 42-contract-population-admin-panel]: Admin panel at /admin/modules uses static hardcoded route (not MODULE_REGISTRY) — accessible only by direct URL, invisible to sidebar
+- [Phase 42-contract-population-admin-panel]: localStorage('fxl-enabled-modules') read synchronously in useState initializer — zero loading flash
 
 ### Pending Todos
 
@@ -71,6 +73,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T05:02:07.220Z
-Stopped at: Completed 41-01-PLAN.md — Phase 42 is next
+Last session: 2026-03-13T05:09:10.724Z
+Stopped at: Completed 42-02-PLAN.md — checkpoint:human-verify awaiting
 Next: /gsd:plan-phase 42
