@@ -4,10 +4,12 @@ import FinanceiroIndex from '@/pages/clients/FinanceiroContaAzul/Index'
 import FinanceiroDocViewer from '@/pages/clients/FinanceiroContaAzul/DocViewer'
 import BlueprintTextView from '@/pages/clients/BlueprintTextView'
 import BriefingForm from '@/pages/clients/BriefingForm'
-import type { ModuleManifest } from '@/modules/registry'
+import type { ModuleDefinition } from '@/modules/registry'
+import { MODULE_IDS } from '@/modules/module-ids'
 
-export const clientsManifest: ModuleManifest = {
-  id: 'clients',
+export const clientsManifest: ModuleDefinition = {
+  id: MODULE_IDS.CLIENTS,
+  description: 'Workspaces de clientes com docs, briefing e wireframe.',
   label: 'Clientes',
   route: '/clientes',
   icon: Users,

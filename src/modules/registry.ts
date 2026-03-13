@@ -50,9 +50,8 @@ export interface ModuleDefinition extends ModuleManifest {
   extensions?: ModuleExtension[]
 }
 
-// Current registry — backward compatible (manifests still typed as ModuleManifest).
-// Plan 02 will update all manifests to ModuleDefinition and then change this type.
-export const MODULE_REGISTRY: ModuleManifest[] = [
+// All manifests now satisfy ModuleDefinition — typed accordingly.
+export const MODULE_REGISTRY: ModuleDefinition[] = [
   docsManifest,
   ferramentasManifest,
   clientsManifest,

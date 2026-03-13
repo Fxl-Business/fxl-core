@@ -1,9 +1,11 @@
 import { BookOpen } from 'lucide-react'
 import DocRenderer from '@/pages/DocRenderer'
-import type { ModuleManifest } from '@/modules/registry'
+import type { ModuleDefinition } from '@/modules/registry'
+import { MODULE_IDS } from '@/modules/module-ids'
 
-export const docsManifest: ModuleManifest = {
-  id: 'docs',
+export const docsManifest: ModuleDefinition = {
+  id: MODULE_IDS.DOCS,
+  description: 'Processo, ferramentas e padroes tecnicos da FXL.',
   label: 'Processo',
   route: '/processo/index',
   icon: BookOpen,

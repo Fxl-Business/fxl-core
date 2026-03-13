@@ -1,8 +1,10 @@
 import { CheckSquare } from 'lucide-react'
-import type { ModuleManifest } from '@/modules/registry'
+import type { ModuleDefinition } from '@/modules/registry'
+import { MODULE_IDS } from '@/modules/module-ids'
 
-export const tasksManifest: ModuleManifest = {
-  id: 'tasks',
+export const tasksManifest: ModuleDefinition = {
+  id: MODULE_IDS.TASKS,
+  description: 'Gestao de tarefas e kanban por cliente e projeto.',
   label: 'Tarefas',
   route: '/tarefas',
   icon: CheckSquare,

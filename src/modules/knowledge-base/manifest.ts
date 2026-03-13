@@ -1,8 +1,10 @@
 import { BookMarked } from 'lucide-react'
-import type { ModuleManifest } from '@/modules/registry'
+import type { ModuleDefinition } from '@/modules/registry'
+import { MODULE_IDS } from '@/modules/module-ids'
 
-export const knowledgeBaseManifest: ModuleManifest = {
-  id: 'knowledge-base',
+export const knowledgeBaseManifest: ModuleDefinition = {
+  id: MODULE_IDS.KNOWLEDGE_BASE,
+  description: 'Base de conhecimento cross-cliente e operacional.',
   label: 'Base de Conhecimento',
   route: '/knowledge-base',
   icon: BookMarked,

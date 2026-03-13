@@ -1,9 +1,11 @@
 import { Wrench } from 'lucide-react'
 import ComponentGallery from '@/pages/tools/ComponentGallery'
-import type { ModuleManifest } from '@/modules/registry'
+import type { ModuleDefinition } from '@/modules/registry'
+import { MODULE_IDS } from '@/modules/module-ids'
 
-export const ferramentasManifest: ModuleManifest = {
-  id: 'ferramentas',
+export const ferramentasManifest: ModuleDefinition = {
+  id: MODULE_IDS.FERRAMENTAS,
+  description: 'Crie e edite wireframes interativos para clientes.',
   label: 'Ferramentas',
   route: '/ferramentas/index',
   icon: Wrench,
