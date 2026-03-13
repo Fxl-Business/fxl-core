@@ -98,7 +98,26 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
-_(No active milestone — run /gsd:new-milestone to start v1.7)_
+<!-- Current milestone: v2.0 Framework Shell + Arquitetura Modular -->
+
+- [ ] Module Registry declarativo com tipos centrais (ModuleDefinition, ModuleExtension)
+- [ ] Home 2.0 como centro de controle da empresa (rota /)
+- [ ] Arquitetura de contratos e extensoes entre modulos (slots, hooks)
+- [ ] Painel interno de controle de modulos (/admin/modules)
+- [ ] Refatoracao de roteamento: / → Home, /docs → Documentacao
+- [ ] Sidebar/navbar refletindo nova estrutura modular
+
+## Current Milestone: v2.0 Framework Shell + Arquitetura Modular
+
+**Goal:** Transformar o FxL Core de app de documentacao em framework shell modular com Home verdadeira, Module Registry declarativo, arquitetura de contratos entre modulos e roteamento refatorado.
+
+**Target features:**
+- Home 2.0: centro de controle como ponto de entrada do app
+- Module Registry: configuracao declarativa de modulos com tipos tipados
+- Arquitetura de contratos: extensoes automaticas quando modulos compativeis estao ativos
+- Sistema de slots: injecao de UI cross-modulo
+- Painel de modulos: admin interno para visualizar e controlar modulos
+- Refatoracao de roteamento: / → Home, /docs → Documentacao
 
 ### Out of Scope
 
@@ -217,4 +236,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-13 after v1.6 milestone completion*
+*Last updated: 2026-03-13 after v2.0 milestone start*

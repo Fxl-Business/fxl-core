@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.6
-milestone_name: 12 Novos Graficos
-status: archived
-stopped_at: "Milestone v1.6 archived — ready for next milestone"
+milestone: v2.0
+milestone_name: Framework Shell + Arquitetura Modular
+status: defining_requirements
+stopped_at: "Defining requirements for milestone v2.0"
 last_updated: "2026-03-13T00:00:00.000Z"
-last_activity: "2026-03-13 — Milestone v1.6 archived, PROJECT.md evolved"
+last_activity: "2026-03-13 — Milestone v2.0 started"
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** FXL Core e o cerebro operacional da empresa -- documentacao, processo e tooling juntos
-**Current focus:** Milestone v1.6 archived — ready for /gsd:new-milestone
+**Current focus:** Milestone v2.0 — Framework Shell + Arquitetura Modular
 
 ## Current Position
 
-Milestone: v1.6 — 12 Novos Graficos (ARCHIVED 2026-03-13)
-Status: Archived
-Last activity: 2026-03-13 — Milestone archived, summaries created, PROJECT.md evolved
-
-Progress: [████████████████████] 100%
+Milestone: v2.0 — Framework Shell + Arquitetura Modular
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-13 — Milestone v2.0 started
 
 ## Accumulated Context
 
@@ -56,5 +56,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: Milestone v1.6 archived
-Next: Define next milestone (v1.7) or run /gsd:new-milestone
+Stopped at: Defining requirements for v2.0
+Next: Define requirements → create roadmap
