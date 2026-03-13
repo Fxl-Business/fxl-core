@@ -382,6 +382,16 @@ export type BlueprintSection =
   | SparklineGridSection
   | SankeySection
 
+export type FilterBarActionsConfig = {
+  showDatePicker?: boolean   // defaults true — shows the calendar/period button
+  datePickerLabel?: string   // defaults "Jan — Mar 2026"
+  showShare?: boolean        // defaults true — shows share button
+  shareLabel?: string        // defaults "Compartilhar"
+  showExport?: boolean       // defaults true — shows export button
+  exportLabel?: string       // defaults "Exportar"
+  showCompare?: boolean      // defaults true — shows compare toggle
+}
+
 export type BlueprintScreen = {
   id: string
   title: string
@@ -390,6 +400,7 @@ export type BlueprintScreen = {
   periodType: PeriodType
   filters: FilterOption[]
   hasCompareSwitch: boolean
+  filterBarActions?: FilterBarActionsConfig
   sections: BlueprintSection[]
   rows?: ScreenRow[] // source of truth when present; sections kept for backward compat
 }

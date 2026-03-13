@@ -15,6 +15,8 @@ export type SidebarElementSelection =
   | { type: 'footer' }
   | { type: 'widget'; widgetIndex: number }
 
+export type FilterBarActionElement = 'date-picker' | 'share' | 'export' | 'compare'
+
 export type EditModeState = {
   active: boolean
   dirty: boolean // unsaved changes exist
@@ -22,4 +24,5 @@ export type EditModeState = {
   selectedSection: { rowIndex: number; cellIndex: number } | null
   selectedHeaderElement: HeaderElementType | null
   selectedSidebarElement: SidebarElementSelection | null
+  selectedFilterBarAction?: FilterBarActionElement | null
 }

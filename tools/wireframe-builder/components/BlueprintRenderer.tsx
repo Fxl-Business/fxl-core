@@ -15,8 +15,8 @@ import {
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { BlueprintScreen, BlueprintSection } from '../types/blueprint'
-import type { GridLayout, ScreenRow } from '../types/editor'
+import type { BlueprintScreen, BlueprintSection, FilterBarActionsConfig } from '../types/blueprint'
+import type { FilterBarActionElement, GridLayout, ScreenRow } from '../types/editor'
 import type { Comment } from '../types/comments'
 import { GRID_LAYOUTS, getCellCount, sectionsToRows } from '../lib/grid-layouts'
 import WireframeFilterBar, { type FilterOption } from './WireframeFilterBar'
@@ -46,6 +46,9 @@ type Props = {
   onFilterClick?: (filterIndex: number) => void
   onFilterDelete?: (filterIndex: number) => void
   onAddFilter?: (filter: FilterOption) => void
+  filterBarActions?: FilterBarActionsConfig
+  selectedFilterBarAction?: FilterBarActionElement | null
+  onFilterBarActionClick?: (action: FilterBarActionElement) => void
 }
 
 // Sortable row wrapper for drag-and-drop reordering
@@ -112,6 +115,9 @@ export default function BlueprintRenderer({
   onFilterClick,
   onFilterDelete,
   onAddFilter,
+  filterBarActions,
+  selectedFilterBarAction,
+  onFilterBarActionClick,
 }: Props) {
   const [compareMode, setCompareMode] = useState(false)
   const [comparePeriod, setComparePeriod] = useState(
@@ -162,6 +168,9 @@ export default function BlueprintRenderer({
           onFilterClick={onFilterClick}
           onFilterDelete={onFilterDelete}
           onAddFilter={onAddFilter}
+          filterBarActions={filterBarActions ?? screen.filterBarActions}
+          selectedFilterBarAction={selectedFilterBarAction}
+          onFilterBarActionClick={onFilterBarActionClick}
         />
       )}
 

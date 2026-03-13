@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Search, Calendar, ChevronDown, Share2, Download, Trash2, Plus } from 'lucide-react'
+import type { FilterBarActionsConfig } from '../types/blueprint'
+import type { FilterBarActionElement } from '../types/editor'
 
 export type FilterOption = {
   key: string
@@ -22,6 +24,9 @@ type Props = {
   onFilterClick?: (filterIndex: number) => void
   onFilterDelete?: (filterIndex: number) => void
   onAddFilter?: (filter: FilterOption) => void
+  filterBarActions?: FilterBarActionsConfig
+  selectedFilterBarAction?: FilterBarActionElement | null
+  onFilterBarActionClick?: (action: FilterBarActionElement) => void
 }
 
 const MESES_MOCK = [
@@ -246,6 +251,58 @@ function FilterControl({ filter }: { filter: FilterOption }) {
 }
 
 // ---------------------------------------------------------------------------
+// Editable action wrapper (edit mode clickable container for filter bar actions)
+// ---------------------------------------------------------------------------
+
+function EditableActionWrapper({
+  actionKey,
+  editMode,
+  selected,
+  onClick,
+  children,
+}: {
+  actionKey: FilterBarActionElement
+  editMode?: boolean
+  selected: boolean
+  onClick?: (action: FilterBarActionElement) => void
+  children: React.ReactNode
+}) {
+  if (!editMode) return <>{children}</>
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        borderRadius: 8,
+        border: selected
+          ? '2px solid var(--wf-accent)'
+          : '1px dashed var(--wf-card-border)',
+        padding: 2,
+        cursor: 'pointer',
+        transition: 'border-color 150ms ease',
+      }}
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick?.(actionKey)
+      }}
+      onMouseEnter={(e) => {
+        if (!selected) {
+          e.currentTarget.style.borderColor = 'var(--wf-accent)'
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!selected) {
+          e.currentTarget.style.borderColor = 'var(--wf-card-border)'
+          e.currentTarget.style.border = '1px dashed var(--wf-card-border)'
+        }
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
@@ -263,6 +320,9 @@ export default function WireframeFilterBar({
   onFilterClick,
   onFilterDelete,
   onAddFilter,
+  filterBarActions,
+  selectedFilterBarAction,
+  onFilterBarActionClick,
 }: Props) {
   const [showPresetPicker, setShowPresetPicker] = useState(false)
   const presetPickerRef = useRef<HTMLDivElement>(null)
@@ -544,35 +604,73 @@ export default function WireframeFilterBar({
 
           {/* Action buttons: date picker (outline) + share (outline) + export (filled) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <button type="button" style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              border: '1px solid var(--wf-card-border)', background: 'transparent',
-              borderRadius: 8, fontSize: 12, fontWeight: 500, color: 'var(--wf-body)',
-              padding: '4px 10px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-            }}>
-              <Calendar size={12} color="var(--wf-muted)" />
-              Jan — Mar 2026
-            </button>
-            <button type="button" style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              border: '1px solid var(--wf-card-border)', background: 'transparent',
-              borderRadius: 8, fontSize: 12, fontWeight: 500, color: 'var(--wf-body)',
-              padding: '4px 10px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-            }}>
-              <Share2 size={12} color="var(--wf-muted)" />
-              Compartilhar
-            </button>
-            <button type="button" style={{
-              display: 'flex', alignItems: 'center', gap: 4,
-              background: 'var(--wf-accent)', color: 'var(--wf-accent-fg)',
-              border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600,
-              padding: '4px 10px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-            }}>
-              <Download size={12} />
-              Exportar
-            </button>
+            {(filterBarActions?.showDatePicker !== false) && (
+              <EditableActionWrapper
+                actionKey="date-picker"
+                editMode={editMode}
+                selected={selectedFilterBarAction === 'date-picker'}
+                onClick={onFilterBarActionClick}
+              >
+                <button type="button" style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  border: '1px solid var(--wf-card-border)', background: 'transparent',
+                  borderRadius: 8, fontSize: 12, fontWeight: 500, color: 'var(--wf-body)',
+                  padding: '4px 10px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                }}>
+                  <Calendar size={12} color="var(--wf-muted)" />
+                  {filterBarActions?.datePickerLabel ?? 'Jan — Mar 2026'}
+                </button>
+              </EditableActionWrapper>
+            )}
+            {(filterBarActions?.showShare !== false) && (
+              <EditableActionWrapper
+                actionKey="share"
+                editMode={editMode}
+                selected={selectedFilterBarAction === 'share'}
+                onClick={onFilterBarActionClick}
+              >
+                <button type="button" style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  border: '1px solid var(--wf-card-border)', background: 'transparent',
+                  borderRadius: 8, fontSize: 12, fontWeight: 500, color: 'var(--wf-body)',
+                  padding: '4px 10px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                }}>
+                  <Share2 size={12} color="var(--wf-muted)" />
+                  {filterBarActions?.shareLabel ?? 'Compartilhar'}
+                </button>
+              </EditableActionWrapper>
+            )}
+            {(filterBarActions?.showExport !== false) && (
+              <EditableActionWrapper
+                actionKey="export"
+                editMode={editMode}
+                selected={selectedFilterBarAction === 'export'}
+                onClick={onFilterBarActionClick}
+              >
+                <button type="button" style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  background: 'var(--wf-accent)', color: 'var(--wf-accent-fg)',
+                  border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                  padding: '4px 10px', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                }}>
+                  <Download size={12} />
+                  {filterBarActions?.exportLabel ?? 'Exportar'}
+                </button>
+              </EditableActionWrapper>
+            )}
           </div>
 
+          {/* Compare toggle — respects filterBarActions.showCompare override */}
+          {(filterBarActions?.showCompare !== undefined
+            ? filterBarActions.showCompare
+            : true
+          ) && (
+          <EditableActionWrapper
+            actionKey="compare"
+            editMode={editMode}
+            selected={selectedFilterBarAction === 'compare'}
+            onClick={onFilterBarActionClick}
+          >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 
             {/* Period selector — visible only when compare is ON, sits LEFT of the label */}
@@ -637,6 +735,8 @@ export default function WireframeFilterBar({
               />
             </button>
           </div>
+          </EditableActionWrapper>
+          )}
         </>
       )}
     </div>

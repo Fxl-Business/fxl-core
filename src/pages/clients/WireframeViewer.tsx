@@ -13,6 +13,7 @@ import PropertyPanel from '@tools/wireframe-builder/components/editor/PropertyPa
 import HeaderPropertyPanel from '@tools/wireframe-builder/components/editor/HeaderPropertyPanel'
 import SidebarPropertyPanel from '@tools/wireframe-builder/components/editor/SidebarPropertyPanel'
 import FilterPropertyPanel from '@tools/wireframe-builder/components/editor/FilterPropertyPanel'
+import FilterBarActionsPanel from '@tools/wireframe-builder/components/editor/FilterBarActionsPanel'
 import ScreenManager from '@tools/wireframe-builder/components/editor/ScreenManager'
 import { getIconComponent } from '@tools/wireframe-builder/components/editor/IconPicker'
 import { toast } from 'sonner'
@@ -46,7 +47,7 @@ import type {
   SidebarGroup,
   SidebarWidget,
 } from '@tools/wireframe-builder/types/blueprint'
-import type { EditModeState, GridLayout, HeaderElementType, ScreenRow, SidebarElementSelection } from '@tools/wireframe-builder/types/editor'
+import type { EditModeState, FilterBarActionElement, GridLayout, HeaderElementType, ScreenRow, SidebarElementSelection } from '@tools/wireframe-builder/types/editor'
 import type { FilterOption } from '@tools/wireframe-builder/components/WireframeFilterBar'
 
 // Dynamic branding import map (extend as clients are added)
@@ -164,6 +165,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
   // Filter inline editing
   const [selectedFilterIndex, setSelectedFilterIndex] = useState<number | null>(null)
+
+  // Filter bar action editing
+  const [selectedFilterBarAction, setSelectedFilterBarAction] = useState<FilterBarActionElement | null>(null)
 
   // Branding update handler (must be before early returns)
   const handleBrandingUpdate = useCallback((partial: Partial<BrandingConfig>) => {
@@ -385,6 +389,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     setWorkingConfig(null)
     setStaleWarning(false)
     setSelectedFilterIndex(null)
+    setSelectedFilterBarAction(null)
     setEditMode({
       active: false,
       dirty: false,
@@ -540,6 +545,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       selectedSidebarElement: null,
     }))
     setSelectedFilterIndex(null)
+    setSelectedFilterBarAction(null)
   }
 
   function handleSelectHeaderElement(element: HeaderElementType) {
@@ -550,6 +556,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       selectedSidebarElement: null,
     }))
     setSelectedFilterIndex(null)
+    setSelectedFilterBarAction(null)
   }
 
   function handleSelectSidebarElement(selection: SidebarElementSelection) {
@@ -560,10 +567,12 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
       selectedSidebarElement: selection,
     }))
     setSelectedFilterIndex(null)
+    setSelectedFilterBarAction(null)
   }
 
   function handleFilterClick(filterIndex: number) {
     setSelectedFilterIndex(filterIndex)
+    setSelectedFilterBarAction(null)
     setEditMode((prev) => ({
       ...prev,
       selectedSection: null,
@@ -600,11 +609,30 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     // Auto-select the newly added filter for immediate editing
     const currentLength = activeScreen?.filters?.length ?? 0
     setSelectedFilterIndex(currentLength)
+    setSelectedFilterBarAction(null)
     setEditMode((prev) => ({
       ...prev,
       selectedSection: null,
       selectedHeaderElement: null,
       selectedSidebarElement: null,
+    }))
+  }
+
+  function handleSelectFilterBarAction(action: FilterBarActionElement) {
+    setSelectedFilterBarAction(action)
+    setSelectedFilterIndex(null)
+    setEditMode((prev) => ({
+      ...prev,
+      selectedSection: null,
+      selectedHeaderElement: null,
+      selectedSidebarElement: null,
+    }))
+  }
+
+  function handleFilterBarActionsChange(updated: import('@tools/wireframe-builder/types/blueprint').FilterBarActionsConfig) {
+    updateWorkingScreen((screen) => ({
+      ...screen,
+      filterBarActions: updated,
     }))
   }
 
@@ -730,6 +758,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
     setActiveIndex(index)
     setEditMode((prev) => ({ ...prev, selectedSection: null, selectedHeaderElement: null, selectedSidebarElement: null }))
     setSelectedFilterIndex(null)
+    setSelectedFilterBarAction(null)
   }
 
   function handleAddScreen(screen: BlueprintScreen) {
@@ -1079,6 +1108,131 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               </button>
             </div>
 
+            {/* Edit mode action bar — add group/widget buttons */}
+            {editMode.active && !effectiveSidebarCollapsed && (
+              <div
+                style={{
+                  padding: '8px 8px 0',
+                  borderBottom: '1px solid var(--wf-sidebar-border)',
+                  flexShrink: 0,
+                }}
+              >
+                <span
+                  style={{
+                    display: 'block',
+                    fontSize: 9,
+                    fontWeight: 700,
+                    textTransform: 'uppercase' as const,
+                    letterSpacing: '0.08em',
+                    color: 'var(--wf-sidebar-muted)',
+                    marginBottom: 6,
+                    paddingLeft: 4,
+                  }}
+                >
+                  ADICIONAR
+                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingBottom: 8 }}>
+                  {/* + Grupo */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const currentGroups = activeConfig?.sidebar?.groups ?? []
+                      updateWorkingConfig((cfg) => ({
+                        ...cfg,
+                        sidebar: {
+                          ...cfg.sidebar,
+                          groups: [...(cfg.sidebar?.groups ?? []), { label: 'Novo Grupo', screenIds: [] }],
+                        },
+                      }))
+                      handleSelectSidebarElement({ type: 'group', groupIndex: currentGroups.length })
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      width: '100%',
+                      padding: '0 8px',
+                      height: 32,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      borderRadius: 6,
+                      border: 'none',
+                      background: 'rgba(255,255,255,0.08)',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      transition: 'background 150ms ease',
+                      fontFamily: 'Inter, sans-serif',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.14)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+                    }}
+                  >
+                    <Plus style={{ width: 14, height: 14, color: 'var(--wf-accent)' }} />
+                    Grupo
+                  </button>
+                  {/* + Widget */}
+                  {(() => {
+                    const currentWidgetTypes = new Set(
+                      (activeConfig?.sidebar?.widgets ?? []).map((w) => w.type),
+                    )
+                    const availableWidgets = Object.values(SIDEBAR_WIDGET_REGISTRY).filter(
+                      (reg) => !currentWidgetTypes.has(reg.type),
+                    )
+                    const isMaxed = availableWidgets.length === 0
+                    return (
+                      <button
+                        type="button"
+                        disabled={isMaxed}
+                        onClick={() => {
+                          if (isMaxed) return
+                          const reg = availableWidgets[0]
+                          updateWorkingConfig((cfg) => ({
+                            ...cfg,
+                            sidebar: {
+                              ...cfg.sidebar,
+                              widgets: [...(cfg.sidebar?.widgets ?? []), reg.defaultProps()],
+                            },
+                          }))
+                          const newIndex = (activeConfig?.sidebar?.widgets ?? []).length
+                          handleSelectSidebarElement({ type: 'widget', widgetIndex: newIndex })
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          width: '100%',
+                          padding: '0 8px',
+                          height: 32,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          borderRadius: 6,
+                          border: 'none',
+                          background: isMaxed ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)',
+                          color: isMaxed ? 'var(--wf-sidebar-muted)' : '#fff',
+                          cursor: isMaxed ? 'not-allowed' : 'pointer',
+                          opacity: isMaxed ? 0.4 : 1,
+                          transition: 'background 150ms ease',
+                          fontFamily: 'Inter, sans-serif',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isMaxed) e.currentTarget.style.background = 'rgba(255,255,255,0.14)'
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isMaxed) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+                        }}
+                      >
+                        <Plus style={{ width: 14, height: 14, color: isMaxed ? 'var(--wf-sidebar-muted)' : 'var(--wf-accent)' }} />
+                        Widget{isMaxed ? ' (max)' : ''}
+                      </button>
+                    )
+                  })()}
+                </div>
+              </div>
+            )}
+
             {/* Navigation items */}
             <nav style={{ flex: 1, padding: effectiveSidebarCollapsed ? '8px 4px' : '8px', overflowY: 'auto' }}>
               {editMode.active ? (
@@ -1243,106 +1397,6 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                       </div>
                     )
                   })}
-                  {/* + Grupo button (edit mode only, shown even when not in edit — hidden by parent ternary) */}
-                  {editMode.active && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const currentGroups = activeConfig?.sidebar?.groups ?? []
-                        updateWorkingConfig((cfg) => ({
-                          ...cfg,
-                          sidebar: {
-                            ...cfg.sidebar,
-                            groups: [...(cfg.sidebar?.groups ?? []), { label: 'Novo Grupo', screenIds: [] }],
-                          },
-                        }))
-                        handleSelectSidebarElement({ type: 'group', groupIndex: currentGroups.length })
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        margin: '4px 8px',
-                        padding: '4px 8px',
-                        height: 28,
-                        fontSize: 10,
-                        fontWeight: 600,
-                        letterSpacing: '0.04em',
-                        borderRadius: 4,
-                        border: '1px dashed var(--wf-sidebar-border)',
-                        background: 'transparent',
-                        color: 'var(--wf-sidebar-muted)',
-                        cursor: 'pointer',
-                        transition: 'background 150ms ease, color 150ms ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#1e293b'
-                        e.currentTarget.style.color = '#fff'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent'
-                        e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
-                      }}
-                    >
-                      <Plus style={{ width: 12, height: 12 }} />
-                      Grupo
-                    </button>
-                  )}
-                  {/* + Widget button (edit mode only) */}
-                  {editMode.active && (() => {
-                    const currentWidgetTypes = new Set(
-                      (activeConfig?.sidebar?.widgets ?? []).map((w) => w.type),
-                    )
-                    const availableWidgets = Object.values(SIDEBAR_WIDGET_REGISTRY).filter(
-                      (reg) => !currentWidgetTypes.has(reg.type),
-                    )
-                    if (availableWidgets.length === 0) return null
-                    return (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const reg = availableWidgets[0]
-                          updateWorkingConfig((cfg) => ({
-                            ...cfg,
-                            sidebar: {
-                              ...cfg.sidebar,
-                              widgets: [...(cfg.sidebar?.widgets ?? []), reg.defaultProps()],
-                            },
-                          }))
-                          const newIndex = (activeConfig?.sidebar?.widgets ?? []).length
-                          handleSelectSidebarElement({ type: 'widget', widgetIndex: newIndex })
-                        }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 4,
-                          margin: '0 8px 4px',
-                          padding: '4px 8px',
-                          height: 28,
-                          fontSize: 10,
-                          fontWeight: 600,
-                          letterSpacing: '0.04em',
-                          borderRadius: 4,
-                          border: '1px dashed var(--wf-sidebar-border)',
-                          background: 'transparent',
-                          color: 'var(--wf-sidebar-muted)',
-                          cursor: 'pointer',
-                          transition: 'background 150ms ease, color 150ms ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = '#1e293b'
-                          e.currentTarget.style.color = '#fff'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'transparent'
-                          e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
-                        }}
-                      >
-                        <Plus style={{ width: 12, height: 12 }} />
-                        Widget
-                      </button>
-                    )
-                  })()}
                 </>
               )}
             </nav>
@@ -1560,6 +1614,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                 onFilterClick={handleFilterClick}
                 onFilterDelete={handleFilterDelete}
                 onAddFilter={handleAddFilter}
+                filterBarActions={activeScreen.filterBarActions}
+                selectedFilterBarAction={selectedFilterBarAction}
+                onFilterBarActionClick={handleSelectFilterBarAction}
               />
             </div>
           </main>
@@ -1613,6 +1670,14 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
         onDelete={() => {
           if (selectedFilterIndex !== null) handleFilterDelete(selectedFilterIndex)
         }}
+      />
+
+      <FilterBarActionsPanel
+        open={selectedFilterBarAction !== null}
+        actionElement={selectedFilterBarAction}
+        config={activeScreen?.filterBarActions ?? {}}
+        onClose={() => setSelectedFilterBarAction(null)}
+        onChange={handleFilterBarActionsChange}
       />
 
       {pendingExitEdit && (
