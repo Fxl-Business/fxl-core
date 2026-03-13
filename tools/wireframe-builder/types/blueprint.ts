@@ -80,6 +80,13 @@ export type ChartType =
   | 'horizontal-bar'
   | 'bubble'
   | 'composed'
+  | 'grouped-bar'
+  | 'bullet'
+  | 'step-line'
+  | 'lollipop'
+  | 'range-bar'
+  | 'bump'
+  | 'polar'
 
 // --- Section types (discriminated union) ---
 

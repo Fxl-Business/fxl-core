@@ -57,6 +57,13 @@ export default function BarLineChartForm({ section, onChange }: Props) {
             <SelectItem value="horizontal-bar">Barra Horizontal</SelectItem>
             <SelectItem value="bubble">Bolhas</SelectItem>
             <SelectItem value="composed">Composto (Barra + Linha + Area)</SelectItem>
+            <SelectItem value="grouped-bar">Barra Agrupada</SelectItem>
+            <SelectItem value="bullet">Bullet (Meta vs Realizado)</SelectItem>
+            <SelectItem value="step-line">Linha em Degrau</SelectItem>
+            <SelectItem value="lollipop">Lollipop (Pirulito)</SelectItem>
+            <SelectItem value="range-bar">Barra de Intervalo</SelectItem>
+            <SelectItem value="bump">Bump (Ranking)</SelectItem>
+            <SelectItem value="polar">Polar / Rose</SelectItem>
           </SelectContent>
         </Select>
       </div>

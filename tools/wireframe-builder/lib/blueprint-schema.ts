@@ -157,6 +157,7 @@ const BarLineChartSectionSchema = z.object({
   chartType: z.enum([
     'bar', 'line', 'bar-line', 'radar', 'treemap', 'funnel', 'scatter', 'area',
     'stacked-bar', 'stacked-area', 'horizontal-bar', 'bubble', 'composed',
+    'grouped-bar', 'bullet', 'step-line', 'lollipop', 'range-bar', 'bump', 'polar',
   ]),
   height: z.number().optional(),
   compareOnly: z.boolean().optional(),

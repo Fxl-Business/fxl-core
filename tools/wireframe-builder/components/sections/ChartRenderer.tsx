@@ -18,6 +18,10 @@ import StackedAreaChartComponent from '../StackedAreaChartComponent'
 import HorizontalBarChartComponent from '../HorizontalBarChartComponent'
 import BubbleChartComponent from '../BubbleChartComponent'
 import ComposedChartComponent from '../ComposedChartComponent'
+import GroupedBarChartComponent from '../GroupedBarChartComponent'
+import StepLineChartComponent from '../StepLineChartComponent'
+import LollipopChartComponent from '../LollipopChartComponent'
+import PolarAreaChartComponent from '../PolarAreaChartComponent'
 
 type ChartSection =
   | BarLineChartSection
@@ -129,6 +133,42 @@ export default function ChartRenderer({ section, compareMode, comparePeriod, cha
         case 'composed':
           return (
             <ComposedChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'grouped-bar':
+          return (
+            <GroupedBarChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'step-line':
+          return (
+            <StepLineChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'lollipop':
+          return (
+            <LollipopChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'polar':
+          return (
+            <PolarAreaChartComponent
               title={section.title}
               height={section.height}
               categories={section.categories}
