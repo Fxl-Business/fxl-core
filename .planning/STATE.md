@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
-status: planning
-stopped_at: Completed 32-task-management-module/32-03-PLAN.md
-last_updated: "2026-03-13T01:18:36.008Z"
-last_activity: 2026-03-12 -- Roadmap written for v1.5 (Phases 29-33), 19 requirements mapped
+status: executing
+stopped_at: Completed 33-home-page-cross-module-integration/33-00-PLAN.md
+last_updated: "2026-03-13T01:22:04.424Z"
+last_activity: "2026-03-12 -- Completed 33-02: KB integration in client page and Cmd+K search"
 progress:
   total_phases: 12
   completed_phases: 11
   total_plans: 25
-  completed_plans: 22
+  completed_plans: 24
   percent: 0
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 
 ## Current Position
 
-Phase: 0 of 5 (roadmap defined, ready to plan Phase 29)
-Plan: --
-Status: Ready to plan
-Last activity: 2026-03-12 -- Roadmap written for v1.5 (Phases 29-33), 19 requirements mapped
+Phase: 33-home-page-cross-module-integration
+Plan: 02 complete
+Status: In progress
+Last activity: 2026-03-12 -- Completed 33-02: KB integration in client page and Cmd+K search
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -75,6 +75,11 @@ v1.5 decisions to track during execution:
 - [Phase 32-task-management-module]: TaskForm: client_slug passes as undefined (not null) to createTask; conditional loading spinner placed after all hook declarations per hooks-before-returns rule
 - [Phase 32-task-management-module]: [Phase 32-03]: DocumentarButton outside TaskCard — cross-module navigation decoupled from card component
 - [Phase 32-task-management-module]: [Phase 32-03]: Optimistic kanban updates via local useState synced from useTasks, refetch on error for rollback
+- [Phase 33-home-page-cross-module-integration]: vitest.config.ts include pattern extended to *.test.tsx — previous pattern only covered *.test.ts
+- [Phase 33-02]: Adapted plan's listKBEntries/KBEntry to actual service exports: listKnowledgeEntries/KnowledgeEntry from Phase 30
+- [Phase 33-02]: KB group in Cmd+K only renders when query.length > 0 — avoids noise in empty dialog state
+- [Phase 33-02]: openRef pattern for stale closure fix in keyboard handler useEffect
+- [Phase 33-02]: kbEntries not cleared on dialog close — cached for instant re-open performance
 
 ### Pending Todos
 
@@ -88,6 +93,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T01:15:26.100Z
-Stopped at: Completed 32-task-management-module/32-03-PLAN.md
-Next: Complete Phase 28 (v1.4), then plan Phase 29 via /gsd:plan-phase 29
+Last session: 2026-03-13T01:22:04.421Z
+Stopped at: Completed 33-home-page-cross-module-integration/33-02-PLAN.md
+Next: Execute Plan 33-03 (Home page cross-module integration)

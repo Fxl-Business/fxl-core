@@ -87,7 +87,7 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 - [x] **Phase 30: Supabase Migrations & Data Layer** - knowledge_entries and tasks tables with tsvector FTS, anon-permissive RLS, and typed service stubs (completed 2026-03-13)
 - [x] **Phase 31: Knowledge Base Module** - Full KB module: list, detail, form, full-text search, ADR format for decision entries (completed 2026-03-13)
 - [x] **Phase 32: Task Management Module** - Full tasks module: list, kanban, create/edit form, task-to-KB documentation link (completed 2026-03-13)
-- [ ] **Phase 33: Home Page & Cross-Module Integration** - Module hub grid from registry, activity feed, KB section in client workspace, KB in Cmd+K
+- [x] **Phase 33: Home Page & Cross-Module Integration** - Module hub grid from registry, activity feed, KB section in client workspace, KB in Cmd+K (completed 2026-03-13)
 
 ## Phase Details
 
@@ -272,7 +272,7 @@ Plans:
   2. An activity feed below the module grid shows the last 10 updates across kb_entries and tasks ordered by recency
   3. Visiting a client page (/clients/:slug) shows a "Conhecimento" section listing KB entries for that client_slug
   4. Opening Cmd+K and typing a query returns KB entries as a separate result group alongside docs results
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 33-01-PLAN.md -- Home page rewrite: MODULE_REGISTRY grid + activity feed
@@ -321,4 +321,4 @@ For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in seque
 | 30. Supabase Migrations & Data Layer | 2/2 | Complete    | 2026-03-13 | - |
 | 31. Knowledge Base Module | 3/3 | Complete    | 2026-03-13 | - |
 | 32. Task Management Module | 3/3 | Complete    | 2026-03-13 | - |
-| 33. Home Page & Cross-Module Integration | v1.5 | 0/2 | Not started | - |
+| 33. Home Page & Cross-Module Integration | 3/3 | Complete   | 2026-03-13 | - |
