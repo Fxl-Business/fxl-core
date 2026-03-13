@@ -112,7 +112,14 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
-<!-- Ready for next milestone -->
+## Current Milestone: v2.2 Wireframe Builder — Configurable Layout Components
+
+**Goal:** Tornar sidebar, header e filter bar do wireframe totalmente configuráveis via visual editor, com suporte a widgets compostos na sidebar (workspace switcher, account selector, user menu).
+
+**Target features:**
+- Sidebar com widgets compostos (workspace switcher, account selector, user menu, search) editáveis via visual editor — referência: sidebar-07 do shadcn/ui
+- Header com campos existentes (showPeriodSelector, showUserIndicator, actions.*) funcionais no render + property panels no editor visual
+- Filter bar sticky configurável via visual editor (add/remove/configurar FilterOption[] por tela)
 
 ### Out of Scope
 
@@ -150,7 +157,7 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ## Current State
 
-All 9 milestones shipped (v1.0 → v2.1). Planning next milestone.
+All 9 milestones shipped (v1.0 → v2.1). Starting v2.2 — Configurable Layout Components.
 
 ## Context
 
@@ -252,4 +259,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-13 after v2.1 milestone completion*
+*Last updated: 2026-03-13 after v2.2 milestone start*
