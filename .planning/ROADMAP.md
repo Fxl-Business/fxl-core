@@ -19,7 +19,7 @@
 
 **Milestone Goal:** Tornar sidebar, header e filter bar do wireframe totalmente configuráveis via visual editor, com suporte a widgets compostos na sidebar (workspace switcher, user menu) e filter bar editor por tela.
 
-- [ ] **Phase 47: Schema Foundation** - Extend SidebarConfig schema with SidebarWidget type in Zod and TypeScript
+- [x] **Phase 47: Schema Foundation** - Extend SidebarConfig schema with SidebarWidget type in Zod and TypeScript (completed 2026-03-13)
 - [ ] **Phase 48: Header Render Wiring** - Wire all HeaderConfig fields to WireframeHeader renderer
 - [ ] **Phase 49: Dashboard Mutation Infrastructure** - updateWorkingConfig helper + AdminToolbar Layout button group
 - [ ] **Phase 50: Header Config Panel** - Sheet panel for all header toggles, brand label, and period type
@@ -38,7 +38,7 @@
   2. `SidebarConfigSchema` in `lib/blueprint-schema.ts` includes `SidebarWidgetSchema` with `.passthrough()` so new widget fields survive a `BlueprintConfigSchema.parse()` round-trip
   3. The existing `financeiro-conta-azul` blueprint JSON passes `BlueprintConfigSchema.safeParse` with no errors after schema changes (backward compatibility confirmed)
   4. `npx tsc --noEmit` reports zero errors with the new types in place
-**Plans**: TBD
+**Plans**: 1 (47-01)
 
 ### Phase 48: Header Render Wiring
 **Goal**: Every field in HeaderConfig is consumed by WireframeHeader — toggling showPeriodSelector, showUserIndicator, or any action field produces an immediate visible change in the wireframe chrome
@@ -49,7 +49,7 @@
   2. Operator sets `showUserIndicator: false` and the user/role chip disappears from the wireframe header
   3. Operator sets any `actions.*` field to false and the corresponding action button disappears from the wireframe header
   4. All existing wireframe header renders are visually unchanged when HeaderConfig fields are undefined (backward compatibility)
-**Plans**: TBD
+**Plans**: 1 (48-01)
 
 ### Phase 49: Dashboard Mutation Infrastructure
 **Goal**: Operators have a mutation helper for dashboard-level config and a clear Layout entry point in the AdminToolbar — the plumbing needed before any layout config panel can persist changes
@@ -59,7 +59,7 @@
   1. AdminToolbar shows a "Layout" button group (Sidebar, Header, Filtros) when wireframe is in edit mode — buttons are not visible in view mode
   2. Clicking each Layout button opens its corresponding panel Sheet (even if panels are stubs at this stage)
   3. `updateWorkingConfig()` helper mutates `workingConfig.sidebar` or `workingConfig.header` correctly and triggers a save cycle — no silent no-ops or screen-level data corruption
-**Plans**: TBD
+**Plans**: 1 (49-01)
 
 ### Phase 50: Header Config Panel
 **Goal**: Operators can configure all header appearance options from a single Sheet panel — every toggle produces an immediately visible change in the wireframe header
@@ -71,7 +71,7 @@
   3. Operator sets a custom `brandLabel` in the panel and sees it replace the default config.label in the header
   4. Operator sets `periodType` (mensal/anual) in the panel and the period selector in the header reflects that value
   5. Changes are persisted when the operator saves the blueprint — reloading the wireframe restores the configured header state
-**Plans**: TBD
+**Plans**: 1 (50-01)
 
 ### Phase 51: Sidebar Widget Renderers
 **Goal**: WorkspaceSwitcher and UserMenu widgets render correctly in the wireframe sidebar — each widget appears in its designated zone and degrades gracefully when sidebar is in rail (collapsed) mode
@@ -82,7 +82,7 @@
   2. When `widgets` array contains a user-menu entry, an avatar initials chip with name and role appears in the sidebar footer zone — visually distinct from the plain text status footer
   3. In sidebar rail (collapsed) mode, each widget renders as an icon-only button using its registered icon from SIDEBAR_WIDGET_REGISTRY
   4. When no widgets are configured, the sidebar renders exactly as before (no visual regression)
-**Plans**: TBD
+**Plans**: 1 (51-01)
 
 ### Phase 52: Sidebar Config Panel
 **Goal**: Operators can manage sidebar groups, assign screens to groups, edit footer text, and add or remove sidebar widgets — all from a single Sheet panel
@@ -94,7 +94,7 @@
   3. Operator can assign a screen to a group via the panel — the screen appears under that group in the sidebar nav; each screen belongs to at most one group
   4. Operator can add a WorkspaceSwitcher or UserMenu widget via the widget picker — the widget appears in the wireframe sidebar after adding
   5. Changes survive a blueprint save-and-reload cycle
-**Plans**: TBD
+**Plans**: 1 (52-01)
 
 ### Phase 53: Filter Bar Editor
 **Goal**: Operators can add, remove, and configure any FilterOption in a screen's sticky filter bar from a dedicated Sheet panel — filter bar changes are scoped strictly to the current screen
@@ -107,7 +107,7 @@
   4. Operator edits filter label, filterType (any of the 5 variants: date-range, multi-select, search, toggle, period-presets), and options inline without leaving the panel
   5. Operator clicks a preset button (Período, Empresa, Produto, Status, Responsável) and a pre-configured FilterOption is added to the screen's filter bar with one click
   6. Filter edits are scoped to the current screen only — no other screen's filters are affected
-**Plans**: TBD
+**Plans**: 1 (53-01)
 
 ## Progress
 
@@ -116,10 +116,10 @@ Phases execute in dependency order: 47 → 48 → 49 → 50 → 51 → 52 → 53
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 47. Schema Foundation | v2.2 | 0/TBD | Not started | - |
-| 48. Header Render Wiring | v2.2 | 0/TBD | Not started | - |
-| 49. Dashboard Mutation Infrastructure | v2.2 | 0/TBD | Not started | - |
-| 50. Header Config Panel | v2.2 | 0/TBD | Not started | - |
-| 51. Sidebar Widget Renderers | v2.2 | 0/TBD | Not started | - |
-| 52. Sidebar Config Panel | v2.2 | 0/TBD | Not started | - |
-| 53. Filter Bar Editor | v2.2 | 0/TBD | Not started | - |
+| 47. Schema Foundation | 1/1 | Complete   | 2026-03-13 | - |
+| 48. Header Render Wiring | v2.2 | 0/1 | Planned | - |
+| 49. Dashboard Mutation Infrastructure | v2.2 | 0/1 | Planned | - |
+| 50. Header Config Panel | v2.2 | 0/1 | Planned | - |
+| 51. Sidebar Widget Renderers | v2.2 | 0/1 | Planned | - |
+| 52. Sidebar Config Panel | v2.2 | 0/1 | Planned | - |
+| 53. Filter Bar Editor | v2.2 | 0/1 | Planned | - |
