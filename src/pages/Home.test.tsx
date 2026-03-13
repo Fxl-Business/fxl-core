@@ -1,27 +1,5 @@
 import { describe, it, expect } from 'vitest'
-
-// ActivityItem type — same shape as defined in RESEARCH.md
-// Plan 33-01 will import from Home.tsx once the type is exported there.
-type ActivityItem = {
-  id: string
-  title: string
-  type: 'kb_entry' | 'task'
-  subtype?: string
-  client_slug?: string | null
-  updated_at: string
-  href: string
-}
-
-// Pure merge/sort function — will be moved to Home.tsx in Plan 33-01
-// and the import updated to reference it there.
-export function mergeAndSortActivityItems(
-  kbItems: ActivityItem[],
-  taskItems: ActivityItem[],
-): ActivityItem[] {
-  return [...kbItems, ...taskItems]
-    .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
-    .slice(0, 10)
-}
+import { mergeAndSortActivityItems, type ActivityItem } from './Home'
 
 describe('Home page', () => {
   describe('MODULE_REGISTRY grid (HOME-01)', () => {
