@@ -21,7 +21,7 @@
 - [x] **Phase 43: Database Schema** - Criar tabela documents no Supabase com indexes e RLS (completed 2026-03-13)
 - [x] **Phase 44: Data Migration** - Seed script migra todos os 62 .md de docs/ para Supabase (completed 2026-03-13)
 - [x] **Phase 45: Dynamic Rendering** - DocRenderer, search index e sidebar consomem dados do banco (completed 2026-03-13)
-- [ ] **Phase 46: Sync CLI** - make sync-down e make sync-up para fluxo bidirecional Claude Code
+- [x] **Phase 46: Sync CLI** - make sync-down e make sync-up para fluxo bidirecional Claude Code (completed 2026-03-13)
 
 ## Phase Details
 
@@ -79,4 +79,4 @@
 | 43. Database Schema | 1/1 | Complete    | 2026-03-13 |
 | 44. Data Migration | 2/2 | Complete    | 2026-03-13 |
 | 45. Dynamic Rendering | 3/3 | Complete    | 2026-03-13 |
-| 46. Sync CLI | 0/TBD | Not started | - |
+| 46. Sync CLI | 2/2 | Complete    | 2026-03-13 |
