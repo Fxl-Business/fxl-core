@@ -1,3 +1,4 @@
+import React from 'react'
 import type { LucideIcon } from 'lucide-react'
 import type { RouteObject } from 'react-router-dom'
 import { docsManifest } from './docs/manifest'
@@ -28,14 +29,30 @@ export interface ModuleManifest {
   routeConfig?: RouteObject[]
 }
 
+export const SLOT_IDS = {
+  HOME_DASHBOARD: 'home.dashboard',
+  HOME_QUICK_ACTIONS: 'home.quick-actions',
+} as const
+
+export type SlotId = typeof SLOT_IDS[keyof typeof SLOT_IDS]
+
+/**
+ * The contract every slot-registered component must satisfy.
+ * MUST be defined before ModuleExtension to prevent ComponentType<any> usage.
+ */
+export interface SlotComponentProps {
+  context?: Record<string, string | number | boolean>
+  className?: string
+}
+
 /**
  * Typed extension descriptor — declares a cross-module capability.
- * The `injects` field will be added in Phase 39 when SlotComponentProps is defined.
  */
 export interface ModuleExtension {
   id: string
+  requires: string[]
   description: string
-  requires: ModuleId[]
+  injects: Record<string, React.ComponentType<SlotComponentProps>>
 }
 
 /**
