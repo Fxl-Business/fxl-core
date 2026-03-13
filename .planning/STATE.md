@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: planning
-stopped_at: Completed 29-module-foundation-registry/29-02-PLAN.md
-last_updated: "2026-03-13T00:40:43.985Z"
+stopped_at: Completed 30-supabase-migrations-data-layer/30-01-PLAN.md
+last_updated: "2026-03-13T00:43:24.501Z"
 last_activity: 2026-03-12 -- Roadmap written for v1.5 (Phases 29-33), 19 requirements mapped
 progress:
   total_phases: 12
   completed_phases: 8
   total_plans: 25
-  completed_plans: 14
+  completed_plans: 15
   percent: 0
 ---
 
@@ -60,6 +60,8 @@ v1.5 decisions to track during execution:
 - [Phase 29-module-foundation-registry]: Home link stays hardcoded in Sidebar.tsx — not a module, universal nav anchor
 - [Phase 29-module-foundation-registry]: Wireframe viewer routes hardcoded in App.tsx — route specificity must be explicit, not manifest-derived
 - [Phase 29-module-foundation-registry]: moduleRoutes computed outside App component body — stable reference, avoids re-creation on render
+- [Phase 30-supabase-migrations-data-layer]: Table named knowledge_entries (not kb_entries) — ROADMAP.md success criteria over REQUIREMENTS.md wording
+- [Phase 30-supabase-migrations-data-layer]: DELETE policy included in all new RLS migrations — 005+ include all 4 CRUD anon policies as complete pattern
 
 ### Pending Todos
 
@@ -73,6 +75,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T00:37:35.094Z
-Stopped at: Completed 29-module-foundation-registry/29-02-PLAN.md
+Last session: 2026-03-13T00:43:24.498Z
+Stopped at: Completed 30-supabase-migrations-data-layer/30-01-PLAN.md
 Next: Complete Phase 28 (v1.4), then plan Phase 29 via /gsd:plan-phase 29

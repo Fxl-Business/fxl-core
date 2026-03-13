@@ -16,7 +16,7 @@ Requirements for Modular Foundation & Knowledge Base milestone. Each maps to roa
 
 ### Knowledge Base
 
-- [ ] **KB-01**: Tabela kb_entries no Supabase com 4 tipos (bug, decision, pattern, lesson), tags, client_slug
+- [x] **KB-01**: Tabela kb_entries no Supabase com 4 tipos (bug, decision, pattern, lesson), tags, client_slug
 - [ ] **KB-02**: Pagina de listagem /knowledge-base com filtro por tipo, tags e cliente
 - [ ] **KB-03**: Pagina de detalhe /knowledge-base/:id com render markdown e metadados
 - [ ] **KB-04**: Formulario de criacao/edicao com type selector, markdown body, tags, client_slug
@@ -26,7 +26,7 @@ Requirements for Modular Foundation & Knowledge Base milestone. Each maps to roa
 
 ### Tarefas
 
-- [ ] **TASK-01**: Tabela tasks no Supabase com status enum, priority, client_slug, due_date
+- [x] **TASK-01**: Tabela tasks no Supabase com status enum, priority, client_slug, due_date
 - [ ] **TASK-02**: Pagina de listagem /tarefas com filtro por status, cliente, prioridade
 - [ ] **TASK-03**: Formulario de criacao/edicao com titulo, descricao, status, priority, due_date, client_slug
 - [ ] **TASK-04**: Kanban view /tarefas/kanban com 4 colunas (todo, in_progress, done, blocked), mudanca via click
@@ -77,14 +77,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MOD-02 | Phase 29 | Complete |
 | MOD-03 | Phase 29 | Complete |
 | MOD-04 | Phase 29 | Complete |
-| KB-01 | Phase 30 | Pending |
+| KB-01 | Phase 30 | Complete |
 | KB-02 | Phase 31 | Pending |
 | KB-03 | Phase 31 | Pending |
 | KB-04 | Phase 31 | Pending |
 | KB-05 | Phase 31 | Pending |
 | KB-06 | Phase 31 | Pending |
 | KB-07 | Phase 33 | Pending |
-| TASK-01 | Phase 30 | Pending |
+| TASK-01 | Phase 30 | Complete |
 | TASK-02 | Phase 32 | Pending |
 | TASK-03 | Phase 32 | Pending |
 | TASK-04 | Phase 32 | Pending |
