@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.3
 milestone_name: Inline Editing UX
 status: in-progress
-stopped_at: Completed Phase 55 (Sidebar Inline Editing) — 2/2 plans done
+stopped_at: Completed Phase 56 (Filter Inline Editing) — 2/2 plans done
 last_updated: "2026-03-13"
-last_activity: "2026-03-13 — Phase 55 complete (sidebar inline editing with clickable groups, footer, widgets)"
+last_activity: "2026-03-13 — Phase 56 complete (filter click-to-edit, delete buttons, add presets)"
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 4
-  percent: 57
+  completed_plans: 6
+  percent: 86
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** FXL Core e o cerebro operacional da empresa — documentacao, processo e tooling juntos
-**Current focus:** v2.3 — Inline Editing UX (Phase 55 complete, Phase 56 next)
+**Current focus:** v2.3 — Inline Editing UX (Phase 56 complete, Phase 57 next)
 
 ## Current Position
 
-Phase: 56 of 57 (Filter Inline Editing)
-Plan: 1 of 2
+Phase: 57 of 57 (Cleanup & Consolidation)
+Plan: 1 of 1
 Status: Ready to execute
-Last activity: 2026-03-13 — Phase 55 complete (sidebar inline editing with clickable groups, footer, widgets)
+Last activity: 2026-03-13 — Phase 56 complete (filter click-to-edit, delete buttons, add presets)
 
-Progress: [======----] 57%
+Progress: [=========-] 86%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 6
 - Average duration: 3min
-- Total execution time: 12min
+- Total execution time: 17min
 
 **By Phase:**
 
@@ -45,6 +45,7 @@ Progress: [======----] 57%
 |-------|-------|-------|----------|
 | 54 - Header Inline Editing | 2/2 | 5min | 2.5min |
 | 55 - Sidebar Inline Editing | 2/2 | 7min | 3.5min |
+| 56 - Filter Inline Editing | 2/2 | 5min | 2.5min |
 
 *Updated after each plan completion*
 
@@ -71,6 +72,14 @@ Phase 55 decisions:
 - Widget add button picks first available widget from registry automatically (no popover picker)
 - Inline add/delete controls visible only in edit mode with hover-to-show delete pattern
 
+Phase 56 decisions:
+- FilterOptionForm extracts per-filter editing logic from FilterBarEditor into reusable form
+- FilterPropertyPanel follows PropertyPanel Sheet pattern with destructive delete button
+- Four-way selection mutex: selectedFilterIndex added alongside section, header, sidebar
+- FILTER_PRESETS defined in WireframeFilterBar with 5 BI presets
+- Auto-select newly added filter for immediate editing via PropertyPanel
+- Edit-mode chips use dashed border with circular Trash2 delete button
+
 ### Pending Todos
 
 None.
@@ -82,5 +91,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: Completed Phase 55 (Sidebar Inline Editing) — 2/2 plans done
-Next: /gsd:plan-phase 56
+Stopped at: Completed Phase 56 (Filter Inline Editing) — 2/2 plans done
+Next: /gsd:execute-phase 57

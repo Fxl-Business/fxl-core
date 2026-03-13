@@ -22,7 +22,7 @@
 
 - [x] **Phase 54: Header Inline Editing** - Operator clicks header elements to open contextual PropertyPanel forms
 - [x] **Phase 55: Sidebar Inline Editing** - Operator clicks sidebar groups, footer, and widgets to edit inline
-- [ ] **Phase 56: Filter Inline Editing** - Operator clicks filter chips to configure, and can add/remove filters in edit mode
+- [x] **Phase 56: Filter Inline Editing** - Operator clicks filter chips to configure, and can add/remove filters in edit mode
 - [ ] **Phase 57: Cleanup & Consolidation** - Remove Sheet panels and AdminToolbar Layout buttons, leaving only click-to-edit
 
 ## Phase Details
@@ -69,8 +69,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 56-01-PLAN.md — Filter chip click-to-edit and delete buttons with FilterPropertyPanel
-- [ ] 56-02-PLAN.md — Add-filter "+" button with 5 BI preset picker
+- [x] 56-01-PLAN.md — Filter chip click-to-edit and delete buttons with FilterPropertyPanel
+- [x] 56-02-PLAN.md — Add-filter "+" button with 5 BI preset picker
 
 ### Phase 57: Cleanup & Consolidation
 **Goal**: The codebase is clean — Sheet panel components are removed, layoutPanel state is gone, and the AdminToolbar no longer has a Layout button group
@@ -92,5 +92,5 @@ Plans:
 | All phases 1-53 shipped | v1.0-v2.2 | 100% | Complete | 2026-03-13 |
 | 54. Header Inline Editing | v2.3 | 2/2 | Complete | 2026-03-13 |
 | 55. Sidebar Inline Editing | v2.3 | 2/2 | Complete | 2026-03-13 |
-| 56. Filter Inline Editing | v2.3 | 0/2 | Not started | - |
+| 56. Filter Inline Editing | v2.3 | 2/2 | Complete | 2026-03-13 |
 | 57. Cleanup & Consolidation | v2.3 | 0/1 | Not started | - |

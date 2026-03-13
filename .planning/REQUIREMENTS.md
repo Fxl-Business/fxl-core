@@ -22,10 +22,10 @@ Requirements for Inline Editing UX — Click-to-Edit para Header, Sidebar e Filt
 
 ### Filter Inline Editing
 
-- [ ] **FILT-10**: Operator can click on a filter chip in the sticky filter bar to open its config in a contextual PropertyPanel
-- [ ] **FILT-11**: Operator can add new filters via a "+" button in the filter bar (visible in edit mode)
-- [ ] **FILT-12**: Operator can remove filters via a delete button on each chip (visible in edit mode)
-- [ ] **FILT-13**: Filter presets (Periodo, Empresa, Produto, Status, Responsavel) available via the add-filter flow
+- [x] **FILT-10**: Operator can click on a filter chip in the sticky filter bar to open its config in a contextual PropertyPanel
+- [x] **FILT-11**: Operator can add new filters via a "+" button in the filter bar (visible in edit mode)
+- [x] **FILT-12**: Operator can remove filters via a delete button on each chip (visible in edit mode)
+- [x] **FILT-13**: Filter presets (Periodo, Empresa, Produto, Status, Responsavel) available via the add-filter flow
 
 ### Cleanup
 
@@ -66,10 +66,10 @@ Requirements for Inline Editing UX — Click-to-Edit para Header, Sidebar e Filt
 | SIDE-11 | Phase 55 | Complete |
 | SIDE-12 | Phase 55 | Complete |
 | SIDE-13 | Phase 55 | Complete |
-| FILT-10 | Phase 56 | Pending |
-| FILT-11 | Phase 56 | Pending |
-| FILT-12 | Phase 56 | Pending |
-| FILT-13 | Phase 56 | Pending |
+| FILT-10 | Phase 56 | Complete |
+| FILT-11 | Phase 56 | Complete |
+| FILT-12 | Phase 56 | Complete |
+| FILT-13 | Phase 56 | Complete |
 | CLN-01 | Phase 57 | Pending |
 | CLN-02 | Phase 57 | Pending |
 | CLN-03 | Phase 57 | Pending |
