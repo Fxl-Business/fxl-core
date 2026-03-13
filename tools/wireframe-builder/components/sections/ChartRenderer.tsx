@@ -22,6 +22,9 @@ import GroupedBarChartComponent from '../GroupedBarChartComponent'
 import StepLineChartComponent from '../StepLineChartComponent'
 import LollipopChartComponent from '../LollipopChartComponent'
 import PolarAreaChartComponent from '../PolarAreaChartComponent'
+import BulletChartComponent from '../BulletChartComponent'
+import RangeBarChartComponent from '../RangeBarChartComponent'
+import BumpChartComponent from '../BumpChartComponent'
 
 type ChartSection =
   | BarLineChartSection
@@ -169,6 +172,33 @@ export default function ChartRenderer({ section, compareMode, comparePeriod, cha
         case 'polar':
           return (
             <PolarAreaChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'bullet':
+          return (
+            <BulletChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'range-bar':
+          return (
+            <RangeBarChartComponent
+              title={section.title}
+              height={section.height}
+              categories={section.categories}
+              chartColors={chartColors}
+            />
+          )
+        case 'bump':
+          return (
+            <BumpChartComponent
               title={section.title}
               height={section.height}
               categories={section.categories}
