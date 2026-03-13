@@ -62,10 +62,6 @@ export const docsManifest: ModuleManifest = {
         { label: 'Testes', href: '/ferramentas/testes' },
       ],
     },
-    {
-      label: 'Ferramentas',
-      href: '/ferramentas/index',
-    },
   ],
   routeConfig: [
     { path: '/processo/*', element: <DocRenderer /> },
