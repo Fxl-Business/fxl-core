@@ -113,7 +113,7 @@ Full details: [milestones/v1.6-ROADMAP.md](milestones/v1.6-ROADMAP.md)
 
 **Milestone Goal:** Transformar o FxL Core de app de documentacao em framework shell modular com Home verdadeira, Module Registry declarativo, arquitetura de contratos entre modulos e roteamento refatorado.
 
-- [ ] **Phase 38: Module Registry Foundation** - Enhanced ModuleDefinition type, module-ids.ts constants, enabled/badge fields on all 5 manifests
+- [ ] **Phase 38: Module Registry Foundation** (2 plans) - Enhanced ModuleDefinition type, module-ids.ts constants, enabled/badge fields on all 5 manifests
 - [ ] **Phase 39: Slot Architecture & Contract Types** - Extension system runtime (ExtensionProvider, ModuleSlot, resolveExtensions), contract type definitions, ESLint boundary update
 - [ ] **Phase 40: Routing Refactor** - Route / confirmed as Home, /docs routes preserved, sidebar filters by enabled modules
 - [ ] **Phase 41: Home 2.0 — Control Center** - Rebuilt Home page as app control center reading exclusively from MODULE_REGISTRY
@@ -130,7 +130,10 @@ Full details: [milestones/v1.6-ROADMAP.md](milestones/v1.6-ROADMAP.md)
   2. Operator can toggle a module's enabled state and the change persists across browser sessions via localStorage
   3. `module-ids.ts` exists as a constants-only file with zero imports, preventing circular dependency at build time
   4. `tsc --noEmit` passes with all new ModuleDefinition fields typed — no `any`, no type assertions
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 38-01-PLAN.md — Types and constants foundation (module-ids.ts, ModuleDefinition, ModuleExtension)
+- [ ] 38-02-PLAN.md — Manifest updates, useModuleEnabled hook, Home.tsx registry integration
 
 ### Phase 39: Slot Architecture & Contract Types
 **Goal**: The extension contract system is operational — type-safe slot injection is possible, the pure resolveExtensions() function is wired as a React context, and ESLint boundary rules cover the new registry-layer files
@@ -152,9 +155,7 @@ Full details: [milestones/v1.6-ROADMAP.md](milestones/v1.6-ROADMAP.md)
   1. Navigating to / in a fresh browser session opens the Home page, not the documentation index
   2. All existing /processo/*, /ferramentas/*, /padroes/* doc routes open correctly — no 404s and no redirect loops
   3. Sidebar navigation items change when modules are toggled enabled/disabled — disabled modules disappear from nav
-**Plans:** 1 plan
-Plans:
-- [ ] 40-01-PLAN.md — Route audit, Home NavLink fix, sidebar enabled filtering
+**Plans**: TBD
 
 ### Phase 41: Home 2.0 — Control Center
 **Goal**: Home is the true entry point of the platform — it communicates the operator's control-center identity, displays all enabled modules with actionable status, and surfaces recent activity without hardcoding per-module knowledge
@@ -189,8 +190,8 @@ Plans:
 | 22-28 | v1.4 | 12/12 | Complete | 2026-03-13 |
 | 29-33 | v1.5 | 14/14 | Complete | 2026-03-13 |
 | 34-37 | v1.6 | 7/7 | Complete | 2026-03-13 |
-| 38. Module Registry Foundation | v2.0 | 0/? | Not started | - |
+| 38. Module Registry Foundation | v2.0 | 0/2 | Not started | - |
 | 39. Slot Architecture & Contract Types | v2.0 | 0/? | Not started | - |
-| 40. Routing Refactor | v2.0 | 0/1 | Not started | - |
+| 40. Routing Refactor | v2.0 | 0/? | Not started | - |
 | 41. Home 2.0 — Control Center | v2.0 | 0/? | Not started | - |
 | 42. Contract Population & Admin Panel | v2.0 | 0/? | Not started | - |
