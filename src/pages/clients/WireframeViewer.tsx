@@ -958,6 +958,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               title={activeScreen.title}
               logoUrl={branding.logoUrl}
               showLogo={activeConfig?.header?.showLogo}
+              showPeriodSelector={activeConfig?.header?.showPeriodSelector}
+              showUserIndicator={activeConfig?.header?.showUserIndicator}
+              actions={activeConfig?.header?.actions}
             />
             {staleWarning && (
               <div className="mx-4 mt-2 flex items-center justify-between rounded-md border border-yellow-200 bg-yellow-50 px-4 py-2 text-sm text-yellow-800">

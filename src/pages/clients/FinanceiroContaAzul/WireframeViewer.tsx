@@ -776,6 +776,10 @@ export default function FinanceiroWireframeViewer() {
             <WireframeHeader
               title={activeScreen.title}
               logoUrl={branding.logoUrl}
+              showLogo={activeConfig?.header?.showLogo}
+              showPeriodSelector={activeConfig?.header?.showPeriodSelector}
+              showUserIndicator={activeConfig?.header?.showUserIndicator}
+              actions={activeConfig?.header?.actions}
             />
             <div
               style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}

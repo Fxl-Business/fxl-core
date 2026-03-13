@@ -317,6 +317,9 @@ function WireframeHeaderPreview() {
         <WireframeHeader
           title={wireframeHeaderMock.title}
           brandLabel={wireframeHeaderMock.brandLabel}
+          showPeriodSelector={wireframeHeaderMock.showPeriodSelector}
+          showUserIndicator={wireframeHeaderMock.showUserIndicator}
+          actions={wireframeHeaderMock.actions}
         />
       </div>
     </div>
@@ -407,7 +410,7 @@ const categories: Category[] = [
         name: 'WireframeHeader',
         status: 'available',
         hasToolbar: true,
-        props: ['title', 'periodType?: mensal | anual | none', 'brandLabel?', 'logoUrl?', 'showLogo?', 'showPeriodSelector?'],
+        props: ['title', 'brandLabel?', 'logoUrl?', 'showLogo?', 'showPeriodSelector?', 'showUserIndicator?', 'actions?'],
         render: () => <WireframeHeaderPreview />,
         specHref: '/ferramentas/blocos/wireframe-header',
       },

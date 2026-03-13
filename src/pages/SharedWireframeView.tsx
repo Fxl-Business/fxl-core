@@ -466,6 +466,9 @@ export default function SharedWireframeView() {
           >
             <WireframeHeader
               title={activeScreen.title}
+              showPeriodSelector={bp?.header?.showPeriodSelector}
+              showUserIndicator={bp?.header?.showUserIndicator}
+              actions={bp?.header?.actions}
             />
             <div
               style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}
