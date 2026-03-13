@@ -1,6 +1,7 @@
 import { CheckSquare } from 'lucide-react'
 import type { ModuleDefinition } from '@/modules/registry'
-import { MODULE_IDS } from '@/modules/module-ids'
+import { MODULE_IDS, SLOT_IDS } from '@/modules/registry'
+import { RecentTasksWidget } from './extensions/RecentTasksWidget'
 
 export const tasksManifest: ModuleDefinition = {
   id: MODULE_IDS.TASKS,
@@ -21,4 +22,14 @@ export const tasksManifest: ModuleDefinition = {
     },
   ],
   routeConfig: [],
+  extensions: [
+    {
+      id: 'tasks-home-widget',
+      description: 'Mostra tarefas pendentes recentes no Home dashboard',
+      requires: [MODULE_IDS.TASKS],
+      injects: {
+        [SLOT_IDS.HOME_DASHBOARD]: RecentTasksWidget,
+      },
+    },
+  ],
 }

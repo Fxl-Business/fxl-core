@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Activity, ArrowRight, BookOpen, CheckSquare } from 'lucide-react'
-import { MODULE_REGISTRY, type ModuleDefinition } from '@/modules/registry'
+import { MODULE_REGISTRY, SLOT_IDS, type ModuleDefinition } from '@/modules/registry'
+import { ExtensionSlot } from '@/modules/slots'
 import { useActivityFeed, type ActivityItem, formatDate } from '@/lib/activity-feed'
 import { useModuleStats, type ModuleStats } from '@/lib/module-stats'
 import { Badge } from '@/components/ui/badge'
@@ -266,6 +267,11 @@ export default function Home() {
           <IdentityCard activeCount={enabledModules.length} stats={stats} />
           <ActivityFeed items={activityItems} loading={activityLoading} />
         </div>
+      </div>
+
+      {/* Extension Widgets — injected by modules via slot system */}
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <ExtensionSlot id={SLOT_IDS.HOME_DASHBOARD} />
       </div>
     </div>
   )
