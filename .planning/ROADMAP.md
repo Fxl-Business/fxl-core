@@ -68,7 +68,10 @@
   1. AdminToolbar no longer shows a Layout button group (Sidebar / Header / Filtros) — edit mode is entered by clicking directly on each component
   2. HeaderConfigPanel, SidebarConfigPanel, and FilterBarEditor as standalone Sheet panels no longer exist in the codebase — their form logic lives inside PropertyPanel forms
   3. layoutPanel state variable is removed from WireframeViewer and no references remain — TypeScript confirms zero errors
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 57-01-PLAN.md — Remove AdminToolbar Layout buttons, delete Sheet panels, clean layoutPanel state
 
 ## Progress
 
@@ -78,4 +81,4 @@
 | 54. Header Inline Editing | v2.3 | 0/? | Not started | - |
 | 55. Sidebar Inline Editing | v2.3 | 0/? | Not started | - |
 | 56. Filter Inline Editing | v2.3 | 0/? | Not started | - |
-| 57. Cleanup & Consolidation | v2.3 | 0/? | Not started | - |
+| 57. Cleanup & Consolidation | v2.3 | 0/1 | Not started | - |
