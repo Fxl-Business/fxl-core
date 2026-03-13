@@ -1,337 +1,83 @@
-# Stack Research: v1.5 Modular Foundation & Knowledge Base
+# Stack Research
 
-**Domain:** React SPA — modular architecture, auto-fed knowledge base, task/project management
+**Domain:** Wireframe Builder — 12 New Chart/Section Types (v1.6)
 **Researched:** 2026-03-12
-**Confidence:** HIGH (official docs verified, existing codebase analyzed, hooks reference confirmed)
+**Confidence:** HIGH
 
-## Scope
-
-This research covers ONLY what is NEW for v1.5. The validated existing stack is unchanged:
-
-- React 18.3 + TypeScript 5.6 strict + Tailwind CSS 3.4 + Vite 5.4 + Vercel
-- Supabase (comments, blueprints, briefings) + Clerk (auth)
-- recharts 2.13.3, lucide-react 0.460, shadcn/ui, cmdk, sonner, dnd-kit
-- Zod 4.x, react-markdown + remark-gfm + rehype-highlight, yaml
-- react-router-dom 6.27, @fontsource-variable/inter + jetbrains-mono
-- vitest 4.x, @testing-library/react 16.x
-
-Four questions to answer: (1) How to structure independent modules in the existing SPA? (2) What storage + retrieval approach for the knowledge base? (3) What data model for task/project management? (4) How to auto-feed the knowledge base from GSD workflow events?
+> This is an additive research document. The base stack (React 18, TypeScript strict,
+> Tailwind CSS 3, Vite 5, Recharts 2.13.3, lucide-react) is validated and unchanged.
+> This document covers ONLY what is new or changed for the 12 new chart types.
 
 ---
 
-## Decision Summary: Zero New Runtime Dependencies
+## Executive Decision: Zero New Dependencies
 
-The v1.5 features are implementable with the existing stack plus two Supabase migrations and
-Claude Code hook scripts (Node.js, no new npm packages). The module system uses React's built-in
-`lazy` + `Suspense` with Vite's automatic code splitting. State management uses React Context
-(already the project pattern) — Zustand is not needed at this scale. TanStack Query is deferred
-per PROJECT.md (v2 item AGEN-02).
+All 12 chart types can be implemented using **Recharts 2.13.3 alone**, already installed.
+No new npm packages are required. Each chart maps to a Recharts primitive or a custom
+composition of existing Recharts primitives, with pure HTML/CSS for the two non-chart sections.
 
 ---
 
-## Part 1: Module System Architecture
+## Chart-by-Chart Recharts Mapping
 
-### Pattern: Feature-Based Directory Modules with Lazy-Loaded Routes
+### Wave 1 — chartType Sub-variants (bar-line-chart section type)
 
-The correct approach for this SPA is **feature-based directory modules** — not micro-frontends,
-not a monorepo, not a custom module registry. This is the standard pattern for React SPAs at
-this scale, and it integrates directly with how Vite handles code splitting.
+| Chart | Recharts Primitive | Implementation Strategy | Confidence |
+|-------|--------------------|------------------------|------------|
+| **Grouped Bar** | `BarChart` + multiple `Bar` | Multiple `Bar` components inside one `BarChart`. Recharts groups them automatically by category with no `stackId`. Standard `barCategoryGap` and `barGap` props control spacing. | HIGH |
+| **Bullet Chart** | `BarChart` + `ReferenceLine` per category | Single thin `Bar` per category plus a background `Bar` (target range, low opacity). One `ReferenceLine` per row for the target marker. Best with `layout="vertical"`. | HIGH |
+| **Step Line** | `LineChart` + `Line type="stepAfter"` | The `type` prop on `Line` natively accepts `"step"`, `"stepBefore"`, and `"stepAfter"`. No extra package. Verified in Recharts API docs. | HIGH |
+| **Range Bar / Gantt** | `BarChart layout="vertical"` + `Bar` with `[start, end]` dataKey | In Recharts 2.x, a `Bar` `dataKey` can reference an array `[low, high]` to render floating/range bars. Standard approach for Gantt-style timelines. Pair with `XAxis type="number"`. | HIGH |
+| **Bump Chart** | `LineChart` + `Line type="bump"` | The `Line` component's `type` prop supports `"bump"`, `"bumpX"`, and `"bumpY"` natively. Used for rank-over-time charts. Verified in official Recharts Line API docs. | HIGH |
+| **Lollipop Chart** | `ComposedChart` + thin `Bar` + `Line` with custom dot | Thin `Bar` serves as the stem. A `Line` with `dot` rendered as a large `<circle>` via the custom `dot` prop makes the lollipop head. The `CustomizedDotLineChart` example in Recharts docs covers this pattern. | HIGH |
+| **Polar / Rose Chart** | `RadialBarChart` + `RadialBar` | `RadialBarChart` is a standard Recharts component. When all bars share the same angle domain and only differ in length, it renders as a Nightingale/Rose chart. No separate library. | HIGH |
 
-**Module = a directory with its own components/, pages/, types/, and an index barrel.**
+### Wave 2 — Standalone Section Types (new entries in section registry)
 
-Each module is lazy-loaded at the route level via `React.lazy()`. Vite automatically splits
-lazy-imported components into separate chunks during build — zero configuration required. At
-the current project scale (single operator, internal tool), micro-frontends would be massive
-overkill with no benefit.
-
-**Directory structure for modules:**
-
-```
-src/
-  modules/
-    docs/               ← existing docs viewer, moved here
-      components/
-      pages/
-      types/
-      index.ts          ← barrel (re-exports public API)
-    wireframe-builder/  ← existing builder, moved here
-      components/
-      pages/
-      types/
-      index.ts
-    knowledge-base/     ← NEW
-      components/
-      pages/
-      types/
-      index.ts
-    projects/           ← NEW (task/project management)
-      components/
-      pages/
-      types/
-      index.ts
-  components/           ← shared shell components (layout, nav, ui)
-  pages/                ← top-level pages (Home, Login, Profile)
-  lib/                  ← shared utilities (supabase, docs-parser, search-index)
-  App.tsx               ← route definitions with lazy imports
-```
-
-**Route-level lazy loading pattern (App.tsx):**
-
-```tsx
-import { lazy, Suspense } from 'react'
-
-const KnowledgeBase = lazy(() => import('./modules/knowledge-base/pages/KnowledgeBasePage'))
-const Projects = lazy(() => import('./modules/projects/pages/ProjectsPage'))
-
-// In router:
-<Route path="/kb/*" element={
-  <Suspense fallback={<PageSkeleton />}>
-    <KnowledgeBase />
-  </Suspense>
-} />
-```
-
-**Why this and not alternatives:**
-- Micro-frontends: overkill — independent deployments, separate build pipelines, module federation
-  complexity are all irrelevant for a single-operator internal tool. Adds 10x the complexity for
-  zero operational benefit at this scale.
-- Monorepo (nx, turborepo): appropriate when teams are separate or packages are published. This is
-  one team, one app, one deploy target.
-- Custom module manifest: unnecessary indirection — Vite's static analysis handles chunking.
-
-**Module boundary rules (to enforce now, prevent future coupling):**
-1. Modules do NOT import from each other's internal directories. Only from their public `index.ts`.
-2. Shared types (client entities, user, etc.) live in `src/types/` — not in any module.
-3. Supabase client, Clerk, and routing utilities live in `src/lib/` — imported by all modules.
-4. No module imports from `src/components/layout/` or other shell components directly — they are
-   provided by the Layout wrapper at the route level.
-
-**Confidence:** HIGH — This is the documented React + Vite pattern. Official React docs, Vite
-docs, and the developer-way.com deep-dive on project structure all confirm feature-based
-organization with lazy-loaded routes.
+| Chart | Recharts Primitive | Implementation Strategy | Confidence |
+|-------|--------------------|------------------------|------------|
+| **Pie Chart** | `PieChart` + `Pie innerRadius={0}` | Identical to the existing `DonutChart` but `innerRadius={0}`. Recommend implementing as a `chartType: 'pie'` variant on the existing `donut-chart` section type to avoid schema duplication — both use the same `slices` data structure. | HIGH |
+| **Heatmap** | Pure HTML/CSS grid | Recharts has no native Heatmap component. The ScatterChart workaround requires significant coordinate math. For wireframe purposes a CSS `grid` with color-coded cells using `--wf-*` tokens is simpler, produces cleaner code, and results in identical visual fidelity. Zero Recharts dependency. | HIGH |
+| **Sparkline Grid** | `LineChart` (stripped) | A grid of mini `LineChart` instances, each with `XAxis hide`, `YAxis hide`, no `CartesianGrid`, no `Tooltip` — just a `Line` and `ResponsiveContainer`. The existing `KpiCard` already renders inline sparklines via this pattern. Reuse at grid scale. `react-sparklines` adds a dependency for what Recharts already handles. | HIGH |
+| **Progress Grid** | Pure HTML/CSS | A CSS grid of labeled progress bars. `div` with Tailwind `w-[{pct}%]` and `--wf-*` token fills. The existing `ProgressBarRenderer` covers single bars; this is the grid variant of the same pattern. Zero Recharts dependency. | HIGH |
+| **Sankey Diagram** | `Sankey` (native Recharts) | Recharts 2.x ships a `Sankey` component as a named export. Source-verified: it is NOT experimental — it is a standard public TypeScript class export (`export class Sankey extends PureComponent<Props, State>`). Required prop: `data: { nodes: Array<{name}>, links: Array<{source: number, target: number, value: number}> }`. | HIGH |
 
 ---
 
-## Part 2: Knowledge Base — Storage and Retrieval
+## Recommended Stack (Additions Only)
 
-### Storage: Supabase (Postgres) — No New Service Needed
+### Core Technologies
 
-The knowledge base is structured entries (bugs, decisions, patterns), not unstructured documents.
-Postgres + tsvector full-text search is the correct solution. This avoids introducing a vector
-database, Algolia, or any external search service. The existing Supabase project handles this.
+No changes. Recharts 2.13.3 already installed covers all 12 types.
 
-**Schema (one migration):**
+### Supporting Libraries
 
-```sql
-CREATE TABLE knowledge_entries (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  kind        text NOT NULL CHECK (kind IN ('bug', 'decision', 'pattern', 'pitfall')),
-  title       text NOT NULL,
-  body        text NOT NULL,           -- markdown, full description
-  tags        text[] NOT NULL DEFAULT '{}',
-  source      text,                    -- 'gsd-hook', 'manual', 'git-commit'
-  phase_ref   text,                    -- e.g. '25-table-components'
-  created_at  timestamptz NOT NULL DEFAULT now(),
-  updated_at  timestamptz NOT NULL DEFAULT now(),
-  search_vec  tsvector GENERATED ALWAYS AS (
-    to_tsvector('english', coalesce(title, '') || ' ' || coalesce(body, '') || ' ' || coalesce(array_to_string(tags, ' '), ''))
-  ) STORED
-);
+No new packages required.
 
-CREATE INDEX knowledge_entries_search_idx ON knowledge_entries USING GIN (search_vec);
-CREATE INDEX knowledge_entries_kind_idx ON knowledge_entries (kind);
-CREATE INDEX knowledge_entries_tags_idx ON knowledge_entries USING GIN (tags);
-```
+### Development Tools
 
-**Why generated column (not trigger) for tsvector:**
-Generated columns with `STORED` are the modern Postgres approach (Postgres 12+, Supabase supports
-this). They are automatically updated on INSERT/UPDATE without a separate trigger function.
-Supabase's hosted Postgres is version 15.x — generated columns are fully supported.
-
-**Retrieval (via Supabase JS client, no new packages):**
-
-```typescript
-// Full-text search — already available in @supabase/supabase-js 2.x
-const { data } = await supabase
-  .from('knowledge_entries')
-  .select('*')
-  .textSearch('search_vec', query, { type: 'websearch', config: 'english' })
-  .order('created_at', { ascending: false })
-  .limit(20)
-
-// Tag filter
-const { data } = await supabase
-  .from('knowledge_entries')
-  .select('*')
-  .contains('tags', ['typescript', 'clerk'])
-  .eq('kind', 'bug')
-```
-
-**Why NOT vector/semantic search for this use case:**
-Semantic search (pgvector, Supabase AI) is valuable for "find conceptually similar" queries.
-The knowledge base is queried by keyword, tag, kind, and phase reference — all well-served by
-tsvector. Adding vector embeddings requires an embedding model API call on every insert, adds
-cost, and introduces a new external dependency. Defer to v2 if semantic search becomes needed.
-
-**Confidence:** HIGH — Supabase full-text search documentation confirms tsvector generated
-columns and GIN indexes. The @supabase/supabase-js 2.x textSearch() method is documented.
+No changes.
 
 ---
 
-## Part 3: Task/Project Management — Data Model
+## Installation
 
-### Approach: Thin Postgres Schema, No External PM Library
-
-A minimal task management model linked to existing entities (clients, phases). No external
-library (no Linear SDK, no ClickUp integration). The UI uses shadcn/ui components already
-in the project. This is scoped to MVP: project + task lists, status, assignment to phase/client.
-
-**Schema (one migration, same file or separate):**
-
-```sql
--- Projects (one per client engagement or one for FXL Core itself)
-CREATE TABLE projects (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name          text NOT NULL,
-  client_slug   text,                -- null = internal (FXL Core)
-  status        text NOT NULL DEFAULT 'active'
-                CHECK (status IN ('active', 'paused', 'completed', 'archived')),
-  description   text,
-  created_at    timestamptz NOT NULL DEFAULT now(),
-  updated_at    timestamptz NOT NULL DEFAULT now()
-);
-
--- Tasks within a project
-CREATE TABLE tasks (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id    uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  title         text NOT NULL,
-  body          text,                -- markdown, optional details
-  status        text NOT NULL DEFAULT 'todo'
-                CHECK (status IN ('todo', 'in-progress', 'done', 'blocked')),
-  priority      text NOT NULL DEFAULT 'medium'
-                CHECK (priority IN ('low', 'medium', 'high')),
-  phase_ref     text,                -- link to GSD phase (e.g. '25-table-components')
-  kb_entry_id   uuid REFERENCES knowledge_entries(id),  -- optional link to KB
-  due_date      date,
-  created_at    timestamptz NOT NULL DEFAULT now(),
-  updated_at    timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE INDEX tasks_project_id_idx ON tasks (project_id);
-CREATE INDEX tasks_status_idx ON tasks (status);
+```bash
+# No new packages needed.
+# All 12 chart types are implementable with existing recharts@2.13.3
 ```
-
-**Why this schema:**
-- `client_slug` ties to the existing clients/ taxonomy without a foreign key to a clients table
-  (which doesn't exist in Supabase yet — clients are file-system entities). Keeps it loose.
-- `phase_ref` is a text field (e.g. '25-table-components') that mirrors the .planning/phases/
-  directory naming — no migration needed when phases change, just a text reference.
-- `kb_entry_id` allows surfacing related knowledge entries from a task without coupling the
-  schemas tightly (nullable FK, not enforced as required).
-- Status and priority as constrained text columns over ENUMs: easier to ALTER if values change
-  (ALTER TYPE in Postgres requires a workaround; text CHECK is simpler to migrate).
-
-**No external library for task UI:**
-shadcn/ui already provides Card, Badge, Select, Dialog, Popover — sufficient for task cards,
-status badges, priority selectors, and task detail dialogs. dnd-kit (already installed) can
-handle kanban drag-reorder if needed. No react-beautiful-dnd, no dnd-kit upgrade.
-
-**Confidence:** HIGH — Schema design based on project's established Supabase patterns (existing
-comments and blueprints tables). No new packages.
 
 ---
 
-## Part 4: Auto-Feed Mechanism — Claude Code Hooks
+## Alternatives Considered
 
-### Pattern: PostToolUse + Stop hooks → Node.js script → Supabase REST API
-
-The project already has a hooks infrastructure in `.claude/settings.json`:
-- `SessionStart` → `gsd-check-update.js`
-- `PostToolUse` → `gsd-context-monitor.js`
-- `Stop` → `pre-stop-checklist.sh`
-
-The auto-feed mechanism extends this existing pattern. A new hook script detects when Claude
-resolves a bug, records a decision, or completes a phase, then inserts a knowledge entry.
-
-**Trigger points:**
-- `Stop` hook — fires when Claude finishes a response. Parse stop context for decision/bug keywords.
-- `PostToolUse` on `Write` — fires after writing `.planning/` files. Detect phase summaries written.
-- Manual: `/gsd:kb-add` slash command (creates entry via Supabase REST without leaving Claude Code).
-
-**Hook approach (no new npm packages):**
-
-```javascript
-// .claude/hooks/kb-auto-feed.js
-// Called from Stop hook. Reads the GSD state, detects KB-worthy events,
-// posts to Supabase via fetch() (Node.js 18+ native — no node-fetch needed).
-
-const input = JSON.parse(fs.readFileSync('/dev/stdin', 'utf-8'))
-// input.stop_hook_active — if true, exit 0 immediately (prevent infinite loop)
-if (input.stop_hook_active) process.exit(0)
-
-// Detect: did Claude just write a VERIFICATION.md or phase SUMMARY.md?
-// Read recent STATE.md, extract decisions section, post to knowledge_entries.
-```
-
-**Why fetch() (native) and not supabase-js in the hook:**
-The hooks run as Node.js scripts. `@supabase/supabase-js` is a browser+Node package, but loading
-it in a hook adds startup latency and requires the package to be resolvable from `~/.claude/`.
-Native `fetch()` + the Supabase REST API (`https://[project].supabase.co/rest/v1/knowledge_entries`)
-with the `apikey` header is simpler, faster, and has zero dependency. The hook reads `VITE_SUPABASE_URL`
-and `VITE_SUPABASE_PUBLISHABLE_KEY` from `.env.local` (same pattern as the existing `make migrate`
-approach that reads credentials from `.env.local`).
-
-```javascript
-// Supabase REST insert — no SDK needed in hooks
-const response = await fetch(`${SUPABASE_URL}/rest/v1/knowledge_entries`, {
-  method: 'POST',
-  headers: {
-    'apikey': SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`,
-    'Content-Type': 'application/json',
-    'Prefer': 'return=minimal'
-  },
-  body: JSON.stringify({ kind, title, body, tags, source: 'gsd-hook', phase_ref })
-})
-```
-
-**Why NOT git hooks (pre-commit, post-commit):**
-Git hooks fire on every commit — the signal-to-noise ratio is low. Most commits are not
-KB-worthy. Claude Code's `Stop` and `PostToolUse` hooks have access to the conversation
-context (what Claude just did), making them better triggers. Git hooks don't know if Claude
-resolved a bug or just formatted code.
-
-**Confidence:** HIGH — Claude Code hooks reference confirmed. Native fetch() confirmed in Node.js
-18+ (the system runs macOS with Node.js 22+ given darwin 25.3.0). `.env.local` reading pattern
-confirmed from existing codebase (`make migrate` reads it via `--env-file .env.local`).
-
----
-
-## State Management: React Context (No Zustand)
-
-The project uses React Context for module-level state (WireframeThemeProvider is the example).
-This pattern scales to the new modules.
-
-**Decision: Do not add Zustand.**
-
-Rationale: The KB and task management UIs are read-heavy (fetch from Supabase, display). There
-is no complex derived state, no cross-module real-time synchronization, and no optimistic update
-choreography that would justify a state management library. React Context + useReducer covers:
-- Filter/sort state in the KB list view (local to that page)
-- Active task status changes (single Supabase mutation, then re-fetch)
-- Module navigation state (already handled by react-router-dom)
-
-TanStack Query (React Query v5) would genuinely improve the DX for KB and tasks — caching, background
-re-fetch, loading states. However, PROJECT.md explicitly defers it to v2 (AGEN-02). The milestone
-goal is to ship the features, not to solve caching elegance. Manual fetch + useState is sufficient
-for an internal tool with one operator.
-
-**When to reconsider:** If KB entries exceed 500+ rows and list view performance degrades, or if
-two browser tabs show stale data simultaneously, TanStack Query becomes the right answer. That is
-a v2 concern.
-
-**Confidence:** HIGH — Existing codebase pattern analysis. PROJECT.md confirms AGEN-02 deferral.
+| Recommended | Alternative | Why Not |
+|-------------|-------------|---------|
+| Recharts native `Sankey` | `react-sankey-chart` (npm) | Recharts ships Sankey natively. Adding a package for what is already available is unnecessary bundle weight. |
+| Pure CSS grid for Heatmap | Recharts `ScatterChart` + custom `shape` | ScatterChart approach requires cell-coordinate math and custom SVG shapes. CSS grid is simpler, more readable, and achieves identical wireframe fidelity. |
+| Pure CSS for Progress Grid | `@radix-ui/react-progress` (already installed) | Radix Progress is designed for accessible production UI. For wireframe mock data, plain `div` width utilities are sufficient and already the pattern in `ProgressBarRenderer`. |
+| Recharts `LineChart` stripped | `react-sparklines` package | `react-sparklines` (borisyankov) is unmaintained (last commit 2021). A bare `LineChart` with hidden axes is the same visual output with zero new dependency. |
+| Recharts `RadialBarChart` | `echarts-for-react` | ECharts has a more feature-rich polar/rose implementation, but adding the entire ECharts library (~1MB) for one chart type is not justified. Recharts `RadialBarChart` achieves wireframe-fidelity equivalence. |
 
 ---
 
@@ -339,64 +85,91 @@ a v2 concern.
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| Zustand | No complex cross-module state at this scale; deferred by PROJECT.md | React Context + useReducer |
-| TanStack Query / React Query | Deferred to v2 (AGEN-02) in PROJECT.md | useState + useEffect fetch pattern |
-| pgvector / Supabase AI embeddings | Overkill for keyword+tag search KB; adds cost, external LLM API | Postgres tsvector (built-in) |
-| Algolia / Meilisearch | External service, cost, sync complexity for a small internal KB | Supabase full-text search |
-| node-fetch in hooks | Node.js 18+ has native fetch() | fetch() (no package) |
-| Micro-frontends | One team, one deploy, internal tool — massive complexity for zero benefit | Feature-based modules with lazy routes |
-| nx / turborepo | No separate teams, no publishable packages, no independent deployments | Single repo, feature directories |
-| react-beautiful-dnd | Archived/unmaintained | @dnd-kit (already installed) |
-| Supabase Realtime for KB/tasks | One operator, no concurrent editing — polling or manual refresh is sufficient | Supabase REST via supabase-js |
-| New shadcn components for task UI | Card, Badge, Select, Dialog, Popover already installed | Existing shadcn/ui components |
+| `react-sankey-chart` or `recharts-sankey` | Recharts 2.x ships Sankey as a named export with full TypeScript types | `import { Sankey } from 'recharts'` |
+| `react-sparklines` | Unmaintained (2021), unnecessary for what Recharts already handles | Stripped `LineChart` (no axes, no grid, no tooltip) |
+| `d3` direct imports | D3 is Recharts' internal dependency. Direct D3 usage creates version coupling and bypasses the section registry pattern | Recharts primitives or pure HTML/CSS |
+| `@mui/x-charts` for Heatmap | Requires the full MUI ecosystem. Overkill for a wireframe mock | Pure CSS grid with `--wf-*` tokens |
+| `react-google-charts` for Gantt | ~200kb external bundle, requires Google CDN. Not justified for one chart type | `BarChart` with `[start, end]` `dataKey` array |
+| Recharts 3.x upgrade | Breaking API changes: new store-based architecture, `Cell` as primary API removed, different animation model. PROJECT.md explicitly defers this. | Stay on 2.13.3 |
 
 ---
 
-## Installation Plan
+## Stack Patterns by Variant
 
-```bash
-# No new runtime dependencies.
-# No new dev dependencies.
-# No package.json changes.
+**For chartType sub-variants (Grouped Bar, Bullet, Step Line, Range Bar, Bump, Lollipop, Polar):**
+- Add new `chartType` string literals to the `ChartType` union in `tools/wireframe-builder/types/blueprint.ts`
+- Add a `case` in `ChartRenderer.tsx` inner switch on `section.chartType`
+- Create one component file per chart in `tools/wireframe-builder/components/`
+- Follow existing naming convention: `GroupedBarChartComponent.tsx`, `BulletChartComponent.tsx`, etc.
 
-# New Supabase migration files:
-# supabase/migrations/005_knowledge_base.sql
-# supabase/migrations/006_projects_tasks.sql
-# (or combined: 005_knowledge_projects.sql)
+**For standalone sections (Heatmap, Sparkline Grid, Progress Grid, Sankey):**
+- Add a new section type to the discriminated union in `blueprint.ts`
+- Register in the section registry (v1.1 decision: one-file change to add a section type)
+- Create a new renderer in `tools/wireframe-builder/components/sections/`
+- Heatmap and Progress Grid: no Recharts import needed in those renderers
 
-# New hook script:
-# .claude/hooks/kb-auto-feed.js
+**For Pie Chart specifically:**
+- Pie uses the same `slices: { label, value }[]` data structure as Donut
+- Recommend `chartType: 'pie'` variant on the existing `donut-chart` section type
+- Renderer change: `innerRadius={0}` instead of `"40%"` — trivial modification to `DonutChart.tsx`
+- If a distinct schema is ever needed, a separate `pie-chart` section type can be added later
 
-# New slash command:
-# .claude/commands/gsd/kb-add.md
+---
+
+## Recharts 2.x Sankey — Key Integration Notes
+
+```typescript
+// Named export — no plugin, no separate package
+import { Sankey } from 'recharts'
+
+// Data shape (differs from all other Recharts charts)
+// source and target are INDEX references to the nodes array, NOT names
+type SankeyData = {
+  nodes: Array<{ name: string }>
+  links: Array<{
+    source: number   // index into nodes[]
+    target: number   // index into nodes[]
+    value: number    // flow width
+  }>
+}
+
+// Usage
+<Sankey
+  data={sankeyData}   // required
+  width={960}
+  height={500}
+  nodePadding={50}
+  nodeWidth={10}
+/>
 ```
 
-**Total: 0 new npm packages. 1-2 Supabase migrations. 1 Claude Code hook script.**
+This `source`/`target` as index pattern is the primary integration gotcha — it differs
+from every other Recharts chart that references data by key name.
 
 ---
 
 ## Version Compatibility
 
-| Package | Current Version | v1.5 Impact | Notes |
-|---------|-----------------|-------------|-------|
-| @supabase/supabase-js | ^2.98.0 | No change | textSearch() and .contains() for arrays supported in 2.x |
-| react-router-dom | ^6.27.0 | No change | React.lazy + Suspense + nested routes already supported |
-| React | ^18.3.1 | No change | lazy(), Suspense, useReducer all built-in |
-| Vite | ^5.4.10 | No change | Automatic code splitting on dynamic imports, no config change |
-| zod | ^4.3.6 | New schemas for KB entries and tasks | No upgrade needed; z.enum() for kind/status/priority |
+| Package | Version | Compatible With | Notes |
+|---------|---------|-----------------|-------|
+| `recharts` | 2.13.3 | React 18, TypeScript 5 strict | All 12 chart types covered natively |
+| `recharts` `Cell` component | 2.13.3 | Deprecated for 4.x, functional in 2.x | Existing Gauge uses `Cell`. Continue using for 2.x. No action needed. |
+| Recharts `Sankey` | 2.13.3 | Standard named export | Full TypeScript types: `SankeyData`, `SankeyNodeOptions`, `SankeyLinkOptions` |
 
 ---
 
 ## Sources
 
-- [Claude Code Hooks Guide](https://code.claude.com/docs/en/hooks-guide) — hook events (PostToolUse, Stop), input schema, exit codes, stop_hook_active field (HIGH confidence, official docs, fetched directly)
-- [Supabase Full Text Search](https://supabase.com/docs/guides/database/full-text-search) — tsvector generated columns, GIN index, textSearch() client method (HIGH confidence, official Supabase docs)
-- [React lazy() and Suspense — React docs](https://react.dev/reference/react/lazy) — lazy import pattern, Suspense fallback (HIGH confidence, official React docs)
-- Existing codebase analysis: `.claude/settings.json` hooks config, `supabase/migrations/`, `src/`, `package.json`, `.planning/PROJECT.md` (HIGH confidence, direct inspection)
-- [React State Management in 2025](https://www.developerway.com/posts/react-state-management-2025) — Context vs Zustand decision framework (MEDIUM confidence, authoritative blog)
-- [React project structure](https://www.developerway.com/posts/react-project-structure) — feature-based module organization rationale (MEDIUM confidence, authoritative blog)
-- [How to Use Supabase with TanStack Query](https://makerkit.dev/blog/saas/supabase-react-query) — confirmed deferral rationale; v5 integration pattern for v2 reference (MEDIUM confidence)
+- [Recharts Sankey API](https://recharts.github.io/en-US/api/Sankey/) — Component props and data structure (HIGH)
+- [Recharts Sankey source](https://github.com/recharts/recharts/blob/2.x/src/chart/Sankey.tsx) — Confirmed standard named export, no experimental marker (HIGH)
+- [Recharts Line API](https://recharts.github.io/en-US/api/Line/) — `type` prop values including `"step"`, `"stepAfter"`, `"bump"`, `"bumpX"`, `"bumpY"` (HIGH)
+- [Recharts RadialBarChart API](https://recharts.github.io/en-US/api/RadialBarChart/) — Native polar chart component (HIGH)
+- [Recharts CustomizedDotLineChart example](https://recharts.github.io/en-US/examples/CustomizedDotLineChart/) — Custom dot pattern for lollipop implementation (HIGH)
+- [Recharts Cell migration guide](https://recharts.github.io/en-US/guide/cell/) — Cell deprecated in 4.x, functional in 2.x (HIGH)
+- [recharts-gantt-chart community repo](https://github.com/rudrodip/recharts-gantt-chart) — Proof of concept: BarChart with `[start, end]` dataKey for Gantt (MEDIUM)
+- [Recharts BarChart API](https://recharts.github.io/en-US/api/BarChart/) — barCategoryGap, barGap, barSize props for grouped bar (HIGH)
 
 ---
-*Stack research for: FXL Core v1.5 Modular Foundation & Knowledge Base*
+
+*Stack research for: FXL Core v1.6 — 12 new chart/section types*
 *Researched: 2026-03-12*

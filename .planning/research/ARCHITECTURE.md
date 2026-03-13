@@ -1,531 +1,445 @@
-# Architecture Research
+# Architecture Research — v1.6: 12 New Chart/Section Types
 
-**Domain:** Modular SPA — Knowledge Base + Task Management integration into existing React + Supabase platform
+**Domain:** Wireframe Builder — Chart and Section Component Expansion
 **Researched:** 2026-03-12
-**Confidence:** HIGH (based on direct codebase reading + established React SPA patterns)
+**Confidence:** HIGH (based on direct codebase inspection)
 
 ---
 
 ## System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                           TopNav (sticky, full-width)               │
-├──────────────────┬──────────────────────────────────────────────────┤
-│                  │                                                   │
-│   Sidebar.tsx    │            <Outlet /> (page content)             │
-│   (w-64, fixed)  │                                                   │
-│                  │   / Home (modular hub)                           │
-│   [nav tree      │   /processo/*  DocRenderer                       │
-│    hardcoded     │   /ferramentas/* DocRenderer                     │
-│    today]        │   /clients/:slug/* interactive pages             │
-│                  │   /knowledge-base/* (NEW)                        │
-│                  │   /tasks/* (NEW)                                  │
-│                  │                                                   │
-├──────────────────┴──────────────────────────────────────────────────┤
-│                        Supabase (data layer)                        │
-│  comments | share_tokens | blueprint_configs | briefing_configs     │
-│  knowledge_entries (NEW) | tasks (NEW) | projects (NEW)             │
-└─────────────────────────────────────────────────────────────────────┘
+BlueprintConfig (Supabase JSON)
+    ↓ Zod parse (BlueprintConfigSchema)
+BlueprintRenderer
+    ↓ iterates screens → rows → sections
+SectionRenderer
+    ↓ looks up type in SECTION_REGISTRY
+Renderer Component         Property Form (editor only)
+    ↓                           ↓
+Chart/Section Component    Property Panel UI
+    ↓
+--wf-* CSS vars + chartColors[]
 ```
 
-### Component Responsibilities (Current State)
+### The Two Extension Points
 
-| Component | Responsibility | Location |
-|-----------|---------------|----------|
-| `App.tsx` | Route definitions, layout grouping | `src/App.tsx` |
-| `Layout.tsx` | Sidebar + TopNav + Outlet wrapper | `src/components/layout/` |
-| `Sidebar.tsx` | Hardcoded nav tree (`NavItem[]`) | `src/components/layout/` |
-| `docs-parser.ts` | `import.meta.glob` over `docs/`, frontmatter + section parsing | `src/lib/` |
-| `search-index.ts` | Builds flat `SearchEntry[]` from all docs | `src/lib/` |
-| `DocRenderer.tsx` | Route handler for any `/docs/*.md` path | `src/pages/` |
-| `WireframeViewer` | Full-screen, outside Layout, parametric by `:clientSlug` | `src/pages/clients/` |
+The architecture has two distinct extension points, not one. The 12 new types split cleanly across them:
+
+```
+Extension Point A — chartType sub-variant
+──────────────────────────────────────────
+BlueprintSection type stays 'bar-line-chart'
+ChartType enum grows + ChartRenderer switch grows
+No registry changes needed
+
+Extension Point B — standalone section type
+────────────────────────────────────────────
+New literal in BlueprintSection union
+New entry in SECTION_REGISTRY
+New Zod schema added to discriminated union
+New Renderer + PropertyForm + leaf Component
+```
+
+### Classification of the 12 New Types
+
+| New Type | Extension Point | Rationale |
+|----------|----------------|-----------|
+| Grouped Bar | A — chartType sub-variant | Same axes + categories pattern as stacked-bar |
+| Bullet Chart | A — chartType sub-variant | Single-metric bar, extends horizontal-bar idiom |
+| Step Line | A — chartType sub-variant | Line variant — Recharts `type="stepBefore"` flag |
+| Polar Area | A — chartType sub-variant | Angular/radar variant with filled wedges |
+| Bump Chart | A — chartType sub-variant | Ranking over time — categories drive X axis |
+| Lollipop | A — chartType sub-variant | Bar + dot combination, categorical data |
+| Range Bar | A — chartType sub-variant | Bar pair (min/max per category) |
+| Pie Chart | B — standalone section | Different data shape: slices[], no categories axis |
+| Heatmap | B — standalone section | 2D matrix — row/col labels, intensity values |
+| Sparkline Grid | B — standalone section | Grid of micro-charts with own layout model |
+| Progress Grid | B — standalone section | Grid of labeled progress items, distinct from progress-bar |
+| Sankey | B — standalone section | Node-link flow data (source/target/value) |
+
+**Note on Pie Chart vs Donut:** Although `donut-chart` exists as a standalone type, Pie warrants its own section type (`pie-chart`) rather than a flag on donut-chart. Pie has no center hole and different slice label placement. Keeping them as separate types preserves clean discriminated union semantics and simple property forms.
 
 ---
 
-## Recommended Structure for v1.5
+## Component Architecture
 
-The existing architecture is a flat SPA. The modularization goal is NOT a micro-frontend split — it is
-organizing code into module-shaped feature folders while keeping a single React app, single router,
-and single Supabase client.
+### Existing Component Boundaries
 
-### Target File Structure
-
-```
-src/
-├── modules/                     # NEW — feature modules, each self-contained
-│   ├── knowledge-base/
-│   │   ├── index.ts             # module manifest (routes, nav items, display name)
-│   │   ├── pages/
-│   │   │   ├── KBIndex.tsx      # list view — all entries, filterable
-│   │   │   └── KBEntry.tsx      # single entry detail view
-│   │   ├── components/
-│   │   │   ├── KBEntryCard.tsx
-│   │   │   └── KBEntryForm.tsx
-│   │   ├── lib/
-│   │   │   └── kb-service.ts    # Supabase CRUD wrappers for knowledge_entries
-│   │   └── types.ts             # KnowledgeEntry, KBCategory, etc.
-│   │
-│   ├── tasks/
-│   │   ├── index.ts             # module manifest
-│   │   ├── pages/
-│   │   │   ├── TasksIndex.tsx   # board / list view
-│   │   │   └── TaskDetail.tsx
-│   │   ├── components/
-│   │   │   ├── TaskCard.tsx
-│   │   │   ├── TaskForm.tsx
-│   │   │   └── TaskStatusBadge.tsx
-│   │   ├── lib/
-│   │   │   └── tasks-service.ts
-│   │   └── types.ts             # Task, Project, TaskStatus, etc.
-│   │
-│   ├── docs/                    # WRAP existing doc machinery (not rewrite)
-│   │   └── index.ts             # manifest only — pages/lib already in src/pages + src/lib
-│   │
-│   └── wireframe-builder/       # WRAP existing tool (not move)
-│       └── index.ts             # manifest only — code stays in tools/wireframe-builder/
-│
-├── registry/
-│   └── modules.ts               # imports all module manifests, exports MODULE_REGISTRY
-│
-├── components/
-│   ├── layout/
-│   │   ├── Layout.tsx           # unchanged structure
-│   │   ├── Sidebar.tsx          # MODIFY: accepts nav from registry instead of hardcoded tree
-│   │   ├── TopNav.tsx           # unchanged
-│   │   ├── ThemeToggle.tsx      # unchanged
-│   │   └── ScrollToTop.tsx      # unchanged
-│   ├── docs/                    # unchanged
-│   └── ui/                      # unchanged (shadcn)
-│
-├── pages/                       # unchanged — existing pages stay here
-│   ├── Home.tsx                 # MODIFY: reads MODULE_REGISTRY to render module cards
-│   ├── DocRenderer.tsx          # unchanged
-│   ├── Login.tsx                # unchanged
-│   ├── Profile.tsx              # unchanged
-│   ├── SharedWireframeView.tsx  # unchanged
-│   ├── clients/                 # unchanged
-│   └── docs/                   # unchanged
-│
-├── lib/                         # unchanged
-│   ├── docs-parser.ts           # unchanged
-│   ├── search-index.ts          # MODIFY: include KB entries in search
-│   ├── supabase.ts              # unchanged
-│   └── utils.ts                 # unchanged
-│
-└── App.tsx                      # MODIFY: reads MODULE_REGISTRY to register routes
-```
-
-### Structure Rationale
-
-- **`src/modules/`:** Each module owns its pages, components, lib, and types. This is the key addition — it creates a named boundary without requiring a micro-frontend split. Existing code is NOT moved inside; legacy code remains in `src/pages/`, `src/lib/`, and `tools/`.
-
-- **`src/registry/modules.ts`:** Single import point. `App.tsx` and `Sidebar.tsx` read from it. This is the "module registry" pattern that lets new modules be added by creating a folder + exporting a manifest.
-
-- **Module manifests (`index.ts`):** Lightweight descriptor objects — not runtime classes. Keep them plain data so App.tsx can safely import without circular deps.
-
-- **Wrapper manifests for existing code:** `docs/index.ts` and `wireframe-builder/index.ts` do NOT move code. They exist only so the registry knows these areas exist and can surface them in Home + Sidebar. This preserves the migration path: zero risk of breaking existing pages.
+| Layer | File / Folder | Responsibility |
+|-------|--------------|----------------|
+| Schema | `lib/blueprint-schema.ts` | Zod discriminated union, one schema per section type |
+| Types | `types/blueprint.ts` | TypeScript `BlueprintSection` discriminated union + `ChartType` |
+| Registry | `lib/section-registry.tsx` | Maps section type → renderer + form + schema + defaultProps |
+| Dispatcher (chart) | `components/sections/ChartRenderer.tsx` | Inner switch for `bar-line-chart` chartType variants |
+| Dispatcher (all) | `components/sections/SectionRenderer.tsx` | Calls SECTION_REGISTRY lookup by type |
+| Leaf component | `components/[Name]Component.tsx` | Pure Recharts component, accepts title/height/categories/chartColors |
+| Renderer | `components/sections/[Name]Renderer.tsx` | Casts BlueprintSection → typed section, calls leaf |
+| Form | `components/editor/property-forms/[Name]Form.tsx` | Editor UI for section properties |
+| Gallery | `src/pages/tools/ComponentGallery.tsx` | Visual catalog — imports leaf components directly with mock data |
 
 ---
 
-## Architectural Patterns
+## Patterns per Extension Point
 
-### Pattern 1: Module Manifest
+### Pattern A: chartType Sub-Variant
 
-**What:** Each module exports a plain object describing its identity, routes, nav items, and home card. The registry assembles them.
-**When to use:** Whenever a new top-level area of the platform is added.
-**Trade-offs:** Simpler than dynamic import() plugin systems. No lazy discovery — all modules are statically imported. That is intentional: small team, explicit control.
+No new renderer or registry entry needed. Three targeted edits across shared files, plus one new leaf component file:
+
+**New file:**
+- `tools/wireframe-builder/components/[Name]ChartComponent.tsx`
+
+**Modified shared files (additive only):**
+- `tools/wireframe-builder/types/blueprint.ts` — add literal to `ChartType` union
+- `tools/wireframe-builder/lib/blueprint-schema.ts` — add literal to `BarLineChartSectionSchema.chartType` z.enum
+- `tools/wireframe-builder/components/sections/ChartRenderer.tsx` — add `case '[name]':` to inner switch
+
+The `BarLineChartSectionSchema`, `BarLineChartSection` type, `BarLineChartForm`, and the `'bar-line-chart'` registry entry are untouched. The section-registry test passes unchanged.
 
 ```typescript
-// src/modules/knowledge-base/index.ts
-import type { ModuleManifest } from '@/registry/modules'
-import KBIndex from './pages/KBIndex'
-import KBEntry from './pages/KBEntry'
-import KBEntryForm from './pages/KBEntryForm'
+// types/blueprint.ts — add to ChartType union
+export type ChartType =
+  | 'bar' | 'line' | 'bar-line' | 'radar' | 'treemap' | 'funnel'
+  | 'scatter' | 'area' | 'stacked-bar' | 'stacked-area'
+  | 'horizontal-bar' | 'bubble' | 'composed'
+  // v1.6:
+  | 'grouped-bar' | 'bullet' | 'step-line' | 'range-bar' | 'bump' | 'lollipop' | 'polar'
 
-export const knowledgeBaseModule: ModuleManifest = {
-  id: 'knowledge-base',
-  displayName: 'Knowledge Base',
-  description: 'Registro estruturado de bugs, decisoes e padroes',
-  icon: 'BookOpen',
-  rootPath: '/knowledge-base',
-  navItems: [
-    { label: 'Todas as Entradas', href: '/knowledge-base' },
-    { label: 'Nova Entrada', href: '/knowledge-base/new' },
-  ],
-  routes: [
-    { path: '/knowledge-base', component: KBIndex },
-    { path: '/knowledge-base/new', component: KBEntryForm },
-    { path: '/knowledge-base/:id', component: KBEntry },
-  ],
-  homeCard: {
-    badge: 'Knowledge Base',
-    title: 'Bugs, decisoes e padroes',
-    description: 'Consulte antes de investigar qualquer problema',
-    href: '/knowledge-base',
-  },
+// lib/blueprint-schema.ts — extend the z.enum
+chartType: z.enum([
+  'bar', 'line', 'bar-line', 'radar', 'treemap', 'funnel',
+  'scatter', 'area', 'stacked-bar', 'stacked-area',
+  'horizontal-bar', 'bubble', 'composed',
+  'grouped-bar', 'bullet', 'step-line', 'range-bar', 'bump', 'lollipop', 'polar',
+]),
+
+// components/sections/ChartRenderer.tsx — add case
+case 'grouped-bar':
+  return (
+    <GroupedBarChartComponent
+      title={section.title}
+      height={section.height}
+      categories={section.categories}
+      chartColors={chartColors}
+    />
+  )
+```
+
+### Pattern B: Standalone Section Type
+
+Five files per new section type (leaf + renderer + form + schema + type), plus additive changes to three shared files and the test.
+
+**New files (per standalone type):**
+- `tools/wireframe-builder/components/[Name]Component.tsx` — leaf Recharts/CSS component
+- `tools/wireframe-builder/components/sections/[Name]Renderer.tsx` — thin cast layer
+- `tools/wireframe-builder/components/editor/property-forms/[Name]Form.tsx` — property editor
+
+**Modified shared files (additive only):**
+- `tools/wireframe-builder/types/blueprint.ts` — add `[Name]Section` type + add to `BlueprintSection` union
+- `tools/wireframe-builder/lib/blueprint-schema.ts` — add `[Name]SectionSchema` + push to `nonRecursiveSections[]`
+- `tools/wireframe-builder/lib/section-registry.tsx` — add entry to `SECTION_REGISTRY`
+
+**Updated test (not optional):**
+- `tools/wireframe-builder/lib/section-registry.test.ts` — `ALL_SECTION_TYPES` array + `toHaveLength` count
+
+The renderer is always a thin cast layer — no logic belongs there:
+
+```typescript
+// components/sections/HeatmapRenderer.tsx
+import type { HeatmapSection } from '../../types/blueprint'
+import type { SectionRendererProps } from '../../lib/section-registry'
+import HeatmapComponent from '../HeatmapComponent'
+
+export default function HeatmapRenderer({ section, chartColors }: SectionRendererProps) {
+  const s = section as HeatmapSection
+  return (
+    <HeatmapComponent
+      title={s.title}
+      rowLabels={s.rowLabels}
+      colLabels={s.colLabels}
+      height={s.height}
+      chartColors={chartColors}
+    />
+  )
 }
 ```
 
+The schema follows the established pattern — one `z.object` with `type: z.literal(...)`, pushed to `nonRecursiveSections[]` (not inline in the discriminated union call):
+
 ```typescript
-// src/registry/modules.ts
-import type { ComponentType } from 'react'
+// lib/blueprint-schema.ts
+const HeatmapSectionSchema = z.object({
+  type: z.literal('heatmap'),
+  title: z.string(),
+  rowLabels: z.array(z.string()).optional(),
+  colLabels: z.array(z.string()).optional(),
+  height: z.number().optional(),
+})
 
-export type NavItem = {
-  label: string
-  href: string
-  children?: NavItem[]
-}
+const nonRecursiveSections = [
+  ...(existing schemas),
+  HeatmapSectionSchema,
+] as const
+```
 
-export type RouteDescriptor = {
-  path: string
-  component: ComponentType
-}
+---
 
-export type HomeCard = {
-  badge: string
+## Leaf Component Contract
+
+All chart leaf components follow this prop interface regardless of chart type. Deviations exist only when the data model requires it (Sankey, Heatmap, Sparkline Grid):
+
+```typescript
+// Standard interface (chartType sub-variants + Pie, ProgressGrid)
+type Props = {
   title: string
-  description: string
-  href: string
+  height?: number
+  categories?: string[]      // X-axis labels; defaults to Jan-Dez
+  chartColors?: string[]     // Brand palette; falls back to --wf-chart-* CSS vars
 }
 
-export type ModuleManifest = {
-  id: string
-  displayName: string
-  description: string
-  icon: string
-  rootPath: string
-  navItems: NavItem[]
-  routes: RouteDescriptor[]
-  homeCard: HomeCard
-}
+// Extended interface for data-model-specific types
+// Heatmap adds: rowLabels?, colLabels?
+// SparklineGrid adds: count?, sparklineHeight?
+// Sankey adds: nodes?, links?
+```
 
-import { docsModule } from '@/modules/docs'
-import { wireframeBuilderModule } from '@/modules/wireframe-builder'
-import { knowledgeBaseModule } from '@/modules/knowledge-base'
-import { tasksModule } from '@/modules/tasks'
+All leaf components use this theming pattern:
 
-export const MODULE_REGISTRY: ModuleManifest[] = [
-  docsModule,
-  wireframeBuilderModule,
-  knowledgeBaseModule,
-  tasksModule,
+```typescript
+const palette = chartColors ?? [
+  'var(--wf-chart-1)',
+  'var(--wf-chart-2)',
+  'var(--wf-chart-3)',
 ]
 ```
 
-### Pattern 2: Registry-Driven Sidebar
-
-**What:** Sidebar reads `MODULE_REGISTRY` instead of a hardcoded `navigation` array. The existing `NavItem[]` type in Sidebar.tsx maps 1:1 to manifest `navItems`.
-**When to use:** Immediately when introducing the registry.
-**Trade-offs:** Slightly less direct than hardcoded nav, but eliminates the need to manually sync App.tsx + Sidebar.tsx + Home.tsx every time a module is added.
-
-The migration is:
-1. Extract hardcoded `navigation` array into `docsModule.navItems` + `wireframeBuilderModule.navItems`
-2. Sidebar reads `MODULE_REGISTRY.flatMap(m => m.navItems)`
-3. No change to `NavSection` component — structure is identical to existing `NavItem[]` shape
-
-### Pattern 3: Registry-Driven Route Registration
-
-**What:** App.tsx reads `MODULE_REGISTRY` to register routes instead of hardcoding every import.
-**When to use:** Alongside Pattern 2 — these ship together.
-**Trade-offs:** Slightly harder to trace at a glance vs explicit imports, but scales cleanly. Component references (not strings) in route descriptors preserve TypeScript safety and tree-shaking.
-
-```tsx
-// App.tsx — new section inside the Layout route group
-{MODULE_REGISTRY.flatMap(mod =>
-  mod.routes.map(route => (
-    <Route
-      key={route.path}
-      path={route.path}
-      element={<route.component />}
-    />
-  ))
-)}
-```
-
-All module routes go inside the `<ProtectedRoute><Layout /></ProtectedRoute>` group. The existing hardcoded client/doc routes stay hardcoded until explicitly migrated.
-
-### Pattern 4: Service Layer per Module
-
-**What:** Each module has a `lib/[module]-service.ts` that wraps all Supabase calls. Pages import from the service, not from `src/lib/supabase.ts` directly.
-**When to use:** For any new Supabase-backed feature (KB, tasks).
-**Trade-offs:** Thin indirection, but consistent with how the rest of the app works. Supabase client access stays in lib files only.
-
-```typescript
-// src/modules/knowledge-base/lib/kb-service.ts
-import { supabase } from '@/lib/supabase'
-import type { KnowledgeEntry, CreateKnowledgeEntryInput } from '../types'
-
-export async function getKBEntries(): Promise<KnowledgeEntry[]> {
-  const { data, error } = await supabase
-    .from('knowledge_entries')
-    .select('*')
-    .order('created_at', { ascending: false })
-  if (error) throw error
-  return data
-}
-
-export async function createKBEntry(
-  input: CreateKnowledgeEntryInput
-): Promise<KnowledgeEntry> {
-  const { data, error } = await supabase
-    .from('knowledge_entries')
-    .insert(input)
-    .select()
-    .single()
-  if (error) throw error
-  return data
-}
-```
+All use `--wf-*` CSS vars for borders, backgrounds, and text (`var(--wf-card)`, `var(--wf-card-border)`, `var(--wf-muted)`, `var(--wf-heading)`). Never use raw Tailwind color classes on chart containers.
 
 ---
 
 ## Data Flow
 
-### Knowledge Base Entry Flow
+### chartType Sub-Variant Flow
 
 ```
-User submits KB form
-    |
-KBEntryForm.tsx
-    |
-kb-service.createKBEntry(input)
-    |
-Supabase INSERT knowledge_entries
-    |
-Redirect to /knowledge-base/:id
-    |
-KBEntry.tsx -> kb-service.getKBEntry(id) -> render detail
+blueprint JSON: { type: 'bar-line-chart', chartType: 'grouped-bar', title: '...' }
+    ↓ BlueprintSectionSchema.safeParse()  [Zod validates chartType enum]
+    ↓ SECTION_REGISTRY['bar-line-chart'].renderer  →  ChartRenderer
+    ↓ ChartRenderer outer switch: case 'bar-line-chart'
+    ↓ ChartRenderer inner switch: case 'grouped-bar'
+    ↓ <GroupedBarChartComponent title={...} chartColors={chartColors} />
+    ↓ Recharts BarChart with grouped bars using --wf-chart-* CSS vars
 ```
 
-### Task Creation Flow (with Client Link)
+### Standalone Section Flow
 
 ```
-User creates task from client page
-    |
-TaskForm.tsx (receives clientSlug prop or from URL context)
-    |
-tasks-service.createTask({ ...input, client_slug })
-    |
-Supabase INSERT tasks
-    |
-Redirect to /tasks/:id (or back to client page)
-    |
-TaskDetail.tsx loads task + linked entities (blueprint, KB entries)
+blueprint JSON: { type: 'heatmap', title: '...', rowLabels: [...] }
+    ↓ BlueprintSectionSchema.safeParse()  [discriminated union picks HeatmapSectionSchema]
+    ↓ SECTION_REGISTRY['heatmap'].renderer  →  HeatmapRenderer
+    ↓ HeatmapRenderer casts: const s = section as HeatmapSection
+    ↓ <HeatmapComponent title={s.title} rowLabels={s.rowLabels} chartColors={chartColors} />
+    ↓ CSS grid or Recharts using --wf-chart-* CSS vars
 ```
 
-### Module Registration Flow (build time)
+### Theming Flow (unchanged for all new types)
 
 ```
-Developer adds new module folder + exports ModuleManifest
-    |
-Import manifest in src/registry/modules.ts
-    |
-MODULE_REGISTRY updated (static constant)
-    |
-Vite rebuilds — App.tsx picks up new routes
-Sidebar.tsx renders new nav section
-Home.tsx renders new module card
+BrandingConfig → brandingToWfOverrides() → CSS vars on :root scope
+chartColors[] = resolved hex palette from useWireframeChartPalette()
+All leaf components: palette = chartColors ?? ['var(--wf-chart-1)', ...]
 ```
 
 ---
 
-## Supabase Schema for New Features
+## Recommended Project Structure (v1.6 additions)
 
-### knowledge_entries table (migration 005)
-
-```sql
-CREATE TABLE public.knowledge_entries (
-  id          uuid      PRIMARY KEY DEFAULT gen_random_uuid(),
-  category    text      NOT NULL
-                CHECK (category IN ('bug', 'decision', 'pattern', 'gotcha')),
-  title       text      NOT NULL,
-  body        text      NOT NULL,         -- markdown content
-  tags        text[]    DEFAULT '{}',
-  client_slug text,                       -- nullable: global or client-specific
-  related_phase text,                     -- optional: 'wireframe', 'briefing', etc.
-  author_id   text,                       -- Clerk user ID (text, not uuid)
-  author_name text,
-  created_at  timestamptz NOT NULL DEFAULT now(),
-  updated_at  timestamptz NOT NULL DEFAULT now()
-);
-
--- Same anon-permissive RLS as blueprint_configs / briefing_configs
-ALTER TABLE public.knowledge_entries ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "anon_read_kb" ON knowledge_entries FOR SELECT TO anon USING (true);
-CREATE POLICY "anon_insert_kb" ON knowledge_entries FOR INSERT TO anon WITH CHECK (true);
-CREATE POLICY "anon_update_kb" ON knowledge_entries FOR UPDATE TO anon USING (true);
-CREATE POLICY "anon_delete_kb" ON knowledge_entries FOR DELETE TO anon USING (true);
+```
+tools/wireframe-builder/
+├── components/
+│   ├── GroupedBarChartComponent.tsx        new (chartType: grouped-bar)
+│   ├── BulletChartComponent.tsx            new (chartType: bullet)
+│   ├── StepLineChartComponent.tsx          new (chartType: step-line)
+│   ├── RangeBarChartComponent.tsx          new (chartType: range-bar)
+│   ├── BumpChartComponent.tsx              new (chartType: bump)
+│   ├── LollipopChartComponent.tsx          new (chartType: lollipop)
+│   ├── PolarAreaChartComponent.tsx         new (chartType: polar)
+│   ├── HeatmapComponent.tsx                new (standalone section)
+│   ├── SparklineGridComponent.tsx          new (standalone section)
+│   ├── ProgressGridComponent.tsx           new (standalone section)
+│   ├── PieChartComponent.tsx               new (standalone section)
+│   ├── SankeyComponent.tsx                 new (standalone section)
+│   └── sections/
+│       ├── HeatmapRenderer.tsx             new
+│       ├── SparklineGridRenderer.tsx       new
+│       ├── ProgressGridRenderer.tsx        new
+│       ├── PieChartRenderer.tsx            new
+│       └── SankeyRenderer.tsx              new
+│   └── editor/property-forms/
+│       ├── HeatmapForm.tsx                 new
+│       ├── SparklineGridForm.tsx           new
+│       ├── ProgressGridForm.tsx            new
+│       ├── PieChartForm.tsx                new
+│       └── SankeyForm.tsx                  new
+├── types/
+│   └── blueprint.ts                        modified (ChartType union + 5 new section types + BlueprintSection union)
+└── lib/
+    ├── blueprint-schema.ts                 modified (chartType enum + 5 new schemas + nonRecursiveSections)
+    ├── section-registry.tsx                modified (5 new entries in SECTION_REGISTRY)
+    └── section-registry.test.ts            modified (ALL_SECTION_TYPES: 23 → 28, toHaveLength: 23 → 28)
 ```
 
-### tasks table (migration 006)
+No new folders. No changes to `src/` outside of `ComponentGallery.tsx`.
 
-```sql
-CREATE TABLE public.tasks (
-  id                          uuid    PRIMARY KEY DEFAULT gen_random_uuid(),
-  title                       text    NOT NULL,
-  description                 text,           -- markdown
-  status                      text    NOT NULL DEFAULT 'open'
-                                CHECK (status IN ('open', 'in_progress', 'done', 'blocked')),
-  priority                    text    NOT NULL DEFAULT 'medium'
-                                CHECK (priority IN ('low', 'medium', 'high')),
-  project_slug                text    NOT NULL, -- 'fxl-core' | client slug
-  client_slug                 text,             -- nullable: internal tasks have no client
-  assignee_id                 text,             -- Clerk user ID
-  assignee_name               text,
-  due_date                    date,
-  linked_kb_entry_id          uuid    REFERENCES knowledge_entries(id) ON DELETE SET NULL,
-  linked_blueprint_client_slug text,            -- soft link, not FK (clients are FS-based)
-  created_by                  text,
-  created_at                  timestamptz NOT NULL DEFAULT now(),
-  updated_at                  timestamptz NOT NULL DEFAULT now()
-);
+---
 
-CREATE TABLE public.projects (
-  slug         text    PRIMARY KEY,         -- 'fxl-core', 'financeiro-conta-azul', etc.
-  display_name text    NOT NULL,
-  description  text,
-  status       text    NOT NULL DEFAULT 'active'
-                 CHECK (status IN ('active', 'paused', 'archived')),
-  created_at   timestamptz NOT NULL DEFAULT now()
-);
+## Build Order (Dependency-Aware)
 
--- Same anon-permissive RLS pattern
-ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "anon_all_tasks" ON tasks FOR ALL TO anon USING (true) WITH CHECK (true);
+### Wave 1 — chartType Sub-Variants (low risk, no registry changes)
 
-ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "anon_all_projects" ON projects FOR ALL TO anon USING (true) WITH CHECK (true);
-```
+Each type in this wave is independent. They can be built in any order. The only shared constraint: all literals must be added to `ChartType` and `chartType` z.enum before `tsc --noEmit` will pass cleanly.
+
+Recommended sequence within Wave 1:
+
+1. **Grouped Bar** — closest to existing stacked-bar pattern, validates the A-pattern end-to-end
+2. **Step Line** — line variant, minimal divergence from existing `AreaChartComponent`
+3. **Lollipop** — bar + dot, uses Recharts ComposedChart (same as existing composed chart)
+4. **Range Bar** — introduces min/max data shape, slightly more custom data synthesis
+5. **Bump Chart** — ranking lines over time, most novel data synthesis in Wave 1
+6. **Bullet Chart** — horizontal progress-bar-like chart using ComposedChart
+7. **Polar Area** — RadarChart with `fill` variant; confirm Recharts behavior before building
+
+After all 7: run `npx tsc --noEmit` to verify all enum additions are consistent.
+
+### Wave 2 — Standalone Sections (higher coordination cost)
+
+Build one complete type end-to-end before starting the next. This serializes edits to shared files (blueprint.ts, blueprint-schema.ts, section-registry.tsx) and avoids merge conflicts.
+
+Recommended sequence within Wave 2:
+
+1. **Pie Chart** — mirrors `donut-chart` pattern most closely. Validates the B-pattern end-to-end with minimal risk. Recharts `PieChart` component is well-documented.
+2. **Heatmap** — 2D matrix, synthetic grid data, no external deps. Can use CSS grid instead of Recharts for the cell layout.
+3. **Progress Grid** — pure CSS/HTML grid of labeled progress bars. No Recharts. Simplest implementation in Wave 2.
+4. **Sparkline Grid** — grid of tiny Recharts `LineChart` instances. Layout challenge: sizing micro-charts. Recharts `ResponsiveContainer` in a CSS grid context.
+5. **Sankey** — most complex. **Requires pre-build investigation.** Recharts 2.x does not include a Sankey component. Options: (a) `d3-sankey` as an added dependency (~15KB), (b) pure SVG paths using precalculated layout, (c) `react-sankey-diagram` or similar. Decide and confirm before implementing.
+
+After each standalone type: run `npx tsc --noEmit` and `section-registry.test.ts` suite.
+
+### Wave Independence
+
+Wave 1 and Wave 2 are fully independent. They share no files in a conflicting way (Wave 1 only touches `ChartType` and `ChartRenderer`; Wave 2 touches different parts of the schema and registry). They can be built in parallel or interleaved.
+
+### Gating Criterion
+
+Each unit (one chart type) must pass `npx tsc --noEmit` before the next unit begins. This prevents type errors from accumulating across types.
 
 ---
 
 ## Integration Points
 
-### New vs Modified
+### Section Registry Test (CRITICAL — will fail if not updated)
 
-| File | Status | What Changes |
-|------|--------|-------------|
-| `src/App.tsx` | MODIFY | Add module route registration from registry |
-| `src/components/layout/Sidebar.tsx` | MODIFY | Read nav from MODULE_REGISTRY instead of hardcoded array |
-| `src/pages/Home.tsx` | MODIFY | Add KB + Tasks module cards; reads homeCard from registry |
-| `src/lib/search-index.ts` | MODIFY | Add async KB entries fetch; return combined SearchEntry[] |
-| `src/registry/modules.ts` | NEW | ModuleManifest type + MODULE_REGISTRY constant |
-| `src/modules/knowledge-base/` | NEW | Full module: index, pages, components, lib, types |
-| `src/modules/tasks/` | NEW | Full module: index, pages, components, lib, types |
-| `src/modules/docs/index.ts` | NEW | Wrapper manifest only — no code moved |
-| `src/modules/wireframe-builder/index.ts` | NEW | Wrapper manifest only — no code moved |
-| `supabase/migrations/005_knowledge_base.sql` | NEW | `knowledge_entries` table + RLS |
-| `supabase/migrations/006_tasks.sql` | NEW | `tasks` + `projects` tables + RLS |
+`lib/section-registry.test.ts` asserts an exact count and enumerates `ALL_SECTION_TYPES`. Every new standalone section type requires:
+- Adding the type string to `ALL_SECTION_TYPES`
+- Updating `toHaveLength(23)` to the new count (one increment per new standalone type)
 
-### Internal Boundaries
+The test fails if either is missed. This is the intended safety net.
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| Module pages -> Supabase | Via module-scoped service (`lib/[module]-service.ts`) | No direct supabase import in components |
-| KB entries -> Search | `search-index.ts` calls Supabase async for KB entries | KB results shown in a distinct section of the Cmd+K palette; docs search remains static (import.meta.glob) |
-| Tasks -> Clients | Task holds `client_slug` text field | No FK (clients are filesystem-based, not DB rows). Resolve client display name from slug at render time. |
-| Tasks -> KB | `linked_kb_entry_id` FK | Optional link: "this task fixed this KB bug" |
-| Sidebar -> Registry | Static import | Registry is a module constant, not React context |
-| Home -> Registry | Static import | Same constant, no prop drilling |
-| App.tsx -> Registry | Static import | Same constant |
+chartType sub-variants do NOT require any test changes.
 
-### External Services
+### Component Gallery (`src/pages/tools/ComponentGallery.tsx`)
 
-| Service | Integration | Notes |
-|---------|-------------|-------|
-| Supabase | New tables via migration files | Same anon RLS pattern as blueprint_configs and briefing_configs — Clerk handles auth externally |
-| Clerk | No change | author_id stored as Clerk user ID (text) in new tables — same as existing pattern |
-| Vercel | No change | SPA deploy — new routes handled by Vite client-side routing |
+The gallery imports leaf components directly (not via the registry) and registers them manually with hardcoded mock data. Every new component — chartType variant or standalone — needs:
+- An import at the top of `ComponentGallery.tsx`
+- A `ComponentEntry` object with `render: () => <Component {...mockProps} />`
+- Mock data added to `./galleryMockData` (separate file)
+
+This is a manual sync step, not automated by the registry.
+
+### AI Generation Engine (`lib/screen-recipes.ts`, `lib/generation-engine.ts`)
+
+Screen recipes reference `BlueprintSection['type']` and specify `defaults: Partial<BlueprintSection>`. New standalone types can be added to `SCREEN_RECIPES` after registration. chartType sub-variants only need the `chartType` string updated in existing recipe defaults — no structural recipe changes.
+
+### Blueprint Migrations
+
+Existing blueprints in Supabase are unaffected. Adding new section types to the discriminated union is additive — Zod parses existing documents without errors. No `schemaVersion` bump needed. No migration file needed.
+
+### `blueprint-schema.ts` Export Convention
+
+Individual schemas are exported by name for use in section-registry.tsx. New standalone schemas follow the same pattern: either `export const [Name]SectionSchema` at the declaration site, or named export in the bottom `export { }` block. GaugeChartSectionSchema uses the first pattern; most others use the second. Either is correct — maintain consistency within each new schema.
 
 ---
 
-## Build Order (considers dependencies)
+## Anti-Patterns
 
-The registry must exist before any module uses it. Supabase migrations must run before service layer code is tested. Home page changes are the lowest risk and can be done last.
+### Anti-Pattern 1: Sankey as a chartType Sub-Variant
 
-1. **Registry scaffold** — Create `src/registry/modules.ts` with the `ModuleManifest` type and an empty `MODULE_REGISTRY`. Update `Sidebar.tsx` to accept nav from the registry alongside (or replacing) the hardcoded tree. This is the foundation; nothing else can be registered until this exists.
+**What people do:** Add `'sankey'` to `ChartType` and dispatch it inside `ChartRenderer.tsx`.
 
-2. **Supabase migrations** — Run `005_knowledge_base.sql` and `006_tasks.sql`. No app code depends on this, but the service layer cannot be tested until tables exist.
+**Why it's wrong:** Sankey has a fundamentally different data model (nodes[] + links[] with source/target/value), not the `categories[]` + `chartColors[]` that `BarLineChartSection` provides. Forcing it into `BarLineChartSection` requires unsafe casts and schema hacks.
 
-3. **Knowledge Base module** — Full module: types, service, pages, components, manifest. Register in `MODULE_REGISTRY`. Wire routes in `App.tsx`. Independent of Tasks, can ship first.
+**Do this instead:** Implement Sankey as a standalone section type with `nodes` and `links` fields in its Zod schema.
 
-4. **Tasks module** — Types, service, pages, components, manifest. Depends on KB types for the `linked_kb_entry_id` reference. Register in `MODULE_REGISTRY`.
+### Anti-Pattern 2: Adding All Type Literals Before Building Components
 
-5. **Home page modular hub** — Refactor `Home.tsx` to read `MODULE_REGISTRY.map(m => m.homeCard)` for the module card grid. Depends on registry having final shape (after KB and Tasks are registered).
+**What people do:** Add all 7 chartType literals to `ChartType` and all 5 standalone types to `BlueprintSection` in one commit before any leaf component exists.
 
-6. **Search integration** — Extend `search-index.ts` to include KB entries. Depends on KB module being live and `knowledge_entries` table existing.
+**Why it's wrong:** TypeScript will error because the registry references renderers that don't exist yet. The test will fail because the count assertion is wrong. The codebase will not compile mid-build.
 
-7. **Wrapper manifests for existing modules** — `docs/index.ts` and `wireframe-builder/index.ts`. No behavior change. Can be done at any point but are lowest priority — they only affect Home page layout.
+**Do this instead:** Add each type's artifacts atomically — type + schema + registry entry + renderer + form in one unit. Run `npx tsc --noEmit` after each unit.
 
----
+### Anti-Pattern 3: Assuming Recharts 2.x Has a Sankey Component
 
-## Anti-Patterns to Avoid
+**What people do:** Proceed to build `SankeyComponent.tsx` using `import { Sankey } from 'recharts'`.
 
-### Anti-Pattern 1: Moving Existing Code into Module Folders
+**Why it's wrong:** Recharts 2.x does not ship a Sankey chart. The import will fail at runtime.
 
-**What people do:** Move `src/pages/DocRenderer.tsx` into `src/modules/docs/pages/DocRenderer.tsx` on the same PR that adds the registry.
+**Do this instead:** Verify the Recharts version in `package.json`, check the Recharts 2.x component list, and plan for either `d3-sankey` or a hand-rolled SVG implementation before starting SankeyComponent.
 
-**Why it's wrong:** High breakage risk for zero feature gain. Existing routes, imports, and tests reference the old paths. Two concerns — registry introduction + code reorganization — should be separate phases.
+### Anti-Pattern 4: Pie Chart as a Donut Variant
 
-**Do this instead:** Create `src/modules/docs/index.ts` as a manifest only. Leave code in `src/pages/`. Move later, in a dedicated refactoring phase if desired.
+**What people do:** Add `variant: 'pie' | 'donut'` to `DonutChartSection` and branch inside `DonutChart.tsx`.
 
-### Anti-Pattern 2: Anon RLS with Clerk JWT Assumptions
+**Why it's wrong:** `donut-chart` is already a registered standalone type with its own schema, form, and defaultProps. Extending it for a second visual variant adds conditional branches and breaks the single-visual-identity principle.
 
-**What people do:** Add `USING (auth.uid() = author_id::uuid)` to new table RLS policies, assuming Clerk's JWT works with `auth.uid()`.
+**Do this instead:** Register `pie-chart` as a new standalone section type. The leaf component is a Recharts `PieChart` without `innerRadius` — a small, clean component.
 
-**Why it's wrong:** Clerk JWTs are not Supabase Auth JWTs. `auth.uid()` returns NULL for Clerk sessions. The existing pattern in this codebase (anon-permissive RLS, Clerk handles auth externally) is already the validated workaround.
+### Anti-Pattern 5: Using Tailwind Color Classes on Chart Containers
 
-**Do this instead:** Keep the anon-permissive RLS pattern from `003_blueprint_configs.sql` and `004_briefing_configs.sql`. Application-level auth via Clerk (check `useAuth()` before calling service functions that write data).
+**What people do:** Apply `bg-white border-gray-200` directly to chart card divs in new components.
 
-### Anti-Pattern 3: String-Based Component Resolution in Registry
+**Why it's wrong:** Breaks dark mode support. All existing components use `--wf-*` CSS vars (`bg-wf-card`, `border-wf-card-border`) which switch automatically via the WireframeThemeProvider.
 
-**What people do:** Store component names as strings in the registry (`route.component = 'KBIndex'`) and use a generic string-to-component lookup map.
-
-**Why it's wrong:** Loses TypeScript type safety, breaks tree-shaking, and moves errors from compile time to runtime.
-
-**Do this instead:** Import page components directly in the module manifest. Pass `ComponentType` references in the route descriptor. The `ModuleManifest` type enforces this.
-
-### Anti-Pattern 4: Dynamic Sidebar via Context/State
-
-**What people do:** Introduce a `SidebarContext` that modules push nav items into at runtime (e.g., on component mount).
-
-**Why it's wrong:** Causes nav to flicker on load, creates ordering ambiguity, and couples page lifecycle to nav rendering. Hard to debug.
-
-**Do this instead:** Registry is a static constant. Nav is determined at compile time. Simpler, faster, and predictable.
-
-### Anti-Pattern 5: Overloading the Supabase Client for App-Level Auth Checks
-
-**What people do:** Use `supabase.auth.getUser()` to check operator identity before KB/task writes.
-
-**Why it's wrong:** Supabase Auth is not the auth layer here — Clerk is. `supabase.auth.getUser()` returns nothing meaningful for Clerk sessions. Auth checks must go through `@clerk/react`'s `useAuth()` hook.
-
-**Do this instead:** Gate write operations with `useAuth().isSignedIn` from Clerk. The service functions themselves are auth-agnostic (anon policies allow all); the UI enforces access.
+**Do this instead:** Follow the same pattern as `StackedBarChartComponent.tsx` — use Tailwind utilities that reference `--wf-*` tokens: `bg-wf-card`, `border-wf-card-border`, `text-wf-heading`, `text-wf-muted`.
 
 ---
 
 ## Scaling Considerations
 
-This is an internal operator tool. Scaling to millions of users is out of scope. The relevant scaling concerns:
+| Concern | Current (23 types) | After v1.6 (28 types) | If further growth (50+ types) |
+|---------|-------------------|----------------------|-------------------------------|
+| `section-registry.tsx` | ~630 lines | ~750 lines | Split into category files, re-export from index |
+| `ChartRenderer.tsx` inner switch | 14 cases | 21 cases | Consider map-based dispatch `{ [key]: Component }` |
+| `blueprint-schema.ts` | ~480 lines | ~600 lines | Split into schema modules by category |
+| `section-registry.test.ts` | 23 types enumerated | 28 types enumerated | Auto-generate from `Object.keys(SECTION_REGISTRY)` |
 
-| Concern | Current (1-5 users) | If FXL grows (10-50 clients) |
-|---------|---------------------|------------------------------|
-| KB entries volume | Trivial | Add pagination + `pg_trgm` full-text search in Supabase |
-| Tasks volume | Trivial | Add filters by project/status/assignee; manageable in Supabase |
-| Module count | 4 modules in v1.5 | Add new module folder + manifest; no architectural change needed |
-| Bundle size | Fine — Vite splits by route already | Use `React.lazy` per module if bundle grows |
-| RLS security | Anon-permissive (operator-only tool) | Add Clerk JWT integration when multi-tenant v2 ships (SEC-01/02 in backlog) |
+At 28 types, none of these thresholds are critical. Noting for awareness.
 
 ---
 
 ## Sources
 
-- Direct codebase reading: `src/App.tsx`, `src/components/layout/Sidebar.tsx`, `src/components/layout/Layout.tsx`, `src/pages/Home.tsx`, `src/lib/docs-parser.ts`, `src/lib/search-index.ts`, `supabase/migrations/001-004`
-- `.planning/PROJECT.md` — architecture decisions, constraints, key decisions table, v1.5 milestone goals
-- Established React SPA feature-folder patterns (MEDIUM confidence — widely documented, no single canonical source; consistent with how the wireframe-builder module is already structured)
-- Supabase anon RLS + Clerk external auth pattern — HIGH confidence (already validated in production in this codebase since v1.1)
+- Direct inspection: `tools/wireframe-builder/lib/section-registry.tsx` — HIGH confidence
+- Direct inspection: `tools/wireframe-builder/lib/blueprint-schema.ts` — HIGH confidence
+- Direct inspection: `tools/wireframe-builder/types/blueprint.ts` — HIGH confidence
+- Direct inspection: `tools/wireframe-builder/components/sections/ChartRenderer.tsx` — HIGH confidence
+- Direct inspection: `tools/wireframe-builder/lib/section-registry.test.ts` — HIGH confidence
+- Direct inspection: `tools/wireframe-builder/components/StackedBarChartComponent.tsx` — HIGH confidence
+- Direct inspection: `tools/wireframe-builder/components/sections/GaugeChartRenderer.tsx` — HIGH confidence
+- Recharts 2.x component inventory — training knowledge (MEDIUM confidence — verify Sankey absence before building)
+- `.planning/PROJECT.md` milestone context — HIGH confidence
 
 ---
 
-*Architecture research for: v1.5 Modular Foundation & Knowledge Base — FXL Core*
+*Architecture research for: v1.6 — 12 New Chart/Section Types*
 *Researched: 2026-03-12*
