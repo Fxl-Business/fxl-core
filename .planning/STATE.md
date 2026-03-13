@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Wireframe Visual Redesign
 status: planning
-stopped_at: Completed 30-supabase-migrations-data-layer/30-01-PLAN.md
-last_updated: "2026-03-13T00:43:24.501Z"
+stopped_at: Completed 30-supabase-migrations-data-layer/30-02-PLAN.md
+last_updated: "2026-03-13T00:45:00.788Z"
 last_activity: 2026-03-12 -- Roadmap written for v1.5 (Phases 29-33), 19 requirements mapped
 progress:
   total_phases: 12
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 25
-  completed_plans: 15
+  completed_plans: 16
   percent: 0
 ---
 
@@ -62,6 +62,8 @@ v1.5 decisions to track during execution:
 - [Phase 29-module-foundation-registry]: moduleRoutes computed outside App component body — stable reference, avoids re-creation on render
 - [Phase 30-supabase-migrations-data-layer]: Table named knowledge_entries (not kb_entries) — ROADMAP.md success criteria over REQUIREMENTS.md wording
 - [Phase 30-supabase-migrations-data-layer]: DELETE policy included in all new RLS migrations — 005+ include all 4 CRUD anon policies as complete pattern
+- [Phase 30-02]: Service files placed in src/lib/ temporarily — will move to module folders in Phases 31/32
+- [Phase 30-02]: searchKnowledgeEntries always passes config: portuguese to .textSearch() for correct FTS stemming
 
 ### Pending Todos
 
@@ -75,6 +77,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T00:43:24.498Z
-Stopped at: Completed 30-supabase-migrations-data-layer/30-01-PLAN.md
+Last session: 2026-03-13T00:45:00.785Z
+Stopped at: Completed 30-supabase-migrations-data-layer/30-02-PLAN.md
 Next: Complete Phase 28 (v1.4), then plan Phase 29 via /gsd:plan-phase 29

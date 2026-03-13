@@ -84,7 +84,7 @@ Full details: [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
 **Milestone Goal:** Transformar o FXL Core de um sistema monolitico em uma plataforma modular com fronteiras claras entre areas, preparada para expansao futura. Introduzir base de conhecimento autoalimentada e gestao de tarefas por cliente.
 
 - [x] **Phase 29: Module Foundation & Registry** - ModuleManifest type, MODULE_REGISTRY, ESLint boundary enforcement, sidebar and routing driven by registry (completed 2026-03-13)
-- [ ] **Phase 30: Supabase Migrations & Data Layer** - knowledge_entries and tasks tables with tsvector FTS, anon-permissive RLS, and typed service stubs
+- [x] **Phase 30: Supabase Migrations & Data Layer** - knowledge_entries and tasks tables with tsvector FTS, anon-permissive RLS, and typed service stubs (completed 2026-03-13)
 - [ ] **Phase 31: Knowledge Base Module** - Full KB module: list, detail, form, full-text search, ADR format for decision entries
 - [ ] **Phase 32: Task Management Module** - Full tasks module: list, kanban, create/edit form, task-to-KB documentation link
 - [ ] **Phase 33: Home Page & Cross-Module Integration** - Module hub grid from registry, activity feed, KB section in client workspace, KB in Cmd+K
@@ -224,7 +224,7 @@ Plans:
   2. Migration 006 applies cleanly and `tasks` table exists with status CHECK constraint accepting todo/in_progress/done/blocked
   3. Existing operations (blueprint save, wireframe comment, briefing submit) continue working after both migrations
   4. kb-service.ts and tasks-service.ts export typed CRUD functions that TypeScript compiles without errors
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 30-01-PLAN.md -- Supabase migrations: knowledge_entries (005) and tasks (006) tables with RLS, FTS, CHECK constraints
@@ -318,7 +318,7 @@ For v1.5: Phase 29 first, then Phase 30, then Phases 31 and 32 (can run in seque
 | 27. Chart Palette & Composition | v1.4 | 2/2 | Complete | 2026-03-11 |
 | 28. Editor Sync & Gallery Validation | 2/2 | Complete    | 2026-03-13 | - |
 | 29. Module Foundation & Registry | 2/2 | Complete    | 2026-03-13 | - |
-| 30. Supabase Migrations & Data Layer | 1/2 | In Progress|  | - |
+| 30. Supabase Migrations & Data Layer | 2/2 | Complete   | 2026-03-13 | - |
 | 31. Knowledge Base Module | v1.5 | 0/2 | Not started | - |
 | 32. Task Management Module | v1.5 | 0/3 | Not started | - |
 | 33. Home Page & Cross-Module Integration | v1.5 | 0/2 | Not started | - |
