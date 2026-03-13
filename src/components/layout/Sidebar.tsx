@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { MODULE_REGISTRY, type NavItem } from '@/modules/registry'
 import { useModuleEnabled } from '@/modules/hooks/useModuleEnabled'
+import { useDocsNav } from '@/hooks/useDocsNav'
+import { MODULE_IDS } from '@/modules/module-ids'
 
 function hasActiveChild(navItem: NavItem, pathname: string): boolean {
   if (navItem.href && pathname === navItem.href) {
@@ -147,13 +149,20 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
 
 export default function Sidebar() {
   const { isEnabled } = useModuleEnabled()
+  const dynamicDocsNav = useDocsNav()
 
   const navigationFromRegistry: NavItem[] = useMemo(() =>
     MODULE_REGISTRY
       .filter(m => m.status !== 'coming-soon')
       .filter(m => isEnabled(m.id))
-      .flatMap(m => m.navChildren ?? []),
-    [isEnabled]
+      .flatMap(m => {
+        // Use dynamic nav for docs module when available
+        if (m.id === MODULE_IDS.DOCS && dynamicDocsNav.length > 0) {
+          return dynamicDocsNav
+        }
+        return m.navChildren ?? []
+      }),
+    [isEnabled, dynamicDocsNav]
   )
 
   return (
