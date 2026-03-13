@@ -145,7 +145,7 @@ Plans:
   3. `<ExtensionSlot>` component renders injected components for a given slot ID, returning null gracefully when no extensions are registered for that slot
   4. `useActiveExtensions(moduleId)` hook returns the correct set of active extensions based on which modules are enabled
   5. ESLint boundary config is updated so extension-registry.ts, slots.tsx, and hooks files are not flagged as boundary violations
-**Plans:** 2/2 plans complete
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 39-01-PLAN.md — Contract types (ModuleExtension, SlotComponentProps), resolveExtensions() pure function, ESLint boundary update
 - [ ] 39-02-PLAN.md — React context slot system (ExtensionProvider, ExtensionSlot), useActiveExtensions hook, App.tsx wiring
@@ -199,7 +199,7 @@ Plans:
 | 29-33 | v1.5 | 14/14 | Complete | 2026-03-13 |
 | 34-37 | v1.6 | 7/7 | Complete | 2026-03-13 |
 | 38. Module Registry Foundation | 2/2 | Complete    | 2026-03-13 | - |
-| 39. Slot Architecture & Contract Types | v2.0 | 0/2 | Not started | - |
+| 39. Slot Architecture & Contract Types | 1/2 | In Progress|  | - |
 | 40. Routing Refactor | v2.0 | 0/? | Not started | - |
 | 41. Home 2.0 — Control Center | v2.0 | 0/1 | Not started | - |
 | 42. Contract Population & Admin Panel | v2.0 | 0/2 | Not started | - |
