@@ -5,6 +5,7 @@ import {
   BlueprintSectionSchema,
   FilterOptionSchema,
   SidebarConfigSchema,
+  SidebarWidgetSchema,     // NEW
   BarLineChartSectionSchema,
   GaugeChartSectionSchema,
 } from './blueprint-schema'
@@ -471,5 +472,178 @@ describe('Phase 20 — new chartType values and gauge-chart section', () => {
       title: 'No Value',
     })
     expect(result.success).toBe(false)
+  })
+})
+
+describe('Phase 47 — SidebarWidget schema', () => {
+  // --- SidebarWidgetSchema discriminated union ---
+
+  it('accepts workspace-switcher widget with all fields', () => {
+    const widget = {
+      type: 'workspace-switcher',
+      label: 'Acme Corp',
+      workspaces: ['Acme Corp', 'Beta Inc'],
+    }
+    const result = SidebarWidgetSchema.safeParse(widget)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts workspace-switcher widget with only type (minimal)', () => {
+    const widget = { type: 'workspace-switcher' }
+    const result = SidebarWidgetSchema.safeParse(widget)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts user-menu widget with all fields', () => {
+    const widget = {
+      type: 'user-menu',
+      name: 'Carlos Silva',
+      role: 'Admin',
+      showRole: true,
+    }
+    const result = SidebarWidgetSchema.safeParse(widget)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts user-menu widget with only type (minimal)', () => {
+    const widget = { type: 'user-menu' }
+    const result = SidebarWidgetSchema.safeParse(widget)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects widget with invalid type discriminant', () => {
+    const widget = { type: 'nonexistent-widget' }
+    const result = SidebarWidgetSchema.safeParse(widget)
+    expect(result.success).toBe(false)
+  })
+
+  it('preserves unknown fields on widget variants via passthrough', () => {
+    const widget = {
+      type: 'workspace-switcher',
+      label: 'Acme',
+      futureField: 'should survive',
+    }
+    const result = SidebarWidgetSchema.safeParse(widget)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect((result.data as Record<string, unknown>).futureField).toBe('should survive')
+    }
+  })
+
+  // --- SidebarConfigSchema with widgets ---
+
+  it('accepts SidebarConfig with widgets array containing workspace-switcher and user-menu', () => {
+    const sidebar = {
+      footer: 'v2.0',
+      groups: [{ label: 'Financeiro', screenIds: ['screen-1'] }],
+      widgets: [
+        { type: 'workspace-switcher', label: 'Acme Corp' },
+        { type: 'user-menu', name: 'Carlos', role: 'Admin' },
+      ],
+    }
+    const result = SidebarConfigSchema.safeParse(sidebar)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts SidebarConfig with empty widgets array', () => {
+    const sidebar = { footer: 'v1.0', widgets: [] }
+    const result = SidebarConfigSchema.safeParse(sidebar)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts SidebarConfig WITHOUT widgets field (backward compat)', () => {
+    const sidebar = { footer: 'v1.0', groups: [] }
+    const result = SidebarConfigSchema.safeParse(sidebar)
+    expect(result.success).toBe(true)
+  })
+
+  it('preserves unknown fields on SidebarConfig via passthrough', () => {
+    const sidebar = {
+      footer: 'v1.0',
+      futureSidebarField: 'should survive',
+    }
+    const result = SidebarConfigSchema.safeParse(sidebar)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect((result.data as Record<string, unknown>).futureSidebarField).toBe('should survive')
+    }
+  })
+
+  // --- BlueprintConfigSchema round-trip with widgets ---
+
+  it('BlueprintConfig with sidebar.widgets survives full parse round-trip', () => {
+    const config = {
+      slug: 'test-client',
+      label: 'Test Client',
+      screens: [{
+        id: 'screen-1',
+        title: 'Dashboard',
+        periodType: 'mensal',
+        filters: [],
+        hasCompareSwitch: false,
+        sections: [{ type: 'kpi-grid', items: [{ label: 'Rev', value: 'R$ 1M' }] }],
+      }],
+      sidebar: {
+        footer: 'v2.0',
+        groups: [{ label: 'Financeiro', screenIds: ['screen-1'] }],
+        widgets: [
+          { type: 'workspace-switcher', label: 'Acme Corp', workspaces: ['Acme', 'Beta'] },
+          { type: 'user-menu', name: 'Carlos', role: 'Admin', showRole: true },
+        ],
+      },
+    }
+    const result = BlueprintConfigSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.sidebar?.widgets).toHaveLength(2)
+      expect(result.data.sidebar?.widgets?.[0].type).toBe('workspace-switcher')
+      expect(result.data.sidebar?.widgets?.[1].type).toBe('user-menu')
+    }
+  })
+
+  it('existing validConfig fixture still passes parse after schema changes (regression guard)', () => {
+    // validConfig has no sidebar.widgets — must still parse successfully
+    const result = BlueprintConfigSchema.safeParse({
+      slug: 'test-client',
+      label: 'Test Client',
+      screens: [{
+        id: 'screen-1',
+        title: 'Dashboard',
+        periodType: 'mensal',
+        filters: [{ key: 'month', label: 'Month' }],
+        hasCompareSwitch: false,
+        sections: [{ type: 'kpi-grid', items: [{ label: 'Revenue', value: 'R$ 100k' }] }],
+      }],
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('existing financeiro-conta-azul-style config with sidebar groups passes (backward compat)', () => {
+    const config = {
+      slug: 'financeiro-conta-azul',
+      label: 'Financeiro Conta Azul',
+      screens: [{
+        id: 'visao-geral',
+        title: 'Visao Geral',
+        periodType: 'mensal',
+        filters: [{ key: 'period', label: 'Periodo' }],
+        hasCompareSwitch: true,
+        sections: [{ type: 'kpi-grid', items: [{ label: 'Receita', value: 'R$ 500k' }] }],
+      }],
+      sidebar: {
+        footer: 'Conta Azul v1.0',
+        groups: [
+          { label: 'Financeiro', screenIds: ['visao-geral'] },
+        ],
+      },
+    }
+    const result = BlueprintConfigSchema.safeParse(config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.sidebar?.footer).toBe('Conta Azul v1.0')
+      expect(result.data.sidebar?.groups).toHaveLength(1)
+      // No widgets field — should be undefined, not an error
+      expect(result.data.sidebar?.widgets).toBeUndefined()
+    }
   })
 })
