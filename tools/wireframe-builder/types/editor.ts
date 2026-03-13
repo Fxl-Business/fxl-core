@@ -21,4 +21,5 @@ export type EditModeState = {
   saving: boolean // save in progress
   selectedSection: { rowIndex: number; cellIndex: number } | null
   selectedHeaderElement: HeaderElementType | null
+  selectedSidebarElement: SidebarElementSelection | null
 }
