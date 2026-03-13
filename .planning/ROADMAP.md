@@ -36,7 +36,11 @@
   2. Operator can click on individual header elements (logo/brand, period selector, user indicator, action buttons) and a contextual PropertyPanel opens on the right side
   3. Each element's PropertyPanel shows only that element's config fields — not the full header form
   4. Changes made in the PropertyPanel reflect immediately in the live header preview (using existing updateWorkingConfig())
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 54-01-PLAN.md — Define header element types and create per-element property forms
+- [ ] 54-02-PLAN.md — Wire clickable header zones, HeaderPropertyPanel, and WireframeViewer state
 
 ### Phase 55: Sidebar Inline Editing
 **Goal**: Operators can click on sidebar groups, footer, and widgets to edit them inline — no separate Sheet panel needed
@@ -82,7 +86,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | All phases 1-53 shipped | v1.0-v2.2 | 100% | Complete | 2026-03-13 |
-| 54. Header Inline Editing | v2.3 | 0/? | Not started | - |
+| 54. Header Inline Editing | v2.3 | 0/2 | Not started | - |
 | 55. Sidebar Inline Editing | v2.3 | 0/? | Not started | - |
 | 56. Filter Inline Editing | v2.3 | 0/2 | Not started | - |
 | 57. Cleanup & Consolidation | v2.3 | 0/1 | Not started | - |
