@@ -69,31 +69,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REG-01 | — | Pending |
-| REG-02 | — | Pending |
-| REG-03 | — | Pending |
-| REG-04 | — | Pending |
-| HOME-01 | — | Pending |
-| HOME-02 | — | Pending |
-| HOME-03 | — | Pending |
-| HOME-04 | — | Pending |
-| CONT-01 | — | Pending |
-| CONT-02 | — | Pending |
-| CONT-03 | — | Pending |
-| CONT-04 | — | Pending |
-| CONT-05 | — | Pending |
-| ROUT-01 | — | Pending |
-| ROUT-02 | — | Pending |
-| ROUT-03 | — | Pending |
-| ROUT-04 | — | Pending |
-| ROUT-05 | — | Pending |
-| ROUT-06 | — | Pending |
+| REG-01 | Phase 38 | Pending |
+| REG-02 | Phase 38 | Pending |
+| REG-03 | Phase 38 | Pending |
+| REG-04 | Phase 38 | Pending |
+| CONT-01 | Phase 39 | Pending |
+| CONT-02 | Phase 39 | Pending |
+| CONT-03 | Phase 39 | Pending |
+| CONT-04 | Phase 39 | Pending |
+| ROUT-06 | Phase 39 | Pending |
+| ROUT-01 | Phase 40 | Pending |
+| ROUT-02 | Phase 40 | Pending |
+| ROUT-03 | Phase 40 | Pending |
+| HOME-01 | Phase 41 | Pending |
+| HOME-02 | Phase 41 | Pending |
+| HOME-03 | Phase 41 | Pending |
+| HOME-04 | Phase 41 | Pending |
+| CONT-05 | Phase 42 | Pending |
+| ROUT-04 | Phase 42 | Pending |
+| ROUT-05 | Phase 42 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19
+- Mapped to phases: 19
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after initial definition*
+*Last updated: 2026-03-13 after roadmap creation — 100% coverage*
