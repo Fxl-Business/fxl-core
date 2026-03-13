@@ -27,6 +27,7 @@ import {
   Target,
   Grid3X3,
   TrendingUp,
+  GitBranch,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -53,6 +54,7 @@ import PieChartRenderer from '../components/sections/PieChartRenderer'
 import ProgressGridRenderer from '../components/sections/ProgressGridRenderer'
 import HeatmapRenderer from '../components/sections/HeatmapRenderer'
 import SparklineGridRenderer from '../components/sections/SparklineGridRenderer'
+import SankeyRenderer from '../components/sections/SankeyRenderer'
 
 // ---------------------------------------------------------------------------
 // Property forms (existing)
@@ -85,6 +87,7 @@ import PieChartForm from '../components/editor/property-forms/PieChartForm'
 import ProgressGridForm from '../components/editor/property-forms/ProgressGridForm'
 import HeatmapForm from '../components/editor/property-forms/HeatmapForm'
 import SparklineGridForm from '../components/editor/property-forms/SparklineGridForm'
+import SankeyForm from '../components/editor/property-forms/SankeyForm'
 
 // ---------------------------------------------------------------------------
 // Zod schemas (individual)
@@ -117,6 +120,7 @@ import {
   ProgressGridSectionSchema,
   HeatmapSectionSchema,
   SparklineGridSectionSchema,
+  SankeySectionSchema,
   BlueprintSectionSchema,
 } from './blueprint-schema'
 
@@ -711,6 +715,41 @@ export const SECTION_REGISTRY: Record<BlueprintSection['type'], SectionRegistrat
     }),
     schema: SparklineGridSectionSchema,
     label: 'Grid de Sparklines',
+  },
+
+  // === Sankey (standalone) ===
+  'sankey': {
+    renderer: SankeyRenderer as unknown as ComponentType<SectionRendererProps>,
+    propertyForm: SankeyForm as unknown as ComponentType<PropertyFormProps>,
+    catalogEntry: {
+      type: 'sankey',
+      label: 'Sankey',
+      description: 'Diagrama de fluxo proporcional entre nos',
+      icon: GitBranch,
+      category: 'Graficos',
+    },
+    defaultProps: () => ({
+      type: 'sankey' as const,
+      title: 'Novo Sankey',
+      // links use integer array indices into nodes[], not string names
+      nodes: [
+        { name: 'Receita A' },
+        { name: 'Receita B' },
+        { name: 'Departamento X' },
+        { name: 'Departamento Y' },
+        { name: 'Resultado' },
+      ],
+      links: [
+        { source: 0, target: 2, value: 40 },
+        { source: 0, target: 3, value: 20 },
+        { source: 1, target: 2, value: 10 },
+        { source: 1, target: 3, value: 30 },
+        { source: 2, target: 4, value: 50 },
+        { source: 3, target: 4, value: 50 },
+      ],
+    }),
+    schema: SankeySectionSchema,
+    label: 'Diagrama Sankey',
   },
 }
 

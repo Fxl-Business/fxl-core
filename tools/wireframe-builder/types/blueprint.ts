@@ -344,6 +344,14 @@ export type SparklineGridSection = {
   items: SparklineGridItem[]
 }
 
+export type SankeySection = {
+  type: 'sankey'
+  title: string
+  height?: number
+  nodes?: { name: string }[]
+  links?: { source: number; target: number; value: number }[]
+}
+
 export type BlueprintSection =
   | KpiGridSection
   | BarLineChartSection
@@ -372,6 +380,7 @@ export type BlueprintSection =
   | ProgressGridSection
   | HeatmapSection
   | SparklineGridSection
+  | SankeySection
 
 export type BlueprintScreen = {
   id: string

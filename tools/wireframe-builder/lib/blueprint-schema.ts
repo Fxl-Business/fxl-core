@@ -413,6 +413,18 @@ export const SparklineGridSectionSchema = z.object({
   items: z.array(SparklineGridItemSchema),
 })
 
+export const SankeySectionSchema = z.object({
+  type: z.literal('sankey'),
+  title: z.string(),
+  height: z.number().optional(),
+  nodes: z.array(z.object({ name: z.string() })).optional(),
+  links: z.array(z.object({
+    source: z.number(),
+    target: z.number(),
+    value: z.number(),
+  })).optional(),
+})
+
 // ---------------------------------------------------------------------------
 // Discriminated union of all section types
 // Note: ChartGridSection has recursive items: BlueprintSection[]
@@ -447,6 +459,7 @@ const nonRecursiveSections = [
   ProgressGridSectionSchema,
   HeatmapSectionSchema,
   SparklineGridSectionSchema,
+  SankeySectionSchema,
 ] as const
 
 // ChartGridSection is defined inline to avoid circular const reference.
