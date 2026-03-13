@@ -58,7 +58,11 @@
   2. Operator in edit mode sees a "+" button in the filter bar that opens an add-filter flow
   3. The add-filter flow offers the 5 BI presets (Periodo, Empresa, Produto, Status, Responsavel) as starting points
   4. Operator in edit mode sees a delete button on each filter chip to remove that filter from the screen's FilterOption[]
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 56-01-PLAN.md — Filter chip click-to-edit and delete buttons with FilterPropertyPanel
+- [ ] 56-02-PLAN.md — Add-filter "+" button with 5 BI preset picker
 
 ### Phase 57: Cleanup & Consolidation
 **Goal**: The codebase is clean — Sheet panel components are removed, layoutPanel state is gone, and the AdminToolbar no longer has a Layout button group
@@ -80,5 +84,5 @@ Plans:
 | All phases 1-53 shipped | v1.0-v2.2 | 100% | Complete | 2026-03-13 |
 | 54. Header Inline Editing | v2.3 | 0/? | Not started | - |
 | 55. Sidebar Inline Editing | v2.3 | 0/? | Not started | - |
-| 56. Filter Inline Editing | v2.3 | 0/? | Not started | - |
+| 56. Filter Inline Editing | v2.3 | 0/2 | Not started | - |
 | 57. Cleanup & Consolidation | v2.3 | 0/1 | Not started | - |
