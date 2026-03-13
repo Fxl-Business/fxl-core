@@ -1,6 +1,5 @@
 import yaml from 'yaml'
-
-const docFiles = import.meta.glob('/docs/**/*.md', { query: '?raw', import: 'default', eager: true })
+import type { DocumentRow } from './docs-service'
 
 export type DocFrontmatter = {
   title: string
@@ -141,18 +140,32 @@ export function extractHeadings(markdown: string): DocHeading[] {
     })
 }
 
-export function getDoc(urlPath: string): ParsedDoc | null {
-  const cleanPath = urlPath.replace(/^\//, '').replace(/\/$/, '')
-  const filePath = `/docs/${cleanPath}.md`
-  const raw = docFiles[filePath] as string | undefined
-  if (!raw) return null
+/** Parse a DocumentRow from Supabase into a ParsedDoc. */
+export function parseDoc(row: DocumentRow): ParsedDoc {
+  const frontmatter: DocFrontmatter = {
+    title: row.title,
+    ...(row.badge && { badge: row.badge }),
+    ...(row.description && { description: row.description }),
+  }
+  const sections = parseBody(row.body)
+  const headings = extractHeadings(row.body)
+  return { frontmatter, sections, headings, rawBody: row.body }
+}
 
+/** Parse raw markdown string (with frontmatter) into a ParsedDoc. Used by sync CLI. */
+export function parseRawMarkdown(raw: string): ParsedDoc {
   const { frontmatter, body } = extractFrontmatter(raw)
   const sections = parseBody(body)
   const headings = extractHeadings(body)
   return { frontmatter, sections, headings, rawBody: body }
 }
 
+/** @deprecated Use useDoc hook instead. Returns null — glob removed in v2.1. */
+export function getDoc(_urlPath: string): ParsedDoc | null {
+  return null
+}
+
+/** @deprecated Use getAllDocuments from docs-service instead. Returns [] — glob removed in v2.1. */
 export function getAllDocPaths(): string[] {
-  return Object.keys(docFiles).map((fp) => fp.replace('/docs/', '/').replace('.md', ''))
+  return []
 }
