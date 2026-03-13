@@ -37,6 +37,7 @@ import { getCommentsByScreen } from '@tools/wireframe-builder/lib/comments'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
 import type { Comment } from '@tools/wireframe-builder/types/comments'
 import { SIDEBAR_WIDGET_REGISTRY } from '@tools/wireframe-builder/lib/sidebar-widget-registry'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import WorkspaceSwitcherWidget from '@tools/wireframe-builder/components/sidebar-widgets/WorkspaceSwitcherWidget'
 import UserMenuWidget from '@tools/wireframe-builder/components/sidebar-widgets/UserMenuWidget'
 import type {
@@ -168,6 +169,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
   // Filter bar action editing
   const [selectedFilterBarAction, setSelectedFilterBarAction] = useState<FilterBarActionElement | null>(null)
+
+  // Widget picker popover
+  const [widgetPopoverOpen, setWidgetPopoverOpen] = useState(false)
 
   // Branding update handler (must be before early returns)
   const handleBrandingUpdate = useCallback((partial: Partial<BrandingConfig>) => {
@@ -1108,145 +1112,9 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
               </button>
             </div>
 
-            {/* Edit mode action bar — add group/widget buttons */}
-            {editMode.active && !effectiveSidebarCollapsed && (
-              <div
-                style={{
-                  padding: '8px 8px 0',
-                  borderBottom: '1px solid var(--wf-sidebar-border)',
-                  flexShrink: 0,
-                }}
-              >
-                <span
-                  style={{
-                    display: 'block',
-                    fontSize: 9,
-                    fontWeight: 700,
-                    textTransform: 'uppercase' as const,
-                    letterSpacing: '0.08em',
-                    color: 'var(--wf-sidebar-muted)',
-                    marginBottom: 6,
-                    paddingLeft: 4,
-                  }}
-                >
-                  ADICIONAR
-                </span>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingBottom: 8 }}>
-                  {/* + Grupo */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const currentGroups = activeConfig?.sidebar?.groups ?? []
-                      updateWorkingConfig((cfg) => ({
-                        ...cfg,
-                        sidebar: {
-                          ...cfg.sidebar,
-                          groups: [...(cfg.sidebar?.groups ?? []), { label: 'Novo Grupo', screenIds: [] }],
-                        },
-                      }))
-                      handleSelectSidebarElement({ type: 'group', groupIndex: currentGroups.length })
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      width: '100%',
-                      padding: '0 8px',
-                      height: 32,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      borderRadius: 6,
-                      border: 'none',
-                      background: 'rgba(255,255,255,0.08)',
-                      color: '#fff',
-                      cursor: 'pointer',
-                      transition: 'background 150ms ease',
-                      fontFamily: 'Inter, sans-serif',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.14)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
-                    }}
-                  >
-                    <Plus style={{ width: 14, height: 14, color: 'var(--wf-accent)' }} />
-                    Grupo
-                  </button>
-                  {/* + Widget */}
-                  {(() => {
-                    const currentWidgetTypes = new Set(
-                      (activeConfig?.sidebar?.widgets ?? []).map((w) => w.type),
-                    )
-                    const availableWidgets = Object.values(SIDEBAR_WIDGET_REGISTRY).filter(
-                      (reg) => !currentWidgetTypes.has(reg.type),
-                    )
-                    const isMaxed = availableWidgets.length === 0
-                    return (
-                      <button
-                        type="button"
-                        disabled={isMaxed}
-                        onClick={() => {
-                          if (isMaxed) return
-                          const reg = availableWidgets[0]
-                          updateWorkingConfig((cfg) => ({
-                            ...cfg,
-                            sidebar: {
-                              ...cfg.sidebar,
-                              widgets: [...(cfg.sidebar?.widgets ?? []), reg.defaultProps()],
-                            },
-                          }))
-                          const newIndex = (activeConfig?.sidebar?.widgets ?? []).length
-                          handleSelectSidebarElement({ type: 'widget', widgetIndex: newIndex })
-                        }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 6,
-                          width: '100%',
-                          padding: '0 8px',
-                          height: 32,
-                          fontSize: 12,
-                          fontWeight: 600,
-                          borderRadius: 6,
-                          border: 'none',
-                          background: isMaxed ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)',
-                          color: isMaxed ? 'var(--wf-sidebar-muted)' : '#fff',
-                          cursor: isMaxed ? 'not-allowed' : 'pointer',
-                          opacity: isMaxed ? 0.4 : 1,
-                          transition: 'background 150ms ease',
-                          fontFamily: 'Inter, sans-serif',
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isMaxed) e.currentTarget.style.background = 'rgba(255,255,255,0.14)'
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isMaxed) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
-                        }}
-                      >
-                        <Plus style={{ width: 14, height: 14, color: isMaxed ? 'var(--wf-sidebar-muted)' : 'var(--wf-accent)' }} />
-                        Widget{isMaxed ? ' (max)' : ''}
-                      </button>
-                    )
-                  })()}
-                </div>
-              </div>
-            )}
-
             {/* Navigation items */}
             <nav style={{ flex: 1, padding: effectiveSidebarCollapsed ? '8px 4px' : '8px', overflowY: 'auto' }}>
-              {editMode.active ? (
-                <ScreenManager
-                  screens={screens}
-                  activeIndex={safeActiveIndex}
-                  editMode={editMode.active}
-                  onSelectScreen={handleScreenSelect}
-                  onAddScreen={handleAddScreen}
-                  onDeleteScreen={handleDeleteScreen}
-                  onRenameScreen={handleRenameScreen}
-                  onReorderScreens={handleReorderScreens}
-                />
-              ) : effectiveSidebarCollapsed ? (
+              {effectiveSidebarCollapsed ? (
                 // Collapsed: icon-only centered buttons
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                   {screens.map((screen, index) => {
@@ -1289,14 +1157,293 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                     )
                   })}
                 </div>
+              ) : editMode.active ? (
+                // Expanded edit mode: grouped rendering with inline add buttons at the bottom
+                <>
+                  {(() => {
+                    const editGroups = partitionScreensByGroups(screens, activeConfig?.sidebar?.groups)
+                    return (
+                      <>
+                        {editGroups.map((group, gi) => {
+                          const isGroupSelected =
+                            group.label !== null &&
+                            editMode.selectedSidebarElement?.type === 'group' &&
+                            editMode.selectedSidebarElement.groupIndex === gi
+                          return (
+                            <div key={gi} style={{ marginBottom: gi < editGroups.length - 1 ? 8 : 0 }}>
+                              {group.label && (
+                                <div
+                                  style={{
+                                    padding: '8px 12px 4px',
+                                    fontSize: 10,
+                                    fontWeight: 600,
+                                    textTransform: 'uppercase' as const,
+                                    letterSpacing: '0.08em',
+                                    color: 'var(--wf-sidebar-muted)',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    borderRadius: 4,
+                                    border: isGroupSelected
+                                      ? '2px solid var(--wf-accent)'
+                                      : '2px solid transparent',
+                                    cursor: 'pointer',
+                                    transition: 'border-color 150ms ease',
+                                  }}
+                                  onClick={() => handleSelectSidebarElement({ type: 'group', groupIndex: gi })}
+                                  onMouseEnter={(e) => {
+                                    if (!isGroupSelected) {
+                                      e.currentTarget.style.borderColor = 'var(--wf-sidebar-muted)'
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (!isGroupSelected) {
+                                      e.currentTarget.style.borderColor = 'transparent'
+                                    }
+                                  }}
+                                >
+                                  <span>{group.label}</span>
+                                  <button
+                                    type="button"
+                                    title="Remover grupo"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      updateWorkingConfig((cfg) => ({
+                                        ...cfg,
+                                        sidebar: {
+                                          ...cfg.sidebar,
+                                          groups: (cfg.sidebar?.groups ?? []).filter((_, i) => i !== gi),
+                                        },
+                                      }))
+                                      if (isGroupSelected) {
+                                        setEditMode((prev) => ({ ...prev, selectedSidebarElement: null }))
+                                      }
+                                    }}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      width: 20,
+                                      height: 20,
+                                      borderRadius: 4,
+                                      border: 'none',
+                                      background: 'transparent',
+                                      color: 'var(--wf-sidebar-muted)',
+                                      cursor: 'pointer',
+                                      flexShrink: 0,
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.color = '#ef4444'
+                                      e.currentTarget.style.background = 'rgba(239,68,68,0.1)'
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
+                                      e.currentTarget.style.background = 'transparent'
+                                    }}
+                                  >
+                                    <Trash2 style={{ width: 12, height: 12 }} />
+                                  </button>
+                                </div>
+                              )}
+                              <ScreenManager
+                                screens={group.screens.map((s) => s.screen)}
+                                activeIndex={group.screens.findIndex((s) => s.originalIndex === safeActiveIndex)}
+                                editMode={true}
+                                onSelectScreen={(localIdx) => handleScreenSelect(group.screens[localIdx].originalIndex)}
+                                onAddScreen={handleAddScreen}
+                                onDeleteScreen={(localIdx) => handleDeleteScreen(group.screens[localIdx].originalIndex)}
+                                onRenameScreen={(localIdx, title) => handleRenameScreen(group.screens[localIdx].originalIndex, title)}
+                                onReorderScreens={
+                                  group.label !== null
+                                    ? (reorderedLocalScreens) => {
+                                        const newScreenIds = reorderedLocalScreens.map((s) => s.id)
+                                        updateWorkingConfig((cfg) => ({
+                                          ...cfg,
+                                          sidebar: {
+                                            ...cfg.sidebar,
+                                            groups: (cfg.sidebar?.groups ?? []).map((g, i) =>
+                                              i === gi ? { ...g, screenIds: newScreenIds } : g
+                                            ),
+                                          },
+                                        }))
+                                      }
+                                    : handleReorderScreens
+                                }
+                              />
+                            </div>
+                          )
+                        })}
+                        {/* Inline add buttons at the bottom of the nav */}
+                        <div style={{ display: 'flex', gap: 4, paddingTop: 8, paddingBottom: 4 }}>
+                          {/* + Grupo */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currentGroups = activeConfig?.sidebar?.groups ?? []
+                              updateWorkingConfig((cfg) => ({
+                                ...cfg,
+                                sidebar: {
+                                  ...cfg.sidebar,
+                                  groups: [...(cfg.sidebar?.groups ?? []), { label: 'Novo Grupo', screenIds: [] }],
+                                },
+                              }))
+                              handleSelectSidebarElement({ type: 'group', groupIndex: currentGroups.length })
+                            }}
+                            style={{
+                              flex: 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 4,
+                              height: 28,
+                              fontSize: 11,
+                              fontWeight: 500,
+                              borderRadius: 5,
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              background: 'transparent',
+                              color: 'var(--wf-sidebar-muted)',
+                              cursor: 'pointer',
+                              transition: 'background 150ms ease, color 150ms ease, border-color 150ms ease',
+                              fontFamily: 'Inter, sans-serif',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+                              e.currentTarget.style.color = '#fff'
+                              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'transparent'
+                              e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
+                              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+                            }}
+                          >
+                            <Plus style={{ width: 12, height: 12 }} />
+                            Grupo
+                          </button>
+                          {/* + Widget with Popover picker */}
+                          {(() => {
+                            const currentWidgetTypes = new Set(
+                              (activeConfig?.sidebar?.widgets ?? []).map((w) => w.type),
+                            )
+                            const availableWidgets = Object.values(SIDEBAR_WIDGET_REGISTRY).filter(
+                              (reg) => !currentWidgetTypes.has(reg.type),
+                            )
+                            const isMaxed = availableWidgets.length === 0
+                            return (
+                              <Popover open={widgetPopoverOpen} onOpenChange={setWidgetPopoverOpen}>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    disabled={isMaxed}
+                                    style={{
+                                      flex: 1,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: 4,
+                                      height: 28,
+                                      fontSize: 11,
+                                      fontWeight: 500,
+                                      borderRadius: 5,
+                                      border: '1px solid rgba(255,255,255,0.12)',
+                                      background: 'transparent',
+                                      color: isMaxed ? 'rgba(255,255,255,0.2)' : 'var(--wf-sidebar-muted)',
+                                      cursor: isMaxed ? 'not-allowed' : 'pointer',
+                                      opacity: isMaxed ? 0.5 : 1,
+                                      transition: 'background 150ms ease, color 150ms ease, border-color 150ms ease',
+                                      fontFamily: 'Inter, sans-serif',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      if (!isMaxed) {
+                                        e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+                                        e.currentTarget.style.color = '#fff'
+                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'
+                                      }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      if (!isMaxed) {
+                                        e.currentTarget.style.background = 'transparent'
+                                        e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
+                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+                                      }
+                                    }}
+                                  >
+                                    <Plus style={{ width: 12, height: 12 }} />
+                                    Widget
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  side="right"
+                                  align="end"
+                                  style={{
+                                    padding: 4,
+                                    minWidth: 180,
+                                    background: '#0f172a',
+                                    border: '1px solid var(--wf-sidebar-border)',
+                                    borderRadius: 8,
+                                  }}
+                                >
+                                  {availableWidgets.map((reg) => {
+                                    const WidgetIcon = reg.icon
+                                    return (
+                                      <button
+                                        key={reg.type}
+                                        type="button"
+                                        onClick={() => {
+                                          updateWorkingConfig((cfg) => ({
+                                            ...cfg,
+                                            sidebar: {
+                                              ...cfg.sidebar,
+                                              widgets: [...(cfg.sidebar?.widgets ?? []), reg.defaultProps()],
+                                            },
+                                          }))
+                                          const newIndex = (activeConfig?.sidebar?.widgets ?? []).length
+                                          handleSelectSidebarElement({ type: 'widget', widgetIndex: newIndex })
+                                          setWidgetPopoverOpen(false)
+                                        }}
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: 8,
+                                          width: '100%',
+                                          padding: '6px 10px',
+                                          fontSize: 12,
+                                          borderRadius: 5,
+                                          border: 'none',
+                                          background: 'transparent',
+                                          color: '#fff',
+                                          cursor: 'pointer',
+                                          fontFamily: 'Inter, sans-serif',
+                                          textAlign: 'left' as const,
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.background = 'transparent'
+                                        }}
+                                      >
+                                        <WidgetIcon style={{ width: 16, height: 16, color: 'var(--wf-sidebar-muted)', flexShrink: 0 }} />
+                                        {reg.label}
+                                      </button>
+                                    )
+                                  })}
+                                </PopoverContent>
+                              </Popover>
+                            )
+                          })()}
+                        </div>
+                      </>
+                    )
+                  })()}
+                </>
               ) : (
-                // Expanded: grouped rendering with headings
+                // Expanded view mode: grouped rendering with headings
                 <>
                   {partitionScreensByGroups(screens, activeConfig?.sidebar?.groups).map((group, gi) => {
-                    const isGroupSelected =
-                      group.label !== null &&
-                      editMode.selectedSidebarElement?.type === 'group' &&
-                      editMode.selectedSidebarElement.groupIndex === gi
                     return (
                       <div key={gi} style={{ marginBottom: gi < partitionScreensByGroups(screens, activeConfig?.sidebar?.groups).length - 1 ? 8 : 0 }}>
                         {group.label && (
@@ -1315,73 +1462,11 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
                               alignItems: 'center',
                               justifyContent: 'space-between',
                               borderRadius: 4,
-                              border: isGroupSelected
-                                ? '2px solid var(--wf-accent)'
-                                : editMode.active
-                                  ? '2px solid transparent'
-                                  : 'none',
-                              cursor: editMode.active ? 'pointer' : 'default',
-                              transition: 'border-color 150ms ease',
-                            }}
-                            onClick={
-                              editMode.active
-                                ? () => handleSelectSidebarElement({ type: 'group', groupIndex: gi })
-                                : undefined
-                            }
-                            onMouseEnter={(e) => {
-                              if (editMode.active && !isGroupSelected) {
-                                e.currentTarget.style.borderColor = 'var(--wf-sidebar-muted)'
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (editMode.active && !isGroupSelected) {
-                                e.currentTarget.style.borderColor = 'transparent'
-                              }
+                              border: 'none',
+                              cursor: 'default',
                             }}
                           >
                             <span>{group.label}</span>
-                            {editMode.active && (
-                              <button
-                                type="button"
-                                title="Remover grupo"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  updateWorkingConfig((cfg) => ({
-                                    ...cfg,
-                                    sidebar: {
-                                      ...cfg.sidebar,
-                                      groups: (cfg.sidebar?.groups ?? []).filter((_, i) => i !== gi),
-                                    },
-                                  }))
-                                  if (isGroupSelected) {
-                                    setEditMode((prev) => ({ ...prev, selectedSidebarElement: null }))
-                                  }
-                                }}
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  width: 20,
-                                  height: 20,
-                                  borderRadius: 4,
-                                  border: 'none',
-                                  background: 'transparent',
-                                  color: 'var(--wf-sidebar-muted)',
-                                  cursor: 'pointer',
-                                  flexShrink: 0,
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.color = '#ef4444'
-                                  e.currentTarget.style.background = 'rgba(239,68,68,0.1)'
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.color = 'var(--wf-sidebar-muted)'
-                                  e.currentTarget.style.background = 'transparent'
-                                }}
-                              >
-                                <Trash2 style={{ width: 12, height: 12 }} />
-                              </button>
-                            )}
                           </div>
                         )}
                         <ScreenManager
