@@ -510,6 +510,48 @@
 
 ---
 
+## Milestone: v2.4 — Component Picker Preview Mode
+
+**Shipped:** 2026-03-14
+**Phases:** 2 | **Plans:** 4 | **Timeline:** 1 session
+
+### What Was Built
+- Hardened defaultProps for all 28 section types with complete, Zod-valid sample data for visual rendering (6 previously empty types enriched, 17 renderability tests)
+- SectionPreview component rendering any section type as scaled-down mini-preview using registry defaultProps + WireframeThemeProvider
+- SectionPreviewCard with 25% CSS scale mini-previews, error boundary isolation, and usePickerMode hook with sessionStorage persistence
+- ComponentPicker dual-mode: preview grid (2-3 columns, max-w-4xl) + compact list toggle with category separators preserved
+
+### What Worked
+- **Registry defaultProps as single source of preview data:** Each section type's defaultProps() already provided Zod-valid sample data — enriching 6 types was sufficient for all 28 to render
+- **CSS scale-transform for faithful mini-previews:** Rendering at full width then scaling down (0.25x/0.35x) preserves exact layout rather than responsive re-layout
+- **Error boundary per preview card:** Class component ErrorBoundary isolates any section render failure to its card without crashing the picker dialog
+- **Mode-conditional rendering within shared category loop:** DRY approach — one catalog.map loop with ternary for preview vs compact rendering
+- **First milestone with audit before completion:** Integration checker traced complete E2E flow and confirmed all 8 requirements wired
+
+### What Was Inefficient
+- **SectionPreview.tsx orphaned:** Phase 58-02 created SectionPreview as its primary deliverable, but Phase 59-01's SectionPreviewCard reimplemented the same pattern directly rather than wrapping it. Dead asset in production.
+- **No VERIFICATION.md or VALIDATION.md files:** Both phases lack formal verification artifacts — requirements confirmed via SUMMARY + integration tracing as compensating evidence
+- **Visual verification pending:** Plan 59-02 Task 2 (human checkpoint for visual verification) noted as needing manual verification but not formally completed
+
+### Patterns Established
+- Scale-transform preview: render at full width (800px/540px) and scale via CSS transform/zoom for faithful miniature rendering
+- External theme isolation: `WireframeThemeProvider externalTheme` prop for contexts that should not read/write localStorage
+- sessionStorage persistence for transient UI state (picker mode) that should survive dialog close but not browser restart
+- Class component ErrorBoundary for preview isolation — lightweight, no React 19 dependency
+
+### Key Lessons
+1. **Audit before completion is validated again** — integration checker found the SectionPreview orphan and confirmed all E2E wiring that wouldn't have been verified otherwise
+2. **Delegate to existing infrastructure when possible** — SectionPreviewCard should have wrapped SectionPreview instead of reimplementing, avoiding dead code
+3. **defaultProps as preview data source is elegant** — no new data fixtures needed, registry already has the data
+4. **CSS scale-transform is the right approach for mini-previews** — responsive re-layout would change component appearance
+
+### Cost Observations
+- Model mix: ~30% opus (orchestrator + audit), ~70% sonnet (executors + integration checker)
+- Sessions: 1 session (all 4 plans + audit + milestone completion)
+- Notable: 4 plans, 4 commits, 514 LOC added in ~29 min total execution (~7 min avg per plan)
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -527,6 +569,7 @@
 | v2.1 | 1 session | 4 | 8 | Dynamic data layer, Supabase-backed docs, bidirectional sync CLI |
 | v2.2 | 1 session | 7 | 7 | Configurable layout components, widget system, Sheet panels (to be replaced by inline editing) |
 | v2.3 | 1 session | 4 | 7 | Inline click-to-edit replacing Sheet panels, five-way selection mutex, per-element form registry |
+| v2.4 | 1 session | 2 | 4 | Component Picker dual-mode preview, scale-transform mini-renders, defaultProps as preview data |
 
 ### Cumulative Quality
 
@@ -543,6 +586,7 @@
 | v2.1 | ~270 tests | no new tests (data layer + CLI) | 0 |
 | v2.2 | ~283 tests | 13 new schema tests (SidebarWidget Zod) | 1 (@radix-ui/react-checkbox via shadcn) |
 | v2.3 | ~283 tests | no new tests (UI refactor) | 1 (@radix-ui/react-context-menu via shadcn) |
+| v2.4 | ~316 tests | 33 new (SectionPreview 33 + renderability 17) | 0 |
 
 ### Velocity
 
@@ -559,6 +603,7 @@
 | v2.1 | 8 | ~45 min | ~5.5 min |
 | v2.2 | 7 | ~43 min | ~6.1 min |
 | v2.3 | 7 | ~19 min | ~2.7 min |
+| v2.4 | 4 | ~29 min | ~7.3 min |
 
 ### Top Lessons (Verified Across Milestones)
 

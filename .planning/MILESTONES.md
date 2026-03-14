@@ -1,5 +1,23 @@
 # Milestones
 
+## v2.4 Component Picker Preview Mode (Shipped: 2026-03-14)
+
+**Phases:** 2 (58-59) | **Plans:** 4 | **Tasks:** 8
+**Timeline:** 1 session (2026-03-13) | **Commits:** 4 | **LOC delta:** +514 / -31
+**Git range:** ed59fb9 → ea8169b
+
+**Delivered:** Added dual-mode preview/compact toggle to the ComponentPicker dialog, allowing operators to see scaled mini-renders of all 28 section types in a 2-3 column grid before adding to the blueprint.
+
+**Key accomplishments:**
+1. Hardened defaultProps for all 28 section types with complete, Zod-valid sample data for visual rendering (6 previously empty types enriched, 17 renderability tests)
+2. SectionPreview component rendering any section type as scaled-down mini-preview using registry defaultProps + WireframeThemeProvider
+3. SectionPreviewCard with 25% CSS scale mini-previews, error boundary isolation, and usePickerMode hook with sessionStorage persistence
+4. ComponentPicker dual-mode: preview grid (2-3 columns, max-w-4xl) + compact list toggle, mode-conditional rendering, category separators preserved
+
+**Archive:** [v2.4-ROADMAP.md](milestones/v2.4-ROADMAP.md) | [v2.4-REQUIREMENTS.md](milestones/v2.4-REQUIREMENTS.md) | [v2.4-MILESTONE-AUDIT.md](milestones/v2.4-MILESTONE-AUDIT.md)
+
+---
+
 ## v2.3 Inline Editing UX (Shipped: 2026-03-13)
 
 **Phases:** 4 (54-57) | **Plans:** 7 | **Tasks:** ~14

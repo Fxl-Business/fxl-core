@@ -121,12 +121,14 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - ✓ Filter inline editing: clickable chips with FilterPropertyPanel, "+" button with 5 BI preset picker — v2.3
 - ✓ Five-way selection mutex across header, sidebar, filter, filter-bar-action, and content — v2.3
 - ✓ Sheet panels removed (HeaderConfigPanel, SidebarConfigPanel, FilterBarEditor), Layout buttons removed — v2.3
+- ✓ Component Picker dual-mode: preview grid (2-3 columns) with SectionPreviewCard mini-renders — v2.4
+- ✓ Toggle preview/compact no dialog de seleção com sessionStorage persistence — v2.4
+- ✓ Dialog responsivo maior (max-w-4xl) para acomodar previews com category separators — v2.4
+- ✓ All 28 defaultProps hardened with complete Zod-valid sample data for visual rendering — v2.4
 
 ### Active
 
-- [ ] Component Picker com modo preview (mini-render dos 28 tipos de seção em grid)
-- [ ] Toggle compact/preview no dialog de seleção de seção
-- [ ] Dialog responsivo maior para acomodar previews
+(Empty — define in next milestone via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -162,23 +164,13 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 - Task dependencies / blocking graph — v2 (TASK-07)
 - Email notifications de task assignments — v2 (TASK-08)
 
-## Current Milestone: v2.4 Component Picker Preview Mode
-
-**Goal:** Adicionar modo preview ao ComponentPicker do Wireframe Builder, permitindo visualizar mini-renders de cada tipo de seção antes de adicionar.
-
-**Target features:**
-- Modo preview com grid 2-3 colunas de mini-renders
-- Toggle entre modo preview (default) e modo compacto (atual)
-- Categorias mantidas como separadores com scroll vertical
-- Dialog maior para acomodar previews
-
 ## Current State
 
-All 11 milestones shipped (v1.0 → v2.3). Building v2.4.
+All 12 milestones shipped (v1.0 → v2.4). Planning next milestone.
 
 ## Context
 
-Shipped v2.3 Inline Editing UX. All 11 milestones complete (v1.0-v2.3).
+Shipped v2.4 Component Picker Preview Mode. All 12 milestones complete (v1.0-v2.4).
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
 ~41,000 LOC TypeScript. 7 Supabase migrations (001-007). 5 active modules in MODULE_REGISTRY.
 Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
@@ -187,7 +179,7 @@ Dynamic data layer: docs content served from Supabase with bidirectional sync CL
 The platform covers the full operator workflow:
 1. **Documentation** — 4-section taxonomy, onboarding, Claude Code + GSD workflow
 2. **Wireframe feedback** — persistent comments, client share links, comment management
-3. **Visual editing** — drag-reorder sections, property panels, screen management, Supabase sync
+3. **Visual editing** — drag-reorder sections, inline click-to-edit, screen management, Supabase sync
 4. **Branding** — structured collection, automatic application via CSS vars and chart colors
 5. **Config pipeline** — TechnicalConfig + Config Resolver → GenerationManifest
 6. **System generation** — 6-file product spec ready for Claude Code to generate in separate repo
@@ -202,6 +194,7 @@ The platform covers the full operator workflow:
 15. **Task Management** — List/kanban/form, optimistic updates, DocumentarButton cross-module KB link
 16. **Home page** — Module hub grid + cross-module activity feed
 17. **Inline editing** — Click-to-edit for header, sidebar, and filter bar with contextual PropertyPanel forms and five-way selection mutex
+18. **Component Picker** — Dual-mode preview/compact dialog with scaled mini-renders of all 28 section types
 
 Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint + branding + TechnicalConfig).
 
@@ -268,6 +261,10 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Per-element form extraction pattern | Each config panel section → standalone form + registry | ✓ Good — forms reusable in PropertyPanel sheets |
 | Five-way selection mutex in WireframeViewer | Only one element type selected at a time | ✓ Good — clean, leak-free state management |
 | Click-to-edit as only editing paradigm | No toolbar shortcuts, operators click directly on component | ✓ Good — intuitive, consistent with block editing |
+| CSS transform scale for preview mini-renders | Render at full width then scale down for faithful miniature | ✓ Good — avoids responsive re-layout artifacts |
+| WireframeThemeProvider externalTheme prop | Avoid localStorage side effects in preview context | ✓ Good — isolated theme for preview rendering |
+| sessionStorage for picker mode persistence | Preserve preview/compact toggle across dialog opens within session | ✓ Good — instant recall, no cross-session leak |
+| SectionPreviewCard reimplements preview pattern | Bypasses SectionPreview, uses SectionRenderer directly | ⚠️ Revisit — SectionPreview.tsx orphaned as dead asset |
 
 ## Constraints
 
@@ -281,4 +278,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
 ---
-*Last updated: 2026-03-13 after v2.4 milestone start*
+*Last updated: 2026-03-14 after v2.4 milestone*
