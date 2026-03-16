@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Reorganizacao Modular
-status: completed
-stopped_at: Completed 60-01-PLAN.md
-last_updated: "2026-03-16T22:14:03.949Z"
-last_activity: 2026-03-16 — Completed Phase 60 Plan 01 (Platform Scaffold)
+status: executing
+stopped_at: Completed 61-02-PLAN.md
+last_updated: "2026-03-16T22:41:26.757Z"
+last_activity: 2026-03-16 — Completed Phase 61 Plan 02 (Shared Layer Migration)
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 8
+  completed_plans: 2
   percent: 25
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 61 of 63 (Module Migration)
-Plan: Ready to plan
-Status: Phase 60 complete, ready for Phase 61
-Last activity: 2026-03-16 — Completed Phase 60 Plan 01 (Platform Scaffold)
+Plan: 2 of 7 complete (Phase 61)
+Status: In progress - executing Phase 61
+Last activity: 2026-03-16 — Completed Phase 61 Plan 02 (Shared Layer Migration)
 
-Progress: [██░░░░░░░░] 25%
+Progress: [███░░░░░░░] 25%
 
 ## Accumulated Context
 
@@ -44,6 +44,7 @@ Progress: [██░░░░░░░░] 25%
 - Design spec Section 4.4 has complete file migration manifest
 - @platform/*, @shared/*, @modules/* convenience aliases added for explicit module boundary support
 - src/modules/wireframe/ created as separate dir from wireframe-builder (both coexist until Phase 61)
+- [Phase 61]: All shadcn/ui components and cn() now in src/shared/, imported via @shared/ui/ and @shared/utils
 
 ### Pending Todos
 
@@ -63,6 +64,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16T22:07:18.504Z
-Stopped at: Completed 60-01-PLAN.md
+Last session: 2026-03-16T22:41:26.753Z
+Stopped at: Completed 61-02-PLAN.md
 Next: `/gsd:plan-phase 61`
