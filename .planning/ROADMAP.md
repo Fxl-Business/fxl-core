@@ -72,7 +72,7 @@ Plans:
 - [x] 61-04-PLAN.md — Complete tasks module (move tasks-service into module)
 - [x] 61-05-PLAN.md — Migrate clients module (move all client pages into module)
 - [x] 61-06-PLAN.md — Create wireframe module (pages, manifest, replace ferramentas)
-- [ ] 61-07-PLAN.md — Extract AppRouter from App.tsx + create module CLAUDE.md files
+- [x] 61-07-PLAN.md — Extract AppRouter from App.tsx + create module CLAUDE.md files
 
 ### Phase 62: Removals
 **Goal**: Dead and redundant code is removed — Knowledge Base module, ProcessDocsViewer, duplicate components — reducing codebase size without any functional change
@@ -84,7 +84,10 @@ Plans:
   3. `ProcessDocsViewer.tsx` does not exist
   4. No duplicate PageHeader.tsx or PromptBlock.tsx copies remain (only canonical versions in modules/docs/)
   5. Knowledge Base routes removed from App.tsx/AppRouter, MODULE_IDS.KNOWLEDGE_BASE removed from module-ids
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 62-01-PLAN.md — Remove KB module, dead code, duplicates, and clean up empty directories
 
 ### Phase 63: Integration Verification
 **Goal**: The reorganized codebase is verified to be functionally identical to the pre-v3.0 state through TypeScript compilation, production build, and exhaustive visual checklist
@@ -104,5 +107,5 @@ Plans:
 |-------|----------------|--------|-----------|
 | 60. Platform Scaffold + Shared Layer | 1/1 | Complete    | 2026-03-16 |
 | 61. Module Migration | 7/7 | Complete    | 2026-03-16 |
-| 62. Removals | 0/? | Not started | - |
+| 62. Removals | 0/1 | Not started | - |
 | 63. Integration Verification | 0/? | Not started | - |
