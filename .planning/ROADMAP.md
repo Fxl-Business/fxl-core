@@ -63,15 +63,15 @@ Plans:
   3. Module system (registry, module-ids, extension-registry, slots, hooks) lives in `src/platform/module-loader/` and module toggling works
   4. App.tsx delegates routing to `src/platform/router/AppRouter.tsx` and all routes resolve
   5. Each of the 4 modules (docs, tasks, clients, wireframe) is self-contained with its own components/, pages/, services/, and CLAUDE.md
-**Plans:** 4/7 plans executed
+**Plans:** 6/7 plans executed
 
 Plans:
 - [x] 61-01-PLAN.md — Move platform layer files (layout, auth, module-loader, services, pages) to src/platform/
 - [x] 61-02-PLAN.md — Move shadcn/ui to src/shared/ui/ and utils to src/shared/utils/
-- [ ] 61-03-PLAN.md — Migrate docs module (components, pages, services, hooks)
-- [ ] 61-04-PLAN.md — Complete tasks module (move tasks-service into module)
-- [ ] 61-05-PLAN.md — Migrate clients module (move all client pages into module)
-- [ ] 61-06-PLAN.md — Create wireframe module (pages, manifest, replace ferramentas)
+- [x] 61-03-PLAN.md — Migrate docs module (components, pages, services, hooks)
+- [x] 61-04-PLAN.md — Complete tasks module (move tasks-service into module)
+- [x] 61-05-PLAN.md — Migrate clients module (move all client pages into module)
+- [x] 61-06-PLAN.md — Create wireframe module (pages, manifest, replace ferramentas)
 - [ ] 61-07-PLAN.md — Extract AppRouter from App.tsx + create module CLAUDE.md files
 
 ### Phase 62: Removals
@@ -103,6 +103,6 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 60. Platform Scaffold + Shared Layer | 1/1 | Complete    | 2026-03-16 |
-| 61. Module Migration | 4/7 | In Progress|  |
+| 61. Module Migration | 6/7 | In Progress|  |
 | 62. Removals | 0/? | Not started | - |
 | 63. Integration Verification | 0/? | Not started | - |

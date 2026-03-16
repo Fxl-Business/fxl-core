@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Reorganizacao Modular
 status: executing
-stopped_at: Completed 61-05-PLAN.md
-last_updated: "2026-03-16T22:55:51.485Z"
-last_activity: 2026-03-16 — Completed Phase 61 Plan 05 (Client Pages Migration)
+stopped_at: Completed 61-06-PLAN.md
+last_updated: "2026-03-16T22:57:19.688Z"
+last_activity: 2026-03-16 — Completed Phase 61 Plan 06 (Wireframe Module Migration)
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 8
-  completed_plans: 5
-  percent: 63
+  completed_plans: 6
+  percent: 75
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 61 of 63 (Module Migration)
-Plan: 5 of 7 complete (Phase 61)
+Plan: 6 of 7 complete (Phase 61)
 Status: In progress - executing Phase 61
-Last activity: 2026-03-16 — Completed Phase 61 Plan 05 (Client Pages Migration)
+Last activity: 2026-03-16 — Completed Phase 61 Plan 06 (Wireframe Module Migration)
 
-Progress: [██████░░░░] 63%
+Progress: [███████░░░] 75%
 
 ## Accumulated Context
 
@@ -49,6 +49,8 @@ Progress: [██████░░░░] 63%
 - [Phase 61]: Tasks module fully self-contained — all imports use module-relative paths or @platform/@shared aliases
 - [Phase 61]: All 8 client pages moved to src/modules/clients/pages/, manifest uses module-relative imports
 - [Phase 61]: Left @/lib/kb-service import as-is in FinanceiroContaAzul/Index.tsx (stays at @/lib/ until Phase 62)
+- [Phase 61]: Wireframe module manifest import updated; ferramentasManifest name kept for zero functional change
+- [Phase 61]: Docs module self-contained — relative imports for intra-module, @modules/docs/ for cross-module consumers
 
 ### Pending Todos
 
@@ -68,6 +70,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16T22:55:51.475Z
-Stopped at: Completed 61-05-PLAN.md
-Next: Execute 61-06-PLAN.md
+Last session: 2026-03-16T22:55:33Z
+Stopped at: Completed 61-06-PLAN.md
+Next: Execute 61-07-PLAN.md
