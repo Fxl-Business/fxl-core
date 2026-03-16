@@ -220,12 +220,82 @@ src/
 - Cross-module so via registry + extensions (padrao existente)
 - `@tools/wireframe-builder/` continua como alias externo
 
-### 4.4 Remocoes
+**Wireframe e uma excecao hibrida**: o modulo `src/modules/wireframe/` contem
+manifest, pages e hooks, mas os componentes visuais continuam em
+`tools/wireframe-builder/components/` (importados via `@tools/`). Isso porque
+os componentes do builder sao reutilizados em contextos fora do modulo
+(export para spokes, renderizacao em clients). Essa excecao e aceita e documentada.
 
-- **Knowledge Base**: remover modulo inteiro (`src/modules/knowledge-base/`),
-  servico (`lib/kb-service`), ID do module-ids, entrada no registry
-- **Codigo morto identificado**: ProcessDocsViewer.tsx, PageHeader.tsx duplicado,
-  PromptBlock duplicado
+### 4.4 Manifesto de migracao de arquivos
+
+Mapeamento explicito de cada arquivo/diretorio para sua nova localizacao:
+
+**src/lib/ (servicos):**
+
+| Arquivo atual | Destino | Motivo |
+|---------------|---------|--------|
+| `lib/supabase.ts` | `platform/supabase.ts` | Infra da plataforma |
+| `lib/docs-service.ts` | `modules/docs/services/docs-service.ts` | Especifico do modulo docs |
+| `lib/docs-parser.ts` | `modules/docs/services/docs-parser.ts` | Especifico do modulo docs |
+| `lib/search-index.ts` | `modules/docs/services/search-index.ts` | Busca e parte do modulo docs |
+| `lib/tasks-service.ts` | `modules/tasks/services/tasks-service.ts` | Especifico do modulo tasks |
+| `lib/tasks-service.test.ts` | `modules/tasks/services/tasks-service.test.ts` | Teste do servico |
+| `lib/kb-service.ts` | **REMOVER** | Knowledge Base descartado |
+| `lib/kb-service.test.ts` | **REMOVER** | Knowledge Base descartado |
+| `lib/activity-feed.ts` | `platform/services/activity-feed.ts` | Usado pela Home (platform-level) |
+| `lib/module-stats.ts` | `platform/services/module-stats.ts` | Usado pela Home (platform-level) |
+| `lib/utils.ts` | `shared/utils/index.ts` | Utilidades cross-module |
+
+**src/components/:**
+
+| Arquivo/dir atual | Destino | Motivo |
+|-------------------|---------|--------|
+| `components/layout/` | `platform/layout/` | Shell da plataforma |
+| `components/docs/` | `modules/docs/components/` | Especifico do modulo docs |
+| `components/ui/` | `shared/ui/` | shadcn usado por todos |
+| `components/ProtectedRoute.tsx` | `platform/auth/ProtectedRoute.tsx` | Auth da plataforma |
+
+**src/pages/:**
+
+| Arquivo/dir atual | Destino | Motivo |
+|-------------------|---------|--------|
+| `pages/Home.tsx` | `platform/pages/Home.tsx` | Pagina da plataforma |
+| `pages/Login.tsx` | `platform/auth/Login.tsx` | Auth da plataforma |
+| `pages/Profile.tsx` | `platform/auth/Profile.tsx` | Auth da plataforma |
+| `pages/DocRenderer.tsx` | `modules/docs/pages/DocRenderer.tsx` | Modulo docs |
+| `pages/SharedWireframeView.tsx` | `modules/wireframe/pages/SharedWireframeView.tsx` | Modulo wireframe |
+| `pages/clients/` | `modules/clients/pages/` | Modulo clients |
+| `pages/docs/ProcessDocsViewer.tsx` | **REMOVER** | Codigo morto (135 linhas, nao usado) |
+| `pages/tools/ComponentGallery.tsx` | `modules/wireframe/pages/ComponentGallery.tsx` | Modulo wireframe |
+
+**src/modules/ (mover para module-loader):**
+
+| Arquivo atual | Destino | Motivo |
+|---------------|---------|--------|
+| `modules/registry.ts` | `platform/module-loader/registry.ts` | Infra do module system |
+| `modules/module-ids.ts` | `platform/module-loader/module-ids.ts` | Constantes do system |
+| `modules/extension-registry.ts` | `platform/module-loader/extension-registry.ts` | Resolucao de extensions |
+| `modules/slots.tsx` | `platform/module-loader/slots.tsx` | Provider + ExtensionSlot |
+| `modules/hooks/useModuleEnabled.tsx` | `platform/module-loader/hooks/useModuleEnabled.tsx` | Hook do system |
+| `modules/knowledge-base/` | **REMOVER** | Modulo descartado |
+
+**App.tsx:**
+
+| O que muda | Detalhes |
+|------------|---------|
+| Routing logic | Extrair para `platform/router/AppRouter.tsx` |
+| Knowledge Base routes | **REMOVER** (linhas 51-56 do App.tsx atual) |
+| Provider stack | Manter em App.tsx (BrowserRouter, ModuleEnabled, Extension) |
+| App.tsx final | Import simplificado: `<AppRouter />` dentro dos providers |
+
+### 4.5 Remocoes
+
+- **Knowledge Base**: modulo (`src/modules/knowledge-base/`), servico (`lib/kb-service.ts`
+  + `lib/kb-service.test.ts`), ID (`MODULE_IDS.KNOWLEDGE_BASE`), entrada no registry,
+  rotas no App.tsx
+- **Codigo morto**: `pages/docs/ProcessDocsViewer.tsx` (135 linhas, nao importado),
+  `components/docs/PageHeader.tsx` (duplicado — manter versao em `components/docs/DocPageHeader.tsx`),
+  `components/docs/PromptBlock.tsx` (duplicado — manter versao dentro do docs module)
 
 ---
 
@@ -238,16 +308,44 @@ src/
 - FXL (a empresa) e o primeiro tenant/org
 - Modulos habilitados **por org** (migra de localStorage para Supabase)
 
-### 5.2 Fluxo
+### 5.2 Clerk-Supabase JWT Bridge
+
+O FXL Core atualmente usa Clerk para auth de app e Supabase anon key para dados
+(padrao "anon-permissive"). Para multi-tenancy com RLS por org_id, precisamos
+que o JWT enviado ao Supabase contenha o `org_id` do Clerk.
+
+**Abordagem escolhida: Supabase Edge Function como token exchange.**
+
+Fluxo:
+1. User faz login via Clerk, seleciona org ativa
+2. Frontend obtem Clerk session token (com `org_id` no payload)
+3. Frontend chama Edge Function `/auth/token-exchange` com Clerk token
+4. Edge Function valida Clerk token (via JWKS), extrai `org_id`, `user_id`, `role`
+5. Edge Function minta JWT customizado usando Supabase JWT secret com claims:
+   `{ sub: user_id, org_id: org_id, role: role }`
+6. Frontend usa esse JWT customizado como Supabase access token
+7. RLS policies leem `org_id` do JWT
+
+**Por que Edge Function e nao JWT template direto:**
+- Supabase nao aceita JWTs de issuers externos sem configuracao do JWT secret
+- Edge Function permite validacao, transformacao e logging centralizado
+- Unico ponto de integracao Clerk<->Supabase
+
+**Fallback para dev/staging:** manter suporte ao anon key (sem org_id)
+com flag `VITE_AUTH_MODE=anon|org`. Em modo anon, RLS fica permissivo
+(comportamento atual). Em modo org, RLS exige org_id.
+
+### 5.3 Fluxo completo
 
 1. User faz login via Clerk
 2. Clerk retorna `organizationMemberships[]`
 3. FXL Core mostra org picker (ou auto-seleciona se so tem uma)
-4. Sidebar, home, modulos filtrados pela org ativa
-5. Supabase RLS usa `org_id` para isolar dados
-6. Connector modules usam token da org para autenticar nas spokes
+4. Frontend chama token exchange para obter JWT Supabase com org_id
+5. Sidebar, home, modulos filtrados pela org ativa
+6. Supabase RLS usa `org_id` do JWT para isolar dados
+7. Connector modules usam Clerk org token para autenticar nas spokes
 
-### 5.3 Schema Supabase
+### 5.4 Schema Supabase
 
 ```sql
 -- Modulos habilitados por tenant
@@ -261,18 +359,49 @@ create table tenant_modules (
 );
 
 -- RLS: usuario so ve modulos da org que pertence
+-- org_id vem do JWT customizado mintado pela Edge Function
 alter table tenant_modules enable row level security;
 create policy "tenant_modules_org_access" on tenant_modules
   for all using (
-    org_id = current_setting('request.jwt.claims')::jsonb->>'org_id'
+    org_id = (current_setting('request.jwt.claims')::jsonb->>'org_id')
   );
 ```
 
-### 5.4 Mudancas no ModuleDefinition
+**Migracao de dados existentes:**
+- Todas as tabelas existentes (documents, comments, blueprints, briefings, tasks)
+  recebem coluna `org_id text` com default = ID da org FXL
+- Backfill: `UPDATE documents SET org_id = 'org_fxl_default' WHERE org_id IS NULL`
+- Novas RLS policies adicionadas a cada tabela existente
+- localStorage module toggles migrados para `tenant_modules` na primeira execucao
+
+### 5.5 Mudancas nos hooks
 
 ```typescript
-// Atual: enabled e booleano estatico ou localStorage
-// Proposto: enabled vem do tenant
+// Hook 1: gestao de organizacao (NOVO)
+function useActiveOrg(): {
+  activeOrg: ClerkOrganization | null
+  orgs: ClerkOrganization[]
+  switchOrg: (orgId: string) => void
+  isLoading: boolean
+}
+
+// Hook 2: modulos habilitados (REFATORADO)
+// Depende de useActiveOrg() internamente
+function useModuleEnabled(): {
+  enabledModules: Set<ModuleId>      // filtrado por org ativa
+  isLoading: boolean                  // true enquanto carrega tenant_modules
+  error: Error | null
+}
+
+// Estrategia de dados:
+// - Initial load: fetch tenant_modules WHERE org_id = activeOrg.id
+// - Cache: React state (nao precisa de React Query por ser dado pequeno)
+// - Fallback se Supabase falhar: todos os modulos habilitados (graceful degradation)
+```
+
+### 5.6 Mudancas no ModuleDefinition
+
+```typescript
 interface ModuleDefinition {
   id: ModuleId
   label: string
@@ -280,18 +409,10 @@ interface ModuleDefinition {
   route: string
   icon: LucideIcon
   status: ModuleStatus
-  // NOVO: modulos que so aparecem para tenants especificos
   tenantScoped?: boolean     // default false = aparece pra todos
   navChildren?: NavItem[]
   routeConfig?: RouteObject[]
   extensions?: ModuleExtension[]
-}
-
-// Hook atualizado
-function useModuleEnabled(): {
-  enabledModules: Set<ModuleId>      // filtrado por org ativa
-  activeOrg: Organization | null
-  switchOrg: (orgId: string) => void
 }
 ```
 
@@ -342,22 +463,73 @@ interface WidgetDefinition {
 
 ### 6.2 Endpoints obrigatorios
 
+**v1 (read-only):** O connector e inicialmente somente leitura. O hub exibe dados
+das spokes mas nao permite editar. Para modificar dados, o usuario acessa a spoke
+diretamente. Endpoints de mutacao (POST, PUT, DELETE) serao adicionados em milestone
+futuro conforme necessidade real.
+
 | Endpoint | Metodo | Retorna |
 |----------|--------|---------|
 | `/api/fxl/manifest` | GET | `FxlAppManifest` |
 | `/api/fxl/entities/:type` | GET | Lista paginada `{ data: T[], total, page, pageSize }` |
 | `/api/fxl/entities/:type/:id` | GET | Entidade individual |
-| `/api/fxl/widgets/:id/data` | GET | Dados para widget |
+| `/api/fxl/widgets/:id/data` | GET | Dados para widget (formato por tipo — ver 6.5) |
 | `/api/fxl/search?q=` | GET | Busca cross-entidade `{ results: SearchResult[] }` |
-| `/api/fxl/health` | GET | `{ status: 'ok', version }` |
+| `/api/fxl/health` | GET | `{ status: 'ok', version, contractVersion: '1.0' }` |
 
-### 6.3 Autenticacao
+**v1 field types suportados:** `string`, `number`, `date`, `boolean`.
+Os tipos `enum` e `relation` sao adiados para v2 do contrato. Isso simplifica
+a UI generica do connector (sem dropdowns, sem resolucao de referencias).
 
-- Clerk organization token compartilhado entre hub e spoke
-- Spoke valida que o token pertence a org correta
-- Sem API keys customizadas — Clerk e a unica fonte de auth
+### 6.3 Autenticacao entre Hub e Spokes
 
-### 6.4 Connector Module no Hub
+**Modelo: Clerk application unico compartilhado.**
+
+Hub e todas as spokes usam a **mesma Clerk application**. Isso significa:
+- Pool de usuarios unico (um login funciona em tudo)
+- Organizations funcionam cross-app (mesmo org_id no hub e nas spokes)
+- Billing Clerk unico
+- Spokes validam o JWT do Clerk usando o JWKS endpoint publico
+
+**Fluxo de autenticacao hub -> spoke:**
+1. Hub obtem Clerk session token do usuario (com org_id ativo)
+2. Hub faz request para spoke API incluindo `Authorization: Bearer <clerk_token>`
+3. Spoke valida JWT via Clerk JWKS (`https://api.clerk.com/v1/jwks`)
+4. Spoke extrai `org_id` do token e filtra dados por org
+5. Spoke retorna dados — sem API keys customizadas
+
+**Implicacao:** todas as spokes devem usar a mesma Clerk publishable key.
+Configurar via env var `VITE_CLERK_PUBLISHABLE_KEY` (ja e o padrao atual).
+
+### 6.4 Tratamento de erros hub-spoke
+
+| Cenario | Comportamento |
+|---------|---------------|
+| Spoke offline/timeout (5s) | Connector mostra badge "Offline" + ultimo dado cacheado se disponivel |
+| Spoke retorna 401 | Re-tentar com token refreshed. Se falhar, mostrar "Reconectar" |
+| Spoke retorna 500 | Mostrar erro generico no card do connector. Nao propagar para app |
+| Clerk offline | App inteira em modo degradado (redirect para pagina de status) |
+| Manifest invalido | Desabilitar connector, logar erro, notificar admin |
+
+### 6.5 Widget data format
+
+Cada widget type tem formato de resposta esperado:
+
+```typescript
+// KPI widget
+{ value: number | string, label: string, trend?: number, prefix?: string, suffix?: string }
+
+// Chart widget
+{ labels: string[], datasets: { label: string, data: number[] }[] }
+
+// Table widget
+{ columns: { key: string, label: string }[], rows: Record<string, unknown>[] }
+
+// List widget
+{ items: { id: string, title: string, subtitle?: string, badge?: string }[] }
+```
+
+### 6.6 Connector Module no Hub
 
 O connector e um modulo generico que sabe renderizar dados de qualquer spoke:
 
@@ -381,6 +553,20 @@ O connector:
 2. Gera rotas dinamicas: `/apps/beach-houses/reservations`, `/apps/beach-houses/properties`
 3. Renderiza UI generica (tabelas, detail views) baseada nos `FieldDefinition[]`
 4. Injeta widgets no HOME_DASHBOARD via extensions
+
+**Roteamento dinamico:** O connector nao depende de `routeConfig` estatico no manifest.
+Em vez disso, o modulo connector registra uma rota catch-all `/apps/:appId/*` e
+internamente usa o manifest da spoke para resolver sub-rotas. Isso funciona porque:
+- O `ModuleDefinition` do connector tem `routeConfig: [{ path: '/apps/*', element: <ConnectorRouter /> }]`
+- `ConnectorRouter` le a lista de connectors habilitados para o tenant
+- Para cada connector, faz GET `/api/fxl/manifest` (cacheado)
+- Gera rotas internas baseado nas entities do manifest
+- Sidebar entries sao gerados dinamicamente a partir dos connectors habilitados
+
+**Lucide icon mapping:** O campo `icon` nas entities e widgets usa nomes de icone
+lucide-react (ex: "calendar", "home", "dollar-sign"). O connector mantem um
+`Record<string, LucideIcon>` mapeando os ~100 icones mais comuns. Icones nao
+encontrados usam fallback `Box`.
 
 ---
 
@@ -468,17 +654,24 @@ interface BlueprintExport {
     branding: BrandingConfig
   }
   sections: SectionConfig[]   // secoes do wireframe (ja existem no BlueprintConfig)
-  entities: {                 // NOVO: inferido das secoes
+  entities: {                 // preenchido pelo operador no wireframe
     type: string              // "reservation"
-    fields: FieldDefinition[] // inferido dos DataTable columns, form inputs
+    fields: FieldDefinition[] // definido manualmente (nao inferido)
   }[]
-  pages: {                    // NOVO: agrupamento de secoes em paginas
+  pages: {                    // agrupamento de secoes em paginas
     slug: string
     label: string
     sections: string[]        // IDs das secoes
   }[]
 }
 ```
+
+**Entidades sao definidas manualmente, nao inferidas automaticamente.**
+O operador preenche a lista de entidades durante a fase de wireframe como parte
+do blueprint. O Wireframe Builder pode sugerir entidades com base nas secoes
+(DataTable columns -> campos sugeridos), mas o operador valida e ajusta.
+Inferencia automatica e ambigua demais (ex: coluna "Cliente" pode ser string,
+enum ou relation) e gera mais retrabalho do que economia.
 
 ### 7.5 CI/CD padrao
 
@@ -491,16 +684,30 @@ echo "FXL Doctor — Verificacao de conformidade"
 npx tsc --noEmit              # type-check
 npx eslint .                  # lint
 npx prettier --check .        # formatting
-# security headers check
-node -e "
-  const v = require('./vercel.json');
+# security headers check (ESM-compatible)
+node --input-type=module -e "
+  import { readFileSync } from 'fs';
+  const v = JSON.parse(readFileSync('./vercel.json', 'utf8'));
   const h = v.headers?.[0]?.headers?.map(h => h.key) || [];
   const req = ['X-Frame-Options','X-Content-Type-Options'];
   const miss = req.filter(r => !h.includes(r));
   if (miss.length) { console.error('Missing:', miss); process.exit(1); }
 "
+# contract version check
+node --input-type=module -e "
+  import { readFileSync } from 'fs';
+  const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
+  const v = pkg.fxlContractVersion;
+  if (!v) { console.error('Missing fxlContractVersion in package.json'); process.exit(1); }
+  const MIN = '1.0';
+  if (v < MIN) { console.error('Contract version', v, '< required', MIN); process.exit(1); }
+"
 echo "FXL Doctor — OK"
 ```
+
+**Versionamento do contrato:** cada spoke tem `"fxlContractVersion": "1.0"` no
+`package.json`. O hub valida versao minima ao fazer GET `/api/fxl/health`
+(que retorna `contractVersion`). `fxl-doctor.sh` valida no CI.
 
 GitHub Actions (`ci.yml`) roda `fxl-doctor.sh` em todo push/PR.
 
@@ -540,13 +747,25 @@ Esta camada e posterior aos milestones v3.0-v3.5. Pre-requisitos:
 | **v3.0** | Reorganizacao modular | Mover arquivos para nova estrutura. Remover Knowledge Base. Zero mudanca funcional. | — |
 | **v3.1** | Multi-tenancy | Clerk Organizations, org picker, tenant_modules, RLS por org_id. FXL como primeiro tenant. | v3.0 |
 | **v3.2** | FXL SDK (Skill) | Criar repo fxl-sdk com skill completa: rules, templates, contract, checklists. | v3.0 |
-| **v3.3** | Connector module generico | Modulo no FXL Core que consome qualquer spoke via contrato. UI generica. | v3.1 + v3.2 |
+| **v3.3** | Connector module generico | Modulo no FXL Core que consome qualquer spoke via contrato. UI generica. | v3.0 + v3.2 (multi-tenancy NAO e pre-requisito — config hardcoded inicialmente, migrado para tenant_modules em v3.5) |
 | **v3.4** | Beach House migration | Criar repo, migrar codigo Lovable, implementar contrato, migrar Supabase. | v3.2 |
 | **v3.5** | Integracao Beach House <-> Hub | Connector configurado, dados aparecendo no hub. | v3.3 + v3.4 |
 
+**Grafo de dependencias atualizado:**
+
+```
+v3.0 (reorganizacao) ──> v3.1 (multi-tenancy)
+  |                                          \
+  |──> v3.2 (SDK skill) ──> v3.3 (connector) ──> v3.5 (integracao)
+  |                     \                    /
+  |                      ──> v3.4 (Beach House)
+```
+
 **Paralelismo possivel:**
 - v3.0 e v3.2 podem rodar em paralelo (FXL Core vs novo repo)
+- v3.1 e v3.3 podem rodar em paralelo (connector nao precisa de multi-tenancy para dev)
 - v3.4 pode iniciar junto com v3.1 (Beach House nao depende de multi-tenancy)
+- v3.5 e o ponto de convergencia (tudo se junta)
 
 ---
 
@@ -578,6 +797,18 @@ Esta camada e posterior aos milestones v3.0-v3.5. Pre-requisitos:
 ## 12. Criterios de Sucesso
 
 - [ ] v3.0: `tsc --noEmit` zero erros apos reorganizacao. Todas as paginas funcionam identico ao antes.
+  Checklist manual de verificacao v3.0:
+  - [ ] Home page renderiza com widgets
+  - [ ] Navegacao sidebar funciona (todos os links)
+  - [ ] DocRenderer abre e renderiza docs corretamente
+  - [ ] Busca (Cmd+K) funciona
+  - [ ] Login/logout funciona
+  - [ ] Pagina de cliente (briefing, blueprint, wireframe) abre
+  - [ ] ComponentGallery renderiza
+  - [ ] SharedWireframeView (rota publica) funciona
+  - [ ] Admin modules toggle funciona
+  - [ ] Dark mode funciona em todas as paginas
+  - [ ] Build de producao (`npm run build`) completa sem erros
 - [ ] v3.1: Login com 2+ orgs mostra org picker. Modulos filtrados por org. RLS isolando dados.
 - [ ] v3.2: Skill funciona: `audita este projeto` gera relatorio. Template gera projeto valido.
 - [ ] v3.3: Connector renderiza entidades de um mock spoke. Widgets aparecem na home.
