@@ -24,13 +24,11 @@ Renders FXL documentation pages (processo, padroes, ferramentas, referencias) fr
 - MarkdownRenderer: Renders markdown content with react-markdown, remarkGfm, rehypeHighlight (components/MarkdownRenderer.tsx)
 - Callout: Info/warning callout block (components/Callout.tsx)
 - Operational: Collapsible operational section for Claude-only content (components/Operational.tsx)
-- PromptBlock: Copyable prompt block with label (components/PromptBlock.tsx)
 - PhaseCard: Card linking to a processo phase (components/PhaseCard.tsx)
 - DocBreadcrumb: Breadcrumb showing section > title (components/DocBreadcrumb.tsx)
 - DocPageHeader: Page header with badge, title, description (components/DocPageHeader.tsx)
 - DocTableOfContents: Right-side sticky TOC from extracted headings (components/DocTableOfContents.tsx)
 - InfoBlock: Styled info block (components/InfoBlock.tsx)
-- PageHeader: Generic page header (components/PageHeader.tsx)
 
 ### Services
 - docs-service: Supabase CRUD with in-memory cache — getDocBySlug, getAllDocuments, getDocsByParentPath, invalidateDocsCache (services/docs-service.ts)
@@ -44,7 +42,7 @@ Renders FXL documentation pages (processo, padroes, ferramentas, referencias) fr
 
 ### From shared/
 - @shared/utils — cn (class merging)
-- @shared/ui/button — Button component (used in PromptBlock)
+- @shared/ui/PromptBlock — Copyable prompt block (used in DocRenderer)
 
 ### From platform/
 - @platform/supabase — supabase client (used in docs-service)
