@@ -1,40 +1,72 @@
-# Module: Wireframe (Ferramentas)
+# Module: wireframe
 
-## Scope
+## Purpose
+Wireframe builder tools module — component gallery and shared (public) wireframe viewer. Visual builder components live in tools/wireframe-builder/ (hybrid split).
 
-Wireframe builder tools — component gallery, shared wireframe viewer.
-This is a hybrid module: pages and manifest live here, but visual
-components live in tools/wireframe-builder/ (imported via @tools/).
+## Ownership
+- src/modules/wireframe/**
 
-## Structure
+## Public API
 
-- `manifest.tsx` — Module registration (routes, nav with all block links)
-- `pages/` — ComponentGallery, SharedWireframeView, galleryMockData
-- `components/` — (currently empty — builder components stay in @tools/wireframe-builder/)
-- `hooks/` — (currently empty)
-- `types/` — (currently empty)
-- `services/` — (currently empty)
+### Types
+- No module-specific types exported (types/ currently empty)
 
-## Rules
+### Hooks
+- None (hooks/ currently empty)
 
-- Visual builder components MUST stay in tools/wireframe-builder/components/
-- Import builder components via @tools/wireframe-builder/...
-- Never import from other modules directly
-- UI components from @shared/ui/, utilities from @shared/utils/
-- Platform imports from @platform/ (supabase, module-loader)
+### Components
+- None (components/ currently empty — builder components stay in @tools/wireframe-builder/)
+
+### Services
+- None (services/ currently empty)
+
+### Pages
+- ComponentGallery: Interactive gallery showcasing all wireframe builder blocks with mock data, prop toggles, category filters, and optional branding preview (pages/ComponentGallery.tsx)
+- SharedWireframeView: Public (unauthenticated) wireframe viewer accessible via token-validated share links, with client name entry, sidebar navigation, comments, and branding (pages/SharedWireframeView.tsx)
+- galleryMockData: Mock data constants for all gallery component previews (pages/galleryMockData.ts)
+
+## Dependencies
+
+### From shared/
+- @shared/utils — cn (class merging)
+
+### From platform/
+- @platform/module-loader/registry — ModuleDefinition type (used in manifest)
+- @platform/module-loader/module-ids — MODULE_IDS.FERRAMENTAS (used in manifest)
+
+### From other modules
+- None — no direct cross-module imports
+
+### From tools/
+- @tools/wireframe-builder/lib/wireframe-theme — WireframeThemeProvider
+- @tools/wireframe-builder/lib/branding — brandingToWfOverrides, resolveBranding, getChartPalette, getFontLinks
+- @tools/wireframe-builder/lib/tokens — validateToken
+- @tools/wireframe-builder/lib/comments — getCommentsByScreen
+- @tools/wireframe-builder/lib/blueprint-store — loadBlueprint
+- @tools/wireframe-builder/types/branding — BrandingConfig, DEFAULT_BRANDING
+- @tools/wireframe-builder/types/comments — Comment, toTargetId
+- @tools/wireframe-builder/types/blueprint — BlueprintConfig, HeatmapRow, SparklineGridItem, ProgressGridItem
+- @tools/wireframe-builder/components/ — KpiCard, KpiCardFull, BarLineChart, WaterfallChart, DonutChart, ParetoChart, DataTable, DrillDownTable, ClickableTable, ConfigTable, CalculoCard, WireframeSidebar, WireframeHeader, WireframeFilterBar, GlobalFilters, InputsScreen, DetailViewSwitcher, UploadSection, ManualInputSection, SaldoBancoInput, WireframeModal, CommentOverlay, BlueprintRenderer, StackedBarChartComponent, StackedAreaChartComponent, HorizontalBarChartComponent, BubbleChartComponent, ComposedChartComponent, GaugeChartComponent, CompositionBar, GroupedBarChartComponent, BulletChartComponent, StepLineChartComponent, LollipopChartComponent, RangeBarChartComponent, BumpChartComponent, PolarAreaChartComponent, PieChartComponent, HeatmapComponent, SparklineGridComponent, ProgressGridComponent, SankeyComponent
+
+### From clients/
+- @clients/financeiro-conta-azul/wireframe/branding.config — dynamic import for per-client branding in SharedWireframeView
+
+## Hybrid Architecture Note
+This module is intentionally split:
+- **src/modules/wireframe/** — manifest, pages, hooks (module system integration)
+- **tools/wireframe-builder/** — visual components, editor, types (reusable across contexts)
+
+Builder components are shared across the gallery page, client wireframe viewer, and shared/public viewer. They must NOT be moved into this module.
+
+## Validation
+- ComponentGallery must render all available block types without errors
+- SharedWireframeView must validate share tokens before rendering wireframe
+- galleryMockData must provide valid props for every gallery component entry
 - MODULE_IDS value is 'ferramentas' (preserved for URL and localStorage compatibility)
 
-## Hybrid Exception
-
-The wireframe module is intentionally split:
-- src/modules/wireframe/ — manifest, pages, hooks (module system integration)
-- tools/wireframe-builder/ — visual components, editor, types (reusable outside module)
-
-This is documented in the design spec Section 4.3. Builder components are shared
-across contexts (module page, client wireframe, spoke export).
-
-## Key Patterns
-
-- ComponentGallery renders all available block types with mock data
-- SharedWireframeView is a public (unauthenticated) route for sharing wireframes
-- Manifest navChildren list all block documentation pages (docs module renders them)
+## Agent Rules
+- **Write:** Only files under `src/modules/wireframe/`
+- **Read:** Entire codebase
+- **Shared writes:** Request via lead -> platform agent
+- **Cross-module writes:** Never — report to lead
+- **Do NOT run** `tsc --noEmit` individually (lead runs full-project check)
