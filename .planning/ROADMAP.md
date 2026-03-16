@@ -107,5 +107,5 @@ Plans:
 |-------|----------------|--------|-----------|
 | 60. Platform Scaffold + Shared Layer | 1/1 | Complete    | 2026-03-16 |
 | 61. Module Migration | 7/7 | Complete    | 2026-03-16 |
-| 62. Removals | 1/1 | Complete   | 2026-03-16 |
+| 62. Removals | 1/1 | Complete    | 2026-03-16 |
 | 63. Integration Verification | 0/? | Not started | - |
