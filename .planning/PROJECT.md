@@ -2,11 +2,11 @@
 
 ## What This Is
 
-Plataforma operacional interna da FXL (BI para PMEs). Combina documentacao de processo, knowledge de clientes, ferramentas AI-first (wireframe-builder com editor visual, design system semantico, 28 tipos de secao, briefing estruturado), pipeline completo Briefing → Blueprint → Wireframe → Spec Generation, base de conhecimento com full-text search, e gestao de tarefas por cliente com kanban board. Arquitetura modular com MODULE_REGISTRY tipado driving sidebar, routing e home page. Interface visual com paleta primary blue #1152d4 + slate, tipografia Inter/JetBrains Mono, dark sidebar, backdrop-blur filter bar, e group-hover effects em todos os componentes de wireframe. O objetivo e ter um processo capaz de entender qualquer negocio e, a partir de perguntas e respostas estruturadas, gerar qualquer produto digital de forma progressivamente automatizada.
+Plataforma multi-tenant modular (hub) da FXL para gestao operacional de empresas. Combina modulos nativos (docs, tarefas, CRM, wireframe builder) com connector modules que consomem APIs de aplicacoes externas (spokes). Cada empresa e um tenant com modulos habilitados especificos. Arquitetura agent-first otimizada para Claude Code, com MODULE_REGISTRY tipado, slot-based extensions, e inline editing. A visao e ser o hub central onde qualquer empresa acessa todos os seus dados (tarefas, CRM, dashboards, docs) em um unico lugar, conectando tanto modulos nativos quanto sistemas externos via contrato de API padronizado.
 
 ## Core Value
 
-O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooling vivem juntos para que o Claude Code tenha contexto completo ao executar qualquer tarefa.
+O FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
 ## Requirements
 
@@ -128,7 +128,31 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ### Active
 
-(Empty — define in next milestone via `/gsd:new-milestone`)
+<!-- v3.0 Reorganizacao Modular — zero mudanca funcional -->
+
+- [ ] Criar camada platform/ (layout, auth, tenants, module-loader, router)
+- [ ] Mover modulos para estrutura autocontida (docs, tasks, clients, wireframe)
+- [ ] Criar camada shared/ (ui, hooks, types, utils)
+- [ ] Migrar src/lib/ para destinos corretos (services por modulo, platform, shared)
+- [ ] Migrar src/components/ para destinos corretos (por modulo, platform, shared)
+- [ ] Migrar src/pages/ para destinos corretos (por modulo, platform)
+- [ ] Remover modulo Knowledge Base (modulo, servico, rotas, IDs)
+- [ ] Remover codigo morto (ProcessDocsViewer, duplicados)
+- [ ] Atualizar imports em todos os arquivos afetados
+- [ ] Simplificar App.tsx (delegar para platform/router)
+
+## Current Milestone: v3.0 Reorganizacao Modular
+
+**Goal:** Reorganizar a estrutura interna do FXL Core para modular monolith com boundaries claras (platform/, modules/, shared/), preparando para multi-tenancy e agent-per-module development.
+
+**Target features:**
+- Camada platform/ separada do codigo de modulos
+- Cada modulo 100% autocontido (manifest, components, pages, services, hooks, types, CLAUDE.md)
+- Remocao do Knowledge Base (redundante com Docs)
+- Remocao de codigo morto
+- Zero mudanca funcional — tudo continua funcionando identico
+
+**Design spec:** `docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md`
 
 ### Out of Scope
 
@@ -166,11 +190,14 @@ O FXL Core e o cerebro operacional da empresa — documentacao, processo e tooli
 
 ## Current State
 
-All 12 milestones shipped (v1.0 → v2.4). Planning next milestone.
+All 12 milestones shipped (v1.0 → v2.4). Starting v3.0 Reorganizacao Modular.
 
 ## Context
 
 Shipped v2.4 Component Picker Preview Mode. All 12 milestones complete (v1.0-v2.4).
+Starting evolucao para plataforma multi-tenant SaaS com arquitetura hub-and-spoke.
+Design spec completa em docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md.
+Roadmap v3.0-v3.5: reorganizacao → multi-tenancy → SDK skill → connector → Beach House → integracao.
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
 ~41,000 LOC TypeScript. 7 Supabase migrations (001-007). 5 active modules in MODULE_REGISTRY.
 Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
@@ -277,5 +304,12 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 - **Visual language**: Primary blue #1152d4 + slate palette, Inter body / JetBrains Mono code, dark sidebar chrome
 - **Module boundaries**: Each module owns its pages, components, hooks, types — cross-module imports go through registry or shared lib/
 
+| Modular monolith over workspace packages/polyrepo | Agent context 360 > isolation, equipe pequena + Claude Code | — Pending |
+| FXL SDK como skill Claude Code (nao npm package) | Analise contextual com IA > pattern matching estatico | — Pending |
+| Clerk Organizations para multi-tenancy | Single Clerk app compartilhado hub + spokes | — Pending |
+| Edge Function JWT bridge Clerk→Supabase | org_id no JWT para RLS por tenant | — Pending |
+| API contract v1 read-only | Comecar simples, mutations em milestone futuro | — Pending |
+| Knowledge Base removido | Redundante com Docs, simplificar | — Pending |
+
 ---
-*Last updated: 2026-03-14 after v2.4 milestone*
+*Last updated: 2026-03-16 after v3.0 milestone start*
