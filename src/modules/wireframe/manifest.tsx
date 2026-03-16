@@ -1,5 +1,5 @@
 import { Wrench } from 'lucide-react'
-import ComponentGallery from '@/pages/tools/ComponentGallery'
+import ComponentGallery from './pages/ComponentGallery'
 import type { ModuleDefinition } from '@platform/module-loader/registry'
 import { MODULE_IDS } from '@platform/module-loader/module-ids'
 
