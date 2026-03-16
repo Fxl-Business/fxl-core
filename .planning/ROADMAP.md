@@ -63,7 +63,7 @@ Plans:
   3. Module system (registry, module-ids, extension-registry, slots, hooks) lives in `src/platform/module-loader/` and module toggling works
   4. App.tsx delegates routing to `src/platform/router/AppRouter.tsx` and all routes resolve
   5. Each of the 4 modules (docs, tasks, clients, wireframe) is self-contained with its own components/, pages/, services/, and CLAUDE.md
-**Plans:** 2/7 plans executed
+**Plans:** 3/7 plans executed
 
 Plans:
 - [x] 61-01-PLAN.md — Move platform layer files (layout, auth, module-loader, services, pages) to src/platform/
@@ -103,6 +103,6 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 60. Platform Scaffold + Shared Layer | 1/1 | Complete    | 2026-03-16 |
-| 61. Module Migration | 2/7 | In Progress|  |
+| 61. Module Migration | 3/7 | In Progress|  |
 | 62. Removals | 0/? | Not started | - |
 | 63. Integration Verification | 0/? | Not started | - |

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAllDocuments, type DocumentRow } from '@/lib/docs-service'
+import { getAllDocuments, type DocumentRow } from '../services/docs-service'
 import type { NavItem } from '@platform/module-loader/registry'
 
 /**

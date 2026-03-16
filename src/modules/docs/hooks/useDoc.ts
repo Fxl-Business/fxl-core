@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { getDocBySlug } from '@/lib/docs-service'
-import { parseDoc, type ParsedDoc } from '@/lib/docs-parser'
+import { getDocBySlug } from '../services/docs-service'
+import { parseDoc, type ParsedDoc } from '../services/docs-parser'
 
 type UseDocResult = {
   doc: ParsedDoc | null

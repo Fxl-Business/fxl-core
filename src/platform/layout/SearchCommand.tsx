@@ -9,7 +9,7 @@ import {
   CommandItem,
   CommandList,
 } from '@shared/ui/command'
-import { buildSearchIndex, type SearchEntry } from '@/lib/search-index'
+import { buildSearchIndex, type SearchEntry } from '@modules/docs/services/search-index'
 import { listKnowledgeEntries, type KnowledgeEntry } from '@/lib/kb-service'
 
 export default function SearchCommand() {

@@ -5,7 +5,7 @@ import { cn } from '@shared/utils'
 import { Separator } from '@shared/ui/separator'
 import { MODULE_REGISTRY, type NavItem } from '@platform/module-loader/registry'
 import { useModuleEnabled } from '@platform/module-loader/hooks/useModuleEnabled'
-import { useDocsNav } from '@/hooks/useDocsNav'
+import { useDocsNav } from '@modules/docs/hooks/useDocsNav'
 import { MODULE_IDS } from '@platform/module-loader/module-ids'
 
 function hasActiveChild(navItem: NavItem, pathname: string): boolean {

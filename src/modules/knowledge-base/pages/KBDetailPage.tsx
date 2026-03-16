@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Pencil } from 'lucide-react'
 import { Button } from '@shared/ui/button'
-import MarkdownRenderer from '@/components/docs/MarkdownRenderer'
+import MarkdownRenderer from '@modules/docs/components/MarkdownRenderer'
 import { useKBEntry } from '../hooks/useKBEntry'
 import { KBMetaPanel } from '../components/KBMetaPanel'
 

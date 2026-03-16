@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import MarkdownRenderer from '@/components/docs/MarkdownRenderer'
+import MarkdownRenderer from '@modules/docs/components/MarkdownRenderer'
 import PromptBlock from '@shared/ui/PromptBlock'
 
 // Process

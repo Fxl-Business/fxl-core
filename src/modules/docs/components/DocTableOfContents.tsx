@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@shared/utils'
-import type { DocHeading } from '@/lib/docs-parser'
+import type { DocHeading } from '../services/docs-parser'
 
 type Props = {
   headings: DocHeading[]
