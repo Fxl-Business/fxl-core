@@ -4,7 +4,7 @@ import { SignUp } from '@clerk/react'
 import Layout from '@platform/layout/Layout'
 import ProtectedRoute from '@platform/auth/ProtectedRoute'
 import Home from '@platform/pages/Home'
-import WireframeViewer from '@/pages/clients/WireframeViewer'
+import WireframeViewer from '@modules/clients/pages/WireframeViewer'
 import Login from '@platform/auth/Login'
 import Profile from '@platform/auth/Profile'
 import { Toaster } from '@shared/ui/sonner'
@@ -12,7 +12,7 @@ import { MODULE_REGISTRY } from '@platform/module-loader/registry'
 import { ModuleEnabledProvider } from '@platform/module-loader/hooks/useModuleEnabled'
 import { ExtensionProvider } from '@platform/module-loader/slots'
 
-const SharedWireframeView = lazy(() => import('@/pages/SharedWireframeView'))
+const SharedWireframeView = lazy(() => import('@modules/wireframe/pages/SharedWireframeView'))
 
 // Admin pages (lazy for code splitting)
 const ModulesPanel = lazy(() => import('@platform/pages/admin/ModulesPanel'))

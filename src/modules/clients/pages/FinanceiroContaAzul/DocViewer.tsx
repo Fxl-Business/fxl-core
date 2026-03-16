@@ -1,11 +1,11 @@
 import { useParams } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
-import MarkdownRenderer from '@/components/docs/MarkdownRenderer'
+import MarkdownRenderer from '@modules/docs/components/MarkdownRenderer'
 
-import briefingRaw from '../../../../clients/financeiro-conta-azul/docs/briefing.md?raw'
-import blueprintRaw from '../../../../clients/financeiro-conta-azul/docs/blueprint.md?raw'
-import brandingRaw from '../../../../clients/financeiro-conta-azul/docs/branding.md?raw'
-import changelogRaw from '../../../../clients/financeiro-conta-azul/docs/changelog.md?raw'
+import briefingRaw from '../../../../../clients/financeiro-conta-azul/docs/briefing.md?raw'
+import blueprintRaw from '../../../../../clients/financeiro-conta-azul/docs/blueprint.md?raw'
+import brandingRaw from '../../../../../clients/financeiro-conta-azul/docs/branding.md?raw'
+import changelogRaw from '../../../../../clients/financeiro-conta-azul/docs/changelog.md?raw'
 
 type DocEntry = { title: string; content: string; filename: string }
 
