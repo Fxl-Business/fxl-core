@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@platform/supabase'
 import type { ShareToken } from '../types/comments'
 
 export async function validateToken(

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@platform/supabase'
 import type { Comment } from '../types/comments'
 
 export async function addComment(params: {

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@platform/supabase'
 import type { BlueprintConfig } from '../types/blueprint'
 import { BlueprintConfigSchema } from './blueprint-schema'
 import { migrateBlueprint, CURRENT_SCHEMA_VERSION } from './blueprint-migrations'

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@platform/supabase'
 import type { BriefingConfig } from '../types/briefing'
 import { BriefingConfigSchema } from './briefing-schema'
 
