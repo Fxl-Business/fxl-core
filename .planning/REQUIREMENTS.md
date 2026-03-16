@@ -26,9 +26,9 @@ Requirements para milestone v3.0 Reorganizacao Modular. Cada um mapeia a fases d
 
 ### Remocoes
 
-- [ ] **REM-01**: Remover modulo Knowledge Base (diretorio, servico, IDs, rotas)
-- [ ] **REM-02**: Remover ProcessDocsViewer.tsx (codigo morto, 135 linhas)
-- [ ] **REM-03**: Remover duplicados (PageHeader.tsx copia, PromptBlock.tsx copia)
+- [x] **REM-01**: Remover modulo Knowledge Base (diretorio, servico, IDs, rotas)
+- [x] **REM-02**: Remover ProcessDocsViewer.tsx (codigo morto, 135 linhas)
+- [x] **REM-03**: Remover duplicados (PageHeader.tsx copia, PromptBlock.tsx copia)
 
 ### Integridade
 
@@ -92,9 +92,9 @@ Requirements para milestone v3.0 Reorganizacao Modular. Cada um mapeia a fases d
 | MOD-03 | Phase 61 | Complete |
 | MOD-04 | Phase 61 | Complete |
 | MOD-05 | Phase 61 | Complete |
-| REM-01 | Phase 62 | Pending |
-| REM-02 | Phase 62 | Pending |
-| REM-03 | Phase 62 | Pending |
+| REM-01 | Phase 62 | Complete |
+| REM-02 | Phase 62 | Complete |
+| REM-03 | Phase 62 | Complete |
 | INT-01 | Phase 63 | Pending |
 | INT-02 | Phase 63 | Pending |
 | INT-03 | Phase 63 | Pending |
