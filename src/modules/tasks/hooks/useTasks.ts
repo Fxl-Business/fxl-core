@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { listTasks } from '@/lib/tasks-service'
-import type { Task, TaskStatus, TaskPriority } from '@/lib/tasks-service'
+import { listTasks } from '../services/tasks-service'
+import type { Task, TaskStatus, TaskPriority } from '../services/tasks-service'
 
 // ---------------------------------------------------------------------------
 // useTasks — fetches tasks with composed filters

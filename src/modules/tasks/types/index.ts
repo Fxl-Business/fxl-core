@@ -1,7 +1,7 @@
 // Re-export types from tasks-service (single source of truth)
-export type { Task, TaskStatus, TaskPriority } from '@/lib/tasks-service'
+export type { Task, TaskStatus, TaskPriority } from '../services/tasks-service'
 
-import type { TaskStatus, TaskPriority } from '@/lib/tasks-service'
+import type { TaskStatus, TaskPriority } from '../services/tasks-service'
 
 // ---------------------------------------------------------------------------
 // Status constants

@@ -37,7 +37,7 @@ function wireDefaultMockChain() {
 
 wireDefaultMockChain()
 
-vi.mock('@/lib/supabase', () => ({
+vi.mock('@platform/supabase', () => ({
   supabase: {
     from: (table: string) => mockFrom(table),
   },

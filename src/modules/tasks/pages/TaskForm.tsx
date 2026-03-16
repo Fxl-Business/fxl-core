@@ -12,8 +12,8 @@ import {
   SelectValue,
 } from '@shared/ui/select'
 import { toast } from 'sonner'
-import { createTask, updateTask, getTask } from '@/lib/tasks-service'
-import type { TaskStatus, TaskPriority } from '@/lib/tasks-service'
+import { createTask, updateTask, getTask } from '../services/tasks-service'
+import type { TaskStatus, TaskPriority } from '../services/tasks-service'
 import { STATUS_LABELS, PRIORITY_LABELS } from '../types'
 
 // ---------------------------------------------------------------------------
