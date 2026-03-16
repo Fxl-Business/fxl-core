@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { CheckCircle2, Clock, ChevronDown } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@shared/utils'
 import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
 import { brandingToWfOverrides } from '@tools/wireframe-builder/lib/branding'
 import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'

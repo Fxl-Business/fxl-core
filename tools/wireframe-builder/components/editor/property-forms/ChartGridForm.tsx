@@ -1,5 +1,5 @@
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Input } from '@shared/ui/input'
+import { Label } from '@shared/ui/label'
 import type { ChartGridSection } from '@tools/wireframe-builder/types/blueprint'
 
 type Props = {

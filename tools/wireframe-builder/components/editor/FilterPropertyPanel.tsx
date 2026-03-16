@@ -3,8 +3,8 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
+} from '@shared/ui/sheet'
+import { Button } from '@shared/ui/button'
 import { Trash2 } from 'lucide-react'
 import type { FilterOption } from '@tools/wireframe-builder/components/WireframeFilterBar'
 import FilterOptionForm from './property-forms/FilterOptionForm'

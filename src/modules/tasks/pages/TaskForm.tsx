@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@shared/ui/button'
+import { Input } from '@shared/ui/input'
+import { Textarea } from '@shared/ui/textarea'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@shared/ui/select'
 import { toast } from 'sonner'
 import { createTask, updateTask, getTask } from '@/lib/tasks-service'
 import type { TaskStatus, TaskPriority } from '@/lib/tasks-service'

@@ -3,7 +3,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet'
+} from '@shared/ui/sheet'
 import type { FilterBarActionsConfig } from '@tools/wireframe-builder/types/blueprint'
 import type { FilterBarActionElement } from '@tools/wireframe-builder/types/editor'
 import FilterBarActionsForm from './property-forms/FilterBarActionsForm'

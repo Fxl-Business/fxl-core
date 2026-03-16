@@ -1,7 +1,7 @@
 import type { BlueprintSection } from '../../types/blueprint'
 import { getCatalog } from '../../lib/section-registry'
 import { LayoutGrid, List } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@shared/utils'
 import { usePickerMode } from './usePickerMode'
 import SectionPreviewCard from './SectionPreviewCard'
 import {
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog'
+} from '@shared/ui/dialog'
 
 type Props = {
   open: boolean

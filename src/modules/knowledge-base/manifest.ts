@@ -1,6 +1,6 @@
 import { BookMarked } from 'lucide-react'
-import type { ModuleDefinition } from '@/modules/registry'
-import { MODULE_IDS, SLOT_IDS } from '@/modules/module-ids'
+import type { ModuleDefinition } from '@platform/module-loader/registry'
+import { MODULE_IDS, SLOT_IDS } from '@platform/module-loader/module-ids'
 import { RecentKBWidget } from './extensions/RecentKBWidget'
 
 export const knowledgeBaseManifest: ModuleDefinition = {

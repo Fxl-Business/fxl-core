@@ -1,5 +1,5 @@
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
+import { Switch } from '@shared/ui/switch'
+import { Label } from '@shared/ui/label'
 import type { HeaderFormProps } from './index'
 
 type ActionToggleProps = {

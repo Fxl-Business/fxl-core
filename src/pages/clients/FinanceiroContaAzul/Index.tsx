@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
-import PromptBlock from '@/components/ui/PromptBlock'
+import PromptBlock from '@shared/ui/PromptBlock'
 import { listKnowledgeEntries, type KnowledgeEntry } from '@/lib/kb-service'
 
 type DocStatus = {

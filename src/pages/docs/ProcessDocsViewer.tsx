@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import MarkdownRenderer from '@/components/docs/MarkdownRenderer'
-import PromptBlock from '@/components/ui/PromptBlock'
+import PromptBlock from '@shared/ui/PromptBlock'
 
 // Process
 import popBiRaw from '../../../docs/process/POP_BI_PERSONALIZADO.md?raw'

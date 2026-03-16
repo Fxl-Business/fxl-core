@@ -1,6 +1,6 @@
-import { Switch } from '@/components/ui/switch'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Switch } from '@shared/ui/switch'
+import { Input } from '@shared/ui/input'
+import { Label } from '@shared/ui/label'
 import type { HeaderFormProps } from './index'
 
 export default function HeaderBrandForm({

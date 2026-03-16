@@ -1,12 +1,12 @@
-import { Switch } from '@/components/ui/switch'
-import { Input } from '@/components/ui/input'
+import { Switch } from '@shared/ui/switch'
+import { Input } from '@shared/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@shared/ui/select'
 import type { SettingsPageSection } from '../../types/blueprint'
 
 type Props = {

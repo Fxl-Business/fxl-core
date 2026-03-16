@@ -1,14 +1,14 @@
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
+import { Button } from '@shared/ui/button'
+import { Input } from '@shared/ui/input'
+import { Label } from '@shared/ui/label'
+import { Switch } from '@shared/ui/switch'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@shared/ui/select'
 import { Plus, Trash2 } from 'lucide-react'
 import type { FormSectionSection } from '@tools/wireframe-builder/types/blueprint'
 

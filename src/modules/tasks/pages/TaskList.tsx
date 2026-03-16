@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, Loader2, LayoutDashboard } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@shared/ui/button'
 import { updateTaskStatus } from '@/lib/tasks-service'
 import { useTasks } from '../hooks/useTasks'
 import { TaskCard } from '../components/TaskCard'

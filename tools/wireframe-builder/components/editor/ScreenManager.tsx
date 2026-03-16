@@ -16,16 +16,16 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Button } from '@shared/ui/button'
+import { Input } from '@shared/ui/input'
+import { Label } from '@shared/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@shared/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -33,14 +33,14 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
+} from '@shared/ui/dialog'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
-} from '@/components/ui/context-menu'
+} from '@shared/ui/context-menu'
 import {
   GripVertical,
   Plus,
@@ -49,7 +49,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@shared/utils'
 import type { BlueprintScreen, PeriodType } from '@tools/wireframe-builder/types/blueprint'
 import IconPicker, { getIconComponent } from './IconPicker'
 

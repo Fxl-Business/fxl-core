@@ -1,7 +1,7 @@
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import { cn } from '@/lib/utils'
+import { Input } from '@shared/ui/input'
+import { Label } from '@shared/ui/label'
+import { Checkbox } from '@shared/ui/checkbox'
+import { cn } from '@shared/utils'
 import type {
   SidebarGroup,
   BlueprintScreen,

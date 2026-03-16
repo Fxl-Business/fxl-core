@@ -3,7 +3,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet'
+} from '@shared/ui/sheet'
 import type { BlueprintSection } from '@tools/wireframe-builder/types/blueprint'
 import { getPropertyForm, getSectionLabel } from '@tools/wireframe-builder/lib/section-registry'
 

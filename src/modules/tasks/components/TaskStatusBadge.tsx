@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn } from '@shared/utils'
 import { STATUS_COLORS, STATUS_LABELS, nextStatus } from '../types'
 import type { Task, TaskStatus } from '../types'
 

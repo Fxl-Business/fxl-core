@@ -1,5 +1,5 @@
 import { CheckCircle2, XCircle, Upload } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@shared/utils'
 
 type HistoryEntry = {
   id: string

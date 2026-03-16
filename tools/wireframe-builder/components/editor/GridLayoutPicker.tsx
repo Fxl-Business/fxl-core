@@ -1,5 +1,5 @@
 import { LayoutGrid } from 'lucide-react'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover'
 import { GRID_LAYOUTS } from '../../lib/grid-layouts'
 import type { GridLayout } from '../../types/editor'
 

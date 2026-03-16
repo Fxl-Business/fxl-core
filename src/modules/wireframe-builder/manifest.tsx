@@ -1,5 +1,5 @@
 import { Puzzle } from 'lucide-react'
-import type { ModuleManifest } from '@/modules/registry'
+import type { ModuleManifest } from '@platform/module-loader/registry'
 
 export const wireframeBuilderManifest: ModuleManifest = {
   id: 'wireframe-builder',

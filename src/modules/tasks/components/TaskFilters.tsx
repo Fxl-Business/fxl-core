@@ -1,11 +1,11 @@
-import { Input } from '@/components/ui/input'
+import { Input } from '@shared/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@shared/ui/select'
 import { STATUS_LABELS, PRIORITY_LABELS } from '../types'
 import type { TaskStatus, TaskPriority } from '../types'
 

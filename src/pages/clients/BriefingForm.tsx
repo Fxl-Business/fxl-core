@@ -3,24 +3,24 @@ import { useParams, Navigate } from 'react-router-dom'
 import { useUser } from '@clerk/react'
 import { Loader2, Plus, Trash2, Save, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+import { Button } from '@shared/ui/button'
+import { Input } from '@shared/ui/input'
+import { Textarea } from '@shared/ui/textarea'
+import { Label } from '@shared/ui/label'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '@/components/ui/card'
+} from '@shared/ui/card'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@shared/ui/select'
 import {
   loadBriefing,
   saveBriefing,

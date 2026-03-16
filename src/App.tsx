@@ -1,21 +1,21 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 import { SignUp } from '@clerk/react'
-import Layout from '@/components/layout/Layout'
-import ProtectedRoute from '@/components/ProtectedRoute'
-import Home from '@/pages/Home'
+import Layout from '@platform/layout/Layout'
+import ProtectedRoute from '@platform/auth/ProtectedRoute'
+import Home from '@platform/pages/Home'
 import WireframeViewer from '@/pages/clients/WireframeViewer'
-import Login from '@/pages/Login'
-import Profile from '@/pages/Profile'
-import { Toaster } from '@/components/ui/sonner'
-import { MODULE_REGISTRY } from '@/modules/registry'
-import { ModuleEnabledProvider } from '@/modules/hooks/useModuleEnabled'
-import { ExtensionProvider } from '@/modules/slots'
+import Login from '@platform/auth/Login'
+import Profile from '@platform/auth/Profile'
+import { Toaster } from '@shared/ui/sonner'
+import { MODULE_REGISTRY } from '@platform/module-loader/registry'
+import { ModuleEnabledProvider } from '@platform/module-loader/hooks/useModuleEnabled'
+import { ExtensionProvider } from '@platform/module-loader/slots'
 
 const SharedWireframeView = lazy(() => import('@/pages/SharedWireframeView'))
 
 // Admin pages (lazy for code splitting)
-const ModulesPanel = lazy(() => import('@/pages/admin/ModulesPanel'))
+const ModulesPanel = lazy(() => import('@platform/pages/admin/ModulesPanel'))
 
 // Knowledge Base pages (lazy for code splitting)
 const KBListPage = lazy(() => import('@/modules/knowledge-base/pages/KBListPage'))

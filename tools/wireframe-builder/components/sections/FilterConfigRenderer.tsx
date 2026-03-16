@@ -1,11 +1,11 @@
-import { Input } from '@/components/ui/input'
+import { Input } from '@shared/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@shared/ui/select'
 import type { FilterConfigSection } from '../../types/blueprint'
 
 type Props = {

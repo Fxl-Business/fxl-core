@@ -1,7 +1,7 @@
 import { Wrench } from 'lucide-react'
 import ComponentGallery from '@/pages/tools/ComponentGallery'
-import type { ModuleDefinition } from '@/modules/registry'
-import { MODULE_IDS } from '@/modules/module-ids'
+import type { ModuleDefinition } from '@platform/module-loader/registry'
+import { MODULE_IDS } from '@platform/module-loader/module-ids'
 
 export const ferramentasManifest: ModuleDefinition = {
   id: MODULE_IDS.FERRAMENTAS,

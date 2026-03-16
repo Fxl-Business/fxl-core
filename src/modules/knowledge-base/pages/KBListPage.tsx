@@ -1,15 +1,15 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, Search } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@shared/ui/button'
+import { Input } from '@shared/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@shared/ui/select'
 import { useKBEntries } from '../hooks/useKBEntries'
 import { KBEntryCard } from '../components/KBEntryCard'
 import { KBTypeFilter } from '../components/KBTypeFilter'

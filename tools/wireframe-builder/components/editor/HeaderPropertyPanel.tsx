@@ -3,7 +3,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet'
+} from '@shared/ui/sheet'
 import type { HeaderConfig } from '@tools/wireframe-builder/types/blueprint'
 import type { HeaderElementType } from '@tools/wireframe-builder/types/editor'
 import { getHeaderForm, getHeaderElementLabel } from './header-forms'

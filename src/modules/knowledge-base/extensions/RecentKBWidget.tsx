@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { BookMarked } from 'lucide-react'
-import type { SlotComponentProps } from '@/modules/registry'
-import { supabase } from '@/lib/supabase'
+import type { SlotComponentProps } from '@platform/module-loader/registry'
+import { supabase } from '@platform/supabase'
 
 // ---------------------------------------------------------------------------
 // Types

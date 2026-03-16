@@ -4,8 +4,8 @@ import FinanceiroIndex from '@/pages/clients/FinanceiroContaAzul/Index'
 import FinanceiroDocViewer from '@/pages/clients/FinanceiroContaAzul/DocViewer'
 import BlueprintTextView from '@/pages/clients/BlueprintTextView'
 import BriefingForm from '@/pages/clients/BriefingForm'
-import type { ModuleDefinition } from '@/modules/registry'
-import { MODULE_IDS } from '@/modules/module-ids'
+import type { ModuleDefinition } from '@platform/module-loader/registry'
+import { MODULE_IDS } from '@platform/module-loader/module-ids'
 
 export const clientsManifest: ModuleDefinition = {
   id: MODULE_IDS.CLIENTS,

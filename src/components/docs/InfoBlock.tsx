@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { AlertCircle, CheckCircle2, Info } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@shared/utils'
 
 type InfoBlockProps = {
   type?: 'info' | 'warning' | 'success'

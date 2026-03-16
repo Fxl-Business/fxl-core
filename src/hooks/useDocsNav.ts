@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getAllDocuments, type DocumentRow } from '@/lib/docs-service'
-import type { NavItem } from '@/modules/registry'
+import type { NavItem } from '@platform/module-loader/registry'
 
 /**
  * Build a NavItem tree from DocumentRow[] matching the exact sidebar structure:

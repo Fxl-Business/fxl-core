@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@shared/ui/button'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover'
+} from '@shared/ui/popover'
 import {
   LayoutDashboard,
   BarChart3,
@@ -28,7 +28,7 @@ import {
   Layers,
   type LucideIcon,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@shared/utils'
 
 const ICON_OPTIONS = [
   'layout-dashboard',

@@ -1,12 +1,12 @@
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
+import { Switch } from '@shared/ui/switch'
+import { Label } from '@shared/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@shared/ui/select'
 import type { PeriodType } from '@tools/wireframe-builder/types/blueprint'
 import type { HeaderFormProps } from './index'
 

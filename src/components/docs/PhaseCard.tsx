@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { cn } from '@/lib/utils'
+import { cn } from '@shared/utils'
 
 type PhaseCardProps = {
   number: number

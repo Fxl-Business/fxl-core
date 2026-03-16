@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Button } from '@/components/ui/button'
+import { Input } from '@shared/ui/input'
+import { Label } from '@shared/ui/label'
+import { Switch } from '@shared/ui/switch'
+import { Button } from '@shared/ui/button'
 import type { SidebarWidget } from '@tools/wireframe-builder/types/blueprint'
 
 type Props = {

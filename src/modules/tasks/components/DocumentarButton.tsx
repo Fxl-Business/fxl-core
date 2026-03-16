@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { BookOpen } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@shared/ui/button'
 import type { Task } from '../types'
 
 // ---------------------------------------------------------------------------
