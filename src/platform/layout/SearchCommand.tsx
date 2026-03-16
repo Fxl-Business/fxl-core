@@ -8,7 +8,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command'
+} from '@shared/ui/command'
 import { buildSearchIndex, type SearchEntry } from '@/lib/search-index'
 import { listKnowledgeEntries, type KnowledgeEntry } from '@/lib/kb-service'
 

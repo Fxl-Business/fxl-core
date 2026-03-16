@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { MODULE_REGISTRY } from '@/modules/registry'
-import type { ModuleDefinition } from '@/modules/registry'
-import { Switch } from '@/components/ui/switch'
+import { MODULE_REGISTRY } from '@platform/module-loader/registry'
+import type { ModuleDefinition } from '@platform/module-loader/registry'
+import { Switch } from '@shared/ui/switch'
 
 // ---------------------------------------------------------------------------
 // Enabled-modules local state hook (localStorage-backed, synchronous init)

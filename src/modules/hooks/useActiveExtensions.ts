@@ -1,6 +1,6 @@
-import { MODULE_REGISTRY } from '../registry'
-import type { ModuleExtension } from '../registry'
-import { useExtensions } from '../slots'
+import { MODULE_REGISTRY } from '@platform/module-loader/registry'
+import type { ModuleExtension } from '@platform/module-loader/registry'
+import { useExtensions } from '@platform/module-loader/slots'
 
 /**
  * Returns the active extensions for a given module ID.

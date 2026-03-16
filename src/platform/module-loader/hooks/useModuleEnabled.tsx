@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
-import type { ModuleId } from '@/modules/registry'
-import { MODULE_IDS } from '@/modules/module-ids'
+import type { ModuleId } from '@platform/module-loader/registry'
+import { MODULE_IDS } from '@platform/module-loader/module-ids'
 
 const STORAGE_KEY = 'fxl-enabled-modules'
 

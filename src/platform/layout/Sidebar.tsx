@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, Home } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { cn } from '@/lib/utils'
-import { Separator } from '@/components/ui/separator'
-import { MODULE_REGISTRY, type NavItem } from '@/modules/registry'
-import { useModuleEnabled } from '@/modules/hooks/useModuleEnabled'
+import { cn } from '@shared/utils'
+import { Separator } from '@shared/ui/separator'
+import { MODULE_REGISTRY, type NavItem } from '@platform/module-loader/registry'
+import { useModuleEnabled } from '@platform/module-loader/hooks/useModuleEnabled'
 import { useDocsNav } from '@/hooks/useDocsNav'
-import { MODULE_IDS } from '@/modules/module-ids'
+import { MODULE_IDS } from '@platform/module-loader/module-ids'
 
 function hasActiveChild(navItem: NavItem, pathname: string): boolean {
   if (navItem.href && pathname === navItem.href) {

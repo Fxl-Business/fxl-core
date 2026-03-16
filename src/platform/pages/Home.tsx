@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { Activity, ArrowRight, BookOpen, CheckSquare } from 'lucide-react'
-import { MODULE_REGISTRY, SLOT_IDS, type ModuleDefinition } from '@/modules/registry'
-import { ExtensionSlot } from '@/modules/slots'
-import { useActivityFeed, type ActivityItem, formatDate } from '@/lib/activity-feed'
-import { useModuleStats, type ModuleStats } from '@/lib/module-stats'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import { MODULE_REGISTRY, SLOT_IDS, type ModuleDefinition } from '@platform/module-loader/registry'
+import { ExtensionSlot } from '@platform/module-loader/slots'
+import { useActivityFeed, type ActivityItem, formatDate } from '@platform/services/activity-feed'
+import { useModuleStats, type ModuleStats } from '@platform/services/module-stats'
+import { Badge } from '@shared/ui/badge'
+import { Separator } from '@shared/ui/separator'
 
 // ---------------------------------------------------------------------------
 // Internal components (not exported)
