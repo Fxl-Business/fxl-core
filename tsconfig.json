@@ -19,7 +19,10 @@
     "paths": {
       "@/*": ["src/*"],
       "@tools/*": ["tools/*"],
-      "@clients/*": ["clients/*"]
+      "@clients/*": ["clients/*"],
+      "@platform/*": ["src/platform/*"],
+      "@shared/*": ["src/shared/*"],
+      "@modules/*": ["src/modules/*"]
     }
   },
   "include": [

@@ -9,6 +9,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
       '@tools': path.resolve(__dirname, 'tools'),
       '@clients': path.resolve(__dirname, 'clients'),
+      '@platform': path.resolve(__dirname, 'src/platform'),
+      '@shared': path.resolve(__dirname, 'src/shared'),
+      '@modules': path.resolve(__dirname, 'src/modules'),
     },
   },
 })
