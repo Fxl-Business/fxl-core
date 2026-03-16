@@ -1,240 +1,157 @@
-# GSD Multi-Agent Implementation Plan
+# GSD Multi-Agent Skill — Implementation Plan
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Evolve GSD to automatically detect multi-module phases and execute them with parallel agents via tmux, including hub-and-spoke communication, wave-based execution, and contract refresh.
+**Goal:** Create a self-contained skill at `.claude/skills/gsd-multi-agent/` that gives GSD automatic multi-module detection and parallel agent execution via tmux — without patching any GSD internal files.
 
-**Architecture:** Modifications to 5 existing GSD components (planner agent, executor agent, verifier agent, execute-phase workflow, new-milestone workflow) plus a new module CLAUDE.md template. No new commands or files beyond the template. The GSD's existing wave system in execute-phase is extended to support multi-agent spawning when the plan declares `execution_mode: multi-agent`.
+**Architecture:** The skill provides rules files that GSD agents (planner, executor, verifier) read automatically via the existing skill discovery mechanism. Each rule file instructs the corresponding agent on multi-agent behavior. A SKILL.md index tells agents when and how to apply the rules.
 
-**Tech Stack:** Claude Code agent system (markdown agent definitions, workflow orchestration), tmux teammate mode, GSD CLI tools (Node.js), git
+**Tech Stack:** Claude Code skill system (SKILL.md + rules/*.md), tmux teammate mode, git
 
 **Spec:** `docs/superpowers/specs/2026-03-16-gsd-multi-agent-design.md`
 
 ---
 
-## Chunk 1: Module Registry Foundation
+## Chunk 1: Skill Skeleton + SKILL.md
 
-### Task 1: Create Module CLAUDE.md Template
+### Task 1: Create Skill Directory and SKILL.md
 
 **Files:**
-- Create: `.claude/get-shit-done/templates/module-claude.md`
+- Create: `.claude/skills/gsd-multi-agent/SKILL.md`
 
-- [ ] **Step 1: Write the module CLAUDE.md template**
-
-```markdown
-# Module: {{module-name}}
-
-## Purpose
-{{one-line description}}
-
-## Ownership
-- src/modules/{{module-name}}/**
-
-## Public API
-
-### Types
-{{exported types with file paths}}
-
-### Hooks
-{{exported hooks with file paths}}
-
-### Components
-{{exported components with file paths}}
-
-## Dependencies
-
-### From shared/
-{{imports from shared/}}
-
-### From platform/
-{{imports from platform/}}
-
-### From other modules
-{{cross-module imports, always read-only}}
-
-## Validation
-- `tsc --noEmit` (full project, only at lead level)
-- {{module-specific checks}}
-
-## Agent Rules
-- **Write:** Only files under `src/modules/{{module-name}}/`
-- **Read:** Entire codebase
-- **Shared writes:** Request via lead → platform agent
-- **Cross-module writes:** Never — report to lead
-```
-
-- [ ] **Step 2: Verify template is well-formed markdown**
-
-Run: `head -5 .claude/get-shit-done/templates/module-claude.md`
-Expected: Shows the `# Module:` header line
-
-- [ ] **Step 3: Commit**
+- [ ] **Step 1: Create skill directory**
 
 ```bash
-git add .claude/get-shit-done/templates/module-claude.md
-git commit -m "infra: add module CLAUDE.md template for multi-agent GSD"
+mkdir -p .claude/skills/gsd-multi-agent/rules
+mkdir -p .claude/skills/gsd-multi-agent/templates
+```
+
+- [ ] **Step 2: Write SKILL.md**
+
+```markdown
+---
+name: gsd-multi-agent
+description: Module-aware parallel execution for GSD. Automatically detects when a phase affects multiple modules and orchestrates parallel agents via tmux with hub-and-spoke communication.
+---
+
+# GSD Multi-Agent
+
+Extends GSD with automatic multi-module detection and parallel agent execution.
+
+## When This Skill Applies
+
+This skill is relevant when:
+- A GSD phase affects files in 2+ modules under `src/modules/`
+- Each module has a `CLAUDE.md` declaring its boundaries and public API
+- The project uses a modular monolith structure (modules/, platform/, shared/)
+
+## Rules Index
+
+Load rules based on your role:
+
+| Your Role | Load This Rule | When |
+|-----------|---------------|------|
+| **gsd-planner** | `rules/module-detection.md` | Always during plan generation |
+| **execute-phase orchestrator** | `rules/multi-agent-execution.md` | When plan has `execution_mode: multi-agent` |
+| **gsd-executor** (spawned as module agent) | `rules/module-scoped-executor.md` | When spawned with `<agent_rules>` containing ownership |
+| **gsd-verifier** | `rules/cross-module-verification.md` | When verifying a phase with `execution_mode: multi-agent` |
+| **new-milestone orchestrator** | `rules/brainstorming-milestone.md` | Always during milestone creation |
+
+## Key Concepts
+
+- **Module Registry:** Each `src/modules/[name]/CLAUDE.md` declares ownership, public API, dependencies
+- **Waves:** Wave 1 (platform/cross-cutting) → Wave 2 (parallel modules) → Wave 3 (integration verification)
+- **Contracts:** TypeScript interfaces derived from plan delta — what changes in this phase
+- **Hub-and-spoke:** Decisions/changes go through lead; simple signals (dependency ready) can be direct
+- **Soft isolation:** Agents can read everything, write only in their owned scope
+
+## Templates
+
+- `templates/module-claude.md` — Template for module CLAUDE.md files
+
+## Fallback
+
+If tmux is not available or `execution_mode` is not `multi-agent`, all GSD behavior remains unchanged.
+This skill adds capabilities — it never removes or overrides existing GSD behavior.
+```
+
+- [ ] **Step 3: Verify directory structure**
+
+```bash
+find .claude/skills/gsd-multi-agent -type f -o -type d | sort
+```
+Expected: SKILL.md, rules/, templates/
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add .claude/skills/gsd-multi-agent/SKILL.md
+git commit -m "infra: create gsd-multi-agent skill skeleton with SKILL.md"
 ```
 
 ---
 
-### Task 2: Generate CLAUDE.md for Each Active Module
+## Chunk 2: Module Detection Rule (Planner)
+
+### Task 2: Create module-detection.md Rule
 
 **Files:**
-- Create: `src/modules/docs/CLAUDE.md`
-- Create: `src/modules/clients/CLAUDE.md`
-- Create: `src/modules/wireframe/CLAUDE.md`
-- Create: `src/modules/tasks/CLAUDE.md`
+- Create: `.claude/skills/gsd-multi-agent/rules/module-detection.md`
 
-For each module, analyze its actual exports/imports by reading its files and generate a CLAUDE.md following the template. Skip `ferramentas`, `hooks`, and `knowledge-base` (these are being removed or reorganized per v3.0 roadmap — Phase 62).
+- [ ] **Step 1: Write module detection rule**
 
-- [ ] **Step 1: Analyze docs module exports**
-
-Read all files under `src/modules/docs/` — identify exported types, hooks, components, and imports from shared/platform/other modules.
-
-- [ ] **Step 2: Write `src/modules/docs/CLAUDE.md`**
-
-Populate template with actual exports/imports discovered. Example structure:
-```markdown
-# Module: docs
-
-## Purpose
-Documentation rendering and navigation — process docs, tools docs, client docs.
-
-## Ownership
-- src/modules/docs/**
-
-## Public API
-
-### Types
-- (none exported cross-module)
-
-### Hooks
-- useDoc: Load and parse a single doc by path (src/modules/docs/hooks/useDoc.ts)
-- useDocsNav: Navigation tree for sidebar (src/modules/docs/hooks/useDocsNav.ts)
-
-### Components
-- MarkdownRenderer: Renders .md with custom tags (src/modules/docs/components/MarkdownRenderer.tsx)
-- DocBreadcrumb: Breadcrumb navigation (src/modules/docs/components/DocBreadcrumb.tsx)
-[... other components discovered]
-
-## Dependencies
-
-### From shared/
-- ui/ components (Button, Card, etc.)
-
-### From platform/
-- Layout, routing
-
-### From other modules
-- (none)
-
-## Validation
-- `tsc --noEmit` (full project, only at lead level)
-
-## Agent Rules
-- **Write:** Only files under `src/modules/docs/`
-- **Read:** Entire codebase
-- **Shared writes:** Request via lead → platform agent
-- **Cross-module writes:** Never — report to lead
-```
-
-- [ ] **Step 3: Discover exports for each remaining module**
-
-For each module (clients, wireframe, tasks), run discovery:
-```bash
-# List all exported symbols
-grep -r "^export" src/modules/clients/ --include="*.ts" --include="*.tsx" | head -20
-grep -r "^export" src/modules/wireframe/ --include="*.ts" --include="*.tsx" | head -20
-grep -r "^export" src/modules/tasks/ --include="*.ts" --include="*.tsx" | head -20
-
-# List all imports FROM other modules/shared/platform
-grep -r "from.*@\|from.*shared\|from.*platform\|from.*modules/" src/modules/clients/ --include="*.ts" --include="*.tsx" | head -20
-grep -r "from.*@\|from.*shared\|from.*platform\|from.*modules/" src/modules/wireframe/ --include="*.ts" --include="*.tsx" | head -20
-grep -r "from.*@\|from.*shared\|from.*platform\|from.*modules/" src/modules/tasks/ --include="*.ts" --include="*.tsx" | head -20
-```
-
-- [ ] **Step 4: Write CLAUDE.md for clients module**
-
-Populate based on discovery. Key areas: BriefingForm, BlueprintTextView, WireframeViewer pages; client context hooks; imports from wireframe module (read-only).
-
-- [ ] **Step 5: Write CLAUDE.md for wireframe module**
-
-Populate based on discovery. Key areas: ComponentGallery, SharedWireframeView pages; wireframe builder components; blueprint types; chart components.
-
-- [ ] **Step 6: Write CLAUDE.md for tasks module**
-
-Populate based on discovery. Key areas: tasks-service.ts; task types; Supabase integration.
-
-- [ ] **Step 7: Verify all CLAUDE.md files exist**
-
-Run: `ls src/modules/*/CLAUDE.md`
-Expected: 4 files (docs, clients, wireframe, tasks)
-
-- [ ] **Step 8: Commit**
-
-```bash
-git add src/modules/docs/CLAUDE.md src/modules/clients/CLAUDE.md src/modules/wireframe/CLAUDE.md src/modules/tasks/CLAUDE.md
-git commit -m "infra: generate module CLAUDE.md files for multi-agent boundaries"
-```
-
----
-
-## Chunk 2: Planner Module Detection
-
-### Task 3: Add Module Detection to gsd-planner
-
-**Files:**
-- Modify: `.claude/agents/gsd-planner.md`
-
-The planner agent needs a new section after task generation that:
-1. Maps each task's files to module owners
-2. Classifies tasks as module-specific, cross-cutting, or unmapped
-3. Decides execution mode (single-agent vs multi-agent)
-4. If multi-agent: generates wave breakdown, sub-waves, and contracts
-
-- [ ] **Step 1: Read current gsd-planner.md fully**
-
-Read the complete file to understand where to insert the new section.
-
-- [ ] **Step 2: Add module detection section after task generation**
-
-Insert a new `<module_detection>` section after the existing planning flow. This section instructs the planner to:
+This rule is read by `gsd-planner` after it generates tasks. It instructs the planner to detect modules, classify tasks, and generate multi-agent plan structure.
 
 ```markdown
-<module_detection>
-## Module-Aware Planning (Automatic)
+# Module Detection — Rules for gsd-planner
 
-After generating tasks, perform module detection:
+After generating tasks for a phase, perform these additional steps.
 
-### Step 1: Discover Modules
+## Step 1: Discover Modules
+
 ```bash
 ls -d src/modules/*/CLAUDE.md 2>/dev/null
 ```
+
 Read each module's CLAUDE.md to understand ownership boundaries and public APIs.
 
-### Step 2: Map Tasks to Modules
+**If a module directory exists but has NO CLAUDE.md:**
+- Auto-generate a scaffold by analyzing exports:
+  ```bash
+  grep -r "^export" src/modules/{name}/ --include="*.ts" --include="*.tsx" | head -20
+  ```
+- Write scaffold using `.claude/skills/gsd-multi-agent/templates/module-claude.md`
+- Log: "⚠ Auto-generated CLAUDE.md for module {name} — review recommended"
+
+## Step 2: Map Tasks to Modules
+
 For each task, identify files it will create/modify and map to owners:
-- `src/modules/[name]/**` → module `[name]`
+- `src/modules/[name]/**` → module `[name]` (dynamic — any dir with CLAUDE.md)
 - `src/platform/**` → platform (cross-cutting)
 - `src/shared/**` → platform (cross-cutting)
 - `docs/**`, `clients/**`, `tools/**`, `supabase/**`, root configs → lead agent (unmapped)
 
 Classify each task as: `module-specific([name])`, `cross-cutting`, or `unmapped`.
 
-### Step 3: Decide Execution Mode
-Count tasks by category:
-- If only 1 module affected → `execution_mode: single-agent` (standard plan, no changes)
-- If 2+ modules affected → calculate parallelization ratio:
-  - `ratio = module-scoped tasks in 2+ modules / total tasks`
-  - If ratio < 0.30 → `execution_mode: single-agent` (not worth parallelizing)
-  - If ratio >= 0.30 → `execution_mode: multi-agent`
-  - Example: 5 cross-cutting + 2 module-scoped = 2/7 = 28% → single-agent
-  - Example: 3 cross-cutting + 8 module-scoped in 3 modules = 8/11 = 72% → multi-agent
-- If only cross-cutting → `execution_mode: single-agent`
-- If only unmapped → `execution_mode: single-agent`
-- If mix of modules + unmapped → `execution_mode: multi-agent`, unmapped tasks go to lead
+## Step 3: Decide Execution Mode
 
-### Step 4: Generate Multi-Agent Plan Structure (only if multi-agent)
+Count tasks by category and calculate parallelization ratio:
+- `ratio = module-scoped tasks in 2+ modules / total tasks`
+- If ratio < 0.30 → `execution_mode: single-agent` (not worth parallelizing). STOP here.
+- If ratio >= 0.30 → `execution_mode: multi-agent`. Continue to Step 4.
+
+**Decision matrix:**
+- Only 1 module affected → single-agent
+- 2+ modules affected with ratio >= 0.30 → multi-agent
+- Only cross-cutting (platform/shared) → single-agent
+- Only unmapped (docs/, clients/, tools/) → single-agent
+- Mix of modules + unmapped → multi-agent, unmapped tasks go to lead
+
+**Examples:**
+- 5 cross-cutting + 2 module-scoped = 2/7 = 28% → single-agent
+- 3 cross-cutting + 8 module-scoped in 3 modules = 8/11 = 72% → multi-agent
+
+## Step 4: Generate Multi-Agent Plan Structure
 
 Add to PLAN.md frontmatter:
 ```yaml
@@ -243,134 +160,106 @@ agents:
   - name: platform
     ownership: ["src/platform/**", "src/shared/**"]
     tasks: [task-ids]
-  - name: wireframe
-    ownership: ["src/modules/wireframe/**"]
+  - name: {module1}
+    ownership: ["src/modules/{module1}/**"]
     tasks: [task-ids]
-  - name: clients
-    ownership: ["src/modules/clients/**"]
+  - name: {module2}
+    ownership: ["src/modules/{module2}/**"]
     tasks: [task-ids]
 waves:
   1: { agent: platform, type: cross-cutting }
-  2: { agents: [wireframe, clients], type: parallel-modules }
+  2: { agents: [{module1}, {module2}], type: parallel-modules }
   3: { type: integration-verification }
 ```
 
-Add Contracts section to plan body:
+Add `## Contracts` section to plan body with TypeScript interfaces:
 ```markdown
 ## Contracts
 
-### platform → wireframe
-- Exports: [TypeScript interfaces with exact shapes]
-- Location: [exact file paths]
+### platform → {module1}
+- Exports: {exact TypeScript interface} (e.g., `TenantConfig { id: string, slug: string }`)
+- Location: {exact file path}
 
-### platform → clients
-- Exports: [TypeScript interfaces with exact shapes]
-- Location: [exact file paths]
+### platform → {module2}
+- Exports: {same or different interfaces}
+- Location: {exact file path}
 ```
 
-**Contract generation rules:**
+**Contract rules:**
 - Derive from task descriptions — what each task creates/modifies that others need
-- Use exact TypeScript interface definitions, not prose
+- Use exact TypeScript interface definitions, NOT prose descriptions
 - Include file paths for every export
 - Only include contracts for the delta (what changes in this phase)
 
-### Step 5: Detect Intra-Wave Dependencies (Sub-Waves)
+## Step 5: Detect Intra-Wave Dependencies (Sub-Waves)
 
 If module A produces something module B consumes within Wave 2:
 ```yaml
 waves:
-  2a: { agents: [wireframe], type: parallel-modules, note: "produces WireframeContext" }
-  2b: { agents: [clients], type: parallel-modules, depends_on: 2a, note: "consumes WireframeContext" }
+  2a: { agents: [{producer}], type: parallel-modules }
+  2b: { agents: [{consumer}], type: parallel-modules, depends_on: 2a }
 ```
 
-If no inter-module dependencies in Wave 2: all modules in single sub-wave.
+If no inter-module dependencies: all modules in single Wave 2.
 
-### Step 6: Self-Check for Multi-Agent Plans
+## Step 6: Self-Check
+
+Before returning the plan:
 - [ ] Every task assigned to exactly one agent
 - [ ] No two agents own overlapping file paths
 - [ ] Cross-cutting tasks assigned to platform agent
-- [ ] Contracts include TypeScript interfaces (not prose descriptions)
+- [ ] Contracts include TypeScript interfaces (not prose)
 - [ ] Sub-waves correctly ordered if inter-module dependencies exist
-</module_detection>
 ```
 
-- [ ] **Step 3: Verify the edit is syntactically valid**
-
-Run: `grep -c "module_detection" .claude/agents/gsd-planner.md`
-Expected: 2 (opening and closing tags)
-
-- [ ] **Step 4: Commit**
+- [ ] **Step 2: Commit**
 
 ```bash
-git add .claude/agents/gsd-planner.md
-git commit -m "infra: add module detection and multi-agent planning to gsd-planner"
+git add .claude/skills/gsd-multi-agent/rules/module-detection.md
+git commit -m "infra: add module-detection rule for gsd-planner"
 ```
 
 ---
 
-## Chunk 3: Execute-Phase Multi-Agent Orchestration
+## Chunk 3: Multi-Agent Execution Rule (Orchestrator)
 
-### Task 4: Add Multi-Agent Execution to execute-phase Workflow
+### Task 3: Create multi-agent-execution.md Rule
 
 **Files:**
-- Modify: `.claude/get-shit-done/workflows/execute-phase.md`
+- Create: `.claude/skills/gsd-multi-agent/rules/multi-agent-execution.md`
 
-This is the core change. The execute-phase workflow needs to detect `execution_mode: multi-agent` in the PLAN.md and switch from single-agent execution to multi-agent wave orchestration.
+- [ ] **Step 1: Write multi-agent execution rule**
 
-- [ ] **Step 1: Read current execute-phase.md fully**
-
-Read the complete file to understand the existing wave execution flow.
-
-- [ ] **Step 2: Add multi-agent detection after plan discovery**
-
-After the `discover_and_group_plans` step, add detection logic:
+This rule is read by the execute-phase orchestrator when it detects `execution_mode: multi-agent` in a plan's frontmatter.
 
 ```markdown
-<step name="detect_multi_agent">
-**Check for multi-agent execution mode:**
+# Multi-Agent Execution — Rules for execute-phase orchestrator
 
-For each plan in `plans[]`, read frontmatter and check for `execution_mode: multi-agent`.
+When a plan has `execution_mode: multi-agent` in frontmatter, follow this orchestration
+instead of the standard single-agent execution.
 
-If ANY plan has `execution_mode: multi-agent`:
-1. Read the plan's `agents` and `waves` frontmatter
-2. Read the plan's `## Contracts` section
-3. Set `MULTI_AGENT=true`
+## Prerequisites Check
 
-If NO plans have multi-agent mode: continue with standard execution (existing flow).
-
-**Tmux + teammate mode availability check:**
 ```bash
-# Check if tmux is installed AND teammate mode is configured
+# Verify tmux is available and teammate mode is configured
 TMUX_INSTALLED=$(command -v tmux &>/dev/null && echo "true" || echo "false")
-TEAMMATE_MODE=$(node "{gsd-tools}" config-get parallelization.multi_agent.enabled 2>/dev/null || echo "false")
-
-if [[ "$TMUX_INSTALLED" == "true" && "$TEAMMATE_MODE" == "true" ]]; then
-  TMUX_AVAILABLE=true
-else
-  TMUX_AVAILABLE=false
-fi
 ```
 
-If `MULTI_AGENT=true` but `TMUX_AVAILABLE=false`:
+If tmux not available:
 ```
-⚠ Multi-agent plan detected but tmux/teammate mode not available.
-Falling back to sequential execution (all waves run in order with single agent).
+⚠ Multi-agent plan detected but tmux not available.
+Falling back to sequential execution (waves in order, single agent).
 ```
-Set `MULTI_AGENT=false` and continue with standard flow.
-</step>
+→ Execute waves sequentially with standard gsd-executor. STOP reading this rule.
+
+## Capture Baseline Commit
+
+Before starting any wave:
+```bash
+BASELINE_COMMIT=$(git rev-parse HEAD)
 ```
 
-- [ ] **Step 3: Add multi-agent execution step**
-
-Add the wave orchestration step for multi-agent execution:
-
-```markdown
-<step name="execute_multi_agent" condition="MULTI_AGENT=true">
-**Multi-agent wave execution with hub-and-spoke communication.**
-
-Parse from plan frontmatter: `agents[]`, `waves{}`, and `## Contracts` section.
-
-### CHECKPOINT 1: Show Execution Plan
+## CHECKPOINT 1: Show Execution Plan
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -382,8 +271,8 @@ Execution Mode: multi-agent ({N} agents)
 
 | Wave | Agent(s) | Tasks | What it builds |
 |------|----------|-------|----------------|
-| 1    | platform | {ids} | {cross-cutting description} |
-| 2    | {module1}, {module2} | {ids} | {parallel module work} |
+| 1    | platform | {ids} | {description}  |
+| 2    | {modules}| {ids} | {description}  |
 | 3    | lead     | —     | Integration verification |
 
 Contracts:
@@ -394,25 +283,9 @@ Proceed? (yes / adjust)
 
 Wait for user confirmation.
 
-**Note on agent spawning:** The `Task()` syntax below is the standard GSD agent spawning pattern used in all workflow .md files (same as existing execute-phase uses for gsd-executor). With `teammateMode: "tmux"`, each `Task()` spawns a new tmux pane. The `name` parameter makes agents addressable via `SendMessage(to="name")`.
+## Wave 1: Platform Agent
 
-**Lead message monitoring:** The lead agent (execute-phase orchestrator) uses `SendMessage` reception to handle messages from module agents. When a module agent sends `SendMessage(to="lead", ...)`, the orchestrator receives it as part of its normal message flow. The orchestrator should check for incoming messages between wave operations and when waiting for agent completion. Messages requiring action (scope escalation, contract deviation) are processed immediately; informational messages are logged.
-
-### Capture Baseline Commit
-
-Before starting any wave, capture the current commit hash for scope verification:
-```bash
-BASELINE_COMMIT=$(git rev-parse HEAD)
-```
-After Wave 1 completes:
-```bash
-POST_WAVE1_COMMIT=$(git rev-parse HEAD)
-```
-Use these for scope violation checks after each wave.
-
-### Wave 1: Platform Agent
-
-Spawn platform agent with cross-cutting tasks:
+Spawn platform agent:
 
 ```
 Task(
@@ -422,7 +295,7 @@ Task(
   prompt="
     <objective>
     Execute cross-cutting tasks for phase {phase_number}.
-    You are the PLATFORM agent — you own src/platform/** and src/shared/**.
+    You are the PLATFORM agent.
     </objective>
 
     <agent_rules>
@@ -437,8 +310,7 @@ Task(
     </contracts_you_produce>
 
     <execution_context>
-    @execute-plan.md
-    @summary.md
+    @execute-plan.md @summary.md
     </execution_context>
 
     <files_to_read>
@@ -446,35 +318,31 @@ Task(
     - .planning/STATE.md
     - ./CLAUDE.md
     </files_to_read>
-
-    <success_criteria>
-    - [ ] All platform tasks executed
-    - [ ] Each task committed individually
-    - [ ] SUMMARY.md created
-    - [ ] Exports match contracts exactly
-    </success_criteria>
   "
 )
 ```
 
-Wait for platform agent to complete.
+Wait for completion. Capture post-Wave-1 commit:
+```bash
+POST_WAVE1_COMMIT=$(git rev-parse HEAD)
+```
 
-### CHECKPOINT 2: Contract Refresh
+## CHECKPOINT 2: Contract Refresh
 
 After platform agent completes:
 
-1. Read platform agent's SUMMARY.md for completed exports
-2. Read the actual TypeScript files created/modified by platform agent
-3. Extract real type definitions from code (not plan predictions)
+1. Read platform agent's SUMMARY.md
+2. Read actual TypeScript files created/modified by platform agent
+3. **Extract real type definitions** from code (not plan predictions)
 4. Update contracts with concrete types for module agents
 5. Log: `✓ Contracts refreshed from platform agent output`
 
-If platform agent failed: follow error recovery (see error_recovery step).
+If platform agent failed → see Error Recovery below.
 
-### Wave 2: Module Agents (Parallel)
+## Wave 2: Module Agents (Parallel)
 
-**Check for sub-waves** in plan frontmatter:
-- If `waves.2a` and `waves.2b` exist: spawn 2a first, wait, then spawn 2b
+Check for sub-waves in plan frontmatter:
+- If `waves.2a` and `waves.2b`: spawn 2a first, wait, then spawn 2b
 - If single Wave 2: spawn all module agents in parallel
 
 For each module agent:
@@ -487,16 +355,12 @@ Task(
   prompt="
     <objective>
     Execute {module-name} module tasks for phase {phase_number}.
-    You are the {MODULE-NAME} agent — you own src/modules/{module-name}/**.
     </objective>
 
     <agent_rules>
-    - Write: src/modules/{module-name}/** ONLY
-    - Read: entire codebase
-    - Do NOT modify src/platform/, src/shared/, or other modules
-    - If you need changes outside your scope:
-      - Send message to lead: describe what you need and why
-      - Wait for lead to delegate to platform agent or authorize
+    Read rules from: .claude/skills/gsd-multi-agent/rules/module-scoped-executor.md
+    Module: {module-name}
+    Ownership: src/modules/{module-name}/**
     </agent_rules>
 
     <module_context>
@@ -504,76 +368,57 @@ Task(
     </module_context>
 
     <contracts_you_consume>
-    {REFRESHED contracts from Checkpoint 2, with real TypeScript types}
+    {REFRESHED contracts with real TypeScript types from Checkpoint 2}
     </contracts_you_consume>
 
     <contracts_you_produce>
-    {contracts where this module is the source, if any}
+    {contracts where this module is source, if any}
     </contracts_you_produce>
 
-    <communication>
-    Hub-and-spoke model:
-    - Decisions, changes, scope escalation → SendMessage to lead
-    - Simple signals (dependency ready, status) → direct to other agents OK
-    - NEVER negotiate contract changes directly with other agents
-    </communication>
-
     <execution_context>
-    @execute-plan.md
-    @summary.md
+    @execute-plan.md @summary.md
     </execution_context>
 
     <files_to_read>
     - {phase_dir}/{plan_file}
     - src/modules/{module-name}/CLAUDE.md
+    - .claude/skills/gsd-multi-agent/rules/module-scoped-executor.md
     - .planning/STATE.md
     - ./CLAUDE.md
     </files_to_read>
-
-    <success_criteria>
-    - [ ] All module tasks executed
-    - [ ] Each task committed individually
-    - [ ] SUMMARY.md created
-    - [ ] git diff shows NO files outside src/modules/{module-name}/
-    </success_criteria>
   "
 )
 ```
 
-Platform agent remains active during Wave 2 for scope escalation:
+Platform agent stays active during Wave 2 for scope escalation:
 ```
-SendMessage(to="platform", "You are now in standby mode for Wave 2.
-  Module agents may request changes to shared/ or platform/ through the lead.
-  Wait for lead instructions.")
+SendMessage(to="platform", "Standby for Wave 2. Module agents may request
+  changes to shared/ or platform/. Wait for lead instructions.")
 ```
 
-Monitor agent messages during Wave 2:
-- If module agent sends scope escalation → evaluate, delegate to platform agent or authorize
-- If module agent sends contract deviation → evaluate impact, update contracts, notify affected agents
-- If module agent sends blocker → coordinate resolution
+**Lead responsibilities during Wave 2:**
+- Monitor incoming messages from module agents via SendMessage
+- If scope escalation → delegate to platform agent or authorize
+- If contract deviation → evaluate, update contracts, notify affected agents
+- If blocker → coordinate resolution between agents
 
 Wait for all module agents to complete.
 
-### Scope Violation Check
+## Scope Violation Check
 
-After all Wave 2 agents report done:
-
+After Wave 2:
 ```bash
-# For each module agent, verify scope compliance
-for AGENT in {module-agents}; do
-  AGENT_FILES=$(git diff --name-only $POST_WAVE1_COMMIT -- "src/modules/${AGENT}/")
-  OUT_OF_SCOPE=$(git diff --name-only $POST_WAVE1_COMMIT | grep -v "src/modules/${AGENT}/" | head -5)
+for AGENT in {module-names}; do
+  OUT_OF_SCOPE=$(git diff --name-only $POST_WAVE1_COMMIT -- | grep -v "src/modules/${AGENT}/" | head -5)
   if [[ -n "$OUT_OF_SCOPE" ]]; then
     echo "⚠ Agent ${AGENT} modified files outside scope: ${OUT_OF_SCOPE}"
+    # Revert out-of-scope changes
+    git checkout $POST_WAVE1_COMMIT -- $OUT_OF_SCOPE
   fi
 done
 ```
 
-If scope violations found:
-- Revert out-of-scope changes: `git checkout $POST_WAVE1_COMMIT -- {file}`
-- Notify agent and request correction through proper channel
-
-### CHECKPOINT 3: Integration Verification
+## CHECKPOINT 3: Integration Verification
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -581,143 +426,187 @@ If scope violations found:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-Run full-project verification:
 ```bash
 npx tsc --noEmit
 npm run build
 ```
 
-Check cross-module imports:
-- Verify no module imports internals from another module (only public API)
-- Verify contracts declared in plan were implemented correctly
+Check cross-module imports — verify no module imports internals from another.
+If verification fails → identify which agent's domain → re-spawn with fix.
+If passes → continue to standard GSD aggregate_results.
 
-If verification fails: identify which agent's domain contains the issue, re-spawn that agent with the specific fix needed.
+## Error Recovery
 
-If verification passes: continue to standard aggregate_results step.
-</step>
-```
-
-- [ ] **Step 4: Add error recovery step**
-
-```markdown
-<step name="error_recovery" condition="MULTI_AGENT=true">
-**Error recovery for multi-agent execution.**
-
-If an agent fails during execution (crash, rate limit, unrecoverable error):
+If an agent fails (crash, rate limit, unrecoverable error):
 
 1. **Other agents continue** — no global abort
-2. **Lead evaluates git diff** of failed agent:
+2. **Evaluate git diff** of failed agent:
    ```bash
-   git diff --name-only $POST_WAVE1_COMMIT..HEAD -- {agent-ownership-paths}
+   git diff --name-only $POST_WAVE1_COMMIT -- src/modules/{failed-agent}/
    ```
-3. **Commit good work** (if any complete tasks):
+3. **Commit good work** (completed tasks):
    ```bash
    git add {completed-files}
    git commit -m "partial: {agent-name} completed tasks before failure"
    ```
-4. **Revert incomplete changes:**
-   ```bash
-   git checkout $POST_WAVE1_COMMIT -- {incomplete-files}
-   ```
-5. **Re-spawn with remaining tasks only:**
-   - New agent gets only the tasks that weren't completed
-   - Fresh context, no attempt to restore failed agent's state
-6. **If dependents exist:** send pause signal, resume after re-spawn completes
-7. **If re-spawn fails 2x:** lead executes remaining tasks directly (break glass)
-</step>
+4. **Revert incomplete** changes
+5. **Re-spawn with remaining tasks only** — fresh agent, no state restoration
+6. **If dependents exist** → pause signal until re-spawn completes
+7. **If re-spawn fails 2x** → lead executes remaining tasks (break glass)
 ```
 
-- [ ] **Step 5: Verify the workflow file is valid**
-
-Run: `grep -c "multi_agent" .claude/get-shit-done/workflows/execute-phase.md`
-Expected: Multiple matches (detection, execution, error recovery)
-
-- [ ] **Step 6: Commit**
+- [ ] **Step 2: Commit**
 
 ```bash
-git add .claude/get-shit-done/workflows/execute-phase.md
-git commit -m "infra: add multi-agent wave execution to execute-phase workflow"
+git add .claude/skills/gsd-multi-agent/rules/multi-agent-execution.md
+git commit -m "infra: add multi-agent execution rule for execute-phase orchestrator"
 ```
 
 ---
 
-## Chunk 4: Verifier Cross-Module Checks
+## Chunk 4: Module-Scoped Executor + Cross-Module Verification Rules
 
-### Task 5: Add Cross-Module Verification to gsd-verifier
+### Task 4: Create module-scoped-executor.md Rule
 
 **Files:**
-- Modify: `.claude/agents/gsd-verifier.md`
+- Create: `.claude/skills/gsd-multi-agent/rules/module-scoped-executor.md`
 
-- [ ] **Step 1: Read current gsd-verifier.md fully**
-
-Read the complete file to understand existing verification flow.
-
-- [ ] **Step 2: Add cross-module verification section**
-
-After the existing anti-pattern scanning section, add:
+- [ ] **Step 1: Write module-scoped executor rule**
 
 ```markdown
-<cross_module_verification>
-## Cross-Module Verification (Multi-Agent Plans)
+# Module-Scoped Executor — Rules for gsd-executor spawned as module agent
 
-If the plan has `execution_mode: multi-agent` in frontmatter, perform additional checks:
+When you are spawned with `<agent_rules>` containing ownership boundaries,
+follow these rules in addition to standard gsd-executor behavior.
 
-### 1. Public API Boundary Check
-For each module with a CLAUDE.md:
+## Scope Enforcement
+
+- **Do NOT run** `tsc --noEmit` or `npm run build` — other agents may be writing
+  simultaneously, results would be inconsistent. Full-project checks run at lead level only.
+- Before every file write, verify the target path is within your declared ownership.
+- If a task requires modifying a file outside your scope:
+  1. Do NOT modify it
+  2. SendMessage to lead: "Task {N} needs change in {file} outside my scope: {what change}"
+  3. Continue with other tasks that don't require out-of-scope changes
+  4. Wait for lead response before completing the blocked task
+
+## Communication Protocol (Hub-and-Spoke)
+
+**Via lead (mandatory for decisions/changes):**
+- Contract deviations → SendMessage(to="lead", ...)
+- Scope escalation (need to write outside ownership) → SendMessage(to="lead", ...)
+- Blockers (waiting on another agent's output) → SendMessage(to="lead", ...)
+
+**Direct to other agents (informational signals only):**
+- Dependency ready → SendMessage(to="{agent-name}", "{thing} exported. You can use it.")
+- Status broadcast → SendMessage(to="{agent-name}", "Completed task {N}")
+
+**NEVER** negotiate contract changes directly with other agents.
+
+## Scope Verification Before Done
+
+Before creating SUMMARY.md:
+```bash
+git diff --name-only {start-commit} | grep -v "{my-ownership-pattern}"
+```
+If any files outside scope were modified:
+- Revert them: `git checkout {start-commit} -- {out-of-scope-files}`
+- Report to lead what was reverted and why it was needed
+
+## Contract Compliance
+
+- Consume contracts exactly as provided (TypeScript types, file paths)
+- If a consumed contract is wrong or insufficient, report to lead — do NOT work around it
+- If you produce contracts, ensure your exports match exactly
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add .claude/skills/gsd-multi-agent/rules/module-scoped-executor.md
+git commit -m "infra: add module-scoped executor rule for soft isolation"
+```
+
+---
+
+### Task 5: Create cross-module-verification.md Rule
+
+**Files:**
+- Create: `.claude/skills/gsd-multi-agent/rules/cross-module-verification.md`
+
+- [ ] **Step 1: Write cross-module verification rule**
+
+```markdown
+# Cross-Module Verification — Rules for gsd-verifier
+
+When verifying a phase whose plan has `execution_mode: multi-agent`, perform
+these additional checks after the standard verification.
+
+## 1. Public API Boundary Check
+
+For each module with a CLAUDE.md under `src/modules/`:
 - Read the module's `## Public API` section
-- Grep for imports FROM this module in OTHER modules
-- Verify all cross-module imports use only the declared public API
-- Flag any import that reaches into module internals (e.g., `src/modules/wireframe/components/internal/`)
+- Search for imports FROM this module in OTHER modules:
+  ```bash
+  grep -r "from.*modules/{name}" src/modules/ --include="*.ts" --include="*.tsx" \
+    | grep -v "src/modules/{name}/"
+  ```
+- Verify all cross-module imports use only declared public API exports
+- **Flag** any import reaching into module internals (e.g., `modules/wireframe/components/internal/`)
 
-### 2. Contract Implementation Check
+## 2. Contract Implementation Check
+
 Read the plan's `## Contracts` section:
-- For each contract, verify the declared exports exist in the specified files
-- Verify TypeScript types match the contract shapes
-- Flag missing or mismatched exports
+- For each contract, verify declared exports exist in specified files
+- Verify TypeScript types match contract shapes (read the actual .ts files)
+- **Flag** missing or mismatched exports as gaps
 
-### 3. Module CLAUDE.md Freshness Check
+## 3. Module CLAUDE.md Freshness
+
 For each module affected by this phase:
-- Read the module's CLAUDE.md
-- Check if new exports created during this phase are listed in Public API
+- Check if new exports created during the phase are listed in the module's CLAUDE.md Public API
 - If not: add to gaps as "CLAUDE.md needs update for [new export]"
 
-### 4. Scope Compliance Check
+## 4. Scope Compliance
+
 ```bash
-# For each module agent's commits, verify file scope
-git log --format="%H %s" --all -- "src/modules/{module}/" | head -20
+# Verify no module agent committed files outside its declared ownership
+git log --format="%H %s" -- "src/modules/{module}/" | head -20
 ```
 Flag any commits that modified files outside the declared module ownership.
-</cross_module_verification>
 ```
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 2: Commit**
 
 ```bash
-git add .claude/agents/gsd-verifier.md
-git commit -m "infra: add cross-module verification checks to gsd-verifier"
+git add .claude/skills/gsd-multi-agent/rules/cross-module-verification.md
+git commit -m "infra: add cross-module verification rule for gsd-verifier"
 ```
 
 ---
 
-## Chunk 5: Brainstorming in Milestones + Executor Agent Rules
+## Chunk 5: Brainstorming Rule + Module Template
 
-### Task 6: Add Brainstorming Invocation to new-milestone Workflow
+### Task 6: Create brainstorming-milestone.md Rule
 
 **Files:**
-- Modify: `.claude/get-shit-done/workflows/new-milestone.md`
+- Create: `.claude/skills/gsd-multi-agent/rules/brainstorming-milestone.md`
 
-- [ ] **Step 1: Read current new-milestone.md fully**
-
-Read the complete file to find the insertion point (after Step 2 "Gather Milestone Goals").
-
-- [ ] **Step 2: Add brainstorming step**
-
-After Step 2 (Gather Milestone Goals), insert:
+- [ ] **Step 1: Write brainstorming milestone rule**
 
 ```markdown
-## 2.5. Brainstorming (Mandatory)
+# Brainstorming in Milestones — Rules for new-milestone orchestrator
 
-Before defining requirements, invoke the brainstorming skill to explore the milestone scope:
+Before defining requirements (Step 9 in the new-milestone workflow),
+invoke the brainstorming skill to explore the milestone scope.
+
+## When to Apply
+
+Always apply when running `/gsd:new-milestone`, unless user passes `--skip-brainstorm`.
+
+## Process
+
+After gathering milestone goals (Step 2) and before defining requirements:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -728,7 +617,7 @@ Before defining requirements, invoke the brainstorming skill to explore the mile
 ```
 
 Invoke `superpowers:brainstorming` skill with context:
-- Project: from PROJECT.md
+- Project context: from PROJECT.md
 - Previous milestones: from MILESTONES.md
 - User's stated goals: from Step 2
 
@@ -738,248 +627,221 @@ The brainstorming process:
 3. Presents design by sections for approval
 4. Writes spec to `docs/superpowers/specs/YYYY-MM-DD-<milestone-name>-design.md`
 
-After spec is written and approved:
-- Use spec as primary input for requirements definition (Step 9)
+## After Brainstorming
+
+- Use the approved spec as primary input for requirements definition
 - Reference spec path in PROJECT.md under Current Milestone
+- The spec becomes the source of truth for what the milestone should build
 
-**Skip condition:** If user explicitly passes `--skip-brainstorm` flag.
+## Why
+
+Guarantees every milestone goes through structured exploration of requirements,
+alternatives, and trade-offs before becoming phases in the roadmap.
+Prevents the "I already know what to do, let me code" anti-pattern.
 ```
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 2: Commit**
 
 ```bash
-git add .claude/get-shit-done/workflows/new-milestone.md
-git commit -m "infra: add mandatory brainstorming to new-milestone workflow"
+git add .claude/skills/gsd-multi-agent/rules/brainstorming-milestone.md
+git commit -m "infra: add brainstorming-milestone rule for new-milestone workflow"
 ```
 
 ---
 
-### Task 7: Add Module-Scoped Agent Rules to gsd-executor
+### Task 7: Create Module CLAUDE.md Template
 
 **Files:**
-- Modify: `.claude/agents/gsd-executor.md`
+- Create: `.claude/skills/gsd-multi-agent/templates/module-claude.md`
 
-- [ ] **Step 1: Read current gsd-executor.md fully**
-
-Read the complete file.
-
-- [ ] **Step 2: Add module-scoped execution section**
-
-Add a section that the executor respects when spawned as a module agent:
+- [ ] **Step 1: Write template**
 
 ```markdown
-<module_scoped_execution>
-## Module-Scoped Execution
+# Module: {{module-name}}
 
-When spawned with `<agent_rules>` containing ownership boundaries:
+## Purpose
+{{one-line description}}
 
-### Scope Enforcement
-- Do NOT run `tsc --noEmit` or `npm run build` — other agents may be writing simultaneously, results would be inconsistent. Full-project checks run at lead level only (Checkpoint 3).
-- Before every file write, verify the target path is within your declared ownership
-- If a task requires modifying a file outside your scope:
-  1. Do NOT modify it
-  2. Send message to lead: "Task {N} needs change in {file} outside my scope: {what change}"
-  3. Continue with other tasks that don't require out-of-scope changes
-  4. Wait for lead response before completing the blocked task
+## Ownership
+- src/modules/{{module-name}}/**
 
-### Communication Protocol
-- **To lead (for decisions/changes):** `SendMessage(to="lead", "...")`
-- **To other agents (signals only):** `SendMessage(to="{agent-name}", "...")`
-- Never negotiate contract changes directly with other agents
+## Public API
 
-### Scope Verification Before Done
-Before creating SUMMARY.md:
-```bash
-git diff --name-only {start-commit} | grep -v "{my-ownership-pattern}"
+### Types
+- {{TypeName}}: {{brief description}} (src/modules/{{module-name}}/types/{{file}})
+
+### Hooks
+- {{useHookName}}: {{brief description}} (src/modules/{{module-name}}/hooks/{{file}})
+
+### Components
+- {{ComponentName}}: {{brief description}} (src/modules/{{module-name}}/components/{{file}})
+
+## Dependencies
+
+### From shared/
+- {{imports from shared/}}
+
+### From platform/
+- {{imports from platform/}}
+
+### From other modules
+- modules/{{other}}: {{what it reads, always read-only}}
+
+## Validation
+- {{module-specific checks}}
+
+## Agent Rules
+- **Write:** Only files under `src/modules/{{module-name}}/`
+- **Read:** Entire codebase
+- **Shared writes:** Request via lead → platform agent
+- **Cross-module writes:** Never — report to lead
+- **Do NOT run** `tsc --noEmit` individually (lead runs full-project check)
 ```
-If any files outside scope were modified: revert them and report to lead.
-</module_scoped_execution>
-```
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 2: Commit**
 
 ```bash
-git add .claude/agents/gsd-executor.md
-git commit -m "infra: add module-scoped execution rules to gsd-executor"
+git add .claude/skills/gsd-multi-agent/templates/module-claude.md
+git commit -m "infra: add module CLAUDE.md template"
 ```
 
 ---
 
-## Chunk 6: Config and Documentation
+## Chunk 6: README + Module CLAUDE.md Generation + Final Verification
 
-### Task 8: Update GSD Config Template
+### Task 8: Create Operational README
 
 **Files:**
-- Modify: `.claude/get-shit-done/templates/config.json`
+- Create: `.claude/skills/gsd-multi-agent/README.md`
 
-- [ ] **Step 1: Read current config.json**
+- [ ] **Step 1: Write README**
 
-- [ ] **Step 2: Add multi-agent config options**
+Move the content from `docs/superpowers/specs/README-multi-agent.md` into the skill directory.
+The README should contain the full operational guide: tmux setup, flow steps, tmux layout diagrams,
+communication examples, decision table, ownership rules, verification levels, troubleshooting.
 
-Add under `parallelization`:
-```json
-{
-  "parallelization": {
-    "enabled": true,
-    "plan_level": true,
-    "task_level": false,
-    "skip_checkpoints": true,
-    "max_concurrent_agents": 3,
-    "min_plans_for_parallel": 2,
-    "multi_agent": {
-      "enabled": true,
-      "min_parallelization_ratio": 0.30,
-      "platform_agent_standby": true
-    }
-  }
-}
-```
+Use the approved content from `docs/superpowers/specs/README-multi-agent.md` as the source.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 2: Commit**
 
 ```bash
-git add .claude/get-shit-done/templates/config.json
-git commit -m "infra: add multi-agent config options to GSD config template"
+git add .claude/skills/gsd-multi-agent/README.md
+git commit -m "infra: add operational README to gsd-multi-agent skill"
 ```
 
 ---
 
-### Task 9: Update Plan Template with Multi-Agent Frontmatter
+### Task 9: Generate Module CLAUDE.md Files
 
 **Files:**
-- Modify: `.claude/get-shit-done/templates/phase-prompt.md`
+- Create: `src/modules/docs/CLAUDE.md`
+- Create: `src/modules/clients/CLAUDE.md`
+- Create: `src/modules/wireframe/CLAUDE.md`
+- Create: `src/modules/tasks/CLAUDE.md`
 
-- [ ] **Step 1: Read current phase-prompt.md**
+For each module, discover actual exports/imports and generate CLAUDE.md.
+Skip `ferramentas`, `hooks`, `knowledge-base` (being removed/reorganized per v3.0).
 
-- [ ] **Step 2: Add multi-agent frontmatter documentation**
-
-In the frontmatter fields section, add:
-
-```markdown
-### Multi-Agent Fields (added automatically by planner when detected)
-
-```yaml
-execution_mode: multi-agent  # or single-agent (default)
-agents:
-  - name: platform
-    ownership: ["src/platform/**", "src/shared/**"]
-    tasks: [1, 3]
-  - name: wireframe
-    ownership: ["src/modules/wireframe/**"]
-    tasks: [2, 4]
-waves:
-  1: { agent: platform, type: cross-cutting }
-  2: { agents: [wireframe, clients], type: parallel-modules }
-  # Sub-waves if inter-module dependencies:
-  # 2a: { agents: [wireframe], type: parallel-modules }
-  # 2b: { agents: [clients], type: parallel-modules, depends_on: 2a }
-  3: { type: integration-verification }
-```
-
-These fields are generated by the planner's module detection step. Do NOT add manually.
-When `execution_mode: multi-agent`, the plan MUST include a `## Contracts` section with TypeScript interfaces.
-```
-
-- [ ] **Step 3: Commit**
+- [ ] **Step 1: Discover exports for each module**
 
 ```bash
-git add .claude/get-shit-done/templates/phase-prompt.md
-git commit -m "infra: document multi-agent frontmatter in phase prompt template"
-```
-
----
-
-### Task 10: Add Auto-Scaffold for New Modules + Deprecation Note
-
-**Files:**
-- Modify: `.claude/agents/gsd-planner.md` (add auto-scaffold instruction)
-- Modify: `.claude/skills/build-with-agent-team/SKILL.md` (add deprecation note)
-
-- [ ] **Step 1: Add auto-scaffold instruction to planner's module detection**
-
-In the `<module_detection>` section's Step 1 (Discover Modules), after reading CLAUDE.md files, add:
-
-```markdown
-If a module directory under src/modules/ exists but has NO CLAUDE.md:
-- Auto-generate a scaffold CLAUDE.md by analyzing the module's exports/imports:
-  ```bash
-  grep -r "^export" src/modules/{name}/ --include="*.ts" --include="*.tsx" | head -20
-  ```
-- Write the scaffold using the module-claude.md template
-- Log: "⚠ Auto-generated CLAUDE.md for module {name} — review recommended"
-```
-
-- [ ] **Step 2: Add deprecation note to build-with-agent-team SKILL.md**
-
-Add at the top of the file, after the frontmatter:
-
-```markdown
-> **Note:** GSD now handles multi-agent execution natively via `/gsd:execute-phase`.
-> This skill is maintained as reference and fallback for projects outside the GSD workflow.
-> For GSD projects, use `/gsd:plan-phase` (auto-detects modules) + `/gsd:execute-phase` (auto-spawns agents).
-```
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add .claude/agents/gsd-planner.md .claude/skills/build-with-agent-team/SKILL.md
-git commit -m "infra: add module CLAUDE.md auto-scaffold and deprecation note for build-with-agent-team"
-```
-
----
-
-### Task 11: Final Integration Verification
-
-**Files:**
-- Read: All modified files
-
-- [ ] **Step 1: Verify all modified files are syntactically valid**
-
-```bash
-# Check all modified markdown files for obvious syntax issues
-for f in \
-  .claude/agents/gsd-planner.md \
-  .claude/agents/gsd-executor.md \
-  .claude/agents/gsd-verifier.md \
-  .claude/get-shit-done/workflows/execute-phase.md \
-  .claude/get-shit-done/workflows/new-milestone.md \
-  .claude/get-shit-done/templates/config.json \
-  .claude/get-shit-done/templates/phase-prompt.md \
-  .claude/get-shit-done/templates/module-claude.md; do
-  echo "--- $f ---"
-  wc -l "$f"
+# For each module, list exports and cross-module imports
+for mod in docs clients wireframe tasks; do
+  echo "=== $mod EXPORTS ==="
+  grep -r "^export" "src/modules/$mod/" --include="*.ts" --include="*.tsx" 2>/dev/null | head -15
+  echo "=== $mod IMPORTS FROM OUTSIDE ==="
+  grep -r "from.*shared\|from.*platform\|from.*modules/" "src/modules/$mod/" --include="*.ts" --include="*.tsx" 2>/dev/null | head -15
+  echo ""
 done
 ```
 
-- [ ] **Step 2: Verify config.json is valid JSON**
+- [ ] **Step 2: Write CLAUDE.md for docs module**
+
+Based on discovery. Key contents: useDoc, useDocsNav hooks; MarkdownRenderer, DocBreadcrumb,
+Callout, Operational, PageHeader, PhaseCard, PromptBlock, DocTableOfContents, InfoBlock components;
+docs-parser, docs-service, search-index services; DocRenderer page.
+
+- [ ] **Step 3: Write CLAUDE.md for clients module**
+
+Key contents: BriefingForm, BlueprintTextView, WireframeViewer, ClientsIndex pages;
+imports from wireframe module (read-only).
+
+- [ ] **Step 4: Write CLAUDE.md for wireframe module**
+
+Key contents: ComponentGallery, SharedWireframeView pages; manifest.tsx;
+chart components; blueprint types; wireframe builder integration.
+
+- [ ] **Step 5: Write CLAUDE.md for tasks module**
+
+Key contents: tasks-service.ts; task types; Supabase integration.
+
+- [ ] **Step 6: Verify all CLAUDE.md files exist and are valid**
 
 ```bash
-node -e "JSON.parse(require('fs').readFileSync('.claude/get-shit-done/templates/config.json', 'utf8')); console.log('Valid JSON')"
-```
-Expected: "Valid JSON"
-
-- [ ] **Step 3: Verify module CLAUDE.md files reference real paths**
-
-For each module CLAUDE.md, verify that referenced files/directories actually exist:
-```bash
+ls src/modules/*/CLAUDE.md
 for mod in docs clients wireframe tasks; do
   echo "=== $mod ==="
-  ls "src/modules/$mod/" | head -10
+  head -3 "src/modules/$mod/CLAUDE.md"
 done
 ```
 
-- [ ] **Step 4: Run project TypeScript check (no code changes, just verification)**
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/modules/docs/CLAUDE.md src/modules/clients/CLAUDE.md \
+  src/modules/wireframe/CLAUDE.md src/modules/tasks/CLAUDE.md
+git commit -m "infra: generate module CLAUDE.md files for multi-agent boundaries"
+```
+
+---
+
+### Task 10: Final Verification
+
+**Files:**
+- Read: All skill files
+
+- [ ] **Step 1: Verify complete skill structure**
+
+```bash
+find .claude/skills/gsd-multi-agent -type f | sort
+```
+
+Expected:
+```
+.claude/skills/gsd-multi-agent/README.md
+.claude/skills/gsd-multi-agent/SKILL.md
+.claude/skills/gsd-multi-agent/rules/brainstorming-milestone.md
+.claude/skills/gsd-multi-agent/rules/cross-module-verification.md
+.claude/skills/gsd-multi-agent/rules/module-detection.md
+.claude/skills/gsd-multi-agent/rules/module-scoped-executor.md
+.claude/skills/gsd-multi-agent/rules/multi-agent-execution.md
+.claude/skills/gsd-multi-agent/templates/module-claude.md
+```
+
+- [ ] **Step 2: Verify all module CLAUDE.md files exist**
+
+```bash
+ls src/modules/docs/CLAUDE.md src/modules/clients/CLAUDE.md \
+  src/modules/wireframe/CLAUDE.md src/modules/tasks/CLAUDE.md
+```
+
+- [ ] **Step 3: Verify TypeScript still passes (no code changes)**
 
 ```bash
 npx tsc --noEmit
 ```
-Expected: No errors (we only modified markdown/json, not TypeScript)
+Expected: No errors (only markdown files created)
 
-- [ ] **Step 5: Commit any remaining changes**
+- [ ] **Step 4: Verify skill is discoverable by GSD**
 
 ```bash
-git add -A
+ls .claude/skills/*/SKILL.md
+```
+Expected: includes `.claude/skills/gsd-multi-agent/SKILL.md`
+
+- [ ] **Step 5: Final commit if needed**
+
+```bash
 git status
-# Only commit if there are changes
-git diff --cached --quiet || git commit -m "infra: finalize GSD multi-agent implementation"
+git diff --cached --quiet || git commit -m "infra: finalize gsd-multi-agent skill"
 ```

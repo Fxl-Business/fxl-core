@@ -330,17 +330,69 @@ Antes de criar o roadmap, o workflow invoca a skill `superpowers:brainstorming`:
 
 Garante que cada milestone passa por exploracao estruturada de requisitos, alternativas e trade-offs antes de virar fases no roadmap. Evita o anti-pattern de "ja sei o que fazer, vou direto pro codigo".
 
-## 6. Changes to GSD Components
+## 6. Delivery: Skill Independente
 
-| Componente | Arquivo | Mudanca |
-|---|---|---|
-| `gsd-planner` agent | `.claude/agents/gsd-planner.md` | Adicionar etapa de module detection, wave breakdown, contract generation |
-| `execute-phase` workflow | `.claude/get-shit-done/workflows/execute-phase.md` | Detectar multi-agent no plano, orquestrar waves, spawnar agentes |
-| `gsd-executor` agent | `.claude/agents/gsd-executor.md` | Nova variante module-scoped com comunicacao e soft isolation |
-| `gsd-verifier` agent | `.claude/agents/gsd-verifier.md` | Adicionar checks cross-module (imports, public API, CLAUDE.md sync) |
-| `new-milestone` workflow | `.claude/get-shit-done/workflows/new-milestone.md` | Invocar brainstorming skill antes de roadmapper |
-| Templates | `.claude/get-shit-done/templates/` | Novo template `module-claude.md` |
-| `build-with-agent-team` skill | `.claude/skills/build-with-agent-team/` | Absorvida pelo GSD — mantida como referencia/fallback para projetos fora do GSD |
+### 6.1 Principio
+
+Tudo vive em `.claude/skills/gsd-multi-agent/` como uma skill auto-contida.
+Zero patches nos arquivos internos do GSD. O GSD ja le skills de `.claude/skills/`
+automaticamente — planner, executor e verifier leem `SKILL.md` e `rules/*.md`
+no inicio de cada execucao. A skill injeta comportamento via regras que esses
+agentes seguem quando a detectam.
+
+### 6.2 Estrutura da Skill
+
+```
+.claude/skills/gsd-multi-agent/
+├── SKILL.md                              ← indice: quando usar, overview, lista de rules
+├── README.md                             ← guia operacional passo-a-passo (tmux, comandos)
+├── rules/
+│   ├── module-detection.md               ← regras pro planner (deteccao, waves, contratos)
+│   ├── multi-agent-execution.md          ← regras pro execute-phase (orquestracao, checkpoints)
+│   ├── module-scoped-executor.md         ← regras pro executor (soft isolation, comunicacao)
+│   ├── cross-module-verification.md      ← regras pro verifier (public API, CLAUDE.md sync)
+│   └── brainstorming-milestone.md        ← regras pro new-milestone (brainstorming obrigatorio)
+└── templates/
+    └── module-claude.md                  ← template CLAUDE.md de modulo
+```
+
+### 6.3 Como os Agentes do GSD Encontram a Skill
+
+O GSD ja tem essa mecanica nativa em todos os agentes:
+
+```markdown
+# Do gsd-planner.md, gsd-executor.md, gsd-verifier.md:
+**Project skills:** Check `.claude/skills/` directory if exists:
+1. List available skills (subdirectories)
+2. Read `SKILL.md` for each skill
+3. Load specific `rules/*.md` as needed
+```
+
+Quando o planner detecta `gsd-multi-agent` em `.claude/skills/`:
+- Le `SKILL.md` → identifica que e a skill de multi-agent
+- Le `rules/module-detection.md` → segue as regras de deteccao de modulos
+- Gera plano com `execution_mode: multi-agent` se aplicavel
+
+Quando o execute-phase ve `execution_mode: multi-agent` no plano:
+- Le `rules/multi-agent-execution.md` → segue orquestracao de waves
+- Spawna agentes com prompt incluindo `rules/module-scoped-executor.md`
+
+Quando o verifier roda apos execucao multi-agent:
+- Le `rules/cross-module-verification.md` → executa checks adicionais
+
+### 6.4 Vantagens
+
+- **Resiliente a updates do GSD** — skill nao modifica arquivos do GSD
+- **Portavel** — pode ser instalada em qualquer projeto com GSD
+- **Removivel** — deletar a pasta desativa o comportamento sem efeitos colaterais
+- **Versionavel** — skill tem seu proprio versionamento independente do GSD
+
+### 6.5 Relacao com build-with-agent-team
+
+A skill `build-with-agent-team` permanece como esta — usada para projetos fora do GSD
+ou para execucao ad-hoc de planos com agentes. A skill `gsd-multi-agent` e especifica
+para o workflow GSD e usa conceitos similares (ownership, contratos, waves) mas integrada
+ao ciclo plan→execute→verify.
 
 ## 7. Module CLAUDE.md Template
 
