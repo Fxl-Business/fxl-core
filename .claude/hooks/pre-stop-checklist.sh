@@ -39,7 +39,7 @@ done
 if [ "$VISUAL_CHANGED" = true ]; then
   # Check if user has confirmed visual verification in this session
   # We use a marker file that gets cleaned up on session start
-  MARKER="/tmp/.claude-visual-verified-$$"
+  MARKER="/tmp/.claude-visual-verified-$(git rev-parse --short HEAD 2>/dev/null || echo 'session')"
   if [ ! -f "$MARKER" ]; then
     CHANGED_FILES=$(git diff --name-only HEAD 2>/dev/null | grep -E '\.tsx$' | head -5)
     echo "{\"decision\": \"block\", \"reason\": \"Visual .tsx files were modified but not verified in the browser. Changed files include: ${CHANGED_FILES}. Per CLAUDE.md rules: open the affected page in the browser (make dev + localhost), verify rendering in light/dark mode, and test interactions. After verification, inform the user of the results.\"}"

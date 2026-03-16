@@ -7,7 +7,7 @@ import { clientsManifest } from './clients/manifest'
 import { knowledgeBaseManifest } from './knowledge-base/manifest'
 import { tasksManifest } from './tasks/manifest'
 
-export { MODULE_IDS, type ModuleId } from './module-ids'
+export { MODULE_IDS, type ModuleId, SLOT_IDS, type SlotId } from './module-ids'
 import type { ModuleId } from './module-ids'
 
 export type ModuleStatus = 'active' | 'beta' | 'coming-soon'
@@ -29,12 +29,7 @@ export interface ModuleManifest {
   routeConfig?: RouteObject[]
 }
 
-export const SLOT_IDS = {
-  HOME_DASHBOARD: 'home.dashboard',
-  HOME_QUICK_ACTIONS: 'home.quick-actions',
-} as const
-
-export type SlotId = typeof SLOT_IDS[keyof typeof SLOT_IDS]
+// SLOT_IDS and SlotId re-exported from module-ids.ts (see above)
 
 /**
  * The contract every slot-registered component must satisfy.

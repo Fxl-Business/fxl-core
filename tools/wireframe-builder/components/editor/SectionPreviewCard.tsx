@@ -61,17 +61,10 @@ export default function SectionPreviewCard({ type, onSelect }: Props) {
       className="group flex cursor-pointer flex-col overflow-hidden rounded-lg border bg-card transition-all hover:border-primary hover:shadow-sm"
     >
       {/* Preview area */}
-      <div className="relative h-[140px] overflow-hidden bg-muted/30" style={{ pointerEvents: 'none' }}>
+      <div className="max-h-[280px] overflow-hidden bg-muted/30" style={{ pointerEvents: 'none' }}>
         <PreviewErrorBoundary fallback={fallback}>
           <WireframeThemeProvider externalTheme="light">
-            <div
-              style={{
-                width: '400%',
-                height: '400%',
-                transform: 'scale(0.25)',
-                transformOrigin: 'top left',
-              }}
-            >
+            <div style={{ zoom: 0.5, width: 540, padding: 8 }}>
               <SectionRenderer
                 section={sectionProps}
                 compareMode={false}
