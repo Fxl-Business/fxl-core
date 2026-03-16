@@ -22,7 +22,7 @@ Requirements para milestone v3.0 Reorganizacao Modular. Cada um mapeia a fases d
 - [x] **MOD-02**: Modulo tasks autocontido (completar migracoes pendentes de pages/services)
 - [x] **MOD-03**: Modulo clients autocontido com pages/ e services/ migrados
 - [x] **MOD-04**: Modulo wireframe autocontido (manifest, pages, hybrid com @tools/)
-- [ ] **MOD-05**: Cada modulo tem CLAUDE.md com instrucoes para agente scoped
+- [x] **MOD-05**: Cada modulo tem CLAUDE.md com instrucoes para agente scoped
 
 ### Remocoes
 
@@ -91,7 +91,7 @@ Requirements para milestone v3.0 Reorganizacao Modular. Cada um mapeia a fases d
 | MOD-02 | Phase 61 | Complete |
 | MOD-03 | Phase 61 | Complete |
 | MOD-04 | Phase 61 | Complete |
-| MOD-05 | Phase 61 | Pending |
+| MOD-05 | Phase 61 | Complete |
 | REM-01 | Phase 62 | Pending |
 | REM-02 | Phase 62 | Pending |
 | REM-03 | Phase 62 | Pending |
