@@ -9,12 +9,12 @@ Requirements para milestone v3.0 Reorganizacao Modular. Cada um mapeia a fases d
 
 ### Estrutura
 
-- [ ] **ESTR-01**: Criar `src/platform/` com subpastas layout/, auth/, tenants/, module-loader/, router/
+- [x] **ESTR-01**: Criar `src/platform/` com subpastas layout/, auth/, tenants/, module-loader/, router/
 - [ ] **ESTR-02**: Mover componentes de layout (Layout, Sidebar, TopNav) para `platform/layout/`
 - [ ] **ESTR-03**: Mover auth (ProtectedRoute, Login, Profile) para `platform/auth/`
 - [ ] **ESTR-04**: Mover module system (registry, module-ids, extension-registry, slots, hooks) para `platform/module-loader/`
 - [ ] **ESTR-05**: Extrair routing logic do App.tsx para `platform/router/AppRouter.tsx`
-- [ ] **ESTR-06**: Criar `src/shared/` com ui/ (shadcn), hooks/, types/, utils/
+- [x] **ESTR-06**: Criar `src/shared/` com ui/ (shadcn), hooks/, types/, utils/
 
 ### Modulos
 
@@ -81,12 +81,12 @@ Requirements para milestone v3.0 Reorganizacao Modular. Cada um mapeia a fases d
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ESTR-01 | Phase 60 | Pending |
+| ESTR-01 | Phase 60 | Complete |
 | ESTR-02 | Phase 61 | Pending |
 | ESTR-03 | Phase 61 | Pending |
 | ESTR-04 | Phase 61 | Pending |
 | ESTR-05 | Phase 61 | Pending |
-| ESTR-06 | Phase 60 | Pending |
+| ESTR-06 | Phase 60 | Complete |
 | MOD-01 | Phase 61 | Pending |
 | MOD-02 | Phase 61 | Pending |
 | MOD-03 | Phase 61 | Pending |
