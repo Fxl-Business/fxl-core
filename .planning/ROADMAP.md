@@ -48,7 +48,10 @@
   2. `src/shared/` directory exists with subdirectories ui/, hooks/, types/, utils/
   3. Each module directory under `src/modules/` has the full autocontido structure (components/, pages/, services/, hooks/, types/) ready to receive files
   4. `tsc --noEmit` still passes (no existing code broken by new empty directories)
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 60-01-PLAN.md — Create directory skeleton (platform/, shared/, module subdirs) and update path aliases
 
 ### Phase 61: Module Migration
 **Goal**: Every file lives in its correct location per the design spec Section 4.4 manifest — platform shell in platform/, module-specific code in modules/, and cross-cutting utilities in shared/
@@ -90,7 +93,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 60. Platform Scaffold + Shared Layer | 0/? | Not started | - |
+| 60. Platform Scaffold + Shared Layer | 0/1 | Not started | - |
 | 61. Module Migration | 0/? | Not started | - |
 | 62. Removals | 0/? | Not started | - |
 | 63. Integration Verification | 0/? | Not started | - |
