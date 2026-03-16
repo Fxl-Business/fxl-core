@@ -82,10 +82,10 @@ Requirements para milestone v3.0 Reorganizacao Modular. Cada um mapeia a fases d
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | ESTR-01 | Phase 60 | Pending |
-| ESTR-02 | Phase 60 | Pending |
-| ESTR-03 | Phase 60 | Pending |
-| ESTR-04 | Phase 60 | Pending |
-| ESTR-05 | Phase 60 | Pending |
+| ESTR-02 | Phase 61 | Pending |
+| ESTR-03 | Phase 61 | Pending |
+| ESTR-04 | Phase 61 | Pending |
+| ESTR-05 | Phase 61 | Pending |
 | ESTR-06 | Phase 60 | Pending |
 | MOD-01 | Phase 61 | Pending |
 | MOD-02 | Phase 61 | Pending |
@@ -106,4 +106,4 @@ Requirements para milestone v3.0 Reorganizacao Modular. Cada um mapeia a fases d
 
 ---
 *Requirements defined: 2026-03-16*
-*Last updated: 2026-03-16 after initial definition*
+*Last updated: 2026-03-16 after roadmap creation*
