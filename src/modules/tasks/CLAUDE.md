@@ -28,7 +28,6 @@ Task management with list view, kanban board, CRUD forms, and home dashboard wid
 - TaskCard: Shared card used in list and kanban — shows title, description preview, status badge, priority, client tag, due date, edit link (components/TaskCard.tsx)
 - TaskFilters: Horizontal filter bar with status/priority selects and client slug input (components/TaskFilters.tsx)
 - TaskStatusBadge: Clickable pill that advances task status on click (components/TaskStatusBadge.tsx)
-- DocumentarButton: Cross-module link to knowledge base entry form, only visible on done tasks (components/DocumentarButton.tsx)
 
 ### Services
 - tasks-service: Full Supabase CRUD — createTask, listTasks, getTask, updateTask, updateTaskStatus, deleteTask (services/tasks-service.ts)

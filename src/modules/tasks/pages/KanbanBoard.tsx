@@ -6,7 +6,6 @@ import { Button } from '@shared/ui/button'
 import { updateTaskStatus } from '../services/tasks-service'
 import { useTasks } from '../hooks/useTasks'
 import { TaskCard } from '../components/TaskCard'
-import { DocumentarButton } from '../components/DocumentarButton'
 import { STATUS_ORDER, STATUS_LABELS } from '../types'
 import type { Task, TaskStatus } from '../types'
 
@@ -113,13 +112,11 @@ export default function KanbanBoard() {
                     </div>
                   ) : (
                     columnTasks.map((task) => (
-                      <div key={task.id} className="flex flex-col gap-1.5">
-                        <TaskCard
-                          task={task}
-                          onStatusChange={handleStatusChange}
-                        />
-                        <DocumentarButton task={task} />
-                      </div>
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onStatusChange={handleStatusChange}
+                      />
                     ))
                   )}
                 </div>

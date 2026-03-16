@@ -7,7 +7,6 @@ export const MODULE_IDS = {
   DOCS: 'docs',
   FERRAMENTAS: 'ferramentas',
   CLIENTS: 'clients',
-  KNOWLEDGE_BASE: 'knowledge-base',
   TASKS: 'tasks',
 } as const
 

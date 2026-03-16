@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import PromptBlock from '@shared/ui/PromptBlock'
-import { listKnowledgeEntries, type KnowledgeEntry } from '@/lib/kb-service'
 
 type DocStatus = {
   doc: string
@@ -27,13 +25,6 @@ const STATUS_COLORS: Record<string, string> = {
   'Em revisão':'bg-orange-50 text-orange-700',
 }
 
-const ENTRY_TYPE_COLORS: Record<string, string> = {
-  bug:      'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-400',
-  decision: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
-  pattern:  'bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-400',
-  lesson:   'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/50 dark:text-yellow-400',
-}
-
 const PROMPT_MASTER = `Olá. Vamos trabalhar no projeto Financeiro Conta Azul.
 ---
 Antes de começar qualquer tarefa, leia todos os arquivos disponíveis no knowledge deste Project.
@@ -49,18 +40,6 @@ O Claude Code nunca deve alterar a subpasta de outro cliente.
 Meu objetivo nesta conversa é: [descrever a tarefa]`
 
 export default function FinanceiroIndex() {
-  const [kbEntries, setKbEntries] = useState<KnowledgeEntry[]>([])
-  const [kbLoading, setKbLoading] = useState(true)
-
-  useEffect(() => {
-    listKnowledgeEntries({ client_slug: 'financeiro-conta-azul' })
-      .then((entries) => {
-        setKbEntries(entries)
-        setKbLoading(false)
-      })
-      .catch(() => setKbLoading(false))
-  }, [])
-
   return (
     <div className="mx-auto max-w-4xl">
       <nav className="mb-4 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
@@ -122,46 +101,6 @@ export default function FinanceiroIndex() {
             </tbody>
           </table>
         </div>
-      </div>
-
-      <div className="mt-8">
-        <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-foreground">Conhecimento</h2>
-        {kbLoading ? (
-          <p className="text-sm text-slate-400">Carregando...</p>
-        ) : kbEntries.length === 0 ? (
-          <p className="text-sm text-slate-400">Nenhum conhecimento registrado para este cliente.</p>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {kbEntries.map((entry) => (
-              <Link
-                key={entry.id}
-                to={`/knowledge-base/${entry.id}`}
-                className="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50/30 dark:border-slate-700 dark:bg-card dark:hover:border-indigo-600/50 dark:hover:bg-indigo-950/20"
-              >
-                <div className="mb-2 flex items-center gap-2">
-                  <span className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${ENTRY_TYPE_COLORS[entry.entry_type] ?? 'bg-muted text-muted-foreground'}`}>
-                    {entry.entry_type}
-                  </span>
-                </div>
-                <p className="mb-2 text-sm font-semibold text-slate-900 group-hover:text-indigo-700 dark:text-foreground dark:group-hover:text-indigo-400">
-                  {entry.title}
-                </p>
-                {entry.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {entry.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </Link>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="mt-8">

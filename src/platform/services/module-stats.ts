@@ -16,15 +16,10 @@ export function useModuleStats(): ModuleStats {
 
     async function load() {
       try {
-        const [taskResult, kbResult] = await Promise.all([
-          supabase
-            .from('tasks')
-            .select('*', { count: 'exact', head: true })
-            .neq('status', 'done'),
-          supabase
-            .from('knowledge_entries')
-            .select('*', { count: 'exact', head: true }),
-        ])
+        const taskResult = await supabase
+          .from('tasks')
+          .select('*', { count: 'exact', head: true })
+          .neq('status', 'done')
 
         if (cancelled) return
 
@@ -32,10 +27,6 @@ export function useModuleStats(): ModuleStats {
 
         if (taskResult.count !== null) {
           newCounts['tasks'] = taskResult.count
-        }
-
-        if (kbResult.count !== null) {
-          newCounts['knowledge-base'] = kbResult.count
         }
 
         setCounts(newCounts)

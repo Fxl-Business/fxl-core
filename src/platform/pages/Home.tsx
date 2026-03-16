@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Activity, ArrowRight, BookOpen, CheckSquare } from 'lucide-react'
+import { Activity, ArrowRight, CheckSquare } from 'lucide-react'
 import { MODULE_REGISTRY, SLOT_IDS, type ModuleDefinition } from '@platform/module-loader/registry'
 import { ExtensionSlot } from '@platform/module-loader/slots'
 import { useActivityFeed, type ActivityItem, formatDate } from '@platform/services/activity-feed'
@@ -173,11 +173,7 @@ function ActivityFeed({
           {items.slice(0, 8).map((item) => (
             <li key={`${item.type}-${item.id}`} className="flex items-start gap-3 p-3">
               <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-50 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                {item.type === 'kb_entry' ? (
-                  <BookOpen className="h-3.5 w-3.5" />
-                ) : (
-                  <CheckSquare className="h-3.5 w-3.5" />
-                )}
+                <CheckSquare className="h-3.5 w-3.5" />
               </div>
               <div className="min-w-0 flex-1">
                 <Link
