@@ -40,6 +40,17 @@ export type ConnectorResult<T> =
 // Internal helpers
 // ---------------------------------------------------------------------------
 
+/** Build headers including API key for spoke authentication */
+function buildHeaders(apiKey?: string): HeadersInit {
+  const headers: Record<string, string> = {
+    'Accept': 'application/json',
+  }
+  if (apiKey) {
+    headers['X-FXL-API-Key'] = apiKey
+  }
+  return headers
+}
+
 async function fetchWithTimeout(
   url: string,
   options?: RequestInit,
@@ -90,9 +101,9 @@ async function handleResponse<T>(response: Response): Promise<ConnectorResult<T>
 // ---------------------------------------------------------------------------
 
 /** Fetch the spoke's manifest (GET /api/fxl/manifest) */
-export async function fetchManifest(baseUrl: string): Promise<ConnectorResult<FxlAppManifest>> {
+export async function fetchManifest(baseUrl: string, apiKey?: string): Promise<ConnectorResult<FxlAppManifest>> {
   try {
-    const response = await fetchWithTimeout(`${baseUrl}/api/fxl/manifest`)
+    const response = await fetchWithTimeout(`${baseUrl}/api/fxl/manifest`, { headers: buildHeaders(apiKey) })
     const result = await handleResponse<FxlAppManifest>(response)
 
     // Validate manifest shape
@@ -115,10 +126,11 @@ export async function fetchEntities(
   entityType: string,
   page = 1,
   pageSize = 20,
+  apiKey?: string,
 ): Promise<ConnectorResult<FxlPaginatedResponse<Record<string, unknown>>>> {
   try {
     const url = `${baseUrl}/api/fxl/entities/${encodeURIComponent(entityType)}?page=${page}&pageSize=${pageSize}`
-    const response = await fetchWithTimeout(url)
+    const response = await fetchWithTimeout(url, { headers: buildHeaders(apiKey) })
     return handleResponse(response)
   } catch (err) {
     return { ok: false, error: buildError(err) }
@@ -130,10 +142,11 @@ export async function fetchEntity(
   baseUrl: string,
   entityType: string,
   entityId: string,
+  apiKey?: string,
 ): Promise<ConnectorResult<Record<string, unknown>>> {
   try {
     const url = `${baseUrl}/api/fxl/entities/${encodeURIComponent(entityType)}/${encodeURIComponent(entityId)}`
-    const response = await fetchWithTimeout(url)
+    const response = await fetchWithTimeout(url, { headers: buildHeaders(apiKey) })
     return handleResponse(response)
   } catch (err) {
     return { ok: false, error: buildError(err) }
@@ -144,11 +157,12 @@ export async function fetchEntity(
 export async function fetchWidgetData<T extends FxlKpiData | FxlChartData | FxlTableData | FxlListData>(
   baseUrl: string,
   widgetEndpoint: string,
+  apiKey?: string,
 ): Promise<ConnectorResult<T>> {
   try {
     // widgetEndpoint is a relative path like "/api/fxl/widgets/total-reservations/data"
     const url = widgetEndpoint.startsWith('http') ? widgetEndpoint : `${baseUrl}${widgetEndpoint}`
-    const response = await fetchWithTimeout(url)
+    const response = await fetchWithTimeout(url, { headers: buildHeaders(apiKey) })
     return handleResponse(response)
   } catch (err) {
     return { ok: false, error: buildError(err) }
@@ -156,9 +170,9 @@ export async function fetchWidgetData<T extends FxlKpiData | FxlChartData | FxlT
 }
 
 /** Check spoke health (GET /api/fxl/health) */
-export async function fetchHealth(baseUrl: string): Promise<ConnectorResult<FxlHealthResponse>> {
+export async function fetchHealth(baseUrl: string, apiKey?: string): Promise<ConnectorResult<FxlHealthResponse>> {
   try {
-    const response = await fetchWithTimeout(`${baseUrl}/api/fxl/health`)
+    const response = await fetchWithTimeout(`${baseUrl}/api/fxl/health`, { headers: buildHeaders(apiKey) })
     return handleResponse(response)
   } catch (err) {
     return { ok: false, error: buildError(err) }

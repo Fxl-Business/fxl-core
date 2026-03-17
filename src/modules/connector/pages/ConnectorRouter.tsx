@@ -39,7 +39,7 @@ export default function ConnectorRouter() {
 }
 
 function ConnectorRoutes({ config }: { config: ConnectorConfig }) {
-  const { manifest, loading, error, status } = useConnector(config.baseUrl)
+  const { manifest, loading, error, status } = useConnector(config.baseUrl, config.apiKey)
 
   if (loading) {
     return (
@@ -107,7 +107,7 @@ function ConnectorRoutes({ config }: { config: ConnectorConfig }) {
         {/* Dashboard — root of the connector */}
         <Route
           index
-          element={<ConnectorDashboard manifest={manifest} baseUrl={config.baseUrl} />}
+          element={<ConnectorDashboard manifest={manifest} baseUrl={config.baseUrl} apiKey={config.apiKey} />}
         />
 
         {/* Entity list — /apps/:appId/:entityType */}
@@ -119,6 +119,7 @@ function ConnectorRoutes({ config }: { config: ConnectorConfig }) {
               <EntityList
                 entity={entity}
                 baseUrl={config.baseUrl}
+                apiKey={config.apiKey}
               />
             }
           />
@@ -133,6 +134,7 @@ function ConnectorRoutes({ config }: { config: ConnectorConfig }) {
               <EntityDetail
                 entity={entity}
                 baseUrl={config.baseUrl}
+                apiKey={config.apiKey}
               />
             }
           />

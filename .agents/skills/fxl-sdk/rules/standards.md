@@ -12,7 +12,7 @@ Every FXL spoke project uses this stack. Do not deviate without explicit approva
 | Components | shadcn/ui | latest |
 | Build | Vite | 5.x |
 | Database | Supabase | @supabase/supabase-js 2.x |
-| Auth | Clerk | @clerk/react 6.x (shared app with Hub) |
+| Auth | Clerk | @clerk/react 6.x (independent from Hub) |
 | Icons | lucide-react | latest |
 | Deploy | Vercel | — |
 | CI | GitHub Actions | — |
@@ -122,15 +122,19 @@ Required env vars for every spoke:
 VITE_SUPABASE_URL=https://xxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
 VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+FXL_API_KEY=<generated-key>            # server-side only, NO VITE_ prefix
 ```
 
 ### Auth
 
-- Clerk is the ONLY auth provider (shared application with Hub)
-- Validate Clerk JWT via JWKS on every API request
-- Extract `org_id` from JWT for data isolation
-- Never trust client-side org_id — always read from server-validated token
-- All API endpoints require valid Clerk token (no public endpoints except health)
+- Clerk is the auth provider for the spoke's own UI (independent from Hub — NOT shared)
+- Hub authenticates to spoke via API key in `X-FXL-API-Key` header
+- Spoke generates API key (`openssl rand -base64 32`) and stores it as `FXL_API_KEY` env var
+- Spoke middleware validates `X-FXL-API-Key` header on all `/api/fxl/*` data endpoints
+- Hub stores the spoke's API key in connector config (Supabase `tenant_modules` table)
+- Hub sends `org_id` as query parameter; spoke trusts it only after validating the API key
+- `FXL_API_KEY` is a server-side secret — NEVER prefix with `VITE_`
+- Manifest and health endpoints are public (no API key required)
 
 ### Supabase RLS
 

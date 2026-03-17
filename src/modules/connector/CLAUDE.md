@@ -9,7 +9,7 @@ Generic connector module that consumes data from any FXL spoke application via t
 ## Public API
 
 ### Types
-- ConnectorConfig: Configuration for a single connector (appId, baseUrl) (types/connector-config.ts)
+- ConnectorConfig: Configuration for a single connector (appId, appName, baseUrl, apiKey) (types/connector-config.ts)
 - ConnectorState: Runtime state (manifest, loading, error, status) (types/index.ts)
 - ConnectorStatus: 'online' | 'offline' | 'error' | 'loading' (types/index.ts)
 - Re-exports all FXL contract types from types/index.ts (FxlAppManifest, FxlEntityDefinition, FxlFieldDefinition, etc.)
@@ -29,7 +29,8 @@ Generic connector module that consumes data from any FXL spoke application via t
 - ListWidget: Renders list widget data (components/widgets/ListWidget.tsx)
 
 ### Services
-- connector-service: Fetch manifest, entities, widget data from spoke API with 5s timeout and error handling (services/connector-service.ts)
+- connector-service: Fetch manifest, entities, widget data from spoke API with 5s timeout, API key auth (X-FXL-API-Key header), and error handling (services/connector-service.ts)
+- connector-config-service: CRUD for connector configs stored in Supabase tenant_modules (services/connector-config-service.ts)
 - icon-map: Maps lucide icon names to React components with Box fallback (services/icon-map.ts)
 
 ### Pages
@@ -50,6 +51,7 @@ Generic connector module that consumes data from any FXL spoke application via t
 ### From platform/
 - @platform/module-loader/registry — ModuleDefinition, SlotComponentProps types
 - @platform/module-loader/module-ids — MODULE_IDS.CONNECTOR, SLOT_IDS.HOME_DASHBOARD
+- @platform/supabase — Supabase client (used by connector-config-service)
 
 ### From other modules
 - None — no direct cross-module imports

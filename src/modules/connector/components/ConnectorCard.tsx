@@ -36,8 +36,8 @@ export function ConnectorHomeWidget({ className }: SlotComponentProps) {
   )
 }
 
-function ConnectorCardItem({ config }: { config: { appId: string; baseUrl: string } }) {
-  const { manifest, status } = useConnector(config.baseUrl)
+function ConnectorCardItem({ config }: { config: { appId: string; appName: string; baseUrl: string; apiKey: string } }) {
+  const { manifest, status } = useConnector(config.baseUrl, config.apiKey)
 
   return (
     <li>

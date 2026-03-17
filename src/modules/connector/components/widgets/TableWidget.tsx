@@ -6,12 +6,13 @@ import { fetchWidgetData, type ConnectorError } from '../../services/connector-s
 interface TableWidgetProps {
   widget: FxlWidgetDefinition
   baseUrl: string
+  apiKey?: string
 }
 
 /**
  * Renders a table widget — columns + rows of summary data.
  */
-export default function TableWidget({ widget, baseUrl }: TableWidgetProps) {
+export default function TableWidget({ widget, baseUrl, apiKey }: TableWidgetProps) {
   const [data, setData] = useState<FxlTableData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<ConnectorError | null>(null)
@@ -21,7 +22,7 @@ export default function TableWidget({ widget, baseUrl }: TableWidgetProps) {
 
     async function load() {
       setLoading(true)
-      const result = await fetchWidgetData<FxlTableData>(baseUrl, widget.endpoint)
+      const result = await fetchWidgetData<FxlTableData>(baseUrl, widget.endpoint, apiKey)
       if (cancelled) return
 
       if (result.ok) {

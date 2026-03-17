@@ -483,23 +483,44 @@ a UI generica do connector (sem dropdowns, sem resolucao de referencias).
 
 ### 6.3 Autenticacao entre Hub e Spokes
 
-**Modelo: Clerk application unico compartilhado.**
+**Modelo: API key por spoke (service-to-service)**
 
-Hub e todas as spokes usam a **mesma Clerk application**. Isso significa:
-- Pool de usuarios unico (um login funciona em tudo)
-- Organizations funcionam cross-app (mesmo org_id no hub e nas spokes)
-- Billing Clerk unico
-- Spokes validam o JWT do Clerk usando o JWKS endpoint publico
+Hub e spokes tem autenticacao INDEPENDENTE. Cada spoke pode usar qualquer provider
+de auth (Supabase Auth, Clerk, Firebase, etc.). A comunicacao hub→spoke usa API key
+dedicada para cada connector.
 
-**Fluxo de autenticacao hub -> spoke:**
-1. Hub obtem Clerk session token do usuario (com org_id ativo)
-2. Hub faz request para spoke API incluindo `Authorization: Bearer <clerk_token>`
-3. Spoke valida JWT via Clerk JWKS (`https://api.clerk.com/v1/jwks`)
-4. Spoke extrai `org_id` do token e filtra dados por org
-5. Spoke retorna dados — sem API keys customizadas
+**Como funciona:**
+1. Operador cadastra connector no hub com `{appId, baseUrl, apiKey}`
+2. Hub armazena config na tabela `tenant_modules` (coluna `config` JSONB)
+3. Quando hub faz request para spoke, inclui header `X-FXL-API-Key: <api_key>`
+4. Spoke valida API key no middleware dos endpoints `/api/fxl/*`
+5. Spoke retorna dados — sem conhecimento de Clerk ou do hub auth
 
-**Implicacao:** todas as spokes devem usar a mesma Clerk publishable key.
-Configurar via env var `VITE_CLERK_PUBLISHABLE_KEY` (ja e o padrao atual).
+**Por que nao Clerk compartilhado:**
+- Spokes sao produtos independentes que podem escalar sozinhos
+- Acoplar auth ao hub limita evolucao da spoke (pricing, provider, user pool)
+- API key e suficiente para contrato v1 read-only
+- Quando mutations vierem (v2), user context via headers customizados (`X-FXL-User-Id`, `X-FXL-Org-Id`)
+
+**Seguranca:**
+- API key protegida por RLS no Supabase (apenas org dona ve a key)
+- API key trafega no header (nao na URL)
+- Para ferramentas internas (operadores confiados), exposicao no browser e aceitavel
+- Para producao com usuarios externos: proxy via Edge Function (melhoria futura)
+
+**Spoke-side middleware (exemplo):**
+```typescript
+// middleware/fxl-auth.ts — valida API key nos endpoints /api/fxl/*
+export function validateFxlApiKey(req: Request): boolean {
+  const apiKey = req.headers.get('X-FXL-API-Key')
+  if (!apiKey) return false
+  // Compare against stored key (env var or database)
+  return apiKey === process.env.FXL_API_KEY
+}
+```
+
+**Implicacao:** Spokes NAO precisam usar a mesma Clerk app que o hub.
+Cada spoke gerencia seus proprios usuarios e auth de forma independente.
 
 ### 6.4 Tratamento de erros hub-spoke
 
@@ -747,25 +768,35 @@ Esta camada e posterior aos milestones v3.0-v3.5. Pre-requisitos:
 | **v3.0** | Reorganizacao modular | Mover arquivos para nova estrutura. Remover Knowledge Base. Zero mudanca funcional. | — |
 | **v3.1** | Multi-tenancy | Clerk Organizations, org picker, tenant_modules, RLS por org_id. FXL como primeiro tenant. | v3.0 |
 | **v3.2** | FXL SDK (Skill) | Criar repo fxl-sdk com skill completa: rules, templates, contract, checklists. | v3.0 |
-| **v3.3** | Connector module generico | Modulo no FXL Core que consome qualquer spoke via contrato. UI generica. | v3.0 + v3.2 (multi-tenancy NAO e pre-requisito — config hardcoded inicialmente, migrado para tenant_modules em v3.5) |
-| **v3.4** | Beach House migration | Criar repo, migrar codigo Lovable, implementar contrato, migrar Supabase. | v3.2 |
-| **v3.5** | Integracao Beach House <-> Hub | Connector configurado, dados aparecendo no hub. | v3.3 + v3.4 |
+| **v3.3** | Connector module generico | Modulo no FXL Core que consome qualquer spoke via contrato. UI generica. Admin UI para gerenciar connectors. | v3.0 + v3.2 |
+
+**Nota sobre spoke projects (ex: Sitio Santa Cruz):**
+
+O onboarding de spokes NAO e milestone do FXL Core. E trabalho feito no repo da spoke,
+guiado pelo FXL SDK skill. O processo esta documentado em `docs/processo/spoke-onboarding.md`.
+
+Passos para conectar uma spoke ao hub:
+1. No repo da spoke: usar FXL SDK skill para auditar e implementar contrato
+2. No hub: cadastrar connector via Admin UI (`/admin/connectors`)
+3. Verificar dados aparecendo no hub via connector module
 
 **Grafo de dependencias atualizado:**
 
 ```
 v3.0 (reorganizacao) ──> v3.1 (multi-tenancy)
-  |                                          \
-  |──> v3.2 (SDK skill) ──> v3.3 (connector) ──> v3.5 (integracao)
-  |                     \                    /
-  |                      ──> v3.4 (Beach House)
+  |
+  |──> v3.2 (SDK skill) ──> v3.3 (connector + admin UI)
+  |                     \
+  |                      ──> Spoke onboarding (repo externo, guiado por SDK)
+  |                                    \
+  |                                     ──> Configurar connector no hub (quick task)
 ```
 
 **Paralelismo possivel:**
-- v3.0 e v3.2 podem rodar em paralelo (FXL Core vs novo repo)
-- v3.1 e v3.3 podem rodar em paralelo (connector nao precisa de multi-tenancy para dev)
-- v3.4 pode iniciar junto com v3.1 (Beach House nao depende de multi-tenancy)
-- v3.5 e o ponto de convergencia (tudo se junta)
+- v3.1 e v3.2 podem rodar em paralelo (hub auth vs SDK skill)
+- v3.3 depende de v3.2 (connector usa tipos do contrato)
+- Spoke onboarding pode iniciar assim que v3.2 estiver pronto
+- Configuracao do connector no hub e um quick task apos spoke ter contrato implementado
 
 ---
 

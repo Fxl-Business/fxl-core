@@ -18,7 +18,7 @@ const CACHE_TTL_MS = 60_000 // 1 minute
  * Hook to fetch and manage the manifest for a specific connector.
  * Caches manifests in memory for 1 minute.
  */
-export function useConnector(baseUrl: string): UseConnectorResult {
+export function useConnector(baseUrl: string, apiKey?: string): UseConnectorResult {
   const [manifest, setManifest] = useState<FxlAppManifest | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<ConnectorError | null>(null)
@@ -39,7 +39,7 @@ export function useConnector(baseUrl: string): UseConnectorResult {
     setError(null)
     setStatus('loading')
 
-    const result = await fetchManifest(baseUrl)
+    const result = await fetchManifest(baseUrl, apiKey)
 
     if (result.ok) {
       setManifest(result.data)
@@ -62,7 +62,7 @@ export function useConnector(baseUrl: string): UseConnectorResult {
     }
 
     setLoading(false)
-  }, [baseUrl])
+  }, [baseUrl, apiKey])
 
   useEffect(() => {
     void doFetch()

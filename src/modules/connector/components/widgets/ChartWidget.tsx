@@ -7,6 +7,7 @@ import { fetchWidgetData, type ConnectorError } from '../../services/connector-s
 interface ChartWidgetProps {
   widget: FxlWidgetDefinition
   baseUrl: string
+  apiKey?: string
 }
 
 // Colors for chart datasets
@@ -23,7 +24,7 @@ const CHART_COLORS = [
  * Renders a chart widget using recharts.
  * Transforms FxlChartData (labels + datasets) into recharts format.
  */
-export default function ChartWidget({ widget, baseUrl }: ChartWidgetProps) {
+export default function ChartWidget({ widget, baseUrl, apiKey }: ChartWidgetProps) {
   const [data, setData] = useState<FxlChartData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<ConnectorError | null>(null)
@@ -33,7 +34,7 @@ export default function ChartWidget({ widget, baseUrl }: ChartWidgetProps) {
 
     async function load() {
       setLoading(true)
-      const result = await fetchWidgetData<FxlChartData>(baseUrl, widget.endpoint)
+      const result = await fetchWidgetData<FxlChartData>(baseUrl, widget.endpoint, apiKey)
       if (cancelled) return
 
       if (result.ok) {

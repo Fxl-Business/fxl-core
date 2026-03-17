@@ -9,13 +9,14 @@ import EntityFields from '../components/EntityFields'
 interface EntityDetailProps {
   entity: FxlEntityDefinition
   baseUrl: string
+  apiKey?: string
 }
 
 /**
  * Generic detail view for a single entity.
  * Fetches entity by ID from the spoke and renders all fields.
  */
-export default function EntityDetail({ entity, baseUrl }: EntityDetailProps) {
+export default function EntityDetail({ entity, baseUrl, apiKey }: EntityDetailProps) {
   const { appId, entityId } = useParams<{ appId: string; entityId: string }>()
   const [data, setData] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(true)
@@ -30,7 +31,7 @@ export default function EntityDetail({ entity, baseUrl }: EntityDetailProps) {
       setLoading(true)
       setError(null)
 
-      const result = await fetchEntity(baseUrl, entity.type, entityId)
+      const result = await fetchEntity(baseUrl, entity.type, entityId, apiKey)
 
       if (cancelled) return
 

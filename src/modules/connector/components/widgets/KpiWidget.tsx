@@ -6,12 +6,13 @@ import { fetchWidgetData, type ConnectorError } from '../../services/connector-s
 interface KpiWidgetProps {
   widget: FxlWidgetDefinition
   baseUrl: string
+  apiKey?: string
 }
 
 /**
  * Renders a KPI widget — single metric with optional trend indicator.
  */
-export default function KpiWidget({ widget, baseUrl }: KpiWidgetProps) {
+export default function KpiWidget({ widget, baseUrl, apiKey }: KpiWidgetProps) {
   const [data, setData] = useState<FxlKpiData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<ConnectorError | null>(null)
@@ -21,7 +22,7 @@ export default function KpiWidget({ widget, baseUrl }: KpiWidgetProps) {
 
     async function load() {
       setLoading(true)
-      const result = await fetchWidgetData<FxlKpiData>(baseUrl, widget.endpoint)
+      const result = await fetchWidgetData<FxlKpiData>(baseUrl, widget.endpoint, apiKey)
       if (cancelled) return
 
       if (result.ok) {

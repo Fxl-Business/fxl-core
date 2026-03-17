@@ -17,7 +17,7 @@ A Claude Code skill that defines standards, templates, contract types, and check
 - Tailwind CSS 3 + shadcn/ui
 - Vite 5
 - Supabase (database + auth RLS)
-- Clerk (shared application with Hub)
+- Clerk (independent from Hub — Hub connects via API key)
 - Vercel (deploy)
 - GitHub Actions (CI)
 
@@ -41,7 +41,7 @@ A Claude Code skill that defines standards, templates, contract types, and check
 **Adding FXL contract to a project** -> Use `rules/connect.md`
 - Adds required API endpoints
 - Copies contract types
-- Configures Clerk JWT validation
+- Configures API key validation middleware
 
 **Refactoring to FXL standards** -> Use `rules/refactor.md`
 - Migration patterns for Lovable/existing projects

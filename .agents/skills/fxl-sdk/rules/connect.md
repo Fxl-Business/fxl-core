@@ -7,7 +7,7 @@ Project already exists and follows FXL standards (or has been audited/refactored
 ## Prerequisites
 
 - Project uses Supabase for database
-- Project uses Clerk for auth (same app as Hub)
+- Project has its own independent auth (Clerk or other — NOT shared with Hub)
 - `org_id` column exists on all tables (see `rules/standards.md`)
 - RLS policies filter by `org_id` (see `checklists/rls-checklist.md`)
 
@@ -56,34 +56,42 @@ export const APP_MANIFEST: FxlAppManifest = {
 
 ### 3. Implement Endpoints
 
-All endpoints require Clerk JWT validation. Create a shared auth middleware:
+Hub and spoke have **independent auth**. The Hub authenticates to the spoke via an API key sent in the `X-FXL-API-Key` header. The spoke validates this key in middleware.
+
+#### Generate and store the API key
+
+```bash
+# On the spoke server, generate a secure API key
+openssl rand -base64 32
+```
+
+Add the key to the spoke's `.env.local`:
+
+```
+FXL_API_KEY=<generated-key>
+```
+
+The Hub stores this same key in the connector config (Supabase `tenant_modules` table, `config->api_key` field) and sends it in every request to the spoke.
+
+#### Create the auth middleware
 
 ```typescript
 // src/api/fxl/middleware.ts
-import { verifyToken } from '@clerk/backend'
 
-export async function validateClerkToken(
+export function validateApiKey(
   request: Request
-): Promise<{ orgId: string; userId: string } | null> {
-  const authHeader = request.headers.get('Authorization')
-  if (!authHeader?.startsWith('Bearer ')) return null
+): { orgId: string } | null {
+  const apiKey = request.headers.get('X-FXL-API-Key')
+  if (!apiKey) return null
 
-  const token = authHeader.slice(7)
+  if (apiKey !== process.env.FXL_API_KEY) return null
 
-  try {
-    const payload = await verifyToken(token, {
-      jwtKey: process.env.CLERK_JWT_KEY,
-      // OR use JWKS:
-      // issuer: 'https://clerk.your-domain.com'
-    })
+  // org_id comes from the query parameter set by the Hub
+  const url = new URL(request.url)
+  const orgId = url.searchParams.get('org_id')
+  if (!orgId) return null
 
-    const orgId = payload.org_id as string | undefined
-    if (!orgId) return null
-
-    return { orgId, userId: payload.sub }
-  } catch {
-    return null
-  }
+  return { orgId }
 }
 ```
 
@@ -280,14 +288,15 @@ npm run dev
 # Test endpoints
 curl http://localhost:5173/api/fxl/health
 curl http://localhost:5173/api/fxl/manifest
-curl -H "Authorization: Bearer $CLERK_TOKEN" http://localhost:5173/api/fxl/entities/{type}
+curl -H "X-FXL-API-Key: $FXL_API_KEY" "http://localhost:5173/api/fxl/entities/{type}?org_id=test-org"
 ```
 
 ## Important Notes
 
 - v1 contract is read-only (GET only). Do not implement POST/PUT/DELETE.
-- All entity queries MUST filter by `org_id` from the validated JWT.
-- Never trust client-provided org_id — always extract from server-validated Clerk token.
+- All entity queries MUST filter by `org_id` from the Hub-provided query parameter.
+- The Hub is the only caller — it sends `org_id` alongside the API key. The spoke trusts the `org_id` only after validating the API key.
+- Never expose `FXL_API_KEY` to the browser — it is a server-side secret (no `VITE_` prefix).
 - Widget data queries are domain-specific — each project implements its own logic.
 - Search is basic (ilike). Consider full-text search for production if dataset is large.
-- The manifest endpoint does not need org_id filtering (it describes the app, not data).
+- The manifest and health endpoints do not need org_id filtering or API key validation (they describe the app, not data).

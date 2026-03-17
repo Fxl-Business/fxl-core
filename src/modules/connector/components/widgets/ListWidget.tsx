@@ -6,12 +6,13 @@ import { fetchWidgetData, type ConnectorError } from '../../services/connector-s
 interface ListWidgetProps {
   widget: FxlWidgetDefinition
   baseUrl: string
+  apiKey?: string
 }
 
 /**
  * Renders a list widget — simple item list with title, subtitle, badge.
  */
-export default function ListWidget({ widget, baseUrl }: ListWidgetProps) {
+export default function ListWidget({ widget, baseUrl, apiKey }: ListWidgetProps) {
   const [data, setData] = useState<FxlListData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<ConnectorError | null>(null)
@@ -21,7 +22,7 @@ export default function ListWidget({ widget, baseUrl }: ListWidgetProps) {
 
     async function load() {
       setLoading(true)
-      const result = await fetchWidgetData<FxlListData>(baseUrl, widget.endpoint)
+      const result = await fetchWidgetData<FxlListData>(baseUrl, widget.endpoint, apiKey)
       if (cancelled) return
 
       if (result.ok) {

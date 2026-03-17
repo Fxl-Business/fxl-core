@@ -14,6 +14,7 @@ const SharedWireframeView = lazy(() => import('@modules/wireframe/pages/SharedWi
 
 // Admin pages (lazy for code splitting)
 const ModulesPanel = lazy(() => import('@platform/pages/admin/ModulesPanel'))
+const ConnectorsPanel = lazy(() => import('@platform/pages/admin/ConnectorsPanel'))
 
 // Tasks pages — TaskList is non-lazy (lightweight); KanbanBoard and TaskForm are lazy
 import TaskList from '@modules/tasks/pages/TaskList'
@@ -47,6 +48,10 @@ export default function AppRouter() {
         <Route
           path="/admin/modules"
           element={<Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense>}
+        />
+        <Route
+          path="/admin/connectors"
+          element={<Suspense fallback={<div>Carregando...</div>}><ConnectorsPanel /></Suspense>}
         />
       </Route>
 

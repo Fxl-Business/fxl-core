@@ -10,13 +10,14 @@ import { FXL_DEFAULT_PAGE_SIZE } from '../types'
 interface EntityListProps {
   entity: FxlEntityDefinition
   baseUrl: string
+  apiKey?: string
 }
 
 /**
  * Generic table view for any entity type.
  * Fetches paginated data from the spoke and renders using EntityTable.
  */
-export default function EntityList({ entity, baseUrl }: EntityListProps) {
+export default function EntityList({ entity, baseUrl, apiKey }: EntityListProps) {
   const { appId } = useParams<{ appId: string }>()
   const [data, setData] = useState<Record<string, unknown>[]>([])
   const [total, setTotal] = useState(0)
@@ -34,7 +35,7 @@ export default function EntityList({ entity, baseUrl }: EntityListProps) {
       setLoading(true)
       setError(null)
 
-      const result = await fetchEntities(baseUrl, entity.type, page, pageSize)
+      const result = await fetchEntities(baseUrl, entity.type, page, pageSize, apiKey)
 
       if (cancelled) return
 

@@ -10,13 +10,14 @@ import ListWidget from '../components/widgets/ListWidget'
 interface ConnectorDashboardProps {
   manifest: FxlAppManifest
   baseUrl: string
+  apiKey?: string
 }
 
 /**
  * Dashboard view for a specific connector.
  * Shows all widgets and entity quick links.
  */
-export default function ConnectorDashboard({ manifest, baseUrl }: ConnectorDashboardProps) {
+export default function ConnectorDashboard({ manifest, baseUrl, apiKey }: ConnectorDashboardProps) {
   const { appId } = useParams<{ appId: string }>()
 
   return (
@@ -31,13 +32,13 @@ export default function ConnectorDashboard({ manifest, baseUrl }: ConnectorDashb
             {manifest.dashboardWidgets.map(widget => {
               switch (widget.type) {
                 case 'kpi':
-                  return <KpiWidget key={widget.id} widget={widget} baseUrl={baseUrl} />
+                  return <KpiWidget key={widget.id} widget={widget} baseUrl={baseUrl} apiKey={apiKey} />
                 case 'chart':
-                  return <ChartWidget key={widget.id} widget={widget} baseUrl={baseUrl} />
+                  return <ChartWidget key={widget.id} widget={widget} baseUrl={baseUrl} apiKey={apiKey} />
                 case 'table':
-                  return <TableWidget key={widget.id} widget={widget} baseUrl={baseUrl} />
+                  return <TableWidget key={widget.id} widget={widget} baseUrl={baseUrl} apiKey={apiKey} />
                 case 'list':
-                  return <ListWidget key={widget.id} widget={widget} baseUrl={baseUrl} />
+                  return <ListWidget key={widget.id} widget={widget} baseUrl={baseUrl} apiKey={apiKey} />
                 default:
                   return null
               }
