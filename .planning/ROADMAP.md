@@ -49,10 +49,10 @@
   3. A tab do browser mostra "Nexo" como titulo
   4. package.json e index.html referenciam "nexo" / "Nexo"
   5. CLAUDE.md e PROJECT.md nao contem mais "FXL Core" ou "Nucleo FXL"; src/ esta limpo dessas strings (exceto SDK)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 73-01: Rename em UI (src/), meta (package.json, index.html) e docs (CLAUDE.md, PROJECT.md)
+- [ ] 73-01-PLAN.md — Rename em UI (src/), meta (package.json, index.html) e docs (CLAUDE.md, PROJECT.md, docs/)
 
 ### Phase 74: Build Verification
 **Goal**: O build de producao confirma que o rename nao introduziu nenhum erro
