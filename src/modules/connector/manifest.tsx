@@ -3,6 +3,7 @@ import type { ModuleDefinition } from '@platform/module-loader/registry'
 import { MODULE_IDS } from '@platform/module-loader/module-ids'
 import { connectorHomeExtension } from './extensions/home-widgets'
 import ConnectorRouter from './pages/ConnectorRouter'
+import ConnectorList from './pages/ConnectorList'
 
 export const connectorManifest: ModuleDefinition = {
   id: MODULE_IDS.CONNECTOR,
@@ -21,6 +22,7 @@ export const connectorManifest: ModuleDefinition = {
     },
   ],
   routeConfig: [
+    { path: '/apps', element: <ConnectorList /> },
     { path: '/apps/:appId/*', element: <ConnectorRouter /> },
   ],
   extensions: [connectorHomeExtension],
