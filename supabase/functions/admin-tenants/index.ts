@@ -58,21 +58,27 @@ serve(async (req: Request) => {
 
   // Route: parse URL path
   const url = new URL(req.url)
-  // Path format: /admin-tenants or /admin-tenants/:orgId
-  // Supabase functions URL: /functions/v1/admin-tenants[/orgId]
+  // Path format: /admin-tenants or /admin-tenants/:orgId or /admin-tenants/:orgId/members
+  // Supabase functions URL: /functions/v1/admin-tenants[/orgId[/members]]
   const pathParts = url.pathname.split('/').filter(Boolean)
   // Last segment after function name
   const functionIndex = pathParts.findIndex((p) => p === 'admin-tenants')
   const orgId = functionIndex !== -1 && pathParts.length > functionIndex + 1
     ? pathParts[functionIndex + 1]
     : null
+  const isMembers = orgId !== null && pathParts.includes('members')
 
   if (req.method === 'GET' && !orgId) {
     // List all Clerk organizations
     return handleListOrgs()
   }
 
-  if (req.method === 'GET' && orgId) {
+  if (req.method === 'GET' && orgId && isMembers) {
+    // List members of a specific org
+    return handleListMembers(orgId)
+  }
+
+  if (req.method === 'GET' && orgId && !isMembers) {
     // Get single org detail
     return handleGetOrg(orgId)
   }
@@ -196,6 +202,44 @@ async function handleCreateOrg(
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     },
   )
+}
+
+async function handleListMembers(orgId: string): Promise<Response> {
+  const res = await fetch(
+    `${CLERK_API_BASE}/organizations/${orgId}/memberships?limit=100`,
+    {
+      headers: {
+        Authorization: `Bearer ${CLERK_SECRET_KEY}`,
+      },
+    }
+  )
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ errors: [{ message: 'Unknown error' }] }))
+    const message = err?.errors?.[0]?.message ?? 'Clerk API error'
+    return jsonError(message, res.status)
+  }
+
+  const data = await res.json()
+  const memberships = data.data ?? []
+
+  const members = memberships.map((mem: Record<string, unknown>) => {
+    const pubData = (mem.public_user_data as Record<string, unknown>) ?? {}
+    return {
+      userId: pubData.user_id ?? mem.user_id ?? '',
+      firstName: pubData.first_name ?? null,
+      lastName: pubData.last_name ?? null,
+      email: pubData.identifier ?? '',
+      imageUrl: pubData.image_url ?? '',
+      role: mem.role ?? 'member',
+      joinedAt: mem.created_at ?? 0,
+    }
+  })
+
+  return jsonOk({
+    members,
+    totalCount: data.total_count ?? members.length,
+  })
 }
 
 function jsonOk(data: unknown): Response {
