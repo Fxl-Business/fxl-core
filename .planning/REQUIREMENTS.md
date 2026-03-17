@@ -15,7 +15,7 @@
 
 ### Admin Dashboard
 
-- [ ] **ADMIN-01**: Pagina /admin com metricas agregadas (total tenants, total usuarios, modulos ativos)
+- [x] **ADMIN-01**: Pagina /admin com metricas agregadas (total tenants, total usuarios, modulos ativos)
 - [x] **ADMIN-02**: Sidebar/nav do admin com links para todas as sub-paginas
 
 ### Tenant Management
@@ -76,7 +76,7 @@
 | AUTH-03 | Phase 75 | Complete |
 | RLS-01 | Phase 75 | Complete |
 | RLS-02 | Phase 75 | Complete |
-| ADMIN-01 | Phase 76 | Pending |
+| ADMIN-01 | Phase 76 | Complete |
 | ADMIN-02 | Phase 76 | Complete |
 | UX-01 | Phase 76 | Complete |
 | UX-02 | Phase 76 | Complete |

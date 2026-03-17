@@ -29,7 +29,7 @@
 ### Phases
 
 - [x] **Phase 75: Auth & RLS Foundation** - JWT claim super_admin + SuperAdminRoute + RLS policies atualizadas em todas as tabelas
-- [ ] **Phase 76: Admin Shell & Dashboard** - Layout /admin/*, sidebar de navegacao e dashboard com metricas agregadas + toggle admin/operator na topbar
+- [x] **Phase 76: Admin Shell & Dashboard** - Layout /admin/*, sidebar de navegacao e dashboard com metricas agregadas + toggle admin/operator na topbar
 - [ ] **Phase 77: Tenant Management** - CRUD de tenants via Clerk Organizations (lista, detalhe, criacao)
 - [ ] **Phase 78: Module Management Evolution** - Migracao de localStorage para Supabase tenant_modules com controle por tenant
 - [ ] **Phase 79: Platform Settings & MCP** - Tabela platform_settings, pagina /admin/settings e configuracao dos MCP servers
@@ -66,7 +66,7 @@ Plans:
 
 Plans:
 - [x] 076-01-PLAN.md — Admin shell layout, sidebar, routes, toggle (ADMIN-02, UX-01, UX-02)
-- [ ] 076-02-PLAN.md — Admin dashboard with platform metrics (ADMIN-01)
+- [x] 076-02-PLAN.md — Admin dashboard with platform metrics (ADMIN-01)
 
 ### Phase 77: Tenant Management
 **Goal**: Super admin pode visualizar, criar e inspecionar tenants (Clerk Organizations) diretamente pelo painel
@@ -138,7 +138,7 @@ Phase 75 primeiro (bloqueante). Phase 76 depende de 75. Phases 77, 78 e 79 sao I
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 75. Auth & RLS Foundation | v4.1 | 2/2 | Complete | 2026-03-17 |
-| 76. Admin Shell & Dashboard | v4.1 | 1/2 | In Progress | - |
+| 76. Admin Shell & Dashboard | v4.1 | 2/2 | Complete | 2026-03-17 |
 | 77. Tenant Management | v4.1 | 0/2 | Not started | - |
 | 78. Module Management Evolution | v4.1 | 0/1 | Not started | - |
 | 79. Platform Settings & MCP | v4.1 | 0/2 | Not started | - |
