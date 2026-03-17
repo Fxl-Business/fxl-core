@@ -29,7 +29,7 @@ serve(async (req: Request) => {
     return jsonError('Server configuration error', 500)
   }
 
-  // Extract and validate super_admin JWT claim
+  // Extract Clerk JWT from Authorization header
   const authHeader = req.headers.get('Authorization')
   if (!authHeader?.startsWith('Bearer ')) {
     return jsonError('Missing or invalid Authorization header', 401)
@@ -51,8 +51,8 @@ serve(async (req: Request) => {
     return jsonError('Failed to decode token', 401)
   }
 
-  // Enforce super_admin claim
-  if (payload.super_admin !== true) {
+  // Enforce super_admin claim (handles both boolean true and string "true")
+  if (payload.super_admin !== true && payload.super_admin !== 'true') {
     return jsonError('Forbidden: super_admin required', 403)
   }
 

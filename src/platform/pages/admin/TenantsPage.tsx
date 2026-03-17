@@ -20,7 +20,7 @@ export default function TenantsPage() {
   // Register Clerk token getter for the service
   useEffect(() => {
     if (session) {
-      setClerkTokenGetter(() => session.getToken())
+      setClerkTokenGetter(() => session.getToken({ template: 'supabase' }))
     }
   }, [session])
 
