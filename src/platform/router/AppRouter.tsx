@@ -23,6 +23,7 @@ const ModulesPanel = lazy(() => import('@platform/pages/admin/ModulesPanel'))
 const ConnectorsPanel = lazy(() => import('@platform/pages/admin/ConnectorsPanel'))
 const SettingsPanel = lazy(() => import('@platform/pages/admin/SettingsPanel'))
 const ProductDocsPage = lazy(() => import('@platform/pages/admin/ProductDocsPage'))
+const UsersPage = lazy(() => import('@platform/pages/admin/UsersPage'))
 
 // Tasks pages — TaskList is non-lazy (lightweight); KanbanBoard and TaskForm are lazy
 import TaskList from '@modules/tasks/pages/TaskList'
@@ -78,6 +79,7 @@ export default function AppRouter() {
         </SuperAdminRoute>
       }>
         <Route path="/admin" element={<Suspense fallback={<div>Carregando...</div>}><AdminDashboard /></Suspense>} />
+        <Route path="/admin/users" element={<Suspense fallback={<div>Carregando...</div>}><UsersPage /></Suspense>} />
         <Route path="/admin/tenants" element={<Suspense fallback={<div>Carregando...</div>}><TenantsPage /></Suspense>} />
         <Route path="/admin/tenants/:orgId" element={<Suspense fallback={<div>Carregando...</div>}><TenantDetailPage /></Suspense>} />
         <Route path="/admin/modules" element={<Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense>} />
