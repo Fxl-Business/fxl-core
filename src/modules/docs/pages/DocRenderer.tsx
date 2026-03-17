@@ -1,4 +1,6 @@
 import { useLocation } from 'react-router-dom'
+import { useUser } from '@clerk/react'
+import { BookOpen } from 'lucide-react'
 import { useDoc } from '../hooks/useDoc'
 import type { DocSection } from '../services/docs-parser'
 import MarkdownRenderer from '../components/MarkdownRenderer'
@@ -64,7 +66,9 @@ function SectionRenderer({ section }: { section: DocSection }) {
 export default function DocRenderer() {
   const location = useLocation()
   const slug = location.pathname.replace(/^\//, '').replace(/\/$/, '')
-  const { doc, loading, error } = useDoc(slug)
+  const { doc, rawDoc, loading, error } = useDoc(slug)
+  const { user } = useUser()
+  const isSuperAdmin = user?.publicMetadata?.super_admin === true
 
   if (loading) {
     return <DocSkeleton />
@@ -82,6 +86,7 @@ export default function DocRenderer() {
   }
 
   const { frontmatter, sections, headings } = doc
+  const isReadOnly = rawDoc?.scope === 'product' && !isSuperAdmin
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -95,6 +100,13 @@ export default function DocRenderer() {
             title={frontmatter.title}
             description={frontmatter.description}
           />
+
+          {isReadOnly && (
+            <div className="mb-6 mt-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/50">
+              <BookOpen className="h-4 w-4 shrink-0" />
+              <span>Doc do Produto — somente leitura para operadores.</span>
+            </div>
+          )}
 
           <div className="mt-8">
             <div className="space-y-4">

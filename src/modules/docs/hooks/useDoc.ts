@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react'
-import { getDocBySlug } from '../services/docs-service'
+import { getDocBySlug, type DocumentRow } from '../services/docs-service'
 import { parseDoc, type ParsedDoc } from '../services/docs-parser'
 
 type UseDocResult = {
   doc: ParsedDoc | null
+  rawDoc: DocumentRow | null
   loading: boolean
   error: string | null
 }
 
 export function useDoc(slug: string): UseDocResult {
   const [doc, setDoc] = useState<ParsedDoc | null>(null)
+  const [rawDoc, setRawDoc] = useState<DocumentRow | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -23,11 +25,13 @@ export function useDoc(slug: string): UseDocResult {
         if (cancelled) return
         if (!row) {
           setDoc(null)
+          setRawDoc(null)
           setLoading(false)
           return
         }
         const parsed = parseDoc(row)
         setDoc(parsed)
+        setRawDoc(row)
         setLoading(false)
       })
       .catch((err: Error) => {
@@ -41,5 +45,5 @@ export function useDoc(slug: string): UseDocResult {
     }
   }, [slug])
 
-  return { doc, loading, error }
+  return { doc, rawDoc, loading, error }
 }

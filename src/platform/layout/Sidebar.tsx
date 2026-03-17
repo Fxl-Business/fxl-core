@@ -149,20 +149,36 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
 
 export default function Sidebar() {
   const { isEnabled } = useModuleEnabled()
-  const dynamicDocsNav = useDocsNav()
+  const { tenantItems, productItems } = useDocsNav()
 
   const navigationFromRegistry: NavItem[] = useMemo(() =>
     MODULE_REGISTRY
       .filter(m => m.status !== 'coming-soon')
       .filter(m => isEnabled(m.id))
       .flatMap(m => {
-        // Use dynamic nav for docs module when available
-        if (m.id === MODULE_IDS.DOCS && dynamicDocsNav.length > 0) {
-          return dynamicDocsNav
+        // Use dynamic nav for docs module — split into two labeled sections
+        if (m.id === MODULE_IDS.DOCS) {
+          const sections: NavItem[] = []
+          if (tenantItems.length > 0) {
+            sections.push({
+              label: 'Docs da Empresa',
+              href: undefined,
+              children: tenantItems,
+            })
+          }
+          if (productItems.length > 0) {
+            sections.push({
+              label: 'Docs do Produto',
+              href: undefined,
+              children: productItems,
+            })
+          }
+          // Fall back to static navChildren if both are empty (cache miss during first load)
+          return sections.length > 0 ? sections : (m.navChildren ?? [])
         }
         return m.navChildren ?? []
       }),
-    [isEnabled, dynamicDocsNav]
+    [isEnabled, tenantItems, productItems]
   )
 
   return (

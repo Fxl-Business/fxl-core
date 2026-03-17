@@ -169,15 +169,21 @@ function findSubParentPath(
   return null
 }
 
+type UseDocsNavResult = {
+  tenantItems: NavItem[]
+  productItems: NavItem[]
+}
+
 /**
- * Hook that fetches all documents from Supabase and builds a NavItem[] tree
- * for the docs module sidebar.
+ * Hook that fetches all documents from Supabase and builds two NavItem sections
+ * for the docs module sidebar: tenant docs (org-isolated) and product docs (global).
  *
- * Returns empty array while loading — Sidebar falls back to hardcoded navChildren.
- * Once loaded, returns the dynamic tree matching the exact current structure.
+ * Returns empty arrays while loading — Sidebar falls back to hardcoded navChildren.
+ * Once loaded, returns dynamic trees for each scope.
  */
-export function useDocsNav(): NavItem[] {
-  const [navItems, setNavItems] = useState<NavItem[]>([])
+export function useDocsNav(): UseDocsNavResult {
+  const [tenantItems, setTenantItems] = useState<NavItem[]>([])
+  const [productItems, setProductItems] = useState<NavItem[]>([])
 
   useEffect(() => {
     let cancelled = false
@@ -185,8 +191,20 @@ export function useDocsNav(): NavItem[] {
     getAllDocuments()
       .then((docs) => {
         if (cancelled) return
-        const tree = buildNavTree(docs)
-        setNavItems(tree)
+
+        // Split by scope
+        const tenantDocs = docs.filter((d) => d.scope === 'tenant')
+        const productDocs = docs.filter((d) => d.scope === 'product')
+
+        // Build tree for tenant docs (hierarchical)
+        const tree = buildNavTree(tenantDocs)
+        setTenantItems(tree)
+
+        // Build flat list for product docs sorted by sort_order
+        const flatProduct: NavItem[] = [...productDocs]
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map((d) => ({ label: d.title, href: `/${d.slug}` }))
+        setProductItems(flatProduct)
       })
       .catch(() => {
         // On error, return empty — Sidebar falls back to hardcoded nav
@@ -197,5 +215,5 @@ export function useDocsNav(): NavItem[] {
     }
   }, [])
 
-  return navItems
+  return { tenantItems, productItems }
 }
