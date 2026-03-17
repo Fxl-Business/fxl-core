@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v4.3
 milestone_name: Admin Polish & Custom Auth
 status: planning
-stopped_at: Phase 86 planned (2 plans, 2 waves)
-last_updated: "2026-03-17T22:36:53.033Z"
+stopped_at: Phase 85 planned (2 plans, 1 wave)
+last_updated: "2026-03-17T22:37:54.736Z"
 last_activity: 2026-03-17 — Roadmap created, 4 phases, 16/16 requirements mapped
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 3
+  total_plans: 4
   completed_plans: 0
   percent: 0
 ---
@@ -61,7 +61,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T22:36:53.026Z
-Stopped at: Phase 86 planned (2 plans, 2 waves)
+Last session: 2026-03-17T22:37:54.733Z
+Stopped at: Phase 85 planned (2 plans, 1 wave)
 Next: Plan Phase 85 (AUTH track) and Phase 86 (ADMIN data fixes) — can run in parallel
-Resume file: .planning/phases/86-admin-data-fixes/86-01-PLAN.md
+Resume file: .planning/phases/85-auth-fix-custom-login/85-01-PLAN.md

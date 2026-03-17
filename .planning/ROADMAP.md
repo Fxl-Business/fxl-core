@@ -57,7 +57,7 @@
   3. Clicking "Continue with Google" completes the OAuth flow and lands the user in the app as authenticated
   4. Submitting valid email/password credentials logs the user in end-to-end
   5. The "Nao tem conta?" link navigates to the signup page
-**Plans**: TBD
+**Plans**: 85-01 (ProtectedRoute fix + SSO callback), 85-02 (Custom login page)
 
 ### Phase 86: Admin Data Fixes
 **Goal**: The admin dashboard and tenant list display accurate headcounts that match Clerk data
@@ -99,7 +99,7 @@ Phase 88 runs last (quality gate).
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 85. Auth Fix & Custom Login | v4.3 | 0/TBD | Not started | - |
+| 85. Auth Fix & Custom Login | v4.3 | 0/2 | Planned | - |
 | 86. Admin Data Fixes | v4.3 | 0/TBD | Not started | - |
 | 87. Admin Users Management | v4.3 | 0/TBD | Not started | - |
 | 88. Quality Gate & Security Audit | v4.3 | 0/TBD | Not started | - |
