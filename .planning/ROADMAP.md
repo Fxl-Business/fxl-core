@@ -106,7 +106,11 @@ Plans:
   3. `.claude/settings.json` contem entrada configurada para Supabase MCP server
   4. `.claude/settings.json` contem entrada configurada para Clerk MCP server
   5. CLAUDE.md ou doc em docs/ descreve operacoes de super admin disponíveis via MCP (criar tenant, habilitar modulo)
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 79-01-PLAN.md — Database migration 010 + Settings admin page
+- [ ] 79-02-PLAN.md — MCP server configuration + operations documentation
 
 ### Phase 80: Build Verification
 **Goal**: Toda a implementacao do milestone passa nas validacoes obrigatorias de qualidade de codigo
@@ -137,5 +141,5 @@ Phase 75 primeiro (bloqueante). Phase 76 depende de 75. Phases 77, 78 e 79 sao I
 | 76. Admin Shell & Dashboard | v4.1 | 0/2 | Not started | - |
 | 77. Tenant Management | v4.1 | 0/2 | Not started | - |
 | 78. Module Management Evolution | v4.1 | 0/1 | Not started | - |
-| 79. Platform Settings & MCP | v4.1 | 0/? | Not started | - |
+| 79. Platform Settings & MCP | v4.1 | 0/2 | Not started | - |
 | 80. Build Verification | v4.1 | 0/1 | Not started | - |
