@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { MODULE_REGISTRY } from '@platform/module-loader/registry'
 import type { ModuleDefinition } from '@platform/module-loader/registry'
@@ -134,8 +135,11 @@ function ModuleCard({ mod, isEnabled, onToggle }: ModuleCardProps) {
 // ---------------------------------------------------------------------------
 
 export default function ModulesPanel() {
+  const [searchParams] = useSearchParams()
   const { orgs, isLoading: orgsLoading } = useActiveOrg()
-  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(
+    searchParams.get('org'),
+  )
   const [moduleStates, setModuleStates] = useState<Map<string, boolean>>(new Map())
   const [isLoadingModules, setIsLoadingModules] = useState(false)
 
