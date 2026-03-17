@@ -55,7 +55,9 @@
   2. A document with `scope = 'tenant'` (default) is only returned for the org_id it belongs to
   3. New documents created without an explicit scope default to `scope = 'tenant'`
   4. Existing documents continue to behave as before (no data loss or access regression)
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 81-01-PLAN.md — Add scope column + RLS policies + TypeScript types
 
 ### Phase 82: Docs UI & Migration
 **Goal**: Super admin can manage product docs via a dedicated admin panel, the sidebar shows two distinct doc sections, and all existing FXL docs are correctly scoped
@@ -99,7 +101,7 @@ Within each track: 81 before 82, 83 before 84.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 81. Docs Data Model | v4.2 | 0/? | Not started | - |
+| 81. Docs Data Model | v4.2 | 0/1 | Not started | - |
 | 82. Docs UI & Migration | v4.2 | 0/? | Not started | - |
 | 83. Onboarding Flow | v4.2 | 0/? | Not started | - |
 | 84. FXL Migration & Cleanup | v4.2 | 0/? | Not started | - |
