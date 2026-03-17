@@ -72,7 +72,11 @@ Plans:
   1. Pagina /admin/tenants lista todas as Clerk Organizations com nome, ID, numero de membros e status
   2. Clicar em um tenant abre /admin/tenants/:orgId com modulos habilitados, conectores e metricas do tenant
   3. Super admin preenche formulario e cria novo tenant (Clerk org) que aparece imediatamente na lista
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 77-01-PLAN.md — Edge Function proxy for Clerk Organizations API + types + client service
+- [ ] 77-02-PLAN.md — TenantsPage (list), TenantDetailPage, CreateTenantDialog + route wiring
 
 ### Phase 78: Module Management Evolution
 **Goal**: Controle de modulos por tenant migra de localStorage (local, per-browser) para Supabase tenant_modules (persistente, per-org), com super admin como unico ponto de controle
@@ -127,7 +131,7 @@ Phase 75 primeiro (bloqueante). Phase 76 depende de 75. Phases 77, 78 e 79 sao I
 |-------|-----------|----------------|--------|-----------|
 | 75. Auth & RLS Foundation | v4.1 | 0/2 | Not started | - |
 | 76. Admin Shell & Dashboard | v4.1 | 0/? | Not started | - |
-| 77. Tenant Management | v4.1 | 0/? | Not started | - |
+| 77. Tenant Management | v4.1 | 0/2 | Not started | - |
 | 78. Module Management Evolution | v4.1 | 0/1 | Not started | - |
 | 79. Platform Settings & MCP | v4.1 | 0/? | Not started | - |
 | 80. Build Verification | v4.1 | 0/? | Not started | - |
