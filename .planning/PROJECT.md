@@ -8,7 +8,18 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: (none — ready for next)
+## Current Milestone: v4.2 Docs do Sistema + Tenant Onboarding
+
+**Goal:** Separar product docs de enterprise docs (scope-based), criar fluxo real de onboarding de tenants, e migrar FXL de org_fxl_default para org Clerk real.
+
+**Target features:**
+- Product docs (global, read-only) vs enterprise docs (tenant-scoped) com coluna `scope`
+- Super admin CRUD de product docs via `/admin/product-docs`
+- Sidebar com "Docs da Empresa" e "Docs do Produto" separados
+- Tela "Criar Empresa" para novos usuários sem org
+- Tela "Sem módulos" quando tenant existe mas sem módulos habilitados
+- Migração de `org_fxl_default` para org Clerk real
+- Remover `VITE_AUTH_MODE` e fallbacks anon
 
 Previous: v4.1 Super Admin (shipped 2026-03-17)
 
@@ -162,7 +173,17 @@ Previous: v4.1 Super Admin (shipped 2026-03-17)
 
 ### Active
 
-(Empty — define in next milestone via `/gsd:new-milestone`)
+- [ ] Coluna `scope` na tabela `documents` com valores `'tenant'` (default) e `'product'`
+- [ ] Product docs visíveis para todos os tenants na sidebar (read-only)
+- [ ] Super admin pode criar/editar/deletar product docs via `/admin/product-docs`
+- [ ] Docs FXL de processo migrados para scope tenant
+- [ ] Docs de SDK/onboarding migrados para scope product
+- [ ] Novo usuário sem org vê tela "Criar Empresa"
+- [ ] Criar empresa cria Clerk org e atribui usuário como admin
+- [ ] Tenant sem módulos habilitados vê tela "Sem módulos"
+- [ ] Dados FXL migrados de `org_fxl_default` para org Clerk real
+- [ ] Flag `VITE_AUTH_MODE` removida
+- [ ] Fallback COALESCE anon removido do RLS
 
 ### Out of Scope
 
@@ -335,4 +356,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Deploy Edge Function with --no-verify-jwt | Gateway JWT check blocks Clerk tokens, function handles auth itself | ✓ Good — required for third-party JWTs |
 
 ---
-*Last updated: 2026-03-17 after v4.1 milestone completion*
+*Last updated: 2026-03-17 after v4.2 milestone start*

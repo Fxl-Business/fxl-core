@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
+milestone: v4.2
+milestone_name: "Docs do Sistema + Tenant Onboarding"
+status: defining_requirements
 stopped_at: null
-last_updated: "2026-03-17T19:00:00Z"
-last_activity: 2026-03-17 — Milestone v4.1 Super Admin archived and tagged
+last_updated: "2026-03-17T20:00:00Z"
+last_activity: 2026-03-17 — Milestone v4.2 started
 progress:
   total_phases: 0
   completed_phases: 0
@@ -21,21 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** Planning next milestone
+**Current focus:** Defining requirements for v4.2
 
 ## Current Position
 
-Milestone: v4.1 Super Admin — SHIPPED 2026-03-17
-Status: Between milestones — ready for /gsd:new-milestone
+Milestone: v4.2 Docs do Sistema + Tenant Onboarding
+Status: Defining requirements
+Last activity: 2026-03-17 — Milestone v4.2 started
 
-Progress: [████████████████████] 100% (v4.1 complete)
+Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
 
 ## Platform Evolution Plan (v4.0-v4.3)
 
 v4.0: Rebrand Nexo — COMPLETE
 v4.1: Super Admin — COMPLETE
-v4.2: Docs do Sistema (product docs vs enterprise docs)
-v4.3: Tenant Onboarding (fluxo real, migrar org_fxl_default)
+v4.2: Docs do Sistema + Tenant Onboarding — IN PROGRESS
 
 Design spec: docs/superpowers/specs/2026-03-17-nexo-platform-evolution-design.md
 
@@ -56,6 +56,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-17
-Stopped at: Milestone v4.1 complete
-Next: /gsd:new-milestone
+Stopped at: Defining requirements
+Next: Define requirements, create roadmap
 Resume file: None
