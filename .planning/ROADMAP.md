@@ -80,7 +80,9 @@ Plans:
   2. Submitting the create-company form creates a Clerk Organization and assigns the user as admin
   3. After org creation, the user lands in the normal app flow with their new tenant context
   4. A tenant that exists but has zero enabled modules sees the "Sem modulos" screen with a clear message
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 83-01-PLAN.md — CriarEmpresa page, SemModulos page, routing gates
 
 ### Phase 84: FXL Migration & Cleanup
 **Goal**: FXL operates as a real Clerk Organization with all data correctly migrated, and all legacy auth fallbacks are removed from the codebase
@@ -103,5 +105,5 @@ Within each track: 81 before 82, 83 before 84.
 |-------|-----------|----------------|--------|-----------|
 | 81. Docs Data Model | v4.2 | 0/1 | Not started | - |
 | 82. Docs UI & Migration | v4.2 | 0/? | Not started | - |
-| 83. Onboarding Flow | v4.2 | 0/? | Not started | - |
+| 83. Onboarding Flow | v4.2 | 0/1 | Not started | - |
 | 84. FXL Migration & Cleanup | v4.2 | 0/? | Not started | - |
