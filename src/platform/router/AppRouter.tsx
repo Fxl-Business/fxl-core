@@ -4,6 +4,7 @@ import type { RouteObject } from 'react-router-dom'
 import { SignUp } from '@clerk/react'
 import Layout from '@platform/layout/Layout'
 import ProtectedRoute from '@platform/auth/ProtectedRoute'
+import SuperAdminRoute from '@platform/auth/SuperAdminRoute'
 import Home from '@platform/pages/Home'
 import Login from '@platform/auth/Login'
 import Profile from '@platform/auth/Profile'
@@ -44,7 +45,10 @@ export default function AppRouter() {
         <Route path="/tarefas/new" element={<Suspense fallback={<div>Carregando...</div>}><TaskForm /></Suspense>} />
         <Route path="/tarefas/:id/edit" element={<Suspense fallback={<div>Carregando...</div>}><TaskForm /></Suspense>} />
 
-        {/* Admin routes — static, not in MODULE_REGISTRY, not in sidebar */}
+      </Route>
+
+      {/* Admin routes — protected by ProtectedRoute + SuperAdminRoute */}
+      <Route element={<ProtectedRoute><SuperAdminRoute><Layout /></SuperAdminRoute></ProtectedRoute>}>
         <Route
           path="/admin/modules"
           element={<Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense>}
