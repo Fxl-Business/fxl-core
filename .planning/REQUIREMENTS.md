@@ -1,134 +1,117 @@
-# Requirements: v3.1 Multi-tenancy
+# Requirements: v3.2 FXL SDK Skill
 
-**Defined:** 2026-03-16
-**Milestone:** v3.1
-**Core Value:** FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Design Spec:** `docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md` (Section 5)
+**Defined:** 2026-03-17
+**Milestone:** v3.2
+**Core Value:** Skill do Claude Code que padroniza projetos spoke FXL com rules, templates, contract types e checklists
+**Design Spec:** `docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md` (Sections 6, 7)
 
-## v3.1 Requirements
+## v3.2 Requirements
 
-Requirements para milestone v3.1 Multi-tenancy. Derivados da Section 5 do design spec.
+Requirements para milestone v3.2 FXL SDK Skill. Derivados das Sections 6 e 7 do design spec.
 
-### Schema & Data (Supabase)
+### Skill Structure
 
-- [x] **SCHEMA-01**: Criar tabela `tenant_modules` com `org_id text`, `module_id text`, `enabled boolean`, `config jsonb`, primary key `(org_id, module_id)`
-  - **Aceite:** Tabela existe no Supabase com RLS habilitado. Policy restringe acesso por `org_id` do JWT.
-  - **Depende de:** Nada (primeira migracao do milestone)
-
-- [x] **SCHEMA-02**: Adicionar coluna `org_id text` a todas as tabelas existentes: `comments`, `share_tokens`, `blueprint_configs`, `briefing_configs`, `tasks`, `documents`, `knowledge_entries`
-  - **Aceite:** Todas as 7 tabelas possuem coluna `org_id` com default `'org_fxl_default'`. Backfill aplicado (nenhum row com `org_id IS NULL`).
+- [ ] **SDK-01**: Criar `SKILL.md` como entry point da skill com indice de rules, cenarios de uso, e navegacao rapida
+  - **Aceite:** SKILL.md existe em `.agents/skills/fxl-sdk/`, segue formato de ~130 linhas, lista todas as rules com descricao de quando usar cada uma.
   - **Depende de:** Nada
 
-- [x] **SCHEMA-03**: Criar RLS policies por `org_id` em todas as tabelas existentes, substituindo as policies anon-permissivas atuais
-  - **Aceite:** Cada tabela tem policy `FOR ALL USING (org_id = (current_setting('request.jwt.claims')::jsonb->>'org_id'))`. Policies anon anteriores removidas ou condicionadas ao auth mode.
-  - **Depende de:** SCHEMA-02
-
-- [x] **SCHEMA-04**: Criar index em `org_id` para todas as tabelas que recebem a coluna
-  - **Aceite:** Index `idx_{table}_org_id` existe em cada tabela. Query plan de `SELECT WHERE org_id = X` usa index scan.
-  - **Depende de:** SCHEMA-02
-
-### Auth & Token Exchange
-
-- [x] **AUTH-01**: Criar Supabase Edge Function `/auth/token-exchange` que valida Clerk JWT (via JWKS), extrai `org_id`, `user_id`, `role` e minta JWT customizado para Supabase
-  - **Aceite:** Edge Function deployada. Recebe Clerk token, retorna Supabase JWT com claims `{ sub, org_id, role }`. Retorna 401 para token invalido.
+- [ ] **SDK-02**: Criar `rules/standards.md` com padroes de codigo, seguranca, e estrutura para projetos spoke
+  - **Aceite:** Arquivo contem stack aprovada (React 18, TypeScript strict, Tailwind, shadcn/ui, Supabase), convencoes de codigo, regras de seguranca, estrutura de pastas padrao.
   - **Depende de:** Nada
 
-- [x] **AUTH-02**: Implementar `VITE_AUTH_MODE=anon|org` flag no frontend para fallback dev/staging
-  - **Aceite:** Em modo `anon`, Supabase usa anon key (comportamento atual). Em modo `org`, Supabase usa JWT customizado do token exchange. Default: `anon`.
-  - **Depende de:** AUTH-01
+- [ ] **SDK-03**: Criar `rules/new-project.md` com instrucoes completas para scaffold de projeto novo
+  - **Aceite:** Arquivo contem passo-a-passo para criar projeto spoke do zero: init, configs, estrutura, CLAUDE.md, contrato, CI/CD.
+  - **Depende de:** SDK-02
 
-- [x] **AUTH-03**: Refatorar `src/platform/supabase.ts` para criar Supabase client com access token dinâmico baseado no auth mode
-  - **Aceite:** Quando `VITE_AUTH_MODE=org`, o Supabase client usa `supabase.auth.setSession()` com o JWT do token exchange. Quando `anon`, comportamento atual mantido.
-  - **Depende de:** AUTH-01, AUTH-02
+- [ ] **SDK-04**: Criar `rules/new-project-from-blueprint.md` para scaffold a partir de export do Wireframe Builder
+  - **Aceite:** Arquivo contem instrucoes para ler `blueprint-export.json`, gerar paginas, componentes, entidades, e endpoints do contrato.
+  - **Depende de:** SDK-03
 
-### Clerk Organizations
+- [ ] **SDK-05**: Criar `rules/audit.md` com instrucoes para auditoria de projetos existentes
+  - **Aceite:** Arquivo contem checklist de auditoria, formato do `FXL-AUDIT.md` gerado, scoring system, categorias (critico, importante, normal).
+  - **Depende de:** SDK-02
 
-- [x] **CLERK-01**: Integrar Clerk Organizations no frontend — `useActiveOrg` hook com `activeOrg`, `orgs`, `switchOrg`, `isLoading`
-  - **Aceite:** Hook funciona com `@clerk/react` useOrganization/useOrganizationList. Retorna org ativa, lista de orgs, funcao de switch.
+- [ ] **SDK-06**: Criar `rules/connect.md` com instrucoes para adicionar contrato FXL a projeto existente
+  - **Aceite:** Arquivo contem passo-a-passo para adicionar endpoints obrigatorios, tipos do contrato, e configuracao de auth Clerk.
+  - **Depende de:** SDK-02
+
+- [ ] **SDK-07**: Criar `rules/refactor.md` com padroes de refatoracao
+  - **Aceite:** Arquivo contem padroes para migrar projetos Lovable/existentes para padroes FXL.
+  - **Depende de:** SDK-02, SDK-05
+
+- [ ] **SDK-08**: Criar `rules/ci-cd.md` com instrucoes de setup GitHub Actions
+  - **Aceite:** Arquivo contem setup completo de CI: workflow file, fxl-doctor.sh, branch protection.
+  - **Depende de:** SDK-02
+
+- [ ] **SDK-09**: Criar `rules/deploy.md` com padroes de deploy Vercel
+  - **Aceite:** Arquivo contem configuracao Vercel, env vars, headers de seguranca, preview deploys.
+  - **Depende de:** SDK-02
+
+### Contract Types
+
+- [ ] **SDK-10**: Criar `contract/types.ts` com tipos TypeScript completos do contrato Hub <-> Spoke
+  - **Aceite:** Arquivo contem todas as interfaces (FxlAppManifest, EntityDefinition, FieldDefinition, WidgetDefinition, response types). v1 field types: string, number, date, boolean apenas.
   - **Depende de:** Nada
 
-- [x] **CLERK-02**: Implementar org picker UI no TopNav — mostra selector quando usuario tem 2+ orgs, auto-seleciona se so tem uma
-  - **Aceite:** Org picker visivel no TopNav. Selecionando org diferente atualiza contexto global. Com 1 org, mostra badge sem dropdown.
-  - **Depende de:** CLERK-01
+### Templates
 
-- [x] **CLERK-03**: Configurar `ClerkProvider` com `organizationSyncOptions` para sincronizar org ativa com URL/session
-  - **Aceite:** `ClerkProvider` no App.tsx configurado. Org ativa persiste entre page reloads.
-  - **Depende de:** CLERK-01
+- [ ] **SDK-11**: Criar `templates/CLAUDE.md.template` com CLAUDE.md padrao para projetos spoke
+  - **Aceite:** Template contem stack, convencoes, regras de escopo, checklist obrigatorio, adaptado para spoke.
+  - **Depende de:** SDK-02
 
-### Module System Multi-tenancy
+- [ ] **SDK-12**: Criar templates de configuracao: `tsconfig.json.template`, `eslint.config.js.template`, `prettier.config.js.template`, `tailwind.preset.js.template`
+  - **Aceite:** Templates sao production-quality, com strict mode, rules consistentes com padroes FXL.
+  - **Depende de:** SDK-02
 
-- [x] **MOD-01**: Refatorar `useModuleEnabled` para ler de `tenant_modules` (Supabase) em vez de `localStorage`
-  - **Aceite:** Em modo `org`, modulos habilitados vem de `tenant_modules WHERE org_id = activeOrg.id`. Em modo `anon`, fallback para localStorage (comportamento atual). Loading state enquanto fetch.
-  - **Depende de:** SCHEMA-01, CLERK-01, AUTH-03
+- [ ] **SDK-13**: Criar templates de infra: `vercel.json.template`, `ci.yml.template`, `fxl-doctor.sh.template`
+  - **Aceite:** vercel.json com security headers, ci.yml com GitHub Actions workflow, fxl-doctor.sh com todos os checks.
+  - **Depende de:** SDK-08, SDK-09
 
-- [x] **MOD-02**: Adicionar campo `tenantScoped?: boolean` ao `ModuleDefinition` — modulos com `tenantScoped: true` so aparecem se habilitados para a org ativa
-  - **Aceite:** Interface `ModuleDefinition` possui campo `tenantScoped`. Sidebar e Home filtram modulos considerando `tenantScoped` + `tenant_modules`.
-  - **Depende de:** MOD-01
+### Checklists
 
-- [x] **MOD-03**: Atualizar Sidebar e Home para filtrar modulos pela org ativa
-  - **Aceite:** Sidebar e Home mostram apenas modulos habilitados para a org ativa. Mudanca de org atualiza sidebar/home imediatamente.
-  - **Depende de:** MOD-01, MOD-02
+- [ ] **SDK-14**: Criar checklists de qualidade: `security-checklist.md`, `structure-checklist.md`, `typescript-checklist.md`
+  - **Aceite:** Cada checklist contem items acionaveis com descricao, exemplo de conformidade, e severidade.
+  - **Depende de:** SDK-02
 
-- [x] **MOD-04**: Migrar toggles de localStorage para `tenant_modules` na primeira execucao (migracao one-time)
-  - **Aceite:** Script de migracao le localStorage, grava em `tenant_modules` para org FXL default, e limpa localStorage. Executa apenas uma vez (flag de migracao).
-  - **Depende de:** SCHEMA-01, MOD-01
-
-### Integration & Verification
-
-- [ ] **INT-01**: `tsc --noEmit` zero erros apos todas as mudancas
-  - **Aceite:** Compilacao TypeScript sem erros.
-  - **Depende de:** Todos os requirements acima
-
-- [ ] **INT-02**: `npm run build` completa sem erros
-  - **Aceite:** Build de producao gera output deployavel.
-  - **Depende de:** INT-01
-
-- [ ] **INT-03**: Login com 2+ orgs mostra org picker, modulos filtrados por org, RLS isolando dados
-  - **Aceite:** Teste manual end-to-end: login, org picker, sidebar filtra, dados isolados por org.
-  - **Depende de:** Todos os requirements acima
-
-- [ ] **INT-04**: Modo `anon` (default) funciona identico ao comportamento pre-v3.1
-  - **Aceite:** Com `VITE_AUTH_MODE=anon` (ou sem a flag), tudo funciona como antes. Zero regressao.
-  - **Depende de:** AUTH-02
+- [ ] **SDK-15**: Criar checklists de contrato: `rls-checklist.md`, `contract-checklist.md`
+  - **Aceite:** RLS checklist cobre todas as tabelas com verificacao de policies. Contract checklist verifica todos os endpoints obrigatorios.
+  - **Depende de:** SDK-10
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Admin UI para gerenciar tenant_modules | v3.1 usa seed/migration. Admin UI e futuro |
-| Billing / subscription por tenant | Futuro, apos validacao do modelo |
-| Connector modules | v3.3 (milestone separado) |
-| Multi-org simultâneo (ver dados de 2 orgs) | Complexidade desnecessaria para v1 multi-tenancy |
-| Roles/permissions granulares alem de admin/member/viewer | Clerk roles suficientes para v3.1 |
-| Real-time sync de tenant_modules | Fetch on org switch e suficiente |
+| npm package / CLI (`npx fxl`) | Skill substitui CLI — configs gerados como arquivos |
+| Connector module no Hub | v3.3 (milestone separado) |
+| Beach House migration | v3.4 (milestone separado) |
+| Contract v2 (enum, relation types) | Futuro, apos validacao com v1 |
+| POST/PUT/DELETE endpoints | v1 e read-only |
+| Blueprint export do Wireframe Builder | v3.4+ (Wireframe Builder precisa de feature de export) |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | Phase 64 | Complete |
-| SCHEMA-02 | Phase 64 | Complete |
-| SCHEMA-03 | Phase 64 | Complete |
-| SCHEMA-04 | Phase 64 | Complete |
-| AUTH-01 | Phase 65 | Complete |
-| AUTH-02 | Phase 65 | Complete |
-| AUTH-03 | Phase 65 | Complete |
-| CLERK-01 | Phase 65 | Complete |
-| CLERK-02 | Phase 65 | Complete |
-| CLERK-03 | Phase 65 | Complete |
-| MOD-01 | Phase 66 | Complete |
-| MOD-02 | Phase 66 | Complete |
-| MOD-03 | Phase 66 | Complete |
-| MOD-04 | Phase 66 | Complete |
-| INT-01 | Phase 67 | Pending |
-| INT-02 | Phase 67 | Pending |
-| INT-03 | Phase 67 | Pending |
-| INT-04 | Phase 67 | Pending |
+| SDK-01 | Phase 68 | Pending |
+| SDK-02 | Phase 68 | Pending |
+| SDK-03 | Phase 68 | Pending |
+| SDK-04 | Phase 68 | Pending |
+| SDK-05 | Phase 68 | Pending |
+| SDK-06 | Phase 68 | Pending |
+| SDK-07 | Phase 68 | Pending |
+| SDK-08 | Phase 68 | Pending |
+| SDK-09 | Phase 68 | Pending |
+| SDK-10 | Phase 68 | Pending |
+| SDK-11 | Phase 69 | Pending |
+| SDK-12 | Phase 69 | Pending |
+| SDK-13 | Phase 69 | Pending |
+| SDK-14 | Phase 69 | Pending |
+| SDK-15 | Phase 69 | Pending |
 
 **Coverage:**
-- v3.1 requirements: 18 total
-- Mapped to phases: 18
+- v3.2 requirements: 15 total
+- Mapped to phases: 15
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-03-16*
+*Requirements defined: 2026-03-17*
