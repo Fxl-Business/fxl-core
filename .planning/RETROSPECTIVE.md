@@ -552,6 +552,47 @@
 
 ---
 
+## Milestone: v4.3 — Admin Polish & Custom Auth
+
+**Shipped:** 2026-03-17
+**Phases:** 4 | **Plans:** 8 | **Timeline:** 1 day
+
+### What Was Built
+- Custom Nexo login page with Google OAuth + email/password (replacing default Clerk SignIn)
+- ProtectedRoute fix eliminating infinite loading for unauthenticated users
+- admin-tenants edge function fix (include_members_count=true for accurate org counts)
+- New admin-users edge function proxying Clerk Users API with super_admin auth
+- AdminDashboard refactored from Clerk hooks to edge function data (shows ALL orgs/users)
+- /admin/users page with user list, org membership badges, and date display
+- TenantDetailPage "Membros" section with role badges via edge function
+
+### What Worked
+- **Parallel tracks:** AUTH (Phase 85) and ADMIN (86-87) executed independently as designed
+- **Edge function pattern reuse:** Phase 86 established patterns cleanly reused in Phase 87 (members endpoint, expanded user data)
+- **Autorun workflow:** First use of /gsd:autorun correctly identified parallelizable phases and wave structure
+- **Prior session work detected:** Autorun/executor agents correctly detected already-completed work instead of re-executing
+
+### What Was Inefficient
+- **Bookkeeping gaps:** REQUIREMENTS.md checkboxes never updated during execution (14/16 unchecked despite all work done)
+- **Missing VERIFICATION.md:** Phases 85-87 had no formal verification files — work verified via code evidence during audit
+- **SUMMARY frontmatter incomplete:** No `requirements_completed` tags in any summary — convention not enforced during this milestone
+- **Roadmap staleness:** Phase 85 was complete on disk but roadmap checkbox was unchecked — autorun had to detect and fix
+
+### Patterns Established
+- admin-service.ts as separate service from tenant-service.ts for clean user vs tenant separation
+- Edge function members endpoint grouped under admin-tenants (org-scoped, not user-scoped)
+- useSignIn from @clerk/react/legacy for custom auth flows in Clerk v6 Core 2
+
+### Key Lessons
+- **Autorun detects stale state:** /gsd:autorun correctly identified Phase 85 as already done and Phase 86 as the only remaining work
+- **Formal verification matters:** Audit had to use code evidence because VERIFICATION.md was missing — adds overhead to audit step
+- **Bookkeeping automation needed:** Manual checkbox updates in REQUIREMENTS.md and ROADMAP.md are unreliable — should be automated by executor
+
+### Cost Observations
+- Model mix: ~80% sonnet (agents), ~20% opus (orchestrator)
+- Sessions: 1 (autorun + audit + complete in single session)
+- Notable: Most v4.3 code was already written in prior sessions; this session was primarily verification and archival
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -570,6 +611,7 @@
 | v2.2 | 1 session | 7 | 7 | Configurable layout components, widget system, Sheet panels (to be replaced by inline editing) |
 | v2.3 | 1 session | 4 | 7 | Inline click-to-edit replacing Sheet panels, five-way selection mutex, per-element form registry |
 | v2.4 | 1 session | 2 | 4 | Component Picker dual-mode preview, scale-transform mini-renders, defaultProps as preview data |
+| v4.3 | 1 day | 4 | 8 | Custom auth, edge function data layer, autorun parallel execution, admin users management |
 
 ### Cumulative Quality
 
@@ -587,6 +629,7 @@
 | v2.2 | ~283 tests | 13 new schema tests (SidebarWidget Zod) | 1 (@radix-ui/react-checkbox via shadcn) |
 | v2.3 | ~283 tests | no new tests (UI refactor) | 1 (@radix-ui/react-context-menu via shadcn) |
 | v2.4 | ~316 tests | 33 new (SectionPreview 33 + renderability 17) | 0 |
+| v4.3 | ~316 tests | no new tests (edge functions + UI) | 0 |
 
 ### Velocity
 
@@ -604,6 +647,7 @@
 | v2.2 | 7 | ~43 min | ~6.1 min |
 | v2.3 | 7 | ~19 min | ~2.7 min |
 | v2.4 | 4 | ~29 min | ~7.3 min |
+| v4.3 | 8 | ~5 min | ~0.6 min |
 
 ### Top Lessons (Verified Across Milestones)
 

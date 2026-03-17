@@ -1,5 +1,25 @@
 # Milestones
 
+## v4.3 Admin Polish & Custom Auth (Shipped: 2026-03-17)
+
+**Phases:** 4 (85-88) | **Plans:** 8 | **Tasks:** ~12
+**Timeline:** 1 day (2026-03-17) | **Commits:** 23 | **LOC delta:** +2,586 / -51
+**Git range:** 82847e6 → acc1047
+
+**Delivered:** Fixed auth flow bugs, built custom Nexo login page, replaced broken Clerk client-side hooks with server-side edge functions for accurate admin metrics, and added full users management with org membership visibility.
+
+**Key accomplishments:**
+1. Custom Nexo login page (Login.tsx) with Google OAuth + email/password, replacing default Clerk SignIn component
+2. Fixed ProtectedRoute infinite loading for unauthenticated users + SSO callback route
+3. Admin dashboard metrics now use edge functions showing ALL Clerk orgs/users (not just current user's)
+4. New admin-users edge function proxying Clerk Users API with super_admin JWT auth
+5. /admin/users page listing all platform users with clickable org membership badges
+6. TenantDetailPage "Membros" section with role badges (admin/member) via edge function
+
+**Archive:** [v4.3-ROADMAP.md](milestones/v4.3-ROADMAP.md) | [v4.3-REQUIREMENTS.md](milestones/v4.3-REQUIREMENTS.md) | [v4.3-MILESTONE-AUDIT.md](milestones/v4.3-MILESTONE-AUDIT.md)
+
+---
+
 ## v4.1 Super Admin (Shipped: 2026-03-17)
 
 **Phases completed:** 7 phases, 10 plans, 6 tasks

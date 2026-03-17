@@ -8,18 +8,9 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v4.3 Admin Polish & Custom Auth
+## Current Milestone: Planning next milestone
 
-**Goal:** Corrigir bugs em auth flow e metricas admin, criar tela de login custom seguindo design Nexo, e adicionar gestao de usuarios.
-
-**Target features:**
-- Fix loading infinito apos logout (ProtectedRoute)
-- Tela de login custom com Google OAuth + email/senha usando useSignIn hooks
-- Fix member count = 0 na listagem de tenants (include_members_count)
-- Fix metricas do dashboard admin (usar edge function em vez de useOrganizationList)
-- Nova edge function admin-users + pagina /admin/users (lista global de usuarios)
-- Lista de membros por tenant na TenantDetailPage
-
+Previous: v4.3 Admin Polish & Custom Auth (shipped 2026-03-17)
 Previous: v4.2 Docs do Sistema + Tenant Onboarding (shipped 2026-03-17)
 
 ## Requirements
@@ -170,14 +161,20 @@ Previous: v4.2 Docs do Sistema + Tenant Onboarding (shipped 2026-03-17)
 - ✓ Platform settings table + admin UI para feature flags e configs globais — v4.1
 - ✓ MCP servers configurados (Supabase read-only, Clerk placeholder) — v4.1
 
+- ✓ ProtectedRoute fix: unauthenticated users see login page immediately (no infinite loading) — v4.3
+- ✓ Custom Nexo login page with Google OAuth + email/password (useSignIn hooks, Nexo branding) — v4.3
+- ✓ SSO callback route for Google OAuth redirect flow — v4.3
+- ✓ admin-tenants edge function returns accurate member counts (include_members_count=true) — v4.3
+- ✓ AdminDashboard metrics via edge functions (totalCount from admin-tenants + admin-users) — v4.3
+- ✓ New admin-users edge function proxying Clerk Users API with super_admin auth — v4.3
+- ✓ /admin/users page listing all Clerk users with org membership badges — v4.3
+- ✓ TenantDetailPage "Membros" section with role badges via listOrgMembers edge function — v4.3
+- ✓ admin-service.ts client service layer following tenant-service.ts pattern — v4.3
+- ✓ TypeScript zero errors + all admin routes verified behind SuperAdminRoute — v4.3
+
 ### Active
 
-- [ ] Usuario deslogado vê tela de login (não loading infinito)
-- [ ] Tela de login custom com Google OAuth + email/senha seguindo design Nexo
-- [ ] TenantsPage mostra member count correto por org
-- [ ] AdminDashboard mostra total de tenants e usuarios corretos
-- [ ] Pagina /admin/users listando todos os usuarios do Clerk
-- [ ] TenantDetailPage mostra membros da org com role badges
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -215,15 +212,16 @@ Previous: v4.2 Docs do Sistema + Tenant Onboarding (shipped 2026-03-17)
 
 ## Current State
 
-19 milestones shipped (v1.0 → v4.2). v4.2 completed Docs do Sistema + Tenant Onboarding.
+20 milestones shipped (v1.0 → v4.3). v4.3 completed Admin Polish & Custom Auth.
 
 ## Context
 
-Shipped v4.2 Docs do Sistema + Tenant Onboarding. 19 milestones complete (v1.0-v4.2).
+Shipped v4.3 Admin Polish & Custom Auth. 20 milestones complete (v1.0-v4.3).
 Codebase reorganizado: src/platform/ (shell), src/modules/ (autocontidos), src/shared/ (cross-module).
 5 modulos ativos (docs, tasks, clients, wireframe, connector), cada um com CLAUDE.md para agent scoped.
-Super admin panel com /admin/* routes: dashboard, tenant management, module management per-tenant, platform settings.
-Supabase Edge Function `admin-tenants` proxying Clerk Organizations API com JWT claim validation.
+Super admin panel com /admin/* routes: dashboard, tenant management, users management, module management per-tenant, platform settings.
+Supabase Edge Functions: `admin-tenants` (orgs + members) and `admin-users` (users) proxying Clerk API com JWT claim validation.
+Custom Nexo login page with Google OAuth + email/password (replaced default Clerk SignIn component).
 Modulos gerenciados per-tenant via Supabase tenant_modules (substituiu localStorage).
 Platform settings (feature flags) via tabela platform_settings com admin UI.
 MCP servers configurados: Supabase (read-only), Clerk (placeholder — npm package nao publicado).
@@ -348,6 +346,10 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | tenant_modules replaces localStorage | Per-tenant persistent state, super admin controlled | ✓ Good — multi-tenant ready |
 | MCP config in .mcp.json (not .claude/settings.json) | settings.json schema rejects mcpServers key | ✓ Good — correct location |
 | Deploy Edge Function with --no-verify-jwt | Gateway JWT check blocks Clerk tokens, function handles auth itself | ✓ Good — required for third-party JWTs |
+| useSignIn hook from @clerk/react/legacy | Clerk v6 Core 2 classic API (isLoaded + setActive), not new SignIn component | ✓ Good — full control over custom login UX |
+| admin-users edge function minimal for Phase 86, expanded in 87 | Intentional phasing: totalCount first, then full user data + org memberships | ✓ Good — incremental delivery |
+| admin-service.ts as separate service (not extending tenant-service) | Separation of concerns: tenant vs user operations in distinct services | ✓ Good — clean module boundaries |
+| Edge function members endpoint via admin-tenants (not admin-users) | Members are org-scoped, fits naturally in tenants function | ✓ Good — logical API grouping |
 
 ---
-*Last updated: 2026-03-17 after v4.3 milestone start*
+*Last updated: 2026-03-17 after v4.3 milestone*

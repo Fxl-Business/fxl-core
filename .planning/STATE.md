@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.3
 milestone_name: Admin Polish & Custom Auth
-status: planning
-stopped_at: Phase 88 context gathered
-last_updated: "2026-03-17T23:16:31.735Z"
-last_activity: 2026-03-17 — Roadmap created, 4 phases, 16/16 requirements mapped
+status: complete
+stopped_at: Milestone archived
+last_updated: "2026-03-17T23:55:00.000Z"
+last_activity: 2026-03-17 — v4.3 milestone complete and archived
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 6
-  percent: 0
+  completed_plans: 8
+  percent: 100
 ---
 
 # Project State
@@ -21,24 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** Phase 85 — Auth Fix & Custom Login (ready to plan)
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Milestone: v4.3 Admin Polish & Custom Auth
-Phase: 85 of 88 (Auth Fix & Custom Login)
-Plan: — (not yet planned)
-Status: Ready to plan
-Last activity: 2026-03-17 — Roadmap created, 4 phases, 16/16 requirements mapped
+Milestone: v4.3 Admin Polish & Custom Auth — COMPLETE
+Status: Archived to .planning/milestones/v4.3-ROADMAP.md
+Last activity: 2026-03-17 — v4.3 milestone complete and archived
 
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
+Progress: [████████████████████] 100%
 
 ## Platform Evolution Plan (v4.0-v4.3)
 
 v4.0: Rebrand Nexo — COMPLETE
 v4.1: Super Admin — COMPLETE
 v4.2: Docs do Sistema + Tenant Onboarding — COMPLETE
-v4.3: Admin Polish & Custom Auth — IN PROGRESS (roadmap ready)
+v4.3: Admin Polish & Custom Auth — COMPLETE
 
 Design spec: docs/superpowers/specs/2026-03-17-admin-polish-custom-auth-design.md
 
@@ -50,6 +48,9 @@ Design spec: docs/superpowers/specs/2026-03-17-admin-polish-custom-auth-design.m
 - [81-01] In-memory cache unchanged; scope filtering happens client-side via getProductDocs/getTenantDocs
 - [Phase 83-01]: AuthOnlyRoute instead of Clerk SignedIn — SignedIn not exported by @clerk/react in this version
 - [Phase 84-01]: RLS hardening: no COALESCE anon fallback; every policy requires valid org_id
+- [Phase 85]: useSignIn from @clerk/react/legacy for custom login (Clerk v6 Core 2 classic API)
+- [Phase 86]: admin-service.ts separate from tenant-service.ts for user vs tenant operations
+- [Phase 87]: Members endpoint in admin-tenants (org-scoped, not user-scoped)
 
 ### Pending Todos
 
@@ -61,7 +62,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T23:09:30.056Z
-Stopped at: Phase 88 context gathered
-Next: Plan Phase 85 (AUTH track) and Phase 86 (ADMIN data fixes) — can run in parallel
-Resume file: .planning/phases/88-quality-gate-security-audit/88-CONTEXT.md
+Last session: 2026-03-17
+Stopped at: Milestone archived
+Next: /gsd:new-milestone
