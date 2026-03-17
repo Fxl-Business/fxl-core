@@ -18,6 +18,7 @@ const AdminLayout = lazy(() => import('@platform/layout/AdminLayout'))
 const AdminDashboard = lazy(() => import('@platform/pages/admin/AdminDashboard'))
 const ModulesPanel = lazy(() => import('@platform/pages/admin/ModulesPanel'))
 const ConnectorsPanel = lazy(() => import('@platform/pages/admin/ConnectorsPanel'))
+const SettingsPanel = lazy(() => import('@platform/pages/admin/SettingsPanel'))
 
 // Tasks pages — TaskList is non-lazy (lightweight); KanbanBoard and TaskForm are lazy
 import TaskList from '@modules/tasks/pages/TaskList'
@@ -62,7 +63,7 @@ export default function AppRouter() {
         <Route path="/admin/modules" element={<Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense>} />
         <Route path="/admin/connectors" element={<Suspense fallback={<div>Carregando...</div>}><ConnectorsPanel /></Suspense>} />
         <Route path="/admin/product-docs" element={<div className="text-slate-500">Product Docs — em breve</div>} />
-        <Route path="/admin/settings" element={<div className="text-slate-500">Settings — em breve</div>} />
+        <Route path="/admin/settings" element={<Suspense fallback={<div>Carregando...</div>}><SettingsPanel /></Suspense>} />
       </Route>
 
       {/* Auth pages — public, full screen */}
