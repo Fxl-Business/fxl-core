@@ -4,6 +4,8 @@ import { supabase } from '@platform/supabase'
 // Types
 // ---------------------------------------------------------------------------
 
+export type DocumentScope = 'tenant' | 'product'
+
 export type DocumentRow = {
   id: string
   title: string
@@ -13,6 +15,8 @@ export type DocumentRow = {
   parent_path: string
   body: string
   sort_order: number
+  org_id: string
+  scope: DocumentScope
   created_at: string
   updated_at: string
 }
@@ -88,4 +92,16 @@ export async function getAllDocuments(): Promise<DocumentRow[]> {
 export async function getDocsByParentPath(parentPath: string): Promise<DocumentRow[]> {
   const docs = await ensureCache()
   return docs.filter((d) => d.parent_path === parentPath)
+}
+
+/** Fetch all product-scoped documents (visible to all tenants). */
+export async function getProductDocs(): Promise<DocumentRow[]> {
+  const docs = await ensureCache()
+  return docs.filter((d) => d.scope === 'product')
+}
+
+/** Fetch all tenant-scoped documents for the current tenant (org-isolated). */
+export async function getTenantDocs(): Promise<DocumentRow[]> {
+  const docs = await ensureCache()
+  return docs.filter((d) => d.scope === 'tenant')
 }
