@@ -16,7 +16,7 @@ const adminNavItems: AdminNavItem[] = [
   { label: 'Tenants', href: '/admin/tenants', icon: Building2 },
   { label: 'Modules', href: '/admin/modules', icon: Blocks },
   { label: 'Connectors', href: '/admin/connectors', icon: Plug },
-  { label: 'Product Docs', href: '/admin/product-docs', icon: FileText, disabled: true },
+  { label: 'Product Docs', href: '/admin/product-docs', icon: FileText },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
