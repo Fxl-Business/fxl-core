@@ -184,6 +184,7 @@ export default function AdminDashboard() {
           label="Usuarios"
           value={userCount}
           icon={Users}
+          href="/admin/users"
           loading={isLoading}
         />
         <MetricCard
@@ -202,7 +203,7 @@ export default function AdminDashboard() {
         <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-foreground">
           Acesso Rapido
         </h2>
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Link
             to="/admin/tenants"
             className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 transition-all hover:border-indigo-200 hover:shadow-sm dark:border-slate-700 dark:bg-card dark:hover:border-indigo-800"
@@ -211,6 +212,16 @@ export default function AdminDashboard() {
             <div>
               <p className="text-sm font-medium text-slate-900 dark:text-foreground">Gerenciar Tenants</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">Criar, visualizar e configurar organizacoes</p>
+            </div>
+          </Link>
+          <Link
+            to="/admin/users"
+            className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 transition-all hover:border-indigo-200 hover:shadow-sm dark:border-slate-700 dark:bg-card dark:hover:border-indigo-800"
+          >
+            <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+            <div>
+              <p className="text-sm font-medium text-slate-900 dark:text-foreground">Gerenciar Usuarios</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Visualizar todos os usuarios da plataforma</p>
             </div>
           </Link>
           <Link
