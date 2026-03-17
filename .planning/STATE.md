@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v4.3
 milestone_name: Admin Polish & Custom Auth
-status: ready-to-plan
-stopped_at: Roadmap created, phases 85-88 defined
-last_updated: "2026-03-17T22:00:00.000Z"
-last_activity: 2026-03-17 — Roadmap v4.3 created (4 phases, 16 requirements)
+status: planning
+stopped_at: Phase 85 context gathered
+last_updated: "2026-03-17T22:31:31.772Z"
+last_activity: 2026-03-17 — Roadmap created, 4 phases, 16/16 requirements mapped
 progress:
   total_phases: 4
   completed_phases: 0
@@ -61,7 +61,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17
-Stopped at: Roadmap v4.3 created — 4 phases (85-88), 16/16 requirements mapped
+Last session: 2026-03-17T22:31:31.770Z
+Stopped at: Phase 85 context gathered
 Next: Plan Phase 85 (AUTH track) and Phase 86 (ADMIN data fixes) — can run in parallel
-Resume file: None
+Resume file: .planning/phases/85-auth-fix-custom-login/85-CONTEXT.md
