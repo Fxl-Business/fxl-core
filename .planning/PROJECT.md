@@ -1,12 +1,22 @@
-# FXL Core — Nucleo FXL
+# Nexo
 
 ## What This Is
 
-Plataforma multi-tenant modular (hub) da FXL para gestao operacional de empresas. Combina modulos nativos (docs, tarefas, CRM, wireframe builder) com connector modules que consomem APIs de aplicacoes externas (spokes). Cada empresa e um tenant com modulos habilitados especificos. Arquitetura agent-first otimizada para Claude Code, com MODULE_REGISTRY tipado, slot-based extensions, e inline editing. A visao e ser o hub central onde qualquer empresa acessa todos os seus dados (tarefas, CRM, dashboards, docs) em um unico lugar, conectando tanto modulos nativos quanto sistemas externos via contrato de API padronizado.
+Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combina modulos nativos (docs, tarefas, CRM, wireframe builder) com connector modules que consomem APIs de aplicacoes externas (spokes). Cada empresa e um tenant com modulos habilitados especificos. Arquitetura agent-first otimizada para Claude Code, com MODULE_REGISTRY tipado, slot-based extensions, e inline editing. A visao e ser o hub central onde qualquer empresa acessa todos os seus dados (tarefas, CRM, dashboards, docs) em um unico lugar, conectando tanto modulos nativos quanto sistemas externos via contrato de API padronizado. A FXL e a primeira empresa (tenant) que utiliza o Nexo.
 
 ## Core Value
 
-O FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
+Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
+
+## Current Milestone: v4.0 Rebrand Nexo
+
+**Goal:** Renomear o produto de "FXL Core" / "Nucleo FXL" para "Nexo" em toda a codebase. Zero mudanca funcional.
+
+**Target features:**
+- Rename em UI (titulos, headers, auth pages, login/signup)
+- Rename em meta (package.json, tab title, favicon)
+- Rename em docs (CLAUDE.md, PROJECT.md)
+- FXL SDK permanece com nome FXL (nome da empresa, nao do produto)
 
 ## Requirements
 
