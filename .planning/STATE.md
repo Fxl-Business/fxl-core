@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.1
 milestone_name: Super Admin
-status: ready_to_plan
-stopped_at: null
-last_updated: "2026-03-17T04:00:00Z"
-last_activity: 2026-03-17 — Roadmap v4.1 criado, 6 fases, 22 requirements mapeados
+status: planning
+stopped_at: Completed 75-01-PLAN.md
+last_updated: "2026-03-17T16:05:04.264Z"
+last_activity: 2026-03-17 — Roadmap criado, 6 fases, 22/22 requirements mapeados
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 10
+  completed_plans: 1
   percent: 0
 ---
 
@@ -58,6 +58,9 @@ Design spec: docs/superpowers/specs/2026-03-17-nexo-platform-evolution-design.md
 - Module management moves from localStorage to Supabase tenant_modules
 - MCP integrations (Supabase + Clerk) for super admin ops via Claude Code
 - Phases 77, 78, 79 are independent and can run in parallel
+- [Phase 75-auth-rls-foundation]: SuperAdminRoute uses useUser() not useAuth() because publicMetadata is only on the user object
+- [Phase 75-auth-rls-foundation]: Admin routes compose ProtectedRoute > SuperAdminRoute > Layout for auth-then-role ordering
+- [Phase 75-auth-rls-foundation]: RLS bypass uses string comparison (= 'true') because JWT claims are always serialized as strings
 
 ### Pending Todos
 
@@ -70,7 +73,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17
-Stopped at: Roadmap v4.1 criado com 6 fases
+Last session: 2026-03-17T16:05:04.262Z
+Stopped at: Completed 75-01-PLAN.md
 Next: /gsd:plan-phase 75
 Resume file: None
