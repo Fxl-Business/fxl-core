@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.1
 milestone_name: Super Admin
 status: executing
-stopped_at: Phase 75 complete
-last_updated: "2026-03-17T18:00:00.000Z"
-last_activity: 2026-03-17 — Phase 75 (Auth & RLS Foundation) complete — 2 plans executed
+stopped_at: Completed 076-01-PLAN.md
+last_updated: "2026-03-17T18:30:00.000Z"
+last_activity: 2026-03-17 — Phase 76 Plan 01 complete (admin shell, sidebar, routes, toggle)
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 10
-  completed_plans: 2
-  percent: 14
+  completed_plans: 3
+  percent: 30
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** Phase 75 — Auth & RLS Foundation
+**Current focus:** Phase 76 — Admin Shell & Dashboard
 
 ## Current Position
 
 Milestone: v4.1 of v4.3 (Super Admin)
-Phase: 75 of 80 (Auth & RLS Foundation) — COMPLETE
-Status: Ready for Phase 76
-Last activity: 2026-03-17 — Phase 75 complete (2/2 plans)
+Phase: 76 of 80 (Admin Shell & Dashboard) — Plan 1/2 complete
+Status: Ready for Phase 76 Plan 02
+Last activity: 2026-03-17 — Phase 76 Plan 01 complete (admin shell, sidebar, routes, toggle)
 
-Progress: [█░░░░░░░░░] 14%
+Progress: [███░░░░░░░] 30%
 
 ## Platform Evolution Plan (v4.0-v4.3)
 
@@ -61,6 +61,8 @@ Design spec: docs/superpowers/specs/2026-03-17-nexo-platform-evolution-design.md
 - [Phase 75-auth-rls-foundation]: SuperAdminRoute uses useUser() not useAuth() because publicMetadata is only on the user object
 - [Phase 75-auth-rls-foundation]: Admin routes compose ProtectedRoute > SuperAdminRoute > Layout for auth-then-role ordering
 - [Phase 75-auth-rls-foundation]: RLS bypass uses string comparison (= 'true') because JWT claims are always serialized as strings
+- [Phase 076-01]: useAdminMode uses useUser() + publicMetadata.super_admin (not sessionClaims) — consistent with Phase 75 SuperAdminRoute decision
+- [Phase 076-01]: Admin routes: SuperAdminRoute wraps AdminLayout directly, removing redundant ProtectedRoute wrapper
 
 ### Pending Todos
 
@@ -72,7 +74,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T16:05:04.262Z
-Stopped at: Phase 75 complete
-Next: /gsd:plan-phase 76
+Last session: 2026-03-17T16:34:39.389Z
+Stopped at: Completed 076-01-PLAN.md
+Next: /gsd:execute-phase 076 plan=02
 Resume file: None

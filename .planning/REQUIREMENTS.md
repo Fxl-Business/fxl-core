@@ -10,13 +10,13 @@
 ### Auth & Roles
 
 - [ ] **AUTH-01**: Clerk JWT template inclui claim `super_admin` extraido de publicMetadata
-- [ ] **AUTH-02**: Componente SuperAdminRoute redireciona usuarios sem claim super_admin
-- [ ] **AUTH-03**: Todas as rotas /admin/* protegidas por SuperAdminRoute
+- [x] **AUTH-02**: Componente SuperAdminRoute redireciona usuarios sem claim super_admin
+- [x] **AUTH-03**: Todas as rotas /admin/* protegidas por SuperAdminRoute
 
 ### Admin Dashboard
 
 - [ ] **ADMIN-01**: Pagina /admin com metricas agregadas (total tenants, total usuarios, modulos ativos)
-- [ ] **ADMIN-02**: Sidebar/nav do admin com links para todas as sub-paginas
+- [x] **ADMIN-02**: Sidebar/nav do admin com links para todas as sub-paginas
 
 ### Tenant Management
 
@@ -37,13 +37,13 @@
 
 ### RLS Updates
 
-- [ ] **RLS-01**: Policies de todas as tabelas atualizadas com check super_admin no JWT
-- [ ] **RLS-02**: Super admin pode ver dados de todos os tenants via RLS bypass
+- [x] **RLS-01**: Policies de todas as tabelas atualizadas com check super_admin no JWT
+- [x] **RLS-02**: Super admin pode ver dados de todos os tenants via RLS bypass
 
 ### Admin UX
 
-- [ ] **UX-01**: Toggle admin/operator na topbar quando usuario tem claim super_admin
-- [ ] **UX-02**: Modo operator funciona como tenant normal (FXL)
+- [x] **UX-01**: Toggle admin/operator na topbar quando usuario tem claim super_admin
+- [x] **UX-02**: Modo operator funciona como tenant normal (FXL)
 
 ### MCP Integrations
 
@@ -72,14 +72,14 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | AUTH-01 | Phase 75 | Pending |
-| AUTH-02 | Phase 75 | Pending |
-| AUTH-03 | Phase 75 | Pending |
-| RLS-01 | Phase 75 | Pending |
-| RLS-02 | Phase 75 | Pending |
+| AUTH-02 | Phase 75 | Complete |
+| AUTH-03 | Phase 75 | Complete |
+| RLS-01 | Phase 75 | Complete |
+| RLS-02 | Phase 75 | Complete |
 | ADMIN-01 | Phase 76 | Pending |
-| ADMIN-02 | Phase 76 | Pending |
-| UX-01 | Phase 76 | Pending |
-| UX-02 | Phase 76 | Pending |
+| ADMIN-02 | Phase 76 | Complete |
+| UX-01 | Phase 76 | Complete |
+| UX-02 | Phase 76 | Complete |
 | TENANT-01 | Phase 77 | Pending |
 | TENANT-02 | Phase 77 | Pending |
 | TENANT-03 | Phase 77 | Pending |
