@@ -62,7 +62,11 @@ Plans:
   2. Dashboard /admin exibe contadores reais: total de tenants (Clerk orgs), total de usuarios e modulos ativos
   3. Topbar exibe botao/icone de toggle apenas quando usuario tem claim super_admin
   4. Clicar no toggle alterna entre modo Admin (/admin/*) e modo Operator (home do tenant FXL) sem recarregar pagina
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 076-01-PLAN.md — Admin shell layout, sidebar, routes, toggle (ADMIN-02, UX-01, UX-02)
+- [ ] 076-02-PLAN.md — Admin dashboard with platform metrics (ADMIN-01)
 
 ### Phase 77: Tenant Management
 **Goal**: Super admin pode visualizar, criar e inspecionar tenants (Clerk Organizations) diretamente pelo painel
@@ -130,8 +134,8 @@ Phase 75 primeiro (bloqueante). Phase 76 depende de 75. Phases 77, 78 e 79 sao I
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 75. Auth & RLS Foundation | v4.1 | 0/2 | Not started | - |
-| 76. Admin Shell & Dashboard | v4.1 | 0/? | Not started | - |
+| 76. Admin Shell & Dashboard | v4.1 | 0/2 | Not started | - |
 | 77. Tenant Management | v4.1 | 0/2 | Not started | - |
 | 78. Module Management Evolution | v4.1 | 0/1 | Not started | - |
 | 79. Platform Settings & MCP | v4.1 | 0/? | Not started | - |
-| 80. Build Verification | v4.1 | 0/? | Not started | - |
+| 80. Build Verification | v4.1 | 0/1 | Not started | - |
