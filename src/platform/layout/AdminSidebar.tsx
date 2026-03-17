@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Building2, Blocks, Settings, Plug, LayoutDashboard, FileText } from 'lucide-react'
+import { Building2, Blocks, Settings, Plug, LayoutDashboard, FileText, Users } from 'lucide-react'
 import { cn } from '@shared/utils'
 import { Separator } from '@shared/ui/separator'
 
@@ -13,6 +13,7 @@ interface AdminNavItem {
 
 const adminNavItems: AdminNavItem[] = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, exact: true },
+  { label: 'Users', href: '/admin/users', icon: Users },
   { label: 'Tenants', href: '/admin/tenants', icon: Building2 },
   { label: 'Modules', href: '/admin/modules', icon: Blocks },
   { label: 'Connectors', href: '/admin/connectors', icon: Plug },
