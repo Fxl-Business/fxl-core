@@ -4,34 +4,9 @@ import { MODULE_IDS } from '@platform/module-loader/module-ids'
 import { isOrgMode } from '@platform/auth/auth-config'
 import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 import { supabase } from '@platform/supabase'
-import { migrateLocalModulesToTenantModules } from '@platform/tenants/migrate-local-modules'
-
-const STORAGE_KEY = 'fxl-enabled-modules'
 
 // All modules enabled by default
 const ALL_MODULE_IDS: ModuleId[] = Object.values(MODULE_IDS)
-
-// ---------------------------------------------------------------------------
-// Anon mode: localStorage-based (original behavior)
-// ---------------------------------------------------------------------------
-
-function loadEnabledModulesFromStorage(): Set<ModuleId> {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (!stored) return new Set(ALL_MODULE_IDS)
-    const parsed = JSON.parse(stored) as string[]
-    const valid = parsed.filter((id): id is ModuleId =>
-      ALL_MODULE_IDS.includes(id as ModuleId)
-    )
-    return new Set(valid)
-  } catch {
-    return new Set(ALL_MODULE_IDS)
-  }
-}
-
-function persistEnabledModulesToStorage(enabled: Set<ModuleId>): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([...enabled]))
-}
 
 // ---------------------------------------------------------------------------
 // Context interface (same for both modes)
@@ -48,31 +23,19 @@ interface ModuleEnabledContextValue {
 const ModuleEnabledContext = createContext<ModuleEnabledContextValue | null>(null)
 
 // ---------------------------------------------------------------------------
-// Anon Provider (localStorage)
+// Anon Provider — all modules enabled, no toggling
 // ---------------------------------------------------------------------------
 
 function AnonModuleEnabledProvider({ children }: { children: ReactNode }) {
-  const [enabledModules, setEnabledModules] = useState<Set<ModuleId>>(loadEnabledModulesFromStorage)
-
-  const toggleModule = useCallback((id: ModuleId) => {
-    setEnabledModules(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        next.add(id)
-      }
-      persistEnabledModulesToStorage(next)
-      return next
-    })
-  }, [])
-
-  const isEnabled = useCallback((id: ModuleId) => {
-    return enabledModules.has(id)
-  }, [enabledModules])
-
+  const value: ModuleEnabledContextValue = {
+    enabledModules: new Set(ALL_MODULE_IDS),
+    toggleModule: () => {},
+    isEnabled: () => true,
+    isLoading: false,
+    error: null,
+  }
   return (
-    <ModuleEnabledContext.Provider value={{ enabledModules, toggleModule, isEnabled, isLoading: false, error: null }}>
+    <ModuleEnabledContext.Provider value={value}>
       {children}
     </ModuleEnabledContext.Provider>
   )
@@ -103,8 +66,6 @@ function OrgModuleEnabledProvider({ children }: { children: ReactNode }) {
     setError(null)
 
     async function fetchModules(orgId: string) {
-      // Run one-time migration from localStorage before fetching
-      await migrateLocalModulesToTenantModules(orgId)
       if (cancelled) return
 
       const { data, error: fetchError } = await supabase

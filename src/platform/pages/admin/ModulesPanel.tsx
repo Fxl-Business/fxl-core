@@ -1,38 +1,22 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { MODULE_REGISTRY } from '@platform/module-loader/registry'
 import type { ModuleDefinition } from '@platform/module-loader/registry'
+import type { ModuleId } from '@platform/module-loader/module-ids'
+import { MODULE_IDS } from '@platform/module-loader/module-ids'
+import { supabase } from '@platform/supabase'
+import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 import { Switch } from '@shared/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@shared/ui/select'
+import { Loader2 } from 'lucide-react'
 
-// ---------------------------------------------------------------------------
-// Enabled-modules local state hook (localStorage-backed, synchronous init)
-// ---------------------------------------------------------------------------
-
-function useEnabledModules() {
-  const [enabledIds, setEnabledIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem('fxl-enabled-modules')
-    if (saved) {
-      try {
-        return JSON.parse(saved) as string[]
-      } catch {
-        /* fall through to default */
-      }
-    }
-    return MODULE_REGISTRY.filter(m => m.enabled !== false).map(m => m.id)
-  })
-
-  function toggleModule(moduleId: string) {
-    setEnabledIds(prev => {
-      const next = prev.includes(moduleId)
-        ? prev.filter(id => id !== moduleId)
-        : [...prev, moduleId]
-      localStorage.setItem('fxl-enabled-modules', JSON.stringify(next))
-      return next
-    })
-  }
-
-  return { enabledIds, toggleModule }
-}
+const ALL_MODULE_IDS: ModuleId[] = Object.values(MODULE_IDS)
 
 // ---------------------------------------------------------------------------
 // Status badge helpers
@@ -146,27 +130,106 @@ function ModuleCard({ mod, isEnabled, onToggle }: ModuleCardProps) {
 }
 
 // ---------------------------------------------------------------------------
-// ModulesPanel page
+// ModulesPanel page — Supabase-backed, per-tenant module management
 // ---------------------------------------------------------------------------
 
 export default function ModulesPanel() {
-  const { enabledIds, toggleModule } = useEnabledModules()
+  const { orgs, isLoading: orgsLoading } = useActiveOrg()
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
+  const [moduleStates, setModuleStates] = useState<Map<string, boolean>>(new Map())
+  const [isLoadingModules, setIsLoadingModules] = useState(false)
+
+  // Fetch module states from Supabase when selected org changes
+  useEffect(() => {
+    if (!selectedOrgId) return
+
+    let cancelled = false
+    setIsLoadingModules(true)
+
+    async function fetchModuleStates(orgId: string) {
+      const { data, error } = await supabase
+        .from('tenant_modules')
+        .select('module_id, enabled')
+        .eq('org_id', orgId)
+
+      if (cancelled) return
+
+      if (error) {
+        toast.error('Erro ao carregar modulos do tenant')
+        setIsLoadingModules(false)
+        return
+      }
+
+      // Build map: modules in DB use their stored value, others default to true (opt-out model)
+      const states = new Map<string, boolean>()
+      const modulesInDb = new Set<string>()
+
+      if (data) {
+        for (const row of data) {
+          modulesInDb.add(row.module_id)
+          states.set(row.module_id, row.enabled)
+        }
+      }
+
+      for (const moduleId of ALL_MODULE_IDS) {
+        if (!modulesInDb.has(moduleId)) {
+          states.set(moduleId, true)
+        }
+      }
+
+      setModuleStates(states)
+      setIsLoadingModules(false)
+    }
+
+    fetchModuleStates(selectedOrgId)
+    return () => { cancelled = true }
+  }, [selectedOrgId])
+
+  const selectedOrg = orgs.find(o => o.id === selectedOrgId)
 
   const activeCount = MODULE_REGISTRY.filter(m =>
-    enabledIds.includes(m.id),
+    moduleStates.get(m.id) ?? true,
   ).length
   const total = MODULE_REGISTRY.length
 
-  function handleToggle(moduleId: string, checked: boolean) {
-    toggleModule(moduleId)
+  const handleToggle = useCallback(async (moduleId: string, checked: boolean) => {
+    if (!selectedOrgId) return
+
     const mod = MODULE_REGISTRY.find(m => m.id === moduleId)
     const label = mod?.label ?? moduleId
-    if (checked) {
-      toast.success(`Modulo "${label}" ativado`)
-    } else {
-      toast(`Modulo "${label}" desativado`)
+    const orgName = selectedOrg?.name ?? selectedOrgId
+
+    // Optimistic update
+    setModuleStates(prev => {
+      const next = new Map(prev)
+      next.set(moduleId, checked)
+      return next
+    })
+
+    const { error } = await supabase
+      .from('tenant_modules')
+      .upsert(
+        { org_id: selectedOrgId, module_id: moduleId, enabled: checked },
+        { onConflict: 'org_id,module_id' }
+      )
+
+    if (error) {
+      // Revert optimistic update
+      setModuleStates(prev => {
+        const next = new Map(prev)
+        next.set(moduleId, !checked)
+        return next
+      })
+      toast.error('Erro ao atualizar modulo')
+      return
     }
-  }
+
+    if (checked) {
+      toast.success(`Modulo "${label}" ativado para ${orgName}`)
+    } else {
+      toast(`Modulo "${label}" desativado para ${orgName}`)
+    }
+  }, [selectedOrgId, selectedOrg])
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
@@ -177,25 +240,67 @@ export default function ModulesPanel() {
             Modulos
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Gerencie os modulos ativos da plataforma.
+            Gerencie os modulos ativos por tenant.
           </p>
         </div>
-        <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400">
-          {activeCount} de {total} ativos
-        </span>
+        {selectedOrgId && (
+          <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400">
+            {activeCount} de {total} ativos
+          </span>
+        )}
       </div>
 
-      {/* Module cards grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {MODULE_REGISTRY.map(mod => (
-          <ModuleCard
-            key={mod.id}
-            mod={mod}
-            isEnabled={enabledIds.includes(mod.id)}
-            onToggle={handleToggle}
-          />
-        ))}
+      {/* Tenant selector */}
+      <div className="w-full max-w-sm">
+        {orgsLoading ? (
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Carregando tenants...
+          </div>
+        ) : (
+          <Select
+            value={selectedOrgId ?? ''}
+            onValueChange={setSelectedOrgId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione um tenant" />
+            </SelectTrigger>
+            <SelectContent>
+              {orgs.map(org => (
+                <SelectItem key={org.id} value={org.id}>
+                  {org.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
+
+      {/* Content */}
+      {!selectedOrgId && (
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Selecione um tenant para gerenciar modulos.
+        </p>
+      )}
+
+      {selectedOrgId && isLoadingModules && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+        </div>
+      )}
+
+      {selectedOrgId && !isLoadingModules && (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {MODULE_REGISTRY.map(mod => (
+            <ModuleCard
+              key={mod.id}
+              mod={mod}
+              isEnabled={moduleStates.get(mod.id) ?? true}
+              onToggle={handleToggle}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
