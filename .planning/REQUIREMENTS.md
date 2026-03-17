@@ -29,29 +29,29 @@ Requirements para milestone v3.1 Multi-tenancy. Derivados da Section 5 do design
 
 ### Auth & Token Exchange
 
-- [ ] **AUTH-01**: Criar Supabase Edge Function `/auth/token-exchange` que valida Clerk JWT (via JWKS), extrai `org_id`, `user_id`, `role` e minta JWT customizado para Supabase
+- [x] **AUTH-01**: Criar Supabase Edge Function `/auth/token-exchange` que valida Clerk JWT (via JWKS), extrai `org_id`, `user_id`, `role` e minta JWT customizado para Supabase
   - **Aceite:** Edge Function deployada. Recebe Clerk token, retorna Supabase JWT com claims `{ sub, org_id, role }`. Retorna 401 para token invalido.
   - **Depende de:** Nada
 
-- [ ] **AUTH-02**: Implementar `VITE_AUTH_MODE=anon|org` flag no frontend para fallback dev/staging
+- [x] **AUTH-02**: Implementar `VITE_AUTH_MODE=anon|org` flag no frontend para fallback dev/staging
   - **Aceite:** Em modo `anon`, Supabase usa anon key (comportamento atual). Em modo `org`, Supabase usa JWT customizado do token exchange. Default: `anon`.
   - **Depende de:** AUTH-01
 
-- [ ] **AUTH-03**: Refatorar `src/platform/supabase.ts` para criar Supabase client com access token dinâmico baseado no auth mode
+- [x] **AUTH-03**: Refatorar `src/platform/supabase.ts` para criar Supabase client com access token dinâmico baseado no auth mode
   - **Aceite:** Quando `VITE_AUTH_MODE=org`, o Supabase client usa `supabase.auth.setSession()` com o JWT do token exchange. Quando `anon`, comportamento atual mantido.
   - **Depende de:** AUTH-01, AUTH-02
 
 ### Clerk Organizations
 
-- [ ] **CLERK-01**: Integrar Clerk Organizations no frontend — `useActiveOrg` hook com `activeOrg`, `orgs`, `switchOrg`, `isLoading`
+- [x] **CLERK-01**: Integrar Clerk Organizations no frontend — `useActiveOrg` hook com `activeOrg`, `orgs`, `switchOrg`, `isLoading`
   - **Aceite:** Hook funciona com `@clerk/react` useOrganization/useOrganizationList. Retorna org ativa, lista de orgs, funcao de switch.
   - **Depende de:** Nada
 
-- [ ] **CLERK-02**: Implementar org picker UI no TopNav — mostra selector quando usuario tem 2+ orgs, auto-seleciona se so tem uma
+- [x] **CLERK-02**: Implementar org picker UI no TopNav — mostra selector quando usuario tem 2+ orgs, auto-seleciona se so tem uma
   - **Aceite:** Org picker visivel no TopNav. Selecionando org diferente atualiza contexto global. Com 1 org, mostra badge sem dropdown.
   - **Depende de:** CLERK-01
 
-- [ ] **CLERK-03**: Configurar `ClerkProvider` com `organizationSyncOptions` para sincronizar org ativa com URL/session
+- [x] **CLERK-03**: Configurar `ClerkProvider` com `organizationSyncOptions` para sincronizar org ativa com URL/session
   - **Aceite:** `ClerkProvider` no App.tsx configurado. Org ativa persiste entre page reloads.
   - **Depende de:** CLERK-01
 
@@ -110,12 +110,12 @@ Requirements para milestone v3.1 Multi-tenancy. Derivados da Section 5 do design
 | SCHEMA-02 | Phase 64 | Complete |
 | SCHEMA-03 | Phase 64 | Complete |
 | SCHEMA-04 | Phase 64 | Complete |
-| AUTH-01 | Phase 65 | Pending |
-| AUTH-02 | Phase 65 | Pending |
-| AUTH-03 | Phase 65 | Pending |
-| CLERK-01 | Phase 65 | Pending |
-| CLERK-02 | Phase 65 | Pending |
-| CLERK-03 | Phase 65 | Pending |
+| AUTH-01 | Phase 65 | Complete |
+| AUTH-02 | Phase 65 | Complete |
+| AUTH-03 | Phase 65 | Complete |
+| CLERK-01 | Phase 65 | Complete |
+| CLERK-02 | Phase 65 | Complete |
+| CLERK-03 | Phase 65 | Complete |
 | MOD-01 | Phase 66 | Pending |
 | MOD-02 | Phase 66 | Pending |
 | MOD-03 | Phase 66 | Pending |

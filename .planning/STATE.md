@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Multi-tenancy
-status: planning
-stopped_at: Completed 64-01-PLAN.md (Supabase Schema & Migrations)
-last_updated: "2026-03-17T01:02:59.799Z"
-last_activity: 2026-03-16 — Created v3.1 requirements and roadmap
+status: executing
+stopped_at: Completed 65-01-PLAN.md (Clerk Organizations + Token Exchange)
+last_updated: "2026-03-17T01:09:00Z"
+last_activity: 2026-03-17 — Executed Phase 65 (Clerk Orgs + Token Exchange)
 progress:
   total_phases: 4
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
-  percent: 0
+  completed_phases: 2
+  total_plans: 2
+  completed_plans: 2
+  percent: 50
 ---
 
 # Project State
@@ -26,10 +26,10 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Milestone: v3.1 of v3.5 (Multi-tenancy)
-Status: Planning — requirements and roadmap created, ready for `/gsd:plan-phase 64`
-Last activity: 2026-03-16 — Created v3.1 requirements and roadmap
+Status: Executing — Phase 65 complete, ready for Phase 66
+Last activity: 2026-03-17 — Executed Phase 65 (Clerk Orgs + Token Exchange)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [=====░░░░░] 50%
 
 ## Multi-Milestone Plan (v3.1-v3.5)
 
@@ -63,6 +63,9 @@ Design spec: docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md
 - VITE_AUTH_MODE=anon|org flag for backward-compatible dev/staging
 - org_id default 'org_fxl_default' for existing data backfill
 - [Phase 64]: COALESCE-based RLS pattern for anon fallback: single FOR ALL policy per table with org_id self-reference when no JWT claims
+- [Phase 65]: organizationSyncOptions not available in @clerk/react 6.0.1; org persistence handled by Clerk session via setActive
+- [Phase 65]: Supabase org client uses custom fetch wrapper with mutable token ref for dynamic JWT injection
+- [Phase 65]: Edge Function uses jose in Deno runtime with @ts-nocheck (not checked by project tsconfig)
 
 ### Pending Todos
 
@@ -72,10 +75,10 @@ None.
 
 - Verify Clerk pricing for Organizations (free tier supports 5 orgs)
 - Edge Function requires Supabase CLI for local dev (supabase functions serve)
-- Clerk Organizations requires @clerk/react 6.x organizationSyncOptions
+- Clerk Organizations works without organizationSyncOptions (not in 6.0.1; setActive handles persistence)
 
 ## Session Continuity
 
-Last session: 2026-03-17T01:02:59.796Z
-Stopped at: Completed 64-01-PLAN.md (Supabase Schema & Migrations)
-Next: `/gsd:plan-phase 64` to create execution plans for Phase 64
+Last session: 2026-03-17T01:09:00Z
+Stopped at: Completed 65-01-PLAN.md (Clerk Organizations + Token Exchange)
+Next: `/gsd:execute-phase 66` to implement module system multi-tenancy
