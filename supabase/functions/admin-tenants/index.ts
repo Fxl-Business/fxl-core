@@ -94,7 +94,7 @@ serve(async (req: Request) => {
 })
 
 async function handleListOrgs(): Promise<Response> {
-  const res = await fetch(`${CLERK_API_BASE}/organizations?limit=100&order_by=-created_at`, {
+  const res = await fetch(`${CLERK_API_BASE}/organizations?limit=100&order_by=-created_at&include_members_count=true`, {
     headers: {
       Authorization: `Bearer ${CLERK_SECRET_KEY}`,
     },

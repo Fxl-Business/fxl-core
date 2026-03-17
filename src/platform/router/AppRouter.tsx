@@ -1,7 +1,7 @@
 import { lazy, Suspense, type ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
-import { SignUp, useAuth, RedirectToSignIn } from '@clerk/react'
+import { SignUp, useAuth, RedirectToSignIn, AuthenticateWithRedirectCallback } from '@clerk/react'
 import Layout from '@platform/layout/Layout'
 import ProtectedRoute from '@platform/auth/ProtectedRoute'
 import SuperAdminRoute from '@platform/auth/SuperAdminRoute'
@@ -85,6 +85,9 @@ export default function AppRouter() {
         <Route path="/admin/product-docs" element={<Suspense fallback={<div>Carregando...</div>}><ProductDocsPage /></Suspense>} />
         <Route path="/admin/settings" element={<Suspense fallback={<div>Carregando...</div>}><SettingsPanel /></Suspense>} />
       </Route>
+
+      {/* SSO callback for OAuth redirect (Google login) */}
+      <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
 
       {/* Auth pages — public, full screen */}
       <Route path="/login/*" element={<Login />} />

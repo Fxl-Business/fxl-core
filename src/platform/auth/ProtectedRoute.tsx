@@ -21,8 +21,8 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     userMemberships: { infinite: true },
   })
 
-  // 1. Clerk SDK not yet loaded
-  if (!isLoaded || !orgsLoaded) {
+  // 1. Clerk SDK not yet loaded — show loading
+  if (!isLoaded) {
     return (
       <div style={loadingStyle}>
         <p style={loadingText}>Carregando...</p>
@@ -30,12 +30,21 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     )
   }
 
-  // 2. Not signed in
+  // 2. Not signed in — redirect immediately (do NOT wait for orgsLoaded)
   if (!isSignedIn) {
     return <RedirectToSignIn />
   }
 
-  // 3. Signed in but no org — redirect to onboarding
+  // 3. Signed in, waiting for org data
+  if (!orgsLoaded) {
+    return (
+      <div style={loadingStyle}>
+        <p style={loadingText}>Carregando...</p>
+      </div>
+    )
+  }
+
+  // 4. Signed in but no org — redirect to onboarding
   if (userMemberships?.data?.length === 0) {
     return <Navigate to="/criar-empresa" replace />
   }
