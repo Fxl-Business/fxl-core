@@ -125,34 +125,19 @@ O FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma 
 - ✓ Toggle preview/compact no dialog de seleção com sessionStorage persistence — v2.4
 - ✓ Dialog responsivo maior (max-w-4xl) para acomodar previews com category separators — v2.4
 - ✓ All 28 defaultProps hardened with complete Zod-valid sample data for visual rendering — v2.4
+- ✓ Camada platform/ com layout, auth, tenants, module-loader, router, services — v3.0
+- ✓ Camada shared/ com ui (19 shadcn), hooks, types, utils — v3.0
+- ✓ Modulo docs autocontido (10 components, 1 page, 3 services, 2 hooks, CLAUDE.md) — v3.0
+- ✓ Modulo tasks autocontido (services migrados, imports module-relative, CLAUDE.md) — v3.0
+- ✓ Modulo clients autocontido (8 pages migradas, manifest atualizado, CLAUDE.md) — v3.0
+- ✓ Modulo wireframe hibrido (manifest + pages no modulo, componentes via @tools/, CLAUDE.md) — v3.0
+- ✓ App.tsx simplificado para 18 linhas (provider wrapper, delega para AppRouter.tsx) — v3.0
+- ✓ Knowledge Base removido (34 arquivos, ~2300 linhas, zero referencias) — v3.0
+- ✓ Path aliases @platform/, @shared/, @modules/ configurados — v3.0
 
 ### Active
 
-<!-- v3.0 Reorganizacao Modular — zero mudanca funcional -->
-
-- [ ] Criar camada platform/ (layout, auth, tenants, module-loader, router)
-- [ ] Mover modulos para estrutura autocontida (docs, tasks, clients, wireframe)
-- [ ] Criar camada shared/ (ui, hooks, types, utils)
-- [ ] Migrar src/lib/ para destinos corretos (services por modulo, platform, shared)
-- [ ] Migrar src/components/ para destinos corretos (por modulo, platform, shared)
-- [ ] Migrar src/pages/ para destinos corretos (por modulo, platform)
-- [ ] Remover modulo Knowledge Base (modulo, servico, rotas, IDs)
-- [ ] Remover codigo morto (ProcessDocsViewer, duplicados)
-- [ ] Atualizar imports em todos os arquivos afetados
-- [ ] Simplificar App.tsx (delegar para platform/router)
-
-## Current Milestone: v3.0 Reorganizacao Modular
-
-**Goal:** Reorganizar a estrutura interna do FXL Core para modular monolith com boundaries claras (platform/, modules/, shared/), preparando para multi-tenancy e agent-per-module development.
-
-**Target features:**
-- Camada platform/ separada do codigo de modulos
-- Cada modulo 100% autocontido (manifest, components, pages, services, hooks, types, CLAUDE.md)
-- Remocao do Knowledge Base (redundante com Docs)
-- Remocao de codigo morto
-- Zero mudanca funcional — tudo continua funcionando identico
-
-**Design spec:** `docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md`
+(Empty — define in next milestone via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -190,14 +175,16 @@ O FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma 
 
 ## Current State
 
-All 12 milestones shipped (v1.0 → v2.4). Starting v3.0 Reorganizacao Modular.
+13 milestones shipped (v1.0 → v3.0). v3.0 completed modular reorganization.
 
 ## Context
 
-Shipped v2.4 Component Picker Preview Mode. All 12 milestones complete (v1.0-v2.4).
-Starting evolucao para plataforma multi-tenant SaaS com arquitetura hub-and-spoke.
-Design spec completa em docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md.
-Roadmap v3.0-v3.5: reorganizacao → multi-tenancy → SDK skill → connector → Beach House → integracao.
+Shipped v3.0 Reorganizacao Modular. 13 milestones complete (v1.0-v3.0).
+Codebase reorganizado: src/platform/ (shell), src/modules/ (autocontidos), src/shared/ (cross-module).
+4 modulos ativos (docs, tasks, clients, wireframe), cada um com CLAUDE.md para agent scoped.
+Knowledge Base removido. App.tsx simplificado para provider wrapper.
+Design spec para evolucao v3.1-v3.5 em docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md.
+Proximo: v3.1 Multi-tenancy (Clerk Organizations + tenant_modules + RLS).
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
 ~41,000 LOC TypeScript. 7 Supabase migrations (001-007). 5 active modules in MODULE_REGISTRY.
 Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
@@ -312,4 +299,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Knowledge Base removido | Redundante com Docs, simplificar | — Pending |
 
 ---
-*Last updated: 2026-03-16 after v3.0 milestone start*
+*Last updated: 2026-03-16 after v3.0 milestone completion*
