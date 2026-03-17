@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.2
 milestone_name: "Docs do Sistema + Tenant Onboarding"
-status: ready_to_plan
-stopped_at: null
-last_updated: "2026-03-17T20:30:00Z"
-last_activity: 2026-03-17 — Roadmap created for v4.2 (phases 81-84)
+status: in_progress
+stopped_at: "Completed 81-01-PLAN.md"
+last_updated: "2026-03-17T21:00:00Z"
+last_activity: 2026-03-17 — Completed 81-01 (docs data model: scope column + RLS + TypeScript types)
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 1
+  completed_plans: 1
+  percent: 5
 ---
 
 # Project State
@@ -27,11 +27,11 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 
 Milestone: v4.2 Docs do Sistema + Tenant Onboarding
 Phase: 81 of 84 (Docs Data Model)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-03-17 — Roadmap created, 17 requirements mapped across 4 phases
+Plan: 1 of 1 in current phase (COMPLETE)
+Status: In progress
+Last activity: 2026-03-17 — Completed 81-01 (scope column on documents table, split RLS policies, TypeScript types)
 
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░░░░░░░░░░░] 5%
 
 ## Platform Evolution Plan (v4.0-v4.3)
 
@@ -45,7 +45,9 @@ Design spec: docs/superpowers/specs/2026-03-17-nexo-platform-evolution-design.md
 
 ### Decisions
 
-(Cleared — see PROJECT.md Key Decisions for full history)
+- [81-01] scope='product' only bypasses org_id in SELECT policy — write policies require super_admin for product docs
+- [81-01] In-memory cache unchanged; scope filtering happens client-side via getProductDocs/getTenantDocs
+- [81-01] org_id added to DocumentRow type to align TypeScript with DB reality
 
 ### Pending Todos
 
@@ -60,6 +62,6 @@ Phases 81-82 and 83-84 are independent tracks — safe to parallelize.
 ## Session Continuity
 
 Last session: 2026-03-17
-Stopped at: Roadmap created, ready to plan Phase 81
-Next: /gsd:plan-phase 81
+Stopped at: Completed 81-01-PLAN.md
+Next: /gsd:execute-phase 82
 Resume file: None
