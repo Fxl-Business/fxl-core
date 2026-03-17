@@ -32,8 +32,8 @@ Requirements for v4.3 Admin Polish & Custom Auth. Each maps to roadmap phases.
 
 ### General
 
-- [ ] **GEN-01**: `npx tsc --noEmit` zero errors
-- [ ] **GEN-02**: Todas as paginas admin acessiveis apenas para super_admin
+- [x] **GEN-01**: `npx tsc --noEmit` zero errors
+- [x] **GEN-02**: Todas as paginas admin acessiveis apenas para super_admin
 
 ## Future Requirements
 
@@ -68,8 +68,8 @@ None for this milestone.
 | USR-02 | Phase 87 | Pending |
 | USR-03 | Phase 87 | Pending |
 | USR-04 | Phase 87 | Pending |
-| GEN-01 | Phase 88 | Pending |
-| GEN-02 | Phase 88 | Pending |
+| GEN-01 | Phase 88 | Complete |
+| GEN-02 | Phase 88 | Complete |
 
 **Coverage:**
 - v4.3 requirements: 16 total
