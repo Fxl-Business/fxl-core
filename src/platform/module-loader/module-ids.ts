@@ -8,6 +8,7 @@ export const MODULE_IDS = {
   FERRAMENTAS: 'ferramentas',
   CLIENTS: 'clients',
   TASKS: 'tasks',
+  CONNECTOR: 'connector',
 } as const
 
 export type ModuleId = typeof MODULE_IDS[keyof typeof MODULE_IDS]

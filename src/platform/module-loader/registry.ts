@@ -5,6 +5,7 @@ import { docsManifest } from '@modules/docs/manifest'
 import { ferramentasManifest } from '@modules/wireframe/manifest'
 import { clientsManifest } from '@modules/clients/manifest'
 import { tasksManifest } from '@modules/tasks/manifest'
+import { connectorManifest } from '@modules/connector/manifest'
 
 export { MODULE_IDS, type ModuleId, SLOT_IDS, type SlotId } from './module-ids'
 import type { ModuleId } from './module-ids'
@@ -69,4 +70,5 @@ export const MODULE_REGISTRY: ModuleDefinition[] = [
   ferramentasManifest,
   clientsManifest,
   tasksManifest,
+  connectorManifest,
 ]
