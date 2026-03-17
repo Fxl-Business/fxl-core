@@ -9,59 +9,59 @@
 
 ### Module Infrastructure
 
-- [ ] **CON-01**: Criar estrutura do modulo connector com CLAUDE.md, manifest.ts, e registro no MODULE_REGISTRY
+- [x] **CON-01**: Criar estrutura do modulo connector com CLAUDE.md, manifest.ts, e registro no MODULE_REGISTRY
   - **Aceite:** MODULE_IDS.CONNECTOR existe, modulo registrado no registry, rota catch-all `/apps/*` configurada.
   - **Depende de:** Nada
 
-- [ ] **CON-02**: Criar tipos do connector (re-export contract types + ConnectorConfig)
+- [x] **CON-02**: Criar tipos do connector (re-export contract types + ConnectorConfig)
   - **Aceite:** types/index.ts re-exporta tipos do contrato SDK, ConnectorConfig define appId + baseUrl.
   - **Depende de:** CON-01
 
-- [ ] **CON-03**: Criar connector-service.ts para comunicacao com spokes
+- [x] **CON-03**: Criar connector-service.ts para comunicacao com spokes
   - **Aceite:** Servico faz GET manifest, entities, widgets com timeout 5s, tratamento de erros (offline, 401, 500).
   - **Depende de:** CON-02
 
-- [ ] **CON-04**: Criar icon-map.ts mapeando ~100 icones lucide comuns com fallback para Box
+- [x] **CON-04**: Criar icon-map.ts mapeando ~100 icones lucide comuns com fallback para Box
   - **Aceite:** Funcao resolveIcon(name) retorna componente LucideIcon, fallback para Box se nao encontrado.
   - **Depende de:** Nada
 
-- [ ] **CON-05**: Criar hooks useConnector e useConnectorList
+- [x] **CON-05**: Criar hooks useConnector e useConnectorList
   - **Aceite:** useConnector(appId) retorna manifest/loading/error. useConnectorList retorna lista de connectors habilitados.
   - **Depende de:** CON-03
 
 ### UI Components
 
-- [ ] **CON-06**: Criar EntityTable e EntityFields para renderizacao generica de entidades
+- [x] **CON-06**: Criar EntityTable e EntityFields para renderizacao generica de entidades
   - **Aceite:** EntityTable renderiza tabela com colunas baseadas em FieldDefinition[]. EntityFields renderiza campos formatados por tipo.
   - **Depende de:** CON-02
 
-- [ ] **CON-07**: Criar EntityList (pagina de listagem) e EntityDetail (pagina de detalhe)
+- [x] **CON-07**: Criar EntityList (pagina de listagem) e EntityDetail (pagina de detalhe)
   - **Aceite:** EntityList busca dados paginados via connector-service. EntityDetail busca entidade individual.
   - **Depende de:** CON-03, CON-06
 
-- [ ] **CON-08**: Criar widget components (KpiWidget, ChartWidget, TableWidget, ListWidget)
+- [x] **CON-08**: Criar widget components (KpiWidget, ChartWidget, TableWidget, ListWidget)
   - **Aceite:** Cada widget renderiza dados no formato correto (ver spec Section 6.5). ChartWidget usa recharts.
   - **Depende de:** CON-02
 
-- [ ] **CON-09**: Criar ConnectorRouter com roteamento dinamico baseado no manifest
+- [x] **CON-09**: Criar ConnectorRouter com roteamento dinamico baseado no manifest
   - **Aceite:** ConnectorRouter resolve sub-rotas de `/apps/:appId/*` usando entities do manifest.
   - **Depende de:** CON-05, CON-07
 
-- [ ] **CON-10**: Criar ConnectorDashboard com widgets overview por connector
+- [x] **CON-10**: Criar ConnectorDashboard com widgets overview por connector
   - **Aceite:** Dashboard renderiza todos os widgets de um connector com layout grid.
   - **Depende de:** CON-05, CON-08
 
-- [ ] **CON-11**: Criar ConnectorCard e ConnectorBadge
+- [x] **CON-11**: Criar ConnectorCard e ConnectorBadge
   - **Aceite:** ConnectorCard mostra app info para Home. ConnectorBadge mostra status online/offline.
   - **Depende de:** CON-05
 
-- [ ] **CON-12**: Criar home-widgets extension para injetar widgets de connectors no Home
+- [x] **CON-12**: Criar home-widgets extension para injetar widgets de connectors no Home
   - **Aceite:** Extension injeta ConnectorCard no HOME_DASHBOARD slot via extension system.
   - **Depende de:** CON-11
 
 ### Integration
 
-- [ ] **CON-13**: tsc --noEmit zero erros, npm run build sem erros
+- [x] **CON-13**: tsc --noEmit zero erros, npm run build sem erros
   - **Aceite:** Build completa sem erros TypeScript ou Vite.
   - **Depende de:** Todos os anteriores
 
@@ -79,19 +79,19 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CON-01 | Phase 70 | Pending |
-| CON-02 | Phase 70 | Pending |
-| CON-03 | Phase 70 | Pending |
-| CON-04 | Phase 70 | Pending |
-| CON-05 | Phase 70 | Pending |
-| CON-06 | Phase 71 | Pending |
-| CON-07 | Phase 71 | Pending |
-| CON-08 | Phase 71 | Pending |
-| CON-09 | Phase 71 | Pending |
-| CON-10 | Phase 71 | Pending |
-| CON-11 | Phase 71 | Pending |
-| CON-12 | Phase 71 | Pending |
-| CON-13 | Phase 72 | Pending |
+| CON-01 | Phase 70 | Complete |
+| CON-02 | Phase 70 | Complete |
+| CON-03 | Phase 70 | Complete |
+| CON-04 | Phase 70 | Complete |
+| CON-05 | Phase 70 | Complete |
+| CON-06 | Phase 71 | Complete |
+| CON-07 | Phase 71 | Complete |
+| CON-08 | Phase 71 | Complete |
+| CON-09 | Phase 71 | Complete |
+| CON-10 | Phase 71 | Complete |
+| CON-11 | Phase 71 | Complete |
+| CON-12 | Phase 71 | Complete |
+| CON-13 | Phase 72 | Complete |
 
 **Coverage:**
 - v3.3 requirements: 13 total

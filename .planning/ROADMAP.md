@@ -35,9 +35,9 @@
 
 ## Phases
 
-- [ ] **Phase 70: Core Connector Infrastructure** - Module structure, types, service, icon-map, hooks
-- [ ] **Phase 71: Connector UI Components** - Entity views, widget components, router, dashboard, cards, extensions
-- [ ] **Phase 72: Integration Verification** - tsc --noEmit, npm run build, route/sidebar verification
+- [x] **Phase 70: Core Connector Infrastructure** - Module structure, types, service, icon-map, hooks (completed 2026-03-17)
+- [x] **Phase 71: Connector UI Components** - Entity views, widget components, router, dashboard, cards, extensions (completed 2026-03-17)
+- [x] **Phase 72: Integration Verification** - tsc --noEmit, npm run build, route/sidebar verification (completed 2026-03-17)
 
 ## Phase Details
 
@@ -51,7 +51,7 @@
   3. connector-service.ts handles manifest/entity/widget fetching with 5s timeout + error handling
   4. icon-map.ts maps ~100 common lucide icons with Box fallback
   5. useConnector and useConnectorList hooks work
-**Plans:** 0/1 plans complete
+**Plans:** 1/1 plans complete
 
 ### Phase 71: Connector UI Components
 **Goal**: Create all UI components: entity rendering, widgets, dynamic router, dashboard, cards, home extension
@@ -63,7 +63,7 @@
   3. ConnectorRouter resolves sub-routes from manifest entities
   4. ConnectorDashboard shows widgets grid
   5. ConnectorCard appears in Home via extension slot
-**Plans:** 0/1 plans complete
+**Plans:** 1/1 plans complete
 
 ### Phase 72: Integration Verification
 **Goal**: Verify everything compiles and builds correctly
@@ -73,7 +73,7 @@
   1. `npx tsc --noEmit` zero errors
   2. `npm run build` completes successfully
   3. Connector route `/apps/*` registered in router
-**Plans:** 0/1 plans complete
+**Plans:** 1/1 plans complete
 
 ## Progress
 
@@ -81,6 +81,6 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 70. Core Connector Infrastructure | 0/1 | Pending | - |
-| 71. Connector UI Components | 0/1 | Pending | - |
-| 72. Integration Verification | 0/1 | Pending | - |
+| 70. Core Connector Infrastructure | 1/1 | Complete | 2026-03-17 |
+| 71. Connector UI Components | 1/1 | Complete | 2026-03-17 |
+| 72. Integration Verification | 1/1 | Complete | 2026-03-17 |
