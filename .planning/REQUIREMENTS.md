@@ -1,109 +1,134 @@
-# Requirements: FXL Core
+# Requirements: v3.1 Multi-tenancy
 
 **Defined:** 2026-03-16
+**Milestone:** v3.1
 **Core Value:** FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
+**Design Spec:** `docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md` (Section 5)
 
-## v3.0 Requirements
+## v3.1 Requirements
 
-Requirements para milestone v3.0 Reorganizacao Modular. Cada um mapeia a fases do roadmap.
+Requirements para milestone v3.1 Multi-tenancy. Derivados da Section 5 do design spec.
 
-### Estrutura
+### Schema & Data (Supabase)
 
-- [x] **ESTR-01**: Criar `src/platform/` com subpastas layout/, auth/, tenants/, module-loader/, router/
-- [x] **ESTR-02**: Mover componentes de layout (Layout, Sidebar, TopNav) para `platform/layout/`
-- [x] **ESTR-03**: Mover auth (ProtectedRoute, Login, Profile) para `platform/auth/`
-- [x] **ESTR-04**: Mover module system (registry, module-ids, extension-registry, slots, hooks) para `platform/module-loader/`
-- [x] **ESTR-05**: Extrair routing logic do App.tsx para `platform/router/AppRouter.tsx`
-- [x] **ESTR-06**: Criar `src/shared/` com ui/ (shadcn), hooks/, types/, utils/
+- [ ] **SCHEMA-01**: Criar tabela `tenant_modules` com `org_id text`, `module_id text`, `enabled boolean`, `config jsonb`, primary key `(org_id, module_id)`
+  - **Aceite:** Tabela existe no Supabase com RLS habilitado. Policy restringe acesso por `org_id` do JWT.
+  - **Depende de:** Nada (primeira migracao do milestone)
 
-### Modulos
+- [ ] **SCHEMA-02**: Adicionar coluna `org_id text` a todas as tabelas existentes: `comments`, `share_tokens`, `blueprint_configs`, `briefing_configs`, `tasks`, `documents`, `knowledge_entries`
+  - **Aceite:** Todas as 7 tabelas possuem coluna `org_id` com default `'org_fxl_default'`. Backfill aplicado (nenhum row com `org_id IS NULL`).
+  - **Depende de:** Nada
 
-- [x] **MOD-01**: Modulo docs autocontido com components/, pages/, services/, hooks/, types/, CLAUDE.md
-- [x] **MOD-02**: Modulo tasks autocontido (completar migracoes pendentes de pages/services)
-- [x] **MOD-03**: Modulo clients autocontido com pages/ e services/ migrados
-- [x] **MOD-04**: Modulo wireframe autocontido (manifest, pages, hybrid com @tools/)
-- [x] **MOD-05**: Cada modulo tem CLAUDE.md com instrucoes para agente scoped
+- [ ] **SCHEMA-03**: Criar RLS policies por `org_id` em todas as tabelas existentes, substituindo as policies anon-permissivas atuais
+  - **Aceite:** Cada tabela tem policy `FOR ALL USING (org_id = (current_setting('request.jwt.claims')::jsonb->>'org_id'))`. Policies anon anteriores removidas ou condicionadas ao auth mode.
+  - **Depende de:** SCHEMA-02
 
-### Remocoes
+- [ ] **SCHEMA-04**: Criar index em `org_id` para todas as tabelas que recebem a coluna
+  - **Aceite:** Index `idx_{table}_org_id` existe em cada tabela. Query plan de `SELECT WHERE org_id = X` usa index scan.
+  - **Depende de:** SCHEMA-02
 
-- [x] **REM-01**: Remover modulo Knowledge Base (diretorio, servico, IDs, rotas)
-- [x] **REM-02**: Remover ProcessDocsViewer.tsx (codigo morto, 135 linhas)
-- [x] **REM-03**: Remover duplicados (PageHeader.tsx copia, PromptBlock.tsx copia)
+### Auth & Token Exchange
 
-### Integridade
+- [ ] **AUTH-01**: Criar Supabase Edge Function `/auth/token-exchange` que valida Clerk JWT (via JWKS), extrai `org_id`, `user_id`, `role` e minta JWT customizado para Supabase
+  - **Aceite:** Edge Function deployada. Recebe Clerk token, retorna Supabase JWT com claims `{ sub, org_id, role }`. Retorna 401 para token invalido.
+  - **Depende de:** Nada
 
-- [ ] **INT-01**: `tsc --noEmit` zero erros apos reorganizacao
+- [ ] **AUTH-02**: Implementar `VITE_AUTH_MODE=anon|org` flag no frontend para fallback dev/staging
+  - **Aceite:** Em modo `anon`, Supabase usa anon key (comportamento atual). Em modo `org`, Supabase usa JWT customizado do token exchange. Default: `anon`.
+  - **Depende de:** AUTH-01
+
+- [ ] **AUTH-03**: Refatorar `src/platform/supabase.ts` para criar Supabase client com access token dinâmico baseado no auth mode
+  - **Aceite:** Quando `VITE_AUTH_MODE=org`, o Supabase client usa `supabase.auth.setSession()` com o JWT do token exchange. Quando `anon`, comportamento atual mantido.
+  - **Depende de:** AUTH-01, AUTH-02
+
+### Clerk Organizations
+
+- [ ] **CLERK-01**: Integrar Clerk Organizations no frontend — `useActiveOrg` hook com `activeOrg`, `orgs`, `switchOrg`, `isLoading`
+  - **Aceite:** Hook funciona com `@clerk/react` useOrganization/useOrganizationList. Retorna org ativa, lista de orgs, funcao de switch.
+  - **Depende de:** Nada
+
+- [ ] **CLERK-02**: Implementar org picker UI no TopNav — mostra selector quando usuario tem 2+ orgs, auto-seleciona se so tem uma
+  - **Aceite:** Org picker visivel no TopNav. Selecionando org diferente atualiza contexto global. Com 1 org, mostra badge sem dropdown.
+  - **Depende de:** CLERK-01
+
+- [ ] **CLERK-03**: Configurar `ClerkProvider` com `organizationSyncOptions` para sincronizar org ativa com URL/session
+  - **Aceite:** `ClerkProvider` no App.tsx configurado. Org ativa persiste entre page reloads.
+  - **Depende de:** CLERK-01
+
+### Module System Multi-tenancy
+
+- [ ] **MOD-01**: Refatorar `useModuleEnabled` para ler de `tenant_modules` (Supabase) em vez de `localStorage`
+  - **Aceite:** Em modo `org`, modulos habilitados vem de `tenant_modules WHERE org_id = activeOrg.id`. Em modo `anon`, fallback para localStorage (comportamento atual). Loading state enquanto fetch.
+  - **Depende de:** SCHEMA-01, CLERK-01, AUTH-03
+
+- [ ] **MOD-02**: Adicionar campo `tenantScoped?: boolean` ao `ModuleDefinition` — modulos com `tenantScoped: true` so aparecem se habilitados para a org ativa
+  - **Aceite:** Interface `ModuleDefinition` possui campo `tenantScoped`. Sidebar e Home filtram modulos considerando `tenantScoped` + `tenant_modules`.
+  - **Depende de:** MOD-01
+
+- [ ] **MOD-03**: Atualizar Sidebar e Home para filtrar modulos pela org ativa
+  - **Aceite:** Sidebar e Home mostram apenas modulos habilitados para a org ativa. Mudanca de org atualiza sidebar/home imediatamente.
+  - **Depende de:** MOD-01, MOD-02
+
+- [ ] **MOD-04**: Migrar toggles de localStorage para `tenant_modules` na primeira execucao (migracao one-time)
+  - **Aceite:** Script de migracao le localStorage, grava em `tenant_modules` para org FXL default, e limpa localStorage. Executa apenas uma vez (flag de migracao).
+  - **Depende de:** SCHEMA-01, MOD-01
+
+### Integration & Verification
+
+- [ ] **INT-01**: `tsc --noEmit` zero erros apos todas as mudancas
+  - **Aceite:** Compilacao TypeScript sem erros.
+  - **Depende de:** Todos os requirements acima
+
 - [ ] **INT-02**: `npm run build` completa sem erros
-- [ ] **INT-03**: Todas as paginas funcionam identico ao antes (checklist visual completo)
+  - **Aceite:** Build de producao gera output deployavel.
+  - **Depende de:** INT-01
 
-## Future Requirements (v3.1+)
+- [ ] **INT-03**: Login com 2+ orgs mostra org picker, modulos filtrados por org, RLS isolando dados
+  - **Aceite:** Teste manual end-to-end: login, org picker, sidebar filtra, dados isolados por org.
+  - **Depende de:** Todos os requirements acima
 
-### Multi-tenancy (v3.1)
-
-- **TENANT-01**: Clerk Organizations integration com org picker
-- **TENANT-02**: Supabase Edge Function JWT bridge (Clerk→Supabase)
-- **TENANT-03**: tenant_modules table com RLS por org_id
-- **TENANT-04**: Migracao de dados existentes (adicionar org_id a todas as tabelas)
-
-### SDK Skill (v3.2)
-
-- **SDK-01**: Repositorio fxl-sdk com SKILL.md e rules/
-- **SDK-02**: Templates de configs (tsconfig, eslint, prettier, tailwind, vercel, CI)
-- **SDK-03**: Contract types (FxlAppManifest, EntityDefinition, etc.)
-- **SDK-04**: Checklists de auditoria (seguranca, estrutura, typescript, RLS)
-
-### Connector (v3.3)
-
-- **CONN-01**: Modulo connector generico que consome API de qualquer spoke
-- **CONN-02**: UI generica para entidades (tabela, detail view)
-- **CONN-03**: Widget injection no HOME_DASHBOARD
-
-### Beach House (v3.4-v3.5)
-
-- **BEACH-01**: Migrar codigo Lovable para infra propria
-- **BEACH-02**: Implementar contrato FXL na spoke
-- **BEACH-03**: Migrar Supabase
-- **BEACH-04**: Integrar com FXL Core via connector
+- [ ] **INT-04**: Modo `anon` (default) funciona identico ao comportamento pre-v3.1
+  - **Aceite:** Com `VITE_AUTH_MODE=anon` (ou sem a flag), tudo funciona como antes. Zero regressao.
+  - **Depende de:** AUTH-02
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Mudancas funcionais no v3.0 | Refactor puro — nenhum comportamento novo |
-| Code splitting / lazy loading | Pode entrar como bonus se trivial, mas nao e requirement |
-| Testes automatizados | Divida tecnica reconhecida, sera milestone separado |
-| CRM module | Milestone futuro apos v3.5 |
-| IA runtime / vector DB | Milestone futuro apos v3.5 |
-| Drag-and-drop no Wireframe Builder | Nao relacionado a reorganizacao |
-| React 19 / Tailwind v4 | Estabilidade da stack |
+| Admin UI para gerenciar tenant_modules | v3.1 usa seed/migration. Admin UI e futuro |
+| Billing / subscription por tenant | Futuro, apos validacao do modelo |
+| Connector modules | v3.3 (milestone separado) |
+| Multi-org simultâneo (ver dados de 2 orgs) | Complexidade desnecessaria para v1 multi-tenancy |
+| Roles/permissions granulares alem de admin/member/viewer | Clerk roles suficientes para v3.1 |
+| Real-time sync de tenant_modules | Fetch on org switch e suficiente |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ESTR-01 | Phase 60 | Complete |
-| ESTR-02 | Phase 61 | Complete |
-| ESTR-03 | Phase 61 | Complete |
-| ESTR-04 | Phase 61 | Complete |
-| ESTR-05 | Phase 61 | Complete |
-| ESTR-06 | Phase 60 | Complete |
-| MOD-01 | Phase 61 | Complete |
-| MOD-02 | Phase 61 | Complete |
-| MOD-03 | Phase 61 | Complete |
-| MOD-04 | Phase 61 | Complete |
-| MOD-05 | Phase 61 | Complete |
-| REM-01 | Phase 62 | Complete |
-| REM-02 | Phase 62 | Complete |
-| REM-03 | Phase 62 | Complete |
-| INT-01 | Phase 63 | Pending |
-| INT-02 | Phase 63 | Pending |
-| INT-03 | Phase 63 | Pending |
+| SCHEMA-01 | Phase 64 | Pending |
+| SCHEMA-02 | Phase 64 | Pending |
+| SCHEMA-03 | Phase 64 | Pending |
+| SCHEMA-04 | Phase 64 | Pending |
+| AUTH-01 | Phase 65 | Pending |
+| AUTH-02 | Phase 65 | Pending |
+| AUTH-03 | Phase 65 | Pending |
+| CLERK-01 | Phase 65 | Pending |
+| CLERK-02 | Phase 65 | Pending |
+| CLERK-03 | Phase 65 | Pending |
+| MOD-01 | Phase 66 | Pending |
+| MOD-02 | Phase 66 | Pending |
+| MOD-03 | Phase 66 | Pending |
+| MOD-04 | Phase 66 | Pending |
+| INT-01 | Phase 67 | Pending |
+| INT-02 | Phase 67 | Pending |
+| INT-03 | Phase 67 | Pending |
+| INT-04 | Phase 67 | Pending |
 
 **Coverage:**
-- v3.0 requirements: 17 total
-- Mapped to phases: 17
+- v3.1 requirements: 18 total
+- Mapped to phases: 18
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-16*
-*Last updated: 2026-03-16 after roadmap creation*
