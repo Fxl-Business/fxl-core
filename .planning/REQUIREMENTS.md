@@ -71,33 +71,34 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| AUTH-03 | TBD | Pending |
-| ADMIN-01 | TBD | Pending |
-| ADMIN-02 | TBD | Pending |
-| TENANT-01 | TBD | Pending |
-| TENANT-02 | TBD | Pending |
-| TENANT-03 | TBD | Pending |
-| MOD-01 | TBD | Pending |
-| MOD-02 | TBD | Pending |
-| MOD-03 | TBD | Pending |
-| SET-01 | TBD | Pending |
-| SET-02 | TBD | Pending |
-| RLS-01 | TBD | Pending |
-| RLS-02 | TBD | Pending |
-| UX-01 | TBD | Pending |
-| UX-02 | TBD | Pending |
-| MCP-01 | TBD | Pending |
-| MCP-02 | TBD | Pending |
-| MCP-03 | TBD | Pending |
-| VERIF-01 | TBD | Pending |
-| VERIF-02 | TBD | Pending |
+| AUTH-01 | Phase 75 | Pending |
+| AUTH-02 | Phase 75 | Pending |
+| AUTH-03 | Phase 75 | Pending |
+| RLS-01 | Phase 75 | Pending |
+| RLS-02 | Phase 75 | Pending |
+| ADMIN-01 | Phase 76 | Pending |
+| ADMIN-02 | Phase 76 | Pending |
+| UX-01 | Phase 76 | Pending |
+| UX-02 | Phase 76 | Pending |
+| TENANT-01 | Phase 77 | Pending |
+| TENANT-02 | Phase 77 | Pending |
+| TENANT-03 | Phase 77 | Pending |
+| MOD-01 | Phase 78 | Pending |
+| MOD-02 | Phase 78 | Pending |
+| MOD-03 | Phase 78 | Pending |
+| SET-01 | Phase 79 | Pending |
+| SET-02 | Phase 79 | Pending |
+| MCP-01 | Phase 79 | Pending |
+| MCP-02 | Phase 79 | Pending |
+| MCP-03 | Phase 79 | Pending |
+| VERIF-01 | Phase 80 | Pending |
+| VERIF-02 | Phase 80 | Pending |
 
 **Coverage:**
 - v4.1 requirements: 22 total
-- Mapped to phases: 0
-- Unmapped: 22
+- Mapped to phases: 22
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
+*Traceability updated: 2026-03-17*
