@@ -275,7 +275,7 @@ If tmux is not available:
 - Zero interface change — the plan is identical, only execution is serial
 - `SendMessage` between agents is NOT available without tmux — all communication goes through the lead's sequential orchestration
 
-### 6.7.1 API Surface Requirements
+### 6.7 API Surface Requirements
 
 | Feature | Requires tmux | Requires Agent tool | Notes |
 |---------|:---:|:---:|-------|
