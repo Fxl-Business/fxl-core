@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react'
 import { Building2, Users, Blocks, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useOrganizationList } from '@clerk/react'
 import { MODULE_REGISTRY } from '@platform/module-loader/registry'
-import { useModuleEnabled } from '@platform/module-loader/hooks/useModuleEnabled'
+import { supabase } from '@platform/supabase'
 import { Separator } from '@shared/ui/separator'
 
 // ---------------------------------------------------------------------------
@@ -52,7 +53,6 @@ function MetricCard({
 // ---------------------------------------------------------------------------
 
 export default function AdminDashboard() {
-  const { isEnabled } = useModuleEnabled()
   const { userMemberships, isLoaded: isOrgsLoaded } = useOrganizationList({
     userMemberships: { infinite: true },
   })
@@ -65,9 +65,62 @@ export default function AdminDashboard() {
     return sum + (m.organization.membersCount ?? 0)
   }, 0) ?? 0
 
-  // Active modules count
-  const activeModuleCount = MODULE_REGISTRY.filter(m => isEnabled(m.id)).length
+  // Per-tenant module average from Supabase tenant_modules table
   const totalModuleCount = MODULE_REGISTRY.length
+  const [avgModulesPerTenant, setAvgModulesPerTenant] = useState<number | null>(null)
+  const [modulesLoading, setModulesLoading] = useState(true)
+
+  useEffect(() => {
+    if (!isOrgsLoaded || tenantCount === 0) {
+      setModulesLoading(false)
+      return
+    }
+
+    const orgIds = (userMemberships?.data ?? []).map(m => m.organization.id)
+
+    async function fetchModuleStats() {
+      const { data, error } = await supabase
+        .from('tenant_modules')
+        .select('org_id, module_id, enabled')
+        .in('org_id', orgIds)
+
+      if (error || !data) {
+        // Fallback: all modules enabled for all tenants
+        setAvgModulesPerTenant(totalModuleCount)
+        setModulesLoading(false)
+        return
+      }
+
+      // Group by org_id and count enabled modules per tenant
+      const perOrg = new Map<string, Set<string>>()
+      const disabledPerOrg = new Map<string, Set<string>>()
+
+      for (const row of data) {
+        if (row.enabled) {
+          if (!perOrg.has(row.org_id)) perOrg.set(row.org_id, new Set())
+          perOrg.get(row.org_id)!.add(row.module_id)
+        } else {
+          if (!disabledPerOrg.has(row.org_id)) disabledPerOrg.set(row.org_id, new Set())
+          disabledPerOrg.get(row.org_id)!.add(row.module_id)
+        }
+      }
+
+      // Calculate active modules per tenant (opt-out model: no row = enabled)
+      let totalActive = 0
+      for (const orgId of orgIds) {
+        const enabledInDb = perOrg.get(orgId)?.size ?? 0
+        const disabledInDb = disabledPerOrg.get(orgId)?.size ?? 0
+        const modulesInDb = enabledInDb + disabledInDb
+        const modulesNotInDb = totalModuleCount - modulesInDb
+        totalActive += enabledInDb + modulesNotInDb
+      }
+
+      setAvgModulesPerTenant(Math.round((totalActive / orgIds.length) * 10) / 10)
+      setModulesLoading(false)
+    }
+
+    fetchModuleStats()
+  }, [isOrgsLoaded, tenantCount, userMemberships?.data, totalModuleCount])
 
   const isLoading = !isOrgsLoaded
 
@@ -99,10 +152,11 @@ export default function AdminDashboard() {
           loading={isLoading}
         />
         <MetricCard
-          label="Modulos Ativos"
-          value={`${activeModuleCount}/${totalModuleCount}`}
+          label="Media modulos/tenant"
+          value={avgModulesPerTenant !== null ? `${avgModulesPerTenant}/${totalModuleCount}` : `—/${totalModuleCount}`}
           icon={Blocks}
           href="/admin/modules"
+          loading={modulesLoading}
         />
       </div>
 

@@ -11,7 +11,7 @@ requires:
   - phase: 075-auth-rls-foundation
     provides: SuperAdminRoute guard
 provides:
-  - AdminDashboard page at /admin with three metric cards (Tenants, Usuarios, Modulos Ativos)
+  - AdminDashboard page at /admin with three metric cards (Tenants, Usuarios, Media modulos/tenant)
   - MetricCard internal component with loading skeleton and optional href link
   - Quick links section with navigation to /admin/tenants and /admin/modules
 affects:
@@ -48,7 +48,7 @@ completed: 2026-03-17
 
 # Phase 76 Plan 02: Admin Shell Dashboard Summary
 
-**AdminDashboard page at /admin displaying live platform metrics — tenant count via useOrganizationList, user count aggregated from membersCount, active module ratio from MODULE_REGISTRY**
+**AdminDashboard page at /admin displaying live platform metrics — tenant count via useOrganizationList, user count aggregated from membersCount, per-tenant module average from Supabase tenant_modules**
 
 ## Performance
 
@@ -60,10 +60,11 @@ completed: 2026-03-17
 
 ## Accomplishments
 - AdminDashboard replaces Plan 01 placeholder with full implementation
-- Three metric cards render real data: Tenants (Clerk orgs), Usuarios (membersCount sum), Modulos Ativos (X/Y from MODULE_REGISTRY)
-- Loading skeleton (animate-pulse) shown while Clerk organizations load
+- Three metric cards render real data: Tenants (Clerk orgs), Usuarios (membersCount sum), Media modulos/tenant (per-tenant average from Supabase)
+- Loading skeleton (animate-pulse) shown while Clerk organizations and module data load
 - Quick links section provides direct navigation to Tenants and Modules management panels
 - Human verification checkpoint confirmed visual correctness and toggle behavior
+- Post-review fix: replaced global MODULE_REGISTRY count with per-tenant average queried from tenant_modules table (opt-out model respected)
 
 ## Task Commits
 
@@ -80,10 +81,17 @@ Each task was committed atomically:
 ## Decisions Made
 - Clerk's `useOrganizationList` used as tenant count proxy: since super admin belongs to all orgs, count approximates total tenants. Accurate platform-wide count requires Clerk Backend API (Phase 79/MCP).
 - `membersCount` accessed via type cast `(m.organization as { membersCount?: number }).membersCount` with 0 fallback to handle Clerk type constraints cleanly without using `any`.
+- Module metric changed from global MODULE_REGISTRY count to per-tenant average from Supabase tenant_modules table, respecting opt-out model (modules not in DB = enabled by default).
 
 ## Deviations from Plan
 
-None - plan executed exactly as written. The Clerk membersCount type cast was anticipated in the plan's "Important" note.
+### Post-Review Fix
+**Module metric changed from global count to per-tenant average**
+- **Found during:** Visual verification by user
+- **Issue:** Module metric used `MODULE_REGISTRY.filter(isEnabled)` which showed global count from current user context, not per-tenant data. Modules are managed per-tenant via `tenant_modules` table.
+- **Fix:** Query `tenant_modules` from Supabase (super admin has RLS bypass), group by org_id, compute average active modules per tenant respecting opt-out model
+- **Files modified:** src/platform/pages/admin/AdminDashboard.tsx
+- **Verification:** npx tsc --noEmit exits 0
 
 ## Issues Encountered
 None.
