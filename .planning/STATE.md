@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: Rebrand Nexo
-status: planning
-stopped_at: Roadmap v4.0 criado — 2 phases (73-74), 13/13 requirements mapped
-last_updated: "2026-03-17T15:28:08.466Z"
-last_activity: 2026-03-17 — Roadmap v4.0 criado (2 phases, 13 requirements mapped)
+milestone: v4.1
+milestone_name: Super Admin
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-03-17T04:00:00Z"
+last_activity: 2026-03-17 — Milestone v4.1 started
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -21,22 +21,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** v4.0 Rebrand Nexo — Phase 73: Rename Nexo
+**Current focus:** v4.1 Super Admin — painel global de administracao
 
 ## Current Position
 
-Milestone: v4.0 of v4.3 (Rebrand Nexo)
-Phase: 73 of 74 (Rename Nexo)
-Plan: 0 of 1 in current phase
-Status: Ready to plan
-Last activity: 2026-03-17 — Roadmap v4.0 criado (2 phases, 13 requirements mapped)
-
-Progress: [░░░░░░░░░░] 0%
+Milestone: v4.1 of v4.3 (Super Admin)
+Status: Defining requirements
+Last activity: 2026-03-17 — Milestone v4.1 started
 
 ## Platform Evolution Plan (v4.0-v4.3)
 
-v4.0: Rebrand Nexo (rename mecanico) <- CURRENT
-v4.1: Super Admin (painel global, roles, MCP)
+v4.0: Rebrand Nexo — COMPLETE
+v4.1: Super Admin (painel global, roles, MCP) ← CURRENT
 v4.2: Docs do Sistema (product docs vs enterprise docs)
 v4.3: Tenant Onboarding (fluxo real, migrar org_fxl_default)
 
@@ -46,12 +42,14 @@ Design spec: docs/superpowers/specs/2026-03-17-nexo-platform-evolution-design.md
 
 ### Decisions
 
-- Product renamed from "FXL Core" / "Nucleo FXL" to "Nexo"
+- Product renamed to "Nexo" (v4.0)
 - FXL SDK keeps "FXL" name (company name, not product)
-- Super admin = single user (Cauet) com Clerk publicMetadata.super_admin = true
+- Super admin = single user (Cauet) with Clerk publicMetadata.super_admin = true
+- RLS bypass: super_admin JWT claim check in policies (no service-role key)
 - Spokes have independent auth (API key, not shared Clerk)
 - Docs separation: scope column (tenant vs product) on documents table
 - MCP integrations (Supabase + Clerk) for super admin ops via Claude Code
+- Module management moves from localStorage to Supabase tenant_modules
 
 ### Pending Todos
 
@@ -64,6 +62,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T03:00:00Z
-Stopped at: Roadmap v4.0 criado — 2 phases (73-74), 13/13 requirements mapped
-Next: /gsd:plan-phase 73
+Last session: 2026-03-17T04:00:00Z
+Stopped at: Starting v4.1 Super Admin
+Next: Define requirements, create roadmap, execute with parallel agents

@@ -8,15 +8,20 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v4.0 Rebrand Nexo
+## Current Milestone: v4.1 Super Admin
 
-**Goal:** Renomear o produto de "FXL Core" / "Nucleo FXL" para "Nexo" em toda a codebase. Zero mudanca funcional.
+**Goal:** Painel global de administracao para gerenciar toda a plataforma Nexo — tenants, modulos, connectors, metricas, feature flags. Integracoes MCP (Supabase + Clerk) para operacoes via Claude Code.
 
 **Target features:**
-- Rename em UI (titulos, headers, auth pages, login/signup)
-- Rename em meta (package.json, tab title, favicon)
-- Rename em docs (CLAUDE.md, PROJECT.md)
-- FXL SDK permanece com nome FXL (nome da empresa, nao do produto)
+- Role check via Clerk publicMetadata.super_admin com JWT claim
+- SuperAdminRoute component protegendo /admin/*
+- Dashboard admin com metricas agregadas
+- Tenant CRUD (criar, desativar, ver detalhes via Clerk orgs)
+- Modulo management por tenant via Supabase tenant_modules (substitui localStorage)
+- Connector management global (migra /admin/connectors existente)
+- Platform settings (feature flags, configs globais)
+- Admin/Operator toggle na topbar
+- MCP integrations (Supabase + Clerk) configurados para Claude Code
 
 ## Requirements
 
