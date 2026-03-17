@@ -57,19 +57,19 @@ Requirements para milestone v3.1 Multi-tenancy. Derivados da Section 5 do design
 
 ### Module System Multi-tenancy
 
-- [ ] **MOD-01**: Refatorar `useModuleEnabled` para ler de `tenant_modules` (Supabase) em vez de `localStorage`
+- [x] **MOD-01**: Refatorar `useModuleEnabled` para ler de `tenant_modules` (Supabase) em vez de `localStorage`
   - **Aceite:** Em modo `org`, modulos habilitados vem de `tenant_modules WHERE org_id = activeOrg.id`. Em modo `anon`, fallback para localStorage (comportamento atual). Loading state enquanto fetch.
   - **Depende de:** SCHEMA-01, CLERK-01, AUTH-03
 
-- [ ] **MOD-02**: Adicionar campo `tenantScoped?: boolean` ao `ModuleDefinition` — modulos com `tenantScoped: true` so aparecem se habilitados para a org ativa
+- [x] **MOD-02**: Adicionar campo `tenantScoped?: boolean` ao `ModuleDefinition` — modulos com `tenantScoped: true` so aparecem se habilitados para a org ativa
   - **Aceite:** Interface `ModuleDefinition` possui campo `tenantScoped`. Sidebar e Home filtram modulos considerando `tenantScoped` + `tenant_modules`.
   - **Depende de:** MOD-01
 
-- [ ] **MOD-03**: Atualizar Sidebar e Home para filtrar modulos pela org ativa
+- [x] **MOD-03**: Atualizar Sidebar e Home para filtrar modulos pela org ativa
   - **Aceite:** Sidebar e Home mostram apenas modulos habilitados para a org ativa. Mudanca de org atualiza sidebar/home imediatamente.
   - **Depende de:** MOD-01, MOD-02
 
-- [ ] **MOD-04**: Migrar toggles de localStorage para `tenant_modules` na primeira execucao (migracao one-time)
+- [x] **MOD-04**: Migrar toggles de localStorage para `tenant_modules` na primeira execucao (migracao one-time)
   - **Aceite:** Script de migracao le localStorage, grava em `tenant_modules` para org FXL default, e limpa localStorage. Executa apenas uma vez (flag de migracao).
   - **Depende de:** SCHEMA-01, MOD-01
 
@@ -116,10 +116,10 @@ Requirements para milestone v3.1 Multi-tenancy. Derivados da Section 5 do design
 | CLERK-01 | Phase 65 | Complete |
 | CLERK-02 | Phase 65 | Complete |
 | CLERK-03 | Phase 65 | Complete |
-| MOD-01 | Phase 66 | Pending |
-| MOD-02 | Phase 66 | Pending |
-| MOD-03 | Phase 66 | Pending |
-| MOD-04 | Phase 66 | Pending |
+| MOD-01 | Phase 66 | Complete |
+| MOD-02 | Phase 66 | Complete |
+| MOD-03 | Phase 66 | Complete |
+| MOD-04 | Phase 66 | Complete |
 | INT-01 | Phase 67 | Pending |
 | INT-02 | Phase 67 | Pending |
 | INT-03 | Phase 67 | Pending |

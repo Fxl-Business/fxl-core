@@ -35,7 +35,7 @@
 
 - [x] **Phase 64: Supabase Schema & Migrations** - tenant_modules table, org_id on existing tables, RLS policies, indexes (completed 2026-03-17)
 - [x] **Phase 65: Clerk Organizations + Token Exchange** - useActiveOrg hook, org picker UI, Edge Function JWT bridge, auth mode flag, Supabase client refactor (completed 2026-03-17)
-- [ ] **Phase 66: Module System Multi-tenancy** - Refactor useModuleEnabled for Supabase, tenantScoped field, sidebar/home filtering, localStorage migration
+- [x] **Phase 66: Module System Multi-tenancy** - Refactor useModuleEnabled for Supabase, tenantScoped field, sidebar/home filtering, localStorage migration (completed 2026-03-17)
 - [ ] **Phase 67: Integration Verification + Auth Mode** - TypeScript/build verification, end-to-end manual test, anon mode backward compatibility
 
 ## Phase Details
@@ -77,7 +77,7 @@
   4. Home page module grid filters by active org's enabled modules
   5. One-time migration script transfers localStorage toggles to tenant_modules for FXL default org
   6. Changing org in org picker immediately updates sidebar and home
-**Plans:** [To be planned]
+**Plans:** 1/1 plans complete
 
 ### Phase 67: Integration Verification + Auth Mode
 **Goal**: The complete multi-tenancy stack is verified end-to-end: TypeScript compiles, build succeeds, anon mode has zero regression, and org mode correctly isolates data and modules by organization
@@ -100,5 +100,5 @@
 |-------|----------------|--------|-----------|
 | 64. Supabase Schema & Migrations | 1/1 | Complete   | 2026-03-17 |
 | 65. Clerk Organizations + Token Exchange | 1/1 | Complete | 2026-03-17 |
-| 66. Module System Multi-tenancy | 0/0 | Pending | — |
+| 66. Module System Multi-tenancy | 1/1 | Complete | 2026-03-17 |
 | 67. Integration Verification + Auth Mode | 0/0 | Pending | — |

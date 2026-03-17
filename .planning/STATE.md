@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Multi-tenancy
 status: executing
-stopped_at: Completed 65-01-PLAN.md (Clerk Organizations + Token Exchange)
-last_updated: "2026-03-17T01:09:00Z"
-last_activity: 2026-03-17 — Executed Phase 65 (Clerk Orgs + Token Exchange)
+stopped_at: Completed 66-01-PLAN.md (Module System Multi-tenancy)
+last_updated: "2026-03-17T01:17:05Z"
+last_activity: 2026-03-17 — Executed Phase 66 (Module System Multi-tenancy)
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
-  percent: 50
+  completed_phases: 3
+  total_plans: 3
+  completed_plans: 3
+  percent: 75
 ---
 
 # Project State
@@ -26,10 +26,10 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Milestone: v3.1 of v3.5 (Multi-tenancy)
-Status: Executing — Phase 65 complete, ready for Phase 66
-Last activity: 2026-03-17 — Executed Phase 65 (Clerk Orgs + Token Exchange)
+Status: Executing — Phase 66 complete, ready for Phase 67
+Last activity: 2026-03-17 — Executed Phase 66 (Module System Multi-tenancy)
 
-Progress: [=====░░░░░] 50%
+Progress: [=======░░░] 75%
 
 ## Multi-Milestone Plan (v3.1-v3.5)
 
@@ -66,6 +66,9 @@ Design spec: docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md
 - [Phase 65]: organizationSyncOptions not available in @clerk/react 6.0.1; org persistence handled by Clerk session via setActive
 - [Phase 65]: Supabase org client uses custom fetch wrapper with mutable token ref for dynamic JWT injection
 - [Phase 65]: Edge Function uses jose in Deno runtime with @ts-nocheck (not checked by project tsconfig)
+- [Phase 66]: Opt-out model for tenant_modules: modules not in table are enabled by default
+- [Phase 66]: Migration runs inline before first fetch in OrgModuleEnabledProvider
+- [Phase 66]: Home page switched from static mod.enabled to dynamic useModuleEnabled hook
 
 ### Pending Todos
 
@@ -79,6 +82,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T01:09:00Z
-Stopped at: Completed 65-01-PLAN.md (Clerk Organizations + Token Exchange)
-Next: `/gsd:execute-phase 66` to implement module system multi-tenancy
+Last session: 2026-03-17T01:17:05Z
+Stopped at: Completed 66-01-PLAN.md (Module System Multi-tenancy)
+Next: `/gsd:execute-phase 67` to run integration verification
