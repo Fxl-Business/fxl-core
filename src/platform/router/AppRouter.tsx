@@ -14,6 +14,8 @@ import WireframeViewer from '@modules/clients/pages/WireframeViewer'
 const SharedWireframeView = lazy(() => import('@modules/wireframe/pages/SharedWireframeView'))
 
 // Admin pages (lazy for code splitting)
+const AdminLayout = lazy(() => import('@platform/layout/AdminLayout'))
+const AdminDashboard = lazy(() => import('@platform/pages/admin/AdminDashboard'))
 const ModulesPanel = lazy(() => import('@platform/pages/admin/ModulesPanel'))
 const ConnectorsPanel = lazy(() => import('@platform/pages/admin/ConnectorsPanel'))
 
@@ -47,16 +49,20 @@ export default function AppRouter() {
 
       </Route>
 
-      {/* Admin routes — protected by ProtectedRoute + SuperAdminRoute */}
-      <Route element={<ProtectedRoute><SuperAdminRoute><Layout /></SuperAdminRoute></ProtectedRoute>}>
-        <Route
-          path="/admin/modules"
-          element={<Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense>}
-        />
-        <Route
-          path="/admin/connectors"
-          element={<Suspense fallback={<div>Carregando...</div>}><ConnectorsPanel /></Suspense>}
-        />
+      {/* Admin routes — SuperAdminRoute + AdminLayout */}
+      <Route element={
+        <SuperAdminRoute>
+          <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>Carregando...</div>}>
+            <AdminLayout />
+          </Suspense>
+        </SuperAdminRoute>
+      }>
+        <Route path="/admin" element={<Suspense fallback={<div>Carregando...</div>}><AdminDashboard /></Suspense>} />
+        <Route path="/admin/tenants" element={<div className="text-slate-500">Tenants — em breve</div>} />
+        <Route path="/admin/modules" element={<Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense>} />
+        <Route path="/admin/connectors" element={<Suspense fallback={<div>Carregando...</div>}><ConnectorsPanel /></Suspense>} />
+        <Route path="/admin/product-docs" element={<div className="text-slate-500">Product Docs — em breve</div>} />
+        <Route path="/admin/settings" element={<div className="text-slate-500">Settings — em breve</div>} />
       </Route>
 
       {/* Auth pages — public, full screen */}
