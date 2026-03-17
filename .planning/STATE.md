@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v4.2
 milestone_name: "Docs do Sistema + Tenant Onboarding"
-status: defining_requirements
+status: ready_to_plan
 stopped_at: null
-last_updated: "2026-03-17T20:00:00Z"
-last_activity: 2026-03-17 — Milestone v4.2 started
+last_updated: "2026-03-17T20:30:00Z"
+last_activity: 2026-03-17 — Roadmap created for v4.2 (phases 81-84)
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,13 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** Defining requirements for v4.2
+**Current focus:** Phase 81 — Docs Data Model (ready to plan)
 
 ## Current Position
 
 Milestone: v4.2 Docs do Sistema + Tenant Onboarding
-Status: Defining requirements
-Last activity: 2026-03-17 — Milestone v4.2 started
+Phase: 81 of 84 (Docs Data Model)
+Plan: 0 of ? in current phase
+Status: Ready to plan
+Last activity: 2026-03-17 — Roadmap created, 17 requirements mapped across 4 phases
 
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
 
@@ -51,11 +53,13 @@ None.
 
 ### Blockers/Concerns
 
-None.
+Phase 82 depends on Phase 81 (scope column must exist before UI and migration).
+Phase 84 depends on Phase 83 (real org must exist before data migration).
+Phases 81-82 and 83-84 are independent tracks — safe to parallelize.
 
 ## Session Continuity
 
 Last session: 2026-03-17
-Stopped at: Defining requirements
-Next: Define requirements, create roadmap
+Stopped at: Roadmap created, ready to plan Phase 81
+Next: /gsd:plan-phase 81
 Resume file: None

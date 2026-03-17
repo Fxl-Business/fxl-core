@@ -70,29 +70,29 @@ Requirements for milestone v4.2 — Docs do Sistema + Tenant Onboarding.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DOCS-01 | TBD | Pending |
-| DOCS-02 | TBD | Pending |
-| DOCS-03 | TBD | Pending |
-| DOCS-04 | TBD | Pending |
-| DOCS-05 | TBD | Pending |
-| DOCS-06 | TBD | Pending |
-| DOCS-07 | TBD | Pending |
-| DOCS-08 | TBD | Pending |
-| DOCS-09 | TBD | Pending |
-| DOCS-10 | TBD | Pending |
-| ONB-01 | TBD | Pending |
-| ONB-02 | TBD | Pending |
-| ONB-03 | TBD | Pending |
-| ONB-04 | TBD | Pending |
-| ONB-05 | TBD | Pending |
-| ONB-06 | TBD | Pending |
-| ONB-07 | TBD | Pending |
+| DOCS-01 | Phase 81 | Pending |
+| DOCS-02 | Phase 81 | Pending |
+| DOCS-03 | Phase 81 | Pending |
+| DOCS-04 | Phase 82 | Pending |
+| DOCS-05 | Phase 82 | Pending |
+| DOCS-06 | Phase 82 | Pending |
+| DOCS-07 | Phase 82 | Pending |
+| DOCS-08 | Phase 82 | Pending |
+| DOCS-09 | Phase 82 | Pending |
+| DOCS-10 | Phase 82 | Pending |
+| ONB-01 | Phase 83 | Pending |
+| ONB-02 | Phase 83 | Pending |
+| ONB-03 | Phase 83 | Pending |
+| ONB-04 | Phase 84 | Pending |
+| ONB-05 | Phase 84 | Pending |
+| ONB-06 | Phase 84 | Pending |
+| ONB-07 | Phase 84 | Pending |
 
 **Coverage:**
 - v4.2 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17 ⚠️
+- Mapped to phases: 17
+- Unmapped: 0 -- all covered
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-17 after initial definition*
+*Last updated: 2026-03-17 after roadmap creation (phases 81-84 assigned)*
