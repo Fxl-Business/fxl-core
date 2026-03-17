@@ -218,6 +218,21 @@ SendMessage(to="platform", "Standby for Wave 2. Boundary agents may request
 
 Wait for all boundary agents to complete.
 
+### Agent Dismissal
+
+After all Wave 2 agents complete and before proceeding to scope verification:
+
+1. **Dismiss boundary agents** — they have no further work. Leaving them idle wastes tmux panes and creates confusion.
+2. **Dismiss platform agent** — standby is no longer needed.
+
+Agents are dismissed by the lead. No explicit API — simply do not send further messages.
+The tmux panes close when the agent processes exit.
+
+**Rule:** Always dismiss agents explicitly after their wave completes. Do not leave agents idle
+across waves. If a subsequent step needs agent-level work, spawn a fresh subagent (which runs
+invisibly) — this is the correct choice for sequential follow-up tasks that don't benefit from
+tmux visibility.
+
 ---
 
 ## Scope Violation Check via Commit Tracers
