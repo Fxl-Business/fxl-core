@@ -42,7 +42,7 @@
 
 - [ ] **Phase 85: Auth Fix & Custom Login** - Fix ProtectedRoute infinite loading and build custom login page with Google OAuth + email/password
 - [ ] **Phase 86: Admin Data Fixes** - Fix member count and dashboard metrics using edge functions instead of client-side Clerk hooks
-- [ ] **Phase 87: Admin Users Management** - New admin-users edge function, /admin/users page, and members list in TenantDetailPage
+- [x] **Phase 87: Admin Users Management** - New admin-users edge function, /admin/users page, and members list in TenantDetailPage (completed 2026-03-17)
 - [ ] **Phase 88: Quality Gate & Security Audit** - TypeScript zero-errors pass and verify all admin routes are super_admin-gated
 
 ### Phase Details
@@ -101,5 +101,5 @@ Phase 88 runs last (quality gate).
 |-------|-----------|----------------|--------|-----------|
 | 85. Auth Fix & Custom Login | v4.3 | 0/2 | Planned | - |
 | 86. Admin Data Fixes | v4.3 | 0/TBD | Not started | - |
-| 87. Admin Users Management | v4.3 | 0/TBD | Not started | - |
+| 87. Admin Users Management | 2/2 | Complete    | 2026-03-17 | - |
 | 88. Quality Gate & Security Audit | v4.3 | 0/TBD | Not started | - |
