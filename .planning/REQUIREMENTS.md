@@ -54,28 +54,28 @@ None for this milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| AUTH-05 | — | Pending |
-| AUTH-06 | — | Pending |
-| ADM-01 | — | Pending |
-| ADM-02 | — | Pending |
-| ADM-03 | — | Pending |
-| ADM-04 | — | Pending |
-| USR-01 | — | Pending |
-| USR-02 | — | Pending |
-| USR-03 | — | Pending |
-| USR-04 | — | Pending |
-| GEN-01 | — | Pending |
-| GEN-02 | — | Pending |
+| AUTH-01 | Phase 85 | Pending |
+| AUTH-02 | Phase 85 | Pending |
+| AUTH-03 | Phase 85 | Pending |
+| AUTH-04 | Phase 85 | Pending |
+| AUTH-05 | Phase 85 | Pending |
+| AUTH-06 | Phase 85 | Pending |
+| ADM-01 | Phase 86 | Pending |
+| ADM-02 | Phase 86 | Pending |
+| ADM-03 | Phase 86 | Pending |
+| ADM-04 | Phase 86 | Pending |
+| USR-01 | Phase 87 | Pending |
+| USR-02 | Phase 87 | Pending |
+| USR-03 | Phase 87 | Pending |
+| USR-04 | Phase 87 | Pending |
+| GEN-01 | Phase 88 | Pending |
+| GEN-02 | Phase 88 | Pending |
 
 **Coverage:**
 - v4.3 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-17 after initial definition*
+*Last updated: 2026-03-17 after roadmap creation (phases 85-88)*
