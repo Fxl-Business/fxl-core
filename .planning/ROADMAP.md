@@ -69,7 +69,9 @@ Plans:
   3. Sidebar shows "Docs da Empresa" and "Docs do Produto" as separate, labeled sections
   4. Operators (non-super-admin) can read product docs but have no create/edit/delete controls
   5. All FXL process docs appear under enterprise docs for the FXL tenant; SDK/onboarding docs appear under product docs for all tenants
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 82-01-PLAN.md — ProductDocsPage, dual sidebar nav, read-only guard, scope backfill migration
 
 ### Phase 83: Onboarding Flow
 **Goal**: New users without an organization are guided to create one, and tenants without modules see a clear empty state instead of a broken UI
@@ -104,6 +106,6 @@ Within each track: 81 before 82, 83 before 84.
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 81. Docs Data Model | 1/1 | Complete   | 2026-03-17 | - |
-| 82. Docs UI & Migration | v4.2 | 0/? | Not started | - |
+| 82. Docs UI & Migration | v4.2 | 0/1 | Not started | - |
 | 83. Onboarding Flow | 1/1 | Complete   | 2026-03-17 | - |
 | 84. FXL Migration & Cleanup | v4.2 | 0/? | Not started | - |
