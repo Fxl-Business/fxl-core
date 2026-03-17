@@ -87,6 +87,13 @@ async function handleListUsers(): Promise<Response> {
     imageUrl: user.image_url ?? '',
     createdAt: user.created_at,
     lastSignInAt: user.last_sign_in_at ?? null,
+    organizationMemberships: ((user.organization_memberships as Array<Record<string, unknown>>) ?? []).map(
+      (mem) => ({
+        orgId: (mem.organization as Record<string, unknown>)?.id ?? mem.organization_id ?? '',
+        orgName: (mem.organization as Record<string, unknown>)?.name ?? '',
+        role: mem.role ?? 'member',
+      })
+    ),
   }))
 
   return jsonOk({
