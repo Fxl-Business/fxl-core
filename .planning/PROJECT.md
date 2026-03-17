@@ -134,6 +134,19 @@ O FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma 
 - ✓ App.tsx simplificado para 18 linhas (provider wrapper, delega para AppRouter.tsx) — v3.0
 - ✓ Knowledge Base removido (34 arquivos, ~2300 linhas, zero referencias) — v3.0
 - ✓ Path aliases @platform/, @shared/, @modules/ configurados — v3.0
+- ✓ Connector module com catch-all `/apps/:appId/*` route e MODULE_IDS.CONNECTOR — v3.3
+- ✓ Contract types (FxlAppManifest, entities, fields, widgets) com ConnectorResult<T> pattern — v3.3
+- ✓ connector-service com 5 fetch functions, 5s timeout, 1min manifest cache — v3.3
+- ✓ Icon map ~100 lucide icons com Box fallback — v3.3
+- ✓ useConnector e useConnectorList hooks — v3.3
+- ✓ EntityTable + EntityFields com formatacao pt-BR por tipo de campo — v3.3
+- ✓ EntityList e EntityDetail pages com loading/error/empty states — v3.3
+- ✓ 4 widget types (KpiWidget, ChartWidget, TableWidget, ListWidget) — v3.3
+- ✓ ConnectorRouter com nested entity routes dinamicos — v3.3
+- ✓ ConnectorDashboard com widget grid layout — v3.3
+- ✓ ConnectorCard + ConnectorBadge para Home — v3.3
+- ✓ HOME_DASHBOARD extension via ConnectorHomeWidget — v3.3
+- ✓ tsc --noEmit zero errors + npm run build success — v3.3
 
 ### Active
 
@@ -175,18 +188,20 @@ O FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma 
 
 ## Current State
 
-13 milestones shipped (v1.0 → v3.0). v3.0 completed modular reorganization.
+16 milestones shipped (v1.0 → v3.3). v3.3 completed Generic Connector Module.
 
 ## Context
 
-Shipped v3.0 Reorganizacao Modular. 13 milestones complete (v1.0-v3.0).
+Shipped v3.3 Generic Connector Module. 16 milestones complete (v1.0-v3.3).
 Codebase reorganizado: src/platform/ (shell), src/modules/ (autocontidos), src/shared/ (cross-module).
-4 modulos ativos (docs, tasks, clients, wireframe), cada um com CLAUDE.md para agent scoped.
-Knowledge Base removido. App.tsx simplificado para provider wrapper.
+5 modulos ativos (docs, tasks, clients, wireframe, connector), cada um com CLAUDE.md para agent scoped.
+Connector module consome spokes via FxlAppManifest contract com UI generica (entities + widgets).
+Multi-tenancy via Clerk Organizations com RLS por org_id e Edge Function JWT bridge.
+FXL SDK Skill disponivel para onboarding de spoke projects.
 Design spec para evolucao v3.1-v3.5 em docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md.
-Proximo: v3.1 Multi-tenancy (Clerk Organizations + tenant_modules + RLS).
+Proximo: v3.4 Beach House Migration + v3.5 Integracao Beach House ↔ Hub.
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
-~41,000 LOC TypeScript. 7 Supabase migrations (001-007). 5 active modules in MODULE_REGISTRY.
+~43,000 LOC TypeScript. 7 Supabase migrations (001-007). 6 modules in MODULE_REGISTRY.
 Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
 Dynamic data layer: docs content served from Supabase with bidirectional sync CLI for Claude Code workflow.
 
@@ -299,4 +314,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Knowledge Base removido | Redundante com Docs, simplificar | — Pending |
 
 ---
-*Last updated: 2026-03-16 after v3.0 milestone completion*
+*Last updated: 2026-03-17 after v3.3 milestone completion*

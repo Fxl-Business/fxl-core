@@ -17,6 +17,7 @@
 - **v3.0 Reorganizacao Modular** - Phases 60-63 (shipped 2026-03-17) -- see milestones/v3.0-ROADMAP.md
 - **v3.1 Multi-tenancy** - Phases 64-67 (shipped 2026-03-17) -- see milestones/v3.1-ROADMAP.md
 - **v3.2 FXL SDK Skill** - Phases 68-69 (shipped 2026-03-17) -- see milestones/v3.2-ROADMAP.md
+- **v3.3 Generic Connector Module** - Phases 70-72 (shipped 2026-03-17) -- see milestones/v3.3-ROADMAP.md
 
 ## Quick Tasks
 
@@ -24,63 +25,3 @@
 |---|------------|------|
 | 13 | Remove light mode toggle, use local date format | 2026-03-13 |
 | 15 | Sidebar editor: grouped screens, context menus, pin support, widget picker | 2026-03-13 |
-
----
-
-## v3.3 Generic Connector Module
-
-**Milestone Goal:** Criar modulo generico no FXL Core que consome qualquer spoke via contrato padronizado (FxlAppManifest), renderizando entidades em tabelas/detail views e widgets (KPI, chart, table, list) com UI generica. Roteamento dinamico via catch-all `/apps/:appId/*`.
-
-**Design spec:** `docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md` (Section 6.6)
-
-## Phases
-
-- [x] **Phase 70: Core Connector Infrastructure** - Module structure, types, service, icon-map, hooks (completed 2026-03-17)
-- [x] **Phase 71: Connector UI Components** - Entity views, widget components, router, dashboard, cards, extensions (completed 2026-03-17)
-- [x] **Phase 72: Integration Verification** - tsc --noEmit, npm run build, route/sidebar verification (completed 2026-03-17)
-
-## Phase Details
-
-### Phase 70: Core Connector Infrastructure
-**Goal**: Create the connector module foundation: registration, types, API service, icon mapping, hooks
-**Depends on**: Nothing (first phase of v3.3)
-**Requirements**: [CON-01, CON-02, CON-03, CON-04, CON-05]
-**Success Criteria** (what must be TRUE):
-  1. MODULE_IDS.CONNECTOR exists and module is in MODULE_REGISTRY
-  2. Contract types re-exported + ConnectorConfig type defined
-  3. connector-service.ts handles manifest/entity/widget fetching with 5s timeout + error handling
-  4. icon-map.ts maps ~100 common lucide icons with Box fallback
-  5. useConnector and useConnectorList hooks work
-**Plans:** 1/1 plans complete
-
-### Phase 71: Connector UI Components
-**Goal**: Create all UI components: entity rendering, widgets, dynamic router, dashboard, cards, home extension
-**Depends on**: Phase 70
-**Requirements**: [CON-06, CON-07, CON-08, CON-09, CON-10, CON-11, CON-12]
-**Success Criteria** (what must be TRUE):
-  1. EntityTable renders fields based on FieldDefinition type
-  2. All 4 widget types render correctly
-  3. ConnectorRouter resolves sub-routes from manifest entities
-  4. ConnectorDashboard shows widgets grid
-  5. ConnectorCard appears in Home via extension slot
-**Plans:** 1/1 plans complete
-
-### Phase 72: Integration Verification
-**Goal**: Verify everything compiles and builds correctly
-**Depends on**: Phase 71
-**Requirements**: [CON-13]
-**Success Criteria** (what must be TRUE):
-  1. `npx tsc --noEmit` zero errors
-  2. `npm run build` completes successfully
-  3. Connector route `/apps/*` registered in router
-**Plans:** 1/1 plans complete
-
-## Progress
-
-**Execution Order:** 70 -> 71 -> 72
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 70. Core Connector Infrastructure | 1/1 | Complete | 2026-03-17 |
-| 71. Connector UI Components | 1/1 | Complete | 2026-03-17 |
-| 72. Integration Verification | 1/1 | Complete | 2026-03-17 |

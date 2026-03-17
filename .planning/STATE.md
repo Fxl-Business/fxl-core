@@ -1,52 +1,42 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.3
-milestone_name: Generic Connector Module
-status: completed
-stopped_at: Completed v3.3 Generic Connector Module (3 phases, 21 files created)
-last_updated: "2026-03-17T02:10:00Z"
-last_activity: 2026-03-17 — v3.3 Generic Connector Module COMPLETE (3 phases, all connector files created)
+milestone: null
+milestone_name: null
+status: between_milestones
+stopped_at: Completed v3.3, ready for v3.4
+last_updated: "2026-03-17T02:15:00Z"
+last_activity: 2026-03-17 — v3.3 archived, proceeding to v3.4+v3.5
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-16)
+See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** v3.3 Generic Connector Module — COMPLETE
+**Current focus:** v3.4 Beach House Migration + v3.5 Integracao Beach House ↔ Hub
 
 ## Current Position
 
-Milestone: v3.3 of v3.5 (Generic Connector Module)
-Status: Complete
-Last activity: 2026-03-17 — v3.3 complete (connector module with 21 files, tsc/build verified)
-
-Progress: [==========] 100%
+Milestone: Between v3.3 and v3.4
+Status: Archival complete, starting next milestones
+Last activity: 2026-03-17 — v3.3 archived
 
 ## Multi-Milestone Plan (v3.1-v3.5)
 
 Wave 0: v3.0 archived
 Wave 1: v3.1 (multi-tenancy) COMPLETE + v3.2 (SDK skill) COMPLETE
-Wave 2: v3.3 (connector) COMPLETE + v3.4 (Beach House) — depend on v3.2
+Wave 2: v3.3 (connector) COMPLETE + v3.4 (Beach House) NEXT
 Wave 3: v3.5 (integration) — depends on v3.3 + v3.4
 
 Design spec: docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md
-
-## v3.3 Phases (70-72)
-
-| Phase | Goal | Depends on | Requirements |
-|-------|------|------------|--------------|
-| 70 | Core connector infrastructure (types, service, hooks) | Nothing | CON-01..05 |
-| 71 | Connector UI components (entities, widgets, router) | Phase 70 | CON-06..12 |
-| 72 | Integration verification (tsc, build) | Phase 71 | CON-13 |
 
 ## Accumulated Context
 
@@ -67,14 +57,10 @@ Design spec: docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md
 - [Phase 68]: Contract v1 limited to 4 field types (string, number, date, boolean)
 - [Phase 68]: Contract v1 is read-only (GET only, no mutations)
 - [Phase 68]: Types copied to spoke projects, not imported from package
-- [Phase 68]: Audit scoring uses weighted system (Critical=10, Important=5, Normal=2)
-- [Phase 69]: fxl-doctor.sh runs 5 checks: tsc, eslint, prettier, security headers, contract version
-- [Phase 69]: Templates use mustache-style placeholders for customization
 - [Phase 70]: Contract types copied inline (SDK skill outside TS compilation scope)
 - [Phase 70]: ConnectorResult<T> uses ok/error discriminated union pattern
 - [Phase 70]: Manifest cache: 1min TTL in-memory Map
 - [Phase 70]: useConnectorList hardcoded for v3.3 (Supabase in v3.5)
-- [Phase 71]: EntityFields.formatFieldValue exported for reuse by EntityTable
 - [Phase 71]: ConnectorHomeWidget follows RecentTasksWidget self-contained pattern
 
 ### Pending Todos
@@ -87,6 +73,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T02:10:00Z
-Stopped at: Completed v3.3 Generic Connector Module
-Next: `/gsd:new-milestone` for v3.4 (Beach House migration) or v3.5 (integration) — see design spec Section 9 for dependency graph
+Last session: 2026-03-17T02:15:00Z
+Stopped at: v3.3 archived, starting v3.4+v3.5
+Next: Create v3.4 milestone (Beach House Migration) then v3.5 (Integration)

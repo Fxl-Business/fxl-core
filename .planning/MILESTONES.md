@@ -1,5 +1,26 @@
 # Milestones
 
+## v3.3 Generic Connector Module (Shipped: 2026-03-17)
+
+**Phases:** 3 (70-72) | **Plans:** 3 | **Tasks:** ~6
+**Timeline:** 1 session (2026-03-16) | **Commits:** 4 | **LOC delta:** +2,039 / -50
+**Git range:** f75ae43 → f1f5de9
+
+**Delivered:** Created generic connector module that consumes any spoke app via FxlAppManifest contract, rendering entities in tables/detail views and widgets (KPI, chart, table, list) with dynamic routing via catch-all `/apps/:appId/*`.
+
+**Key accomplishments:**
+1. Connector module foundation: CLAUDE.md, manifest, MODULE_IDS.CONNECTOR, catch-all route registration
+2. Contract types copied inline from SDK skill with ConnectorResult<T> discriminated union pattern
+3. connector-service with 5 fetch functions, 5s AbortController timeout, and 1min in-memory manifest cache
+4. Icon map covering ~100 lucide icons with Box fallback for spoke icon resolution
+5. Complete UI layer: EntityTable, EntityFields (pt-BR formatting), EntityList, EntityDetail, ConnectorDashboard
+6. 4 widget types (KpiWidget, ChartWidget, TableWidget, ListWidget) + ConnectorRouter with nested entity routes
+7. HOME_DASHBOARD extension slot integration via ConnectorHomeWidget
+
+**Archive:** [v3.3-ROADMAP.md](milestones/v3.3-ROADMAP.md) | [v3.3-REQUIREMENTS.md](milestones/v3.3-REQUIREMENTS.md)
+
+---
+
 ## v3.0 Reorganizacao Modular (Shipped: 2026-03-17)
 
 **Phases completed:** 4 phases, 9 plans, 0 tasks
