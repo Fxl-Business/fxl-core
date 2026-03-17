@@ -10,6 +10,7 @@ import { MODULE_IDS } from '@platform/module-loader/module-ids'
 export const clientsManifest: ModuleDefinition = {
   id: MODULE_IDS.CLIENTS,
   description: 'Workspaces de clientes com docs, briefing e wireframe.',
+  tenantScoped: true,
   label: 'Clientes',
   route: '/clientes',
   icon: Users,

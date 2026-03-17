@@ -6,6 +6,7 @@ import { MODULE_IDS } from '@platform/module-loader/module-ids'
 export const docsManifest: ModuleDefinition = {
   id: MODULE_IDS.DOCS,
   description: 'Processo, ferramentas e padroes tecnicos da FXL.',
+  tenantScoped: true,
   label: 'Processo',
   route: '/processo/index',
   icon: BookOpen,
