@@ -8,20 +8,9 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v4.1 Super Admin
+## Current Milestone: (none — ready for next)
 
-**Goal:** Painel global de administracao para gerenciar toda a plataforma Nexo — tenants, modulos, connectors, metricas, feature flags. Integracoes MCP (Supabase + Clerk) para operacoes via Claude Code.
-
-**Target features:**
-- Role check via Clerk publicMetadata.super_admin com JWT claim
-- SuperAdminRoute component protegendo /admin/*
-- Dashboard admin com metricas agregadas
-- Tenant CRUD (criar, desativar, ver detalhes via Clerk orgs)
-- Modulo management por tenant via Supabase tenant_modules (substitui localStorage)
-- Connector management global (migra /admin/connectors existente)
-- Platform settings (feature flags, configs globais)
-- Admin/Operator toggle na topbar
-- MCP integrations (Supabase + Clerk) configurados para Claude Code
+Previous: v4.1 Super Admin (shipped 2026-03-17)
 
 ## Requirements
 
@@ -163,6 +152,14 @@ Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modul
 - ✓ HOME_DASHBOARD extension via ConnectorHomeWidget — v3.3
 - ✓ tsc --noEmit zero errors + npm run build success — v3.3
 
+- ✓ JWT super_admin claim + SuperAdminRoute protegendo todas as rotas /admin/* — v4.1
+- ✓ RLS bypass em 8 tabelas Supabase para super admin — v4.1
+- ✓ Admin shell dedicado com sidebar, dashboard com metricas agregadas, toggle admin/operator — v4.1
+- ✓ Tenant CRUD via Supabase Edge Function proxy para Clerk Organizations API — v4.1
+- ✓ Modulos migrados de localStorage para Supabase tenant_modules (per-tenant) — v4.1
+- ✓ Platform settings table + admin UI para feature flags e configs globais — v4.1
+- ✓ MCP servers configurados (Supabase read-only, Clerk placeholder) — v4.1
+
 ### Active
 
 (Empty — define in next milestone via `/gsd:new-milestone`)
@@ -203,20 +200,23 @@ Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modul
 
 ## Current State
 
-16 milestones shipped (v1.0 → v3.3). v3.3 completed Generic Connector Module.
+18 milestones shipped (v1.0 → v4.1). v4.1 completed Super Admin panel.
 
 ## Context
 
-Shipped v3.3 Generic Connector Module. 16 milestones complete (v1.0-v3.3).
+Shipped v4.1 Super Admin. 18 milestones complete (v1.0-v4.1).
 Codebase reorganizado: src/platform/ (shell), src/modules/ (autocontidos), src/shared/ (cross-module).
 5 modulos ativos (docs, tasks, clients, wireframe, connector), cada um com CLAUDE.md para agent scoped.
-Connector module consome spokes via FxlAppManifest contract com UI generica (entities + widgets).
+Super admin panel com /admin/* routes: dashboard, tenant management, module management per-tenant, platform settings.
+Supabase Edge Function `admin-tenants` proxying Clerk Organizations API com JWT claim validation.
+Modulos gerenciados per-tenant via Supabase tenant_modules (substituiu localStorage).
+Platform settings (feature flags) via tabela platform_settings com admin UI.
+MCP servers configurados: Supabase (read-only), Clerk (placeholder — npm package nao publicado).
 Multi-tenancy via Clerk Organizations com RLS por org_id e Edge Function JWT bridge.
 FXL SDK Skill disponivel para onboarding de spoke projects.
-Design spec para evolucao v3.1-v3.5 em docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md.
-Proximo: v3.4 Beach House Migration + v3.5 Integracao Beach House ↔ Hub.
+Design spec para evolucao em docs/superpowers/specs/.
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
-~43,000 LOC TypeScript. 7 Supabase migrations (001-007). 6 modules in MODULE_REGISTRY.
+10 Supabase migrations (001-010). 6 modules in MODULE_REGISTRY.
 Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
 Dynamic data layer: docs content served from Supabase with bidirectional sync CLI for Claude Code workflow.
 
@@ -328,5 +328,11 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | API contract v1 read-only | Comecar simples, mutations em milestone futuro | — Pending |
 | Knowledge Base removido | Redundante com Docs, simplificar | — Pending |
 
+| Super admin via JWT claim (not role table) | Simpler, no extra DB table, Clerk publicMetadata as source | ✓ Good — works with RLS bypass |
+| Supabase Edge Function as Clerk API proxy | Keeps CLERK_SECRET_KEY server-side in Vite SPA | ✓ Good — secure, no secret in client |
+| tenant_modules replaces localStorage | Per-tenant persistent state, super admin controlled | ✓ Good — multi-tenant ready |
+| MCP config in .mcp.json (not .claude/settings.json) | settings.json schema rejects mcpServers key | ✓ Good — correct location |
+| Deploy Edge Function with --no-verify-jwt | Gateway JWT check blocks Clerk tokens, function handles auth itself | ✓ Good — required for third-party JWTs |
+
 ---
-*Last updated: 2026-03-17 after v3.3 milestone completion*
+*Last updated: 2026-03-17 after v4.1 milestone completion*

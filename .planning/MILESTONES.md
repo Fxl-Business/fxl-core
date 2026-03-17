@@ -1,5 +1,14 @@
 # Milestones
 
+## v4.1 Super Admin (Shipped: 2026-03-17)
+
+**Phases completed:** 7 phases, 10 plans, 6 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+
 ## v4.0 Rebrand Nexo (Shipped: 2026-03-17)
 
 **Phases:** 2 (73-74) | **Plans:** 2 | **Tasks:** 4
