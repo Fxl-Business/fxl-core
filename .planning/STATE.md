@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.1
 milestone_name: Super Admin
 status: Ready for Phase 77/78/79 (independent, parallelizable)
-stopped_at: Completed 77-01-PLAN.md
-last_updated: "2026-03-17T16:50:20.864Z"
+stopped_at: Completed 77-02-PLAN.md — awaiting Task 3 human verification checkpoint
+last_updated: "2026-03-17T16:56:02.381Z"
 last_activity: 2026-03-17 — Phase 76 Plan 02 complete (AdminDashboard with live Clerk metrics)
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 5
   total_plans: 10
-  completed_plans: 7
+  completed_plans: 9
   percent: 40
 ---
 
@@ -67,6 +67,8 @@ Design spec: docs/superpowers/specs/2026-03-17-nexo-platform-evolution-design.md
 - [Phase 076-02]: membersCount accessed via type cast with 0 fallback — Clerk Organization type doesn't expose this directly
 - [Phase 77-tenant-management]: JWT decoded without re-verification in Edge Function — Supabase gateway handles token signature validation, super_admin claim extracted for authorization
 - [Phase 77-tenant-management]: setClerkTokenGetter() module-level pattern for tenant service — allows auth header injection outside React component context
+- [Phase 77-tenant-management]: setClerkTokenGetter registered in each page independently via useSession — lazy-loaded pages mount at separate times
+- [Phase 77-tenant-management]: TenantsPage uses button elements for rows with useNavigate() for full-width row click navigation
 
 ### Pending Todos
 
@@ -78,7 +80,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T16:50:20.862Z
-Stopped at: Completed 77-01-PLAN.md
+Last session: 2026-03-17T16:56:02.378Z
+Stopped at: Completed 77-02-PLAN.md — awaiting Task 3 human verification checkpoint
 Next: /gsd:execute-phase 077 (or 077+078+079 in parallel)
 Resume file: None

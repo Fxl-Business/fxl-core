@@ -30,7 +30,7 @@
 
 - [x] **Phase 75: Auth & RLS Foundation** - JWT claim super_admin + SuperAdminRoute + RLS policies atualizadas em todas as tabelas
 - [x] **Phase 76: Admin Shell & Dashboard** - Layout /admin/*, sidebar de navegacao e dashboard com metricas agregadas + toggle admin/operator na topbar
-- [ ] **Phase 77: Tenant Management** - CRUD de tenants via Clerk Organizations (lista, detalhe, criacao)
+- [x] **Phase 77: Tenant Management** - CRUD de tenants via Clerk Organizations (lista, detalhe, criacao) (completed 2026-03-17)
 - [ ] **Phase 78: Module Management Evolution** - Migracao de localStorage para Supabase tenant_modules com controle por tenant
 - [ ] **Phase 79: Platform Settings & MCP** - Tabela platform_settings, pagina /admin/settings e configuracao dos MCP servers
 - [ ] **Phase 80: Build Verification** - Zero erros TypeScript e build de producao limpo
@@ -76,7 +76,7 @@ Plans:
   1. Pagina /admin/tenants lista todas as Clerk Organizations com nome, ID, numero de membros e status
   2. Clicar em um tenant abre /admin/tenants/:orgId com modulos habilitados, conectores e metricas do tenant
   3. Super admin preenche formulario e cria novo tenant (Clerk org) que aparece imediatamente na lista
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 77-01-PLAN.md — Edge Function proxy for Clerk Organizations API + types + client service
@@ -139,7 +139,7 @@ Phase 75 primeiro (bloqueante). Phase 76 depende de 75. Phases 77, 78 e 79 sao I
 |-------|-----------|----------------|--------|-----------|
 | 75. Auth & RLS Foundation | v4.1 | 2/2 | Complete | 2026-03-17 |
 | 76. Admin Shell & Dashboard | v4.1 | 2/2 | Complete | 2026-03-17 |
-| 77. Tenant Management | 1/2 | In Progress|  | - |
+| 77. Tenant Management | 2/2 | Complete   | 2026-03-17 | - |
 | 78. Module Management Evolution | v4.1 | 0/1 | Not started | - |
 | 79. Platform Settings & MCP | v4.1 | 0/2 | Not started | - |
 | 80. Build Verification | v4.1 | 0/1 | Not started | - |
