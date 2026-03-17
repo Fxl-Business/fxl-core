@@ -1,5 +1,23 @@
 # Milestones
 
+## v4.0 Rebrand Nexo (Shipped: 2026-03-17)
+
+**Phases:** 2 (73-74) | **Plans:** 2 | **Tasks:** 4
+**Timeline:** 1 session (2026-03-17) | **Commits:** 3
+**Git range:** 399273e → 8e27105
+
+**Delivered:** Renamed product from "FXL Core" / "Nucleo FXL" to "Nexo" across all user-visible surfaces, meta files, and documentation. Zero functional changes.
+
+**Key accomplishments:**
+1. Renamed 10 files across UI (Login, TopNav, Home, AppRouter), meta (index.html), and docs (CLAUDE.md, PROJECT.md, spoke-onboarding, fase2, branding-collection)
+2. Preserved "FXL SDK" references (company name, not product)
+3. tsc --noEmit zero errors, npm run build clean (16.36s, 3448 modules)
+4. Zero grep matches for "FXL Core" or "Nucleo FXL" in src/
+
+**Archive:** [v4.0-ROADMAP.md](milestones/v4.0-ROADMAP.md) | [v4.0-REQUIREMENTS.md](milestones/v4.0-REQUIREMENTS.md)
+
+---
+
 ## v3.3 Generic Connector Module (Shipped: 2026-03-17)
 
 **Phases:** 3 (70-72) | **Plans:** 3 | **Tasks:** ~6
