@@ -220,18 +220,33 @@ Wait for all boundary agents to complete.
 
 ### Agent Dismissal
 
-After all Wave 2 agents complete and before proceeding to scope verification:
+After all wave agents complete and results are consolidated, **immediately shut down every agent
+from that wave** before proceeding to the next step. Leaving agents idle wastes tmux panes,
+confuses the user, and burns context.
 
-1. **Dismiss boundary agents** — they have no further work. Leaving them idle wastes tmux panes and creates confusion.
-2. **Dismiss platform agent** — standby is no longer needed.
+**How to dismiss:** Use `SendMessage` with a `shutdown_request` for each agent:
 
-Agents are dismissed by the lead. No explicit API — simply do not send further messages.
-The tmux panes close when the agent processes exit.
+```
+SendMessage(
+  to="{agent-name}",
+  message={ "type": "shutdown_request", "reason": "Wave complete. Results consolidated." }
+)
+```
 
-**Rule:** Always dismiss agents explicitly after their wave completes. Do not leave agents idle
-across waves. If a subsequent step needs agent-level work, spawn a fresh subagent (which runs
-invisibly) — this is the correct choice for sequential follow-up tasks that don't benefit from
-tmux visibility.
+The agent will receive the shutdown request, approve it, and its tmux pane will close.
+
+**Dismissal sequence:**
+
+1. All wave agents return results → lead consolidates
+2. **Immediately** send `shutdown_request` to every agent in the completed wave
+3. Only then proceed to next wave / scope verification / integration check
+
+**Rule:** Never leave agents idle across waves or after consolidation. If a subsequent step
+needs agent-level work, spawn a fresh subagent (which runs invisibly) — this is the correct
+choice for sequential follow-up tasks that don't benefit from tmux visibility.
+
+**Common mistake:** Assuming agents auto-exit when you stop messaging them. They do NOT —
+tmux agents stay idle indefinitely until explicitly shut down via `shutdown_request`.
 
 ---
 
