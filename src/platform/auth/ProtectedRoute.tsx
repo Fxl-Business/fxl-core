@@ -1,19 +1,44 @@
-import { useAuth, RedirectToSignIn } from '@clerk/react'
+import { useAuth, RedirectToSignIn, useOrganizationList } from '@clerk/react'
+import { Navigate } from 'react-router-dom'
+import { isOrgMode } from '@platform/auth/auth-config'
 import type { ReactNode } from 'react'
+
+const loadingStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: '100vh',
+  fontFamily: 'Inter, sans-serif',
+}
+
+const loadingText: React.CSSProperties = {
+  fontSize: 14,
+  color: '#757575',
+}
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth()
+  const { userMemberships, isLoaded: orgsLoaded } = useOrganizationList({
+    userMemberships: { infinite: true },
+  })
 
-  if (!isLoaded) {
+  // 1. Clerk SDK not yet loaded
+  if (!isLoaded || (isOrgMode() && !orgsLoaded)) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
-        <p style={{ fontSize: 14, color: '#757575' }}>Carregando...</p>
+      <div style={loadingStyle}>
+        <p style={loadingText}>Carregando...</p>
       </div>
     )
   }
 
+  // 2. Not signed in
   if (!isSignedIn) {
     return <RedirectToSignIn />
+  }
+
+  // 3. Signed in but no org (only in org mode) — redirect to onboarding
+  if (isOrgMode() && userMemberships?.data?.length === 0) {
+    return <Navigate to="/criar-empresa" replace />
   }
 
   return <>{children}</>

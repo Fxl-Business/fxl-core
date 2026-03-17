@@ -7,6 +7,8 @@ import { useActivityFeed, type ActivityItem, formatDate } from '@platform/servic
 import { useModuleStats, type ModuleStats } from '@platform/services/module-stats'
 import { Badge } from '@shared/ui/badge'
 import { Separator } from '@shared/ui/separator'
+import { isOrgMode } from '@platform/auth/auth-config'
+import SemModulos from '@platform/pages/SemModulos'
 
 // ---------------------------------------------------------------------------
 // Internal components (not exported)
@@ -209,7 +211,12 @@ function ActivityFeed({
 export default function Home() {
   const { items: activityItems, loading: activityLoading } = useActivityFeed()
   const stats = useModuleStats()
-  const { isEnabled } = useModuleEnabled()
+  const { isEnabled, enabledModules: enabledModuleSet, isLoading: modulesLoading } = useModuleEnabled()
+
+  // Show empty state if no modules enabled (after loading completes, org mode only)
+  if (!modulesLoading && enabledModuleSet.size === 0 && isOrgMode()) {
+    return <SemModulos />
+  }
 
   const enabledModules = MODULE_REGISTRY.filter((mod) => isEnabled(mod.id))
   const featuredModule = enabledModules.find((mod) => mod.status === 'active') ?? enabledModules[0]

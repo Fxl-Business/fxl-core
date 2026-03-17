@@ -1,11 +1,12 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, type ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
-import { SignUp } from '@clerk/react'
+import { SignUp, useAuth, RedirectToSignIn } from '@clerk/react'
 import Layout from '@platform/layout/Layout'
 import ProtectedRoute from '@platform/auth/ProtectedRoute'
 import SuperAdminRoute from '@platform/auth/SuperAdminRoute'
 import Home from '@platform/pages/Home'
+import CriarEmpresa from '@platform/pages/CriarEmpresa'
 import Login from '@platform/auth/Login'
 import Profile from '@platform/auth/Profile'
 import { MODULE_REGISTRY } from '@platform/module-loader/registry'
@@ -30,6 +31,21 @@ const TaskForm = lazy(() => import('@modules/tasks/pages/TaskForm'))
 const moduleRoutes = MODULE_REGISTRY
   .flatMap(m => m.routeConfig ?? [])
   .filter((cfg): cfg is RouteObject & { path: string } => cfg.path !== undefined)
+
+// Thin auth-only guard: checks isSignedIn only, NOT org membership.
+// Used for routes that must be accessible to signed-in users without an org (e.g. /criar-empresa).
+function AuthOnlyRoute({ children }: { children: ReactNode }) {
+  const { isSignedIn, isLoaded } = useAuth()
+  if (!isLoaded) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
+        <p style={{ fontSize: 14, color: '#757575' }}>Carregando...</p>
+      </div>
+    )
+  }
+  if (!isSignedIn) return <RedirectToSignIn />
+  return <>{children}</>
+}
 
 export default function AppRouter() {
   return (
@@ -81,6 +97,16 @@ export default function AppRouter() {
             </div>
             <SignUp routing="path" path="/signup" signInUrl="/login" />
           </div>
+        }
+      />
+
+      {/* Onboarding — auth required but no-org-required (avoids ProtectedRoute redirect loop) */}
+      <Route
+        path="/criar-empresa"
+        element={
+          <AuthOnlyRoute>
+            <CriarEmpresa />
+          </AuthOnlyRoute>
         }
       />
 
