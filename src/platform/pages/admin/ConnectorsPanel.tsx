@@ -14,6 +14,7 @@ import {
 } from '@modules/connector/services/connector-config-service'
 import { fetchHealth } from '@modules/connector/services/connector-service'
 import type { ConnectorConfig } from '@modules/connector/types'
+import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -221,6 +222,7 @@ function ConnectorCard({ connector, onEdit, onDelete, onToggle }: ConnectorCardP
 // ---------------------------------------------------------------------------
 
 export default function ConnectorsPanel() {
+  const { activeOrg } = useActiveOrg()
   const [connectors, setConnectors] = useState<ConnectorRow[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -238,7 +240,7 @@ export default function ConnectorsPanel() {
   }, [])
 
   async function handleSave(config: ConnectorConfig) {
-    const result = await upsertConnectorConfig(config)
+    const result = await upsertConnectorConfig(config, true, activeOrg?.id ?? '')
     if (result.ok) {
       toast.success(editing ? 'Connector atualizado' : 'Connector adicionado')
       setShowForm(false)
@@ -250,7 +252,7 @@ export default function ConnectorsPanel() {
   }
 
   async function handleDelete(appId: string) {
-    const result = await deleteConnectorConfig(appId)
+    const result = await deleteConnectorConfig(appId, activeOrg?.id ?? '')
     if (result.ok) {
       toast('Connector removido')
       await loadConnectors()
@@ -260,7 +262,7 @@ export default function ConnectorsPanel() {
   }
 
   async function handleToggle(appId: string, enabled: boolean) {
-    const result = await toggleConnectorEnabled(appId, enabled)
+    const result = await toggleConnectorEnabled(appId, enabled, activeOrg?.id ?? '')
     if (result.ok) {
       toast(enabled ? 'Connector ativado' : 'Connector desativado')
       await loadConnectors()
