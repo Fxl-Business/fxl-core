@@ -12,7 +12,7 @@ export default function TopNav() {
             <span className="text-xs font-bold leading-none text-primary-foreground">FXL</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-foreground">Nucleo FXL</span>
+            <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-foreground">Nexo</span>
             <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 dark:text-muted-foreground">
               FXL-CORE
             </span>

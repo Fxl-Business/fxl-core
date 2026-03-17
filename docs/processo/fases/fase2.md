@@ -75,7 +75,7 @@ Para BI Personalizado: aprovacao do cliente. Para Produto: aprovacao da equipe F
 |----------|------------------|
 | Claude Code (`fxl`) | Gera os arquivos `.tsx` do wireframe usando componentes do modulo |
 | `tools/wireframe-builder/components/` | Modulo oficial de componentes React reutilizaveis de wireframe |
-| Nucleo FXL (Vercel) | Hospeda o app React com viewer de wireframe e overlay de comentarios |
+| Nexo (Vercel) | Hospeda o app React com viewer de wireframe e overlay de comentarios |
 
 ### Modulo de componentes
 

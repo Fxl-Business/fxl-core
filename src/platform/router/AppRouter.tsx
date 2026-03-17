@@ -62,7 +62,7 @@ export default function AppRouter() {
         element={
           <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 dark:bg-background">
             <div className="mb-8 text-center">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-foreground">Nucleo FXL</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-foreground">Nexo</h1>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Crie sua conta</p>
             </div>
             <SignUp routing="path" path="/signup" signInUrl="/login" />

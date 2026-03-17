@@ -1,13 +1,13 @@
-# CLAUDE.md — FXL Core (Nucleo FXL)
+# CLAUDE.md — Nexo
 
 ## Natureza do Projeto
 
-O FXL Core e a plataforma operacional interna da FXL, empresa de BI para PMEs.
+O Nexo e a plataforma operacional interna da FXL, empresa de BI para PMEs.
 Nao e um site de documentacao — e uma plataforma que usa documentacao
 como interface primaria, ao lado de ferramentas executaveis,
 workspaces de cliente e operacao assistida por IA.
 
-O que o FXL Core NAO e:
+O que o Nexo NAO e:
 - Nao e documentacao publica de produto (como docs do Supabase)
 - Nao e apenas um repositorio de .md renderizados
 - Nao e um monolito onde tudo se mistura sem fronteiras
@@ -156,6 +156,15 @@ O diretorio `.planning/` contem todo o estado de planejamento e execucao do proj
 O sistema GSD (Get Shit Done), localizado em `.claude/get-shit-done/`, usa esses arquivos
 para planejamento estruturado e execucao via agentes. Os slash commands `/gsd:*`
 (em `.claude/commands/gsd/`) sao a interface principal para interagir com o workflow.
+
+### Milestones futuras pre-planejadas
+
+Antes de sugerir `/gsd:new-milestone`, verificar se ja existem milestones planejadas
+no design spec em `docs/superpowers/specs/`. O arquivo
+`2026-03-16-fxl-platform-evolution-design.md` contem o roadmap v3.1-v3.5 com
+dependencias, criterios de aceite e ordem de execucao. Se existir milestone pre-planejada,
+sugerir `/gsd:new-milestone` referenciando a proxima milestone do spec (nao como criacao
+do zero).
 
 ---
 

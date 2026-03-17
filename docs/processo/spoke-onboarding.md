@@ -1,23 +1,23 @@
 ---
 title: Spoke Onboarding
 badge: Processo
-description: Como conectar um projeto externo ao FXL Core como spoke
+description: Como conectar um projeto externo ao Nexo como spoke
 ---
 
 # Spoke Onboarding
 
-Este documento descreve o processo de conectar qualquer projeto externo ao FXL Core (hub) como spoke, usando o contrato padronizado FXL.
+Este documento descreve o processo de conectar qualquer projeto externo ao Nexo (hub) como spoke, usando o contrato padronizado FXL.
 
 ## Pre-requisitos
 
 - FXL SDK Skill instalada no Claude Code (`.agents/skills/fxl-sdk/`)
 - Projeto spoke com stack compativel (React 18, TypeScript, Supabase, Vite)
-- Acesso ao FXL Core como operador (para cadastrar o connector)
+- Acesso ao Nexo como operador (para cadastrar o connector)
 
 ## Visao Geral
 
 ```
-Spoke (projeto externo)          Hub (FXL Core)
+Spoke (projeto externo)          Hub (Nexo)
 ┌─────────────────────┐         ┌─────────────────────┐
 │ App propria          │         │ Connector Module    │
 │ Auth propria         │ ◄──── │ (UI generica)       │
@@ -98,7 +98,7 @@ Verificar que `GET <baseUrl>/api/fxl/health` retorna:
 
 ### 6. Cadastrar connector no hub
 
-No FXL Core, acessar `/admin/connectors` e cadastrar:
+No Nexo, acessar `/admin/connectors` e cadastrar:
 
 | Campo | Valor |
 |-------|-------|
@@ -144,7 +144,7 @@ Ao trabalhar em um projeto spoke:
 5. `fxl-doctor.sh` roda no CI para validar conformidade
 
 Ao conectar uma spoke ao hub:
-1. Admin UI em `/admin/connectors` no FXL Core
+1. Admin UI em `/admin/connectors` no Nexo
 2. Config salva em `tenant_modules` com `module_id = 'connector:<appId>'`
 3. `useConnectorList` le configs do Supabase
 4. `connector-service` envia header `X-FXL-API-Key` em cada request

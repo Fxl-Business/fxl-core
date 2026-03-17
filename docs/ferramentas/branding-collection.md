@@ -13,7 +13,7 @@ Branding controla a identidade visual do wireframe de cada cliente. Quando confi
 O resultado: o cliente ve o wireframe com a cara da empresa dele, nao com cores genericas.
 
 {% callout type="info" %}
-Branding afeta **apenas o wireframe** — nunca muda o tema do app FXL Core (sidebar, header, docs).
+Branding afeta **apenas o wireframe** — nunca muda o tema do app Nexo (sidebar, header, docs).
 {% /callout %}
 
 ## Campos obrigatorios

@@ -167,7 +167,7 @@ Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modul
 - Mobile apps — foco web-first, mobile e futuro
 - SaaS completo como output — comecar com Dashboard BI, expandir depois
 - Geracao de sistemas sem revisao humana — sempre semi-automatico com revisao
-- Backend proprio no FXL Core alem de comentarios — FXL Core e documentacao/tooling
+- Backend proprio no Nexo alem de comentarios — Nexo e documentacao/tooling
 - Drag-and-drop generico de dashboards — o Blueprint-driven process e o produto
 - Global Skills do Claude Code via .claude/skills/ — deferido para v2 (GSKILL-01/02)
 - Runtime execution de formulas KPI — v1 usa string literal specifications
@@ -248,7 +248,7 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Sistema de cliente em repo separado | Isolamento, deploy independente, stack variavel | ✓ Good — clean separation |
 | Clerk em vez de Supabase Auth | Google OAuth, melhor DX, anon clients via localStorage UUID | ✓ Good — simplified auth |
 | Decimal phase numbering (02.1, 02.2, 02.3) | Clear insertion semantics for urgent work | ✓ Good — 3 phases inserted cleanly |
-| --brand-* CSS var prefix | Avoid collision with FXL Core app theme (--primary, --accent) | ✓ Good — no conflicts |
+| --brand-* CSS var prefix | Avoid collision with Nexo app theme (--primary, --accent) | ✓ Good — no conflicts |
 | String literal formulas (not runtime) | Simpler for v1, runtime eval in v2 | ✓ Good — sufficient for spec generation |
 | Semantic design tokens with dark mode | Production-grade visual quality, theme flexibility | ✓ Good — clean light/dark switching |
 | Config Resolver as pure function | Deterministic, testable, no I/O side effects | ✓ Good — easy to test |
@@ -307,7 +307,7 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 
 ## Constraints
 
-- **Stack FXL Core**: React 18 + TypeScript strict + Tailwind + Vite + Vercel — nao muda
+- **Stack Nexo**: React 18 + TypeScript strict + Tailwind + Vite + Vercel — nao muda
 - **Zero `any`**: TypeScript strict com `tsc --noEmit` como gate de aceite
 - **Sem backend pesado no Core**: Supabase apenas para features interativas (comentarios, blueprints, briefings, KB, tasks)
 - **Blueprint prevalece**: Se blueprint e wireframe divergirem, blueprint e a fonte da verdade

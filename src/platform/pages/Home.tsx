@@ -117,7 +117,7 @@ function IdentityCard({
           <span className="text-xs font-bold text-white">FXL</span>
         </div>
         <div>
-          <h2 className="text-sm font-bold text-slate-900 dark:text-foreground">Nucleo FXL</h2>
+          <h2 className="text-sm font-bold text-slate-900 dark:text-foreground">Nexo</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Plataforma operacional interna
           </p>
@@ -230,7 +230,7 @@ export default function Home() {
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-foreground">
-          Nucleo FXL
+          Nexo
         </h1>
         <p className="mt-2 text-base text-slate-600 dark:text-slate-400">
           Centro de controle — processo, knowledge e ferramentas
