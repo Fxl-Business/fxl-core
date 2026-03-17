@@ -100,7 +100,9 @@
 **Success Criteria** (what must be TRUE):
   1. `npx tsc --noEmit` retorna zero erros em todo o codebase
   2. `npm run build` completa sem erros e gera bundle de producao valido
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 80-01-PLAN.md — Fix TypeScript errors and verify production build
 
 ## Quick Tasks
 
