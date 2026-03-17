@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.2
-milestone_name: FXL SDK Skill
-status: completed
-stopped_at: Completed v3.2 FXL SDK Skill (2 phases, 23 files created)
-last_updated: "2026-03-17T01:44:00Z"
-last_activity: 2026-03-17 — v3.2 FXL SDK Skill COMPLETE (2 phases, all skill files created)
+milestone: v3.3
+milestone_name: Generic Connector Module
+status: in-progress
+stopped_at: Starting v3.3 execution
+last_updated: "2026-03-17T02:00:00Z"
+last_activity: 2026-03-17 — Starting v3.3 Generic Connector Module
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
-  percent: 100
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,31 +21,32 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** v3.2 FXL SDK Skill — COMPLETE
+**Current focus:** v3.3 Generic Connector Module
 
 ## Current Position
 
-Milestone: v3.2 of v3.5 (FXL SDK Skill)
-Status: Complete
-Last activity: 2026-03-17 — v3.2 FXL SDK Skill complete (SKILL.md, 8 rules, contract types, 8 templates, 5 checklists)
+Milestone: v3.3 of v3.5 (Generic Connector Module)
+Status: In Progress
+Last activity: 2026-03-17 — Starting Phase 70
 
-Progress: [==========] 100%
+Progress: [..........] 0%
 
 ## Multi-Milestone Plan (v3.1-v3.5)
 
 Wave 0: v3.0 archived
 Wave 1: v3.1 (multi-tenancy) COMPLETE + v3.2 (SDK skill) COMPLETE
-Wave 2: v3.3 (connector) + v3.4 (Beach House) — depend on v3.2
+Wave 2: v3.3 (connector) IN PROGRESS + v3.4 (Beach House) — depend on v3.2
 Wave 3: v3.5 (integration) — depends on v3.3 + v3.4
 
 Design spec: docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md
 
-## v3.2 Phases (68-69)
+## v3.3 Phases (70-72)
 
 | Phase | Goal | Depends on | Requirements |
 |-------|------|------------|--------------|
-| 68 | SDK core structure (SKILL.md, rules, contract) | Nothing | SDK-01..10 |
-| 69 | Templates + checklists | Phase 68 | SDK-11..15 |
+| 70 | Core connector infrastructure (types, service, hooks) | Nothing | CON-01..05 |
+| 71 | Connector UI components (entities, widgets, router) | Phase 70 | CON-06..12 |
+| 72 | Integration verification (tsc, build) | Phase 71 | CON-13 |
 
 ## Accumulated Context
 
@@ -80,6 +81,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T01:44:00Z
-Stopped at: Completed v3.2 FXL SDK Skill
-Next: `/gsd:new-milestone` for v3.3 (connector module) or v3.4 (Beach House migration) — see design spec Section 9 for dependency graph
+Last session: 2026-03-17T02:00:00Z
+Stopped at: Starting v3.3 Phase 70
+Next: Execute Phase 70 (connector infrastructure)

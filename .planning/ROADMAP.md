@@ -16,6 +16,7 @@
 - **v2.4 Component Picker Preview Mode** - Phases 58-59 (shipped 2026-03-14) -- see milestones/v2.4-ROADMAP.md
 - **v3.0 Reorganizacao Modular** - Phases 60-63 (shipped 2026-03-17) -- see milestones/v3.0-ROADMAP.md
 - **v3.1 Multi-tenancy** - Phases 64-67 (shipped 2026-03-17) -- see milestones/v3.1-ROADMAP.md
+- **v3.2 FXL SDK Skill** - Phases 68-69 (shipped 2026-03-17) -- see milestones/v3.2-ROADMAP.md
 
 ## Quick Tasks
 
@@ -26,48 +27,60 @@
 
 ---
 
-## v3.2 FXL SDK Skill
+## v3.3 Generic Connector Module
 
-**Milestone Goal:** Criar skill completa do Claude Code para padronizar projetos spoke FXL: rules de scaffold/audit/refactor/connect, contract types TypeScript do contrato Hub<->Spoke, templates production-quality de configs, e checklists de seguranca/estrutura/RLS.
+**Milestone Goal:** Criar modulo generico no FXL Core que consome qualquer spoke via contrato padronizado (FxlAppManifest), renderizando entidades em tabelas/detail views e widgets (KPI, chart, table, list) com UI generica. Roteamento dinamico via catch-all `/apps/:appId/*`.
 
-**Design spec:** `docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md` (Sections 6, 7)
+**Design spec:** `docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md` (Section 6.6)
 
 ## Phases
 
-- [x] **Phase 68: SDK Core Structure** - SKILL.md entry point, all rules/*.md files, contract/types.ts (completed 2026-03-17)
-- [x] **Phase 69: SDK Templates + Checklists** - All templates/*.template files, all checklists/*.md files (completed 2026-03-17)
+- [ ] **Phase 70: Core Connector Infrastructure** - Module structure, types, service, icon-map, hooks
+- [ ] **Phase 71: Connector UI Components** - Entity views, widget components, router, dashboard, cards, extensions
+- [ ] **Phase 72: Integration Verification** - tsc --noEmit, npm run build, route/sidebar verification
 
 ## Phase Details
 
-### Phase 68: SDK Core Structure
-**Goal**: Create the FXL SDK skill entry point (SKILL.md), all 8 rules files with detailed guidance, and the contract types TypeScript file
-**Depends on**: Nothing (first phase of v3.2)
-**Requirements**: [SDK-01, SDK-02, SDK-03, SDK-04, SDK-05, SDK-06, SDK-07, SDK-08, SDK-09, SDK-10]
+### Phase 70: Core Connector Infrastructure
+**Goal**: Create the connector module foundation: registration, types, API service, icon mapping, hooks
+**Depends on**: Nothing (first phase of v3.3)
+**Requirements**: [CON-01, CON-02, CON-03, CON-04, CON-05]
 **Success Criteria** (what must be TRUE):
-  1. `SKILL.md` exists with ~130 lines, indexes all rules, describes when to use each
-  2. All 8 rules files exist in `rules/` with detailed, actionable guidance
-  3. `contract/types.ts` exists with all Hub<->Spoke contract interfaces
-  4. Contract types use v1 field types only (string, number, date, boolean)
-  5. Rules reference templates and checklists (even though created in Phase 69)
-**Plans:** 1/1 plans complete
+  1. MODULE_IDS.CONNECTOR exists and module is in MODULE_REGISTRY
+  2. Contract types re-exported + ConnectorConfig type defined
+  3. connector-service.ts handles manifest/entity/widget fetching with 5s timeout + error handling
+  4. icon-map.ts maps ~100 common lucide icons with Box fallback
+  5. useConnector and useConnectorList hooks work
+**Plans:** 0/1 plans complete
 
-### Phase 69: SDK Templates + Checklists
-**Goal**: Create all production-quality templates for spoke project configs and all quality/compliance checklists
-**Depends on**: Phase 68 (templates reference standards from rules)
-**Requirements**: [SDK-11, SDK-12, SDK-13, SDK-14, SDK-15]
+### Phase 71: Connector UI Components
+**Goal**: Create all UI components: entity rendering, widgets, dynamic router, dashboard, cards, home extension
+**Depends on**: Phase 70
+**Requirements**: [CON-06, CON-07, CON-08, CON-09, CON-10, CON-11, CON-12]
 **Success Criteria** (what must be TRUE):
-  1. `templates/CLAUDE.md.template` exists with complete spoke project CLAUDE.md
-  2. All config templates exist: tsconfig.json, eslint, prettier, tailwind preset
-  3. All infra templates exist: vercel.json, ci.yml, fxl-doctor.sh
-  4. All 5 checklists exist with actionable items and severity levels
-  5. fxl-doctor.sh template includes all CI checks from design spec
-**Plans:** 1/1 plans complete
+  1. EntityTable renders fields based on FieldDefinition type
+  2. All 4 widget types render correctly
+  3. ConnectorRouter resolves sub-routes from manifest entities
+  4. ConnectorDashboard shows widgets grid
+  5. ConnectorCard appears in Home via extension slot
+**Plans:** 0/1 plans complete
+
+### Phase 72: Integration Verification
+**Goal**: Verify everything compiles and builds correctly
+**Depends on**: Phase 71
+**Requirements**: [CON-13]
+**Success Criteria** (what must be TRUE):
+  1. `npx tsc --noEmit` zero errors
+  2. `npm run build` completes successfully
+  3. Connector route `/apps/*` registered in router
+**Plans:** 0/1 plans complete
 
 ## Progress
 
-**Execution Order:** 68 -> 69
+**Execution Order:** 70 -> 71 -> 72
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 68. SDK Core Structure | 1/1 | Complete | 2026-03-17 |
-| 69. SDK Templates + Checklists | 1/1 | Complete | 2026-03-17 |
+| 70. Core Connector Infrastructure | 0/1 | Pending | - |
+| 71. Connector UI Components | 0/1 | Pending | - |
+| 72. Integration Verification | 0/1 | Pending | - |

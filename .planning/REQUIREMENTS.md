@@ -1,116 +1,101 @@
-# Requirements: v3.2 FXL SDK Skill
+# Requirements: v3.3 Generic Connector Module
 
 **Defined:** 2026-03-17
-**Milestone:** v3.2
-**Core Value:** Skill do Claude Code que padroniza projetos spoke FXL com rules, templates, contract types e checklists
-**Design Spec:** `docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md` (Sections 6, 7)
+**Milestone:** v3.3
+**Core Value:** Modulo generico no FXL Core que consome qualquer spoke via contrato padronizado, renderizando entidades e widgets com UI generica
+**Design Spec:** `docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md` (Section 6.6)
 
-## v3.2 Requirements
+## v3.3 Requirements
 
-Requirements para milestone v3.2 FXL SDK Skill. Derivados das Sections 6 e 7 do design spec.
+### Module Infrastructure
 
-### Skill Structure
-
-- [x] **SDK-01**: Criar `SKILL.md` como entry point da skill com indice de rules, cenarios de uso, e navegacao rapida
-  - **Aceite:** SKILL.md existe em `.agents/skills/fxl-sdk/`, segue formato de ~130 linhas, lista todas as rules com descricao de quando usar cada uma.
+- [ ] **CON-01**: Criar estrutura do modulo connector com CLAUDE.md, manifest.ts, e registro no MODULE_REGISTRY
+  - **Aceite:** MODULE_IDS.CONNECTOR existe, modulo registrado no registry, rota catch-all `/apps/*` configurada.
   - **Depende de:** Nada
 
-- [x] **SDK-02**: Criar `rules/standards.md` com padroes de codigo, seguranca, e estrutura para projetos spoke
-  - **Aceite:** Arquivo contem stack aprovada (React 18, TypeScript strict, Tailwind, shadcn/ui, Supabase), convencoes de codigo, regras de seguranca, estrutura de pastas padrao.
+- [ ] **CON-02**: Criar tipos do connector (re-export contract types + ConnectorConfig)
+  - **Aceite:** types/index.ts re-exporta tipos do contrato SDK, ConnectorConfig define appId + baseUrl.
+  - **Depende de:** CON-01
+
+- [ ] **CON-03**: Criar connector-service.ts para comunicacao com spokes
+  - **Aceite:** Servico faz GET manifest, entities, widgets com timeout 5s, tratamento de erros (offline, 401, 500).
+  - **Depende de:** CON-02
+
+- [ ] **CON-04**: Criar icon-map.ts mapeando ~100 icones lucide comuns com fallback para Box
+  - **Aceite:** Funcao resolveIcon(name) retorna componente LucideIcon, fallback para Box se nao encontrado.
   - **Depende de:** Nada
 
-- [x] **SDK-03**: Criar `rules/new-project.md` com instrucoes completas para scaffold de projeto novo
-  - **Aceite:** Arquivo contem passo-a-passo para criar projeto spoke do zero: init, configs, estrutura, CLAUDE.md, contrato, CI/CD.
-  - **Depende de:** SDK-02
+- [ ] **CON-05**: Criar hooks useConnector e useConnectorList
+  - **Aceite:** useConnector(appId) retorna manifest/loading/error. useConnectorList retorna lista de connectors habilitados.
+  - **Depende de:** CON-03
 
-- [x] **SDK-04**: Criar `rules/new-project-from-blueprint.md` para scaffold a partir de export do Wireframe Builder
-  - **Aceite:** Arquivo contem instrucoes para ler `blueprint-export.json`, gerar paginas, componentes, entidades, e endpoints do contrato.
-  - **Depende de:** SDK-03
+### UI Components
 
-- [x] **SDK-05**: Criar `rules/audit.md` com instrucoes para auditoria de projetos existentes
-  - **Aceite:** Arquivo contem checklist de auditoria, formato do `FXL-AUDIT.md` gerado, scoring system, categorias (critico, importante, normal).
-  - **Depende de:** SDK-02
+- [ ] **CON-06**: Criar EntityTable e EntityFields para renderizacao generica de entidades
+  - **Aceite:** EntityTable renderiza tabela com colunas baseadas em FieldDefinition[]. EntityFields renderiza campos formatados por tipo.
+  - **Depende de:** CON-02
 
-- [x] **SDK-06**: Criar `rules/connect.md` com instrucoes para adicionar contrato FXL a projeto existente
-  - **Aceite:** Arquivo contem passo-a-passo para adicionar endpoints obrigatorios, tipos do contrato, e configuracao de auth Clerk.
-  - **Depende de:** SDK-02
+- [ ] **CON-07**: Criar EntityList (pagina de listagem) e EntityDetail (pagina de detalhe)
+  - **Aceite:** EntityList busca dados paginados via connector-service. EntityDetail busca entidade individual.
+  - **Depende de:** CON-03, CON-06
 
-- [x] **SDK-07**: Criar `rules/refactor.md` com padroes de refatoracao
-  - **Aceite:** Arquivo contem padroes para migrar projetos Lovable/existentes para padroes FXL.
-  - **Depende de:** SDK-02, SDK-05
+- [ ] **CON-08**: Criar widget components (KpiWidget, ChartWidget, TableWidget, ListWidget)
+  - **Aceite:** Cada widget renderiza dados no formato correto (ver spec Section 6.5). ChartWidget usa recharts.
+  - **Depende de:** CON-02
 
-- [x] **SDK-08**: Criar `rules/ci-cd.md` com instrucoes de setup GitHub Actions
-  - **Aceite:** Arquivo contem setup completo de CI: workflow file, fxl-doctor.sh, branch protection.
-  - **Depende de:** SDK-02
+- [ ] **CON-09**: Criar ConnectorRouter com roteamento dinamico baseado no manifest
+  - **Aceite:** ConnectorRouter resolve sub-rotas de `/apps/:appId/*` usando entities do manifest.
+  - **Depende de:** CON-05, CON-07
 
-- [x] **SDK-09**: Criar `rules/deploy.md` com padroes de deploy Vercel
-  - **Aceite:** Arquivo contem configuracao Vercel, env vars, headers de seguranca, preview deploys.
-  - **Depende de:** SDK-02
+- [ ] **CON-10**: Criar ConnectorDashboard com widgets overview por connector
+  - **Aceite:** Dashboard renderiza todos os widgets de um connector com layout grid.
+  - **Depende de:** CON-05, CON-08
 
-### Contract Types
+- [ ] **CON-11**: Criar ConnectorCard e ConnectorBadge
+  - **Aceite:** ConnectorCard mostra app info para Home. ConnectorBadge mostra status online/offline.
+  - **Depende de:** CON-05
 
-- [x] **SDK-10**: Criar `contract/types.ts` com tipos TypeScript completos do contrato Hub <-> Spoke
-  - **Aceite:** Arquivo contem todas as interfaces (FxlAppManifest, EntityDefinition, FieldDefinition, WidgetDefinition, response types). v1 field types: string, number, date, boolean apenas.
-  - **Depende de:** Nada
+- [ ] **CON-12**: Criar home-widgets extension para injetar widgets de connectors no Home
+  - **Aceite:** Extension injeta ConnectorCard no HOME_DASHBOARD slot via extension system.
+  - **Depende de:** CON-11
 
-### Templates
+### Integration
 
-- [x] **SDK-11**: Criar `templates/CLAUDE.md.template` com CLAUDE.md padrao para projetos spoke
-  - **Aceite:** Template contem stack, convencoes, regras de escopo, checklist obrigatorio, adaptado para spoke.
-  - **Depende de:** SDK-02
-
-- [x] **SDK-12**: Criar templates de configuracao: `tsconfig.json.template`, `eslint.config.js.template`, `prettier.config.js.template`, `tailwind.preset.js.template`
-  - **Aceite:** Templates sao production-quality, com strict mode, rules consistentes com padroes FXL.
-  - **Depende de:** SDK-02
-
-- [x] **SDK-13**: Criar templates de infra: `vercel.json.template`, `ci.yml.template`, `fxl-doctor.sh.template`
-  - **Aceite:** vercel.json com security headers, ci.yml com GitHub Actions workflow, fxl-doctor.sh com todos os checks.
-  - **Depende de:** SDK-08, SDK-09
-
-### Checklists
-
-- [x] **SDK-14**: Criar checklists de qualidade: `security-checklist.md`, `structure-checklist.md`, `typescript-checklist.md`
-  - **Aceite:** Cada checklist contem items acionaveis com descricao, exemplo de conformidade, e severidade.
-  - **Depende de:** SDK-02
-
-- [x] **SDK-15**: Criar checklists de contrato: `rls-checklist.md`, `contract-checklist.md`
-  - **Aceite:** RLS checklist cobre todas as tabelas com verificacao de policies. Contract checklist verifica todos os endpoints obrigatorios.
-  - **Depende de:** SDK-10
+- [ ] **CON-13**: tsc --noEmit zero erros, npm run build sem erros
+  - **Aceite:** Build completa sem erros TypeScript ou Vite.
+  - **Depende de:** Todos os anteriores
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| npm package / CLI (`npx fxl`) | Skill substitui CLI — configs gerados como arquivos |
-| Connector module no Hub | v3.3 (milestone separado) |
-| Beach House migration | v3.4 (milestone separado) |
-| Contract v2 (enum, relation types) | Futuro, apos validacao com v1 |
-| POST/PUT/DELETE endpoints | v1 e read-only |
-| Blueprint export do Wireframe Builder | v3.4+ (Wireframe Builder precisa de feature de export) |
+| Multi-tenancy integration | v3.5 (config hardcoded inicialmente) |
+| CRUD/mutations | v1 contract is read-only |
+| React Query / cache layer | Simple fetch + state (project convention) |
+| Real spoke connection | v3.5 (Beach House) |
+| enum/relation field types | v2 contract |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SDK-01 | Phase 68 | Complete |
-| SDK-02 | Phase 68 | Complete |
-| SDK-03 | Phase 68 | Complete |
-| SDK-04 | Phase 68 | Complete |
-| SDK-05 | Phase 68 | Complete |
-| SDK-06 | Phase 68 | Complete |
-| SDK-07 | Phase 68 | Complete |
-| SDK-08 | Phase 68 | Complete |
-| SDK-09 | Phase 68 | Complete |
-| SDK-10 | Phase 68 | Complete |
-| SDK-11 | Phase 69 | Complete |
-| SDK-12 | Phase 69 | Complete |
-| SDK-13 | Phase 69 | Complete |
-| SDK-14 | Phase 69 | Complete |
-| SDK-15 | Phase 69 | Complete |
+| CON-01 | Phase 70 | Pending |
+| CON-02 | Phase 70 | Pending |
+| CON-03 | Phase 70 | Pending |
+| CON-04 | Phase 70 | Pending |
+| CON-05 | Phase 70 | Pending |
+| CON-06 | Phase 71 | Pending |
+| CON-07 | Phase 71 | Pending |
+| CON-08 | Phase 71 | Pending |
+| CON-09 | Phase 71 | Pending |
+| CON-10 | Phase 71 | Pending |
+| CON-11 | Phase 71 | Pending |
+| CON-12 | Phase 71 | Pending |
+| CON-13 | Phase 72 | Pending |
 
 **Coverage:**
-- v3.2 requirements: 15 total
-- Mapped to phases: 15
+- v3.3 requirements: 13 total
+- Mapped to phases: 13
 - Unmapped: 0
 
 ---
