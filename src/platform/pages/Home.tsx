@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Activity, ArrowRight, CheckSquare } from 'lucide-react'
 import { MODULE_REGISTRY, SLOT_IDS, type ModuleDefinition } from '@platform/module-loader/registry'
 import { ExtensionSlot } from '@platform/module-loader/slots'
+import { useModuleEnabled } from '@platform/module-loader/hooks/useModuleEnabled'
 import { useActivityFeed, type ActivityItem, formatDate } from '@platform/services/activity-feed'
 import { useModuleStats, type ModuleStats } from '@platform/services/module-stats'
 import { Badge } from '@shared/ui/badge'
@@ -208,8 +209,9 @@ function ActivityFeed({
 export default function Home() {
   const { items: activityItems, loading: activityLoading } = useActivityFeed()
   const stats = useModuleStats()
+  const { isEnabled } = useModuleEnabled()
 
-  const enabledModules = MODULE_REGISTRY.filter((mod) => mod.enabled !== false)
+  const enabledModules = MODULE_REGISTRY.filter((mod) => isEnabled(mod.id))
   const featuredModule = enabledModules.find((mod) => mod.status === 'active') ?? enabledModules[0]
   const remainingModules = featuredModule
     ? enabledModules.filter((mod) => mod.id !== featuredModule.id)
