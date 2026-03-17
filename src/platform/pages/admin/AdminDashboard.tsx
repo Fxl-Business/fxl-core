@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Building2, Users, Blocks, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useOrganizationList } from '@clerk/react'
+import { useSession } from '@clerk/react'
 import { MODULE_REGISTRY } from '@platform/module-loader/registry'
 import { supabase } from '@platform/supabase'
+import { listTenants, setClerkTokenGetter } from '@platform/services/tenant-service'
+import { listUsers, setAdminClerkTokenGetter } from '@platform/services/admin-service'
 import { Separator } from '@shared/ui/separator'
 
 // ---------------------------------------------------------------------------
@@ -53,43 +55,76 @@ function MetricCard({
 // ---------------------------------------------------------------------------
 
 export default function AdminDashboard() {
-  const { userMemberships, isLoaded: isOrgsLoaded } = useOrganizationList({
-    userMemberships: { infinite: true },
-  })
+  const { session } = useSession()
 
-  // Tenant count = number of Clerk organizations the super admin belongs to
-  const tenantCount = userMemberships?.data?.length ?? 0
-
-  // User count = sum of membersCount across all orgs
-  const userCount = userMemberships?.data?.reduce((sum, m) => {
-    return sum + (m.organization.membersCount ?? 0)
-  }, 0) ?? 0
+  const [tenantCount, setTenantCount] = useState(0)
+  const [userCount, setUserCount] = useState(0)
+  const [metricsLoading, setMetricsLoading] = useState(true)
 
   // Per-tenant module average from Supabase tenant_modules table
   const totalModuleCount = MODULE_REGISTRY.length
   const [avgModulesPerTenant, setAvgModulesPerTenant] = useState<number | null>(null)
   const [modulesLoading, setModulesLoading] = useState(true)
 
+  // Register token getters for both services
   useEffect(() => {
-    if (!isOrgsLoaded || tenantCount === 0) {
+    if (session) {
+      setClerkTokenGetter(() => session.getToken({ template: 'supabase' }))
+      setAdminClerkTokenGetter(() => session.getToken({ template: 'supabase' }))
+    }
+  }, [session])
+
+  // Fetch metrics from edge functions
+  useEffect(() => {
+    if (!session) return
+
+    let cancelled = false
+
+    async function fetchMetrics() {
+      setMetricsLoading(true)
+      try {
+        const [tenantsResult, usersResult] = await Promise.all([
+          listTenants(),
+          listUsers(),
+        ])
+        if (!cancelled) {
+          setTenantCount(tenantsResult.totalCount)
+          setUserCount(usersResult.totalCount)
+        }
+      } catch (err) {
+        console.error('Failed to fetch admin metrics:', err)
+        // On error, counts stay at 0 — MetricCard shows 0
+      } finally {
+        if (!cancelled) setMetricsLoading(false)
+      }
+    }
+
+    fetchMetrics()
+    return () => { cancelled = true }
+  }, [session])
+
+  // Fetch module stats after metrics are loaded
+  useEffect(() => {
+    if (metricsLoading || tenantCount === 0) {
       setModulesLoading(false)
       return
     }
 
-    const orgIds = (userMemberships?.data ?? []).map(m => m.organization.id)
-
     async function fetchModuleStats() {
+      // Fetch all tenant_modules rows (no org filter needed — super admin sees all)
       const { data, error } = await supabase
         .from('tenant_modules')
         .select('org_id, module_id, enabled')
-        .in('org_id', orgIds)
 
       if (error || !data) {
-        // Fallback: all modules enabled for all tenants
         setAvgModulesPerTenant(totalModuleCount)
         setModulesLoading(false)
         return
       }
+
+      // Collect unique org IDs from tenant_modules
+      const orgIds = [...new Set(data.map(row => row.org_id))]
+      const denominator = orgIds.length || 1
 
       // Group by org_id and count enabled modules per tenant
       const perOrg = new Map<string, Set<string>>()
@@ -115,14 +150,14 @@ export default function AdminDashboard() {
         totalActive += enabledInDb + modulesNotInDb
       }
 
-      setAvgModulesPerTenant(Math.round((totalActive / orgIds.length) * 10) / 10)
+      setAvgModulesPerTenant(Math.round((totalActive / denominator) * 10) / 10)
       setModulesLoading(false)
     }
 
     fetchModuleStats()
-  }, [isOrgsLoaded, tenantCount, userMemberships?.data, totalModuleCount])
+  }, [metricsLoading, tenantCount, totalModuleCount])
 
-  const isLoading = !isOrgsLoaded
+  const isLoading = metricsLoading
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
