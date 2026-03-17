@@ -1,9 +1,8 @@
 import { useOrganization, useOrganizationList } from '@clerk/react'
 import { useCallback, useMemo } from 'react'
-import { isOrgMode } from '@platform/auth/auth-config'
 
 export interface ActiveOrgState {
-  /** Currently active Clerk organization (null if user has no orgs or in anon mode) */
+  /** Currently active Clerk organization (null if user has no orgs) */
   activeOrg: { id: string; name: string; slug: string | null; imageUrl: string } | null
   /** All organizations the user belongs to */
   orgs: { id: string; name: string; slug: string | null; imageUrl: string }[]
@@ -15,9 +14,7 @@ export interface ActiveOrgState {
 
 /**
  * Hook wrapping Clerk's useOrganization + useOrganizationList.
- *
- * In anon mode, returns stub values (no orgs, not loading).
- * In org mode, returns real Clerk organization data.
+ * Returns real Clerk organization data.
  */
 export function useActiveOrg(): ActiveOrgState {
   const { organization, isLoaded: isOrgLoaded } = useOrganization()
@@ -53,16 +50,6 @@ export function useActiveOrg(): ActiveOrgState {
       imageUrl: organization.imageUrl,
     }
   }, [organization])
-
-  // In anon mode, return stubs — don't block the app
-  if (!isOrgMode()) {
-    return {
-      activeOrg: null,
-      orgs: [],
-      switchOrg: () => {},
-      isLoading: false,
-    }
-  }
 
   return {
     activeOrg,

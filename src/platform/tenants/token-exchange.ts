@@ -30,7 +30,6 @@ export async function exchangeToken(clerkToken: string): Promise<TokenExchangeRe
   if (!FUNCTIONS_URL) {
     throw new Error(
       'VITE_SUPABASE_FUNCTIONS_URL is not set. ' +
-      'Required when VITE_AUTH_MODE=org. ' +
       'Set it to your Supabase project functions URL (e.g., https://<project>.supabase.co/functions/v1).',
     )
   }

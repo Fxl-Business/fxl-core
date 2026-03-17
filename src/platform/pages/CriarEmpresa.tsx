@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useOrganizationList } from '@clerk/react'
 import { Loader2 } from 'lucide-react'
-import { isOrgMode } from '@platform/auth/auth-config'
 import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 
 export default function CriarEmpresa() {
@@ -14,11 +13,6 @@ export default function CriarEmpresa() {
   const [slug, setSlug] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Not applicable outside org mode
-  if (!isOrgMode()) {
-    return <Navigate to="/" replace />
-  }
 
   // Already has an org — skip onboarding
   if (orgs.length > 0) {

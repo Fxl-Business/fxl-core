@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { ModuleId } from '@platform/module-loader/registry'
 import { MODULE_IDS } from '@platform/module-loader/module-ids'
-import { isOrgMode } from '@platform/auth/auth-config'
 import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 import { supabase } from '@platform/supabase'
 
@@ -21,25 +20,6 @@ interface ModuleEnabledContextValue {
 }
 
 const ModuleEnabledContext = createContext<ModuleEnabledContextValue | null>(null)
-
-// ---------------------------------------------------------------------------
-// Anon Provider — all modules enabled, no toggling
-// ---------------------------------------------------------------------------
-
-function AnonModuleEnabledProvider({ children }: { children: ReactNode }) {
-  const value: ModuleEnabledContextValue = {
-    enabledModules: new Set(ALL_MODULE_IDS),
-    toggleModule: () => {},
-    isEnabled: () => true,
-    isLoading: false,
-    error: null,
-  }
-  return (
-    <ModuleEnabledContext.Provider value={value}>
-      {children}
-    </ModuleEnabledContext.Provider>
-  )
-}
 
 // ---------------------------------------------------------------------------
 // Org Provider (Supabase tenant_modules)
@@ -171,10 +151,7 @@ function OrgModuleEnabledProvider({ children }: { children: ReactNode }) {
 // ---------------------------------------------------------------------------
 
 export function ModuleEnabledProvider({ children }: { children: ReactNode }) {
-  if (isOrgMode()) {
-    return <OrgModuleEnabledProvider>{children}</OrgModuleEnabledProvider>
-  }
-  return <AnonModuleEnabledProvider>{children}</AnonModuleEnabledProvider>
+  return <OrgModuleEnabledProvider>{children}</OrgModuleEnabledProvider>
 }
 
 export function useModuleEnabled(): ModuleEnabledContextValue {

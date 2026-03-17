@@ -1,6 +1,5 @@
 import { useAuth, RedirectToSignIn, useOrganizationList } from '@clerk/react'
 import { Navigate } from 'react-router-dom'
-import { isOrgMode } from '@platform/auth/auth-config'
 import type { ReactNode } from 'react'
 
 const loadingStyle: React.CSSProperties = {
@@ -23,7 +22,7 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   })
 
   // 1. Clerk SDK not yet loaded
-  if (!isLoaded || (isOrgMode() && !orgsLoaded)) {
+  if (!isLoaded || !orgsLoaded) {
     return (
       <div style={loadingStyle}>
         <p style={loadingText}>Carregando...</p>
@@ -36,8 +35,8 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     return <RedirectToSignIn />
   }
 
-  // 3. Signed in but no org (only in org mode) — redirect to onboarding
-  if (isOrgMode() && userMemberships?.data?.length === 0) {
+  // 3. Signed in but no org — redirect to onboarding
+  if (userMemberships?.data?.length === 0) {
     return <Navigate to="/criar-empresa" replace />
   }
 

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.2
 milestone_name: Docs do Sistema + Tenant Onboarding
 status: executing
-stopped_at: Completed 82-01-PLAN.md
-last_updated: "2026-03-17T19:35:18.466Z"
-last_activity: 2026-03-17 — Completed 81-01 (scope column on documents table, split RLS policies, TypeScript types)
+stopped_at: Completed 84-01-PLAN.md (code complete, pending manual data migration)
+last_updated: "2026-03-17T21:00:00.000Z"
+last_activity: 2026-03-17 — Completed 84-01 (RLS hardening, auth-config removal, supabase simplification)
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 4
-  completed_plans: 3
-  percent: 5
+  completed_plans: 4
+  percent: 100
 ---
 
 # Project State
@@ -26,12 +26,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Milestone: v4.2 Docs do Sistema + Tenant Onboarding
-Phase: 81 of 84 (Docs Data Model)
+Phase: 84 of 84 (FXL Migration & Cleanup) — CODE COMPLETE
 Plan: 1 of 1 in current phase (COMPLETE)
-Status: In progress
-Last activity: 2026-03-17 — Completed 81-01 (scope column on documents table, split RLS policies, TypeScript types)
+Status: Code complete — pending manual steps (Clerk org creation + data migration 014)
+Last activity: 2026-03-17 — Completed 84-01 (RLS hardening, auth-config removal, supabase simplification)
 
-Progress: [█░░░░░░░░░░░░░░░░░░░] 5%
+Progress: [████████████████████] 100% (code complete)
 
 ## Platform Evolution Plan (v4.0-v4.3)
 
@@ -68,5 +68,5 @@ Phases 81-82 and 83-84 are independent tracks — safe to parallelize.
 
 Last session: 2026-03-17T19:35:14.343Z
 Stopped at: Completed 82-01-PLAN.md
-Next: /gsd:execute-phase 82
+Next: Manual steps — create FXL org in Clerk Dashboard, run migration 014, then /gsd:complete-milestone
 Resume file: None

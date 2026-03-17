@@ -7,7 +7,6 @@ import { useActivityFeed, type ActivityItem, formatDate } from '@platform/servic
 import { useModuleStats, type ModuleStats } from '@platform/services/module-stats'
 import { Badge } from '@shared/ui/badge'
 import { Separator } from '@shared/ui/separator'
-import { isOrgMode } from '@platform/auth/auth-config'
 import SemModulos from '@platform/pages/SemModulos'
 
 // ---------------------------------------------------------------------------
@@ -213,8 +212,8 @@ export default function Home() {
   const stats = useModuleStats()
   const { isEnabled, enabledModules: enabledModuleSet, isLoading: modulesLoading } = useModuleEnabled()
 
-  // Show empty state if no modules enabled (after loading completes, org mode only)
-  if (!modulesLoading && enabledModuleSet.size === 0 && isOrgMode()) {
+  // Show empty state if no modules enabled (after loading completes)
+  if (!modulesLoading && enabledModuleSet.size === 0) {
     return <SemModulos />
   }
 

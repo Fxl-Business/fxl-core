@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Building2, ChevronDown, Check } from 'lucide-react'
 import { useActiveOrg } from './useActiveOrg'
-import { isOrgMode } from '@platform/auth/auth-config'
 
 /**
  * Organization picker for TopNav.
@@ -28,8 +27,8 @@ export function OrgPicker() {
     }
   }, [open])
 
-  // In anon mode or no orgs, render nothing
-  if (!isOrgMode() || isLoading || orgs.length === 0) {
+  // No orgs or still loading, render nothing
+  if (isLoading || orgs.length === 0) {
     return null
   }
 
