@@ -139,7 +139,7 @@ Phase 75 primeiro (bloqueante). Phase 76 depende de 75. Phases 77, 78 e 79 sao I
 |-------|-----------|----------------|--------|-----------|
 | 75. Auth & RLS Foundation | v4.1 | 2/2 | Complete | 2026-03-17 |
 | 76. Admin Shell & Dashboard | v4.1 | 2/2 | Complete | 2026-03-17 |
-| 77. Tenant Management | v4.1 | 2/2 | Complete | 2026-03-17 |
+| 77. Tenant Management | v4.1 | Complete    | 2026-03-17 | 2026-03-17 |
 | 78. Module Management Evolution | v4.1 | 0/1 | Not started | - |
 | 79. Platform Settings & MCP | v4.1 | 0/2 | Not started | - |
 | 80. Build Verification | v4.1 | 0/1 | Not started | - |
