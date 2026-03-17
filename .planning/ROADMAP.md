@@ -95,7 +95,9 @@ Plans:
   2. All existing FXL documents, tasks, and records are accessible under the new org_id
   3. `VITE_AUTH_MODE` and all references to it are removed from the codebase
   4. RLS policies contain no COALESCE anon fallback; every policy requires a valid org_id
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 84-01-PLAN.md — RLS hardening migration + FXL data migration + VITE_AUTH_MODE removal + AnonModuleEnabledProvider removal
 
 ## Progress
 
@@ -108,4 +110,4 @@ Within each track: 81 before 82, 83 before 84.
 | 81. Docs Data Model | 1/1 | Complete   | 2026-03-17 | - |
 | 82. Docs UI & Migration | v4.2 | 0/1 | Not started | - |
 | 83. Onboarding Flow | 1/1 | Complete   | 2026-03-17 | - |
-| 84. FXL Migration & Cleanup | v4.2 | 0/? | Not started | - |
+| 84. FXL Migration & Cleanup | v4.2 | 0/1 | Not started | - |
