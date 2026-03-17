@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.1
 milestone_name: Super Admin
-status: executing
-stopped_at: Phase 76 complete (post-review fix applied)
-last_updated: "2026-03-17T19:00:00.000Z"
-last_activity: 2026-03-17 — Phase 76 complete (post-review fix: module metric per-tenant average)
+status: Ready for Phase 77/78/79 (independent, parallelizable)
+stopped_at: Completed 77-01-PLAN.md
+last_updated: "2026-03-17T16:50:20.864Z"
+last_activity: 2026-03-17 — Phase 76 Plan 02 complete (AdminDashboard with live Clerk metrics)
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 10
-  completed_plans: 4
+  completed_plans: 7
   percent: 40
 ---
 
@@ -65,6 +65,8 @@ Design spec: docs/superpowers/specs/2026-03-17-nexo-platform-evolution-design.md
 - [Phase 076-01]: Admin routes: SuperAdminRoute wraps AdminLayout directly, removing redundant ProtectedRoute wrapper
 - [Phase 076-02]: useOrganizationList used as tenant count proxy (super admin belongs to all orgs); accurate count via Clerk Backend API deferred to Phase 79
 - [Phase 076-02]: membersCount accessed via type cast with 0 fallback — Clerk Organization type doesn't expose this directly
+- [Phase 77-tenant-management]: JWT decoded without re-verification in Edge Function — Supabase gateway handles token signature validation, super_admin claim extracted for authorization
+- [Phase 77-tenant-management]: setClerkTokenGetter() module-level pattern for tenant service — allows auth header injection outside React component context
 
 ### Pending Todos
 
@@ -76,7 +78,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T18:45:00Z
-Stopped at: Completed 076-02-PLAN.md
+Last session: 2026-03-17T16:50:20.862Z
+Stopped at: Completed 77-01-PLAN.md
 Next: /gsd:execute-phase 077 (or 077+078+079 in parallel)
 Resume file: None
