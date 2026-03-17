@@ -8,20 +8,19 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v4.2 Docs do Sistema + Tenant Onboarding
+## Current Milestone: v4.3 Admin Polish & Custom Auth
 
-**Goal:** Separar product docs de enterprise docs (scope-based), criar fluxo real de onboarding de tenants, e migrar FXL de org_fxl_default para org Clerk real.
+**Goal:** Corrigir bugs em auth flow e metricas admin, criar tela de login custom seguindo design Nexo, e adicionar gestao de usuarios.
 
 **Target features:**
-- Product docs (global, read-only) vs enterprise docs (tenant-scoped) com coluna `scope`
-- Super admin CRUD de product docs via `/admin/product-docs`
-- Sidebar com "Docs da Empresa" e "Docs do Produto" separados
-- Tela "Criar Empresa" para novos usuários sem org
-- Tela "Sem módulos" quando tenant existe mas sem módulos habilitados
-- Migração de `org_fxl_default` para org Clerk real
-- Remover `VITE_AUTH_MODE` e fallbacks anon
+- Fix loading infinito apos logout (ProtectedRoute)
+- Tela de login custom com Google OAuth + email/senha usando useSignIn hooks
+- Fix member count = 0 na listagem de tenants (include_members_count)
+- Fix metricas do dashboard admin (usar edge function em vez de useOrganizationList)
+- Nova edge function admin-users + pagina /admin/users (lista global de usuarios)
+- Lista de membros por tenant na TenantDetailPage
 
-Previous: v4.1 Super Admin (shipped 2026-03-17)
+Previous: v4.2 Docs do Sistema + Tenant Onboarding (shipped 2026-03-17)
 
 ## Requirements
 
@@ -173,17 +172,12 @@ Previous: v4.1 Super Admin (shipped 2026-03-17)
 
 ### Active
 
-- [ ] Coluna `scope` na tabela `documents` com valores `'tenant'` (default) e `'product'`
-- [ ] Product docs visíveis para todos os tenants na sidebar (read-only)
-- [ ] Super admin pode criar/editar/deletar product docs via `/admin/product-docs`
-- [ ] Docs FXL de processo migrados para scope tenant
-- [ ] Docs de SDK/onboarding migrados para scope product
-- [ ] Novo usuário sem org vê tela "Criar Empresa"
-- [ ] Criar empresa cria Clerk org e atribui usuário como admin
-- [ ] Tenant sem módulos habilitados vê tela "Sem módulos"
-- [ ] Dados FXL migrados de `org_fxl_default` para org Clerk real
-- [ ] Flag `VITE_AUTH_MODE` removida
-- [ ] Fallback COALESCE anon removido do RLS
+- [ ] Usuario deslogado vê tela de login (não loading infinito)
+- [ ] Tela de login custom com Google OAuth + email/senha seguindo design Nexo
+- [ ] TenantsPage mostra member count correto por org
+- [ ] AdminDashboard mostra total de tenants e usuarios corretos
+- [ ] Pagina /admin/users listando todos os usuarios do Clerk
+- [ ] TenantDetailPage mostra membros da org com role badges
 
 ### Out of Scope
 
@@ -221,11 +215,11 @@ Previous: v4.1 Super Admin (shipped 2026-03-17)
 
 ## Current State
 
-18 milestones shipped (v1.0 → v4.1). v4.1 completed Super Admin panel.
+19 milestones shipped (v1.0 → v4.2). v4.2 completed Docs do Sistema + Tenant Onboarding.
 
 ## Context
 
-Shipped v4.1 Super Admin. 18 milestones complete (v1.0-v4.1).
+Shipped v4.2 Docs do Sistema + Tenant Onboarding. 19 milestones complete (v1.0-v4.2).
 Codebase reorganizado: src/platform/ (shell), src/modules/ (autocontidos), src/shared/ (cross-module).
 5 modulos ativos (docs, tasks, clients, wireframe, connector), cada um com CLAUDE.md para agent scoped.
 Super admin panel com /admin/* routes: dashboard, tenant management, module management per-tenant, platform settings.
@@ -356,4 +350,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Deploy Edge Function with --no-verify-jwt | Gateway JWT check blocks Clerk tokens, function handles auth itself | ✓ Good — required for third-party JWTs |
 
 ---
-*Last updated: 2026-03-17 after v4.2 milestone start*
+*Last updated: 2026-03-17 after v4.3 milestone start*

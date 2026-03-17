@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.2
-milestone_name: Docs do Sistema + Tenant Onboarding
-status: executing
-stopped_at: Completed 84-01-PLAN.md (code complete, pending manual data migration)
-last_updated: "2026-03-17T21:00:00.000Z"
-last_activity: 2026-03-17 — Completed 84-01 (RLS hardening, auth-config removal, supabase simplification)
+milestone: v4.3
+milestone_name: Admin Polish & Custom Auth
+status: defining-requirements
+stopped_at: Milestone started, defining requirements
+last_updated: "2026-03-17T22:00:00.000Z"
+last_activity: 2026-03-17 — Milestone v4.3 started
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 4
-  completed_plans: 4
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,25 +21,26 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** Phase 81 — Docs Data Model (ready to plan)
+**Current focus:** Defining requirements for v4.3
 
 ## Current Position
 
-Milestone: v4.2 Docs do Sistema + Tenant Onboarding
-Phase: 84 of 84 (FXL Migration & Cleanup) — CODE COMPLETE
-Plan: 1 of 1 in current phase (COMPLETE)
-Status: Code complete — pending manual steps (Clerk org creation + data migration 014)
-Last activity: 2026-03-17 — Completed 84-01 (RLS hardening, auth-config removal, supabase simplification)
+Milestone: v4.3 Admin Polish & Custom Auth
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-17 — Milestone v4.3 started
 
-Progress: [████████████████████] 100% (code complete)
+Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
 
 ## Platform Evolution Plan (v4.0-v4.3)
 
 v4.0: Rebrand Nexo — COMPLETE
 v4.1: Super Admin — COMPLETE
-v4.2: Docs do Sistema + Tenant Onboarding — IN PROGRESS
+v4.2: Docs do Sistema + Tenant Onboarding — COMPLETE
+v4.3: Admin Polish & Custom Auth — IN PROGRESS
 
-Design spec: docs/superpowers/specs/2026-03-17-nexo-platform-evolution-design.md
+Design spec: docs/superpowers/specs/2026-03-17-admin-polish-custom-auth-design.md
 
 ## Accumulated Context
 
@@ -60,13 +61,11 @@ None.
 
 ### Blockers/Concerns
 
-Phase 82 depends on Phase 81 (scope column must exist before UI and migration).
-Phase 84 depends on Phase 83 (real org must exist before data migration).
-Phases 81-82 and 83-84 are independent tracks — safe to parallelize.
+None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T19:35:14.343Z
-Stopped at: Completed 82-01-PLAN.md
-Next: Manual steps — create FXL org in Clerk Dashboard, run migration 014, then /gsd:complete-milestone
+Last session: 2026-03-17
+Stopped at: Milestone v4.3 started
+Next: Define requirements, create roadmap
 Resume file: None
