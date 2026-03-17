@@ -34,8 +34,8 @@
 
 ## Phases
 
-- [ ] **Phase 68: SDK Core Structure** - SKILL.md entry point, all rules/*.md files, contract/types.ts
-- [ ] **Phase 69: SDK Templates + Checklists** - All templates/*.template files, all checklists/*.md files
+- [x] **Phase 68: SDK Core Structure** - SKILL.md entry point, all rules/*.md files, contract/types.ts (completed 2026-03-17)
+- [x] **Phase 69: SDK Templates + Checklists** - All templates/*.template files, all checklists/*.md files (completed 2026-03-17)
 
 ## Phase Details
 
@@ -49,7 +49,7 @@
   3. `contract/types.ts` exists with all Hub<->Spoke contract interfaces
   4. Contract types use v1 field types only (string, number, date, boolean)
   5. Rules reference templates and checklists (even though created in Phase 69)
-**Plans:** 0/1 plans complete
+**Plans:** 1/1 plans complete
 
 ### Phase 69: SDK Templates + Checklists
 **Goal**: Create all production-quality templates for spoke project configs and all quality/compliance checklists
@@ -61,7 +61,7 @@
   3. All infra templates exist: vercel.json, ci.yml, fxl-doctor.sh
   4. All 5 checklists exist with actionable items and severity levels
   5. fxl-doctor.sh template includes all CI checks from design spec
-**Plans:** 0/1 plans complete
+**Plans:** 1/1 plans complete
 
 ## Progress
 
@@ -69,5 +69,5 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 68. SDK Core Structure | 0/1 | Pending | - |
-| 69. SDK Templates + Checklists | 0/1 | Pending | - |
+| 68. SDK Core Structure | 1/1 | Complete | 2026-03-17 |
+| 69. SDK Templates + Checklists | 1/1 | Complete | 2026-03-17 |

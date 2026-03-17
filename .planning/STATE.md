@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: Multi-tenancy
+milestone: v3.2
+milestone_name: FXL SDK Skill
 status: completed
-stopped_at: Completed 67-01-PLAN.md (Integration Verification)
-last_updated: "2026-03-16T15:00:00Z"
-last_activity: 2026-03-16 — v3.1 Multi-tenancy COMPLETE (4 phases, tsc + build pass)
+stopped_at: Completed v3.2 FXL SDK Skill (2 phases, 23 files created)
+last_updated: "2026-03-17T01:44:00Z"
+last_activity: 2026-03-17 — v3.2 FXL SDK Skill COMPLETE (2 phases, all skill files created)
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 2
+  completed_phases: 2
+  total_plans: 2
+  completed_plans: 2
   percent: 100
 ---
 
@@ -21,33 +21,31 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** FXL Core e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** v3.1 Multi-tenancy (Clerk Organizations)
+**Current focus:** v3.2 FXL SDK Skill — COMPLETE
 
 ## Current Position
 
-Milestone: v3.1 of v3.5 (Multi-tenancy)
-Status: Executing — Phase 66 complete, ready for Phase 67
-Last activity: 2026-03-17 — Executed Phase 66 (Module System Multi-tenancy)
+Milestone: v3.2 of v3.5 (FXL SDK Skill)
+Status: Complete
+Last activity: 2026-03-17 — v3.2 FXL SDK Skill complete (SKILL.md, 8 rules, contract types, 8 templates, 5 checklists)
 
-Progress: [=======░░░] 75%
+Progress: [==========] 100%
 
 ## Multi-Milestone Plan (v3.1-v3.5)
 
 Wave 0: v3.0 archived
-Wave 1: v3.1 (multi-tenancy) + v3.2 (SDK skill) — parallel candidates
+Wave 1: v3.1 (multi-tenancy) COMPLETE + v3.2 (SDK skill) COMPLETE
 Wave 2: v3.3 (connector) + v3.4 (Beach House) — depend on v3.2
 Wave 3: v3.5 (integration) — depends on v3.3 + v3.4
 
 Design spec: docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md
 
-## v3.1 Phases (64-67)
+## v3.2 Phases (68-69)
 
 | Phase | Goal | Depends on | Requirements |
 |-------|------|------------|--------------|
-| 64 | Supabase schema + migrations | Nothing | SCHEMA-01..04 |
-| 65 | Clerk Orgs + Token Exchange | Phase 64 | AUTH-01..03, CLERK-01..03 |
-| 66 | Module system multi-tenancy | Phase 64, 65 | MOD-01..04 |
-| 67 | Integration verification | Phase 64, 65, 66 | INT-01..04 |
+| 68 | SDK core structure (SKILL.md, rules, contract) | Nothing | SDK-01..10 |
+| 69 | Templates + checklists | Phase 68 | SDK-11..15 |
 
 ## Accumulated Context
 
@@ -62,13 +60,15 @@ Design spec: docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md
 - Edge Function JWT bridge chosen over direct JWT template (validation + logging)
 - VITE_AUTH_MODE=anon|org flag for backward-compatible dev/staging
 - org_id default 'org_fxl_default' for existing data backfill
-- [Phase 64]: COALESCE-based RLS pattern for anon fallback: single FOR ALL policy per table with org_id self-reference when no JWT claims
-- [Phase 65]: organizationSyncOptions not available in @clerk/react 6.0.1; org persistence handled by Clerk session via setActive
-- [Phase 65]: Supabase org client uses custom fetch wrapper with mutable token ref for dynamic JWT injection
-- [Phase 65]: Edge Function uses jose in Deno runtime with @ts-nocheck (not checked by project tsconfig)
+- [Phase 64]: COALESCE-based RLS pattern for anon fallback
+- [Phase 65]: Supabase org client uses custom fetch wrapper with mutable token ref
 - [Phase 66]: Opt-out model for tenant_modules: modules not in table are enabled by default
-- [Phase 66]: Migration runs inline before first fetch in OrgModuleEnabledProvider
-- [Phase 66]: Home page switched from static mod.enabled to dynamic useModuleEnabled hook
+- [Phase 68]: Contract v1 limited to 4 field types (string, number, date, boolean)
+- [Phase 68]: Contract v1 is read-only (GET only, no mutations)
+- [Phase 68]: Types copied to spoke projects, not imported from package
+- [Phase 68]: Audit scoring uses weighted system (Critical=10, Important=5, Normal=2)
+- [Phase 69]: fxl-doctor.sh runs 5 checks: tsc, eslint, prettier, security headers, contract version
+- [Phase 69]: Templates use mustache-style placeholders for customization
 
 ### Pending Todos
 
@@ -77,11 +77,9 @@ None.
 ### Blockers/Concerns
 
 - Verify Clerk pricing for Organizations (free tier supports 5 orgs)
-- Edge Function requires Supabase CLI for local dev (supabase functions serve)
-- Clerk Organizations works without organizationSyncOptions (not in 6.0.1; setActive handles persistence)
 
 ## Session Continuity
 
-Last session: 2026-03-17T01:17:05Z
-Stopped at: Completed 66-01-PLAN.md (Module System Multi-tenancy)
-Next: `/gsd:execute-phase 67` to run integration verification
+Last session: 2026-03-17T01:44:00Z
+Stopped at: Completed v3.2 FXL SDK Skill
+Next: `/gsd:new-milestone` for v3.3 (connector module) or v3.4 (Beach House migration) — see design spec Section 9 for dependency graph
