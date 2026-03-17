@@ -27,7 +27,7 @@ decisions:
   - "Contract types copied inline (SDK skill outside TS scope)"
   - "ConnectorResult<T> uses ok/error discriminated union pattern"
   - "Manifest cache: 1min TTL in-memory Map"
-  - "useConnectorList returns hardcoded array for v3.3 (Supabase in v3.5)"
+  - "useConnectorList returns hardcoded array for v3.3 (Supabase in future)"
   - "Icon map covers ~100 common lucide icons with Box fallback"
 metrics:
   duration: "~5min"
@@ -50,7 +50,7 @@ Connector module with Result-pattern API service, 5s timeout, ~100 icon mappings
 4. **connector-service**: 5 functions (fetchManifest, fetchEntities, fetchEntity, fetchWidgetData, fetchHealth) with 5s AbortController timeout and ConnectorResult<T> discriminated union
 5. **icon-map**: 100 lucide icons mapped by name string with Box fallback
 6. **useConnector hook**: Fetches + caches manifest per baseUrl (1min TTL), exposes status/loading/error/refetch
-7. **useConnectorList hook**: Returns enabled connectors (hardcoded empty for v3.3, ready for Supabase in v3.5)
+7. **useConnectorList hook**: Returns enabled connectors (hardcoded empty for v3.3, ready for Supabase in future)
 
 ## Deviations from Plan
 

@@ -223,5 +223,5 @@ After scaffold, the project should have:
 
 - v1 contract is read-only: generated forms are display-only
 - Field types limited to string, number, date, boolean (no enum, no relation)
-- Blueprint export feature does not exist in Wireframe Builder yet (v3.4+)
+- Blueprint export feature does not exist in Wireframe Builder yet
 - This rule documents the planned flow for when export becomes available

@@ -754,10 +754,10 @@ GitHub Actions (`ci.yml`) roda `fxl-doctor.sh` em todo push/PR.
 
 ### 8.3 Implementacao (adiada)
 
-Esta camada e posterior aos milestones v3.0-v3.5. Pre-requisitos:
+Esta camada e posterior aos milestones v3.0-v3.3. Pre-requisitos:
 - Multi-tenancy funcionando (v3.1)
 - Contrato de API estavel (v3.2 + v3.3)
-- Pelo menos 1 spoke conectada (v3.5)
+- Nota: v3.4/v3.5 foram descontinuadas — evolucao continua via v4.x spec
 
 ---
 
@@ -805,8 +805,8 @@ v3.0 (reorganizacao) ──> v3.1 (multi-tenancy)
 - Drag-and-drop no Wireframe Builder
 - Real-time collaborative editing (CRDT)
 - Mobile apps
-- Modulo CRM (sera milestone futuro apos v3.5)
-- IA runtime / vector DB (sera milestone futuro apos v3.5)
+- Modulo CRM (milestone futuro)
+- IA runtime / vector DB (milestone futuro)
 - React Query / loading states globais
 - Code splitting / lazy loading (pode entrar em v3.0 como bonus)
 - Testes automatizados (divida tecnica reconhecida, sera enderecard separadamente)
@@ -843,5 +843,5 @@ v3.0 (reorganizacao) ──> v3.1 (multi-tenancy)
 - [ ] v3.1: Login com 2+ orgs mostra org picker. Modulos filtrados por org. RLS isolando dados.
 - [ ] v3.2: Skill funciona: `audita este projeto` gera relatorio. Template gera projeto valido.
 - [ ] v3.3: Connector renderiza entidades de um mock spoke. Widgets aparecem na home.
-- [ ] v3.4: Beach House rodando em infra propria. Contrato implementado. Supabase migrado.
-- [ ] v3.5: Dados do Beach House visiveis no FXL Core. Navegacao seamless hub <-> spoke data.
+- ~~v3.4: Beach House~~ — DESCONTINUADA (superseded by v4.x evolution spec)
+- ~~v3.5: Beach House no FXL Core~~ — DESCONTINUADA (superseded by v4.x evolution spec)

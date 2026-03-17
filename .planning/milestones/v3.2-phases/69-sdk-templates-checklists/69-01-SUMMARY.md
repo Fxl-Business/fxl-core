@@ -11,7 +11,7 @@ provides:
   - 8 production-quality config templates for spoke projects
   - 5 verification checklists with severity-weighted items
   - fxl-doctor.sh CI health check script template
-affects: [v3.4-beach-house, all-future-spoke-projects]
+affects: [all-future-spoke-projects]
 
 tech-stack:
   added: []
@@ -108,7 +108,7 @@ None.
 ## Next Phase Readiness
 
 - v3.2 FXL SDK Skill is COMPLETE
-- Ready for v3.3 (connector module) or v3.4 (Beach House migration)
+- Ready for v3.3 (connector module) or future spoke projects
 - SDK can be used immediately for auditing or scaffolding spoke projects
 
 ---

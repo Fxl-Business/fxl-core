@@ -11,7 +11,7 @@ provides:
   - FXL SDK skill entry point (SKILL.md)
   - 8 rules files for scaffold, audit, refactor, connect, CI, deploy
   - Hub<->Spoke contract types (TypeScript)
-affects: [69-sdk-templates-checklists, v3.4-beach-house, v3.3-connector]
+affects: [69-sdk-templates-checklists, v3.3-connector]
 
 tech-stack:
   added: [fxl-sdk-skill]

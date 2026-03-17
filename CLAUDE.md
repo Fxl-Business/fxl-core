@@ -161,10 +161,10 @@ para planejamento estruturado e execucao via agentes. Os slash commands `/gsd:*`
 
 Antes de sugerir `/gsd:new-milestone`, verificar se ja existem milestones planejadas
 no design spec em `docs/superpowers/specs/`. O arquivo
-`2026-03-16-fxl-platform-evolution-design.md` contem o roadmap v3.1-v3.5 com
+`2026-03-17-nexo-platform-evolution-design.md` contem o roadmap v4.0-v4.3 com
 dependencias, criterios de aceite e ordem de execucao. Se existir milestone pre-planejada,
 sugerir `/gsd:new-milestone` referenciando a proxima milestone do spec (nao como criacao
-do zero).
+do zero). Nota: v3.4/v3.5 (Beach House) foram descontinuadas.
 
 ---
 
