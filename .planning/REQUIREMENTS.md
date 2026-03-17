@@ -37,10 +37,10 @@ Requirements for milestone v4.2 — Docs do Sistema + Tenant Onboarding.
 
 ### Onboarding — FXL Migration
 
-- [ ] **ONB-04**: FXL migrada de `org_fxl_default` para org Clerk real
-- [ ] **ONB-05**: Todos os dados existentes (documents, tasks, etc.) recebem novo `org_id`
-- [ ] **ONB-06**: Flag `VITE_AUTH_MODE` removida do codebase
-- [ ] **ONB-07**: Fallback COALESCE anon removido de todas as RLS policies
+- [x] **ONB-04**: FXL migrada de `org_fxl_default` para org Clerk real
+- [x] **ONB-05**: Todos os dados existentes (documents, tasks, etc.) recebem novo `org_id`
+- [x] **ONB-06**: Flag `VITE_AUTH_MODE` removida do codebase
+- [x] **ONB-07**: Fallback COALESCE anon removido de todas as RLS policies
 
 ## Future Requirements
 
@@ -83,10 +83,10 @@ Requirements for milestone v4.2 — Docs do Sistema + Tenant Onboarding.
 | ONB-01 | Phase 83 | Complete |
 | ONB-02 | Phase 83 | Complete |
 | ONB-03 | Phase 83 | Complete |
-| ONB-04 | Phase 84 | Pending |
-| ONB-05 | Phase 84 | Pending |
-| ONB-06 | Phase 84 | Pending |
-| ONB-07 | Phase 84 | Pending |
+| ONB-04 | Phase 84 | Complete |
+| ONB-05 | Phase 84 | Complete |
+| ONB-06 | Phase 84 | Complete |
+| ONB-07 | Phase 84 | Complete |
 
 **Coverage:**
 - v4.2 requirements: 17 total
@@ -95,4 +95,4 @@ Requirements for milestone v4.2 — Docs do Sistema + Tenant Onboarding.
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-17 after roadmap creation (phases 81-84 assigned)*
+*Last updated: 2026-03-17 — all 17 requirements complete; ONB-04/05 verified in production database*

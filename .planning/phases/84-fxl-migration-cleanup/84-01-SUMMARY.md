@@ -3,6 +3,7 @@ phase: 84-fxl-migration-cleanup
 plan: 01
 subsystem: auth
 tags: [rls, supabase, clerk, migration, cleanup, auth-config]
+requirements-completed: [ONB-04, ONB-05, ONB-06, ONB-07]
 
 # Dependency graph
 requires:
@@ -54,6 +55,5 @@ decisions:
 - auth-config.ts: file does not exist
 
 # Pending
-- Task 0: Create FXL org in Clerk Dashboard (manual action)
-- Task 4: Run migration 014 with real org_id (manual action after Task 0)
+_(none — migration 014 executed manually and verified in production database 2026-03-17)_
 ---

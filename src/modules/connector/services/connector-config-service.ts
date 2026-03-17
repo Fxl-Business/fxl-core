@@ -96,7 +96,7 @@ export async function listAllConnectorConfigs(): Promise<
 export async function upsertConnectorConfig(
   config: ConnectorConfig,
   enabled = true,
-  orgId = 'org_fxl_default',
+  orgId: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const { error } = await supabase
     .from('tenant_modules')
@@ -126,7 +126,7 @@ export async function upsertConnectorConfig(
 /** Delete a connector config */
 export async function deleteConnectorConfig(
   appId: string,
-  orgId = 'org_fxl_default',
+  orgId: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const { error } = await supabase
     .from('tenant_modules')
@@ -146,7 +146,7 @@ export async function deleteConnectorConfig(
 export async function toggleConnectorEnabled(
   appId: string,
   enabled: boolean,
-  orgId = 'org_fxl_default',
+  orgId: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const { error } = await supabase
     .from('tenant_modules')
