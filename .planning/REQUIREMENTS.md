@@ -9,31 +9,31 @@ Requirements for milestone v4.2 — Docs do Sistema + Tenant Onboarding.
 
 ### Docs — Scope & Data Model
 
-- [ ] **DOCS-01**: Coluna `scope` na tabela `documents` com valores `'tenant'` (default) e `'product'`
-- [ ] **DOCS-02**: Product docs (`scope = 'product'`) visíveis para todos os tenants, sem filtro `org_id`
-- [ ] **DOCS-03**: Enterprise docs (`scope = 'tenant'`) mantêm comportamento atual (filtrado por `org_id`)
+- [x] **DOCS-01**: Coluna `scope` na tabela `documents` com valores `'tenant'` (default) e `'product'`
+- [x] **DOCS-02**: Product docs (`scope = 'product'`) visíveis para todos os tenants, sem filtro `org_id`
+- [x] **DOCS-03**: Enterprise docs (`scope = 'tenant'`) mantêm comportamento atual (filtrado por `org_id`)
 
 ### Docs — Management
 
-- [ ] **DOCS-04**: Super admin pode criar product docs via `/admin/product-docs`
-- [ ] **DOCS-05**: Super admin pode editar e deletar product docs
-- [ ] **DOCS-06**: Tenant admin cria/edita enterprise docs via interface normal de docs
+- [x] **DOCS-04**: Super admin pode criar product docs via `/admin/product-docs`
+- [x] **DOCS-05**: Super admin pode editar e deletar product docs
+- [x] **DOCS-06**: Tenant admin cria/edita enterprise docs via interface normal de docs
 
 ### Docs — Sidebar & Navigation
 
-- [ ] **DOCS-07**: Sidebar mostra "Docs da Empresa" (tenant-scoped) e "Docs do Produto" (global) como seções separadas
-- [ ] **DOCS-08**: Product docs são read-only para operadores (não-super-admin)
+- [x] **DOCS-07**: Sidebar mostra "Docs da Empresa" (tenant-scoped) e "Docs do Produto" (global) como seções separadas
+- [x] **DOCS-08**: Product docs são read-only para operadores (não-super-admin)
 
 ### Docs — Migration
 
-- [ ] **DOCS-09**: Docs de processo FXL (`processo/`, `ferramentas/`, `padroes/`) migrados como enterprise docs do tenant FXL
-- [ ] **DOCS-10**: Docs de SDK/onboarding migrados como product docs (global)
+- [x] **DOCS-09**: Docs de processo FXL (`processo/`, `ferramentas/`, `padroes/`) migrados como enterprise docs do tenant FXL
+- [x] **DOCS-10**: Docs de SDK/onboarding migrados como product docs (global)
 
 ### Onboarding — Org Creation
 
-- [ ] **ONB-01**: Novo usuário sem org vê tela "Criar Empresa"
-- [ ] **ONB-02**: Criar empresa cria Clerk Organization e atribui usuário como admin
-- [ ] **ONB-03**: Tenant sem módulos habilitados vê tela "Sem módulos" com mensagem clara
+- [x] **ONB-01**: Novo usuário sem org vê tela "Criar Empresa"
+- [x] **ONB-02**: Criar empresa cria Clerk Organization e atribui usuário como admin
+- [x] **ONB-03**: Tenant sem módulos habilitados vê tela "Sem módulos" com mensagem clara
 
 ### Onboarding — FXL Migration
 
@@ -70,19 +70,19 @@ Requirements for milestone v4.2 — Docs do Sistema + Tenant Onboarding.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DOCS-01 | Phase 81 | Pending |
-| DOCS-02 | Phase 81 | Pending |
-| DOCS-03 | Phase 81 | Pending |
-| DOCS-04 | Phase 82 | Pending |
-| DOCS-05 | Phase 82 | Pending |
-| DOCS-06 | Phase 82 | Pending |
-| DOCS-07 | Phase 82 | Pending |
-| DOCS-08 | Phase 82 | Pending |
-| DOCS-09 | Phase 82 | Pending |
-| DOCS-10 | Phase 82 | Pending |
-| ONB-01 | Phase 83 | Pending |
-| ONB-02 | Phase 83 | Pending |
-| ONB-03 | Phase 83 | Pending |
+| DOCS-01 | Phase 81 | Complete |
+| DOCS-02 | Phase 81 | Complete |
+| DOCS-03 | Phase 81 | Complete |
+| DOCS-04 | Phase 82 | Complete |
+| DOCS-05 | Phase 82 | Complete |
+| DOCS-06 | Phase 82 | Complete |
+| DOCS-07 | Phase 82 | Complete |
+| DOCS-08 | Phase 82 | Complete |
+| DOCS-09 | Phase 82 | Complete |
+| DOCS-10 | Phase 82 | Complete |
+| ONB-01 | Phase 83 | Complete |
+| ONB-02 | Phase 83 | Complete |
+| ONB-03 | Phase 83 | Complete |
 | ONB-04 | Phase 84 | Pending |
 | ONB-05 | Phase 84 | Pending |
 | ONB-06 | Phase 84 | Pending |

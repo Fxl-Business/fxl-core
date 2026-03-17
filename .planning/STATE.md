@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.2
 milestone_name: Docs do Sistema + Tenant Onboarding
 status: executing
-stopped_at: Completed 83-01-PLAN.md
-last_updated: "2026-03-17T19:24:29.726Z"
+stopped_at: Completed 82-01-PLAN.md
+last_updated: "2026-03-17T19:35:18.466Z"
 last_activity: 2026-03-17 — Completed 81-01 (scope column on documents table, split RLS policies, TypeScript types)
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 3
+  total_plans: 4
+  completed_plans: 3
   percent: 5
 ---
 
@@ -50,6 +50,9 @@ Design spec: docs/superpowers/specs/2026-03-17-nexo-platform-evolution-design.md
 - [81-01] org_id added to DocumentRow type to align TypeScript with DB reality
 - [Phase 83-01]: AuthOnlyRoute instead of Clerk SignedIn — SignedIn not exported by @clerk/react in this version
 - [Phase 83-01]: isOrgMode() guard on SemModulos check preserves anon mode where all modules are enabled by default
+- [Phase 82-docs-ui-migration]: useDoc returns rawDoc to avoid duplicate getDocBySlug call in DocRenderer
+- [Phase 82-docs-ui-migration]: useDocsNav returns { tenantItems, productItems } split by scope; Sidebar builds labeled sections
+- [Phase 82-docs-ui-migration]: Product docs use flat nav in sidebar (not hierarchical) for v4.2
 
 ### Pending Todos
 
@@ -63,7 +66,7 @@ Phases 81-82 and 83-84 are independent tracks — safe to parallelize.
 
 ## Session Continuity
 
-Last session: 2026-03-17T19:24:29.723Z
-Stopped at: Completed 83-01-PLAN.md
+Last session: 2026-03-17T19:35:14.343Z
+Stopped at: Completed 82-01-PLAN.md
 Next: /gsd:execute-phase 82
 Resume file: None

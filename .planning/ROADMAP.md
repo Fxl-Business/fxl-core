@@ -40,7 +40,7 @@
 ### Phases
 
 - [x] **Phase 81: Docs Data Model** - Add scope column, RLS changes, product doc visibility (completed 2026-03-17)
-- [ ] **Phase 82: Docs UI & Migration** - Admin CRUD for product docs, sidebar separation, content migration
+- [x] **Phase 82: Docs UI & Migration** - Admin CRUD for product docs, sidebar separation, content migration (completed 2026-03-17)
 - [x] **Phase 83: Onboarding Flow** - Org creation screen, empty states, no-modules state (completed 2026-03-17)
 - [ ] **Phase 84: FXL Migration & Cleanup** - Migrate FXL to real Clerk org, remove legacy auth artifacts
 
@@ -108,6 +108,6 @@ Within each track: 81 before 82, 83 before 84.
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 81. Docs Data Model | 1/1 | Complete   | 2026-03-17 | - |
-| 82. Docs UI & Migration | v4.2 | 0/1 | Not started | - |
+| 82. Docs UI & Migration | 1/1 | Complete   | 2026-03-17 | - |
 | 83. Onboarding Flow | 1/1 | Complete   | 2026-03-17 | - |
 | 84. FXL Migration & Cleanup | v4.2 | 0/1 | Not started | - |
