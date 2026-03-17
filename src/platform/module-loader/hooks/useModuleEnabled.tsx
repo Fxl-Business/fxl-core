@@ -4,6 +4,7 @@ import { MODULE_IDS } from '@platform/module-loader/module-ids'
 import { isOrgMode } from '@platform/auth/auth-config'
 import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 import { supabase } from '@platform/supabase'
+import { migrateLocalModulesToTenantModules } from '@platform/tenants/migrate-local-modules'
 
 const STORAGE_KEY = 'fxl-enabled-modules'
 
@@ -102,6 +103,10 @@ function OrgModuleEnabledProvider({ children }: { children: ReactNode }) {
     setError(null)
 
     async function fetchModules(orgId: string) {
+      // Run one-time migration from localStorage before fetching
+      await migrateLocalModulesToTenantModules(orgId)
+      if (cancelled) return
+
       const { data, error: fetchError } = await supabase
         .from('tenant_modules')
         .select('module_id, enabled')
