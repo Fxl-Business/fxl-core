@@ -46,24 +46,24 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BRAND-01 | TBD | Pending |
-| BRAND-02 | TBD | Pending |
-| BRAND-03 | TBD | Pending |
-| BRAND-04 | TBD | Pending |
-| BRAND-05 | TBD | Pending |
-| BRAND-06 | TBD | Pending |
-| META-01 | TBD | Pending |
-| META-02 | TBD | Pending |
-| DOCS-01 | TBD | Pending |
-| DOCS-02 | TBD | Pending |
-| DOCS-03 | TBD | Pending |
-| VERIF-01 | TBD | Pending |
-| VERIF-02 | TBD | Pending |
+| BRAND-01 | Phase 73 | Pending |
+| BRAND-02 | Phase 73 | Pending |
+| BRAND-03 | Phase 73 | Pending |
+| BRAND-04 | Phase 73 | Pending |
+| BRAND-05 | Phase 73 | Pending |
+| BRAND-06 | Phase 73 | Pending |
+| META-01 | Phase 73 | Pending |
+| META-02 | Phase 73 | Pending |
+| DOCS-01 | Phase 73 | Pending |
+| DOCS-02 | Phase 73 | Pending |
+| DOCS-03 | Phase 73 | Pending |
+| VERIF-01 | Phase 74 | Pending |
+| VERIF-02 | Phase 74 | Pending |
 
 **Coverage:**
 - v4.0 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13
+- Mapped to phases: 13
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
