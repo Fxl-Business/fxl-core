@@ -79,7 +79,10 @@
   2. Super admin habilita ou desabilita um modulo para um tenant especifico e a mudanca persiste ao recarregar
   3. Operador do tenant (modo operator) ve na sidebar apenas os modulos que o super admin habilitou para seu org
   4. localStorage nao e mais usado como fonte de verdade para modulos habilitados
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 78-01-PLAN.md — Supabase tenant_modules CRUD + localStorage removal
 
 ### Phase 79: Platform Settings & MCP
 **Goal**: Super admin tem pagina para gerenciar feature flags e configs globais; Claude Code tem acesso direto a Supabase e Clerk via MCP servers configurados
@@ -121,6 +124,6 @@ Phase 75 primeiro (bloqueante). Phase 76 depende de 75. Phases 77, 78 e 79 sao I
 | 75. Auth & RLS Foundation | v4.1 | 0/? | Not started | - |
 | 76. Admin Shell & Dashboard | v4.1 | 0/? | Not started | - |
 | 77. Tenant Management | v4.1 | 0/? | Not started | - |
-| 78. Module Management Evolution | v4.1 | 0/? | Not started | - |
+| 78. Module Management Evolution | v4.1 | 0/1 | Not started | - |
 | 79. Platform Settings & MCP | v4.1 | 0/? | Not started | - |
 | 80. Build Verification | v4.1 | 0/? | Not started | - |
