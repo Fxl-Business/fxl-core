@@ -4,7 +4,9 @@ import { useSession } from '@clerk/react'
 import { ArrowLeft, Building2, Users, Calendar, Shield, Blocks, ExternalLink } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import { getTenantDetail, setClerkTokenGetter } from '@platform/services/tenant-service'
+import { listOrgMembers, setAdminClerkTokenGetter } from '@platform/services/admin-service'
 import type { TenantDetail } from '@platform/types/tenant'
+import type { OrgMember } from '@platform/types/admin'
 
 // ---------------------------------------------------------------------------
 // Info card component
@@ -42,11 +44,14 @@ export default function TenantDetailPage() {
   const [tenant, setTenant] = useState<TenantDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [members, setMembers] = useState<OrgMember[]>([])
+  const [membersLoading, setMembersLoading] = useState(true)
 
-  // Register Clerk token getter for the service
+  // Register Clerk token getters for both services
   useEffect(() => {
     if (session) {
       setClerkTokenGetter(() => session.getToken({ template: 'supabase' }))
+      setAdminClerkTokenGetter(() => session.getToken({ template: 'supabase' }))
     }
   }, [session])
 
@@ -75,6 +80,32 @@ export default function TenantDetailPage() {
     fetchDetail()
     return () => { cancelled = true }
   }, [orgId, session, navigate])
+
+  // Fetch org members
+  useEffect(() => {
+    if (!orgId || !session) {
+      setMembersLoading(false)
+      return
+    }
+
+    let cancelled = false
+
+    async function fetchMembers() {
+      setMembersLoading(true)
+      try {
+        const data = await listOrgMembers(orgId!)
+        if (!cancelled) setMembers(data.members)
+      } catch {
+        // Silently fail — tenant detail still shows, members section shows empty
+        if (!cancelled) setMembers([])
+      } finally {
+        if (!cancelled) setMembersLoading(false)
+      }
+    }
+
+    fetchMembers()
+    return () => { cancelled = true }
+  }, [orgId, session])
 
   // ----- Loading state -----
   if (loading) {
@@ -165,6 +196,78 @@ export default function TenantDetailPage() {
           value={tenant.maxAllowedMemberships ?? 'Ilimitado'}
           icon={Shield}
         />
+      </div>
+
+      {/* Members section */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-foreground">
+          Membros
+        </h2>
+        {membersLoading && (
+          <div className="space-y-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-14 w-full animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+            ))}
+          </div>
+        )}
+        {!membersLoading && members.length === 0 && (
+          <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center dark:border-slate-700">
+            <Users className="mx-auto mb-2 h-6 w-6 text-slate-300 dark:text-slate-600" />
+            <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum membro encontrado</p>
+          </div>
+        )}
+        {!membersLoading && members.length > 0 && (
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-card">
+            {members.map((member, idx) => {
+              const fullName = [member.firstName, member.lastName].filter(Boolean).join(' ') || 'Sem nome'
+              const isAdmin = member.role === 'admin' || member.role === 'org:admin'
+              return (
+                <div
+                  key={member.userId}
+                  className={[
+                    'flex items-center gap-3 px-4 py-3',
+                    idx !== 0 ? 'border-t border-slate-100 dark:border-slate-700/50' : '',
+                  ].join(' ')}
+                >
+                  {/* Avatar */}
+                  {member.imageUrl ? (
+                    <img
+                      src={member.imageUrl}
+                      alt={fullName}
+                      className="h-8 w-8 shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+                      <Users className="h-4 w-4" />
+                    </div>
+                  )}
+
+                  {/* Name + Email */}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-900 dark:text-foreground">
+                      {fullName}
+                    </p>
+                    <p className="truncate text-xs text-slate-400 dark:text-slate-500">
+                      {member.email}
+                    </p>
+                  </div>
+
+                  {/* Role badge */}
+                  <span
+                    className={[
+                      'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium',
+                      isAdmin
+                        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400'
+                        : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+                    ].join(' ')}
+                  >
+                    {isAdmin ? 'Admin' : 'Membro'}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Public metadata */}
