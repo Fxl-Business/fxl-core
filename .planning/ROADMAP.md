@@ -36,7 +36,7 @@
 - [x] **Phase 64: Supabase Schema & Migrations** - tenant_modules table, org_id on existing tables, RLS policies, indexes (completed 2026-03-17)
 - [x] **Phase 65: Clerk Organizations + Token Exchange** - useActiveOrg hook, org picker UI, Edge Function JWT bridge, auth mode flag, Supabase client refactor (completed 2026-03-17)
 - [x] **Phase 66: Module System Multi-tenancy** - Refactor useModuleEnabled for Supabase, tenantScoped field, sidebar/home filtering, localStorage migration (completed 2026-03-17)
-- [ ] **Phase 67: Integration Verification + Auth Mode** - TypeScript/build verification, end-to-end manual test, anon mode backward compatibility
+- [x] **Phase 67: Integration Verification + Auth Mode** - TypeScript/build verification, end-to-end manual test, anon mode backward compatibility
 
 ## Phase Details
 
@@ -101,4 +101,4 @@
 | 64. Supabase Schema & Migrations | 1/1 | Complete   | 2026-03-17 |
 | 65. Clerk Organizations + Token Exchange | 1/1 | Complete | 2026-03-17 |
 | 66. Module System Multi-tenancy | 1/1 | Complete | 2026-03-17 |
-| 67. Integration Verification + Auth Mode | 0/0 | Pending | — |
+| 67. Integration Verification + Auth Mode | 1/1 | Complete | 2026-03-16 |
