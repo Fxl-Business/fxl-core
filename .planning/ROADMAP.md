@@ -79,8 +79,8 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 77-01-PLAN.md — Edge Function proxy for Clerk Organizations API + types + client service
-- [ ] 77-02-PLAN.md — TenantsPage (list), TenantDetailPage, CreateTenantDialog + route wiring
+- [x] 77-01-PLAN.md — Edge Function proxy for Clerk Organizations API + types + client service
+- [x] 77-02-PLAN.md — TenantsPage (list), TenantDetailPage, CreateTenantDialog + route wiring
 
 ### Phase 78: Module Management Evolution
 **Goal**: Controle de modulos por tenant migra de localStorage (local, per-browser) para Supabase tenant_modules (persistente, per-org), com super admin como unico ponto de controle
@@ -139,7 +139,7 @@ Phase 75 primeiro (bloqueante). Phase 76 depende de 75. Phases 77, 78 e 79 sao I
 |-------|-----------|----------------|--------|-----------|
 | 75. Auth & RLS Foundation | v4.1 | 2/2 | Complete | 2026-03-17 |
 | 76. Admin Shell & Dashboard | v4.1 | 2/2 | Complete | 2026-03-17 |
-| 77. Tenant Management | 2/2 | Complete   | 2026-03-17 | - |
+| 77. Tenant Management | v4.1 | 2/2 | Complete | 2026-03-17 |
 | 78. Module Management Evolution | v4.1 | 0/1 | Not started | - |
 | 79. Platform Settings & MCP | v4.1 | 0/2 | Not started | - |
 | 80. Build Verification | v4.1 | 0/1 | Not started | - |
