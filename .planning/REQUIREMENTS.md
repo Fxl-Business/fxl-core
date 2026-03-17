@@ -11,19 +11,19 @@ Requirements para milestone v3.1 Multi-tenancy. Derivados da Section 5 do design
 
 ### Schema & Data (Supabase)
 
-- [ ] **SCHEMA-01**: Criar tabela `tenant_modules` com `org_id text`, `module_id text`, `enabled boolean`, `config jsonb`, primary key `(org_id, module_id)`
+- [x] **SCHEMA-01**: Criar tabela `tenant_modules` com `org_id text`, `module_id text`, `enabled boolean`, `config jsonb`, primary key `(org_id, module_id)`
   - **Aceite:** Tabela existe no Supabase com RLS habilitado. Policy restringe acesso por `org_id` do JWT.
   - **Depende de:** Nada (primeira migracao do milestone)
 
-- [ ] **SCHEMA-02**: Adicionar coluna `org_id text` a todas as tabelas existentes: `comments`, `share_tokens`, `blueprint_configs`, `briefing_configs`, `tasks`, `documents`, `knowledge_entries`
+- [x] **SCHEMA-02**: Adicionar coluna `org_id text` a todas as tabelas existentes: `comments`, `share_tokens`, `blueprint_configs`, `briefing_configs`, `tasks`, `documents`, `knowledge_entries`
   - **Aceite:** Todas as 7 tabelas possuem coluna `org_id` com default `'org_fxl_default'`. Backfill aplicado (nenhum row com `org_id IS NULL`).
   - **Depende de:** Nada
 
-- [ ] **SCHEMA-03**: Criar RLS policies por `org_id` em todas as tabelas existentes, substituindo as policies anon-permissivas atuais
+- [x] **SCHEMA-03**: Criar RLS policies por `org_id` em todas as tabelas existentes, substituindo as policies anon-permissivas atuais
   - **Aceite:** Cada tabela tem policy `FOR ALL USING (org_id = (current_setting('request.jwt.claims')::jsonb->>'org_id'))`. Policies anon anteriores removidas ou condicionadas ao auth mode.
   - **Depende de:** SCHEMA-02
 
-- [ ] **SCHEMA-04**: Criar index em `org_id` para todas as tabelas que recebem a coluna
+- [x] **SCHEMA-04**: Criar index em `org_id` para todas as tabelas que recebem a coluna
   - **Aceite:** Index `idx_{table}_org_id` existe em cada tabela. Query plan de `SELECT WHERE org_id = X` usa index scan.
   - **Depende de:** SCHEMA-02
 
@@ -106,10 +106,10 @@ Requirements para milestone v3.1 Multi-tenancy. Derivados da Section 5 do design
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | Phase 64 | Pending |
-| SCHEMA-02 | Phase 64 | Pending |
-| SCHEMA-03 | Phase 64 | Pending |
-| SCHEMA-04 | Phase 64 | Pending |
+| SCHEMA-01 | Phase 64 | Complete |
+| SCHEMA-02 | Phase 64 | Complete |
+| SCHEMA-03 | Phase 64 | Complete |
+| SCHEMA-04 | Phase 64 | Complete |
 | AUTH-01 | Phase 65 | Pending |
 | AUTH-02 | Phase 65 | Pending |
 | AUTH-03 | Phase 65 | Pending |

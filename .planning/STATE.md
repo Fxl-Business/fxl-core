@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Multi-tenancy
 status: planning
-stopped_at: null
-last_updated: "2026-03-16T14:00:00.000Z"
-last_activity: 2026-03-16 — Created v3.1 requirements (18 reqs) and roadmap (4 phases)
+stopped_at: Completed 64-01-PLAN.md (Supabase Schema & Migrations)
+last_updated: "2026-03-17T01:02:59.799Z"
+last_activity: 2026-03-16 — Created v3.1 requirements and roadmap
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
   percent: 0
 ---
 
@@ -62,6 +62,7 @@ Design spec: docs/superpowers/specs/2026-03-16-fxl-platform-evolution-design.md
 - Edge Function JWT bridge chosen over direct JWT template (validation + logging)
 - VITE_AUTH_MODE=anon|org flag for backward-compatible dev/staging
 - org_id default 'org_fxl_default' for existing data backfill
+- [Phase 64]: COALESCE-based RLS pattern for anon fallback: single FOR ALL policy per table with org_id self-reference when no JWT claims
 
 ### Pending Todos
 
@@ -75,6 +76,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16T14:00:00.000Z
-Stopped at: Requirements and roadmap created
+Last session: 2026-03-17T01:02:59.796Z
+Stopped at: Completed 64-01-PLAN.md (Supabase Schema & Migrations)
 Next: `/gsd:plan-phase 64` to create execution plans for Phase 64

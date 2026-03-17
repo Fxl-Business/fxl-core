@@ -33,7 +33,7 @@
 
 ## Phases
 
-- [ ] **Phase 64: Supabase Schema & Migrations** - tenant_modules table, org_id on existing tables, RLS policies, indexes
+- [x] **Phase 64: Supabase Schema & Migrations** - tenant_modules table, org_id on existing tables, RLS policies, indexes (completed 2026-03-17)
 - [ ] **Phase 65: Clerk Organizations + Token Exchange** - useActiveOrg hook, org picker UI, Edge Function JWT bridge, auth mode flag, Supabase client refactor
 - [ ] **Phase 66: Module System Multi-tenancy** - Refactor useModuleEnabled for Supabase, tenantScoped field, sidebar/home filtering, localStorage migration
 - [ ] **Phase 67: Integration Verification + Auth Mode** - TypeScript/build verification, end-to-end manual test, anon mode backward compatibility
@@ -51,7 +51,7 @@
   4. RLS policies on all tables filter by `org_id` from JWT claims (with anon fallback for backward compat)
   5. Indexes on `org_id` exist for all tables
   6. `make migrate` applies cleanly on fresh and existing databases
-**Plans:** [To be planned]
+**Plans:** 1/1 plans complete
 
 ### Phase 65: Clerk Organizations + Token Exchange
 **Goal**: Clerk Organizations integrated in the frontend with org picker, and a Supabase Edge Function bridges Clerk JWTs to Supabase JWTs with org_id claims, controlled by VITE_AUTH_MODE flag
@@ -98,7 +98,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 64. Supabase Schema & Migrations | 0/0 | Pending | — |
+| 64. Supabase Schema & Migrations | 1/1 | Complete   | 2026-03-17 |
 | 65. Clerk Organizations + Token Exchange | 0/0 | Pending | — |
 | 66. Module System Multi-tenancy | 0/0 | Pending | — |
 | 67. Integration Verification + Auth Mode | 0/0 | Pending | — |
