@@ -10,7 +10,7 @@
  *   setAdminClerkTokenGetter(() => session.getToken())
  *   const { users, totalCount } = await listUsers()
  */
-import type { AdminUserListResponse } from '@platform/types/admin'
+import type { AdminUserListResponse, OrgMemberListResponse } from '@platform/types/admin'
 
 const FUNCTIONS_URL = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL ?? ''
 
@@ -60,5 +60,20 @@ export async function listUsers(): Promise<AdminUserListResponse> {
   return res.json() as Promise<AdminUserListResponse>
 }
 
+/**
+ * List all members of a specific organization (admin-only).
+ * Calls the admin-tenants Supabase Edge Function members endpoint.
+ *
+ * @param orgId - Clerk org ID (e.g., "org_xxx")
+ * @returns { members: OrgMember[], totalCount: number }
+ */
+export async function listOrgMembers(orgId: string): Promise<OrgMemberListResponse> {
+  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants/${orgId}/members`, {
+    headers: await getAuthHeaders(),
+  })
+  if (!res.ok) throw new Error(`Failed to list org members: ${res.status}`)
+  return res.json() as Promise<OrgMemberListResponse>
+}
+
 // Re-export types for convenience
-export type { AdminUser, AdminUserListResponse } from '@platform/types/admin'
+export type { AdminUser, AdminUserListResponse, OrgMembership, OrgMember, OrgMemberListResponse } from '@platform/types/admin'
