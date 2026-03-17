@@ -47,7 +47,11 @@
   3. Usuario com claim super_admin acessa `/admin/*` normalmente sem redirecionamento
   4. Consulta SQL direta no Supabase retorna dados de todos os tenants quando JWT tem `super_admin = true`
   5. Consulta com JWT de tenant comum continua retornando apenas dados do proprio org_id
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 75-01-PLAN.md — SuperAdminRoute component + AppRouter wiring + RLS migration 009
+- [ ] 75-02-PLAN.md — Clerk JWT template config (checkpoint) + E2E verification
 
 ### Phase 76: Admin Shell & Dashboard
 **Goal**: Super admin tem um shell de navegacao dedicado para a area /admin e ve metricas agregadas da plataforma logo ao entrar
@@ -121,7 +125,7 @@ Phase 75 primeiro (bloqueante). Phase 76 depende de 75. Phases 77, 78 e 79 sao I
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 75. Auth & RLS Foundation | v4.1 | 0/? | Not started | - |
+| 75. Auth & RLS Foundation | v4.1 | 0/2 | Not started | - |
 | 76. Admin Shell & Dashboard | v4.1 | 0/? | Not started | - |
 | 77. Tenant Management | v4.1 | 0/? | Not started | - |
 | 78. Module Management Evolution | v4.1 | 0/1 | Not started | - |
