@@ -210,7 +210,7 @@ As skills referenciadas acima vivem em diferentes niveis:
 - composition-patterns, frontend-design, react-best-practices, ui-ux-pro-max, web-design-guidelines — regras de frontend
 
 **Skills locais do projeto (`.claude/skills/`):**
-- build-with-agent-team, gsd-multi-agent — diretorios no projeto
+- build-with-agent-team, agent-orchestrator — diretorios no projeto
 - clerk, clerk-backend-api, clerk-custom-ui, clerk-setup, clerk-webhooks, clerk-testing, clerk-orgs, clerk-swift, clerk-nextjs-patterns — symlinks para `.agents/skills/`
 
 **Skills de terceiros (`.agents/skills/`):**
