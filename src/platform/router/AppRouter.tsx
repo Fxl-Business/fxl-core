@@ -16,6 +16,8 @@ const SharedWireframeView = lazy(() => import('@modules/wireframe/pages/SharedWi
 // Admin pages (lazy for code splitting)
 const AdminLayout = lazy(() => import('@platform/layout/AdminLayout'))
 const AdminDashboard = lazy(() => import('@platform/pages/admin/AdminDashboard'))
+const TenantsPage = lazy(() => import('@platform/pages/admin/TenantsPage'))
+const TenantDetailPage = lazy(() => import('@platform/pages/admin/TenantDetailPage'))
 const ModulesPanel = lazy(() => import('@platform/pages/admin/ModulesPanel'))
 const ConnectorsPanel = lazy(() => import('@platform/pages/admin/ConnectorsPanel'))
 const SettingsPanel = lazy(() => import('@platform/pages/admin/SettingsPanel'))
@@ -59,7 +61,8 @@ export default function AppRouter() {
         </SuperAdminRoute>
       }>
         <Route path="/admin" element={<Suspense fallback={<div>Carregando...</div>}><AdminDashboard /></Suspense>} />
-        <Route path="/admin/tenants" element={<div className="text-slate-500">Tenants — em breve</div>} />
+        <Route path="/admin/tenants" element={<Suspense fallback={<div>Carregando...</div>}><TenantsPage /></Suspense>} />
+        <Route path="/admin/tenants/:orgId" element={<Suspense fallback={<div>Carregando...</div>}><TenantDetailPage /></Suspense>} />
         <Route path="/admin/modules" element={<Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense>} />
         <Route path="/admin/connectors" element={<Suspense fallback={<div>Carregando...</div>}><ConnectorsPanel /></Suspense>} />
         <Route path="/admin/product-docs" element={<div className="text-slate-500">Product Docs — em breve</div>} />
