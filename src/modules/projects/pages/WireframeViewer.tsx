@@ -181,11 +181,11 @@ function partitionScreensForEdit(
 
 /**
  * Generic parametric wireframe viewer.
- * Resolves blueprint + branding from Supabase by :clientSlug route param.
+ * Resolves blueprint + branding from Supabase by :projectSlug route param.
  */
 export default function WireframeViewer({ clientSlug: clientSlugProp }: { clientSlug?: string }) {
-  const params = useParams<{ clientSlug: string }>()
-  const clientSlug = clientSlugProp ?? params.clientSlug
+  const params = useParams<{ projectSlug: string }>()
+  const clientSlug = clientSlugProp ?? params.projectSlug
 
   if (!clientSlug) {
     return <Navigate to="/" replace />

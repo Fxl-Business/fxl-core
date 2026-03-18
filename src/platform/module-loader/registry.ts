@@ -3,6 +3,7 @@ import type { LucideIcon } from 'lucide-react'
 import type { RouteObject } from 'react-router-dom'
 import { docsManifest } from '@modules/docs/manifest'
 import { ferramentasManifest } from '@modules/wireframe/manifest'
+import { projectsManifest } from '@modules/projects/manifest'
 import { clientsManifest } from '@modules/clients/manifest'
 import { tasksManifest } from '@modules/tasks/manifest'
 import { connectorManifest } from '@modules/connector/manifest'
@@ -68,6 +69,7 @@ export interface ModuleDefinition extends ModuleManifest {
 export const MODULE_REGISTRY: ModuleDefinition[] = [
   docsManifest,
   ferramentasManifest,
+  projectsManifest,
   clientsManifest,
   tasksManifest,
   connectorManifest,

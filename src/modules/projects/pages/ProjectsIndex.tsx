@@ -4,16 +4,16 @@ import { ChevronRight, Loader2 } from 'lucide-react'
 import { listClients } from '../services/clients-service'
 import type { Client } from '../services/clients-service'
 
-export default function ClientsIndex() {
-  const [clients, setClients] = useState<Client[]>([])
+export default function ProjectsIndex() {
+  const [projects, setProjects] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     listClients()
-      .then(setClients)
+      .then(setProjects)
       .catch((err) => {
-        const message = err instanceof Error ? err.message : 'Erro ao carregar clientes'
+        const message = err instanceof Error ? err.message : 'Erro ao carregar projetos'
         setError(message)
       })
       .finally(() => setLoading(false))
@@ -22,13 +22,13 @@ export default function ClientsIndex() {
   return (
     <div className="mx-auto max-w-4xl">
       <span className="mb-3 inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600 ring-1 ring-inset ring-indigo-600/20 dark:bg-indigo-950/50 dark:text-indigo-400 dark:ring-indigo-400/30">
-        Clientes
+        Projetos
       </span>
       <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-foreground">
-        Clientes
+        Projetos
       </h1>
       <p className="mt-3 text-lg text-slate-600 dark:text-slate-400">
-        Workspaces de clientes com docs, briefing e wireframe.
+        Workspaces de projetos com docs, briefing e wireframe.
       </p>
 
       <div className="mt-8">
@@ -42,27 +42,27 @@ export default function ClientsIndex() {
           <p className="text-sm text-red-500">{error}</p>
         )}
 
-        {!loading && !error && clients.length === 0 && (
+        {!loading && !error && projects.length === 0 && (
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Nenhum cliente encontrado para esta organização.
+            Nenhum projeto encontrado para esta organização.
           </p>
         )}
 
-        {!loading && !error && clients.length > 0 && (
+        {!loading && !error && projects.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2">
-            {clients.map((client) => (
+            {projects.map((project) => (
               <Link
-                key={client.slug}
-                to={`/clients/${client.slug}`}
+                key={project.slug}
+                to={`/projetos/${project.slug}`}
                 className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50/30 dark:border-slate-700 dark:bg-card dark:hover:border-indigo-600/50 dark:hover:bg-indigo-950/20"
               >
                 <div>
                   <p className="text-sm font-semibold text-slate-900 group-hover:text-indigo-700 dark:text-foreground dark:group-hover:text-indigo-400">
-                    {client.name}
+                    {project.name}
                   </p>
-                  {client.description && (
+                  {project.description && (
                     <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                      {client.description}
+                      {project.description}
                     </p>
                   )}
                 </div>

@@ -167,8 +167,9 @@ export default function Sidebar() {
               children: tenantItems,
             }]
           }
-          // Fall back to static navChildren if empty (cache miss during first load)
-          return m.navChildren ?? []
+          // No tenant docs for this org yet — show nothing (do NOT fall back to
+          // FXL-specific hardcoded manifest which leaks internal docs to other orgs)
+          return []
         }
         return m.navChildren ?? []
       }),

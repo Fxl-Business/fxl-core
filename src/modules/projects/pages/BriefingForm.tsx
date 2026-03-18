@@ -87,7 +87,7 @@ function emptyBriefing(): BriefingConfig {
 // ---------------------------------------------------------------------------
 
 export default function BriefingForm() {
-  const { clientSlug } = useParams<{ clientSlug: string }>()
+  const { projectSlug: clientSlug } = useParams<{ projectSlug: string }>()
 
   if (!clientSlug) {
     return <Navigate to="/" replace />

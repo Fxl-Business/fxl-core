@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactNode } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
 import { SignUp, useAuth, RedirectToSignIn, AuthenticateWithRedirectCallback } from '@clerk/react'
 import Layout from '@platform/layout/Layout'
@@ -10,7 +10,7 @@ import CriarEmpresa from '@platform/pages/CriarEmpresa'
 import Login from '@platform/auth/Login'
 import Profile from '@platform/auth/Profile'
 import { MODULE_REGISTRY } from '@platform/module-loader/registry'
-import WireframeViewer from '@modules/clients/pages/WireframeViewer'
+import WireframeViewer from '@modules/projects/pages/WireframeViewer'
 
 const SharedWireframeView = lazy(() => import('@modules/wireframe/pages/SharedWireframeView'))
 
@@ -52,6 +52,15 @@ function AuthOnlyRoute({ children }: { children: ReactNode }) {
 export default function AppRouter() {
   return (
     <Routes>
+      {/* Wireframe viewer — protected, full screen (MUST be before Layout group
+           to avoid /projetos/:projectSlug/:doc catching the URL) */}
+      <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
+        <Route
+          path="/projetos/:projectSlug/wireframe"
+          element={<WireframeViewer />}
+        />
+      </Route>
+
       {/* Protected operator routes (inside Layout) */}
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         {/* Home */}
@@ -122,21 +131,10 @@ export default function AppRouter() {
         element={<ProtectedRoute><Profile /></ProtectedRoute>}
       />
 
-      {/* Wireframe viewer — protected, full screen (static route beats /:doc wildcard) */}
-      <Route
-        path="/clients/financeiro-conta-azul/wireframe"
-        element={<ProtectedRoute><WireframeViewer clientSlug="financeiro-conta-azul" /></ProtectedRoute>}
-      />
-      {/* Parametric fallback for other clients */}
-      <Route
-        path="/clients/:clientSlug/wireframe"
-        element={<ProtectedRoute><WireframeViewer /></ProtectedRoute>}
-      />
-
       {/* Redirect old wireframe-view route to new parametric route */}
       <Route
         path="/clients/financeiro-conta-azul/wireframe-view"
-        element={<Navigate to="/clients/financeiro-conta-azul/wireframe" replace />}
+        element={<Navigate to="/projetos/financeiro-conta-azul/wireframe" replace />}
       />
 
       {/* Shared wireframe viewer for external clients (token-gated, public) */}

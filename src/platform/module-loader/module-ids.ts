@@ -6,6 +6,7 @@
 export const MODULE_IDS = {
   DOCS: 'docs',
   FERRAMENTAS: 'ferramentas',
+  PROJECTS: 'projects',
   CLIENTS: 'clients',
   TASKS: 'tasks',
   CONNECTOR: 'connector',
