@@ -20,17 +20,17 @@ import * as path from 'node:path'
 // ---------------------------------------------------------------------------
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL
-const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!supabaseUrl || !supabaseKey) {
+if (!supabaseUrl || !supabaseServiceKey) {
   console.error(
-    'Missing environment variables. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY are set.\n' +
+    'Missing environment variables. Ensure VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.\n' +
     'Run with: npx tsx --env-file .env.local tools/sync/sync-up.ts'
   )
   process.exit(1)
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // ---------------------------------------------------------------------------
 // Types
@@ -40,6 +40,8 @@ type Frontmatter = {
   title?: string
   badge?: string
   description?: string
+  scope?: 'tenant' | 'product'
+  sort_order?: number
 }
 
 type DocumentUpsert = {
@@ -49,6 +51,8 @@ type DocumentUpsert = {
   slug: string
   parent_path: string
   body: string
+  sort_order: number
+  scope: 'tenant' | 'product'
   updated_at: string
 }
 
@@ -125,6 +129,8 @@ async function syncUp(): Promise<void> {
       slug,
       parent_path: parentPath,
       body,
+      sort_order: frontmatter.sort_order ?? 0,
+      scope: frontmatter.scope ?? 'tenant',
       updated_at: new Date().toISOString(),
     })
   }
