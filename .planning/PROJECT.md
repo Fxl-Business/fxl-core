@@ -8,11 +8,18 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: — (idle)
+## Current Milestone: v7.0 Admin-Only Org Management
+
+**Goal:** Lock down organization creation to super admin only, add "request access" screen for unaffiliated users, and implement safe tenant archival (soft-delete with data preservation).
+
+**Target features:**
+- Remove self-service org creation (`/criar-empresa`)
+- "Solicitar acesso" screen for users without org membership
+- Admin panel: unaffiliated users filter/tab with quick org linking
+- Safe tenant archival (soft-delete) with restore capability
+- Admin dashboard improvements (unaffiliated users + archived tenants counts)
 
 Previous: v6.0 Reestruturação de Módulos (shipped 2026-03-18)
-
-**v6.0 delivered:** Separated Clientes (cadastro) from Projetos (briefing→blueprint→wireframe), sidebar workspace with dropdown switcher, dynamic navigation per module, projects table with nullable client_id, full CRUD for both modules.
 
 ## Requirements
 
@@ -195,7 +202,11 @@ Previous: v6.0 Reestruturação de Módulos (shipped 2026-03-18)
 
 ### Active
 
-(No active milestone)
+- [ ] Remove self-service org creation, admin-only org creation
+- [ ] "Solicitar acesso" screen for unaffiliated users
+- [ ] Admin unaffiliated users management and org linking
+- [ ] Safe tenant archival with soft-delete and restore
+- [ ] Admin dashboard with unaffiliated/archived counts
 
 ### Out of Scope
 

@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: —
-milestone_name: —
-status: idle
-stopped_at: v6.0 completed — ready for next milestone
+milestone: v7.0
+milestone_name: Admin-Only Org Management
+status: defining_requirements
+stopped_at: null
 last_updated: "2026-03-18"
-last_activity: 2026-03-18 — v6.0 Reestruturação de Módulos shipped (5 phases, 25 requirements satisfied)
+last_activity: 2026-03-18 — Milestone v7.0 started
 progress:
   total_phases: 0
   completed_phases: 0
@@ -21,22 +21,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-18)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** No active milestone — v6.0 shipped, ready for next milestone
+**Current focus:** v7.0 Admin-Only Org Management
 
 ## Current Position
 
-Milestone: — (idle)
-Phase: —
+Milestone: v7.0 Admin-Only Org Management
+Phase: Not started (defining requirements)
 Plan: —
-Status: Idle — awaiting next milestone
-Last activity: 2026-03-18 — v6.0 Reestruturação de Módulos shipped
-
-Progress: [##########] 100% (v6.0)
+Status: Defining requirements
+Last activity: 2026-03-18 — Milestone v7.0 started
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1+ (v6.0)
+- Total plans completed: 0
 - Average duration: -
 - Total execution time: -
 
@@ -59,5 +57,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: v6.0 completed — all 25 requirements satisfied
-Next action: /gsd:new-milestone (or check docs/superpowers/specs/ for pre-planned milestones)
+Stopped at: Starting milestone v7.0
+Next action: Define requirements and create roadmap
