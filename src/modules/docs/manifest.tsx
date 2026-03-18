@@ -71,5 +71,6 @@ export const docsManifest: ModuleDefinition = {
     { path: '/referencias/*', element: <DocRenderer /> },
     { path: '/padroes/*', element: <DocRenderer /> },
     { path: '/ferramentas/*', element: <DocRenderer /> },
+    { path: '/sdk/*', element: <DocRenderer /> },
   ],
 }
