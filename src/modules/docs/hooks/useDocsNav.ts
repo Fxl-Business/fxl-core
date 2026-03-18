@@ -200,11 +200,43 @@ export function useDocsNav(): UseDocsNavResult {
         const tree = buildNavTree(tenantDocs)
         setTenantItems(tree)
 
-        // Build flat list for product docs sorted by sort_order
-        const flatProduct: NavItem[] = [...productDocs]
-          .sort((a, b) => a.sort_order - b.sort_order)
-          .map((d) => ({ label: d.title, href: `/${d.slug}` }))
-        setProductItems(flatProduct)
+        // Group product docs by badge for hierarchical sidebar
+        const productByBadge = new Map<string, DocumentRow[]>()
+        for (const doc of productDocs) {
+          // Skip index pages from the flat list — they become group parents
+          if (doc.slug.endsWith('/index')) continue
+          const badge = doc.badge || 'Outros'
+          const group = productByBadge.get(badge) ?? []
+          group.push(doc)
+          productByBadge.set(badge, group)
+        }
+
+        const groupedProduct: NavItem[] = []
+        for (const [badge, badgeDocs] of productByBadge) {
+          const sorted = [...badgeDocs].sort((a, b) => a.sort_order - b.sort_order)
+          // Find the index page for this badge group (e.g., sdk/index for badge "SDK")
+          const indexDoc = productDocs.find(
+            (d) => d.badge === badge && d.slug.endsWith('/index')
+          )
+          if (sorted.length === 1 && !indexDoc) {
+            // Single doc without index — render flat
+            groupedProduct.push({
+              label: sorted[0].title,
+              href: `/${sorted[0].slug}`,
+            })
+          } else {
+            // Multiple docs or has index — render as group
+            groupedProduct.push({
+              label: indexDoc?.title ?? badge,
+              href: indexDoc ? `/${indexDoc.slug}` : undefined,
+              children: sorted.map((d) => ({
+                label: d.title,
+                href: `/${d.slug}`,
+              })),
+            })
+          }
+        }
+        setProductItems(groupedProduct)
       })
       .catch(() => {
         // On error, return empty — Sidebar falls back to hardcoded nav
