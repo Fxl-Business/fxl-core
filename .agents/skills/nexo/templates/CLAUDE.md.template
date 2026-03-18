@@ -1,0 +1,167 @@
+# CLAUDE.md — {{PROJECT_NAME}}
+
+## Project Nature
+
+{{PROJECT_NAME}} is an FXL spoke application — a standalone system that connects
+to the FXL Core hub via the FXL contract API. It follows FXL SDK standards
+for code quality, security, and structure.
+
+- **App ID:** {{PROJECT_SLUG}}
+- **Contract Version:** 1.0 (read-only)
+- **Hub Connection:** FXL Core consumes this app's data via `/api/fxl/*` endpoints
+
+---
+
+## Stack
+
+- React 18 + TypeScript 5 (strict: true)
+- Tailwind CSS 3 + shadcn/ui
+- Vite 5
+- Supabase (@supabase/supabase-js 2.x)
+- Clerk (@clerk/react 6.x — shared application with FXL Core Hub)
+- lucide-react (icons)
+- Vercel (deploy)
+- GitHub Actions (CI via fxl-doctor.sh)
+
+---
+
+## Project Structure
+
+```
+{{PROJECT_SLUG}}/
+  CLAUDE.md              <- this file
+  package.json           <- includes fxlContractVersion, fxlAppId
+  tsconfig.json          <- strict: true
+  eslint.config.js
+  prettier.config.js
+  tailwind.config.ts
+  vercel.json            <- security headers + SPA rewrite
+  fxl-doctor.sh          <- CI health check
+  .github/workflows/ci.yml
+  src/
+    main.tsx
+    App.tsx
+    api/fxl/             <- FXL contract endpoints
+    components/
+      ui/                <- shadcn/ui
+      layout/            <- shell components
+      {{DOMAIN}}/        <- domain-specific components
+    pages/               <- route pages
+    hooks/               <- custom hooks
+    lib/                 <- supabase client, auth, utilities
+      services/          <- data access services
+    types/
+      fxl-contract.ts    <- contract types (copied from SDK)
+      {{DOMAIN}}.ts      <- domain types
+    styles/
+      globals.css
+  supabase/
+    migrations/          <- SQL migrations
+```
+
+---
+
+## Entities
+
+{{ENTITIES}}
+
+---
+
+## Code Conventions
+
+- **TypeScript strict mode** — zero errors from `npx tsc --noEmit`
+- **Never use `any`** — use `unknown` + type guards
+- **Named exports only** — no default exports
+- **Functional components only** — no class components
+- **Path aliases:** `@/` maps to `src/`
+- **Props interfaces:** named `{Component}Props`
+
+### Import Order
+
+1. React
+2. External libraries
+3. Internal modules (`@/components/`, `@/lib/`, etc.)
+4. Types
+
+### Naming
+
+| What | Convention | Example |
+|------|-----------|---------|
+| Components | PascalCase | `ReservationCard.tsx` |
+| Hooks | camelCase, use- prefix | `useReservations.ts` |
+| Services | camelCase, -service suffix | `reservation-service.ts` |
+| Types | PascalCase | `Reservation` |
+| Constants | UPPER_SNAKE_CASE | `MAX_PAGE_SIZE` |
+| DB tables | snake_case | `reservations` |
+| DB columns | snake_case | `check_in_date` |
+| API routes | kebab-case | `/api/fxl/entities` |
+
+### Commit Convention
+
+- `feat: [description]` — new feature
+- `fix: [description]` — bug fix
+- `refactor: [description]` — code cleanup
+- `chore: [description]` — config, tooling
+
+---
+
+## Security Rules
+
+- ALL secrets in `.env.local` (NEVER committed)
+- Client-side env vars prefixed with `VITE_`
+- Clerk JWT validated on every API request
+- `org_id` extracted from server-validated JWT (never from client)
+- RLS enabled on EVERY Supabase table
+- Every table has `org_id text NOT NULL` column
+- Security headers set in `vercel.json`
+
+---
+
+## FXL Contract
+
+This app exposes these endpoints for the FXL Core Hub:
+
+| Endpoint | Description |
+|----------|-------------|
+| GET /api/fxl/manifest | App metadata, entities, widgets |
+| GET /api/fxl/entities/:type | Paginated entity list |
+| GET /api/fxl/entities/:type/:id | Single entity |
+| GET /api/fxl/widgets/:id/data | Widget data |
+| GET /api/fxl/search?q= | Cross-entity search |
+| GET /api/fxl/health | Health + contract version |
+
+Contract is v1 (read-only). All entity endpoints filter by `org_id`.
+
+---
+
+## Environment Variables
+
+```
+VITE_SUPABASE_URL=https://xxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ...
+VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+```
+
+---
+
+## Quality Gates
+
+Before closing any task:
+
+```bash
+npx tsc --noEmit          # zero errors
+npx eslint .              # zero errors
+npx prettier --check .    # zero formatting issues
+bash fxl-doctor.sh        # all checks pass
+```
+
+---
+
+## What NEVER to Do
+
+- Never use `any` in TypeScript
+- Never commit `.env.local`
+- Never create tables without RLS
+- Never trust client-provided org_id
+- Never add dependencies without documenting here
+- Never skip the quality gates above

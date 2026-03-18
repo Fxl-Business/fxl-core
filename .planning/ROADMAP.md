@@ -41,7 +41,7 @@
 
 ## Phases
 
-- [ ] **Phase 99: Consolidation** - Unify SDK skill + orchestrator into single Nexo Skill structure
+- [x] **Phase 99: Consolidation** - Unify SDK skill + orchestrator into single Nexo Skill structure
 - [ ] **Phase 100: Methodology Layer** - GSD bridge with FXL-customized discuss/plan/execute flow
 - [ ] **Phase 101: MCP Bridge** - Skill consults and feeds MCP Server automatically
 - [ ] **Phase 102: Scaffold Flow** - Create complete spoke project via skill + MCP integration
@@ -59,7 +59,8 @@
   2. SDK rules exist at .agents/skills/nexo/sdk/ and are loadable by Claude Code
   3. SDK checklists, templates, and contract types exist at their new paths under .agents/skills/nexo/
   4. The old skill paths are no longer required to access any capability (new paths are self-sufficient)
-**Plans**: TBD
+**Plans**: 1/1 complete
+**Completed**: 2026-03-18
 
 ### Phase 100: Methodology Layer
 **Goal**: FXL projects follow a customized discuss/plan/execute workflow that leverages MCP for context
@@ -122,7 +123,7 @@ Order: 99 -> [100, 101] (parallel) -> 102 -> 103 -> 104
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 99. Consolidation | 0/? | Not started | - |
+| 99. Consolidation | 1/1 | Complete | 2026-03-18 |
 | 100. Methodology Layer | 0/? | Not started | - |
 | 101. MCP Bridge | 0/? | Not started | - |
 | 102. Scaffold Flow | 0/? | Not started | - |

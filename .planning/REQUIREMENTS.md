@@ -9,11 +9,11 @@ Requirements for v5.2. Each maps to roadmap phases.
 
 ### Consolidation
 
-- [ ] **CONS-01**: Nexo Skill entry point (SKILL.md) routes to all capabilities (scaffold, audit, connect, orchestrate, methodology, learn)
-- [ ] **CONS-02**: SDK rules migrated from .agents/skills/fxl-sdk/rules/ to .agents/skills/nexo/sdk/
-- [ ] **CONS-03**: SDK checklists migrated from .agents/skills/fxl-sdk/checklists/ to .agents/skills/nexo/checklists/
-- [ ] **CONS-04**: SDK templates migrated from .agents/skills/fxl-sdk/templates/ to .agents/skills/nexo/templates/
-- [ ] **CONS-05**: Contract types migrated from .agents/skills/fxl-sdk/contract/ to .agents/skills/nexo/contract/
+- [x] **CONS-01**: Nexo Skill entry point (SKILL.md) routes to all capabilities (scaffold, audit, connect, orchestrate, methodology, learn)
+- [x] **CONS-02**: SDK rules migrated from .agents/skills/fxl-sdk/rules/ to .agents/skills/nexo/sdk/
+- [x] **CONS-03**: SDK checklists migrated from .agents/skills/fxl-sdk/checklists/ to .agents/skills/nexo/checklists/
+- [x] **CONS-04**: SDK templates migrated from .agents/skills/fxl-sdk/templates/ to .agents/skills/nexo/templates/
+- [x] **CONS-05**: Contract types migrated from .agents/skills/fxl-sdk/contract/ to .agents/skills/nexo/contract/
 
 ### Methodology
 
@@ -71,11 +71,11 @@ Requirements for v5.2. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONS-01 | Phase 99 | Pending |
-| CONS-02 | Phase 99 | Pending |
-| CONS-03 | Phase 99 | Pending |
-| CONS-04 | Phase 99 | Pending |
-| CONS-05 | Phase 99 | Pending |
+| CONS-01 | Phase 99 | Done |
+| CONS-02 | Phase 99 | Done |
+| CONS-03 | Phase 99 | Done |
+| CONS-04 | Phase 99 | Done |
+| CONS-05 | Phase 99 | Done |
 | METH-01 | Phase 100 | Pending |
 | METH-02 | Phase 100 | Pending |
 | METH-03 | Phase 100 | Pending |
