@@ -11,7 +11,7 @@ Requirements para UX Polish + Multi-tenancy data isolation.
 
 - [x] **DATA-01**: Tarefas sao scoped por org_id — cada org ve apenas suas tarefas
 - [x] **DATA-02**: Clientes sao scoped por org_id — financeiro-conta-azul visivel apenas para a org que criou
-- [ ] **DATA-03**: Wireframes/blueprints sao scoped por org_id — dados do cliente isolados por org
+- [x] **DATA-03**: Wireframes/blueprints sao scoped por org_id — dados do cliente isolados por org
 - [ ] **DATA-04**: Docs da org (processo, padroes) scoped por org_id na sidebar
 - [x] **DATA-05**: Dados existentes (tarefas, wireframes) recuperados ou re-associados a org correta
 
@@ -52,7 +52,7 @@ None deferred.
 |-------------|-------|--------|
 | DATA-01 | Phase 105 | Done |
 | DATA-02 | Phase 105 | Done |
-| DATA-03 | Phase 109 (gap closure) | Pending |
+| DATA-03 | Phase 109 (gap closure) | Done |
 | DATA-04 | Phase 111 (gap closure) | Pending |
 | DATA-05 | Phase 106 | Done |
 | ADMN-01 | Phase 110 (gap closure) | Done |
@@ -67,8 +67,8 @@ None deferred.
 - v5.3 requirements: 12 total
 - Mapped to phases: 12
 - Unmapped: 0
-- Done: 8 (DATA-01, DATA-02, DATA-05, HEAD-01, HEAD-02, HEAD-03, ADMN-01, ADMN-02)
-- Pending gap closure: 4 (DATA-03, DATA-04, ARCH-01, ARCH-02)
+- Done: 9 (DATA-01, DATA-02, DATA-03, DATA-05, HEAD-01, HEAD-02, HEAD-03, ADMN-01, ADMN-02)
+- Pending gap closure: 3 (DATA-04, ARCH-01, ARCH-02)
 
 ---
 *Requirements defined: 2026-03-18*
