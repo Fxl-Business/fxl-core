@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react'
-import { BookOpen, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, Eye, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import {
   getProductDocs,
   invalidateDocsCache,
   type DocumentRow,
 } from '@modules/docs/services/docs-service'
+import { parseDoc, type DocSection } from '@modules/docs/services/docs-parser'
+import MarkdownRenderer from '@modules/docs/components/MarkdownRenderer'
+import Callout from '@modules/docs/components/Callout'
+import Operational from '@modules/docs/components/Operational'
+import PromptBlock from '@shared/ui/PromptBlock'
+import PhaseCard from '@modules/docs/components/PhaseCard'
+import DocPageHeader from '@modules/docs/components/DocPageHeader'
+import DocTableOfContents from '@modules/docs/components/DocTableOfContents'
+import { cn } from '@shared/utils'
 import { supabase } from '@platform/supabase'
 
 // ---------------------------------------------------------------------------
@@ -32,6 +41,90 @@ const EMPTY_FORM: DocFormValues = {
   description: '',
   body: '',
   sort_order: 0,
+}
+
+// ---------------------------------------------------------------------------
+// Section renderer (same logic as DocRenderer)
+// ---------------------------------------------------------------------------
+
+function SectionRenderer({ section }: { section: DocSection }) {
+  switch (section.type) {
+    case 'markdown':
+      return <MarkdownRenderer content={section.content} />
+    case 'prompt':
+      return <PromptBlock label={section.label} prompt={section.content} />
+    case 'callout':
+      return <Callout type={section.variant} content={section.content} />
+    case 'operational':
+      return <Operational content={section.content} />
+    case 'phase-card':
+      return (
+        <PhaseCard
+          number={section.number}
+          title={section.title}
+          description={section.description}
+          href={section.href}
+        />
+      )
+    default:
+      return null
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Doc reader sidebar nav
+// ---------------------------------------------------------------------------
+
+function ReaderNav({
+  docs,
+  activeSlug,
+  onSelect,
+}: {
+  docs: DocumentRow[]
+  activeSlug: string
+  onSelect: (doc: DocumentRow) => void
+}) {
+  // Group by badge, sorted by sort_order
+  const grouped = new Map<string, DocumentRow[]>()
+  for (const doc of docs) {
+    if (doc.slug.endsWith('/index')) continue
+    const badge = doc.badge || 'Outros'
+    const group = grouped.get(badge) ?? []
+    group.push(doc)
+    grouped.set(badge, group)
+  }
+
+  return (
+    <nav className="space-y-4">
+      {[...grouped.entries()].map(([badge, badgeDocs]) => {
+        const sorted = [...badgeDocs].sort((a, b) => a.sort_order - b.sort_order)
+        return (
+          <div key={badge}>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              {badge}
+            </p>
+            <div className="space-y-0.5">
+              {sorted.map((doc) => (
+                <button
+                  key={doc.id}
+                  type="button"
+                  onClick={() => onSelect(doc)}
+                  className={cn(
+                    'block w-full truncate rounded-md px-3 py-1.5 text-left text-sm transition-colors',
+                    doc.slug === activeSlug
+                      ? 'bg-indigo-50 font-medium text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-400',
+                  )}
+                >
+                  {doc.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </nav>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -181,6 +274,7 @@ export default function ProductDocsPage() {
   const [error, setError] = useState<string | null>(null)
   const [formMode, setFormMode] = useState<FormMode>('hidden')
   const [saving, setSaving] = useState(false)
+  const [reading, setReading] = useState<DocumentRow | null>(null)
 
   async function fetchDocs() {
     setLoading(true)
@@ -254,6 +348,72 @@ export default function ProductDocsPage() {
       setError(err instanceof Error ? err.message : 'Erro ao deletar doc')
     }
   }
+
+  // -------------------------------------------------------------------------
+  // Reader mode — renders full doc content like DocRenderer
+  // -------------------------------------------------------------------------
+
+  if (reading) {
+    const parsed = parseDoc(reading)
+    const { frontmatter, sections, headings } = parsed
+
+    return (
+      <div className="flex gap-6">
+        {/* Sidebar nav */}
+        <div className="hidden w-56 shrink-0 lg:block">
+          <button
+            type="button"
+            onClick={() => setReading(null)}
+            className="mb-4 flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Gerenciar
+          </button>
+          <ReaderNav
+            docs={docs}
+            activeSlug={reading.slug}
+            onSelect={setReading}
+          />
+        </div>
+
+        {/* Doc content */}
+        <div className="min-w-0 flex-1">
+          {/* Mobile back button */}
+          <button
+            type="button"
+            onClick={() => setReading(null)}
+            className="mb-4 flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-indigo-600 lg:hidden dark:text-slate-400 dark:hover:text-indigo-400"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Voltar para lista
+          </button>
+
+          <DocPageHeader
+            badge={frontmatter.badge}
+            title={frontmatter.title}
+            description={frontmatter.description}
+          />
+
+          <div className="mt-8">
+            <div className="flex gap-10">
+              <div className="min-w-0 flex-1 space-y-4">
+                {sections.map((section, i) => (
+                  <SectionRenderer key={i} section={section} />
+                ))}
+              </div>
+              {headings.length > 1 && (
+                <DocTableOfContents headings={headings} />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // -------------------------------------------------------------------------
+  // List mode — CRUD management
+  // -------------------------------------------------------------------------
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -342,20 +502,24 @@ export default function ProductDocsPage() {
             <div key={doc.id}>
               {/* Row */}
               <div
-                className={[
+                className={cn(
                   'flex items-center gap-4 px-5 py-4',
                   idx !== 0 ? 'border-t border-slate-100 dark:border-slate-700/50' : '',
-                ].join(' ')}
+                )}
               >
                 {/* Icon */}
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
                   <BookOpen className="h-4 w-4" />
                 </div>
 
-                {/* Title + meta */}
-                <div className="min-w-0 flex-1">
+                {/* Title + meta — clickable to read */}
+                <button
+                  type="button"
+                  onClick={() => setReading(doc)}
+                  className="min-w-0 flex-1 text-left"
+                >
                   <div className="flex items-center gap-2">
-                    <p className="truncate font-medium text-slate-900 dark:text-foreground">
+                    <p className="truncate font-medium text-slate-900 hover:text-indigo-600 dark:text-foreground dark:hover:text-indigo-400">
                       {doc.title}
                     </p>
                     {doc.badge && (
@@ -367,10 +531,18 @@ export default function ProductDocsPage() {
                   <p className="truncate font-mono text-xs text-slate-400 dark:text-slate-500">
                     {doc.slug}
                   </p>
-                </div>
+                </button>
 
                 {/* Action buttons */}
                 <div className="flex shrink-0 items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setReading(doc)}
+                    className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800 dark:hover:text-indigo-400"
+                    title="Ler"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </button>
                   <button
                     type="button"
                     onClick={() => setFormMode({ edit: doc })}

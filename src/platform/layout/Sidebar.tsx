@@ -149,7 +149,7 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
 
 export default function Sidebar() {
   const { isEnabled } = useModuleEnabled()
-  const { tenantItems, productItems } = useDocsNav()
+  const { tenantItems } = useDocsNav()
 
   const navigationFromRegistry: NavItem[] = useMemo(() =>
     MODULE_REGISTRY
@@ -158,27 +158,21 @@ export default function Sidebar() {
       .flatMap(m => {
         // Use dynamic nav for docs module — split into two labeled sections
         if (m.id === MODULE_IDS.DOCS) {
-          const sections: NavItem[] = []
+          // Only show tenant docs in the regular sidebar.
+          // Product docs (SDK) are managed via /admin/product-docs.
           if (tenantItems.length > 0) {
-            sections.push({
+            return [{
               label: 'Docs da Empresa',
               href: undefined,
               children: tenantItems,
-            })
+            }]
           }
-          if (productItems.length > 0) {
-            sections.push({
-              label: 'Docs do Produto',
-              href: undefined,
-              children: productItems,
-            })
-          }
-          // Fall back to static navChildren if both are empty (cache miss during first load)
-          return sections.length > 0 ? sections : (m.navChildren ?? [])
+          // Fall back to static navChildren if empty (cache miss during first load)
+          return m.navChildren ?? []
         }
         return m.navChildren ?? []
       }),
-    [isEnabled, tenantItems, productItems]
+    [isEnabled, tenantItems]
   )
 
   return (
