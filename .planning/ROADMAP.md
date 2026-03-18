@@ -60,7 +60,7 @@ See: milestones/v5.3-ROADMAP.md
 
 ### Phases
 
-- [ ] **Phase 112: DB Migration** - Criar tabela projects, estender clients, adicionar project_id nas tabelas dependentes e migrar dados existentes
+- [x] **Phase 112: DB Migration** - Criar tabela projects, estender clients, adicionar project_id nas tabelas dependentes e migrar dados existentes
 - [ ] **Phase 113: Code Restructure** - Renomear módulo clients para projects, criar placeholder do módulo clients, genericizar pages hardcoded, atualizar module-ids
 - [ ] **Phase 114: Projetos Module** - Ligar rotas /projetos/:slug/*, nav dinâmica, migrar stores de client_slug para project_id
 - [ ] **Phase 115: Clientes Module** - CRUD completo de clientes (lista, criar, perfil, editar), nav dinâmica no workspace
@@ -129,7 +129,7 @@ See: milestones/v5.3-ROADMAP.md
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 112. DB Migration | v6.0 | 0/TBD | Not started | - |
+| 112. DB Migration | v6.0 | 1/1 | Completed | 2026-03-18 |
 | 113. Code Restructure | v6.0 | 0/TBD | Not started | - |
 | 114. Projetos Module | v6.0 | 0/TBD | Not started | - |
 | 115. Clientes Module | v6.0 | 0/TBD | Not started | - |
