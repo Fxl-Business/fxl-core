@@ -8,12 +8,19 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: Planning Next
+## Current Milestone: v6.0 Reestruturação de Módulos
+
+**Goal:** Separar Clientes (cadastro) de Projetos (briefing→blueprint→wireframe), implementar sidebar workspace com dropdown switcher e navegação dinâmica por módulo.
+
+**Target features:**
+- Módulo Clientes novo (CRUD simples: nome, logo, slug, status)
+- Módulo Projetos (rename do atual "Clientes" com rotas /projetos/:slug/*)
+- Sidebar workspace com dropdown switcher por módulo (estilo Slack)
+- Navegação dinâmica via useNavItems() hook por módulo
+- Migração de dados: tabela projects, FKs em briefing_configs/blueprint_configs/comments/share_tokens
+- Projetos autossuficiente (client_id nullable — sem Clientes ativo, vincula à org)
 
 Previous: v5.3 UX Polish (shipped 2026-03-18)
-Previous: v5.2 Nexo Skill (shipped 2026-03-18)
-Previous: v5.1 MCP Server (shipped 2026-03-18)
-Previous: v5.0 SDK Docs (shipped 2026-03-17)
 
 ## Requirements
 
@@ -190,7 +197,12 @@ Previous: v5.0 SDK Docs (shipped 2026-03-17)
 
 ### Active
 
-(Nenhum — aguardando definicao do proximo milestone)
+- [ ] Módulo Clientes com CRUD por org (nome, logo, slug, status)
+- [ ] Módulo Projetos com rotas /projetos/:slug/* (briefing, blueprint, wireframe, branding)
+- [ ] Sidebar workspace com dropdown switcher entre módulos
+- [ ] Navegação dinâmica via useNavItems() hook por módulo
+- [ ] Tabela projects com client_id nullable + migração de dados
+- [ ] Stores migrados de client_slug para project_id/project_slug
 
 ### Out of Scope
 
@@ -228,7 +240,7 @@ Previous: v5.0 SDK Docs (shipped 2026-03-17)
 
 ## Current State
 
-24 milestones shipped (v1.0 → v5.3). v5.3 completed multi-tenancy data isolation, header UX polish, and admin enhancements (impersonation + member management).
+24 milestones shipped (v1.0 → v5.3). v6.0 restructures modules: Clientes (cadastro) split from Projetos (criação), sidebar workspace pattern, dynamic nav.
 
 ## Context
 
@@ -373,4 +385,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Gap closure phases 109-111 for audit traceability | Separate phases to close verification gaps vs reopen completed work | ✓ Good — clean audit trail |
 
 ---
-*Last updated: 2026-03-18 after v5.3 milestone shipped*
+*Last updated: 2026-03-18 after v6.0 milestone started*
