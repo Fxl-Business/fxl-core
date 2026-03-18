@@ -27,8 +27,8 @@ import {
   getChartPalette,
   getFontLinks,
   brandingToWfOverrides,
+  loadBrandingConfig,
 } from '@tools/wireframe-builder/lib/branding'
-import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'
 import type { BrandingConfig } from '@tools/wireframe-builder/types/branding'
 import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
 import { BrandingProvider } from '@tools/wireframe-builder/lib/branding-context'
@@ -58,10 +58,7 @@ import type {
 import type { EditModeState, FilterBarActionElement, GridLayout, HeaderElementType, ScreenRow, SidebarElementSelection } from '@tools/wireframe-builder/types/editor'
 import type { FilterOption } from '@tools/wireframe-builder/components/WireframeFilterBar'
 
-// Dynamic branding import map (extend as clients are added)
-const brandingMap: Record<string, () => Promise<{ default: BrandingConfig }>> = {
-  'financeiro-conta-azul': () => import('@clients/financeiro-conta-azul/wireframe/branding.config'),
-}
+// Branding is loaded dynamically via loadBrandingConfig (auto-discovers clients/*/wireframe/branding.config.ts)
 
 // ---------------------------------------------------------------------------
 // partitionScreensByGroups -- module-level helper for group rendering
@@ -282,25 +279,10 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
 
   useEffect(() => {
     async function loadBranding() {
-      const brandLoader = brandingMap[clientSlug]
-      if (brandLoader) {
-        try {
-          const brandMod = await brandLoader()
-          const resolved = resolveBranding(brandMod.default)
-          setBranding(resolved)
-          setChartPalette(getChartPalette(resolved))
-        } catch {
-          // Branding load failed -- use defaults silently
-          const resolved = resolveBranding(DEFAULT_BRANDING)
-          setBranding(resolved)
-          setChartPalette(getChartPalette(resolved))
-        }
-      } else {
-        // No custom branding for this client -- use defaults
-        const resolved = resolveBranding(DEFAULT_BRANDING)
-        setBranding(resolved)
-        setChartPalette(getChartPalette(resolved))
-      }
+      const brandConfig = await loadBrandingConfig(clientSlug)
+      const resolved = resolveBranding(brandConfig)
+      setBranding(resolved)
+      setChartPalette(getChartPalette(resolved))
     }
     loadBranding()
   }, [clientSlug])

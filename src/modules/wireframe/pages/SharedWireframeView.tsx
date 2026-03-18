@@ -9,9 +9,9 @@ import {
   getChartPalette,
   getFontLinks,
   brandingToWfOverrides,
+  loadBrandingConfig,
 } from '@tools/wireframe-builder/lib/branding'
 import { WireframeThemeProvider } from '@tools/wireframe-builder/lib/wireframe-theme'
-import { DEFAULT_BRANDING } from '@tools/wireframe-builder/types/branding'
 import type { BrandingConfig } from '@tools/wireframe-builder/types/branding'
 import { toTargetId } from '@tools/wireframe-builder/types/comments'
 import type { Comment } from '@tools/wireframe-builder/types/comments'
@@ -32,14 +32,7 @@ function getClientId(): string {
   return id
 }
 
-/** Dynamic import map for per-client branding configs */
-const brandingMap: Record<
-  string,
-  () => Promise<{ default: BrandingConfig }>
-> = {
-  'financeiro-conta-azul': () =>
-    import('@clients/financeiro-conta-azul/wireframe/branding.config'),
-}
+// Branding is loaded dynamically via loadBrandingConfig (auto-discovers clients/*/wireframe/branding.config.ts)
 
 type ViewState =
   | { step: 'loading' }
@@ -114,17 +107,8 @@ export default function SharedWireframeView() {
         return
       }
 
-      // Load branding config (fallback to defaults if not found)
-      let brandConfig: BrandingConfig = DEFAULT_BRANDING
-      const brandLoader = brandingMap[clientSlug]
-      if (brandLoader) {
-        try {
-          const brandMod = await brandLoader()
-          brandConfig = brandMod.default
-        } catch {
-          // Branding load failed -- use defaults silently
-        }
-      }
+      // Load branding config (falls back to defaults if not found)
+      const brandConfig = await loadBrandingConfig(clientSlug)
 
       setViewState({
         step: 'wireframe',

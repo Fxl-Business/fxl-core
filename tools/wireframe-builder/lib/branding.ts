@@ -217,3 +217,41 @@ export function brandingToWfOverrides(branding: BrandingConfig): React.CSSProper
     ? overrides as unknown as React.CSSProperties
     : undefined
 }
+
+// ---------------------------------------------------------------------------
+// Dynamic branding loader — auto-discovers all clients/*/wireframe/branding.config.ts
+// ---------------------------------------------------------------------------
+
+/**
+ * Vite eager-false glob that discovers all per-project branding configs.
+ * Each key is like "/../../clients/financeiro-conta-azul/wireframe/branding.config.ts".
+ * We extract the slug from the path and build a Record<slug, loader>.
+ */
+const brandingModules = import.meta.glob<{ default: BrandingConfig }>(
+  '/clients/*/wireframe/branding.config.ts',
+)
+
+/** Extract project slug from a glob path like "/clients/<slug>/wireframe/branding.config.ts" */
+function slugFromGlobPath(path: string): string | null {
+  const match = path.match(/\/clients\/([^/]+)\/wireframe\/branding\.config\.ts$/)
+  return match ? match[1] : null
+}
+
+/**
+ * Load branding config for a given project slug.
+ * Returns DEFAULT_BRANDING when no config file exists for the slug.
+ */
+export async function loadBrandingConfig(projectSlug: string): Promise<BrandingConfig> {
+  for (const [path, loader] of Object.entries(brandingModules)) {
+    const slug = slugFromGlobPath(path)
+    if (slug === projectSlug) {
+      try {
+        const mod = await loader()
+        return mod.default
+      } catch {
+        return DEFAULT_BRANDING
+      }
+    }
+  }
+  return DEFAULT_BRANDING
+}
