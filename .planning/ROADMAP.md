@@ -25,7 +25,7 @@
 - **v5.0 SDK Docs** - Phases 89-93 (shipped 2026-03-17) -- see milestones/v5.0-ROADMAP.md
 - **v5.1 MCP Server** - Phases 94-98 (shipped 2026-03-18) -- see milestones/v5.1-ROADMAP.md
 - **v5.2 Nexo Skill** - Phases 99-104 (shipped 2026-03-18) -- see milestones/v5.2-ROADMAP.md
-- **v5.3 UX Polish** - Phases 105-108 (active)
+- **v5.3 UX Polish** - Phases 105-111 (active — gap closure in progress)
 
 ## Quick Tasks
 
@@ -44,6 +44,9 @@
 - [x] **Phase 106: Data Recovery** - Recuperar e re-associar dados existentes (tarefas, wireframes) a org correta (completed 2026-03-18)
 - [x] **Phase 107: Header UX** - Adicionar avatar com dropdown de logout, distinguir admin vs operator, corrigir brand "Nexo" (completed 2026-03-18)
 - [x] **Phase 108: Admin Enhancements** - Admin pode gerenciar membros de qualquer org e entrar na visao de qualquer org (impersonate) (completed 2026-03-18)
+- [ ] **Phase 109: Blueprint RLS** - Implementar RLS em blueprints/blueprint_configs para isolamento por org_id (gap closure: DATA-03)
+- [ ] **Phase 110: Phase 108 Verification** - Produzir VERIFICATION.md formal para Phase 108 com tsc --noEmit e checklist de artifacts (gap closure: ADMN-01, ADMN-02)
+- [ ] **Phase 111: Audit Closure** - Fechar gaps de verificacao parcial (DATA-04, ARCH-01, ARCH-02), criar VALIDATION.md para todas as fases, marcar checkboxes em REQUIREMENTS.md
 
 ### Progress Table
 
@@ -53,6 +56,9 @@
 | 106. Data Recovery | 0/? | Complete    | 2026-03-18 |
 | 107. Header UX | 1/1 | Complete    | 2026-03-18 |
 | 108. Admin Enhancements | 4/4 | Complete    | 2026-03-18 |
+| 109. Blueprint RLS | 0/? | Pending     | — |
+| 110. Phase 108 Verification | 0/? | Pending     | — |
+| 111. Audit Closure | 0/? | Pending     | — |
 
 ---
 
@@ -125,6 +131,70 @@
   2. Na mesma pagina, o admin consegue remover um membro da org
   3. O admin pode selecionar "Entrar como esta org" e ver o Nexo com os dados e modulos daquela org, como se fosse um operator dela
   4. Ao sair do modo impersonation, o admin retorna para sua sessao original sem necessidade de novo login
+
+**Plans**: TBD
+
+---
+
+### Phase 109: Blueprint RLS
+
+**Goal**: Wireframes e blueprints sao isolados por org_id via RLS no banco — nenhum org pode ver dados de wireframe de outra org
+
+**Gap Closure**: Closes DATA-03 (explicitly deferred by Phase 105 VERIFICATION.md)
+
+**Depends on**: Phase 105 (org_id columns on blueprint_configs already added by Phase 106 recovery migration)
+
+**Requirements**: DATA-03
+
+**Success Criteria** (what must be TRUE):
+  1. A tabela `blueprints` tem coluna `org_id` com RLS policy ativa que filtra por `auth.jwt() ->> 'org_id'`
+  2. A tabela `blueprint_configs` tem RLS policy ativa com mesmo filtro por org_id
+  3. Um operator da org A nao consegue acessar blueprints da org B (verificado via teste de RLS)
+  4. `npx tsc --noEmit` passa com zero erros apos a migration
+
+**Plans**: TBD
+
+---
+
+### Phase 110: Phase 108 Verification
+
+**Goal**: Produzir o artefato formal de verificacao para Phase 108 — documentando que ADMN-01 e ADMN-02 foram entregues e passam em TypeScript
+
+**Gap Closure**: Closes ADMN-01, ADMN-02 (orphaned — code exists but no VERIFICATION.md)
+
+**Depends on**: Phase 108 (artifacts already exist — just needs formal documentation)
+
+**Requirements**: ADMN-01, ADMN-02
+
+**Success Criteria** (what must be TRUE):
+  1. `108-VERIFICATION.md` existe em `.planning/phases/108-admin-enhancements/`
+  2. VERIFICATION.md lista cada artefato de entrega: TenantDetailPage.tsx (add/remove UI), ImpersonationContext.tsx, ImpersonationBanner.tsx, admin-service.ts (addOrgMember/removeOrgMember)
+  3. VERIFICATION.md documenta resultado de `npx tsc --noEmit` (0 errors)
+  4. ADMN-01 e ADMN-02 marcados como `[x]` em REQUIREMENTS.md
+  5. Traceability table atualizado: ADMN-01 e ADMN-02 status = Done
+
+**Plans**: TBD
+
+---
+
+### Phase 111: Audit Closure
+
+**Goal**: Fechar todos os gaps de verificacao parcial e garantir compliance total de Nyquist — VALIDATION.md em todas as fases, REQUIREMENTS.md com todos os checkboxes marcados, DATA-04/ARCH-01/ARCH-02 explicitamente verificados
+
+**Gap Closure**: Closes DATA-04 (partial), ARCH-01 (partial), ARCH-02 (partial), integration gap (REQUIREMENTS.md checkboxes), Nyquist coverage (all 4 phases missing VALIDATION.md)
+
+**Depends on**: Phases 109, 110 (must be complete so all requirements can be checked off)
+
+**Requirements**: DATA-04, ARCH-01, ARCH-02 (partial verification promotion to satisfied)
+
+**Success Criteria** (what must be TRUE):
+  1. DATA-04: Verificacao explicita que docs sidebar exibe apenas docs da org atual (smoke test ou codigo evidence)
+  2. ARCH-01: Verificacao explicita que module registry separa ferramenta global de dado org-scoped
+  3. ARCH-02: Verificacao explicita que Wireframe Builder e listado como ferramenta global, wireframes como dados da org
+  4. VALIDATION.md criado para todas as fases 105, 106, 107, 108 com smoke tests ou evidence de funcionamento
+  5. Todos os 12 checkboxes em REQUIREMENTS.md marcados como `[x]`
+  6. Traceability table com todos os status = Done
+  7. `npx tsc --noEmit` passa com zero erros
 
 **Plans**: TBD
 
