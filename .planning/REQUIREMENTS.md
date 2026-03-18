@@ -1,103 +1,71 @@
-# Requirements: Nexo — v5.2 Nexo Skill
+# Requirements: Nexo — v5.3 UX Polish
 
 **Defined:** 2026-03-18
 **Core Value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
 
-## v1 Requirements
+## v5.3 Requirements
 
-Requirements for v5.2. Each maps to roadmap phases.
+Requirements para UX Polish + Multi-tenancy data isolation.
 
-### Consolidation
+### Isolamento de Dados
 
-- [x] **CONS-01**: Nexo Skill entry point (SKILL.md) routes to all capabilities (scaffold, audit, connect, orchestrate, methodology, learn)
-- [x] **CONS-02**: SDK rules migrated from .agents/skills/fxl-sdk/rules/ to .agents/skills/nexo/sdk/
-- [x] **CONS-03**: SDK checklists migrated from .agents/skills/fxl-sdk/checklists/ to .agents/skills/nexo/checklists/
-- [x] **CONS-04**: SDK templates migrated from .agents/skills/fxl-sdk/templates/ to .agents/skills/nexo/templates/
-- [x] **CONS-05**: Contract types migrated from .agents/skills/fxl-sdk/contract/ to .agents/skills/nexo/contract/
+- [ ] **DATA-01**: Tarefas sao scoped por org_id — cada org ve apenas suas tarefas
+- [ ] **DATA-02**: Clientes sao scoped por org_id — financeiro-conta-azul visivel apenas para a org que criou
+- [ ] **DATA-03**: Wireframes/blueprints sao scoped por org_id — dados do cliente isolados por org
+- [ ] **DATA-04**: Docs da org (processo, padroes) scoped por org_id na sidebar
+- [ ] **DATA-05**: Dados existentes (tarefas, wireframes) recuperados ou re-associados a org correta
 
-### Methodology
+### Admin
 
-- [x] **METH-01**: Workflow document defines discuss→plan→execute flow customized for FXL projects
-- [x] **METH-02**: Post-execution hook captures learnings automatically via MCP after phase completion
-- [x] **METH-03**: Pre-planning step consults MCP for existing standards and pitfalls before planning
+- [ ] **ADMN-01**: Admin pode gerenciar membros de qualquer organizacao (add/remove usuarios)
+- [ ] **ADMN-02**: Admin pode entrar na visao de qualquer organizacao (impersonate org)
 
-### MCP Bridge
+### Header UX
 
-- [x] **MCPB-01**: Integration module calls get_standards() before planning a new spoke
-- [x] **MCPB-02**: Integration module calls get_learnings() and get_pitfalls() for context enrichment
-- [x] **MCPB-03**: Integration module calls add_learning() after discovering new patterns during execution
-- [x] **MCPB-04**: Integration module calls add_pitfall() when encountering errors worth documenting
+- [ ] **HEAD-01**: Usuario pode ver icone/avatar no header com menu dropdown para logout
+- [ ] **HEAD-02**: Header distingue visualmente admin vs operator
+- [ ] **HEAD-03**: Header exibe "Nexo" como brand (nao "Fxl Core Fxl")
 
-### Scaffold
+### Arquitetura Modular
 
-- [x] **SCAF-01**: Scaffold command creates complete spoke project structure from template
-- [x] **SCAF-02**: Generated spoke includes CLAUDE.md with FXL SDK rules and MCP config
-- [x] **SCAF-03**: Generated spoke includes .mcp.json pointing to the MCP Server
-- [x] **SCAF-04**: Scaffold registers project in MCP via sdk_projects table (slug, name, stack_choices)
-- [x] **SCAF-05**: Scaffold asks platform (web/mobile), framework (vite/next), and modules questions
-
-### Documentation
-
-- [x] **DOCS-01**: docs/sdk/nexo-skill.md filled with complete guide (capabilities, structure, usage)
-
-### Deprecation
-
-- [x] **DEPR-01**: .agents/skills/fxl-sdk/ directory removed after migration validated
-- [x] **DEPR-02**: All references to old skill paths updated (CLAUDE.md, docs, configs)
-- [x] **DEPR-03**: agent-orchestrator references updated to point to nexo/orchestrator/
+- [ ] **ARCH-01**: Separacao clara entre funcionalidade do modulo (ferramenta) e dados do cliente (org-scoped)
+- [ ] **ARCH-02**: Wireframe Builder como ferramenta global, wireframes de clientes como dados da org
 
 ## Future Requirements
 
-### Advanced Orchestration
-
-- **ORCH-01**: Multi-agent coordination across spoke repositories
-- **ORCH-02**: Cross-repo learning propagation (auto-sync learnings between spokes)
-
-### Advanced Scaffold
-
-- **ASCF-01**: Blueprint-from-briefing integration in scaffold flow
-- **ASCF-02**: Auto-generate initial wireframe screens from spoke domain
+None deferred.
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| npm package distribution of SDK | Skill-based distribution via Claude Code is the chosen approach |
-| Vector database for knowledge search | Simple Supabase FTS sufficient for current scale |
-| Runtime SDK validation (linting) | Static analysis via skill + checklists is sufficient |
-| Cross-repo real-time sync | Async via MCP is sufficient for current team size |
+| Real-time collaborative editing | Complexity — defer to v6+ |
+| Self-service tenant signup | Admin-controlled for now |
+| Per-org module customization (beyond enable/disable) | Current toggle system sufficient |
+| Billing/subscription per org | Not needed yet |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONS-01 | Phase 99 | Done |
-| CONS-02 | Phase 99 | Done |
-| CONS-03 | Phase 99 | Done |
-| CONS-04 | Phase 99 | Done |
-| CONS-05 | Phase 99 | Done |
-| METH-01 | Phase 100 | Done |
-| METH-02 | Phase 100 | Done |
-| METH-03 | Phase 100 | Done |
-| MCPB-01 | Phase 101 | Done |
-| MCPB-02 | Phase 101 | Done |
-| MCPB-03 | Phase 101 | Done |
-| MCPB-04 | Phase 101 | Done |
-| SCAF-01 | Phase 102 | Done |
-| SCAF-02 | Phase 102 | Done |
-| SCAF-03 | Phase 102 | Done |
-| SCAF-04 | Phase 102 | Done |
-| SCAF-05 | Phase 102 | Done |
-| DOCS-01 | Phase 103 | Done |
-| DEPR-01 | Phase 104 | Done |
-| DEPR-02 | Phase 104 | Done |
-| DEPR-03 | Phase 104 | Done |
+| DATA-01 | — | Pending |
+| DATA-02 | — | Pending |
+| DATA-03 | — | Pending |
+| DATA-04 | — | Pending |
+| DATA-05 | — | Pending |
+| ADMN-01 | — | Pending |
+| ADMN-02 | — | Pending |
+| HEAD-01 | — | Pending |
+| HEAD-02 | — | Pending |
+| HEAD-03 | — | Pending |
+| ARCH-01 | — | Pending |
+| ARCH-02 | — | Pending |
 
 **Coverage:**
-- v1 requirements: 21 total
-- Mapped to phases: 21
-- Unmapped: 0
+- v5.3 requirements: 12 total
+- Mapped to phases: 0
+- Unmapped: 12 ⚠️
 
 ---
 *Requirements defined: 2026-03-18*
-*Last updated: 2026-03-18 after roadmap creation*
+*Last updated: 2026-03-18 after initial definition*

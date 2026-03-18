@@ -12,10 +12,14 @@ Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modul
 
 **Goal:** Corrigir UX gaps no header (logout, identidade admin/operator) e investigar docs desaparecidos.
 
+**Goal:** Multi-tenancy data isolation + UX polish no header e admin.
+
 **Target features:**
-- Icone de usuario no header com opcao de logout
-- Fix: docs da org FXL que sumiram apos alteracoes recentes
-- Header distinguir visualmente admin vs operator, renomear para Nexo
+- Isolamento de dados por org_id (tarefas, clientes, wireframes, docs)
+- Recuperacao de dados existentes (tarefas, wireframes que sumiram)
+- Admin: gerenciar membros, impersonate org
+- Header: logout, distincao admin/operator, rebrand Nexo
+- Separacao clara modulo (ferramenta) vs dados do cliente (org-scoped)
 
 Previous: v5.2 Nexo Skill (shipped 2026-03-18)
 Previous: v5.1 MCP Server (shipped 2026-03-18)
@@ -187,9 +191,18 @@ Previous: v5.0 SDK Docs (shipped 2026-03-17)
 
 ### Active
 
-- [ ] Icone de usuario no header para logout
-- [ ] Fix docs da org FXL que sumiram
-- [ ] Header: distincao admin vs operator + rebrand Nexo
+- [ ] DATA-01: Tarefas scoped por org_id
+- [ ] DATA-02: Clientes scoped por org_id
+- [ ] DATA-03: Wireframes/blueprints scoped por org_id
+- [ ] DATA-04: Docs da org scoped na sidebar
+- [ ] DATA-05: Dados existentes recuperados/re-associados
+- [ ] ADMN-01: Admin gerencia membros de qualquer org
+- [ ] ADMN-02: Admin impersonate org
+- [ ] HEAD-01: Avatar + dropdown logout no header
+- [ ] HEAD-02: Header distingue admin vs operator
+- [ ] HEAD-03: Header exibe "Nexo" como brand
+- [ ] ARCH-01: Separacao modulo (ferramenta) vs dados (org-scoped)
+- [ ] ARCH-02: Wireframe Builder global, wireframes como dados da org
 
 ### Out of Scope
 
