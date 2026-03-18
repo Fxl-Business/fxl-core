@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useSession } from '@clerk/react'
-import { ArrowLeft, Building2, Users, Calendar, Shield, Blocks, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Building2, Users, Calendar, Shield, Blocks, ExternalLink, Trash2, Eye, UserPlus } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import { getTenantDetail, setClerkTokenGetter } from '@platform/services/tenant-service'
-import { listOrgMembers, setAdminClerkTokenGetter } from '@platform/services/admin-service'
+import { listOrgMembers, addOrgMember, removeOrgMember, setAdminClerkTokenGetter } from '@platform/services/admin-service'
+import { useImpersonation } from '@platform/auth/ImpersonationContext'
 import type { TenantDetail } from '@platform/types/tenant'
 import type { OrgMember } from '@platform/types/admin'
 
@@ -46,6 +47,20 @@ export default function TenantDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [members, setMembers] = useState<OrgMember[]>([])
   const [membersLoading, setMembersLoading] = useState(true)
+  const [membersError, setMembersError] = useState<string | null>(null)
+
+  // Add member state
+  const [addUserId, setAddUserId] = useState('')
+  const [addLoading, setAddLoading] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
+
+  // Remove confirmation state: maps userId → boolean (true = confirm pending)
+  const [confirmRemoveMap, setConfirmRemoveMap] = useState<Map<string, boolean>>(new Map())
+  const [removeLoadingMap, setRemoveLoadingMap] = useState<Map<string, boolean>>(new Map())
+
+  // Impersonation
+  const { enterImpersonation, isImpersonating, impersonatedOrgId } = useImpersonation()
+  const [impersonateLoading, setImpersonateLoading] = useState(false)
 
   // Register Clerk token getters for both services
   useEffect(() => {
@@ -81,31 +96,105 @@ export default function TenantDetailPage() {
     return () => { cancelled = true }
   }, [orgId, session, navigate])
 
-  // Fetch org members
+  // Standalone loadMembers — called both from useEffect and after mutations
+  async function loadMembers(cancelled?: { value: boolean }) {
+    if (!orgId || !session) return
+    setMembersLoading(true)
+    setMembersError(null)
+    try {
+      const data = await listOrgMembers(orgId)
+      if (!cancelled?.value) setMembers(data.members ?? [])
+    } catch (err) {
+      console.error('Failed to fetch org members:', err)
+      if (!cancelled?.value) {
+        setMembers([])
+        setMembersError(err instanceof Error ? err.message : 'Erro ao carregar membros')
+      }
+    } finally {
+      if (!cancelled?.value) setMembersLoading(false)
+    }
+  }
+
+  // Fetch org members on mount
   useEffect(() => {
     if (!orgId || !session) {
       setMembersLoading(false)
       return
     }
+    const state = { value: false }
+    void loadMembers(state)
+    return () => { state.value = true }
+  }, [orgId, session]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    let cancelled = false
+  // ---------------------------------------------------------------------------
+  // Member management handlers
+  // ---------------------------------------------------------------------------
 
-    async function fetchMembers() {
-      setMembersLoading(true)
-      try {
-        const data = await listOrgMembers(orgId!)
-        if (!cancelled) setMembers(data.members)
-      } catch {
-        // Silently fail — tenant detail still shows, members section shows empty
-        if (!cancelled) setMembers([])
-      } finally {
-        if (!cancelled) setMembersLoading(false)
-      }
+  async function handleAddMember(e: React.FormEvent) {
+    e.preventDefault()
+    const userId = addUserId.trim()
+    if (!userId.startsWith('user_')) {
+      setAddError('O userId deve começar com "user_" (ex: user_abc123)')
+      return
     }
+    if (!orgId) return
 
-    fetchMembers()
-    return () => { cancelled = true }
-  }, [orgId, session])
+    setAddLoading(true)
+    setAddError(null)
+    try {
+      await addOrgMember(orgId, userId)
+      setAddUserId('')
+      await loadMembers()
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Erro ao adicionar membro')
+    } finally {
+      setAddLoading(false)
+    }
+  }
+
+  function handleRemoveClick(userId: string) {
+    setConfirmRemoveMap(prev => {
+      const next = new Map(prev)
+      next.set(userId, true)
+      return next
+    })
+  }
+
+  function handleRemoveCancel(userId: string) {
+    setConfirmRemoveMap(prev => {
+      const next = new Map(prev)
+      next.delete(userId)
+      return next
+    })
+  }
+
+  async function handleRemoveConfirm(userId: string) {
+    if (!orgId) return
+    setRemoveLoadingMap(prev => new Map(prev).set(userId, true))
+    try {
+      await removeOrgMember(orgId, userId)
+      setConfirmRemoveMap(prev => { const n = new Map(prev); n.delete(userId); return n })
+      await loadMembers()
+    } catch (err) {
+      console.error('Failed to remove member:', err)
+      setConfirmRemoveMap(prev => { const n = new Map(prev); n.delete(userId); return n })
+    } finally {
+      setRemoveLoadingMap(prev => { const n = new Map(prev); n.delete(userId); return n })
+    }
+  }
+
+  async function handleEnterImpersonation() {
+    if (!orgId || !tenant) return
+    setImpersonateLoading(true)
+    try {
+      await enterImpersonation(orgId, tenant.name)
+      navigate('/')
+    } catch (err) {
+      console.error('Impersonation failed:', err)
+    } finally {
+      setImpersonateLoading(false)
+    }
+  }
 
   // ----- Loading state -----
   if (loading) {
@@ -158,32 +247,48 @@ export default function TenantDetailPage() {
       </Link>
 
       {/* Header */}
-      <div className="flex items-start gap-4">
-        {tenant.imageUrl ? (
-          <img
-            src={tenant.imageUrl}
-            alt={tenant.name}
-            className="h-16 w-16 shrink-0 rounded-2xl object-cover"
-          />
-        ) : (
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
-            <Building2 className="h-8 w-8" />
-          </div>
-        )}
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-foreground">{tenant.name}</h1>
-          {tenant.slug && (
-            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">/{tenant.slug}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-4">
+          {tenant.imageUrl ? (
+            <img
+              src={tenant.imageUrl}
+              alt={tenant.name}
+              className="h-16 w-16 shrink-0 rounded-2xl object-cover"
+            />
+          ) : (
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+              <Building2 className="h-8 w-8" />
+            </div>
           )}
-          <p className="mt-1 font-mono text-xs text-slate-400 dark:text-slate-500">{tenant.id}</p>
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-foreground">{tenant.name}</h1>
+            {tenant.slug && (
+              <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">/{tenant.slug}</p>
+            )}
+            <p className="mt-1 font-mono text-xs text-slate-400 dark:text-slate-500">{tenant.id}</p>
+          </div>
         </div>
+
+        {/* Impersonation button — only show when not already impersonating this org */}
+        {!(isImpersonating && impersonatedOrgId === orgId) && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleEnterImpersonation}
+            disabled={impersonateLoading}
+            className="shrink-0 gap-1.5 border-indigo-200 text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
+          >
+            <Eye className="h-3.5 w-3.5" />
+            {impersonateLoading ? 'Entrando...' : 'Entrar como esta org'}
+          </Button>
+        )}
       </div>
 
       {/* Info cards grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <InfoCard
           label="Membros"
-          value={tenant.membersCount}
+          value={!membersLoading && members.length > 0 ? members.length : tenant.membersCount}
           icon={Users}
         />
         <InfoCard
@@ -203,6 +308,32 @@ export default function TenantDetailPage() {
         <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-foreground">
           Membros
         </h2>
+
+        {/* Add Member form */}
+        <form onSubmit={handleAddMember} className="flex items-start gap-2">
+          <div className="flex-1">
+            <input
+              type="text"
+              value={addUserId}
+              onChange={e => setAddUserId(e.target.value)}
+              placeholder="user_..."
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-card dark:text-foreground dark:placeholder-slate-500 dark:focus:border-indigo-700 dark:focus:ring-indigo-950/50"
+            />
+            {addError && (
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{addError}</p>
+            )}
+          </div>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={addLoading || !addUserId.trim()}
+            className="shrink-0 gap-1.5"
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+            {addLoading ? 'Adicionando...' : 'Adicionar'}
+          </Button>
+        </form>
+
         {membersLoading && (
           <div className="space-y-2">
             {[1, 2, 3].map(i => (
@@ -210,7 +341,12 @@ export default function TenantDetailPage() {
             ))}
           </div>
         )}
-        {!membersLoading && members.length === 0 && (
+        {!membersLoading && membersError && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/20">
+            <p className="text-sm text-red-700 dark:text-red-400">{membersError}</p>
+          </div>
+        )}
+        {!membersLoading && !membersError && members.length === 0 && (
           <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center dark:border-slate-700">
             <Users className="mx-auto mb-2 h-6 w-6 text-slate-300 dark:text-slate-600" />
             <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum membro encontrado</p>
@@ -221,11 +357,13 @@ export default function TenantDetailPage() {
             {members.map((member, idx) => {
               const fullName = [member.firstName, member.lastName].filter(Boolean).join(' ') || 'Sem nome'
               const isAdmin = member.role === 'admin' || member.role === 'org:admin'
+              const isConfirming = confirmRemoveMap.get(member.userId) === true
+              const isRemovingThis = removeLoadingMap.get(member.userId) === true
               return (
                 <div
                   key={member.userId}
                   className={[
-                    'flex items-center gap-3 px-4 py-3',
+                    'group flex items-center gap-3 px-4 py-3',
                     idx !== 0 ? 'border-t border-slate-100 dark:border-slate-700/50' : '',
                   ].join(' ')}
                 >
@@ -263,6 +401,39 @@ export default function TenantDetailPage() {
                   >
                     {isAdmin ? 'Admin' : 'Membro'}
                   </span>
+
+                  {/* Remove button (2-click inline confirm) */}
+                  <div className="ml-1 flex shrink-0 items-center gap-1">
+                    {isConfirming ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => void handleRemoveConfirm(member.userId)}
+                          disabled={isRemovingThis}
+                          className="rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                        >
+                          {isRemovingThis ? '...' : 'Confirmar?'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCancel(member.userId)}
+                          className="rounded p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                          aria-label="Cancelar remoção"
+                        >
+                          ✕
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveClick(member.userId)}
+                        className="rounded p-1 text-slate-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100 dark:hover:text-red-400"
+                        aria-label={`Remover ${fullName}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               )
             })}
