@@ -42,9 +42,9 @@ Requirements for v5.2. Each maps to roadmap phases.
 
 ### Deprecation
 
-- [ ] **DEPR-01**: .agents/skills/fxl-sdk/ directory removed after migration validated
-- [ ] **DEPR-02**: All references to old skill paths updated (CLAUDE.md, docs, configs)
-- [ ] **DEPR-03**: agent-orchestrator references updated to point to nexo/orchestrator/
+- [x] **DEPR-01**: .agents/skills/fxl-sdk/ directory removed after migration validated
+- [x] **DEPR-02**: All references to old skill paths updated (CLAUDE.md, docs, configs)
+- [x] **DEPR-03**: agent-orchestrator references updated to point to nexo/orchestrator/
 
 ## Future Requirements
 
@@ -89,9 +89,9 @@ Requirements for v5.2. Each maps to roadmap phases.
 | SCAF-04 | Phase 102 | Pending |
 | SCAF-05 | Phase 102 | Pending |
 | DOCS-01 | Phase 103 | Pending |
-| DEPR-01 | Phase 104 | Pending |
-| DEPR-02 | Phase 104 | Pending |
-| DEPR-03 | Phase 104 | Pending |
+| DEPR-01 | Phase 104 | Done |
+| DEPR-02 | Phase 104 | Done |
+| DEPR-03 | Phase 104 | Done |
 
 **Coverage:**
 - v1 requirements: 21 total

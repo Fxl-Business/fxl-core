@@ -21,7 +21,7 @@ Previous: v5.0 SDK Docs (shipped 2026-03-17)
 - MCP bridge (skill consulta e alimenta MCP automaticamente)
 - Scaffold flow (criar spoke completo via skill + MCP)
 - Docs update (preencher docs/sdk/nexo-skill.md)
-- Deprecar skills antigas (remover .agents/skills/fxl-sdk/ e agent-orchestrator)
+- Deprecar skills antigas (concluido — .agents/skills/fxl-sdk/ removido, referencias atualizadas para .agents/skills/nexo/)
 
 ## Requirements
 

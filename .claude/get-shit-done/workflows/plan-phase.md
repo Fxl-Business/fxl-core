@@ -416,8 +416,8 @@ Output consumed by /gsd:execute-phase. Plans need:
 </downstream_consumer>
 
 <parallel_execution>
-**Parallel agent orchestration:** Read .claude/skills/agent-orchestrator/rules/boundary-detection.md
-and .claude/skills/agent-orchestrator/rules/task-analysis.md
+**Parallel agent orchestration:** Read .agents/skills/nexo/orchestrator/rules/boundary-detection.md
+and .agents/skills/nexo/orchestrator/rules/task-analysis.md
 
 After generating tasks, run boundary detection and task analysis.
 If execution_mode resolves to multi-agent, add to PLAN.md frontmatter:

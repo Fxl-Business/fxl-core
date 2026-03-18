@@ -213,7 +213,7 @@ If gaps_found:
 Check if any plan in this phase has `execution_mode: multi-agent` in frontmatter.
 
 If yes:
-  Read .claude/skills/agent-orchestrator/rules/integration-check.md
+  Read .agents/skills/nexo/orchestrator/rules/integration-check.md
   Run cross-boundary verification in addition to standard checks.
   Append results to VERIFICATION.md under "## Cross-Boundary Verification".
 

@@ -42,11 +42,11 @@
 ## Phases
 
 - [x] **Phase 99: Consolidation** - Unify SDK skill + orchestrator into single Nexo Skill structure
-- [ ] **Phase 100: Methodology Layer** - GSD bridge with FXL-customized discuss/plan/execute flow
-- [ ] **Phase 101: MCP Bridge** - Skill consults and feeds MCP Server automatically
-- [ ] **Phase 102: Scaffold Flow** - Create complete spoke project via skill + MCP integration
+- [x] **Phase 100: Methodology Layer** - GSD bridge with FXL-customized discuss/plan/execute flow
+- [x] **Phase 101: MCP Bridge** - Skill consults and feeds MCP Server automatically
+- [x] **Phase 102: Scaffold Flow** - Create complete spoke project via skill + MCP integration
 - [ ] **Phase 103: Documentation** - Fill docs/sdk/nexo-skill.md with complete usage guide
-- [ ] **Phase 104: Deprecation** - Remove old skills and update all references
+- [x] **Phase 104: Deprecation** - Remove old skills and update all references
 
 ## Phase Details
 
@@ -70,7 +70,8 @@
   1. A workflow document at .agents/skills/nexo/methodology/ defines the discuss/plan/execute flow for FXL projects
   2. After phase completion, a post-execution hook captures learnings and writes them to MCP via add_learning()
   3. Before planning a new phase, the pre-planning step retrieves existing standards and pitfalls from MCP
-**Plans**: TBD
+**Plans**: 1/1 complete
+**Completed**: 2026-03-18
 
 ### Phase 101: MCP Bridge
 **Goal**: The Nexo Skill automatically consults and feeds the MCP Server during its operations
@@ -81,7 +82,8 @@
   2. The skill calls get_learnings() and get_pitfalls() to enrich context before any operation
   3. When discovering a new pattern during execution, the skill calls add_learning() to persist it
   4. When encountering a documentable error, the skill calls add_pitfall() to persist it
-**Plans**: TBD
+**Plans**: 1/1 complete
+**Completed**: 2026-03-18
 
 ### Phase 102: Scaffold Flow
 **Goal**: A single scaffold command creates a complete, ready-to-develop spoke project with all FXL conventions
@@ -92,7 +94,8 @@
   2. The generated spoke contains a CLAUDE.md with FXL SDK rules and a .mcp.json pointing to the MCP Server
   3. The scaffold registers the new project in the MCP Server via sdk_projects table (slug, name, stack_choices)
   4. The scaffold prompts for platform (web/mobile), framework (vite/next), and module selections before generating
-**Plans**: TBD
+**Plans**: 1/1 complete
+**Completed**: 2026-03-18
 
 ### Phase 103: Documentation
 **Goal**: Operators and Claude Code can learn how to use the Nexo Skill from a complete guide in the docs
@@ -111,7 +114,8 @@
   1. The directory .agents/skills/fxl-sdk/ no longer exists
   2. CLAUDE.md, docs, and config files reference .agents/skills/nexo/ (not fxl-sdk or agent-orchestrator)
   3. agent-orchestrator references point to nexo/orchestrator/ throughout the codebase
-**Plans**: TBD
+**Plans**: 1/1 complete
+**Completed**: 2026-03-18
 
 ## Progress
 
@@ -124,8 +128,8 @@ Order: 99 -> [100, 101] (parallel) -> 102 -> 103 -> 104
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 99. Consolidation | 1/1 | Complete | 2026-03-18 |
-| 100. Methodology Layer | 0/? | Not started | - |
-| 101. MCP Bridge | 0/? | Not started | - |
-| 102. Scaffold Flow | 0/? | Not started | - |
+| 100. Methodology Layer | 1/1 | Complete | 2026-03-18 |
+| 101. MCP Bridge | 1/1 | Complete | 2026-03-18 |
+| 102. Scaffold Flow | 1/1 | Complete | 2026-03-18 |
 | 103. Documentation | 0/? | Not started | - |
-| 104. Deprecation | 0/? | Not started | - |
+| 104. Deprecation | 1/1 | Complete | 2026-03-18 |

@@ -8,7 +8,7 @@
 // ---- Connector-specific types ----
 export { type ConnectorConfig, type ConnectorStatus } from './connector-config'
 
-// ---- Contract types (copied from .agents/skills/fxl-sdk/contract/types.ts) ----
+// ---- Contract types (copied from .agents/skills/nexo/contract/types.ts) ----
 
 /** Metadata that every spoke exposes via GET /api/fxl/manifest */
 export interface FxlAppManifest {

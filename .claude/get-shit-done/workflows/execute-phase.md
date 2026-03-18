@@ -107,7 +107,7 @@ Execute each wave in sequence. Within a wave: parallel if `PARALLELIZATION=true`
 **Before spawning agents, check for multi-agent execution:**
 
 Read first incomplete plan's frontmatter. If `execution_mode: multi-agent`:
-  Read .claude/skills/agent-orchestrator/rules/orchestration.md
+  Read .agents/skills/nexo/orchestrator/rules/orchestration.md
   Follow wave-based orchestration instead of standard sequential spawn.
   STOP reading the rest of execute_waves — orchestration.md takes over.
   After orchestration completes, resume at `<step name="aggregate_results">`.

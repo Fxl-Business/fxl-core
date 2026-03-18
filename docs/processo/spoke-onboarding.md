@@ -10,7 +10,7 @@ Este documento descreve o processo de conectar qualquer projeto externo ao Nexo 
 
 ## Pre-requisitos
 
-- FXL SDK Skill instalada no Claude Code (`.agents/skills/fxl-sdk/`)
+- Nexo Skill instalada no Claude Code (`.agents/skills/nexo/`)
 - Projeto spoke com stack compativel (React 18, TypeScript, Supabase, Vite)
 - Acesso ao Nexo como operador (para cadastrar o connector)
 
@@ -37,7 +37,7 @@ A unica conexao com o hub e via API (6 endpoints padronizados) autenticada por A
 Abrir o Claude Code no repo da spoke e pedir:
 
 {% prompt label="Auditar projeto" %}
-Audita esse projeto contra os padroes FXL usando a skill fxl-sdk
+Audita esse projeto contra os padroes FXL usando a Nexo Skill
 {% endprompt %}
 
 O SDK gera um `FXL-AUDIT.md` com score de conformidade e plano de refatoracao.
@@ -47,7 +47,7 @@ O SDK gera um `FXL-AUDIT.md` com score de conformidade e plano de refatoracao.
 Pedir ao Claude Code:
 
 {% prompt label="Adicionar contrato" %}
-Adiciona o contrato FXL a esse projeto usando a skill fxl-sdk (rules/connect.md)
+Adiciona o contrato FXL a esse projeto usando a Nexo Skill (sdk/connect.md)
 {% endprompt %}
 
 Isso cria:
@@ -137,7 +137,7 @@ Hub ──[X-FXL-API-Key: abc123]──► Spoke
 ## Para o Claude Code
 
 Ao trabalhar em um projeto spoke:
-1. Sempre usar a skill `fxl-sdk` como referencia
+1. Sempre usar a Nexo Skill (`.agents/skills/nexo/`) como referencia
 2. Os endpoints `/api/fxl/*` sao Supabase Edge Functions
 3. O middleware de API key valida o header `X-FXL-API-Key`
 4. Tipos do contrato sao COPIADOS para o projeto (nao importados)

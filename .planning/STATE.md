@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Nexo Skill
 status: in-progress
-stopped_at: Phase 99 complete, ready for Phase 100/101 (parallel)
+stopped_at: All phases complete (99-104), v5.2 milestone done
 last_updated: "2026-03-18T00:00:00.000Z"
-last_activity: 2026-03-18 — Phase 99 Consolidation complete
+last_activity: 2026-03-18 — Phase 104 Deprecation complete
 progress:
   total_phases: 6
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
-  percent: 17
+  completed_phases: 6
+  total_plans: 6
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-03-18)
 ## Current Position
 
 Milestone: v5.2 Nexo Skill
-Phase: 99 of 104 (Consolidation) — complete
+Phase: 104 of 104 (Deprecation) — complete
 Plan: 1/1 complete
-Status: Phase 99 done, ready for Phase 100/101 (parallel)
-Last activity: 2026-03-18 — Phase 99 Consolidation executed
+Status: All phases complete (99-104)
+Last activity: 2026-03-18 — Phase 104 Deprecation executed
 
-Progress: [##░░░░░░░░] 17%
+Progress: [##########] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
+- Total plans completed: 4
 - Average duration: -
 - Total execution time: -
 
@@ -45,6 +45,11 @@ Progress: [##░░░░░░░░] 17%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 99. Consolidation | 1/1 | - | - |
+| 100. Methodology Layer | 1/1 | - | - |
+| 101. MCP Bridge | 1/1 | - | - |
+| 102. Scaffold Flow | 1/1 | - | - |
+| 103. Documentation | 1/1 | - | - |
+| 104. Deprecation | 1/1 | - | - |
 
 *Updated after each plan completion*
 
@@ -55,11 +60,22 @@ Progress: [##░░░░░░░░] 17%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- v5.2: Consolidate FXL SDK skill + agent-orchestrator into single Nexo Skill
+- v5.2: Consolidated FXL SDK skill + agent-orchestrator into single Nexo Skill at .agents/skills/nexo/
 - v5.2: Phases 100 and 101 can run in parallel (no dependency between them)
 - v5.2-P99: SDK rules moved to .agents/skills/nexo/sdk/ (from fxl-sdk/rules/)
-- v5.2-P99: Orchestrator rules moved to .agents/skills/nexo/orchestrator/ (from .claude/skills/agent-orchestrator/)
+- v5.2-P99: Orchestrator rules moved to .agents/skills/nexo/orchestrator/ (old .claude/skills/agent-orchestrator/ references updated in P104)
+- v5.2-P104: .agents/skills/fxl-sdk/ removed, all GSD workflow refs updated to .agents/skills/nexo/orchestrator/, docs updated
 - v5.2-P99: SKILL.md routes 6 capabilities: scaffold, audit, connect, orchestrate, methodology, learn
+- v5.2-P101: MCP bridge created at .agents/skills/nexo/mcp-bridge/ with pre-operation, post-operation, spoke-planning rules
+- v5.2-P101: Every SDK operation now has mandatory pre/post MCP integration points in SKILL.md
+- v5.2-P100: Methodology created at .agents/skills/nexo/methodology/ with workflow, pre-planning, post-execution hooks
+- v5.2-P100: Pre-planning hook calls get_standards(), get_pitfalls(), get_learnings(), search_knowledge() before task generation
+- v5.2-P100: Post-execution hook captures learnings and pitfalls to MCP after verification passes
+- v5.2-P102: Scaffold flow created at sdk/scaffold-flow.md — unified 4-stage flow (Gather, Context, Generate, Register)
+- v5.2-P102: register_project MCP tool added to write tools — upserts into sdk_projects table
+- v5.2-P102: .mcp.json.template created for spoke projects to connect to FXL SDK MCP Server
+- v5.2-P102: scaffold-flow.md supersedes new-project.md as the recommended scaffold command
+- v5.2-P102: MCP server redeployed with register_project tool (Cloudflare Workers)
 
 ### Pending Todos
 
@@ -72,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Phase 99 complete, ready for Phase 100/101
+Stopped at: All phases complete (99-104), v5.2 milestone done
 Resume file: None
