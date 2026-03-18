@@ -8,19 +8,9 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v5.3 UX Polish
+## Current Milestone: Planning Next
 
-**Goal:** Corrigir UX gaps no header (logout, identidade admin/operator) e investigar docs desaparecidos.
-
-**Goal:** Multi-tenancy data isolation + UX polish no header e admin.
-
-**Target features:**
-- Isolamento de dados por org_id (tarefas, clientes, wireframes, docs)
-- Recuperacao de dados existentes (tarefas, wireframes que sumiram)
-- Admin: gerenciar membros, impersonate org
-- Header: logout, distincao admin/operator, rebrand Nexo
-- Separacao clara modulo (ferramenta) vs dados do cliente (org-scoped)
-
+Previous: v5.3 UX Polish (shipped 2026-03-18)
 Previous: v5.2 Nexo Skill (shipped 2026-03-18)
 Previous: v5.1 MCP Server (shipped 2026-03-18)
 Previous: v5.0 SDK Docs (shipped 2026-03-17)
@@ -186,23 +176,21 @@ Previous: v5.0 SDK Docs (shipped 2026-03-17)
 - ✓ Nexo Skill unificada com todas as capacidades (scaffold, audit, connect, orchestrate, methodology, learn) — v5.2
 - ✓ MCP bridge integrado (skill consulta e alimenta MCP automaticamente) — v5.2
 - ✓ Scaffold flow gerando spoke completo com CLAUDE.md + .mcp.json — v5.2
+- ✓ Tarefas e clientes scoped por org_id com RLS + service layer automatico — v5.3
+- ✓ Wireframes/blueprints scoped por org_id (blueprint_configs RLS strict policy) — v5.3
+- ✓ Docs sidebar scoped por org via JWT exchange + cache invalidation on org switch — v5.3
+- ✓ Migration idempotente 017 re-associando dados do placeholder org_fxl_default para org real — v5.3
+- ✓ Admin: add/remove membros de qualquer org via TenantDetailPage + admin-tenants edge function — v5.3
+- ✓ Admin: impersonate org via ImpersonationContext + ImpersonationBanner (amber banner + exit) — v5.3
+- ✓ Header UX: UserMenu com avatar, dropdown logout, ADMIN badge amber para super_admin — v5.3
+- ✓ Header brand corrigido para "Nexo" (FXL-CORE subtitle removido) — v5.3
+- ✓ MODULE_REGISTRY com tenantScoped?: boolean separando ferramenta global de dado org-scoped — v5.3
 - ✓ Docs SDK atualizados com pagina nexo-skill.md — v5.2
 - ✓ Skills antigas deprecadas e removidas — v5.2
 
 ### Active
 
-- [ ] DATA-01: Tarefas scoped por org_id
-- [ ] DATA-02: Clientes scoped por org_id
-- [ ] DATA-03: Wireframes/blueprints scoped por org_id
-- [ ] DATA-04: Docs da org scoped na sidebar
-- [ ] DATA-05: Dados existentes recuperados/re-associados
-- [ ] ADMN-01: Admin gerencia membros de qualquer org
-- [ ] ADMN-02: Admin impersonate org
-- [ ] HEAD-01: Avatar + dropdown logout no header
-- [ ] HEAD-02: Header distingue admin vs operator
-- [ ] HEAD-03: Header exibe "Nexo" como brand
-- [ ] ARCH-01: Separacao modulo (ferramenta) vs dados (org-scoped)
-- [ ] ARCH-02: Wireframe Builder global, wireframes como dados da org
+(Nenhum — aguardando definicao do proximo milestone)
 
 ### Out of Scope
 
@@ -240,11 +228,11 @@ Previous: v5.0 SDK Docs (shipped 2026-03-17)
 
 ## Current State
 
-23 milestones shipped (v1.0 → v5.2). v5.2 completed Nexo Skill.
+24 milestones shipped (v1.0 → v5.3). v5.3 completed multi-tenancy data isolation, header UX polish, and admin enhancements (impersonation + member management).
 
 ## Context
 
-Shipped v5.2 Nexo Skill. 23 milestones complete (v1.0-v5.2).
+Shipped v5.3 UX Polish. 24 milestones complete (v1.0-v5.3).
 Codebase reorganizado: src/platform/ (shell), src/modules/ (autocontidos), src/shared/ (cross-module).
 5 modulos ativos (docs, tasks, clients, wireframe, connector), cada um com CLAUDE.md para agent scoped.
 Super admin panel com /admin/* routes: dashboard, tenant management, users management, module management per-tenant, platform settings.
@@ -258,7 +246,7 @@ Nexo Skill unificada (.agents/skills/nexo/) com scaffold, audit, connect, orches
 MCP bridge integrado para consultar e alimentar knowledge base automaticamente.
 Design spec para evolucao em docs/superpowers/specs/.
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
-10 Supabase migrations (001-010). 6 modules in MODULE_REGISTRY.
+17+ Supabase migrations (001-017). 6 modules in MODULE_REGISTRY.
 Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
 Dynamic data layer: docs content served from Supabase with bidirectional sync CLI for Claude Code workflow.
 
@@ -379,6 +367,10 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | admin-users edge function minimal for Phase 86, expanded in 87 | Intentional phasing: totalCount first, then full user data + org memberships | ✓ Good — incremental delivery |
 | admin-service.ts as separate service (not extending tenant-service) | Separation of concerns: tenant vs user operations in distinct services | ✓ Good — clean module boundaries |
 | Edge function members endpoint via admin-tenants (not admin-users) | Members are org-scoped, fits naturally in tenants function | ✓ Good — logical API grouping |
+| useOrgTokenExchange onOrgChange callback pattern | Avoid platform→modules import boundary violation for docs cache | ✓ Good — clean boundary, cache invalidation works |
+| ImpersonationContext as React context (not URL param) | State-based impersonation, no URL pollution, easy to exit | ✓ Good — amber banner UX clear |
+| Phase 109 as formal audit (no new migration needed) | blueprint_configs RLS already correct since migration 013 | ✓ Good — discovered existing policy was sufficient |
+| Gap closure phases 109-111 for audit traceability | Separate phases to close verification gaps vs reopen completed work | ✓ Good — clean audit trail |
 
 ---
-*Last updated: 2026-03-18 after v5.3 milestone started*
+*Last updated: 2026-03-18 after v5.3 milestone shipped*

@@ -1,5 +1,14 @@
 # Milestones
 
+## v5.3 UX Polish (Shipped: 2026-03-18)
+
+**Phases completed:** 7 phases, 13 plans, 5 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+
 ## v4.3 Admin Polish & Custom Auth (Shipped: 2026-03-17)
 
 **Phases:** 4 (85-88) | **Plans:** 8 | **Tasks:** ~12

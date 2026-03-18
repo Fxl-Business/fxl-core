@@ -605,6 +605,46 @@
 - Sessions: 1 (autorun + audit + complete in single session)
 - Notable: Most v4.3 code was already written in prior sessions; this session was primarily verification and archival
 
+## Milestone: v5.3 — UX Polish
+
+**Shipped:** 2026-03-18
+**Phases:** 7 | **Plans:** 13
+
+### What Was Built
+- Multi-tenancy data isolation: tasks, clients, blueprints scoped by org_id with RLS
+- Data recovery migration (017) idempotently re-associating existing rows from placeholder org to real FXL org
+- Header UX overhaul: UserMenu with avatar/dropdown/logout, ADMIN amber badge, "Nexo" brand (FXL-CORE removed)
+- Admin member management: add/remove org members via TenantDetailPage + admin-tenants edge function
+- Admin org impersonation: ImpersonationContext + ImpersonationBanner (amber banner with exit)
+- Gap closure audit: Phases 109-111 formally verified DATA-03/DATA-04/ADMN-01/ADMN-02/ARCH-01/ARCH-02
+
+### What Worked
+- **Gap closure phase pattern:** Phases 109-111 were lightweight verification-only phases that closed audit gaps without reopening completed work — clean, traceable pattern
+- **Blueprint RLS already correct:** Phase 109 discovered DATA-03 was satisfied since migration 013 — audit found the evidence, no code change needed
+- **ImpersonationContext pattern:** State-based impersonation via React context + amber banner is clear UX — no URL pollution, easy to exit
+- **13 plans across 7 phases shipped cleanly:** tsc --noEmit 0 errors throughout the entire milestone
+
+### What Was Inefficient
+- **Initial audit found 6 unsatisfied requirements:** Verification documentation was not produced during Phase 108 execution — VERIFICATION.md and REQUIREMENTS.md checkbox updates were deferred, creating audit debt
+- **Three extra phases for audit closure:** Phases 109, 110, 111 were entirely documentation/audit work. If verification artifacts had been produced during execution, the milestone would have been 4 phases, not 7
+- **REQUIREMENTS.md checkboxes unchecked throughout:** All 12 requirements remained `[ ]` until Phase 111 — checkboxes should be updated in the same commit as the verification artifact
+
+### Patterns Established
+- **Verification artifact = delivery gate:** Phase must produce VERIFICATION.md + update REQUIREMENTS.md traceability at completion, not retroactively
+- **Audit = discovery, not creation:** Audit phase should find evidence already documented in VERIFICATION.md, not create new evidence
+- **RLS audit as verification:** When RLS policy is claimed to be in place, the verification artifact should include `pg_policies` query output as evidence
+
+### Key Lessons
+1. **Complete VERIFICATION.md in the same session as execution** — retrofitting verification creates 1-3 extra phases of audit debt
+2. **Mark REQUIREMENTS.md checkboxes in the same commit as VERIFICATION.md** — leaving them unchecked signals work is incomplete when it isn't
+3. **Database policies should be re-audited, not assumed** — Phase 109 discovered the policy was already correct from migration 013; earlier auditing would have avoided the deferred gap
+4. **Gap closure phases have predictable structure:** audit SQL + tsc + VERIFICATION.md + REQUIREMENTS.md update = 1 plan, ~30 min each
+
+### Cost Observations
+- Model mix: ~100% sonnet (all phases including orchestration)
+- Sessions: 1 (phases 105-111 + audit + complete in sequence)
+- Notable: 3 of 7 phases were audit/documentation work that could have been eliminated with better verification hygiene during execution phases
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
