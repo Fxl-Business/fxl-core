@@ -71,13 +71,33 @@ Requirements for v5.2. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | | |
+| CONS-01 | Phase 99 | Pending |
+| CONS-02 | Phase 99 | Pending |
+| CONS-03 | Phase 99 | Pending |
+| CONS-04 | Phase 99 | Pending |
+| CONS-05 | Phase 99 | Pending |
+| METH-01 | Phase 100 | Pending |
+| METH-02 | Phase 100 | Pending |
+| METH-03 | Phase 100 | Pending |
+| MCPB-01 | Phase 101 | Pending |
+| MCPB-02 | Phase 101 | Pending |
+| MCPB-03 | Phase 101 | Pending |
+| MCPB-04 | Phase 101 | Pending |
+| SCAF-01 | Phase 102 | Pending |
+| SCAF-02 | Phase 102 | Pending |
+| SCAF-03 | Phase 102 | Pending |
+| SCAF-04 | Phase 102 | Pending |
+| SCAF-05 | Phase 102 | Pending |
+| DOCS-01 | Phase 103 | Pending |
+| DEPR-01 | Phase 104 | Pending |
+| DEPR-02 | Phase 104 | Pending |
+| DEPR-03 | Phase 104 | Pending |
 
 **Coverage:**
-- v1 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18
+- v1 requirements: 21 total
+- Mapped to phases: 21
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-18*
-*Last updated: 2026-03-18 after initial definition*
+*Last updated: 2026-03-18 after roadmap creation*
