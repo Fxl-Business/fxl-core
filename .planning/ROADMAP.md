@@ -40,7 +40,7 @@
 
 ### Phases
 
-- [ ] **Phase 105: Data Isolation** - Adicionar org_id em todas as tabelas de dados operacionais e enforcar isolamento por org via RLS + service layer
+- [x] **Phase 105: Data Isolation** - Adicionar org_id em todas as tabelas de dados operacionais e enforcar isolamento por org via RLS + service layer (completed 2026-03-18)
 - [ ] **Phase 106: Data Recovery** - Recuperar e re-associar dados existentes (tarefas, wireframes) a org correta
 - [x] **Phase 107: Header UX** - Adicionar avatar com dropdown de logout, distinguir admin vs operator, corrigir brand "Nexo" (completed 2026-03-18)
 - [ ] **Phase 108: Admin Enhancements** - Admin pode gerenciar membros de qualquer org e entrar na visao de qualquer org (impersonate)
@@ -49,7 +49,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 105. Data Isolation | 0/? | Not started | - |
+| 105. Data Isolation | 4/4 | Complete    | 2026-03-18 |
 | 106. Data Recovery | 0/? | Not started | - |
 | 107. Header UX | 1/1 | Complete    | 2026-03-18 |
 | 108. Admin Enhancements | 0/? | Not started | - |
