@@ -588,6 +588,18 @@
 - **Formal verification matters:** Audit had to use code evidence because VERIFICATION.md was missing — adds overhead to audit step
 - **Bookkeeping automation needed:** Manual checkbox updates in REQUIREMENTS.md and ROADMAP.md are unreliable — should be automated by executor
 
+### Post-Ship Bugs (corrigidos em sessao de debug)
+
+7 bugs encontrados e corrigidos apos o deploy do v4.3. Todos documentados em `.planning/PITFALLS.md` com regras derivadas:
+
+1. **Promise.all mascarando falhas** — Dashboard mostrava 0/0/0 porque `Promise.all` falhava inteiro quando `admin-users` nao estava deployada
+2. **Edge function nao deployada** — `admin-users` existia no repo mas nunca foi deployada; CORS error era o sintoma
+3. **Formato Clerk API inconsistente** — `/v1/users` retorna array plano, codigo esperava `{ data: [] }`
+4. **Clerk /v1/users sem org memberships** — campo nao vem por padrao; reescrita para fetch separado por org
+5. **Sub-path removido pelo gateway Supabase** — `/admin-tenants/{orgId}/members` roteava para `handleGetOrg`; fix: query param `?include=members`
+6. **Null safety ausente** — `data.members` undefined causava tela branca; fix: `?? []`
+7. **Card de contagem desatualizado** — `tenant.membersCount` mostrava 0 enquanto lista mostrava membros; fix: usar `members.length` quando carregado
+
 ### Cost Observations
 - Model mix: ~80% sonnet (agents), ~20% opus (orchestrator)
 - Sessions: 1 (autorun + audit + complete in single session)
