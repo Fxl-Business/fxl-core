@@ -17,8 +17,8 @@ Requirements para UX Polish + Multi-tenancy data isolation.
 
 ### Admin
 
-- [ ] **ADMN-01**: Admin pode gerenciar membros de qualquer organizacao (add/remove usuarios)
-- [ ] **ADMN-02**: Admin pode entrar na visao de qualquer organizacao (impersonate org)
+- [x] **ADMN-01**: Admin pode gerenciar membros de qualquer organizacao (add/remove usuarios)
+- [x] **ADMN-02**: Admin pode entrar na visao de qualquer organizacao (impersonate org)
 <!-- gap closure: Phase 110 will produce VERIFICATION.md and mark these done -->
 
 ### Header UX
@@ -55,8 +55,8 @@ None deferred.
 | DATA-03 | Phase 109 (gap closure) | Pending |
 | DATA-04 | Phase 111 (gap closure) | Pending |
 | DATA-05 | Phase 106 | Done |
-| ADMN-01 | Phase 110 (gap closure) | Pending |
-| ADMN-02 | Phase 110 (gap closure) | Pending |
+| ADMN-01 | Phase 110 (gap closure) | Done |
+| ADMN-02 | Phase 110 (gap closure) | Done |
 | HEAD-01 | Phase 107 | Done |
 | HEAD-02 | Phase 107 | Done |
 | HEAD-03 | Phase 107 | Done |
@@ -67,8 +67,8 @@ None deferred.
 - v5.3 requirements: 12 total
 - Mapped to phases: 12
 - Unmapped: 0
-- Done: 6 (DATA-01, DATA-02, DATA-05, HEAD-01, HEAD-02, HEAD-03)
-- Pending gap closure: 6 (DATA-03, DATA-04, ADMN-01, ADMN-02, ARCH-01, ARCH-02)
+- Done: 8 (DATA-01, DATA-02, DATA-05, HEAD-01, HEAD-02, HEAD-03, ADMN-01, ADMN-02)
+- Pending gap closure: 4 (DATA-03, DATA-04, ARCH-01, ARCH-02)
 
 ---
 *Requirements defined: 2026-03-18*
