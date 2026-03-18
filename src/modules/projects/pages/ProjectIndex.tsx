@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { ChevronRight, Loader2 } from 'lucide-react'
-import { getClient } from '../services/clients-service'
-import type { Client } from '../services/clients-service'
+import { Badge } from '@shared/ui/badge'
+import { getProjectBySlug } from '../services/projects-service'
+import type { ProjectWithClient } from '../types/project'
 
 type DocStatus = {
   doc: string
@@ -15,26 +16,25 @@ const defaultDocs: DocStatus[] = [
   { doc: 'blueprint',  label: 'Blueprint',  status: 'Pendente' },
   { doc: 'wireframe',  label: 'Wireframe',  status: 'Pendente' },
   { doc: 'branding',   label: 'Branding',   status: 'Pendente' },
-  { doc: 'changelog',  label: 'Changelog',  status: 'Pendente' },
 ]
 
 const STATUS_COLORS: Record<string, string> = {
   Rascunho:    'bg-yellow-50 text-yellow-700',
   Pendente:    'bg-muted text-muted-foreground',
   Iniciado:    'bg-blue-50 text-blue-700',
-  'Concluído': 'bg-green-50 text-green-700',
-  'Em revisão':'bg-orange-50 text-orange-700',
+  'Concluido': 'bg-green-50 text-green-700',
+  'Em revisao':'bg-orange-50 text-orange-700',
 }
 
 export default function ProjectIndex() {
   const { projectSlug } = useParams<{ projectSlug: string }>()
-  const [project, setProject] = useState<Client | null>(null)
+  const [project, setProject] = useState<ProjectWithClient | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!projectSlug) return
-    getClient(projectSlug)
+    getProjectBySlug(projectSlug)
       .then(setProject)
       .catch((err) => {
         const message = err instanceof Error ? err.message : 'Erro ao carregar projeto'
@@ -76,10 +76,10 @@ export default function ProjectIndex() {
       <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-foreground">
         {name}
       </h1>
-      {project?.description && (
-        <p className="mt-3 text-lg text-slate-600 dark:text-slate-400">
-          {project.description}
-        </p>
+      {project?.client_name && (
+        <Badge variant="secondary" className="mt-2">
+          Cliente: {project.client_name}
+        </Badge>
       )}
 
       <div className="mt-8">

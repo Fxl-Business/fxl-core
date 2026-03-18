@@ -1,5 +1,6 @@
 import { supabase } from '@platform/supabase'
 import type { Comment } from '../types/comments'
+import { resolveProjectId } from './project-resolver'
 
 export async function addComment(params: {
   clientSlug: string
@@ -9,6 +10,8 @@ export async function addComment(params: {
   authorRole: 'operador' | 'cliente'
   text: string
 }): Promise<Comment> {
+  const projectId = await resolveProjectId(params.clientSlug)
+
   const { data, error } = await supabase
     .from('comments')
     .insert({
@@ -18,6 +21,7 @@ export async function addComment(params: {
       author_name: params.authorName,
       author_role: params.authorRole,
       text: params.text,
+      ...(projectId ? { project_id: projectId } : {}),
     })
     .select()
     .single()
@@ -30,6 +34,23 @@ export async function getCommentsByScreen(
   clientSlug: string,
   screenId: string
 ): Promise<Comment[]> {
+  const projectId = await resolveProjectId(clientSlug)
+
+  // Prefer project_id if available
+  if (projectId) {
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('project_id', projectId)
+      .like('target_id', `%${screenId}%`)
+      .order('created_at', { ascending: true })
+
+    if (!error && data) {
+      return (data ?? []) as Comment[]
+    }
+  }
+
+  // Fallback to client_slug
   const { data, error } = await supabase
     .from('comments')
     .select('*')
@@ -44,6 +65,20 @@ export async function getCommentsByScreen(
 export async function getCommentsForClient(
   clientSlug: string
 ): Promise<Comment[]> {
+  const projectId = await resolveProjectId(clientSlug)
+
+  if (projectId) {
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: true })
+
+    if (!error && data) {
+      return (data ?? []) as Comment[]
+    }
+  }
+
   const { data, error } = await supabase
     .from('comments')
     .select('*')

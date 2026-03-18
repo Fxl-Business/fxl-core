@@ -2,6 +2,7 @@ import { supabase } from '@platform/supabase'
 import type { BlueprintConfig } from '../types/blueprint'
 import { BlueprintConfigSchema } from './blueprint-schema'
 import { migrateBlueprint, CURRENT_SCHEMA_VERSION } from './blueprint-migrations'
+import { resolveProjectId } from './project-resolver'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -19,12 +20,73 @@ export type SaveBlueprintResult = {
 }
 
 // ---------------------------------------------------------------------------
+// Internal: parse a raw DB row into a LoadBlueprintResult (with lazy migration)
+// ---------------------------------------------------------------------------
+
+async function parseRow(
+  row: { config: unknown; updated_at: string },
+  clientSlug: string,
+  projectId: string | null,
+): Promise<LoadBlueprintResult | null> {
+  const raw = row.config as Record<string, unknown>
+  const version = typeof raw.schemaVersion === 'number' ? raw.schemaVersion : 0
+
+  // Lazy migration: if stored version is behind, migrate and save back
+  if (version < CURRENT_SCHEMA_VERSION) {
+    try {
+      const migrated = migrateBlueprint(raw)
+
+      const upsertPayload: Record<string, unknown> = {
+        client_slug: clientSlug,
+        config: migrated,
+        updated_by: 'system:migration',
+        updated_at: new Date().toISOString(),
+      }
+      if (projectId) {
+        upsertPayload.project_id = projectId
+      }
+
+      await supabase
+        .from('blueprint_configs')
+        .upsert(upsertPayload, { onConflict: 'client_slug' })
+
+      return { config: migrated as BlueprintConfig, updatedAt: row.updated_at }
+    } catch {
+      return null
+    }
+  }
+
+  const result = BlueprintConfigSchema.safeParse(raw)
+  if (!result.success) {
+    return null
+  }
+
+  return { config: result.data as BlueprintConfig, updatedAt: row.updated_at }
+}
+
+// ---------------------------------------------------------------------------
 // Load
 // ---------------------------------------------------------------------------
 
 export async function loadBlueprint(
   clientSlug: string
 ): Promise<LoadBlueprintResult | null> {
+  const projectId = await resolveProjectId(clientSlug)
+
+  // Try project_id first
+  if (projectId) {
+    const { data, error } = await supabase
+      .from('blueprint_configs')
+      .select('config, updated_at')
+      .eq('project_id', projectId)
+      .maybeSingle()
+
+    if (!error && data) {
+      return parseRow(data, clientSlug, projectId)
+    }
+  }
+
+  // Fallback: query by client_slug
   const { data, error } = await supabase
     .from('blueprint_configs')
     .select('config, updated_at')
@@ -34,41 +96,7 @@ export async function loadBlueprint(
   if (error) throw error
   if (!data) return null
 
-  const raw = data.config as Record<string, unknown>
-  const version = typeof raw.schemaVersion === 'number' ? raw.schemaVersion : 0
-
-  // Lazy migration: if stored version is behind, migrate and save back
-  if (version < CURRENT_SCHEMA_VERSION) {
-    try {
-      const migrated = migrateBlueprint(raw)
-
-      // Save migrated config back to DB
-      await supabase
-        .from('blueprint_configs')
-        .upsert(
-          {
-            client_slug: clientSlug,
-            config: migrated,
-            updated_by: 'system:migration',
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'client_slug' }
-        )
-
-      return { config: migrated as BlueprintConfig, updatedAt: data.updated_at }
-    } catch {
-      // Migration failed -- return null so caller handles gracefully
-      return null
-    }
-  }
-
-  // Validate via Zod safeParse (replaces unsafe `as BlueprintConfig` cast)
-  const result = BlueprintConfigSchema.safeParse(raw)
-  if (!result.success) {
-    return null
-  }
-
-  return { config: result.data as BlueprintConfig, updatedAt: data.updated_at }
+  return parseRow(data, clientSlug, projectId)
 }
 
 // ---------------------------------------------------------------------------
@@ -81,24 +109,26 @@ export async function saveBlueprint(
   updatedBy: string,
   lastKnownUpdatedAt: string | null
 ): Promise<SaveBlueprintResult> {
-  // Validate via Zod parse before writing (throws on invalid)
   const validated = BlueprintConfigSchema.parse(config)
-
   const now = new Date().toISOString()
+  const projectId = await resolveProjectId(clientSlug)
+
+  // Build base payload
+  const basePayload: Record<string, unknown> = {
+    client_slug: clientSlug,
+    config: validated,
+    updated_by: updatedBy,
+    updated_at: now,
+  }
+  if (projectId) {
+    basePayload.project_id = projectId
+  }
 
   // If no lastKnownUpdatedAt, use upsert (new record or force overwrite)
   if (lastKnownUpdatedAt === null) {
     const { error } = await supabase
       .from('blueprint_configs')
-      .upsert(
-        {
-          client_slug: clientSlug,
-          config: validated,
-          updated_by: updatedBy,
-          updated_at: now,
-        },
-        { onConflict: 'client_slug' }
-      )
+      .upsert(basePayload, { onConflict: 'client_slug' })
 
     if (error) throw error
     return { success: true, conflict: false, updatedAt: now }
@@ -111,6 +141,7 @@ export async function saveBlueprint(
       config: validated,
       updated_by: updatedBy,
       updated_at: now,
+      ...(projectId ? { project_id: projectId } : {}),
     })
     .eq('client_slug', clientSlug)
     .eq('updated_at', lastKnownUpdatedAt)
@@ -124,7 +155,6 @@ export async function saveBlueprint(
     return { success: false, conflict: true }
   }
 
-  // Return the DB-assigned updated_at for next comparison
   return { success: true, conflict: false, updatedAt: data.updated_at }
 }
 
@@ -135,6 +165,18 @@ export async function saveBlueprint(
 export async function checkForUpdates(
   clientSlug: string
 ): Promise<string | null> {
+  const projectId = await resolveProjectId(clientSlug)
+
+  if (projectId) {
+    const { data } = await supabase
+      .from('blueprint_configs')
+      .select('updated_at')
+      .eq('project_id', projectId)
+      .maybeSingle()
+    if (data) return data.updated_at ?? null
+  }
+
+  // Fallback
   const { data } = await supabase
     .from('blueprint_configs')
     .select('updated_at')
