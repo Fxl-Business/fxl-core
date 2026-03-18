@@ -8,20 +8,11 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v5.2 Nexo Skill
+## Current Milestone: idle
 
+Previous: v5.2 Nexo Skill (shipped 2026-03-18)
 Previous: v5.1 MCP Server (shipped 2026-03-18)
 Previous: v5.0 SDK Docs (shipped 2026-03-17)
-
-**Goal:** Consolidar skills existentes (FXL SDK + agent orchestrator) em uma Nexo Skill unificada que integra com o MCP Server e customiza a metodologia GSD para projetos FXL.
-
-**Target features:**
-- Consolidar SDK skill + orchestrator na estrutura Nexo Skill
-- Methodology layer (GSD bridge, fluxo customizado FXL)
-- MCP bridge (skill consulta e alimenta MCP automaticamente)
-- Scaffold flow (criar spoke completo via skill + MCP)
-- Docs update (preencher docs/sdk/nexo-skill.md)
-- Deprecar skills antigas (concluido — .agents/skills/fxl-sdk/ removido, referencias atualizadas para .agents/skills/nexo/)
 
 ## Requirements
 
@@ -181,14 +172,15 @@ Previous: v5.0 SDK Docs (shipped 2026-03-17)
 - ✓ TenantDetailPage "Membros" section with role badges via listOrgMembers edge function — v4.3
 - ✓ admin-service.ts client service layer following tenant-service.ts pattern — v4.3
 - ✓ TypeScript zero errors + all admin routes verified behind SuperAdminRoute — v4.3
+- ✓ Nexo Skill unificada com todas as capacidades (scaffold, audit, connect, orchestrate, methodology, learn) — v5.2
+- ✓ MCP bridge integrado (skill consulta e alimenta MCP automaticamente) — v5.2
+- ✓ Scaffold flow gerando spoke completo com CLAUDE.md + .mcp.json — v5.2
+- ✓ Docs SDK atualizados com pagina nexo-skill.md — v5.2
+- ✓ Skills antigas deprecadas e removidas — v5.2
 
 ### Active
 
-- [ ] Nexo Skill unificada com todas as capacidades (scaffold, audit, connect, orchestrate, methodology, learn)
-- [ ] MCP bridge integrado (skill consulta e alimenta MCP automaticamente)
-- [ ] Scaffold flow gerando spoke completo com CLAUDE.md + .mcp.json
-- [ ] Docs SDK atualizados com pagina nexo-skill.md
-- [ ] Skills antigas deprecadas e removidas
+(none — awaiting next milestone)
 
 ### Out of Scope
 
@@ -226,11 +218,11 @@ Previous: v5.0 SDK Docs (shipped 2026-03-17)
 
 ## Current State
 
-22 milestones shipped (v1.0 → v5.1). v5.1 completed MCP Server.
+23 milestones shipped (v1.0 → v5.2). v5.2 completed Nexo Skill.
 
 ## Context
 
-Shipped v5.1 MCP Server. 22 milestones complete (v1.0-v5.1).
+Shipped v5.2 Nexo Skill. 23 milestones complete (v1.0-v5.2).
 Codebase reorganizado: src/platform/ (shell), src/modules/ (autocontidos), src/shared/ (cross-module).
 5 modulos ativos (docs, tasks, clients, wireframe, connector), cada um com CLAUDE.md para agent scoped.
 Super admin panel com /admin/* routes: dashboard, tenant management, users management, module management per-tenant, platform settings.
@@ -240,7 +232,8 @@ Modulos gerenciados per-tenant via Supabase tenant_modules (substituiu localStor
 Platform settings (feature flags) via tabela platform_settings com admin UI.
 MCP servers configurados: Supabase (read-only), Clerk (placeholder — npm package nao publicado).
 Multi-tenancy via Clerk Organizations com RLS por org_id e Edge Function JWT bridge.
-FXL SDK Skill disponivel para onboarding de spoke projects.
+Nexo Skill unificada (.agents/skills/nexo/) com scaffold, audit, connect, orchestrate, methodology, learn.
+MCP bridge integrado para consultar e alimentar knowledge base automaticamente.
 Design spec para evolucao em docs/superpowers/specs/.
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
 10 Supabase migrations (001-010). 6 modules in MODULE_REGISTRY.
@@ -366,4 +359,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function members endpoint via admin-tenants (not admin-users) | Members are org-scoped, fits naturally in tenants function | ✓ Good — logical API grouping |
 
 ---
-*Last updated: 2026-03-18 after v5.2 milestone start*
+*Last updated: 2026-03-18 after v5.2 milestone archived*
