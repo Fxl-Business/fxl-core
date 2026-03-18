@@ -19,7 +19,7 @@ Verify TypeScript configuration and usage against FXL standards.
 - [ ] **[Critical]** Zero uses of `any` type in source code
 - [ ] **[Critical]** Zero `@ts-ignore` comments in source code
 - [ ] **[Critical]** Zero `@ts-nocheck` comments in source code
-- [ ] **[Critical]** `npx tsc --noEmit` passes with zero errors
+- [ ] **[Critical]** `bunx tsc --noEmit` passes with zero errors
 - [ ] **[Important]** Function parameters have explicit type annotations
 - [ ] **[Important]** Return types are explicit for exported functions
 - [ ] **[Important]** Props interfaces defined for all React components
@@ -62,7 +62,7 @@ grep -rn "@ts-ignore\|@ts-nocheck\|@ts-expect-error" src/ --include="*.ts" --inc
 grep -rn "!\\." src/ --include="*.ts" --include="*.tsx" | grep -v "!=" | grep -v "node_modules"
 
 # Full type check
-npx tsc --noEmit
+bunx tsc --noEmit
 ```
 
 ## Scoring

@@ -16,7 +16,7 @@ Follow these 8 rules at all times during execution:
 2. **READ any file in the codebase.** You have full read access to understand context, contracts,
    types, and dependencies across all boundaries.
 
-3. **Do NOT run `tsc --noEmit` or `npm run build`.** Other agents may be writing simultaneously —
+3. **Do NOT run `tsc --noEmit` or `bun run build`.** Other agents may be writing simultaneously —
    results would be inconsistent. Full-project checks run at lead level only (Wave 3).
 
 4. **Verify before every file write.** Before creating or modifying any file, confirm the target

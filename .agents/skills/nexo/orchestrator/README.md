@@ -231,8 +231,8 @@ Modelo hub-and-spoke: decisoes e mudancas passam pelo lead. Sinais simples podem
    - Validacoes do CLAUDE.md do boundary (se existir)
 
 2. **Lead** roda verificacao integrada:
-   - `npx tsc --noEmit` (type check global)
-   - `npm run build` (build verification)
+   - `bunx tsc --noEmit` (type check global)
+   - `bun run build` (build verification)
    - Auditoria de imports cross-boundary (so flagga internals)
    - Scope compliance via commit tracers
 

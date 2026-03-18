@@ -294,8 +294,8 @@ which eliminates false positives when multiple agents commit in parallel.
 
 Run the checks defined in `rules/integration-check.md`:
 
-1. `npx tsc --noEmit` — global type check
-2. `npm run build` — build verification
+1. `bunx tsc --noEmit` — global type check
+2. `bun run build` — build verification
 3. Cross-boundary import audit (internal imports only)
 4. Scope compliance (already done above, include results)
 

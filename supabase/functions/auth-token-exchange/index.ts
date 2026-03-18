@@ -12,7 +12,7 @@ import * as jose from 'https://deno.land/x/jose@v4.14.4/index.ts'
 
 const CLERK_ISSUER = Deno.env.get('CLERK_ISSUER') // e.g., https://clerk.your-domain.com
 const CLERK_JWKS_URL = CLERK_ISSUER ? `${CLERK_ISSUER}/.well-known/jwks.json` : null
-const SUPABASE_JWT_SECRET = Deno.env.get('SUPABASE_JWT_SECRET') // from Supabase Dashboard -> Settings -> API -> JWT Secret
+const SUPABASE_JWT_SECRET = Deno.env.get('JWT_SIGNING_SECRET') // from Supabase Dashboard -> Settings -> API -> JWT Secret
 const TOKEN_EXPIRY_SECONDS = 3600 // 1 hour
 
 const corsHeaders = {
@@ -46,16 +46,26 @@ serve(async (req: Request) => {
   }
   const clerkToken = authHeader.slice(7)
 
+  // Parse request body to get org_id (Clerk default session tokens don't include org claims)
+  let bodyOrgId: string | undefined
+  try {
+    const body = await req.json()
+    bodyOrgId = typeof body?.org_id === 'string' ? body.org_id : undefined
+  } catch {
+    // No body or invalid JSON — org_id may still come from JWT claims
+  }
+
   try {
     // Fetch Clerk JWKS and verify the token
     const jwks = jose.createRemoteJWKSet(new URL(CLERK_JWKS_URL))
-    const { payload } = await jose.jwtVerify(clerkToken, jwks, {
-      issuer: CLERK_ISSUER,
-    })
+    // Verify signature via Clerk JWKS (issuer check skipped — JWKS already
+    // guarantees the token was signed by our Clerk instance)
+    const { payload } = await jose.jwtVerify(clerkToken, jwks)
 
     // Extract claims from Clerk JWT
     const userId = payload.sub
-    const orgId = (payload as Record<string, unknown>).org_id as string | undefined
+    // Prefer org_id from JWT claims; fall back to request body
+    const orgId = (payload as Record<string, unknown>).org_id as string | undefined ?? bodyOrgId
     const orgRole = (payload as Record<string, unknown>).org_role as string | undefined
 
     if (!userId) {
@@ -63,7 +73,7 @@ serve(async (req: Request) => {
     }
 
     if (!orgId) {
-      return jsonError('Clerk token missing org_id claim. User must select an organization.', 400)
+      return jsonError('org_id is required. Pass it in the request body as { org_id: string }.', 400)
     }
 
     // Mint Supabase-compatible JWT

@@ -23,10 +23,11 @@ export interface TokenExchangeError {
  * Exchange a Clerk session token for a Supabase JWT via Edge Function.
  *
  * @param clerkToken - The Clerk session token (from session.getToken())
+ * @param orgId - The active Clerk organization ID
  * @returns Supabase JWT with org_id claims
  * @throws Error if the exchange fails or the token is invalid
  */
-export async function exchangeToken(clerkToken: string): Promise<TokenExchangeResult> {
+export async function exchangeToken(clerkToken: string, orgId: string): Promise<TokenExchangeResult> {
   if (!FUNCTIONS_URL) {
     throw new Error(
       'VITE_SUPABASE_FUNCTIONS_URL is not set. ' +
@@ -42,6 +43,7 @@ export async function exchangeToken(clerkToken: string): Promise<TokenExchangeRe
       'Content-Type': 'application/json',
       Authorization: `Bearer ${clerkToken}`,
     },
+    body: JSON.stringify({ org_id: orgId }),
   })
 
   if (!response.ok) {

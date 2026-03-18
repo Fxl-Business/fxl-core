@@ -1,4 +1,4 @@
-.PHONY: dev build lint preview install migrate seed-docs seed-docs-force sync-down sync-up
+.PHONY: dev build lint preview install migrate seed-docs seed-docs-force sync-down sync-up test check-functions
 
 dev:
 	npm run dev
@@ -8,6 +8,12 @@ build:
 
 lint:
 	npx tsc --noEmit
+
+test:
+	npx vitest run
+
+check-functions:
+	npx tsx --env-file .env.local scripts/check-edge-functions.ts
 
 preview:
 	npm run preview

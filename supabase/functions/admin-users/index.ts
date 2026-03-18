@@ -65,20 +65,60 @@ serve(async (req: Request) => {
 })
 
 async function handleListUsers(): Promise<Response> {
-  const res = await fetch(`${CLERK_API_BASE}/users?limit=100&order_by=-created_at`, {
-    headers: {
-      Authorization: `Bearer ${CLERK_SECRET_KEY}`,
-    },
-  })
+  const clerkHeaders = { Authorization: `Bearer ${CLERK_SECRET_KEY}` }
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ errors: [{ message: 'Unknown error' }] }))
+  // 1. Fetch users and organizations in parallel
+  const [usersRes, orgsRes] = await Promise.all([
+    fetch(`${CLERK_API_BASE}/users?limit=100&order_by=-created_at`, { headers: clerkHeaders }),
+    fetch(`${CLERK_API_BASE}/organizations?limit=100`, { headers: clerkHeaders }),
+  ])
+
+  if (!usersRes.ok) {
+    const err = await usersRes.json().catch(() => ({ errors: [{ message: 'Unknown error' }] }))
     const message = err?.errors?.[0]?.message ?? 'Clerk API error'
-    return jsonError(message, res.status)
+    return jsonError(message, usersRes.status)
   }
 
-  const data = await res.json()
-  const users = (data.data ?? []).map((user: Record<string, unknown>) => ({
+  const rawData = await usersRes.json()
+  const userList = Array.isArray(rawData) ? rawData : (rawData.data ?? [])
+
+  // 2. Build user→org memberships map from org memberships
+  // Clerk /v1/users does NOT include organization_memberships — fetch per org
+  const userOrgMap = new Map<string, Array<{ orgId: string; orgName: string; role: string }>>()
+
+  if (orgsRes.ok) {
+    const orgsData = await orgsRes.json()
+    const orgs = orgsData.data ?? []
+
+    // Fetch memberships for all orgs in parallel
+    const membershipResults = await Promise.all(
+      orgs.map(async (org: Record<string, unknown>) => {
+        const memRes = await fetch(
+          `${CLERK_API_BASE}/organizations/${org.id}/memberships?limit=100`,
+          { headers: clerkHeaders },
+        )
+        if (!memRes.ok) return { org, memberships: [] }
+        const memData = await memRes.json()
+        return { org, memberships: memData.data ?? [] }
+      }),
+    )
+
+    for (const { org, memberships } of membershipResults) {
+      for (const mem of memberships) {
+        const userId = (mem.public_user_data as Record<string, unknown>)?.user_id ?? ''
+        if (!userId) continue
+        if (!userOrgMap.has(userId as string)) userOrgMap.set(userId as string, [])
+        userOrgMap.get(userId as string)!.push({
+          orgId: org.id as string,
+          orgName: (org.name as string) ?? '',
+          role: (mem.role as string) ?? 'member',
+        })
+      }
+    }
+  }
+
+  // 3. Map users with enriched org memberships
+  const users = userList.map((user: Record<string, unknown>) => ({
     id: user.id,
     firstName: user.first_name ?? null,
     lastName: user.last_name ?? null,
@@ -87,18 +127,12 @@ async function handleListUsers(): Promise<Response> {
     imageUrl: user.image_url ?? '',
     createdAt: user.created_at,
     lastSignInAt: user.last_sign_in_at ?? null,
-    organizationMemberships: ((user.organization_memberships as Array<Record<string, unknown>>) ?? []).map(
-      (mem) => ({
-        orgId: (mem.organization as Record<string, unknown>)?.id ?? mem.organization_id ?? '',
-        orgName: (mem.organization as Record<string, unknown>)?.name ?? '',
-        role: mem.role ?? 'member',
-      })
-    ),
+    organizationMemberships: userOrgMap.get(user.id as string) ?? [],
   }))
 
   return jsonOk({
     users,
-    totalCount: data.total_count ?? users.length,
+    totalCount: users.length,
   })
 }
 

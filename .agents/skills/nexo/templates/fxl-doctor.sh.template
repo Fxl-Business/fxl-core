@@ -10,7 +10,7 @@ ERRORS=0
 
 # 1. TypeScript type-check
 echo "[1/5] TypeScript type-check..."
-if npx tsc --noEmit; then
+if bunx tsc --noEmit; then
   echo "  PASS: TypeScript"
 else
   echo "  FAIL: TypeScript errors found"
@@ -20,7 +20,7 @@ echo ""
 
 # 2. ESLint
 echo "[2/5] ESLint..."
-if npx eslint .; then
+if bunx eslint .; then
   echo "  PASS: ESLint"
 else
   echo "  FAIL: ESLint errors found"
@@ -30,10 +30,10 @@ echo ""
 
 # 3. Prettier
 echo "[3/5] Prettier formatting..."
-if npx prettier --check .; then
+if bunx prettier --check .; then
   echo "  PASS: Prettier"
 else
-  echo "  FAIL: Formatting issues found (run: npx prettier --write .)"
+  echo "  FAIL: Formatting issues found (run: bunx prettier --write .)"
   ERRORS=$((ERRORS + 1))
 fi
 echo ""

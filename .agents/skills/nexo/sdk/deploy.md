@@ -10,7 +10,7 @@ Setting up Vercel deployment for an FXL spoke project. Covers initial setup, env
 
 ```bash
 # Install Vercel CLI (if not already)
-npm i -g vercel
+bun install -g vercel
 
 # Link project
 vercel link
@@ -21,7 +21,7 @@ Or connect via Vercel Dashboard:
 2. Import Git repository
 3. Select the spoke project repo
 4. Framework preset: Vite
-5. Build command: `npm run build`
+5. Build command: `bun run build`
 6. Output directory: `dist`
 
 ### 2. Configure vercel.json
@@ -31,7 +31,7 @@ Copy from `../templates/vercel.json.template`. Key settings:
 ```json
 {
   "framework": "vite",
-  "buildCommand": "npm run build",
+  "buildCommand": "bun run build",
   "outputDirectory": "dist",
   "headers": [
     {
@@ -192,8 +192,8 @@ Vite generates hashed filenames for assets. Add cache headers:
 
 ### Build fails on Vercel but works locally
 - Check that all `VITE_*` env vars are set in Vercel
-- Vercel uses Node.js 18 by default — match locally
-- Run `npm run build` locally to replicate
+- Vercel uses Node.js 18 by default — match locally with Bun
+- Run `bun run build` locally to replicate
 
 ### 404 on page refresh
 - Verify the SPA rewrite rule in `vercel.json`

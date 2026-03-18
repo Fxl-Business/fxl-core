@@ -82,20 +82,27 @@ export default function AdminDashboard() {
 
     async function fetchMetrics() {
       setMetricsLoading(true)
-      try {
-        const [tenantsResult, usersResult] = await Promise.all([
-          listTenants(),
-          listUsers(),
-        ])
-        if (!cancelled) {
-          setTenantCount(tenantsResult.totalCount)
-          setUserCount(usersResult.totalCount)
+
+      // Fetch independently so one failure doesn't zero out the other
+      const [tenantsResult, usersResult] = await Promise.allSettled([
+        listTenants(),
+        listUsers(),
+      ])
+
+      if (!cancelled) {
+        if (tenantsResult.status === 'fulfilled') {
+          setTenantCount(tenantsResult.value.totalCount)
+        } else {
+          console.error('Failed to fetch tenants:', tenantsResult.reason)
         }
-      } catch (err) {
-        console.error('Failed to fetch admin metrics:', err)
-        // On error, counts stay at 0 — MetricCard shows 0
-      } finally {
-        if (!cancelled) setMetricsLoading(false)
+
+        if (usersResult.status === 'fulfilled') {
+          setUserCount(usersResult.value.totalCount)
+        } else {
+          console.error('Failed to fetch users:', usersResult.reason)
+        }
+
+        setMetricsLoading(false)
       }
     }
 

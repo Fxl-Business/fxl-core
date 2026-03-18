@@ -32,7 +32,7 @@ A unica conexao com o hub e via API (6 endpoints padronizados) autenticada por A
 
 ## Passo a Passo
 
-### 1. Auditar o projeto com FXL SDK
+### 1. Auditar o projeto com Nexo SDK
 
 Abrir o Claude Code no repo da spoke e pedir:
 

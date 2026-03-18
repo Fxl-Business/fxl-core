@@ -68,7 +68,7 @@ Create `FXL-AUDIT.md` at project root with this format:
 **Project:** {project name}
 **Date:** {audit date}
 **Score:** {score}% — Rating: {A/B/C/D/F}
-**Audited by:** Claude Code with FXL SDK skill
+**Audited by:** Claude Code with Nexo SDK skill
 
 ## Summary
 
@@ -168,7 +168,7 @@ Lovable-generated projects typically have these issues:
 
 ## Tips
 
-- Run `npx tsc --noEmit` first — if it fails with hundreds of errors, the project likely needs full config replacement before detailed audit
+- Run `bunx tsc --noEmit` first — if it fails with hundreds of errors, the project likely needs full config replacement before detailed audit
 - Check `package.json` for outdated or unnecessary dependencies
 - Look for hardcoded URLs, API keys, or secrets in source code
 - Check if `.env.local` is in `.gitignore`

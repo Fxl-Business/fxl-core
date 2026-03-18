@@ -11,9 +11,9 @@ Setting up continuous integration for an FXL spoke project. This rule covers Git
 The health check script that runs in CI and can be run locally. Copy from `../templates/fxl-doctor.sh.template`.
 
 This script checks:
-- TypeScript compilation (`npx tsc --noEmit`)
-- ESLint (`npx eslint .`)
-- Prettier formatting (`npx prettier --check .`)
+- TypeScript compilation (`bunx tsc --noEmit`)
+- ESLint (`bunx eslint .`)
+- Prettier formatting (`bunx prettier --check .`)
 - Security headers in `vercel.json`
 - Contract version in `package.json`
 
@@ -30,10 +30,10 @@ Copy from `../templates/ci.yml.template`. The workflow runs on:
 
 Steps:
 1. Checkout code
-2. Setup Node.js 18
-3. Install dependencies (`npm ci`)
+2. Setup Bun (latest)
+3. Install dependencies (`bun install --frozen-lockfile`)
 4. Run `fxl-doctor.sh`
-5. Run build (`npm run build`)
+5. Run build (`bun run build`)
 
 ### 3. Branch Protection (Manual)
 
@@ -62,41 +62,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: '18'
-          cache: 'npm'
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Run FXL Doctor
         run: bash fxl-doctor.sh
 
       - name: Build
-        run: npm run build
+        run: bun run build
 ```
 
 ## What fxl-doctor.sh Checks
 
 ### Type Check
 ```bash
-npx tsc --noEmit
+bunx tsc --noEmit
 ```
 Zero TypeScript errors. This is the primary gate.
 
 ### Lint
 ```bash
-npx eslint .
+bunx eslint .
 ```
 Zero ESLint errors. Warnings are allowed but should be addressed.
 
 ### Formatting
 ```bash
-npx prettier --check .
+bunx prettier --check .
 ```
-All files formatted correctly. Run `npx prettier --write .` to fix.
+All files formatted correctly. Run `bunx prettier --write .` to fix.
 
 ### Security Headers
 Validates that `vercel.json` contains required security headers:
@@ -130,13 +129,13 @@ fi
 ## Troubleshooting
 
 ### CI fails but local passes
-- Check Node.js version matches (18)
-- Run `npm ci` locally (not `npm install`) to match CI lockfile behavior
+- Check Bun version matches (1.x)
+- Run `bun install --frozen-lockfile` locally to match CI lockfile behavior
 - Check that `.env.local` values are not required for type-check/build
 
 ### Type errors in CI only
 - Likely a missing type dependency. Check `devDependencies` in `package.json`
-- Run `npx tsc --noEmit` locally with a clean `node_modules/` (delete and reinstall)
+- Run `bunx tsc --noEmit` locally with a clean `node_modules/` (delete and reinstall)
 
 ### Build fails in CI
 - Vite build requires all imports to resolve

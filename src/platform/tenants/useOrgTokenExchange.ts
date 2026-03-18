@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSession } from '@clerk/react'
 import { useActiveOrg } from './useActiveOrg'
 import { exchangeToken } from './token-exchange'
-import { setOrgAccessToken } from '@platform/supabase'
+import { setOrgAccessToken, getOrgAccessToken } from '@platform/supabase'
 
 export interface OrgTokenState {
   isReady: boolean
@@ -28,8 +28,9 @@ export function useOrgTokenExchange(options?: OrgTokenExchangeOptions): OrgToken
   const { session, isLoaded } = useSession()
   const { activeOrg } = useActiveOrg()
   const prevOrgIdRef = useRef<string | null>(null)
-  const isReadyRef = useRef(false)
-  const errorRef = useRef<string | null>(null)
+  // If token was already exchanged (e.g., navigating within SPA), start ready
+  const [isReady, setIsReady] = useState(() => getOrgAccessToken() !== null)
+  const [error, setError] = useState<string | null>(null)
   const onOrgChangeRef = useRef(options?.onOrgChange)
   onOrgChangeRef.current = options?.onOrgChange
 
@@ -44,15 +45,16 @@ export function useOrgTokenExchange(options?: OrgTokenExchangeOptions): OrgToken
       try {
         const clerkToken = await session!.getToken()
         if (!clerkToken) {
-          errorRef.current = 'Clerk session token unavailable'
+          setError('Clerk session token unavailable')
+          setIsReady(false)
           setOrgAccessToken(null)
           return
         }
 
-        const result = await exchangeToken(clerkToken)
+        const result = await exchangeToken(clerkToken, activeOrg!.id)
         setOrgAccessToken(result.access_token)
-        errorRef.current = null
-        isReadyRef.current = true
+        setError(null)
+        setIsReady(true)
 
         // Fire onOrgChange callback on org switch so callers can invalidate their caches
         if (orgChanged && onOrgChangeRef.current) {
@@ -62,8 +64,8 @@ export function useOrgTokenExchange(options?: OrgTokenExchangeOptions): OrgToken
         prevOrgIdRef.current = activeOrg!.id
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Token exchange failed'
-        errorRef.current = message
-        isReadyRef.current = false
+        setError(message)
+        setIsReady(false)
         setOrgAccessToken(null)
         console.error('[useOrgTokenExchange]', message)
       }
@@ -72,8 +74,5 @@ export function useOrgTokenExchange(options?: OrgTokenExchangeOptions): OrgToken
     void doExchange()
   }, [isLoaded, session, activeOrg?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return {
-    isReady: isReadyRef.current,
-    error: errorRef.current,
-  }
+  return { isReady, error }
 }

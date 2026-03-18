@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "fxl-sdk": {
+      "type": "http",
+      "url": "https://fxl-sdk-mcp.cauetpinciara.workers.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer {{NEXO_MCP_TOKEN}}"
+      }
+    }
+  }
+}

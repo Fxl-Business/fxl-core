@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight, Settings, User, Loader2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Loader2 } from 'lucide-react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { useUser } from '@clerk/react'
 import { cn } from '@shared/utils'
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover'
 import {
@@ -325,50 +324,6 @@ function ModuleSwitcher({
 }
 
 // ---------------------------------------------------------------------------
-// SidebarFooter — Admin (super_admin only) + Profile
-// ---------------------------------------------------------------------------
-
-function SidebarFooter() {
-  const { user } = useUser()
-  const isSuperAdmin = user?.publicMetadata?.super_admin === true
-
-  return (
-    <div className="flex items-center gap-2 border-t border-slate-200 px-2 pt-3 dark:border-sidebar-border">
-      {isSuperAdmin && (
-        <NavLink
-          to="/admin"
-          className={({ isActive }) =>
-            cn(
-              'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
-              isActive
-                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
-                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-sidebar-muted-foreground dark:hover:bg-sidebar-accent/10 dark:hover:text-sidebar-foreground',
-            )
-          }
-        >
-          <Settings className="h-3.5 w-3.5" />
-          Admin
-        </NavLink>
-      )}
-      <NavLink
-        to="/perfil"
-        className={({ isActive }) =>
-          cn(
-            'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ml-auto',
-            isActive
-              ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
-              : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-sidebar-muted-foreground dark:hover:bg-sidebar-accent/10 dark:hover:text-sidebar-foreground',
-          )
-        }
-      >
-        <User className="h-3.5 w-3.5" />
-        Perfil
-      </NavLink>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
 // Sidebar — main export
 // ---------------------------------------------------------------------------
 
@@ -392,8 +347,12 @@ export default function Sidebar() {
     [location.pathname, enabledModules],
   )
 
+  // Hide sidebar entirely when no module is active (e.g. home page)
+  if (!activeModule) {
+    return null
+  }
+
   function handleModuleSelect(mod: ModuleDefinition) {
-    // Navigate to the module's home route
     navigate(mod.route)
   }
 
@@ -410,20 +369,8 @@ export default function Sidebar() {
 
       {/* Middle: Scrollable nav area */}
       <nav className="flex-1 overflow-y-auto px-6 py-4">
-        {activeModule ? (
-          <ModuleNavContent key={activeModule.id} module={activeModule} />
-        ) : (
-          /* Home / no module selected — show nothing or a hint */
-          <p className="text-xs text-slate-400 dark:text-sidebar-muted-foreground">
-            Selecione um modulo acima para ver a navegacao.
-          </p>
-        )}
+        <ModuleNavContent key={activeModule.id} module={activeModule} />
       </nav>
-
-      {/* Bottom: Footer */}
-      <div className="p-4 pt-0">
-        <SidebarFooter />
-      </div>
     </aside>
   )
 }

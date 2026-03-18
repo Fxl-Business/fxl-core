@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, BookOpen, Eye, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, ChevronDown, ChevronRight, Eye, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import {
   getProductDocs,
@@ -265,6 +265,179 @@ function DocForm({
 }
 
 // ---------------------------------------------------------------------------
+// Grouped docs list with collapsible badge sections
+// ---------------------------------------------------------------------------
+
+function GroupedDocsList({
+  docs,
+  formMode,
+  saving,
+  onRead,
+  onEdit,
+  onDelete,
+  onSave,
+  onCancelEdit,
+}: {
+  docs: DocumentRow[]
+  formMode: FormMode
+  saving: boolean
+  onRead: (doc: DocumentRow) => void
+  onEdit: (doc: DocumentRow) => void
+  onDelete: (doc: DocumentRow) => void
+  onSave: (values: DocFormValues) => void
+  onCancelEdit: () => void
+}) {
+  // Group all docs by badge (including index docs so we can find the index slug)
+  const grouped = new Map<string, DocumentRow[]>()
+  for (const doc of docs) {
+    const badge = doc.badge || 'Outros'
+    const group = grouped.get(badge) ?? []
+    group.push(doc)
+    grouped.set(badge, group)
+  }
+
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => new Set())
+
+  function toggleGroup(badge: string) {
+    setOpenGroups((prev) => {
+      const next = new Set(prev)
+      if (next.has(badge)) {
+        next.delete(badge)
+      } else {
+        next.add(badge)
+      }
+      return next
+    })
+  }
+
+  return (
+    <div className="space-y-3">
+      {[...grouped.entries()].map(([badge, badgeDocs]) => {
+        const sorted = [...badgeDocs].sort((a, b) => a.sort_order - b.sort_order)
+        // Non-index docs shown in the accordion
+        const contentDocs = sorted.filter((d) => !d.slug.endsWith('/index'))
+        // Index doc used as the group link target
+        const indexDoc = sorted.find((d) => d.slug.endsWith('/index'))
+        const isOpen = openGroups.has(badge)
+
+        return (
+          <div
+            key={badge}
+            className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-card"
+          >
+            {/* Group header: label opens inline reader for index doc, chevron toggles accordion */}
+            <div className="flex items-center gap-3 px-5 py-4">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+                <BookOpen className="h-4 w-4" />
+              </div>
+              <button
+                type="button"
+                onClick={() => indexDoc && onRead(indexDoc)}
+                className="min-w-0 flex-1 text-left transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"
+              >
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-slate-900 dark:text-foreground">{badge}</p>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">
+                    {contentDocs.length} {contentDocs.length === 1 ? 'doc' : 'docs'}
+                  </span>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleGroup(badge)}
+                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                title="Gerenciar docs"
+              >
+                {isOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
+            {/* Group docs — only shown when expanded, for CRUD */}
+            {isOpen && (
+              <div className="border-t border-slate-100 dark:border-slate-700/50">
+                {contentDocs.map((doc, idx) => (
+                  <div key={doc.id}>
+                    <div
+                      className={cn(
+                        'flex items-center gap-4 px-5 py-3 pl-16',
+                        idx !== 0 ? 'border-t border-slate-100 dark:border-slate-700/50' : '',
+                      )}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => onRead(doc)}
+                        className="min-w-0 flex-1 text-left"
+                      >
+                        <p className="truncate text-sm font-medium text-slate-800 hover:text-indigo-600 dark:text-foreground dark:hover:text-indigo-400">
+                          {doc.title}
+                        </p>
+                        <p className="truncate font-mono text-xs text-slate-400 dark:text-slate-500">
+                          {doc.slug}
+                        </p>
+                      </button>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => onRead(doc)}
+                          className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800 dark:hover:text-indigo-400"
+                          title="Ler"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onEdit(doc)}
+                          className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800 dark:hover:text-indigo-400"
+                          title="Editar"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDelete(doc)}
+                          className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                          title="Deletar"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    {typeof formMode === 'object' &&
+                      'edit' in formMode &&
+                      formMode.edit.id === doc.id && (
+                        <div className="border-t border-slate-100 px-5 py-4 dark:border-slate-700/50">
+                          <DocForm
+                            initial={{
+                              title: doc.title,
+                              slug: doc.slug,
+                              parent_path: doc.parent_path,
+                              badge: doc.badge,
+                              description: doc.description,
+                              body: doc.body,
+                              sort_order: doc.sort_order,
+                            }}
+                            saving={saving}
+                            onSave={onSave}
+                            onCancel={onCancelEdit}
+                          />
+                        </div>
+                      )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // ProductDocsPage
 // ---------------------------------------------------------------------------
 
@@ -495,97 +668,18 @@ export default function ProductDocsPage() {
         </div>
       )}
 
-      {/* Docs list */}
+      {/* Docs list — grouped by badge */}
       {!loading && !error && docs.length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-card">
-          {docs.map((doc, idx) => (
-            <div key={doc.id}>
-              {/* Row */}
-              <div
-                className={cn(
-                  'flex items-center gap-4 px-5 py-4',
-                  idx !== 0 ? 'border-t border-slate-100 dark:border-slate-700/50' : '',
-                )}
-              >
-                {/* Icon */}
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
-                  <BookOpen className="h-4 w-4" />
-                </div>
-
-                {/* Title + meta — clickable to read */}
-                <button
-                  type="button"
-                  onClick={() => setReading(doc)}
-                  className="min-w-0 flex-1 text-left"
-                >
-                  <div className="flex items-center gap-2">
-                    <p className="truncate font-medium text-slate-900 hover:text-indigo-600 dark:text-foreground dark:hover:text-indigo-400">
-                      {doc.title}
-                    </p>
-                    {doc.badge && (
-                      <span className="shrink-0 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400">
-                        {doc.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="truncate font-mono text-xs text-slate-400 dark:text-slate-500">
-                    {doc.slug}
-                  </p>
-                </button>
-
-                {/* Action buttons */}
-                <div className="flex shrink-0 items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setReading(doc)}
-                    className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800 dark:hover:text-indigo-400"
-                    title="Ler"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormMode({ edit: doc })}
-                    className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800 dark:hover:text-indigo-400"
-                    title="Editar"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(doc)}
-                    className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                    title="Deletar"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Inline edit form for this row */}
-              {typeof formMode === 'object' &&
-                'edit' in formMode &&
-                formMode.edit.id === doc.id && (
-                  <div className="border-t border-slate-100 px-5 py-4 dark:border-slate-700/50">
-                    <DocForm
-                      initial={{
-                        title: doc.title,
-                        slug: doc.slug,
-                        parent_path: doc.parent_path,
-                        badge: doc.badge,
-                        description: doc.description,
-                        body: doc.body,
-                        sort_order: doc.sort_order,
-                      }}
-                      saving={saving}
-                      onSave={handleSave}
-                      onCancel={() => setFormMode('hidden')}
-                    />
-                  </div>
-                )}
-            </div>
-          ))}
-        </div>
+        <GroupedDocsList
+          docs={docs}
+          formMode={formMode}
+          saving={saving}
+          onRead={setReading}
+          onEdit={(doc) => setFormMode({ edit: doc })}
+          onDelete={handleDelete}
+          onSave={handleSave}
+          onCancelEdit={() => setFormMode('hidden')}
+        />
       )}
     </div>
   )

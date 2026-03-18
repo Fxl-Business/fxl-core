@@ -12,7 +12,7 @@ import * as jose from 'https://deno.land/x/jose@v4.14.4/index.ts'
 
 const CLERK_SECRET_KEY = Deno.env.get('CLERK_SECRET_KEY')
 const CLERK_API_BASE = 'https://api.clerk.com/v1'
-const SUPABASE_JWT_SECRET = Deno.env.get('SUPABASE_JWT_SECRET')
+const SUPABASE_JWT_SECRET = Deno.env.get('JWT_SIGNING_SECRET')
 const TOKEN_EXPIRY_SECONDS = 3600
 
 const corsHeaders = {

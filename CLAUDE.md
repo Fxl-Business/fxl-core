@@ -50,147 +50,46 @@ Todo novo conteudo deve ser classificado em uma delas.
 
 ---
 
-## Estrutura do repositorio
-
-```
-fxl/
-├── CLAUDE.md                ← este arquivo — regras operacionais
-├── README.md
-├── package.json
-├── Makefile                 ← dev, build, lint, migrate
-│
-├── docs/                    ← Conteudo renderizado (fonte unica de verdade)
-│   │                           Cada .md = uma pagina via parser proprio
-│   ├── processo/            ← Processo — regras, fases, identidade
-│   │   └── fases/           ← fase1.md a fase6.md
-│   ├── ferramentas/         ← Ferramentas + Padroes — tools, premissas, seguranca, testes
-│   │   └── techs/           ← Padroes — catalogo de tecnologias (badge: Padroes)
-│   ├── padroes/             ← Padroes — landing page da secao
-│   └── referencias/         ← Ferramentas (legacy)
-│
-├── clients/                 ← Clientes — contexto isolado por cliente
-│   └── [client-slug]/
-│       ├── CLAUDE.md
-│       ├── docs/            ← briefing, blueprint, branding, changelog
-│       └── wireframe/       ← blueprint config e artefatos
-│
-├── tools/                   ← Ferramentas — codigo executavel das tools
-│   └── wireframe-builder/
-│       ├── SKILL.md         ← instrucoes para o Claude Code
-│       ├── components/      ← componentes React reutilizaveis
-│       ├── lib/             ← utilidades do builder
-│       ├── scripts/         ← scripts auxiliares
-│       ├── styles/          ← estilos do builder
-│       └── types/           ← tipos TypeScript do builder
-│
-├── src/                     ← Plataforma — app shell React
-│   ├── components/
-│   │   ├── layout/          ← Layout, Sidebar, SearchCommand, TopNav, ThemeToggle
-│   │   ├── docs/            ← Callout, Operational, PageHeader, PhaseCard, PromptBlock,
-│   │   │                       DocBreadcrumb, DocTableOfContents, InfoBlock, MarkdownRenderer
-│   │   ├── ui/              ← shadcn/ui
-│   │   └── ProtectedRoute.tsx
-│   ├── pages/               ← Paginas interativas
-│   │   ├── Home.tsx
-│   │   ├── Login.tsx
-│   │   ├── Profile.tsx
-│   │   ├── DocRenderer.tsx
-│   │   ├── SharedWireframeView.tsx
-│   │   ├── clients/         ← BriefingForm, BlueprintTextView, WireframeViewer
-│   │   ├── docs/            ← ProcessDocsViewer
-│   │   └── tools/           ← ComponentGallery
-│   ├── lib/                 ← docs-parser, search-index, supabase, utils
-│   └── App.tsx
-│
-├── supabase/                ← Supabase CLI (migrations)
-│   └── migrations/          ← SQL migrations (001_ a 004_)
-│
-├── .planning/               ← Planejamento e estado do projeto (GSD workflow)
-│   ├── STATE.md             ← Estado atual (milestone, progresso, decisoes)
-│   ├── ROADMAP.md           ← Roadmap de fases do milestone atual
-│   ├── PROJECT.md           ← Contexto do projeto (stack, arquitetura, decisoes-chave)
-│   ├── RETROSPECTIVE.md     ← Retrospectivas por milestone
-│   ├── config.json          ← Configuracao do GSD (mode, granularity, models)
-│   ├── phases/              ← Planos e sumarios por fase
-│   ├── quick/               ← Quick tasks (tarefas atomicas fora de milestone)
-│   ├── milestones/          ← Roadmaps e fases arquivadas de milestones anteriores
-│   ├── codebase/            ← Mapa automatico do codebase (ARCHITECTURE.md, STACK.md)
-│   └── research/            ← Pesquisa tecnica (stack, features, pitfalls)
-│
-├── .claude/                 ← Plataforma — AI runtime
-│   ├── commands/gsd/        ← Slash commands (/gsd:*) — planning, execution, verification
-│   ├── get-shit-done/       ← GSD workflow engine (workflows, templates, bin, references)
-│   ├── hooks/               ← Session hooks (context monitor, status line, update checker)
-│   ├── agents/              ← Agent definitions (planner, executor, verifier, etc.)
-│   ├── skills/              ← Symlinks para skills globais e .agents/skills/
-│   └── settings.json        ← Permissions, hooks config, status line
-│
-└── .agents/                 ← Skills de terceiros
-    └── skills/              ← Vendor skills
-        ├── clerk/           ← Core Clerk auth skill
-        ├── clerk-backend-api/
-        ├── clerk-custom-ui/
-        ├── clerk-setup/
-        ├── clerk-webhooks/
-        ├── clerk-testing/
-        ├── clerk-orgs/
-        ├── clerk-swift/
-        └── clerk-nextjs-patterns/
-```
-
----
-
 ## Planejamento e estado — .planning/
 
-O diretorio `.planning/` contem todo o estado de planejamento e execucao do projeto.
+O diretorio `.planning/` contem o estado de planejamento e execucao do projeto.
+O sistema GSD (`.claude/get-shit-done/`) usa esses arquivos via slash commands `/gsd:*`.
 
-- **`.planning/STATE.md`** e a fonte de verdade para a posicao atual do projeto:
-  milestone ativo, progresso (fases/planos completos), decisoes acumuladas, blockers.
-- **`.planning/ROADMAP.md`** contem o breakdown de fases do milestone atual.
-- **`.planning/PROJECT.md`** consolida contexto do projeto: stack, arquitetura, decisoes-chave.
-- **Quick tasks** vivem em `.planning/quick/N-slug/` — tarefas atomicas fora do ciclo de milestone.
-- **Milestones anteriores** ficam arquivados em `.planning/milestones/` (ex: v1.0, v1.1).
-- **`.planning/codebase/`** contem mapa automatico do codebase (ARCHITECTURE.md, STACK.md).
-- **`.planning/research/`** contem pesquisa tecnica feita durante planejamento.
+Arquivos-chave: `STATE.md` (posicao atual), `ROADMAP.md` (fases do milestone),
+`PROJECT.md` (contexto), `PITFALLS.md` (erros recorrentes e regras derivadas).
 
-O sistema GSD (Get Shit Done), localizado em `.claude/get-shit-done/`, usa esses arquivos
-para planejamento estruturado e execucao via agentes. Os slash commands `/gsd:*`
-(em `.claude/commands/gsd/`) sao a interface principal para interagir com o workflow.
-
-### Milestones futuras pre-planejadas
-
-Antes de sugerir `/gsd:new-milestone`, verificar se ja existem milestones planejadas
-no design spec em `docs/superpowers/specs/`. O arquivo
-`2026-03-17-nexo-platform-evolution-design.md` contem o roadmap v4.0-v4.3 com
-dependencias, criterios de aceite e ordem de execucao. Se existir milestone pre-planejada,
-sugerir `/gsd:new-milestone` referenciando a proxima milestone do spec (nao como criacao
-do zero). Nota: v3.4/v3.5 (Beach House) foram descontinuadas.
+Antes de sugerir `/gsd:new-milestone`, verificar milestones pre-planejadas
+em `docs/superpowers/specs/`. Nota: v3.4/v3.5 (Beach House) foram descontinuadas.
 
 ---
 
 ## Regra principal — docs/ e a fonte de verdade
 
-Cada `.md` em `docs/` e renderizado como pagina via parser proprio com react-markdown.
-Nao existe duplicacao entre docs e pages.
+**CRITICO: Os documentos exibidos na UI do Nexo vem do banco de dados Supabase (tabela `documents`), NAO dos arquivos `.md` do filesystem.**
+
+**NUNCA edite arquivos em `docs/` para corrigir conteudo de paginas. Isso nao funciona.**
+Para qualquer correcao de conteudo visivel na UI, use `mcp__supabase__execute_sql` com UPDATE na tabela `documents` onde `slug = 'caminho/slug'`.
+
+- Editar arquivos em `docs/` NAO tem efeito nenhum na UI.
+- Para atualizar o conteudo de uma pagina visivel no Nexo, e preciso atualizar a tabela `documents` no Supabase (via `mcp__supabase__execute_sql` ou `/admin/product-docs`).
+- Os arquivos `.md` em `docs/sdk/`, `docs/processo/` etc. sao apenas referencia/fonte para sincronizacao manual. Eles NAO sao servidos diretamente.
+- Campos da tabela `documents`: `title`, `badge`, `description`, `slug`, `parent_path`, `body` (markdown sem frontmatter), `sort_order`, `scope` (`product` | `tenant`).
+- O campo `body` deve conter APENAS o markdown — sem bloco `---frontmatter---`. Os campos `title`, `badge`, `description` sao colunas separadas.
 
 Se um conteudo precisa ser lido pelo Claude E exibido para humanos,
-ele vive em `docs/` como um unico `.md`.
+ele vive em `docs/` como um unico `.md` E deve estar sincronizado na tabela `documents`.
 
 Secoes especificas para o Claude podem usar o tag `{% operational %}`.
 Essas secoes ficam colapsaveis na UI mas sao lidas linearmente pelo Claude.
 
 ---
 
-## Regra de escopo — clients/
+## Regras de escopo
 
-Todo prompt que envolva um cliente deve especificar o slug explicitamente.
+**clients/:** Todo prompt que envolva um cliente deve especificar o slug explicitamente.
 O Claude Code nunca altera a subpasta de um cliente ao executar tarefa de outro.
 
----
-
-## Regra de escopo — tools/
-
-Cada tool tem seu `SKILL.md` com instrucoes de uso.
+**tools/:** Cada tool tem seu `SKILL.md` com instrucoes de uso.
 Componentes de tool sao importados via `@tools/[nome]/components/`.
 Nunca criar componentes locais na pasta de um cliente — sinalizar para
 adicionar ao modulo compartilhado da tool.
@@ -208,29 +107,6 @@ clients/*/wireframe/), invocar as seguintes skills para guiar a implementacao:
 - composition-patterns — compound components, render props, context providers
 - ui-ux-pro-max — decisoes de design (paletas, tipografia, estilos)
 - web-design-guidelines — audit de acessibilidade e boas praticas de UI
-
----
-
-## Skills — localizacao
-
-As skills referenciadas acima vivem em diferentes niveis:
-
-**Skills globais (instaladas na maquina do usuario):**
-- composition-patterns, frontend-design, react-best-practices, ui-ux-pro-max, web-design-guidelines — regras de frontend
-
-**Skills locais do projeto (`.claude/skills/`):**
-- build-with-agent-team, agent-orchestrator — diretorios no projeto
-- clerk, clerk-backend-api, clerk-custom-ui, clerk-setup, clerk-webhooks, clerk-testing, clerk-orgs, clerk-swift, clerk-nextjs-patterns — symlinks para `.agents/skills/`
-
-**Skills de terceiros (`.agents/skills/`):**
-- clerk, clerk-backend-api, clerk-custom-ui, clerk-setup, clerk-webhooks, clerk-testing — auth Clerk
-- clerk-orgs, clerk-swift, clerk-nextjs-patterns — extensoes Clerk
-
-**Skills de tools (`tools/*/SKILL.md`):**
-- wireframe-builder — instrucoes de uso do Wireframe Builder
-
-Cada skill contem um `SKILL.md` como indice leve (~130 linhas) e um diretorio `rules/`
-com regras detalhadas. Carregar `SKILL.md` primeiro, depois `rules/*.md` conforme necessario.
 
 ---
 
@@ -279,9 +155,9 @@ Tags customizadas disponiveis (parseadas pelo docs-parser):
 
 ### Environment Variables
 
-- `VITE_SUPABASE_URL` — URL do projeto Supabase (Dashboard -> Settings -> API -> Project URL)
-- `VITE_SUPABASE_PUBLISHABLE_KEY` — chave anon publica (Dashboard -> Settings -> API -> anon public key)
-- `VITE_CLERK_PUBLISHABLE_KEY` — chave publica do Clerk (Dashboard -> API Keys -> Publishable key)
+- `VITE_SUPABASE_URL` — URL do projeto Supabase
+- `VITE_SUPABASE_PUBLISHABLE_KEY` — chave anon publica
+- `VITE_CLERK_PUBLISHABLE_KEY` — chave publica do Clerk
 
 ---
 
@@ -291,31 +167,15 @@ Tags customizadas disponiveis (parseadas pelo docs-parser):
 npx tsc --noEmit
 ```
 
-Zero erros TypeScript e condicao de aceite.
-Nunca usar `any` como solucao para erros de tipo.
+Zero erros TypeScript e condicao de aceite. Nunca usar `any` como solucao para erros de tipo.
 
 ### Validacao visual obrigatoria
 
 Toda alteracao em componentes visuais (src/components/, src/pages/, tools/*/components/,
 clients/*/wireframe/) DEVE incluir verificacao visual no browser antes de considerar
-a tarefa concluida. Isso se aplica a TODOS os contextos de execucao, incluindo
-`/gsd:execute-phase`, quick tasks, e edits manuais.
-
-- Abrir a pagina/tela afetada no browser (`make dev` + localhost)
-- Verificar que a alteracao renderiza corretamente em light e dark mode (quando aplicavel)
-- Verificar que nao houve regressao visual em componentes adjacentes
-- Se a alteracao envolve interacao (hover, click, toggle), testar cada interacao
+a tarefa concluida (`make dev` + localhost). Verificar light/dark mode e interacoes.
 
 Nunca assumir que "compila = funciona". TypeScript garante tipos, nao comportamento visual.
-
-### Makefile targets
-
-- `make dev` — inicia servidor de desenvolvimento (npm run dev)
-- `make build` — build de producao (npm run build)
-- `make lint` — verifica tipos TypeScript (npx tsc --noEmit)
-- `make preview` — preview do build (npm run preview)
-- `make install` — instala dependencias (npm install)
-- `make migrate` — aplica migrations no Supabase (le credenciais de .env.local)
 
 ---
 
@@ -328,3 +188,11 @@ Nunca assumir que "compila = funciona". TypeScript garante tipos, nao comportame
 - Nunca alterar subpasta de um cliente ao executar tarefa de outro
 - Nunca criar paginas .tsx para conteudo que deveria ser .md em docs/
 - Nunca misturar spec/catalogo com implementation guidance no mesmo arquivo
+- Nunca usar `Promise.all` para fetches independentes — usar `Promise.allSettled`
+- Nunca criar edge function sem deployar imediatamente no Supabase
+- Nunca assumir formato de resposta de API externa — verificar o shape real antes
+- Nunca acessar campos de resposta de API sem fallback (`?? []`, `?? 0`)
+- Nunca usar sub-paths em edge functions do Supabase — usar query params
+- Nunca exibir card de contagem e lista dos mesmos dados com fontes diferentes
+
+Detalhes e exemplos de cada regra de API/edge function em `.planning/PITFALLS.md`.

@@ -186,8 +186,8 @@ Update the generated CLAUDE.md with:
 ### 10. Verify
 
 ```bash
-npx tsc --noEmit
-npm run build
+bunx tsc --noEmit
+bun run build
 bash fxl-doctor.sh
 ```
 

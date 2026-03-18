@@ -6,7 +6,7 @@ User asks to create a new spoke project from scratch (no blueprint export). For 
 
 ## Prerequisites
 
-- Node.js 18+
+- Bun 1.x+
 - GitHub account with access to FXL org
 - Clerk publishable key (same as Hub)
 - Supabase project created
@@ -16,7 +16,7 @@ User asks to create a new spoke project from scratch (no blueprint export). For 
 ### 1. Initialize Project
 
 ```bash
-npm create vite@latest {project-slug} -- --template react-ts
+bunx create-vite@latest {project-slug} -- --template react-ts
 cd {project-slug}
 ```
 
@@ -24,15 +24,15 @@ cd {project-slug}
 
 ```bash
 # Core
-npm install @supabase/supabase-js@2 @clerk/react@6 lucide-react zod
+bun install @supabase/supabase-js@2 @clerk/react@6 lucide-react zod
 
 # UI
-npm install tailwindcss@3 postcss autoprefixer
-npm install -D @types/node
-npx tailwindcss init -p
+bun install tailwindcss@3 postcss autoprefixer
+bun install -D @types/node
+bunx tailwindcss init -p
 
 # shadcn/ui setup
-npx shadcn@latest init
+bunx shadcn@latest init
 ```
 
 Configure shadcn/ui when prompted:
@@ -192,17 +192,17 @@ See `sdk/deploy.md` for Vercel configuration.
 
 Run all quality gates:
 ```bash
-npx tsc --noEmit
-npx eslint .
-npx prettier --check .
+bunx tsc --noEmit
+bunx eslint .
+bunx prettier --check .
 bash fxl-doctor.sh
 ```
 
 ## Checklist After Scaffold
 
-- [ ] `npx tsc --noEmit` passes
-- [ ] `npm run build` succeeds
-- [ ] `npm run dev` starts without errors
+- [ ] `bunx tsc --noEmit` passes
+- [ ] `bun run build` succeeds
+- [ ] `bun run dev` starts without errors
 - [ ] CLAUDE.md exists with project-specific rules
 - [ ] .env.example committed, .env.local NOT committed
 - [ ] All 6 contract endpoints return valid responses

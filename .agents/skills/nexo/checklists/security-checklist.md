@@ -48,8 +48,8 @@ Verify security posture of an FXL spoke project. Each item has a severity level.
 
 ## Dependencies
 
-- [ ] **[Important]** No known vulnerable dependencies (`npm audit`)
-- [ ] **[Normal]** `package-lock.json` is committed
+- [ ] **[Important]** No known vulnerable dependencies (`bun audit`)
+- [ ] **[Normal]** `bun.lockb` is committed
 - [ ] **[Normal]** Dependencies are up to date (no major version behind)
 
 ## Scoring

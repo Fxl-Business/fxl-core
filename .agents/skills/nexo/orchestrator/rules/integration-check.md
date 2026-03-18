@@ -12,7 +12,7 @@ These 4 checks run after every multi-agent execution, regardless of context.
 ### 1. Global Type Check
 
 ```bash
-npx tsc --noEmit
+bunx tsc --noEmit
 ```
 
 - Must exit with 0 errors
@@ -22,7 +22,7 @@ npx tsc --noEmit
 ### 2. Build Verification
 
 ```bash
-npm run build
+bun run build
 ```
 
 - Must complete successfully
@@ -97,19 +97,19 @@ Run these additional checks when the condition applies:
 
 | Condition | Check | Command |
 |-----------|-------|---------|
-| Project has test suite | Run tests | `npm test` or `npx vitest run` |
+| Project has test suite | Run tests | `bun test` or `bunx vitest run` |
 | Boundary has CLAUDE.md | Verify new exports in Public API | Read CLAUDE.md, compare with actual new exports |
 | Contracts defined in plan | Verify declared exports exist | Read contract files, check exports match |
-| Project has lint config | Run linter | `npm run lint` |
+| Project has lint config | Run linter | `bun run lint` |
 
 ### Test Suite Check
 
 ```bash
 # Detect test runner
 if [[ -f "vitest.config.ts" ]] || grep -q "vitest" package.json 2>/dev/null; then
-  npx vitest run
+  bunx vitest run
 elif grep -q '"test"' package.json 2>/dev/null; then
-  npm test
+  bun test
 fi
 ```
 
@@ -213,7 +213,7 @@ Append results to VERIFICATION.md under a dedicated section:
 | Check | Result | Details |
 |-------|--------|---------|
 | TypeScript (`tsc --noEmit`) | ✓ PASS | 0 errors |
-| Build (`npm run build`) | ✓ PASS | Bundle: {size} |
+| Build (`bun run build`) | ✓ PASS | Bundle: {size} |
 | Cross-boundary imports | ✓ PASS | No internal imports detected |
 | Scope compliance | ✓ PASS | All agents within ownership |
 

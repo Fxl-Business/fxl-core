@@ -1,17 +1,14 @@
 {
   "mcpServers": {
     "supabase": {
-      "command": "npx",
-      "args": ["-y", "@supabase/mcp-server-supabase@latest", "--read-only"],
-      "env": {
-        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
-      }
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=cbkuibeppojtzhiwkvxb"
     },
-    "clerk": {
-      "command": "npx",
-      "args": ["-y", "@anthropic/mcp-server-clerk@latest"],
-      "env": {
-        "CLERK_SECRET_KEY": "${CLERK_SECRET_KEY}"
+    "fxl-sdk": {
+      "type": "http",
+      "url": "https://fxl-sdk-mcp.cauetpinciara.workers.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer 0bc9fe52650e954f944aec8f9e748a0975c83a3f25e0dd624349b7db1df03e4c"
       }
     }
   }

@@ -1,0 +1,23 @@
+{
+  "name": "@{{PROJECT_SLUG}}/backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/server.ts",
+    "start": "bun src/server.ts",
+    "type-check": "bunx tsc --noEmit",
+    "lint": "bunx eslint src"
+  },
+  "dependencies": {
+    "@clerk/backend": "^1.x",
+    "@hono/node-server": "^1.x",
+    "@supabase/supabase-js": "^2.x",
+    "hono": "^4.x",
+    "zod": "^3.x"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.x"
+  }
+}

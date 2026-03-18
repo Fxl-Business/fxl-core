@@ -283,7 +283,7 @@ Run through `../checklists/contract-checklist.md` to verify all endpoints are co
 
 ```bash
 # Start dev server
-npm run dev
+bun run dev
 
 # Test endpoints
 curl http://localhost:5173/api/fxl/health

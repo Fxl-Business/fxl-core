@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 import { setOrgAccessToken, getOrgAccessToken } from '@platform/supabase'
 import { getImpersonationToken, setAdminClerkTokenGetter } from '@platform/services/admin-service'
+import { invalidateDocsCache } from '@modules/docs/services/docs-service'
 import { useSession } from '@clerk/react'
 
 export interface ImpersonationState {
@@ -54,6 +55,9 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
         // Override Supabase client to use impersonated org token
         setOrgAccessToken(result.access_token)
 
+        // Invalidate docs cache so queries re-fetch with the new tenant context
+        invalidateDocsCache()
+
         setImpersonatedOrgId(orgId)
         setImpersonatedOrgName(orgName)
         setIsImpersonating(true)
@@ -70,6 +74,9 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
     // Restore the original org token
     setOrgAccessToken(originalTokenRef.current)
     originalTokenRef.current = null
+
+    // Invalidate docs cache so queries re-fetch with the admin's own tenant context
+    invalidateDocsCache()
 
     setIsImpersonating(false)
     setImpersonatedOrgId(null)

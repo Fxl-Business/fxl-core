@@ -43,7 +43,7 @@ Verify project directory structure and organization against FXL standards.
 - [ ] **[Important]** `.github/workflows/ci.yml` exists
 - [ ] **[Normal]** CI workflow runs on push to main and PRs
 - [ ] **[Normal]** CI workflow runs `fxl-doctor.sh`
-- [ ] **[Normal]** CI workflow runs `npm run build`
+- [ ] **[Normal]** CI workflow runs `bun run build`
 
 ## Naming Conventions
 

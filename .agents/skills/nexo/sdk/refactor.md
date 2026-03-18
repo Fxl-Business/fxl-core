@@ -9,7 +9,7 @@ After running an audit (`sdk/audit.md`), use these patterns to incrementally bri
 1. **Incremental, not big-bang** — refactor one system at a time, verify after each step
 2. **Types first** — fix TypeScript config and types before changing logic
 3. **Security before features** — RLS and auth before UI polish
-4. **Keep it running** — `npm run dev` should work after every step
+4. **Keep it running** — `bun run dev` should work after every step
 
 ## Refactoring Order
 
@@ -20,7 +20,7 @@ Follow this order. Each step builds on the previous.
 **Goal:** Enable strict mode and fix all type errors.
 
 1. Copy `../templates/tsconfig.json.template` to `tsconfig.json`
-2. Run `npx tsc --noEmit` — expect many errors
+2. Run `bunx tsc --noEmit` — expect many errors
 3. Fix errors in this order:
    a. Replace `any` with proper types (most common)
    b. Add missing type annotations to function parameters
@@ -53,7 +53,7 @@ Follow this order. Each step builds on the previous.
    | Hooks inline in components | hooks/ | Extract shared hooks |
 
 3. Update all imports after moving
-4. Run `npx tsc --noEmit` to verify
+4. Run `bunx tsc --noEmit` to verify
 
 ### Step 3: Config Files
 
@@ -67,8 +67,8 @@ Follow this order. Each step builds on the previous.
 
 2. Run formatters:
    ```bash
-   npx prettier --write .
-   npx eslint --fix .
+   bunx prettier --write .
+   bunx eslint --fix .
    ```
 
 3. Fix remaining lint errors manually
@@ -232,9 +232,9 @@ function App() {
 
 After each refactoring step, run:
 ```bash
-npx tsc --noEmit          # types
-npx eslint .              # lint (after step 3)
-npm run dev               # app still works
+bunx tsc --noEmit         # types
+bunx eslint .             # lint (after step 3)
+bun run dev               # app still works
 ```
 
 After all steps:

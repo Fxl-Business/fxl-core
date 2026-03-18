@@ -1,14 +1,14 @@
 ---
 title: Visao Geral
 badge: SDK
-description: O que e o FXL SDK, seus pilares e a arquitetura Hub-Spoke
+description: O que e o Nexo SDK, seus pilares e a arquitetura Hub-Spoke
 scope: product
 sort_order: 10
 ---
 
-# Visao Geral do FXL SDK
+# Visao Geral do Nexo SDK
 
-O FXL SDK e o playbook de engenharia da FXL. Ele define como todo sistema
+O Nexo SDK e o playbook de engenharia da FXL. Ele define como todo sistema
 construido pela empresa deve ser estruturado, codificado, testado e deployado.
 
 {% callout type="warning" %}
@@ -22,7 +22,7 @@ O SDK e distribuido atraves de 3 canais complementares:
 
 ```
 ┌───────────────────────────────────────────────┐
-│               FXL SDK Ecosystem               │
+│               Nexo SDK Ecosystem               │
 │                                               │
 │  ┌───────────┐ ┌────────────┐ ┌────────────┐  │
 │  │   Docs    │ │ MCP Server │ │ Nexo Skill │  │
@@ -45,17 +45,18 @@ As paginas de documentacao em `/sdk/` sao a referencia canonica do SDK.
 Toda regra, padrao e decisao tecnica esta documentada aqui para consulta
 humana e para o Claude usar como contexto.
 
-### MCP Server (v5.1)
+### MCP Server
 
-O MCP Server sera um servidor que expoe o conhecimento do SDK como tools
+O MCP Server e um servidor que expoe o conhecimento do SDK como tools
 acessiveis pelo Claude Code em qualquer projeto spoke. Isso permite que
 o Claude consulte padroes FXL sem precisar ter a skill instalada localmente.
+Veja detalhes completos na pagina [MCP Server](/sdk/mcp-server).
 
-### Nexo Skill (v5.2)
+### Nexo Skill
 
-A Nexo Skill sera a unificacao de todas as skills do Claude Code em uma unica
+A Nexo Skill e a unificacao de todas as skills do Claude Code em uma unica
 skill contextual. Ela orquestra scaffold, audit, connect e deploy usando
-os padroes definidos no SDK.
+os padroes definidos no SDK. Veja detalhes completos na pagina [Nexo Skill](/sdk/nexo-skill).
 
 ## Arquitetura Hub ↔ Spoke
 

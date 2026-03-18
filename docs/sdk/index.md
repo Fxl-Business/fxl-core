@@ -1,14 +1,14 @@
 ---
-title: FXL SDK
+title: Nexo SDK
 badge: SDK
 description: Playbook de engenharia da FXL — stack, padroes, contract e ferramentas para projetos spoke
 scope: product
 sort_order: 0
 ---
 
-# FXL SDK
+# Nexo SDK
 
-O FXL SDK e o playbook de engenharia que todo sistema construido pela FXL deve seguir.
+O Nexo SDK e o playbook de engenharia que todo sistema construido pela FXL deve seguir.
 Ele define stack, padroes de codigo, seguranca, infraestrutura e integracao com o Nexo Hub.
 
 {% callout type="info" %}
