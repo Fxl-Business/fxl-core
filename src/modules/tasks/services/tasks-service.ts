@@ -15,6 +15,7 @@ export interface Task {
   priority: TaskPriority
   client_slug: string | null
   due_date: string | null  // ISO date string — Supabase returns date as string
+  org_id: string
   created_by: string | null
   created_at: string
   updated_at: string
@@ -22,6 +23,7 @@ export interface Task {
 
 export interface CreateTaskParams {
   title: string
+  org_id: string  // Required: caller gets this from useActiveOrg().activeOrg?.id ?? ''
   description?: string
   status?: TaskStatus
   priority?: TaskPriority
@@ -54,6 +56,7 @@ export async function createTask(params: CreateTaskParams): Promise<Task> {
       client_slug: params.client_slug ?? null,
       due_date: params.due_date ?? null,
       created_by: params.created_by ?? null,
+      org_id: params.org_id,
     })
     .select()
     .single()

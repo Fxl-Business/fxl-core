@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 import { createTask, updateTask, getTask } from '../services/tasks-service'
 import type { TaskStatus, TaskPriority } from '../services/tasks-service'
 import { STATUS_LABELS, PRIORITY_LABELS } from '../types'
+import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 
 // ---------------------------------------------------------------------------
 // TaskForm — /tarefas/new and /tarefas/:id/edit
@@ -43,6 +44,7 @@ export default function TaskForm() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isEditMode = Boolean(id)
+  const { activeOrg } = useActiveOrg()
 
   const [formData, setFormData] = useState<FormState>(DEFAULT_FORM)
   const [loading, setLoading] = useState(false)
@@ -100,6 +102,7 @@ export default function TaskForm() {
           priority: formData.priority,
           due_date: formData.dueDate || null,
           client_slug: formData.clientSlug.trim() !== '' ? formData.clientSlug.trim() : undefined,
+          org_id: activeOrg?.id ?? '',
         })
         toast.success('Tarefa criada')
       }

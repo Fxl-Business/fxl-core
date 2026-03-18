@@ -66,6 +66,7 @@ const fakeTask: Task = {
   priority: 'high',
   client_slug: 'acme',
   due_date: '2026-03-15',
+  org_id: 'org_test_123',
   created_by: 'user_clerk_123',
   created_at: '2026-03-12T10:00:00Z',
   updated_at: '2026-03-12T10:00:00Z',
@@ -96,6 +97,7 @@ describe('createTask', () => {
       client_slug: 'acme',
       due_date: '2026-03-15',
       created_by: 'user_clerk_123',
+      org_id: 'org_test_123',
     })
 
     expect(mockFrom).toHaveBeenCalledWith('tasks')
@@ -110,7 +112,7 @@ describe('createTask', () => {
     mockFrom.mockReturnValue({ insert: mockInsert, select: mockSelect, update: mockUpdate, delete: mockDelete })
 
     await expect(
-      createTask({ title: 'Test task', description: '' })
+      createTask({ title: 'Test task', description: '', org_id: 'org_test_123' })
     ).rejects.toThrow('DB error')
   })
 
@@ -120,7 +122,7 @@ describe('createTask', () => {
     mockInsert.mockReturnValue({ select: selectMock })
     mockFrom.mockReturnValue({ insert: mockInsert, select: mockSelect, update: mockUpdate, delete: mockDelete })
 
-    await createTask({ title: 'Minimal task', description: '' })
+    await createTask({ title: 'Minimal task', description: '', org_id: 'org_test_123' })
 
     const insertCall = mockInsert.mock.calls[0] as unknown[]
     const payload = insertCall[0] as Record<string, unknown>
