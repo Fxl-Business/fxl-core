@@ -12,14 +12,13 @@ Requirements para UX Polish + Multi-tenancy data isolation.
 - [x] **DATA-01**: Tarefas sao scoped por org_id — cada org ve apenas suas tarefas
 - [x] **DATA-02**: Clientes sao scoped por org_id — financeiro-conta-azul visivel apenas para a org que criou
 - [x] **DATA-03**: Wireframes/blueprints sao scoped por org_id — dados do cliente isolados por org
-- [ ] **DATA-04**: Docs da org (processo, padroes) scoped por org_id na sidebar
+- [x] **DATA-04**: Docs da org (processo, padroes) scoped por org_id na sidebar
 - [x] **DATA-05**: Dados existentes (tarefas, wireframes) recuperados ou re-associados a org correta
 
 ### Admin
 
 - [x] **ADMN-01**: Admin pode gerenciar membros de qualquer organizacao (add/remove usuarios)
 - [x] **ADMN-02**: Admin pode entrar na visao de qualquer organizacao (impersonate org)
-<!-- gap closure: Phase 110 will produce VERIFICATION.md and mark these done -->
 
 ### Header UX
 
@@ -29,9 +28,8 @@ Requirements para UX Polish + Multi-tenancy data isolation.
 
 ### Arquitetura Modular
 
-- [ ] **ARCH-01**: Separacao clara entre funcionalidade do modulo (ferramenta) e dados do cliente (org-scoped)
-- [ ] **ARCH-02**: Wireframe Builder como ferramenta global, wireframes de clientes como dados da org
-<!-- gap closure: Phase 111 will explicitly verify and mark these done -->
+- [x] **ARCH-01**: Separacao clara entre funcionalidade do modulo (ferramenta) e dados do cliente (org-scoped)
+- [x] **ARCH-02**: Wireframe Builder como ferramenta global, wireframes de clientes como dados da org
 
 ## Future Requirements
 
@@ -53,23 +51,23 @@ None deferred.
 | DATA-01 | Phase 105 | Done |
 | DATA-02 | Phase 105 | Done |
 | DATA-03 | Phase 109 (gap closure) | Done |
-| DATA-04 | Phase 111 (gap closure) | Pending |
+| DATA-04 | Phase 111 (gap closure) | Done |
 | DATA-05 | Phase 106 | Done |
 | ADMN-01 | Phase 110 (gap closure) | Done |
 | ADMN-02 | Phase 110 (gap closure) | Done |
 | HEAD-01 | Phase 107 | Done |
 | HEAD-02 | Phase 107 | Done |
 | HEAD-03 | Phase 107 | Done |
-| ARCH-01 | Phase 111 (gap closure) | Pending |
-| ARCH-02 | Phase 111 (gap closure) | Pending |
+| ARCH-01 | Phase 111 (gap closure) | Done |
+| ARCH-02 | Phase 111 (gap closure) | Done |
 
 **Coverage:**
 - v5.3 requirements: 12 total
 - Mapped to phases: 12
 - Unmapped: 0
-- Done: 9 (DATA-01, DATA-02, DATA-03, DATA-05, HEAD-01, HEAD-02, HEAD-03, ADMN-01, ADMN-02)
-- Pending gap closure: 3 (DATA-04, ARCH-01, ARCH-02)
+- Done: 12 (all)
+- Pending gap closure: 0
 
 ---
 *Requirements defined: 2026-03-18*
-*Last updated: 2026-03-18 — traceability populated after roadmap creation*
+*Last updated: 2026-03-18 — Phase 111 audit closure: all 12 requirements verified and closed*
