@@ -1,67 +1,31 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.3
-milestone_name: Admin Polish & Custom Auth
-status: complete
-stopped_at: Milestone archived
-last_updated: "2026-03-17T23:55:00.000Z"
-last_activity: 2026-03-17 — v4.3 milestone complete and archived
+milestone: v5.2
+milestone_name: Nexo Skill
+status: defining-requirements
+stopped_at: n/a
+last_updated: "2026-03-18T00:00:00.000Z"
+last_activity: 2026-03-18 — Milestone v5.2 started
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-17)
+See: .planning/PROJECT.md (updated 2026-03-18)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** Planning next milestone
+**Current focus:** v5.2 Nexo Skill — consolidar skills em skill unificada com MCP bridge
 
 ## Current Position
 
-Milestone: v4.3 Admin Polish & Custom Auth — COMPLETE
-Status: Archived to .planning/milestones/v4.3-ROADMAP.md
-Last activity: 2026-03-17 — v4.3 milestone complete and archived
-
-Progress: [████████████████████] 100%
-
-## Platform Evolution Plan (v4.0-v4.3)
-
-v4.0: Rebrand Nexo — COMPLETE
-v4.1: Super Admin — COMPLETE
-v4.2: Docs do Sistema + Tenant Onboarding — COMPLETE
-v4.3: Admin Polish & Custom Auth — COMPLETE
-
-Design spec: docs/superpowers/specs/2026-03-17-admin-polish-custom-auth-design.md
-
-## Accumulated Context
-
-### Decisions
-
-- [81-01] scope='product' only bypasses org_id in SELECT policy — write policies require super_admin for product docs
-- [81-01] In-memory cache unchanged; scope filtering happens client-side via getProductDocs/getTenantDocs
-- [Phase 83-01]: AuthOnlyRoute instead of Clerk SignedIn — SignedIn not exported by @clerk/react in this version
-- [Phase 84-01]: RLS hardening: no COALESCE anon fallback; every policy requires valid org_id
-- [Phase 85]: useSignIn from @clerk/react/legacy for custom login (Clerk v6 Core 2 classic API)
-- [Phase 86]: admin-service.ts separate from tenant-service.ts for user vs tenant operations
-- [Phase 87]: Members endpoint in admin-tenants (org-scoped, not user-scoped)
-
-### Pending Todos
-
-None.
-
-### Blockers/Concerns
-
-None.
-
-## Session Continuity
-
-Last session: 2026-03-17
-Stopped at: Milestone archived
-Next: /gsd:new-milestone
+Milestone: v5.2 Nexo Skill
+Phase: Not started (defining requirements)
+Status: Defining requirements
+Last activity: 2026-03-18 — Milestone v5.2 started

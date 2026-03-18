@@ -8,10 +8,20 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: Planning next milestone
+## Current Milestone: v5.2 Nexo Skill
 
-Previous: v4.3 Admin Polish & Custom Auth (shipped 2026-03-17)
-Previous: v4.2 Docs do Sistema + Tenant Onboarding (shipped 2026-03-17)
+Previous: v5.1 MCP Server (shipped 2026-03-18)
+Previous: v5.0 SDK Docs (shipped 2026-03-17)
+
+**Goal:** Consolidar skills existentes (FXL SDK + agent orchestrator) em uma Nexo Skill unificada que integra com o MCP Server e customiza a metodologia GSD para projetos FXL.
+
+**Target features:**
+- Consolidar SDK skill + orchestrator na estrutura Nexo Skill
+- Methodology layer (GSD bridge, fluxo customizado FXL)
+- MCP bridge (skill consulta e alimenta MCP automaticamente)
+- Scaffold flow (criar spoke completo via skill + MCP)
+- Docs update (preencher docs/sdk/nexo-skill.md)
+- Deprecar skills antigas (remover .agents/skills/fxl-sdk/ e agent-orchestrator)
 
 ## Requirements
 
@@ -174,7 +184,11 @@ Previous: v4.2 Docs do Sistema + Tenant Onboarding (shipped 2026-03-17)
 
 ### Active
 
-(None — planning next milestone)
+- [ ] Nexo Skill unificada com todas as capacidades (scaffold, audit, connect, orchestrate, methodology, learn)
+- [ ] MCP bridge integrado (skill consulta e alimenta MCP automaticamente)
+- [ ] Scaffold flow gerando spoke completo com CLAUDE.md + .mcp.json
+- [ ] Docs SDK atualizados com pagina nexo-skill.md
+- [ ] Skills antigas deprecadas e removidas
 
 ### Out of Scope
 
@@ -212,11 +226,11 @@ Previous: v4.2 Docs do Sistema + Tenant Onboarding (shipped 2026-03-17)
 
 ## Current State
 
-20 milestones shipped (v1.0 → v4.3). v4.3 completed Admin Polish & Custom Auth.
+22 milestones shipped (v1.0 → v5.1). v5.1 completed MCP Server.
 
 ## Context
 
-Shipped v4.3 Admin Polish & Custom Auth. 20 milestones complete (v1.0-v4.3).
+Shipped v5.1 MCP Server. 22 milestones complete (v1.0-v5.1).
 Codebase reorganizado: src/platform/ (shell), src/modules/ (autocontidos), src/shared/ (cross-module).
 5 modulos ativos (docs, tasks, clients, wireframe, connector), cada um com CLAUDE.md para agent scoped.
 Super admin panel com /admin/* routes: dashboard, tenant management, users management, module management per-tenant, platform settings.
@@ -352,4 +366,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function members endpoint via admin-tenants (not admin-users) | Members are org-scoped, fits naturally in tenants function | ✓ Good — logical API grouping |
 
 ---
-*Last updated: 2026-03-17 after v4.3 milestone*
+*Last updated: 2026-03-18 after v5.2 milestone start*
