@@ -1,5 +1,23 @@
 # Milestones
 
+## v6.0 Reestruturação de Módulos (Shipped: 2026-03-18)
+
+**Phases:** 5 (112-116) | **Plans:** 1+ | **Tasks:** ~25 requirements
+**Timeline:** 1 day (2026-03-18)
+
+**Delivered:** Separated Clientes (cadastro) from Projetos (briefing→blueprint→wireframe), implemented sidebar workspace with dropdown switcher and dynamic navigation per module. DB migration with projects table, code restructure with module rename, full CRUD for both modules, and workspace-aware sidebar.
+
+**Key accomplishments:**
+1. DB Migration: projects table with client_id nullable, clients extended with logo_url/status, project_id FKs on briefing_configs/blueprint_configs/comments/share_tokens, data migrated
+2. Code Restructure: src/modules/clients/ renamed to src/modules/projects/, new src/modules/clients/ created from scratch, pages parametrized by slug, module-ids.ts updated
+3. Projetos Module: /projetos/:slug/* routes (briefing, blueprint, wireframe, branding), stores migrated from client_slug to project_id, dynamic sidebar nav
+4. Clientes Module: full CRUD (list, create, profile, edit), dynamic sidebar nav in workspace
+5. Sidebar Workspace: dropdown switcher, useNavItems() hook per module, fixed footer with Admin/Perfil
+
+**Archive:** [v6.0-ROADMAP.md](milestones/v6.0-ROADMAP.md) | [v6.0-REQUIREMENTS.md](milestones/v6.0-REQUIREMENTS.md)
+
+---
+
 ## v5.3 UX Polish (Shipped: 2026-03-18)
 
 **Phases completed:** 7 phases, 13 plans, 5 tasks

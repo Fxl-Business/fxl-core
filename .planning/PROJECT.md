@@ -8,19 +8,11 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v6.0 Reestruturação de Módulos
+## Current Milestone: — (idle)
 
-**Goal:** Separar Clientes (cadastro) de Projetos (briefing→blueprint→wireframe), implementar sidebar workspace com dropdown switcher e navegação dinâmica por módulo.
+Previous: v6.0 Reestruturação de Módulos (shipped 2026-03-18)
 
-**Target features:**
-- Módulo Clientes novo (CRUD simples: nome, logo, slug, status)
-- Módulo Projetos (rename do atual "Clientes" com rotas /projetos/:slug/*)
-- Sidebar workspace com dropdown switcher por módulo (estilo Slack)
-- Navegação dinâmica via useNavItems() hook por módulo
-- Migração de dados: tabela projects, FKs em briefing_configs/blueprint_configs/comments/share_tokens
-- Projetos autossuficiente (client_id nullable — sem Clientes ativo, vincula à org)
-
-Previous: v5.3 UX Polish (shipped 2026-03-18)
+**v6.0 delivered:** Separated Clientes (cadastro) from Projetos (briefing→blueprint→wireframe), sidebar workspace with dropdown switcher, dynamic navigation per module, projects table with nullable client_id, full CRUD for both modules.
 
 ## Requirements
 
@@ -194,15 +186,16 @@ Previous: v5.3 UX Polish (shipped 2026-03-18)
 - ✓ MODULE_REGISTRY com tenantScoped?: boolean separando ferramenta global de dado org-scoped — v5.3
 - ✓ Docs SDK atualizados com pagina nexo-skill.md — v5.2
 - ✓ Skills antigas deprecadas e removidas — v5.2
+- ✓ Módulo Clientes com CRUD por org (nome, logo, slug, status) — v6.0
+- ✓ Módulo Projetos com rotas /projetos/:slug/* (briefing, blueprint, wireframe, branding) — v6.0
+- ✓ Sidebar workspace com dropdown switcher entre módulos — v6.0
+- ✓ Navegação dinâmica via useNavItems() hook por módulo — v6.0
+- ✓ Tabela projects com client_id nullable + migração de dados — v6.0
+- ✓ Stores migrados de client_slug para project_id/project_slug — v6.0
 
 ### Active
 
-- [ ] Módulo Clientes com CRUD por org (nome, logo, slug, status)
-- [ ] Módulo Projetos com rotas /projetos/:slug/* (briefing, blueprint, wireframe, branding)
-- [ ] Sidebar workspace com dropdown switcher entre módulos
-- [ ] Navegação dinâmica via useNavItems() hook por módulo
-- [ ] Tabela projects com client_id nullable + migração de dados
-- [ ] Stores migrados de client_slug para project_id/project_slug
+(No active milestone)
 
 ### Out of Scope
 
@@ -240,11 +233,11 @@ Previous: v5.3 UX Polish (shipped 2026-03-18)
 
 ## Current State
 
-24 milestones shipped (v1.0 → v5.3). v6.0 restructures modules: Clientes (cadastro) split from Projetos (criação), sidebar workspace pattern, dynamic nav.
+25 milestones shipped (v1.0 → v6.0). Modules restructured: Clientes (cadastro) separated from Projetos (criação), sidebar workspace with dropdown switcher, dynamic nav per module.
 
 ## Context
 
-Shipped v5.3 UX Polish. 24 milestones complete (v1.0-v5.3).
+Shipped v6.0 Reestruturação de Módulos. 25 milestones complete (v1.0-v6.0).
 Codebase reorganizado: src/platform/ (shell), src/modules/ (autocontidos), src/shared/ (cross-module).
 5 modulos ativos (docs, tasks, clients, wireframe, connector), cada um com CLAUDE.md para agent scoped.
 Super admin panel com /admin/* routes: dashboard, tenant management, users management, module management per-tenant, platform settings.
@@ -258,7 +251,7 @@ Nexo Skill unificada (.agents/skills/nexo/) com scaffold, audit, connect, orches
 MCP bridge integrado para consultar e alimentar knowledge base automaticamente.
 Design spec para evolucao em docs/superpowers/specs/.
 Tech stack: React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, Vercel.
-17+ Supabase migrations (001-017). 6 modules in MODULE_REGISTRY.
+18+ Supabase migrations (001-018). 7 modules in MODULE_REGISTRY (docs, tasks, projects, clients, wireframe, connector + admin).
 Modular architecture: ModuleDefinition registry, cross-module slot injection, runtime enable/disable, admin panel.
 Dynamic data layer: docs content served from Supabase with bidirectional sync CLI for Claude Code workflow.
 
@@ -385,4 +378,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Gap closure phases 109-111 for audit traceability | Separate phases to close verification gaps vs reopen completed work | ✓ Good — clean audit trail |
 
 ---
-*Last updated: 2026-03-18 after v6.0 milestone started*
+*Last updated: 2026-03-18 after v6.0 milestone shipped*
