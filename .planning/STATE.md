@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: idle
-status: idle
-stopped_at: v5.2 Nexo Skill completed and archived
+milestone: v5.3
+milestone_name: UX Polish
+status: defining-requirements
+stopped_at: Milestone v5.3 started
 last_updated: "2026-03-18T00:00:00.000Z"
-last_activity: 2026-03-18 — v5.2 milestone archived
+last_activity: 2026-03-18 — Milestone v5.3 started
 progress:
   total_phases: 0
   completed_phases: 0
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-18)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** Idle — awaiting next milestone
+**Current focus:** v5.3 UX Polish — header logout, docs fix, admin identity
 
 ## Current Position
 
-Milestone: none (idle)
-Phase: n/a
-Plan: n/a
-Status: Idle — v5.2 Nexo Skill shipped and archived
-Last activity: 2026-03-18 — v5.2 milestone archived
+Milestone: v5.3 UX Polish
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-18 — Milestone v5.3 started
 
 Progress: [----------] 0%
 
@@ -59,5 +59,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: v5.2 Nexo Skill completed and archived
+Stopped at: Milestone v5.3 started — defining requirements
 Resume file: None

@@ -8,7 +8,14 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: idle
+## Current Milestone: v5.3 UX Polish
+
+**Goal:** Corrigir UX gaps no header (logout, identidade admin/operator) e investigar docs desaparecidos.
+
+**Target features:**
+- Icone de usuario no header com opcao de logout
+- Fix: docs da org FXL que sumiram apos alteracoes recentes
+- Header distinguir visualmente admin vs operator, renomear para Nexo
 
 Previous: v5.2 Nexo Skill (shipped 2026-03-18)
 Previous: v5.1 MCP Server (shipped 2026-03-18)
@@ -180,7 +187,9 @@ Previous: v5.0 SDK Docs (shipped 2026-03-17)
 
 ### Active
 
-(none — awaiting next milestone)
+- [ ] Icone de usuario no header para logout
+- [ ] Fix docs da org FXL que sumiram
+- [ ] Header: distincao admin vs operator + rebrand Nexo
 
 ### Out of Scope
 
@@ -359,4 +368,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function members endpoint via admin-tenants (not admin-users) | Members are org-scoped, fits naturally in tenants function | ✓ Good — logical API grouping |
 
 ---
-*Last updated: 2026-03-18 after v5.2 milestone archived*
+*Last updated: 2026-03-18 after v5.3 milestone started*
