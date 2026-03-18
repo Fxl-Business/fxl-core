@@ -73,37 +73,37 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 | — | Pending |
-| CLI-02 | — | Pending |
-| CLI-03 | — | Pending |
-| CLI-04 | — | Pending |
-| CLI-05 | — | Pending |
-| PROJ-01 | — | Pending |
-| PROJ-02 | — | Pending |
-| PROJ-03 | — | Pending |
-| PROJ-04 | — | Pending |
-| PROJ-05 | — | Pending |
-| PROJ-06 | — | Pending |
-| PROJ-07 | — | Pending |
-| SIDE-01 | — | Pending |
-| SIDE-02 | — | Pending |
-| SIDE-03 | — | Pending |
-| SIDE-04 | — | Pending |
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| DATA-04 | — | Pending |
-| DATA-05 | — | Pending |
-| CODE-01 | — | Pending |
-| CODE-02 | — | Pending |
-| CODE-03 | — | Pending |
-| CODE-04 | — | Pending |
+| CLI-01 | Phase 115 | Pending |
+| CLI-02 | Phase 115 | Pending |
+| CLI-03 | Phase 115 | Pending |
+| CLI-04 | Phase 115 | Pending |
+| CLI-05 | Phase 115 | Pending |
+| PROJ-01 | Phase 114 | Pending |
+| PROJ-02 | Phase 114 | Pending |
+| PROJ-03 | Phase 114 | Pending |
+| PROJ-04 | Phase 114 | Pending |
+| PROJ-05 | Phase 114 | Pending |
+| PROJ-06 | Phase 114 | Pending |
+| PROJ-07 | Phase 114 | Pending |
+| SIDE-01 | Phase 116 | Pending |
+| SIDE-02 | Phase 116 | Pending |
+| SIDE-03 | Phase 116 | Pending |
+| SIDE-04 | Phase 116 | Pending |
+| DATA-01 | Phase 112 | Pending |
+| DATA-02 | Phase 112 | Pending |
+| DATA-03 | Phase 112 | Pending |
+| DATA-04 | Phase 112 | Pending |
+| DATA-05 | Phase 114 | Pending |
+| CODE-01 | Phase 113 | Pending |
+| CODE-02 | Phase 113 | Pending |
+| CODE-03 | Phase 113 | Pending |
+| CODE-04 | Phase 113 | Pending |
 
 **Coverage:**
 - v6.0 requirements: 25 total
-- Mapped to phases: 0
-- Unmapped: 25
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-18*
-*Last updated: 2026-03-18 after initial definition*
+*Last updated: 2026-03-18 — traceability filled after roadmap creation*

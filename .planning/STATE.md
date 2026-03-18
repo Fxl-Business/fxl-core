@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v6.0
 milestone_name: Reestruturação de Módulos
-status: defining_requirements
-stopped_at: Milestone v6.0 started — defining requirements
+status: ready_to_plan
+stopped_at: Roadmap created — ready to plan Phase 112
 last_updated: "2026-03-18"
-last_activity: 2026-03-18 — Milestone v6.0 started
+last_activity: 2026-03-18 — Roadmap v6.0 created (5 phases, 25 requirements mapped)
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,15 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-18)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** v6.0 Reestruturação de Módulos
+**Current focus:** v6.0 Reestruturação de Módulos — Phase 112: DB Migration
 
 ## Current Position
 
 Milestone: v6.0 Reestruturação de Módulos
-Phase: Not started (defining requirements)
+Phase: 112 of 116 (DB Migration) — not started
 Plan: —
-Status: Defining requirements
-Last activity: 2026-03-18 — Milestone v6.0 started
+Status: Ready to plan
+Last activity: 2026-03-18 — Roadmap created, 25/25 requirements mapped
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -45,6 +47,11 @@ Last activity: 2026-03-18 — Milestone v6.0 started
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
+Recent decisions for v6.0:
+
+- Projetos module = rename of src/modules/clients/ (not new code); Clientes module = new from scratch
+- client_id is nullable on projects table — Projetos autossuficiente sem Clientes ativo
+- Phase 115 (Clientes) depends only on Phase 112 (DB), independent of Phase 113/114
 
 ### Pending Todos
 
@@ -57,5 +64,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Defining requirements for v6.0
-Next action: Define requirements, then create roadmap
+Stopped at: Roadmap v6.0 created — 5 phases (112-116), 25 requirements
+Next action: /gsd:plan-phase 112
