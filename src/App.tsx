@@ -3,16 +3,19 @@ import { ModuleEnabledProvider } from '@platform/module-loader/hooks/useModuleEn
 import { ExtensionProvider } from '@platform/module-loader/slots'
 import { Toaster } from '@shared/ui/sonner'
 import AppRouter from '@platform/router/AppRouter'
+import { ImpersonationProvider } from '@platform/auth/ImpersonationContext'
 
 export default function App() {
   return (
     <BrowserRouter>
-      <ModuleEnabledProvider>
-        <ExtensionProvider>
-          <AppRouter />
-          <Toaster />
-        </ExtensionProvider>
-      </ModuleEnabledProvider>
+      <ImpersonationProvider>
+        <ModuleEnabledProvider>
+          <ExtensionProvider>
+            <AppRouter />
+            <Toaster />
+          </ExtensionProvider>
+        </ModuleEnabledProvider>
+      </ImpersonationProvider>
     </BrowserRouter>
   )
 }
