@@ -17,28 +17,28 @@ Requirements for v5.2. Each maps to roadmap phases.
 
 ### Methodology
 
-- [ ] **METH-01**: Workflow document defines discuss→plan→execute flow customized for FXL projects
-- [ ] **METH-02**: Post-execution hook captures learnings automatically via MCP after phase completion
-- [ ] **METH-03**: Pre-planning step consults MCP for existing standards and pitfalls before planning
+- [x] **METH-01**: Workflow document defines discuss→plan→execute flow customized for FXL projects
+- [x] **METH-02**: Post-execution hook captures learnings automatically via MCP after phase completion
+- [x] **METH-03**: Pre-planning step consults MCP for existing standards and pitfalls before planning
 
 ### MCP Bridge
 
-- [ ] **MCPB-01**: Integration module calls get_standards() before planning a new spoke
-- [ ] **MCPB-02**: Integration module calls get_learnings() and get_pitfalls() for context enrichment
-- [ ] **MCPB-03**: Integration module calls add_learning() after discovering new patterns during execution
-- [ ] **MCPB-04**: Integration module calls add_pitfall() when encountering errors worth documenting
+- [x] **MCPB-01**: Integration module calls get_standards() before planning a new spoke
+- [x] **MCPB-02**: Integration module calls get_learnings() and get_pitfalls() for context enrichment
+- [x] **MCPB-03**: Integration module calls add_learning() after discovering new patterns during execution
+- [x] **MCPB-04**: Integration module calls add_pitfall() when encountering errors worth documenting
 
 ### Scaffold
 
-- [ ] **SCAF-01**: Scaffold command creates complete spoke project structure from template
-- [ ] **SCAF-02**: Generated spoke includes CLAUDE.md with FXL SDK rules and MCP config
-- [ ] **SCAF-03**: Generated spoke includes .mcp.json pointing to the MCP Server
-- [ ] **SCAF-04**: Scaffold registers project in MCP via sdk_projects table (slug, name, stack_choices)
-- [ ] **SCAF-05**: Scaffold asks platform (web/mobile), framework (vite/next), and modules questions
+- [x] **SCAF-01**: Scaffold command creates complete spoke project structure from template
+- [x] **SCAF-02**: Generated spoke includes CLAUDE.md with FXL SDK rules and MCP config
+- [x] **SCAF-03**: Generated spoke includes .mcp.json pointing to the MCP Server
+- [x] **SCAF-04**: Scaffold registers project in MCP via sdk_projects table (slug, name, stack_choices)
+- [x] **SCAF-05**: Scaffold asks platform (web/mobile), framework (vite/next), and modules questions
 
 ### Documentation
 
-- [ ] **DOCS-01**: docs/sdk/nexo-skill.md filled with complete guide (capabilities, structure, usage)
+- [x] **DOCS-01**: docs/sdk/nexo-skill.md filled with complete guide (capabilities, structure, usage)
 
 ### Deprecation
 
@@ -76,19 +76,19 @@ Requirements for v5.2. Each maps to roadmap phases.
 | CONS-03 | Phase 99 | Done |
 | CONS-04 | Phase 99 | Done |
 | CONS-05 | Phase 99 | Done |
-| METH-01 | Phase 100 | Pending |
-| METH-02 | Phase 100 | Pending |
-| METH-03 | Phase 100 | Pending |
-| MCPB-01 | Phase 101 | Pending |
-| MCPB-02 | Phase 101 | Pending |
-| MCPB-03 | Phase 101 | Pending |
-| MCPB-04 | Phase 101 | Pending |
-| SCAF-01 | Phase 102 | Pending |
-| SCAF-02 | Phase 102 | Pending |
-| SCAF-03 | Phase 102 | Pending |
-| SCAF-04 | Phase 102 | Pending |
-| SCAF-05 | Phase 102 | Pending |
-| DOCS-01 | Phase 103 | Pending |
+| METH-01 | Phase 100 | Done |
+| METH-02 | Phase 100 | Done |
+| METH-03 | Phase 100 | Done |
+| MCPB-01 | Phase 101 | Done |
+| MCPB-02 | Phase 101 | Done |
+| MCPB-03 | Phase 101 | Done |
+| MCPB-04 | Phase 101 | Done |
+| SCAF-01 | Phase 102 | Done |
+| SCAF-02 | Phase 102 | Done |
+| SCAF-03 | Phase 102 | Done |
+| SCAF-04 | Phase 102 | Done |
+| SCAF-05 | Phase 102 | Done |
+| DOCS-01 | Phase 103 | Done |
 | DEPR-01 | Phase 104 | Done |
 | DEPR-02 | Phase 104 | Done |
 | DEPR-03 | Phase 104 | Done |
