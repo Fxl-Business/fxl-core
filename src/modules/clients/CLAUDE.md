@@ -1,25 +1,50 @@
 # Module: clients
 
 ## Purpose
-Simple CRUD for client registration (name, slug, description, status).
-This is NOT the project workspace module -- that lives at src/modules/projects/.
+Client registration and management (CRUD). Lists, creates, edits, and displays client profiles for the org.
 
 ## Ownership
 - src/modules/clients/**
 
 ## Public API
 
+### Types
+- Client, ClientStatus, CreateClientParams, UpdateClientParams (types.ts)
+
+### Hooks
+- useClients() — list all clients with loading/error/refetch
+- useClient(slug) — fetch single client by slug
+
+### Services
+- clients-service.ts — listClients, getClientBySlug, createClient, updateClient, deleteClient
+
 ### Pages
-- ClientsListPage: Table listing all clients for the organization (pages/ClientsListPage.tsx)
+- ClientList — /clientes — card grid with create dialog
+- ClientProfile — /clientes/:slug — profile with edit dialog, link to projects
+
+### Components
+- ClientCard — card for list display
+- ClientForm — create/edit form used inside Dialog
 
 ## Dependencies
 
+### From shared/
+- @/components/ui/button, card, badge, dialog, input, label, textarea, select
+
 ### From platform/
-- @platform/module-loader/registry — ModuleDefinition type (used in manifest)
-- @platform/module-loader/module-ids — MODULE_IDS.CLIENTS (used in manifest)
-- @platform/supabase — supabase client for DB access
+- @/modules/registry — ModuleDefinition type
+- @/modules/module-ids — MODULE_IDS.CLIENTS
+
+### From external/
+- @/lib/supabase — Supabase client
+- react-router-dom — Link, useParams
+- lucide-react — icons
+
+## DB Table
+- `clients` (migrations 016 + 018): id, slug, name, description, org_id, logo_url, status, created_at
+- RLS: org_id match from JWT + super_admin bypass
 
 ## Agent Rules
 - **Write:** Only files under `src/modules/clients/`
 - **Read:** Entire codebase
-- **Do NOT** confuse with src/modules/projects/ (formerly clients)
+- This module is SIMPLE CRUD — does NOT contain briefing/blueprint/wireframe (that's Projetos)

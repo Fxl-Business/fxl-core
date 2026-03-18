@@ -1,12 +1,12 @@
 import { Users } from 'lucide-react'
-import ClientsListPage from './pages/ClientsListPage'
 import type { ModuleDefinition } from '@platform/module-loader/registry'
 import { MODULE_IDS } from '@platform/module-loader/module-ids'
+import ClientList from './pages/ClientList'
+import ClientProfile from './pages/ClientProfile'
 
 export const clientsManifest: ModuleDefinition = {
   id: MODULE_IDS.CLIENTS,
-  description: 'Cadastro de clientes da organizacao.',
-  tenantScoped: true,
+  description: 'Cadastro e gestao de clientes da organizacao.',
   label: 'Clientes',
   route: '/clientes',
   icon: Users,
@@ -18,6 +18,7 @@ export const clientsManifest: ModuleDefinition = {
     },
   ],
   routeConfig: [
-    { path: '/clientes', element: <ClientsListPage /> },
+    { path: '/clientes', element: <ClientList /> },
+    { path: '/clientes/:slug', element: <ClientProfile /> },
   ],
 }
