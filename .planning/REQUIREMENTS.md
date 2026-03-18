@@ -48,24 +48,24 @@ None deferred.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| DATA-04 | — | Pending |
-| DATA-05 | — | Pending |
-| ADMN-01 | — | Pending |
-| ADMN-02 | — | Pending |
-| HEAD-01 | — | Pending |
-| HEAD-02 | — | Pending |
-| HEAD-03 | — | Pending |
-| ARCH-01 | — | Pending |
-| ARCH-02 | — | Pending |
+| DATA-01 | Phase 105 | Pending |
+| DATA-02 | Phase 105 | Pending |
+| DATA-03 | Phase 105 | Pending |
+| DATA-04 | Phase 105 | Pending |
+| DATA-05 | Phase 106 | Pending |
+| ADMN-01 | Phase 108 | Pending |
+| ADMN-02 | Phase 108 | Pending |
+| HEAD-01 | Phase 107 | Pending |
+| HEAD-02 | Phase 107 | Pending |
+| HEAD-03 | Phase 107 | Pending |
+| ARCH-01 | Phase 105 | Pending |
+| ARCH-02 | Phase 105 | Pending |
 
 **Coverage:**
 - v5.3 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-18*
-*Last updated: 2026-03-18 after initial definition*
+*Last updated: 2026-03-18 — traceability populated after roadmap creation*
