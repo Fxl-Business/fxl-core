@@ -55,6 +55,18 @@ export interface ModuleExtension {
  * Full module definition — extends ModuleManifest with registry metadata.
  * Plan 02 will update each manifest to satisfy this interface.
  */
+/**
+ * Return type for the optional useNavItems hook on ModuleDefinition.
+ */
+export interface UseNavItemsResult {
+  items: NavItem[]
+  isLoading: boolean
+}
+
+/**
+ * Full module definition — extends ModuleManifest with registry metadata.
+ * Plan 02 will update each manifest to satisfy this interface.
+ */
 export interface ModuleDefinition extends ModuleManifest {
   id: ModuleId
   description: string
@@ -63,6 +75,12 @@ export interface ModuleDefinition extends ModuleManifest {
   /** When true, module visibility is controlled per-org via tenant_modules table in org mode */
   tenantScoped?: boolean
   extensions?: ModuleExtension[]
+  /**
+   * Optional hook that returns dynamic nav items for this module.
+   * When present, the sidebar calls this hook instead of using static navChildren.
+   * Must be a React hook (follows Rules of Hooks).
+   */
+  useNavItems?: () => UseNavItemsResult
 }
 
 // All manifests now satisfy ModuleDefinition — typed accordingly.

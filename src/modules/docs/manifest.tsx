@@ -2,6 +2,7 @@ import { BookOpen } from 'lucide-react'
 import DocRenderer from './pages/DocRenderer'
 import type { ModuleDefinition } from '@platform/module-loader/registry'
 import { MODULE_IDS } from '@platform/module-loader/module-ids'
+import { useDocsNavItems } from './hooks/useDocsNavItems'
 
 export const docsManifest: ModuleDefinition = {
   id: MODULE_IDS.DOCS,
@@ -11,6 +12,7 @@ export const docsManifest: ModuleDefinition = {
   route: '/processo/index',
   icon: BookOpen,
   status: 'active',
+  useNavItems: useDocsNavItems,
   navChildren: [
     {
       label: 'Processo',

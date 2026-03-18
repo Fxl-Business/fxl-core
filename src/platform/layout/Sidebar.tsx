@@ -1,24 +1,62 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight, Home } from 'lucide-react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { ChevronDown, ChevronRight, Settings, User, Loader2 } from 'lucide-react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { useUser } from '@clerk/react'
 import { cn } from '@shared/utils'
-import { Separator } from '@shared/ui/separator'
-import { MODULE_REGISTRY, type NavItem } from '@platform/module-loader/registry'
+import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover'
+import {
+  MODULE_REGISTRY,
+  type ModuleDefinition,
+  type NavItem,
+  type UseNavItemsResult,
+} from '@platform/module-loader/registry'
 import { useModuleEnabled } from '@platform/module-loader/hooks/useModuleEnabled'
-import { useDocsNav } from '@modules/docs/hooks/useDocsNav'
-import { MODULE_IDS } from '@platform/module-loader/module-ids'
+
+// ---------------------------------------------------------------------------
+// Utilities
+// ---------------------------------------------------------------------------
 
 function hasActiveChild(navItem: NavItem, pathname: string): boolean {
   if (navItem.href && pathname === navItem.href) {
     return true
   }
-
   if (!navItem.children) {
     return false
   }
-
   return navItem.children.some((child) => hasActiveChild(child, pathname))
 }
+
+/**
+ * Determine which module is active based on current pathname.
+ * Matches the module whose `route` prefix best fits the current path.
+ */
+function detectActiveModule(
+  pathname: string,
+  enabledModules: ModuleDefinition[],
+): ModuleDefinition | null {
+  // Build candidates with their route prefix for matching
+  const candidates = enabledModules.map((m) => {
+    // Normalise route to a prefix (strip trailing /index, etc.)
+    const prefix = m.route.replace(/\/index$/, '')
+    return { module: m, prefix }
+  })
+
+  // Sort by prefix length descending so longer (more specific) prefixes match first
+  candidates.sort((a, b) => b.prefix.length - a.prefix.length)
+
+  for (const { module: mod, prefix } of candidates) {
+    if (pathname === prefix || pathname.startsWith(prefix + '/')) {
+      return mod
+    }
+  }
+
+  // Fallback: if on home ("/"), return first enabled module
+  return null
+}
+
+// ---------------------------------------------------------------------------
+// NavSection — renders a single nav item with optional children
+// ---------------------------------------------------------------------------
 
 function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
   const location = useLocation()
@@ -147,62 +185,245 @@ function NavSection({ item, depth = 0 }: { item: NavItem; depth?: number }) {
   )
 }
 
-export default function Sidebar() {
-  const { isEnabled } = useModuleEnabled()
-  const { tenantItems } = useDocsNav()
+// ---------------------------------------------------------------------------
+// ModuleNavContent — calls the module's useNavItems hook or falls back to static
+// ---------------------------------------------------------------------------
 
-  const navigationFromRegistry: NavItem[] = useMemo(() =>
-    MODULE_REGISTRY
-      .filter(m => m.status !== 'coming-soon')
-      .filter(m => isEnabled(m.id))
-      .flatMap(m => {
-        // Use dynamic nav for docs module — split into two labeled sections
-        if (m.id === MODULE_IDS.DOCS) {
-          // Only show tenant docs in the regular sidebar.
-          // Product docs (SDK) are managed via /admin/product-docs.
-          if (tenantItems.length > 0) {
-            return [{
-              label: 'Docs da Empresa',
-              href: undefined,
-              children: tenantItems,
-            }]
-          }
-          // No tenant docs for this org yet — show nothing (do NOT fall back to
-          // FXL-specific hardcoded manifest which leaks internal docs to other orgs)
-          return []
-        }
-        return m.navChildren ?? []
-      }),
-    [isEnabled, tenantItems]
-  )
+/**
+ * Wrapper component that calls a module's useNavItems hook.
+ * Must be a component (not inline) so the hook is called unconditionally
+ * at the top level of a React component.
+ */
+function DynamicNavContent({ useNavItems }: { useNavItems: () => UseNavItemsResult }) {
+  const { items, isLoading } = useNavItems()
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-sidebar-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Carregando...
+      </div>
+    )
+  }
+
+  if (items.length === 0) {
+    return (
+      <p className="text-xs text-slate-400 dark:text-sidebar-muted-foreground">
+        Nenhum item ainda.
+      </p>
+    )
+  }
 
   return (
-    <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50/50 p-6 md:block dark:border-sidebar-border dark:bg-sidebar">
-      <nav className="space-y-8">
-        {/* Home link with icon — hardcoded, not a module */}
+    <div className="space-y-3">
+      {items.map((item) => (
+        <NavSection key={item.label + (item.href ?? '')} item={item} depth={0} />
+      ))}
+    </div>
+  )
+}
+
+function StaticNavContent({ navChildren }: { navChildren: NavItem[] }) {
+  if (navChildren.length === 0) {
+    return (
+      <p className="text-xs text-slate-400 dark:text-sidebar-muted-foreground">
+        Nenhum item ainda.
+      </p>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {navChildren.map((item) => (
+        <NavSection key={item.label + (item.href ?? '')} item={item} depth={0} />
+      ))}
+    </div>
+  )
+}
+
+/**
+ * Renders the nav content for the active module.
+ * Delegates to DynamicNavContent (hook-based) or StaticNavContent (navChildren).
+ */
+function ModuleNavContent({ module: mod }: { module: ModuleDefinition }) {
+  if (mod.useNavItems) {
+    return <DynamicNavContent useNavItems={mod.useNavItems} />
+  }
+  return <StaticNavContent navChildren={mod.navChildren ?? []} />
+}
+
+// ---------------------------------------------------------------------------
+// ModuleSwitcher — dropdown at the top of the sidebar
+// ---------------------------------------------------------------------------
+
+function ModuleSwitcher({
+  activeModule,
+  enabledModules,
+  onSelect,
+}: {
+  activeModule: ModuleDefinition | null
+  enabledModules: ModuleDefinition[]
+  onSelect: (mod: ModuleDefinition) => void
+}) {
+  const [open, setOpen] = useState(false)
+
+  const Icon = activeModule?.icon
+  const label = activeModule?.label ?? 'Selecionar Modulo'
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+            'bg-slate-100 text-slate-800 hover:bg-slate-200',
+            'dark:bg-sidebar-accent/10 dark:text-sidebar-foreground dark:hover:bg-sidebar-accent/20',
+          )}
+        >
+          {Icon && <Icon className="h-4 w-4 shrink-0" />}
+          <span className="flex-1 truncate text-left">{label}</span>
+          <ChevronDown className={cn('h-4 w-4 shrink-0 transition-transform', open && 'rotate-180')} />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        sideOffset={4}
+        className="w-[var(--radix-popover-trigger-width)] p-1"
+      >
+        {enabledModules.map((mod) => {
+          const ModIcon = mod.icon
+          const isActive = mod.id === activeModule?.id
+          return (
+            <button
+              key={mod.id}
+              type="button"
+              onClick={() => {
+                onSelect(mod)
+                setOpen(false)
+              }}
+              className={cn(
+                'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+                isActive
+                  ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
+                  : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700',
+              )}
+            >
+              <ModIcon className="h-4 w-4 shrink-0" />
+              <span className="truncate">{mod.label}</span>
+              {mod.status === 'beta' && (
+                <span className="ml-auto rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
+                  Beta
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// SidebarFooter — Admin (super_admin only) + Profile
+// ---------------------------------------------------------------------------
+
+function SidebarFooter() {
+  const { user } = useUser()
+  const isSuperAdmin = user?.publicMetadata?.super_admin === true
+
+  return (
+    <div className="flex items-center gap-2 border-t border-slate-200 px-2 pt-3 dark:border-sidebar-border">
+      {isSuperAdmin && (
         <NavLink
-          to="/"
-          end
+          to="/admin"
           className={({ isActive }) =>
             cn(
-              'flex items-center gap-2 text-sm font-medium transition-colors',
+              'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
               isActive
-                ? 'text-indigo-600 dark:text-sidebar-accent'
-                : 'text-slate-600 hover:text-indigo-600 dark:text-sidebar-muted-foreground dark:hover:text-sidebar-accent',
+                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-sidebar-muted-foreground dark:hover:bg-sidebar-accent/10 dark:hover:text-sidebar-foreground',
             )
           }
         >
-          <Home className="h-4 w-4" />
-          Home
+          <Settings className="h-3.5 w-3.5" />
+          Admin
         </NavLink>
+      )}
+      <NavLink
+        to="/perfil"
+        className={({ isActive }) =>
+          cn(
+            'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ml-auto',
+            isActive
+              ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
+              : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-sidebar-muted-foreground dark:hover:bg-sidebar-accent/10 dark:hover:text-sidebar-foreground',
+          )
+        }
+      >
+        <User className="h-3.5 w-3.5" />
+        Perfil
+      </NavLink>
+    </div>
+  )
+}
 
-        <Separator className="my-4" />
+// ---------------------------------------------------------------------------
+// Sidebar — main export
+// ---------------------------------------------------------------------------
 
-        {/* Navigation from MODULE_REGISTRY */}
-        {navigationFromRegistry.map((item) => (
-          <NavSection key={item.label} item={item} depth={0} />
-        ))}
+export default function Sidebar() {
+  const { isEnabled } = useModuleEnabled()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  // Build the list of enabled, non-coming-soon modules
+  const enabledModules = useMemo(
+    () =>
+      MODULE_REGISTRY
+        .filter((m) => m.status !== 'coming-soon')
+        .filter((m) => isEnabled(m.id)),
+    [isEnabled],
+  )
+
+  // Detect active module from current route
+  const activeModule = useMemo(
+    () => detectActiveModule(location.pathname, enabledModules),
+    [location.pathname, enabledModules],
+  )
+
+  function handleModuleSelect(mod: ModuleDefinition) {
+    // Navigate to the module's home route
+    navigate(mod.route)
+  }
+
+  return (
+    <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-50/50 md:flex dark:border-sidebar-border dark:bg-sidebar">
+      {/* Top: Module Switcher */}
+      <div className="p-4 pb-2">
+        <ModuleSwitcher
+          activeModule={activeModule}
+          enabledModules={enabledModules}
+          onSelect={handleModuleSelect}
+        />
+      </div>
+
+      {/* Middle: Scrollable nav area */}
+      <nav className="flex-1 overflow-y-auto px-6 py-4">
+        {activeModule ? (
+          <ModuleNavContent key={activeModule.id} module={activeModule} />
+        ) : (
+          /* Home / no module selected — show nothing or a hint */
+          <p className="text-xs text-slate-400 dark:text-sidebar-muted-foreground">
+            Selecione um modulo acima para ver a navegacao.
+          </p>
+        )}
       </nav>
+
+      {/* Bottom: Footer */}
+      <div className="p-4 pt-0">
+        <SidebarFooter />
+      </div>
     </aside>
   )
 }
