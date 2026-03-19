@@ -6,7 +6,7 @@ import Layout from '@platform/layout/Layout'
 import ProtectedRoute from '@platform/auth/ProtectedRoute'
 import SuperAdminRoute from '@platform/auth/SuperAdminRoute'
 import Home from '@platform/pages/Home'
-import CriarEmpresa from '@platform/pages/CriarEmpresa'
+import SolicitarAcesso from '@platform/pages/SolicitarAcesso'
 import Login from '@platform/auth/Login'
 import Profile from '@platform/auth/Profile'
 import { MODULE_REGISTRY } from '@platform/module-loader/registry'
@@ -35,7 +35,7 @@ const moduleRoutes = MODULE_REGISTRY
   .filter((cfg): cfg is RouteObject & { path: string } => cfg.path !== undefined)
 
 // Thin auth-only guard: checks isSignedIn only, NOT org membership.
-// Used for routes that must be accessible to signed-in users without an org (e.g. /criar-empresa).
+// Used for routes that must be accessible to signed-in users without an org (e.g. /solicitar-acesso).
 function AuthOnlyRoute({ children }: { children: ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth()
   if (!isLoaded) {
@@ -115,12 +115,12 @@ export default function AppRouter() {
         }
       />
 
-      {/* Onboarding — auth required but no-org-required (avoids ProtectedRoute redirect loop) */}
+      {/* Request access — auth required but no-org-required (avoids ProtectedRoute redirect loop) */}
       <Route
-        path="/criar-empresa"
+        path="/solicitar-acesso"
         element={
           <AuthOnlyRoute>
-            <CriarEmpresa />
+            <SolicitarAcesso />
           </AuthOnlyRoute>
         }
       />
