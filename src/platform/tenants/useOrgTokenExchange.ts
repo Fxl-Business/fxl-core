@@ -42,18 +42,20 @@ export function useOrgTokenExchange(options?: OrgTokenExchangeOptions): OrgToken
     const orgChanged = prevOrgIdRef.current !== null && prevOrgIdRef.current !== activeOrg.id
 
     async function doExchange() {
+      // Immediately invalidate current token so no queries fire with stale org token
+      setIsReady(false)
+      setOrgAccessToken(null)
+      setError(null)
+
       try {
         const clerkToken = await session!.getToken()
         if (!clerkToken) {
           setError('Clerk session token unavailable')
-          setIsReady(false)
-          setOrgAccessToken(null)
           return
         }
 
         const result = await exchangeToken(clerkToken, activeOrg!.id)
         setOrgAccessToken(result.access_token)
-        setError(null)
         setIsReady(true)
 
         // Fire onOrgChange callback on org switch so callers can invalidate their caches
@@ -65,8 +67,6 @@ export function useOrgTokenExchange(options?: OrgTokenExchangeOptions): OrgToken
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Token exchange failed'
         setError(message)
-        setIsReady(false)
-        setOrgAccessToken(null)
         console.error('[useOrgTokenExchange]', message)
       }
     }
