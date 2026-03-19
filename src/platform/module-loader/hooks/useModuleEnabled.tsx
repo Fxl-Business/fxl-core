@@ -3,6 +3,7 @@ import type { ModuleId } from '@platform/module-loader/registry'
 import { MODULE_IDS } from '@platform/module-loader/module-ids'
 import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 import { supabase } from '@platform/supabase'
+import { onModulesInvalidated, getImpersonationOrgId } from '@platform/module-loader/module-signals'
 
 // All modules enabled by default
 const ALL_MODULE_IDS: ModuleId[] = Object.values(MODULE_IDS)
@@ -30,6 +31,12 @@ function OrgModuleEnabledProvider({ children }: { children: ReactNode }) {
   const [enabledModules, setEnabledModules] = useState<Set<ModuleId>>(new Set(ALL_MODULE_IDS))
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [refetchTick, setRefetchTick] = useState(0)
+
+  // Subscribe to module invalidation events (fires on impersonation enter/exit)
+  useEffect(() => {
+    return onModulesInvalidated(() => setRefetchTick((t) => t + 1))
+  }, [])
 
   // Fetch enabled modules from tenant_modules for the active org
   useEffect(() => {
@@ -44,6 +51,10 @@ function OrgModuleEnabledProvider({ children }: { children: ReactNode }) {
     let cancelled = false
     setIsLoading(true)
     setError(null)
+
+    // During impersonation, query tenant_modules for the impersonated org.
+    // The Supabase JWT is already scoped to that org, so RLS allows the read.
+    const effectiveOrgId = getImpersonationOrgId() ?? activeOrg.id
 
     async function fetchModules(orgId: string) {
       if (cancelled) return
@@ -90,10 +101,10 @@ function OrgModuleEnabledProvider({ children }: { children: ReactNode }) {
       setIsLoading(false)
     }
 
-    fetchModules(activeOrg.id)
+    fetchModules(effectiveOrgId)
 
     return () => { cancelled = true }
-  }, [activeOrg, orgLoading])
+  }, [activeOrg, orgLoading, refetchTick])
 
   const toggleModule = useCallback(async (id: ModuleId) => {
     if (!activeOrg) return
