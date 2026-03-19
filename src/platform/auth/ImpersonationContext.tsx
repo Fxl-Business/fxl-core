@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
-import { setOrgAccessToken, getOrgAccessToken } from '@platform/supabase'
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { useOrgToken } from '@platform/tenants/OrgTokenContext'
 import { getImpersonationToken, setAdminClerkTokenGetter } from '@platform/services/admin-service'
 import { invalidateDocsCache } from '@modules/docs/services/docs-service'
 import { invalidateModules, setImpersonationOrgId } from '@platform/module-loader/module-signals'
@@ -26,13 +26,11 @@ export function useImpersonation(): ImpersonationState {
 
 export function ImpersonationProvider({ children }: { children: ReactNode }) {
   const { session } = useSession()
+  const { setTokenOverride, clearTokenOverride } = useOrgToken()
   const [isImpersonating, setIsImpersonating] = useState(false)
   const [impersonatedOrgId, setImpersonatedOrgId] = useState<string | null>(null)
   const [impersonatedOrgName, setImpersonatedOrgName] = useState<string | null>(null)
   const [impersonationError, setImpersonationError] = useState<string | null>(null)
-
-  // Store original token in a ref — does not trigger re-renders
-  const originalTokenRef = useRef<string | null>(null)
 
   const enterImpersonation = useCallback(
     async (orgId: string, orgName: string) => {
@@ -47,14 +45,11 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
         // Register token getter so admin-service can authenticate
         setAdminClerkTokenGetter(() => session.getToken({ template: 'supabase' }))
 
-        // Save the current org token BEFORE overriding it
-        originalTokenRef.current = getOrgAccessToken()
-
         // Get impersonation token from edge function
         const result = await getImpersonationToken(orgId)
 
-        // Override Supabase client to use impersonated org token
-        setOrgAccessToken(result.access_token)
+        // Override Supabase client to use impersonated org token via context
+        setTokenOverride(result.access_token)
 
         // Set impersonation org ID so useModuleEnabled queries the target org
         setImpersonationOrgId(orgId)
@@ -72,13 +67,12 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
         console.error('[ImpersonationContext] enterImpersonation failed:', message)
       }
     },
-    [session],
+    [session, setTokenOverride],
   )
 
   const exitImpersonation = useCallback(() => {
-    // Restore the original org token
-    setOrgAccessToken(originalTokenRef.current)
-    originalTokenRef.current = null
+    // Restore the original org token via context
+    clearTokenOverride()
 
     // Clear impersonation org ID so useModuleEnabled reverts to admin's own org
     setImpersonationOrgId(null)
@@ -91,7 +85,7 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
     setImpersonatedOrgId(null)
     setImpersonatedOrgName(null)
     setImpersonationError(null)
-  }, [])
+  }, [clearTokenOverride])
 
   return (
     <ImpersonationContext.Provider
