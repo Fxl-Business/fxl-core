@@ -4,18 +4,22 @@ import { ExtensionProvider } from '@platform/module-loader/slots'
 import { Toaster } from '@shared/ui/sonner'
 import AppRouter from '@platform/router/AppRouter'
 import { ImpersonationProvider } from '@platform/auth/ImpersonationContext'
+import { OrgTokenProvider } from '@platform/tenants/OrgTokenContext'
+import { invalidateDocsCache } from '@modules/docs/services/docs-service'
 
 export default function App() {
   return (
     <BrowserRouter>
-      <ImpersonationProvider>
-        <ModuleEnabledProvider>
-          <ExtensionProvider>
-            <AppRouter />
-            <Toaster />
-          </ExtensionProvider>
-        </ModuleEnabledProvider>
-      </ImpersonationProvider>
+      <OrgTokenProvider onOrgChange={invalidateDocsCache}>
+        <ImpersonationProvider>
+          <ModuleEnabledProvider>
+            <ExtensionProvider>
+              <AppRouter />
+              <Toaster />
+            </ExtensionProvider>
+          </ModuleEnabledProvider>
+        </ImpersonationProvider>
+      </OrgTokenProvider>
     </BrowserRouter>
   )
 }
