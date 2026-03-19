@@ -50,7 +50,7 @@
 - [ ] **Phase 121: Auth & Token Exchange** — Diagnosticar e corrigir pipeline de token exchange; garantir que JWT carrega org_id correto para todas as orgs
 - [ ] **Phase 122: Document Scoping & RLS** — Corrigir visibilidade de docs por org (tenant isolado, product para admins), invalidar cache ao trocar org
 - [ ] **Phase 123: Modules & Org Lifecycle** — Corrigir opt-out model de modules, impersonation mode, org switch com reload de dados, empty states claros
-- [ ] **Phase 124: Regression Guard** — Smoke test end-to-end validando fluxo completo login → org → sidebar → troca org
+- [x] **Phase 124: Regression Guard** — Smoke test end-to-end validando fluxo completo login → org → sidebar → troca org
 
 ### Phase Details
 
@@ -111,7 +111,7 @@ Plans:
   3. O smoke test pode ser executado localmente com um comando unico sem setup manual alem do .env
 **Plans**: 1 plan
 Plans:
-- [ ] 124-01-PLAN.md — Smoke test script + Makefile target + env docs
+- [x] 124-01-PLAN.md — Smoke test script + Makefile target + env docs
 
 ### Progress
 
@@ -120,7 +120,7 @@ Plans:
 | 121. Auth & Token Exchange | 0/4 | Planning done | — |
 | 122. Document Scoping & RLS | 0/2 | Planned | — |
 | 123. Modules & Org Lifecycle | 0/2 | Planned | — |
-| 124. Regression Guard | 0/1 | Planned | — |
+| 124. Regression Guard | 1/1 | Complete | 2026-03-19 |
 
 ---
 

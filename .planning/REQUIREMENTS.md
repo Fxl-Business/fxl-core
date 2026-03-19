@@ -31,7 +31,7 @@
 - [ ] **TEST-01**: Unit tests para useOrgTokenExchange, useActiveOrg, token-exchange service
 - [ ] **TEST-02**: Integration tests executando queries SQL com JWTs de diferentes orgs, validando isolamento
 - [x] **TEST-03**: Tests validando que dados mudam corretamente ao trocar de org (cache, sidebar, modules)
-- [ ] **TEST-04**: Smoke test login -> org ativa -> sidebar com docs -> troca org -> sidebar atualiza
+- [x] **TEST-04**: Smoke test login -> org ativa -> sidebar com docs -> troca org -> sidebar atualiza
 
 ## Future Requirements
 
@@ -65,7 +65,7 @@
 | TEST-01 | Phase 121 | Pending |
 | TEST-02 | Phase 122 | Pending |
 | TEST-03 | Phase 123 | Verified |
-| TEST-04 | Phase 124 | Pending |
+| TEST-04 | Phase 124 | Verified |
 
 **Coverage:**
 - v8.0 requirements: 16 total
