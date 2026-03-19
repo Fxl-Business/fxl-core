@@ -1,12 +1,15 @@
-import { useClerk } from '@clerk/react'
+import { useClerk, useUser } from '@clerk/react'
 import { useNavigate } from 'react-router-dom'
-import { Building2 } from 'lucide-react'
+import { Building2, Shield } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import { Card, CardContent, CardFooter } from '@shared/ui/card'
 
 export default function SolicitarAcesso() {
   const { signOut } = useClerk()
+  const { user } = useUser()
   const navigate = useNavigate()
+
+  const isSuperAdmin = user?.publicMetadata?.super_admin === true
 
   async function handleSignOut() {
     await signOut()
@@ -31,7 +34,16 @@ export default function SolicitarAcesso() {
           </p>
         </CardContent>
 
-        <CardFooter className="pt-4">
+        <CardFooter className="flex-col gap-2 pt-4">
+          {isSuperAdmin && (
+            <Button
+              className="w-full gap-2"
+              onClick={() => navigate('/admin')}
+            >
+              <Shield className="h-4 w-4" />
+              Painel Admin
+            </Button>
+          )}
           <Button
             variant="outline"
             className="w-full"

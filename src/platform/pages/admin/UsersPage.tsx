@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useSession } from '@clerk/react'
-import { Users, RefreshCw, Link2 } from 'lucide-react'
+import { Users, RefreshCw, Link2, Unlink, X } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@shared/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select'
-import { listUsers, setAdminClerkTokenGetter, addOrgMember } from '@platform/services/admin-service'
+import { listUsers, setAdminClerkTokenGetter, addOrgMember, removeOrgMember } from '@platform/services/admin-service'
 import { listTenants, setClerkTokenGetter } from '@platform/services/tenant-service'
 import { toast } from 'sonner'
 import type { AdminUser } from '@platform/types/admin'
@@ -32,6 +32,13 @@ export default function UsersPage() {
   const [tenants, setTenants] = useState<Tenant[]>([])
   const [tenantsLoading, setTenantsLoading] = useState(false)
   const [assignLoading, setAssignLoading] = useState(false)
+
+  // Remove membership dialog state
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false)
+  const [removingUser, setRemovingUser] = useState<AdminUser | null>(null)
+  const [removingOrgId, setRemovingOrgId] = useState('')
+  const [removingOrgName, setRemovingOrgName] = useState('')
+  const [removeLoading, setRemoveLoading] = useState(false)
 
   // Register Clerk token getter for both services
   useEffect(() => {
@@ -102,6 +109,31 @@ export default function UsersPage() {
       toast.error(err instanceof Error ? err.message : 'Erro ao vincular usuario')
     } finally {
       setAssignLoading(false)
+    }
+  }
+
+  function openRemoveDialog(user: AdminUser, orgId: string, orgName: string) {
+    setRemovingUser(user)
+    setRemovingOrgId(orgId)
+    setRemovingOrgName(orgName)
+    setRemoveDialogOpen(true)
+  }
+
+  async function handleRemove() {
+    if (!removingUser || !removingOrgId) return
+    setRemoveLoading(true)
+    try {
+      await removeOrgMember(removingOrgId, removingUser.id)
+      toast.success('Usuario desvinculado com sucesso')
+      setRemoveDialogOpen(false)
+      setRemovingUser(null)
+      setRemovingOrgId('')
+      setRemovingOrgName('')
+      await fetchUsers()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao desvincular usuario')
+    } finally {
+      setRemoveLoading(false)
     }
   }
 
@@ -224,28 +256,38 @@ export default function UsersPage() {
                     </span>
                   )}
                   {user.organizationMemberships.map((mem) => (
-                    <Link
+                    <span
                       key={mem.orgId}
-                      to={`/admin/tenants/${mem.orgId}`}
-                      className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 transition-colors hover:bg-indigo-50 hover:text-indigo-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-400"
+                      className="group inline-flex items-center gap-1 rounded-full bg-slate-100 pl-2.5 pr-1 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400"
                     >
-                      {mem.orgName || mem.orgId}
-                    </Link>
+                      <Link
+                        to={`/admin/tenants/${mem.orgId}`}
+                        className="transition-colors hover:text-indigo-700 dark:hover:text-indigo-400"
+                      >
+                        {mem.orgName || mem.orgId}
+                      </Link>
+                      <button
+                        type="button"
+                        title="Desvincular"
+                        onClick={() => openRemoveDialog(user, mem.orgId, mem.orgName || mem.orgId)}
+                        className="ml-0.5 rounded-full p-0.5 text-slate-400 opacity-0 transition-all hover:bg-red-100 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-950 dark:hover:text-red-400"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
                   ))}
                 </div>
 
-                {/* Vincular button for unaffiliated users */}
-                {user.organizationMemberships.length === 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0 gap-1.5 text-xs"
-                    onClick={() => openAssignDialog(user)}
-                  >
-                    <Link2 className="h-3 w-3" />
-                    Vincular
-                  </Button>
-                )}
+                {/* Vincular button — available for all users */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 gap-1.5 text-xs"
+                  onClick={() => openAssignDialog(user)}
+                >
+                  <Link2 className="h-3 w-3" />
+                  Vincular
+                </Button>
 
                 {/* Last sign-in date */}
                 <span className="hidden shrink-0 text-sm text-slate-400 dark:text-slate-500 md:block">
@@ -314,6 +356,52 @@ export default function UsersPage() {
             >
               <Link2 className="h-3.5 w-3.5" />
               {assignLoading ? 'Vinculando...' : 'Vincular'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove Membership Dialog */}
+      <Dialog
+        open={removeDialogOpen}
+        onOpenChange={(open) => {
+          setRemoveDialogOpen(open)
+          if (!open) {
+            setRemovingUser(null)
+            setRemovingOrgId('')
+            setRemovingOrgName('')
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Desvincular usuario</DialogTitle>
+            <DialogDescription>
+              Remover{' '}
+              <span className="font-medium text-foreground">
+                {removingUser
+                  ? [removingUser.firstName, removingUser.lastName].filter(Boolean).join(' ') || removingUser.email
+                  : ''}
+              </span>{' '}
+              da organizacao{' '}
+              <span className="font-medium text-foreground">{removingOrgName}</span>?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRemoveDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={removeLoading}
+              onClick={() => void handleRemove()}
+              className="gap-1.5"
+            >
+              <Unlink className="h-3.5 w-3.5" />
+              {removeLoading ? 'Removendo...' : 'Desvincular'}
             </Button>
           </DialogFooter>
         </DialogContent>

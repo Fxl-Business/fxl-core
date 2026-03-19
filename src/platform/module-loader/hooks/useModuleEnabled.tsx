@@ -35,8 +35,8 @@ function OrgModuleEnabledProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (orgLoading) return
     if (!activeOrg) {
-      // No org selected — show all modules as enabled (graceful fallback)
-      setEnabledModules(new Set(ALL_MODULE_IDS))
+      // No org selected — disable all modules (user should be redirected by ProtectedRoute)
+      setEnabledModules(new Set())
       setIsLoading(false)
       return
     }

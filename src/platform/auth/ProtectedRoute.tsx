@@ -1,8 +1,7 @@
-import { useAuth, RedirectToSignIn, useOrganizationList } from '@clerk/react'
+import { useAuth, RedirectToSignIn, useOrganization, useOrganizationList } from '@clerk/react'
 import { Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useOrgTokenExchange } from '@platform/tenants/useOrgTokenExchange'
-import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 import { invalidateDocsCache } from '@modules/docs/services/docs-service'
 
 const loadingStyle: React.CSSProperties = {
@@ -23,8 +22,11 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const { userMemberships, isLoaded: orgsLoaded } = useOrganizationList({
     userMemberships: { infinite: true },
   })
-
-  const { activeOrg } = useActiveOrg()
+  // Raw Clerk active org — used ONLY as hydration guard.
+  // During page reload, Clerk may briefly report empty memberships while still
+  // having a cached organization. We use this to avoid a false redirect.
+  // useActiveOrg handles clearing stale orgs via setActive(null).
+  const { organization: clerkCachedOrg } = useOrganization()
 
   // Wire Clerk org → Supabase JWT token exchange.
   // Called unconditionally (hook rules). Effect runs only when session + org are ready.
@@ -55,10 +57,11 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   }
 
   // 4. Signed in but no org — redirect to request access.
-  // Wait for activeOrg to settle: Clerk may briefly report empty memberships
-  // after a full page reload before hydrating the real data. Only redirect
-  // when both the list reports zero AND no active org is selected.
-  if (userMemberships?.data?.length === 0 && !activeOrg) {
+  // Guard: during hydration, Clerk may briefly report empty memberships while
+  // still having a cached org from a previous session. In that case, wait for
+  // the real data to settle. useActiveOrg clears stale orgs via setActive(null),
+  // so clerkCachedOrg will become null once the stale state is resolved.
+  if (userMemberships?.data?.length === 0 && !clerkCachedOrg) {
     return <Navigate to="/solicitar-acesso" replace />
   }
 
