@@ -8,11 +8,19 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Latest Milestone: v7.0 Admin-Only Org Management (shipped 2026-03-18)
+## Current Milestone: v8.0 Estabilidade Multi-Tenant
 
-**Delivered:** Locked down org creation to super admin only, added /solicitar-acesso holding screen, admin user management with unaffiliated filter and org-linking, tenant archival with soft-delete/restore, and admin dashboard metric cards.
+**Goal:** Corrigir bugs de isolamento multi-tenant (sidebar vazia ao trocar org, token exchange quebrado, dados inacessiveis) e adicionar test suite por area para prevenir regressoes.
 
-Previous: v6.0 Reestruturação de Módulos (shipped 2026-03-18)
+**Target features:**
+- Diagnosticar e corrigir pipeline de auth/token exchange que impede acesso a dados
+- Corrigir scoping de documentos (product docs visiveis para admins, tenant docs por org)
+- Garantir que tenant_modules funcione corretamente para todas as orgs
+- Corrigir impersonation mode para orgs com dados
+- Test suite cobrindo: token exchange, RLS policies, org switch, module enablement
+- Testes de integracao validando que dados nao somem ao trocar de org
+
+Previous: v7.0 Admin-Only Org Management (shipped 2026-03-18)
 
 ## Requirements
 
@@ -202,7 +210,12 @@ Previous: v6.0 Reestruturação de Módulos (shipped 2026-03-18)
 
 ### Active
 
-(No active requirements -- next milestone not yet planned)
+- [ ] Token exchange pipeline funciona corretamente para todas as orgs
+- [ ] Documentos visiveis por org (tenant docs isolados, product docs para admins)
+- [ ] Org switch preserva acesso aos dados da org ativa
+- [ ] Impersonation mode funciona para orgs com dados
+- [ ] tenant_modules funciona com opt-out model para orgs sem configuracao
+- [ ] Test suite cobrindo pipeline multi-tenant critico
 
 ### Out of Scope
 
@@ -392,4 +405,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function archive/restore with Clerk metadata sync | Single action archives DB + Clerk org in one call | ✓ Good — atomic operation |
 
 ---
-*Last updated: 2026-03-18 after v7.0 milestone completed*
+*Last updated: 2026-03-19 after v8.0 milestone started*
