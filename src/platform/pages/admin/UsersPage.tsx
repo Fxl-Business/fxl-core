@@ -1,23 +1,37 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSession } from '@clerk/react'
-import { Users, RefreshCw } from 'lucide-react'
+import { Users, RefreshCw, Link2 } from 'lucide-react'
 import { Button } from '@shared/ui/button'
-import { listUsers, setAdminClerkTokenGetter } from '@platform/services/admin-service'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@shared/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select'
+import { listUsers, setAdminClerkTokenGetter, addOrgMember } from '@platform/services/admin-service'
+import { listTenants, setClerkTokenGetter } from '@platform/services/tenant-service'
+import { toast } from 'sonner'
 import type { AdminUser } from '@platform/types/admin'
+import type { Tenant } from '@platform/types/tenant'
 
 export default function UsersPage() {
   const { session } = useSession()
 
   const [users, setUsers] = useState<AdminUser[]>([])
-  const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [filter, setFilter] = useState<'all' | 'unaffiliated' | 'affiliated'>('all')
 
-  // Register Clerk token getter for the service
+  // Org assignment dialog state
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false)
+  const [assigningUser, setAssigningUser] = useState<AdminUser | null>(null)
+  const [selectedOrgId, setSelectedOrgId] = useState('')
+  const [tenants, setTenants] = useState<Tenant[]>([])
+  const [tenantsLoading, setTenantsLoading] = useState(false)
+  const [assignLoading, setAssignLoading] = useState(false)
+
+  // Register Clerk token getter for both services
   useEffect(() => {
     if (session) {
       setAdminClerkTokenGetter(() => session.getToken({ template: 'supabase' }))
+      setClerkTokenGetter(() => session.getToken({ template: 'supabase' }))
     }
   }, [session])
 
@@ -26,8 +40,7 @@ export default function UsersPage() {
     setError(null)
     try {
       const result = await listUsers()
-      setUsers(result.users)
-      setTotalCount(result.totalCount)
+      setUsers(result.users ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar usuarios')
     } finally {
@@ -42,6 +55,56 @@ export default function UsersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
 
+  // Computed filtered lists
+  const unaffiliatedUsers = users.filter(u => u.organizationMemberships.length === 0)
+  const affiliatedUsers = users.filter(u => u.organizationMemberships.length > 0)
+  const filteredUsers = filter === 'all' ? users : filter === 'unaffiliated' ? unaffiliatedUsers : affiliatedUsers
+  const counts = { all: users.length, unaffiliated: unaffiliatedUsers.length, affiliated: affiliatedUsers.length }
+
+  // Org assignment functions
+  async function fetchTenants() {
+    setTenantsLoading(true)
+    try {
+      const result = await listTenants()
+      setTenants(result.tenants ?? [])
+    } catch (err) {
+      console.error('Failed to fetch tenants:', err)
+      setTenants([])
+    } finally {
+      setTenantsLoading(false)
+    }
+  }
+
+  function openAssignDialog(user: AdminUser) {
+    setAssigningUser(user)
+    setSelectedOrgId('')
+    setAssignDialogOpen(true)
+    fetchTenants()
+  }
+
+  async function handleAssign() {
+    if (!assigningUser || !selectedOrgId) return
+    setAssignLoading(true)
+    try {
+      await addOrgMember(selectedOrgId, assigningUser.id)
+      toast.success('Usuario vinculado com sucesso')
+      setAssignDialogOpen(false)
+      setAssigningUser(null)
+      setSelectedOrgId('')
+      await fetchUsers()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao vincular usuario')
+    } finally {
+      setAssignLoading(false)
+    }
+  }
+
+  const filterOptions: { key: 'all' | 'unaffiliated' | 'affiliated'; label: string }[] = [
+    { key: 'all', label: 'Todos' },
+    { key: 'unaffiliated', label: 'Sem org' },
+    { key: 'affiliated', label: 'Com org' },
+  ]
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       {/* Header */}
@@ -52,12 +115,24 @@ export default function UsersPage() {
         </p>
       </div>
 
-      {/* Stats bar */}
+      {/* Segmented filter */}
       {!loading && !error && (
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400">
-            {totalCount} {totalCount === 1 ? 'usuario' : 'usuarios'}
-          </span>
+        <div className="inline-flex rounded-lg border border-slate-200 p-0.5 gap-0.5 dark:border-slate-700">
+          {filterOptions.map(opt => (
+            <button
+              key={opt.key}
+              type="button"
+              onClick={() => setFilter(opt.key)}
+              className={[
+                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                filter === opt.key
+                  ? 'bg-indigo-600 text-white dark:bg-indigo-500'
+                  : 'bg-white text-slate-600 hover:bg-slate-50 dark:bg-card dark:text-slate-400 dark:hover:bg-slate-800',
+              ].join(' ')}
+            >
+              {opt.label} ({counts[opt.key]})
+            </button>
+          ))}
         </div>
       )}
 
@@ -90,17 +165,19 @@ export default function UsersPage() {
       )}
 
       {/* Empty state */}
-      {!loading && !error && users.length === 0 && (
+      {!loading && !error && filteredUsers.length === 0 && (
         <div className="rounded-xl border border-dashed border-slate-200 p-12 text-center dark:border-slate-700">
           <Users className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum usuario encontrado</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            {filter === 'all' ? 'Nenhum usuario encontrado' : filter === 'unaffiliated' ? 'Nenhum usuario sem organizacao' : 'Nenhum usuario com organizacao'}
+          </p>
         </div>
       )}
 
       {/* User list */}
-      {!loading && !error && users.length > 0 && (
+      {!loading && !error && filteredUsers.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-card">
-          {users.map((user, idx) => {
+          {filteredUsers.map((user, idx) => {
             const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Sem nome'
             return (
               <div
@@ -151,6 +228,19 @@ export default function UsersPage() {
                   ))}
                 </div>
 
+                {/* Vincular button for unaffiliated users */}
+                {user.organizationMemberships.length === 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 gap-1.5 text-xs"
+                    onClick={() => openAssignDialog(user)}
+                  >
+                    <Link2 className="h-3 w-3" />
+                    Vincular
+                  </Button>
+                )}
+
                 {/* Last sign-in date */}
                 <span className="hidden shrink-0 text-sm text-slate-400 dark:text-slate-500 md:block">
                   {user.lastSignInAt
@@ -162,6 +252,66 @@ export default function UsersPage() {
           })}
         </div>
       )}
+
+      {/* Org Assignment Dialog */}
+      <Dialog
+        open={assignDialogOpen}
+        onOpenChange={(open) => {
+          setAssignDialogOpen(open)
+          if (!open) {
+            setSelectedOrgId('')
+            setAssigningUser(null)
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Vincular usuario a organizacao</DialogTitle>
+            <DialogDescription>
+              {assigningUser
+                ? `${[assigningUser.firstName, assigningUser.lastName].filter(Boolean).join(' ') || 'Sem nome'} (${assigningUser.email})`
+                : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+              Organizacao
+            </label>
+            {tenantsLoading ? (
+              <div className="h-10 w-full animate-pulse rounded-md bg-slate-100 dark:bg-slate-800" />
+            ) : (
+              <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecionar organizacao..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {tenants.map(t => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setAssignDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              disabled={!selectedOrgId || assignLoading}
+              onClick={() => void handleAssign()}
+              className="gap-1.5"
+            >
+              <Link2 className="h-3.5 w-3.5" />
+              {assignLoading ? 'Vinculando...' : 'Vincular'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

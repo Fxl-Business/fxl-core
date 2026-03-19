@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useSession } from '@clerk/react'
-import { ArrowLeft, Building2, Users, Calendar, Shield, Blocks, ExternalLink, Trash2, Eye, UserPlus } from 'lucide-react'
+import { ArrowLeft, Building2, Users, Calendar, Shield, Blocks, ExternalLink, Trash2, Eye, UserPlus, ChevronsUpDown, Check } from 'lucide-react'
 import { Button } from '@shared/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@shared/ui/command'
 import { getTenantDetail, setClerkTokenGetter } from '@platform/services/tenant-service'
-import { listOrgMembers, addOrgMember, removeOrgMember, setAdminClerkTokenGetter } from '@platform/services/admin-service'
+import { listOrgMembers, addOrgMember, removeOrgMember, listUsers, setAdminClerkTokenGetter } from '@platform/services/admin-service'
 import { useImpersonation } from '@platform/auth/ImpersonationContext'
+import { toast } from 'sonner'
 import type { TenantDetail } from '@platform/types/tenant'
-import type { OrgMember } from '@platform/types/admin'
+import type { OrgMember, AdminUser } from '@platform/types/admin'
 
 // ---------------------------------------------------------------------------
 // Info card component
@@ -49,8 +52,11 @@ export default function TenantDetailPage() {
   const [membersLoading, setMembersLoading] = useState(true)
   const [membersError, setMembersError] = useState<string | null>(null)
 
-  // Add member state
-  const [addUserId, setAddUserId] = useState('')
+  // Add member state (combobox)
+  const [comboboxOpen, setComboboxOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
+  const [unaffiliatedUsers, setUnaffiliatedUsers] = useState<AdminUser[]>([])
+  const [usersLoading, setUsersLoading] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
 
@@ -127,24 +133,44 @@ export default function TenantDetailPage() {
   }, [orgId, session]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---------------------------------------------------------------------------
+  // Unaffiliated users for combobox
+  // ---------------------------------------------------------------------------
+
+  async function fetchUnaffiliatedUsers() {
+    setUsersLoading(true)
+    try {
+      const result = await listUsers()
+      setUnaffiliatedUsers(
+        (result.users ?? []).filter(u => u.organizationMemberships.length === 0)
+      )
+    } catch (err) {
+      console.error('Failed to fetch unaffiliated users:', err)
+      setUnaffiliatedUsers([])
+    } finally {
+      setUsersLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (session) {
+      fetchUnaffiliatedUsers()
+    }
+  }, [session]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ---------------------------------------------------------------------------
   // Member management handlers
   // ---------------------------------------------------------------------------
 
-  async function handleAddMember(e: React.FormEvent) {
-    e.preventDefault()
-    const userId = addUserId.trim()
-    if (!userId.startsWith('user_')) {
-      setAddError('O userId deve começar com "user_" (ex: user_abc123)')
-      return
-    }
-    if (!orgId) return
-
+  async function handleAddMember() {
+    if (!selectedUser || !orgId) return
     setAddLoading(true)
     setAddError(null)
     try {
-      await addOrgMember(orgId, userId)
-      setAddUserId('')
-      await loadMembers()
+      await addOrgMember(orgId, selectedUser.id)
+      const userName = [selectedUser.firstName, selectedUser.lastName].filter(Boolean).join(' ') || selectedUser.email
+      toast.success(`${userName} adicionado com sucesso`)
+      setSelectedUser(null)
+      await Promise.allSettled([loadMembers(), fetchUnaffiliatedUsers()])
     } catch (err) {
       setAddError(err instanceof Error ? err.message : 'Erro ao adicionar membro')
     } finally {
@@ -309,30 +335,90 @@ export default function TenantDetailPage() {
           Membros
         </h2>
 
-        {/* Add Member form */}
-        <form onSubmit={handleAddMember} className="flex items-start gap-2">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={addUserId}
-              onChange={e => setAddUserId(e.target.value)}
-              placeholder="user_..."
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-card dark:text-foreground dark:placeholder-slate-500 dark:focus:border-indigo-700 dark:focus:ring-indigo-950/50"
-            />
-            {addError && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{addError}</p>
-            )}
-          </div>
+        {/* Add Member combobox */}
+        <div className="flex items-start gap-2">
+          <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={comboboxOpen}
+                className="flex-1 justify-between text-sm font-normal"
+              >
+                {selectedUser ? (
+                  <div className="flex items-center gap-2 truncate">
+                    {selectedUser.imageUrl ? (
+                      <img src={selectedUser.imageUrl} alt="" className="h-5 w-5 rounded-full object-cover" />
+                    ) : (
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+                        <Users className="h-3 w-3" />
+                      </div>
+                    )}
+                    <span className="truncate">
+                      {[selectedUser.firstName, selectedUser.lastName].filter(Boolean).join(' ') || 'Sem nome'}
+                    </span>
+                    <span className="truncate text-xs text-slate-400">{selectedUser.email}</span>
+                  </div>
+                ) : (
+                  <span className="text-slate-400 dark:text-slate-500">
+                    {usersLoading ? 'Carregando usuarios...' : 'Buscar usuario sem org...'}
+                  </span>
+                )}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Buscar por nome ou email..." />
+                <CommandList>
+                  <CommandEmpty>Nenhum usuario sem org encontrado</CommandEmpty>
+                  <CommandGroup>
+                    {unaffiliatedUsers.map(user => {
+                      const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Sem nome'
+                      return (
+                        <CommandItem
+                          key={user.id}
+                          value={`${fullName} ${user.email}`}
+                          onSelect={() => {
+                            setSelectedUser(user)
+                            setComboboxOpen(false)
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            {user.imageUrl ? (
+                              <img src={user.imageUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                            ) : (
+                              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+                                <Users className="h-3 w-3" />
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm">{fullName}</p>
+                              <p className="truncate text-xs text-slate-400">{user.email}</p>
+                            </div>
+                            {selectedUser?.id === user.id && <Check className="h-4 w-4 text-indigo-600" />}
+                          </div>
+                        </CommandItem>
+                      )
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
           <Button
-            type="submit"
             size="sm"
-            disabled={addLoading || !addUserId.trim()}
+            disabled={addLoading || !selectedUser}
             className="shrink-0 gap-1.5"
+            onClick={() => void handleAddMember()}
           >
             <UserPlus className="h-3.5 w-3.5" />
             {addLoading ? 'Adicionando...' : 'Adicionar'}
           </Button>
-        </form>
+        </div>
+        {addError && (
+          <p className="text-xs text-red-600 dark:text-red-400">{addError}</p>
+        )}
 
         {membersLoading && (
           <div className="space-y-2">
