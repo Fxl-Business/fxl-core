@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useSession } from '@clerk/react'
 import { Users, RefreshCw, Link2 } from 'lucide-react'
 import { Button } from '@shared/ui/button'
@@ -17,7 +17,13 @@ export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [filter, setFilter] = useState<'all' | 'unaffiliated' | 'affiliated'>('all')
+  const [searchParams] = useSearchParams()
+  const initialFilter = (() => {
+    const param = searchParams.get('filter')
+    if (param === 'unaffiliated' || param === 'affiliated') return param
+    return 'all' as const
+  })()
+  const [filter, setFilter] = useState<'all' | 'unaffiliated' | 'affiliated'>(initialFilter)
 
   // Org assignment dialog state
   const [assignDialogOpen, setAssignDialogOpen] = useState(false)
