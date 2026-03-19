@@ -1,77 +1,85 @@
-# Requirements: Nexo v8.0 Estabilidade Multi-Tenant
+# Requirements: Nexo v9.0 Resiliencia de Plataforma
 
 **Defined:** 2026-03-19
 **Core Value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
 
-## v8.0 Requirements
+## v9.0 Requirements
 
-### Auth & Token Exchange
+Requirements para resiliencia, observabilidade e CI/CD da plataforma.
 
-- [ ] **AUTH-01**: Token exchange produz JWT com org_id correto para a org ativa do usuario
-- [ ] **AUTH-02**: Quando token exchange falha, usuario ve mensagem de erro clara (nao sidebar vazia silenciosa)
-- [ ] **AUTH-03**: Ao trocar de org, novo token e obtido automaticamente e Supabase client e atualizado
-- [ ] **AUTH-04**: Super admin com JWT super_admin=true acessa dados de qualquer org via RLS bypass
+### Isolamento & Seguranca
 
-### Document Scoping & RLS
+- [ ] **ISO-01**: Cada modulo tem error boundary isolado — crash em um modulo nao derruba a plataforma
+- [ ] **ISO-02**: Token de org gerenciado via React Context (nao variavel global mutavel)
+- [ ] **ISO-03**: Requests in-flight sao cancelados via AbortController ao trocar de org
 
-- [ ] **DOCS-01**: Tenant docs (scope='tenant') visiveis apenas para membros da org dona
-- [ ] **DOCS-02**: Product docs (scope='product') visiveis para super admins de qualquer org
-- [ ] **DOCS-03**: Sidebar de docs popula corretamente apos login e apos org switch
-- [ ] **DOCS-04**: Cache de docs e invalidado ao trocar de org, sem dados stale da org anterior
+### Observabilidade
 
-### Modules & Org Lifecycle
+- [ ] **OBS-01**: Sentry captura erros de runtime no frontend (React errors + network failures)
+- [ ] **OBS-02**: Error boundaries reportam crashes ao Sentry com contexto de modulo/org
 
-- [x] **MORG-01**: Org sem tenant_modules = todos os modulos habilitados por padrao
-- [x] **MORG-02**: Admin impersonando org vee dados daquela org (docs, clients, tasks, projects)
-- [x] **MORG-03**: Trocar org via OrgPicker recarrega todos os dados da nova org sem reload manual
-- [x] **MORG-04**: Org sem dados mostra empty states claros (nao sidebar vazia sem explicacao)
+### CI/CD
 
-### Test Suite
+- [ ] **CI-01**: GitHub Actions roda `tsc --noEmit` automaticamente em todo PR
+- [ ] **CI-02**: GitHub Actions roda `vitest run` automaticamente em todo PR
+- [ ] **CI-03**: PR so pode ser merged se CI passa (branch protection)
 
-- [ ] **TEST-01**: Unit tests para useOrgTokenExchange, useActiveOrg, token-exchange service
-- [ ] **TEST-02**: Integration tests executando queries SQL com JWTs de diferentes orgs, validando isolamento
-- [x] **TEST-03**: Tests validando que dados mudam corretamente ao trocar de org (cache, sidebar, modules)
-- [x] **TEST-04**: Smoke test login -> org ativa -> sidebar com docs -> troca org -> sidebar atualiza
+### Resiliencia
 
-## Future Requirements
+- [ ] **RES-01**: Token exchange faz retry com backoff exponencial (3 tentativas) em falha de rede
+- [ ] **RES-02**: Chamadas criticas (admin-service, tenant-service) tem retry wrapper reutilizavel
 
-(none deferred)
+## Future Requirements (v10.0+)
+
+### Seguranca
+
+- **SEC-01**: Rate limiting nas Edge Functions (auth-token-exchange, admin-tenants, admin-users)
+- **SEC-02**: Audit log de acoes administrativas e impersonation
+
+### Observabilidade
+
+- **OBS-03**: Logging estruturado nas Edge Functions (Axiom/Logflare)
+- **OBS-04**: Health check endpoint nas Edge Functions
+
+### Dados
+
+- **DAT-01**: Indices compostos auditados via EXPLAIN ANALYZE nas queries principais
+- **DAT-02**: Cache de dados criticos de users/orgs do Clerk no Supabase como fallback
+
+### Developer Experience
+
+- **DX-01**: useFeatureFlag hook consumindo platform_settings no frontend
+- **DX-02**: Testes E2E com Playwright cobrindo critical path (login → org switch → CRUD)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Migracao automatica de dados entre orgs | Operacao admin manual, nao self-service |
-| E2E browser tests (Playwright/Cypress) | Complexidade de setup, unit/integration suficiente para v8.0 |
-| Test coverage para wireframe/blueprint | Foco em multi-tenant pipeline, wireframe e estavel |
-| Performance testing | Foco em corretude, nao performance |
+| Logging nas Edge Functions | Depende de escolha de provider (Axiom/Logflare) — v10.0 |
+| Rate limiting | Precisa infra adicional (Cloudflare/pg_net) — v10.0 |
+| Cache Clerk no Supabase | Fallback para cenario improvavel — v10.0 |
+| Testes E2E Playwright | Alto esforço de setup, baixo risco imediato — v10.0 |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 121 | Pending |
-| AUTH-02 | Phase 121 | Pending |
-| AUTH-03 | Phase 121 | Pending |
-| AUTH-04 | Phase 121 | Pending |
-| DOCS-01 | Phase 122 | Pending |
-| DOCS-02 | Phase 122 | Pending |
-| DOCS-03 | Phase 122 | Pending |
-| DOCS-04 | Phase 122 | Pending |
-| MORG-01 | Phase 123 | Verified |
-| MORG-02 | Phase 123 | Verified |
-| MORG-03 | Phase 123 | Verified |
-| MORG-04 | Phase 123 | Verified |
-| TEST-01 | Phase 121 | Pending |
-| TEST-02 | Phase 122 | Pending |
-| TEST-03 | Phase 123 | Verified |
-| TEST-04 | Phase 124 | Verified |
+| ISO-01 | TBD | Pending |
+| ISO-02 | TBD | Pending |
+| ISO-03 | TBD | Pending |
+| OBS-01 | TBD | Pending |
+| OBS-02 | TBD | Pending |
+| CI-01 | TBD | Pending |
+| CI-02 | TBD | Pending |
+| CI-03 | TBD | Pending |
+| RES-01 | TBD | Pending |
+| RES-02 | TBD | Pending |
 
 **Coverage:**
-- v8.0 requirements: 16 total
-- Mapped to phases: 16
-- Unmapped: 0
+- v9.0 requirements: 10 total
+- Mapped to phases: 0
+- Unmapped: 10
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after roadmap creation*
+*Last updated: 2026-03-19 after initial definition*
