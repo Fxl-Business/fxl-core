@@ -64,7 +64,12 @@
   3. Ao trocar de org via OrgPicker, novo token e obtido e Supabase client e atualizado antes de qualquer query disparar
   4. Super admin autenticado com JWT super_admin=true consegue ler dados de qualquer org via RLS bypass
   5. useOrgTokenExchange, useActiveOrg e token-exchange service tem unit tests cobrindo fluxo feliz e casos de erro
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 121-01-PLAN.md — Vitest path aliases fix + useOrgTokenExchange race condition fix
+- [ ] 121-02-PLAN.md — Commit and verify uncommitted auth changes (ProtectedRoute, useActiveOrg, useModuleEnabled)
+- [ ] 121-03-PLAN.md — Unit tests for token-exchange service, useOrgTokenExchange, useActiveOrg
+- [ ] 121-04-PLAN.md — Edge function super_admin claim + deploy verification checkpoint
 
 #### Phase 122: Document Scoping & RLS
 **Goal**: Cada org ve exatamente os documentos a que tem direito — tenant docs isolados, product docs para admins
@@ -98,18 +103,16 @@
   1. Smoke test executa a sequencia: login → org ativa → sidebar com docs → troca de org → sidebar atualiza com docs da nova org
   2. Smoke test falha visivelmente com exit code != 0 e mensagem clara se qualquer passo produzir estado incorreto
   3. O smoke test pode ser executado localmente com um comando unico sem setup manual alem do .env
-**Plans**: 1 plan
-Plans:
-- [ ] 124-01-PLAN.md — Programmatic smoke test script validating RLS isolation via JWT minting + Supabase queries
+**Plans**: TBD
 
 ### Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 121. Auth & Token Exchange | 0/? | Not started | — |
+| 121. Auth & Token Exchange | 0/4 | Planning done | — |
 | 122. Document Scoping & RLS | 0/? | Not started | — |
 | 123. Modules & Org Lifecycle | 0/? | Not started | — |
-| 124. Regression Guard | 0/1 | Planning done | — |
+| 124. Regression Guard | 0/? | Not started | — |
 
 ---
 
