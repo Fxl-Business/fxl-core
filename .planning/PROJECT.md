@@ -244,7 +244,7 @@ Previous: v6.0 Reestruturação de Módulos (shipped 2026-03-18)
 
 ## Current State
 
-25 milestones shipped (v1.0 → v6.0). Modules restructured: Clientes (cadastro) separated from Projetos (criação), sidebar workspace with dropdown switcher, dynamic nav per module.
+26 milestones shipped (v1.0 → v7.0). Phase 120 complete — admin dashboard now shows unaffiliated user count and archived tenant count with direct navigation to filtered views. v7.0 Admin-Only Org Management milestone complete.
 
 ## Context
 
@@ -389,4 +389,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Gap closure phases 109-111 for audit traceability | Separate phases to close verification gaps vs reopen completed work | ✓ Good — clean audit trail |
 
 ---
-*Last updated: 2026-03-18 after v6.0 milestone shipped*
+*Last updated: 2026-03-18 after v7.0 milestone shipped*
