@@ -62,28 +62,28 @@ Requirements for Admin-Only Org Management milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ACC-01 | — | Pending |
-| ACC-02 | — | Pending |
-| ACC-03 | — | Pending |
-| ACC-04 | — | Pending |
-| ADM-01 | — | Pending |
-| ADM-02 | — | Pending |
-| ADM-03 | — | Pending |
-| ADM-04 | — | Pending |
-| ARC-01 | — | Pending |
-| ARC-02 | — | Pending |
-| ARC-03 | — | Pending |
-| ARC-04 | — | Pending |
-| ARC-05 | — | Pending |
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
+| ACC-01 | Phase 117 | Pending |
+| ACC-02 | Phase 117 | Pending |
+| ACC-03 | Phase 117 | Pending |
+| ACC-04 | Phase 117 | Pending |
+| ADM-01 | Phase 118 | Pending |
+| ADM-02 | Phase 118 | Pending |
+| ADM-03 | Phase 118 | Pending |
+| ADM-04 | Phase 118 | Pending |
+| ARC-01 | Phase 119 | Pending |
+| ARC-02 | Phase 119 | Pending |
+| ARC-03 | Phase 119 | Pending |
+| ARC-04 | Phase 119 | Pending |
+| ARC-05 | Phase 119 | Pending |
+| DASH-01 | Phase 120 | Pending |
+| DASH-02 | Phase 120 | Pending |
+| DASH-03 | Phase 120 | Pending |
 
 **Coverage:**
 - v7.0 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 ⚠️
+- Mapped to phases: 16
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-18*
-*Last updated: 2026-03-18 after initial definition*
+*Last updated: 2026-03-18 — traceability mapped after roadmap creation*
