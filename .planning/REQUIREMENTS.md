@@ -50,28 +50,28 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| DOCS-01 | — | Pending |
-| DOCS-02 | — | Pending |
-| DOCS-03 | — | Pending |
-| DOCS-04 | — | Pending |
-| MORG-01 | — | Pending |
-| MORG-02 | — | Pending |
-| MORG-03 | — | Pending |
-| MORG-04 | — | Pending |
-| TEST-01 | — | Pending |
-| TEST-02 | — | Pending |
-| TEST-03 | — | Pending |
-| TEST-04 | — | Pending |
+| AUTH-01 | Phase 121 | Pending |
+| AUTH-02 | Phase 121 | Pending |
+| AUTH-03 | Phase 121 | Pending |
+| AUTH-04 | Phase 121 | Pending |
+| DOCS-01 | Phase 122 | Pending |
+| DOCS-02 | Phase 122 | Pending |
+| DOCS-03 | Phase 122 | Pending |
+| DOCS-04 | Phase 122 | Pending |
+| MORG-01 | Phase 123 | Pending |
+| MORG-02 | Phase 123 | Pending |
+| MORG-03 | Phase 123 | Pending |
+| MORG-04 | Phase 123 | Pending |
+| TEST-01 | Phase 121 | Pending |
+| TEST-02 | Phase 122 | Pending |
+| TEST-03 | Phase 123 | Pending |
+| TEST-04 | Phase 124 | Pending |
 
 **Coverage:**
 - v8.0 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after initial definition*
+*Last updated: 2026-03-19 after roadmap creation*
