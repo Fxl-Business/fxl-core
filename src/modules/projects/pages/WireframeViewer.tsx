@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import { MessageSquare, Loader2, PanelLeft, Plus, Pin } from 'lucide-react'
 import { useUser } from '@clerk/react'
+import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 import { arrayMove } from '@dnd-kit/sortable'
 import CommentOverlay from '@tools/wireframe-builder/components/CommentOverlay'
 import CommentManager from '@tools/wireframe-builder/components/CommentManager'
@@ -197,6 +198,7 @@ export default function WireframeViewer({ clientSlug: clientSlugProp }: { client
 
 function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
   const { user } = useUser()
+  const { activeOrg } = useActiveOrg()
 
   // Dynamic branding resolution
   const [branding, setBranding] = useState<BrandingConfig | null>(null)
@@ -1977,6 +1979,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
         onClose={() => setShareOpen(false)}
         clientSlug={clientSlug}
         userId={user?.id ?? ''}
+        orgId={activeOrg?.id ?? ''}
       />
 
       {drawerTarget && (

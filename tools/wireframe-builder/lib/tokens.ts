@@ -20,6 +20,7 @@ export async function validateToken(
 export async function createShareToken(
   clientSlug: string,
   createdBy: string,
+  orgId: string,
   expiresInDays = 30
 ): Promise<ShareToken> {
   const expiresAt = new Date()
@@ -31,6 +32,7 @@ export async function createShareToken(
     .insert({
       client_slug: clientSlug,
       created_by: createdBy,
+      org_id: orgId,
       expires_at: expiresAt.toISOString(),
       ...(projectId ? { project_id: projectId } : {}),
     })

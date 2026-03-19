@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ChevronDown, ChevronRight, X, Link2, Copy, Check, Trash2, Plus, Loader2 } from 'lucide-react'
 import { useUser } from '@clerk/react'
+import { useActiveOrg } from '@platform/tenants/useActiveOrg'
 import { getCommentsForClient, resolveComment } from '../lib/comments'
 import { createShareToken, getTokensForClient, revokeToken } from '../lib/tokens'
 import { parseTargetId } from '../types/comments'
@@ -45,6 +46,7 @@ function formatScreenId(screenId: string): string {
 
 export default function CommentManager({ clientSlug, open, onClose }: Props) {
   const { user } = useUser()
+  const { activeOrg } = useActiveOrg()
   const [allComments, setAllComments] = useState<Comment[]>([])
   const [filter, setFilter] = useState<FilterType>('todos')
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
@@ -99,7 +101,7 @@ export default function CommentManager({ clientSlug, open, onClose }: Props) {
     if (!user?.id || creatingToken) return
     setCreatingToken(true)
     try {
-      await createShareToken(clientSlug, user.id)
+      await createShareToken(clientSlug, user.id, activeOrg?.id ?? '')
       await fetchTokens()
     } catch {
       // Silently fail

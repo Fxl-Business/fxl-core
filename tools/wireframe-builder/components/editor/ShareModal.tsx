@@ -19,6 +19,7 @@ type Props = {
   onClose: () => void
   clientSlug: string
   userId: string
+  orgId: string
 }
 
 function formatDate(iso: string): string {
@@ -34,7 +35,7 @@ function truncateToken(token: string): string {
   return `${token.slice(0, 6)}...${token.slice(-4)}`
 }
 
-export default function ShareModal({ open, onClose, clientSlug, userId }: Props) {
+export default function ShareModal({ open, onClose, clientSlug, userId, orgId }: Props) {
   const [tokens, setTokens] = useState<ShareToken[]>([])
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -73,7 +74,7 @@ export default function ShareModal({ open, onClose, clientSlug, userId }: Props)
   async function handleGenerate() {
     setGenerating(true)
     try {
-      const newToken = await createShareToken(clientSlug, userId, 30)
+      const newToken = await createShareToken(clientSlug, userId, orgId, 30)
       setTokens((prev) => [newToken, ...prev])
       toast.success('Link gerado!')
     } catch (err) {
