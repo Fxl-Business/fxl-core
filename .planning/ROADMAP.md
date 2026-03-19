@@ -71,7 +71,11 @@ Plans:
   2. Admin can switch between "all", "unaffiliated", and "affiliated" views of the user list
   3. From the unaffiliated users list, admin can assign a user to an existing organization without navigating away
   4. When adding a member to a tenant via TenantDetailPage, admin can search existing unaffiliated users by name/email to find them quickly
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 118-01-PLAN.md — UsersPage filter (Todos/Sem org/Com org) and org assignment dialog
+- [ ] 118-02-PLAN.md — TenantDetailPage user search combobox replacing raw userId input
 
 ### Phase 119: Tenant Archival
 **Goal**: Admin can safely archive a tenant — hiding it from normal operation while preserving all data — and can restore it later
