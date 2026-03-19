@@ -253,7 +253,7 @@ Previous: v7.0 Admin-Only Org Management (shipped 2026-03-18)
 
 ## Current State
 
-27 milestones shipped (v1.0 → v7.0). v8.0 Phase 121 (Auth & Token Exchange) complete — fixed token exchange race condition on org switch, committed Clerk hydration guard fixes, added super_admin JWT forwarding, deployed edge function v11, 15 unit tests covering auth pipeline. 19+ Supabase migrations (001-019).
+27 milestones shipped (v1.0 → v7.0). v8.0 Phases 121-123 complete. Phase 121 (Auth) fixed token exchange race condition, Clerk hydration guard, super_admin JWT forwarding. Phase 122 (Documents RLS) fixed RLS policies for tenant/product scoping, cache invalidation. Phase 123 (Modules & Org Lifecycle) implemented pub/sub cache invalidation for docs and modules, reactive org-switch sidebar reload, impersonation module reload with effective org_id, contextual empty states. 19+ Supabase migrations.
 
 ## Context
 
@@ -405,4 +405,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function archive/restore with Clerk metadata sync | Single action archives DB + Clerk org in one call | ✓ Good — atomic operation |
 
 ---
-*Last updated: 2026-03-19 after v8.0 milestone started*
+*Last updated: 2026-03-19 after Phase 123 complete*
