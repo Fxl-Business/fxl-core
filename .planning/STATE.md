@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: "(none)"
-milestone_name: "(none)"
-status: idle
-stopped_at: v8.0 Estabilidade Multi-Tenant shipped
-last_updated: "2026-03-19T19:00:00.000Z"
+milestone: "v9.0"
+milestone_name: "Resiliencia de Plataforma"
+status: defining_requirements
+stopped_at: ""
+last_updated: "2026-03-19T20:00:00.000Z"
 progress:
   total_phases: 0
   completed_phases: 0
@@ -19,11 +19,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** No active milestone
+**Current focus:** v9.0 Resiliencia de Plataforma — defining requirements
 
 ## Current Position
 
-No active milestone. Last completed: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19).
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-19 — Milestone v9.0 started
 
 ## Performance Metrics
 
@@ -57,7 +60,7 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-03-19 - Completed quick task 260319-mpw: Fix RLS policy on share_tokens table that blocks insert for wireframe share link generation
-Last session: 2026-03-19T19:00:00.000Z
-Stopped at: v8.0 Estabilidade Multi-Tenant shipped
-Next action: Start new milestone
+Last activity: 2026-03-19 - Started milestone v9.0 Resiliencia de Plataforma
+Last session: 2026-03-19T20:00:00.000Z
+Stopped at: Defining requirements
+Next action: Define requirements and create roadmap

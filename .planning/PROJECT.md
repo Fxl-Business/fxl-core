@@ -8,19 +8,18 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v8.0 Estabilidade Multi-Tenant
+## Current Milestone: v9.0 Resiliencia de Plataforma
 
-**Goal:** Corrigir bugs de isolamento multi-tenant (sidebar vazia ao trocar org, token exchange quebrado, dados inacessiveis) e adicionar test suite por area para prevenir regressoes.
+**Goal:** Eliminar gaps criticos de resiliencia, observabilidade e seguranca de dados na plataforma multi-tenant — error boundaries, token management seguro, CI/CD, monitoring e retry.
 
 **Target features:**
-- Diagnosticar e corrigir pipeline de auth/token exchange que impede acesso a dados
-- Corrigir scoping de documentos (product docs visiveis para admins, tenant docs por org)
-- Garantir que tenant_modules funcione corretamente para todas as orgs
-- Corrigir impersonation mode para orgs com dados
-- Test suite cobrindo: token exchange, RLS policies, org switch, module enablement
-- Testes de integracao validando que dados nao somem ao trocar de org
+- Error boundaries por modulo isolando crashes sem derrubar a plataforma inteira
+- Token management via React Context com abort de requests in-flight no org switch (eliminar risco de data leak entre tenants)
+- GitHub Actions CI pipeline com type-check e testes automaticos em PRs
+- Sentry no frontend para captura de erros em producao
+- Retry com backoff exponencial no token exchange para resiliencia de rede
 
-Previous: v7.0 Admin-Only Org Management (shipped 2026-03-18)
+Previous: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19)
 
 ## Requirements
 
@@ -207,15 +206,21 @@ Previous: v7.0 Admin-Only Org Management (shipped 2026-03-18)
 - ✓ Tenant archival: archived_at on 10 tables, RLS exclusion, Clerk metadata sync — v7.0
 - ✓ Tenant restore: reverse soft-delete, re-enable Clerk org — v7.0
 - ✓ Admin dashboard: unaffiliated users + archived tenants metric cards with navigation — v7.0
+- ✓ Token exchange pipeline funciona corretamente para todas as orgs — v8.0
+- ✓ Documentos visiveis por org (tenant docs isolados, product docs para admins) — v8.0
+- ✓ Org switch preserva acesso aos dados da org ativa — v8.0
+- ✓ Impersonation mode funciona para orgs com dados — v8.0
+- ✓ Test suite cobrindo pipeline multi-tenant critico (auth, 15 unit tests) — v8.0
+- ✓ Pub/sub cache invalidation for docs and modules on org switch — v8.0
+- ✓ Programmatic smoke test validating token-exchange → RLS isolation (make smoke-test) — v8.0
 
 ### Active
 
-- [x] Token exchange pipeline funciona corretamente para todas as orgs — Validated in Phase 121: Auth & Token Exchange
-- [ ] Documentos visiveis por org (tenant docs isolados, product docs para admins)
-- [ ] Org switch preserva acesso aos dados da org ativa
-- [ ] Impersonation mode funciona para orgs com dados
-- [ ] tenant_modules funciona com opt-out model para orgs sem configuracao
-- [x] Test suite cobrindo pipeline multi-tenant critico (auth) — Validated in Phase 121: 15 unit tests
+- [ ] Error boundary por modulo isolando crashes sem derrubar a plataforma
+- [ ] Token management via React Context com abort de requests in-flight no org switch
+- [ ] GitHub Actions CI com tsc + vitest rodando automaticamente em PRs
+- [ ] Sentry integrado no frontend capturando erros em producao
+- [ ] Retry com backoff exponencial no token exchange e chamadas criticas
 
 ### Out of Scope
 
@@ -253,7 +258,7 @@ Previous: v7.0 Admin-Only Org Management (shipped 2026-03-18)
 
 ## Current State
 
-27 milestones shipped (v1.0 → v7.0). v8.0 Phases 121-124 complete. Phase 121 (Auth) fixed token exchange race condition, Clerk hydration guard, super_admin JWT forwarding. Phase 122 (Documents RLS) fixed RLS policies for tenant/product scoping, cache invalidation. Phase 123 (Modules & Org Lifecycle) implemented pub/sub cache invalidation for docs and modules, reactive org-switch sidebar reload, impersonation module reload with effective org_id, contextual empty states. Phase 124 (Regression Guard) added programmatic smoke test validating token-exchange -> RLS isolation pipeline (make smoke-test). 19+ Supabase migrations.
+28 milestones shipped (v1.0 → v8.0). v8.0 Phases 121-124 fixed multi-tenant isolation (auth, RLS, modules, smoke test). 24 Supabase migrations. Architecture analysis revealed critical gaps: no error boundaries, global mutable token, no CI/CD, no monitoring, no retry logic.
 
 ## Context
 
@@ -405,4 +410,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function archive/restore with Clerk metadata sync | Single action archives DB + Clerk org in one call | ✓ Good — atomic operation |
 
 ---
-*Last updated: 2026-03-19 after Phase 124 complete*
+*Last updated: 2026-03-19 after v9.0 milestone start*
