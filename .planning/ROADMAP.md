@@ -49,6 +49,43 @@
 
 See: milestones/v9.0-ROADMAP.md
 
+### Phase 125: Error Boundaries + Sentry
+**Goal**: A plataforma captura e isola falhas de runtime — crashes em modulos nao derrubam o app e todos os erros chegam ao Sentry com contexto acionavel
+**Depends on**: Nothing (independent)
+**Requirements**: ISO-01, OBS-01, OBS-02
+**Success Criteria** (what must be TRUE):
+  1. Um crash em qualquer modulo (docs, tasks, wireframe, connector) exibe fallback UI do modulo sem derrubar o header, sidebar ou outros modulos
+  2. Erros de runtime capturados pelo error boundary aparecem no Sentry dashboard com stack trace, nome do modulo e org_id do usuario
+  3. Erros de rede (fetch failures) capturados proativamente pelo Sentry no frontend com contexto de URL e status code
+  4. O restante da plataforma permanece navegavel e funcional enquanto o modulo com erro exibe seu fallback
+
+### Phase 126: Token Management Context
+**Goal**: O token de org e gerenciado por React Context — nao ha variavel global mutavel, e requests in-flight de org anterior sao cancelados atomicamente no momento do switch
+**Depends on**: Nothing (independent)
+**Requirements**: ISO-02, ISO-03
+**Success Criteria** (what must be TRUE):
+  1. Ao trocar de org, nenhum request iniciado com o token da org anterior completa e popula a UI — todos sao cancelados via AbortController
+  2. O token de org nao existe como variavel global mutavel — e acessado exclusivamente via React Context
+  3. Componentes consumindo o token via Context recebem o valor atualizado automaticamente apos org switch sem necessidade de refresh manual
+
+### Phase 127: CI/CD Pipeline
+**Goal**: Todo PR tem type-check e testes rodando automaticamente e nao pode ser merged se CI falhar — zero regressoes silenciosas chegam a main
+**Depends on**: Nothing (independent)
+**Requirements**: CI-01, CI-02, CI-03
+**Success Criteria** (what must be TRUE):
+  1. Ao abrir ou atualizar qualquer PR, GitHub Actions dispara automaticamente um job com `tsc --noEmit` e reporta sucesso/falha no PR
+  2. O mesmo job roda `vitest run` e exibe contagem de testes passados/falhados diretamente no PR
+  3. O merge de um PR com CI falhando e bloqueado por branch protection rule — nao ha como fazer bypass sem desativar a protecao explicitamente
+
+### Phase 128: Retry & Resilience
+**Goal**: Falhas transitorias de rede nao causam falha permanente no token exchange nem em chamadas criticas — retry automatico com backoff exponencial absorve instabilidades
+**Depends on**: Nothing (independent)
+**Requirements**: RES-01, RES-02
+**Success Criteria** (what must be TRUE):
+  1. Uma falha de rede no token exchange dispara retry automatico ate 3 vezes com intervalo exponencial antes de propagar erro para o usuario
+  2. admin-service e tenant-service usam o mesmo retry wrapper sem duplicar logica de backoff
+  3. O retry wrapper e reutilizavel por qualquer chamada critica futura com configuracao de tentativas e delays via parametros
+
 ---
 
 <details>
