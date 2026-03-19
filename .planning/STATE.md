@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v8.0
 milestone_name: Estabilidade Multi-Tenant
-status: executing
-stopped_at: Phase 122 complete — Document Scoping & RLS
-last_updated: "2026-03-19T18:15:00.000Z"
+status: unknown
+stopped_at: Roadmap created for v8.0
+last_updated: "2026-03-19T18:10:08.751Z"
 progress:
   total_phases: 4
   completed_phases: 2
@@ -19,13 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** Phase 122 complete — Document Scoping & RLS. Next: Phase 123
+**Current focus:** Phase 123 — Modules & Org Lifecycle
 
 ## Current Position
 
-Phase: 122 (Document Scoping & RLS) — DONE
-Plan: 2 of 2 (complete)
-Next: Phase 123 (Modules & Org Lifecycle)
+Phase: 123 (Modules & Org Lifecycle) — EXECUTING
+Plan: 1 of 2
 
 ## Performance Metrics
 
