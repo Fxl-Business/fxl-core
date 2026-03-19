@@ -216,10 +216,10 @@ Previous: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19)
 
 ### Active
 
-- [ ] Error boundary por modulo isolando crashes sem derrubar a plataforma
+- [x] Error boundary por modulo isolando crashes sem derrubar a plataforma — Validated in Phase 125
+- [x] Sentry integrado no frontend capturando erros em producao — Validated in Phase 125
 - [ ] Token management via React Context com abort de requests in-flight no org switch
 - [ ] GitHub Actions CI com tsc + vitest rodando automaticamente em PRs
-- [ ] Sentry integrado no frontend capturando erros em producao
 - [ ] Retry com backoff exponencial no token exchange e chamadas criticas
 
 ### Out of Scope
@@ -258,7 +258,7 @@ Previous: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19)
 
 ## Current State
 
-28 milestones shipped (v1.0 → v8.0). v8.0 Phases 121-124 fixed multi-tenant isolation (auth, RLS, modules, smoke test). 24 Supabase migrations. Architecture analysis revealed critical gaps: no error boundaries, global mutable token, no CI/CD, no monitoring, no retry logic.
+28 milestones shipped (v1.0 → v8.0). v8.0 Phases 121-124 fixed multi-tenant isolation (auth, RLS, modules, smoke test). 24 Supabase migrations. Phase 125 complete: error boundaries per module + Sentry integrated for runtime error capture in production.
 
 ## Context
 
@@ -410,4 +410,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function archive/restore with Clerk metadata sync | Single action archives DB + Clerk org in one call | ✓ Good — atomic operation |
 
 ---
-*Last updated: 2026-03-19 after v9.0 milestone start*
+*Last updated: 2026-03-19 after Phase 125 complete*
