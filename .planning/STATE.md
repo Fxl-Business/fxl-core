@@ -49,8 +49,15 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 None.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260319-mpw | Fix RLS policy on share_tokens table that blocks insert for wireframe share link generation | 2026-03-19 | 893db26 | [260319-mpw-fix-rls-policy-on-share-tokens-table-tha](./quick/260319-mpw-fix-rls-policy-on-share-tokens-table-tha/) |
+
 ## Session Continuity
 
+Last activity: 2026-03-19 - Completed quick task 260319-mpw: Fix RLS policy on share_tokens table that blocks insert for wireframe share link generation
 Last session: 2026-03-19T19:00:00.000Z
 Stopped at: v8.0 Estabilidade Multi-Tenant shipped
 Next action: Start new milestone
