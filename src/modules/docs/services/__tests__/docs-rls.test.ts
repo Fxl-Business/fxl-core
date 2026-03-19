@@ -68,22 +68,32 @@ describe('docs-service cache invalidation', () => {
     vi.restoreAllMocks()
   })
 
-  it('getDocsCacheVersion starts at 0', async () => {
-    const { getDocsCacheVersion } = await import('../docs-service')
-    expect(getDocsCacheVersion()).toBe(0)
+  it('invalidateDocsCache notifies all subscribed listeners', async () => {
+    const { onDocsCacheInvalidated, invalidateDocsCache } = await import('../docs-service')
+
+    const calls: number[] = []
+    const unsub1 = onDocsCacheInvalidated(() => { calls.push(1) })
+    const unsub2 = onDocsCacheInvalidated(() => { calls.push(2) })
+
+    invalidateDocsCache()
+    expect(calls).toEqual([1, 2])
+
+    unsub1()
+    unsub2()
   })
 
-  it('invalidateDocsCache increments cache version', async () => {
-    const { getDocsCacheVersion, invalidateDocsCache } = await import('../docs-service')
+  it('onDocsCacheInvalidated unsubscribe stops notifications', async () => {
+    const { onDocsCacheInvalidated, invalidateDocsCache } = await import('../docs-service')
 
-    const v0 = getDocsCacheVersion()
-    invalidateDocsCache()
-    const v1 = getDocsCacheVersion()
-    invalidateDocsCache()
-    const v2 = getDocsCacheVersion()
+    let callCount = 0
+    const unsub = onDocsCacheInvalidated(() => { callCount++ })
 
-    expect(v1).toBe(v0 + 1)
-    expect(v2).toBe(v0 + 2)
+    invalidateDocsCache()
+    expect(callCount).toBe(1)
+
+    unsub()
+    invalidateDocsCache()
+    expect(callCount).toBe(1) // still 1 — unsubscribed
   })
 
   it('invalidateDocsCache clears cached data so next fetch is fresh', async () => {

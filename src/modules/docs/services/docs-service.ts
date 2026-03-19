@@ -22,23 +22,27 @@ export type DocumentRow = {
 }
 
 // ---------------------------------------------------------------------------
+// Cache invalidation pub/sub
+// ---------------------------------------------------------------------------
+
+const _cacheListeners = new Set<() => void>()
+
+/**
+ * Subscribe to docs cache invalidation events.
+ * Called by useDocsNav so it can re-fetch when org switches.
+ * Returns an unsubscribe function.
+ */
+export function onDocsCacheInvalidated(cb: () => void): () => void {
+  _cacheListeners.add(cb)
+  return () => { _cacheListeners.delete(cb) }
+}
+
+// ---------------------------------------------------------------------------
 // In-memory cache
 // ---------------------------------------------------------------------------
 
 let docsCache: DocumentRow[] | null = null
 let docsCachePromise: Promise<DocumentRow[]> | null = null
-
-/**
- * Monotonically increasing counter that increments when invalidateDocsCache()
- * is called. Allows React hooks to detect cache invalidation (e.g., org switch)
- * and re-fetch documents with the new JWT.
- */
-let cacheVersion = 0
-
-/** Returns the current cache version. Used by useDocsNav to detect invalidation. */
-export function getDocsCacheVersion(): number {
-  return cacheVersion
-}
 
 /**
  * Ensures the full documents list is loaded exactly once.
@@ -79,11 +83,12 @@ function ensureCache(): Promise<DocumentRow[]> {
 /**
  * Clears the in-memory cache so the next call triggers a fresh Supabase fetch.
  * Use after a sync-up operation that may have changed the documents table.
+ * Notifies all listeners (e.g., useDocsNav) so they can re-fetch.
  */
 export function invalidateDocsCache(): void {
   docsCache = null
   docsCachePromise = null
-  cacheVersion += 1
+  _cacheListeners.forEach((cb) => { cb() })
 }
 
 // ---------------------------------------------------------------------------

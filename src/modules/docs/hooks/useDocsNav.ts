@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAllDocuments, getDocsCacheVersion, type DocumentRow } from '../services/docs-service'
+import { getAllDocuments, onDocsCacheInvalidated, type DocumentRow } from '../services/docs-service'
 import type { NavItem } from '@platform/module-loader/registry'
 
 /**
@@ -172,6 +172,7 @@ function findSubParentPath(
 type UseDocsNavResult = {
   tenantItems: NavItem[]
   productItems: NavItem[]
+  isLoading: boolean
 }
 
 /**
@@ -180,24 +181,26 @@ type UseDocsNavResult = {
  *
  * Returns empty arrays while loading — Sidebar falls back to hardcoded navChildren.
  * Once loaded, returns dynamic trees for each scope.
+ *
+ * Reactively re-fetches when invalidateDocsCache() is called (org switch, impersonation).
  */
 export function useDocsNav(): UseDocsNavResult {
   const [tenantItems, setTenantItems] = useState<NavItem[]>([])
   const [productItems, setProductItems] = useState<NavItem[]>([])
-  const [cacheVersion, setCacheVersion] = useState(() => getDocsCacheVersion())
+  const [isLoading, setIsLoading] = useState(true)
+  const [refetchTick, setRefetchTick] = useState(0)
 
-  // Listen for cache invalidation (org switch) by polling getDocsCacheVersion().
-  // When invalidateDocsCache() is called, cacheVersion increments, re-triggering the fetch effect.
+  // Subscribe to cache invalidation (fires on org switch or impersonation enter/exit)
   useEffect(() => {
-    const id = setInterval(() => {
-      const v = getDocsCacheVersion()
-      setCacheVersion((prev) => (prev !== v ? v : prev))
-    }, 100)
-    return () => clearInterval(id)
+    const unsubscribe = onDocsCacheInvalidated(() => {
+      setRefetchTick((t) => t + 1)
+    })
+    return unsubscribe
   }, [])
 
   useEffect(() => {
     let cancelled = false
+    setIsLoading(true)
 
     // Reset to empty while re-fetching (avoid showing stale docs from previous org)
     setTenantItems([])
@@ -252,15 +255,20 @@ export function useDocsNav(): UseDocsNavResult {
           }
         }
         setProductItems(groupedProduct)
+        setIsLoading(false)
       })
       .catch(() => {
-        // On error, return empty — Sidebar falls back to hardcoded nav
+        if (!cancelled) {
+          setTenantItems([])
+          setProductItems([])
+          setIsLoading(false)
+        }
       })
 
     return () => {
       cancelled = true
     }
-  }, [cacheVersion])
+  }, [refetchTick])
 
-  return { tenantItems, productItems }
+  return { tenantItems, productItems, isLoading }
 }

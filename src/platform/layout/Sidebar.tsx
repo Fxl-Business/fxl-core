@@ -207,9 +207,14 @@ function DynamicNavContent({ useNavItems }: { useNavItems: () => UseNavItemsResu
 
   if (items.length === 0) {
     return (
-      <p className="text-xs text-slate-400 dark:text-sidebar-muted-foreground">
-        Nenhum item ainda.
-      </p>
+      <div className="space-y-2 px-2">
+        <p className="text-xs text-slate-400 dark:text-sidebar-muted-foreground">
+          Nenhum documento encontrado para esta organização.
+        </p>
+        <p className="text-xs text-slate-400 dark:text-sidebar-muted-foreground">
+          Documentos são adicionados via <span className="font-medium">/admin/product-docs</span>.
+        </p>
+      </div>
     )
   }
 

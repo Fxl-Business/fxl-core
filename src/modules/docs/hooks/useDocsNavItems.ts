@@ -9,7 +9,7 @@ import { useDocsNav } from './useDocsNav'
  * Only exposes tenant docs — product docs are managed via /admin/product-docs.
  */
 export function useDocsNavItems(): UseNavItemsResult {
-  const { tenantItems } = useDocsNav()
+  const { tenantItems, isLoading } = useDocsNav()
 
   const items = useMemo(() => {
     if (tenantItems.length > 0) {
@@ -20,6 +20,6 @@ export function useDocsNavItems(): UseNavItemsResult {
 
   return {
     items,
-    isLoading: false, // useDocsNav doesn't expose loading state; items are [] until ready
+    isLoading,
   }
 }
