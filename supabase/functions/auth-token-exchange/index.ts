@@ -76,6 +76,11 @@ serve(async (req: Request) => {
       return jsonError('org_id is required. Pass it in the request body as { org_id: string }.', 400)
     }
 
+    // Extract super_admin from Clerk publicMetadata (appears as top-level or nested claim)
+    const superAdmin =
+      (payload as Record<string, unknown>).super_admin === true ||
+      ((payload as Record<string, unknown>).public_metadata as Record<string, unknown> | undefined)?.super_admin === true
+
     // Mint Supabase-compatible JWT
     const now = Math.floor(Date.now() / 1000)
     const secret = new TextEncoder().encode(SUPABASE_JWT_SECRET)
@@ -86,6 +91,7 @@ serve(async (req: Request) => {
       role: orgRole ?? 'authenticated',
       aud: 'authenticated',
       iss: 'supabase',
+      ...(superAdmin ? { super_admin: true } : {}),
     })
       .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
       .setIssuedAt(now)
