@@ -93,7 +93,10 @@ Plans:
   3. Trocar de org via OrgPicker recarrega sidebar, docs, modulos e dados sem exigir reload manual da pagina
   4. Org com zero dados mostra empty states com texto explicativo em vez de sidebar vazia sem mensagem
   5. Tests validam que sidebar e modulos mudam corretamente ao simular org switch (cache, sidebar, module list)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 123-01-PLAN.md — Module opt-out logic, docs nav reactive reload, empty state UX
+- [ ] 123-02-PLAN.md — Impersonation fixes: module reload on enter/exit, effective org_id for tenant_modules
 
 #### Phase 124: Regression Guard
 **Goal**: Fluxo multi-tenant critico esta coberto por smoke test que detecta regressao antes de chegar ao usuario
@@ -111,7 +114,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 121. Auth & Token Exchange | 0/4 | Planning done | — |
 | 122. Document Scoping & RLS | 0/? | Not started | — |
-| 123. Modules & Org Lifecycle | 0/? | Not started | — |
+| 123. Modules & Org Lifecycle | 0/2 | Planned | — |
 | 124. Regression Guard | 0/? | Not started | — |
 
 ---
