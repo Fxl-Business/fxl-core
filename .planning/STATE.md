@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v8.0
 milestone_name: Estabilidade Multi-Tenant
-status: roadmap_ready
-stopped_at: null
-last_updated: "2026-03-19T12:00:00.000Z"
+status: unknown
+stopped_at: Roadmap created for v8.0
+last_updated: "2026-03-19T17:59:25.052Z"
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 9
+  completed_plans: 4
 ---
 
 # Project State
@@ -19,16 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** v8.0 Estabilidade Multi-Tenant — fix bugs + testes por area
+**Current focus:** Phase 121 — Auth & Token Exchange
 
 ## Current Position
 
-Phase: 121 — Auth & Token Exchange
-Plan: —
-Status: Ready to plan (roadmap created, no plans yet)
-Last activity: 2026-03-19 — Roadmap v8.0 created
-
-Progress: `[ ] 121  [ ] 122  [ ] 123  [ ] 124`
+Phase: 121 (Auth & Token Exchange) — EXECUTING
+Plan: 1 of 4
 
 ## Performance Metrics
 
