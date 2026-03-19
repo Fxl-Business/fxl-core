@@ -9,6 +9,7 @@ export async function addComment(params: {
   authorName: string
   authorRole: 'operador' | 'cliente'
   text: string
+  orgId?: string
 }): Promise<Comment> {
   const projectId = await resolveProjectId(params.clientSlug)
 
@@ -22,6 +23,7 @@ export async function addComment(params: {
       author_role: params.authorRole,
       text: params.text,
       ...(projectId ? { project_id: projectId } : {}),
+      ...(params.orgId ? { org_id: params.orgId } : {}),
     })
     .select()
     .single()

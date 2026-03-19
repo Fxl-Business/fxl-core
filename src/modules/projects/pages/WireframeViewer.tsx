@@ -1991,6 +1991,7 @@ function WireframeViewerInner({ clientSlug }: { clientSlug: string }) {
           authorId={authorId}
           authorName={authorName}
           authorRole="operador"
+          orgId={activeOrg?.id ?? ''}
           open={drawerOpen}
           onClose={handleCloseDrawer}
         />

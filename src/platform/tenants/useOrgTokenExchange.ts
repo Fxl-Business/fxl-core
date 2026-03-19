@@ -28,14 +28,19 @@ export function useOrgTokenExchange(options?: OrgTokenExchangeOptions): OrgToken
   const { session, isLoaded } = useSession()
   const { activeOrg } = useActiveOrg()
   const prevOrgIdRef = useRef<string | null>(null)
+  const sessionRef = useRef(session)
+  sessionRef.current = session
   // If token was already exchanged (e.g., navigating within SPA), start ready
   const [isReady, setIsReady] = useState(() => getOrgAccessToken() !== null)
   const [error, setError] = useState<string | null>(null)
   const onOrgChangeRef = useRef(options?.onOrgChange)
   onOrgChangeRef.current = options?.onOrgChange
 
+  // Stable session ID — avoids re-running effect on every Clerk token refresh
+  const sessionId = session?.id ?? null
+
   useEffect(() => {
-    if (!isLoaded || !session || !activeOrg) {
+    if (!isLoaded || !sessionId || !activeOrg) {
       return
     }
 
@@ -48,7 +53,12 @@ export function useOrgTokenExchange(options?: OrgTokenExchangeOptions): OrgToken
       setError(null)
 
       try {
-        const clerkToken = await session!.getToken()
+        const currentSession = sessionRef.current
+        if (!currentSession) {
+          setError('Clerk session unavailable')
+          return
+        }
+        const clerkToken = await currentSession.getToken()
         if (!clerkToken) {
           setError('Clerk session token unavailable')
           return
@@ -73,7 +83,7 @@ export function useOrgTokenExchange(options?: OrgTokenExchangeOptions): OrgToken
     }
 
     void doExchange()
-  }, [isLoaded, session, activeOrg?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isLoaded, sessionId, activeOrg?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { isReady, error }
 }
