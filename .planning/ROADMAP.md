@@ -56,7 +56,11 @@
   2. A user with no org membership is automatically redirected to `/solicitar-acesso` instead of the app
   3. The `/solicitar-acesso` screen displays Nexo branding, a clear message explaining they need admin approval, and a functional sign out button
   4. Only super admin can create a new organization (via the admin panel — no client-side `createOrganization()` call exists)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 117-01-PLAN.md — Create SolicitarAcesso page (new branded holding screen)
+- [ ] 117-02-PLAN.md — Remove CriarEmpresa, update router and ProtectedRoute redirect
 
 ### Phase 118: Admin User Management
 **Goal**: Admin can identify all unaffiliated users at a glance and link them to organizations without leaving the users panel
@@ -97,7 +101,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 117. Access Control Lockdown | 0/? | Not started | - |
+| 117. Access Control Lockdown | 0/2 | Not started | - |
 | 118. Admin User Management | 0/? | Not started | - |
 | 119. Tenant Archival | 0/? | Not started | - |
 | 120. Admin Dashboard Improvements | 0/? | Not started | - |
