@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSession } from '@clerk/react'
-import { Building2, Plus, RefreshCw } from 'lucide-react'
+import { Building2, Plus, RefreshCw, RotateCcw, Archive } from 'lucide-react'
 import { Button } from '@shared/ui/button'
-import { listTenants, setClerkTokenGetter } from '@platform/services/tenant-service'
+import { listTenants, restoreTenant, setClerkTokenGetter } from '@platform/services/tenant-service'
 import type { Tenant } from '@platform/types/tenant'
 import { CreateTenantDialog } from './CreateTenantDialog'
 
@@ -17,6 +17,12 @@ export default function TenantsPage() {
   const [error, setError] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
 
+  // Archived state
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active')
+  const [archivedTenants, setArchivedTenants] = useState<Tenant[]>([])
+  const [archivedCount, setArchivedCount] = useState(0)
+  const [archivedLoading, setArchivedLoading] = useState(false)
+
   // Register Clerk token getter for the service
   useEffect(() => {
     if (session) {
@@ -24,11 +30,11 @@ export default function TenantsPage() {
     }
   }, [session])
 
-  async function fetchTenants() {
+  async function fetchActiveTenants() {
     setLoading(true)
     setError(null)
     try {
-      const result = await listTenants()
+      const result = await listTenants('active')
       setTenants(result.tenants)
       setTotalCount(result.totalCount)
     } catch (err) {
@@ -38,9 +44,23 @@ export default function TenantsPage() {
     }
   }
 
+  async function fetchArchivedTenants() {
+    setArchivedLoading(true)
+    try {
+      const result = await listTenants('archived')
+      setArchivedTenants(result.tenants)
+      setArchivedCount(result.totalCount)
+    } catch (err) {
+      console.error('Failed to fetch archived tenants:', err)
+    } finally {
+      setArchivedLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (session) {
-      fetchTenants()
+      void fetchActiveTenants()
+      void fetchArchivedTenants()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
@@ -48,6 +68,21 @@ export default function TenantsPage() {
   function handleRowClick(tenantId: string) {
     navigate(`/admin/tenants/${tenantId}`)
   }
+
+  async function handleRestore(orgId: string) {
+    try {
+      await restoreTenant(orgId)
+      await fetchActiveTenants()
+      await fetchArchivedTenants()
+      setActiveTab('active')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao restaurar tenant')
+    }
+  }
+
+  const isActiveTab = activeTab === 'active'
+  const currentLoading = isActiveTab ? loading : archivedLoading
+  const currentTenants = isActiveTab ? tenants : archivedTenants
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -65,17 +100,52 @@ export default function TenantsPage() {
         </Button>
       </div>
 
-      {/* Stats bar */}
-      {!loading && !error && (
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400">
-            {totalCount} {totalCount === 1 ? 'organizacao' : 'organizacoes'}
+      {/* Tab bar */}
+      <div className="flex gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800">
+        <button
+          type="button"
+          onClick={() => setActiveTab('active')}
+          className={[
+            'flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors',
+            isActiveTab
+              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-foreground'
+              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300',
+          ].join(' ')}
+        >
+          Ativas
+          <span className={[
+            'rounded-full px-2 py-0.5 text-xs font-medium',
+            isActiveTab
+              ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400'
+              : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400',
+          ].join(' ')}>
+            {totalCount}
           </span>
-        </div>
-      )}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('archived')}
+          className={[
+            'flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors',
+            !isActiveTab
+              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-foreground'
+              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300',
+          ].join(' ')}
+        >
+          Arquivadas
+          <span className={[
+            'rounded-full px-2 py-0.5 text-xs font-medium',
+            !isActiveTab
+              ? 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+              : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400',
+          ].join(' ')}>
+            {archivedCount}
+          </span>
+        </button>
+      </div>
 
       {/* Loading state */}
-      {loading && (
+      {currentLoading && (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
             <div
@@ -87,14 +157,17 @@ export default function TenantsPage() {
       )}
 
       {/* Error state */}
-      {!loading && error && (
+      {!currentLoading && error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-900 dark:bg-red-950/20">
           <p className="text-sm font-medium text-red-700 dark:text-red-400">{error}</p>
           <Button
             variant="outline"
             size="sm"
             className="mt-3 gap-2"
-            onClick={fetchTenants}
+            onClick={() => {
+              if (isActiveTab) void fetchActiveTenants()
+              else void fetchArchivedTenants()
+            }}
           >
             <RefreshCw className="h-3 w-3" />
             Tentar novamente
@@ -103,15 +176,24 @@ export default function TenantsPage() {
       )}
 
       {/* Empty state */}
-      {!loading && !error && tenants.length === 0 && (
+      {!currentLoading && !error && currentTenants.length === 0 && (
         <div className="rounded-xl border border-dashed border-slate-200 p-12 text-center dark:border-slate-700">
-          <Building2 className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum tenant encontrado</p>
+          {isActiveTab ? (
+            <>
+              <Building2 className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
+              <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum tenant encontrado</p>
+            </>
+          ) : (
+            <>
+              <Archive className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
+              <p className="text-sm text-slate-500 dark:text-slate-400">Nenhum tenant arquivado</p>
+            </>
+          )}
         </div>
       )}
 
-      {/* Tenant list */}
-      {!loading && !error && tenants.length > 0 && (
+      {/* Tenant list — Active tab */}
+      {!currentLoading && !error && isActiveTab && tenants.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-card">
           {tenants.map((tenant, idx) => (
             <button
@@ -161,11 +243,65 @@ export default function TenantsPage() {
         </div>
       )}
 
+      {/* Tenant list — Archived tab */}
+      {!currentLoading && !error && !isActiveTab && archivedTenants.length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-card">
+          {archivedTenants.map((tenant, idx) => (
+            <div
+              key={tenant.id}
+              className={[
+                'flex w-full items-center gap-4 px-5 py-4 opacity-60',
+                idx !== 0 ? 'border-t border-slate-100 dark:border-slate-700/50' : '',
+              ].join(' ')}
+            >
+              {/* Avatar */}
+              {tenant.imageUrl ? (
+                <img
+                  src={tenant.imageUrl}
+                  alt={tenant.name}
+                  className="h-8 w-8 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-500">
+                  <Building2 className="h-4 w-4" />
+                </div>
+              )}
+
+              {/* Name + ID */}
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium text-slate-900 dark:text-foreground">
+                  {tenant.name}
+                </p>
+                <p className="truncate font-mono text-xs text-slate-400 dark:text-slate-500">
+                  {tenant.id}
+                </p>
+              </div>
+
+              {/* Archived badge */}
+              <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-500">
+                Arquivado
+              </span>
+
+              {/* Restore button */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 gap-1.5 text-xs"
+                onClick={(e) => { e.stopPropagation(); void handleRestore(tenant.id) }}
+              >
+                <RotateCcw className="h-3 w-3" />
+                Restaurar
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Create Tenant Dialog */}
       <CreateTenantDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onCreated={fetchTenants}
+        onCreated={() => void fetchActiveTenants()}
       />
     </div>
   )

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useSession } from '@clerk/react'
-import { ArrowLeft, Building2, Users, Calendar, Shield, Blocks, ExternalLink, Trash2, Eye, UserPlus, ChevronsUpDown, Check } from 'lucide-react'
+import { ArrowLeft, Building2, Users, Calendar, Shield, Blocks, ExternalLink, Trash2, Eye, UserPlus, ChevronsUpDown, Check, Archive } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@shared/ui/command'
-import { getTenantDetail, setClerkTokenGetter } from '@platform/services/tenant-service'
+import { getTenantDetail, archiveTenant, setClerkTokenGetter } from '@platform/services/tenant-service'
 import { listOrgMembers, addOrgMember, removeOrgMember, listUsers, setAdminClerkTokenGetter } from '@platform/services/admin-service'
 import { useImpersonation } from '@platform/auth/ImpersonationContext'
 import { toast } from 'sonner'
@@ -67,6 +67,11 @@ export default function TenantDetailPage() {
   // Impersonation
   const { enterImpersonation, isImpersonating, impersonatedOrgId } = useImpersonation()
   const [impersonateLoading, setImpersonateLoading] = useState(false)
+
+  // Archive state
+  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
+  const [archiveLoading, setArchiveLoading] = useState(false)
+  const [archiveError, setArchiveError] = useState<string | null>(null)
 
   // Register Clerk token getters for both services
   useEffect(() => {
@@ -222,6 +227,20 @@ export default function TenantDetailPage() {
     }
   }
 
+  async function handleArchive() {
+    if (!orgId) return
+    setArchiveLoading(true)
+    setArchiveError(null)
+    try {
+      await archiveTenant(orgId)
+      navigate('/admin/tenants')
+    } catch (err) {
+      setArchiveError(err instanceof Error ? err.message : 'Erro ao arquivar tenant')
+    } finally {
+      setArchiveLoading(false)
+    }
+  }
+
   // ----- Loading state -----
   if (loading) {
     return (
@@ -295,19 +314,33 @@ export default function TenantDetailPage() {
           </div>
         </div>
 
-        {/* Impersonation button — only show when not already impersonating this org */}
-        {!(isImpersonating && impersonatedOrgId === orgId) && (
+        {/* Action buttons */}
+        <div className="flex items-center gap-2">
+          {/* Impersonation button — only show when not already impersonating this org */}
+          {!(isImpersonating && impersonatedOrgId === orgId) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleEnterImpersonation}
+              disabled={impersonateLoading}
+              className="shrink-0 gap-1.5 border-indigo-200 text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              {impersonateLoading ? 'Entrando...' : 'Entrar como esta org'}
+            </Button>
+          )}
+
+          {/* Archive button */}
           <Button
             variant="outline"
             size="sm"
-            onClick={handleEnterImpersonation}
-            disabled={impersonateLoading}
-            className="shrink-0 gap-1.5 border-indigo-200 text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
+            onClick={() => setArchiveConfirmOpen(true)}
+            className="shrink-0 gap-1.5 border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
           >
-            <Eye className="h-3.5 w-3.5" />
-            {impersonateLoading ? 'Entrando...' : 'Entrar como esta org'}
+            <Archive className="h-3.5 w-3.5" />
+            Arquivar
           </Button>
-        )}
+        </div>
       </div>
 
       {/* Info cards grid */}
@@ -577,6 +610,46 @@ export default function TenantDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Archive confirmation dialog */}
+      {archiveConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-700 dark:bg-card">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-foreground">
+              Arquivar tenant
+            </h3>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              Tem certeza que deseja arquivar <strong>{tenant.name}</strong>?
+            </p>
+            <ul className="mt-3 space-y-1 text-sm text-slate-500 dark:text-slate-400">
+              <li>- Todos os membros serao removidos da organizacao</li>
+              <li>- Os dados serao preservados mas ocultos</li>
+              <li>- Voce podera restaurar depois</li>
+            </ul>
+            {archiveError && (
+              <p className="mt-3 text-sm text-red-600 dark:text-red-400">{archiveError}</p>
+            )}
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { setArchiveConfirmOpen(false); setArchiveError(null) }}
+                disabled={archiveLoading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => void handleArchive()}
+                disabled={archiveLoading}
+                className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+              >
+                {archiveLoading ? 'Arquivando...' : 'Confirmar arquivamento'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

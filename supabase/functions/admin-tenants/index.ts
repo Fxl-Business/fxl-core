@@ -1,25 +1,43 @@
 // Supabase Edge Function: admin-tenants
 // Proxies Clerk Organizations API (list, detail, create, member management) for super admin use.
+// Also handles tenant archival/restore operations.
 //
 // Runtime: Deno (Supabase Functions)
-// Methods: GET (list / detail), POST (create / add-member / impersonate-token), DELETE (remove-member)
+// Methods: GET (list / detail), POST (create / add-member / impersonate-token / archive / restore), DELETE (remove-member)
 // Auth: Bearer token with super_admin JWT claim required
-// Returns: Tenant[] | TenantDetail | TenantDetail (created) | member response | impersonation token
+// Returns: Tenant[] | TenantDetail | TenantDetail (created) | member response | impersonation token | archive/restore result
 
 // @ts-nocheck — Deno runtime, not checked by project tsc
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import * as jose from 'https://deno.land/x/jose@v4.14.4/index.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
 const CLERK_SECRET_KEY = Deno.env.get('CLERK_SECRET_KEY')
 const CLERK_API_BASE = 'https://api.clerk.com/v1'
 const SUPABASE_JWT_SECRET = Deno.env.get('JWT_SIGNING_SECRET')
 const TOKEN_EXPIRY_SECONDS = 3600
 
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+function getSupabaseAdmin() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not configured')
+  }
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, PATCH, OPTIONS',
 }
+
+const ARCHIVABLE_TABLES = [
+  'tenant_modules', 'comments', 'share_tokens', 'blueprint_configs',
+  'briefing_configs', 'knowledge_entries', 'tasks', 'documents',
+  'clients', 'projects',
+] as const
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -103,9 +121,26 @@ serve(async (req: Request) => {
     return handleImpersonateToken(body.orgId, adminUserId)
   }
 
+  if (req.method === 'POST' && action === 'archive') {
+    const body = await req.json().catch(() => null)
+    if (!body || typeof body.orgId !== 'string') {
+      return jsonError('Request body must include { orgId: string }', 400)
+    }
+    return handleArchiveTenant(body.orgId)
+  }
+
+  if (req.method === 'POST' && action === 'restore') {
+    const body = await req.json().catch(() => null)
+    if (!body || typeof body.orgId !== 'string') {
+      return jsonError('Request body must include { orgId: string }', 400)
+    }
+    return handleRestoreTenant(body.orgId)
+  }
+
   if (req.method === 'GET' && !orgId) {
     // List all Clerk organizations
-    return handleListOrgs()
+    const status = url.searchParams.get('status') ?? 'active'
+    return handleListOrgs(status)
   }
 
   if (req.method === 'GET' && orgId && isMembers) {
@@ -134,7 +169,7 @@ serve(async (req: Request) => {
   return jsonError('Not found', 404)
 })
 
-async function handleListOrgs(): Promise<Response> {
+async function handleListOrgs(status: string = 'active'): Promise<Response> {
   const res = await fetch(`${CLERK_API_BASE}/organizations?limit=100&order_by=-created_at&include_members_count=true`, {
     headers: {
       Authorization: `Bearer ${CLERK_SECRET_KEY}`,
@@ -150,18 +185,28 @@ async function handleListOrgs(): Promise<Response> {
   const data = await res.json()
   const orgs = data.data ?? []
 
-  const tenants = orgs.map((org: Record<string, unknown>) => ({
-    id: org.id,
-    name: org.name,
-    slug: org.slug ?? null,
-    membersCount: org.members_count ?? 0,
-    createdAt: org.created_at,
-    imageUrl: org.image_url ?? '',
-  }))
+  // Map and include publicMetadata for filtering
+  const allTenants = orgs.map((org: Record<string, unknown>) => {
+    const pubMeta = (org.public_metadata ?? {}) as Record<string, unknown>
+    return {
+      id: org.id,
+      name: org.name,
+      slug: org.slug ?? null,
+      membersCount: org.members_count ?? 0,
+      createdAt: org.created_at,
+      imageUrl: org.image_url ?? '',
+      archived: pubMeta.archived === true,
+    }
+  })
+
+  // Filter by status
+  const tenants = status === 'archived'
+    ? allTenants.filter((t: { archived: boolean }) => t.archived)
+    : allTenants.filter((t: { archived: boolean }) => !t.archived)
 
   return jsonOk({
     tenants,
-    totalCount: data.total_count ?? tenants.length,
+    totalCount: tenants.length,
   })
 }
 
@@ -332,6 +377,132 @@ async function handleRemoveMember(
   }
 
   return jsonOk({ removed: true, userId })
+}
+
+async function handleArchiveTenant(orgId: string): Promise<Response> {
+  const supabase = getSupabaseAdmin()
+  const now = new Date().toISOString()
+
+  // Step 1: List all org memberships
+  const membersRes = await fetch(
+    `${CLERK_API_BASE}/organizations/${orgId}/memberships?limit=100`,
+    { headers: { Authorization: `Bearer ${CLERK_SECRET_KEY}` } },
+  )
+  if (!membersRes.ok) {
+    const err = await membersRes.json().catch(() => ({ errors: [{ message: 'Unknown error' }] }))
+    return jsonError(err?.errors?.[0]?.message ?? 'Failed to list members for archival', membersRes.status)
+  }
+  const membersData = await membersRes.json()
+  const memberIds: string[] = (membersData.data ?? []).map(
+    (m: Record<string, unknown>) => {
+      const pub = (m.public_user_data as Record<string, unknown>) ?? {}
+      return (pub.user_id ?? m.user_id ?? '') as string
+    }
+  ).filter((id: string) => id.length > 0)
+
+  // Step 2: Remove all memberships
+  const removeResults = await Promise.allSettled(
+    memberIds.map((userId: string) =>
+      fetch(`${CLERK_API_BASE}/organizations/${orgId}/memberships/${userId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${CLERK_SECRET_KEY}` },
+      })
+    )
+  )
+  const removeFailed = removeResults.filter(r => r.status === 'rejected').length
+  if (removeFailed > 0) {
+    return jsonError(`Failed to remove ${removeFailed} of ${memberIds.length} members`, 500)
+  }
+
+  // Step 3: Set Clerk org publicMetadata.archived = true
+  const metaRes = await fetch(`${CLERK_API_BASE}/organizations/${orgId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${CLERK_SECRET_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ public_metadata: { archived: true } }),
+  })
+  if (!metaRes.ok) {
+    const err = await metaRes.json().catch(() => ({ errors: [{ message: 'Unknown error' }] }))
+    return jsonError(err?.errors?.[0]?.message ?? 'Failed to set archived metadata', metaRes.status)
+  }
+
+  // Step 4: Stamp archived_at on all Supabase tables
+  const dbResults = await Promise.allSettled(
+    ARCHIVABLE_TABLES.map((table) =>
+      supabase
+        .from(table)
+        .update({ archived_at: now })
+        .eq('org_id', orgId)
+        .is('archived_at', null)
+    )
+  )
+  const dbErrors = dbResults
+    .map((r, i) => {
+      if (r.status === 'rejected') return ARCHIVABLE_TABLES[i]
+      if (r.status === 'fulfilled' && r.value.error) return `${ARCHIVABLE_TABLES[i]}: ${r.value.error.message}`
+      return null
+    })
+    .filter(Boolean)
+
+  if (dbErrors.length > 0) {
+    return jsonError(`Partial archive — DB errors: ${dbErrors.join(', ')}`, 500)
+  }
+
+  return jsonOk({
+    archived: true,
+    orgId,
+    membersRemoved: memberIds.length,
+    tablesUpdated: ARCHIVABLE_TABLES.length,
+    archivedAt: now,
+  })
+}
+
+async function handleRestoreTenant(orgId: string): Promise<Response> {
+  const supabase = getSupabaseAdmin()
+
+  // Step 1: Clear archived_at on all Supabase tables
+  const dbResults = await Promise.allSettled(
+    ARCHIVABLE_TABLES.map((table) =>
+      supabase
+        .from(table)
+        .update({ archived_at: null })
+        .eq('org_id', orgId)
+        .not('archived_at', 'is', null)
+    )
+  )
+  const dbErrors = dbResults
+    .map((r, i) => {
+      if (r.status === 'rejected') return ARCHIVABLE_TABLES[i]
+      if (r.status === 'fulfilled' && r.value.error) return `${ARCHIVABLE_TABLES[i]}: ${r.value.error.message}`
+      return null
+    })
+    .filter(Boolean)
+
+  if (dbErrors.length > 0) {
+    return jsonError(`Partial restore — DB errors: ${dbErrors.join(', ')}`, 500)
+  }
+
+  // Step 2: Clear archived from Clerk org publicMetadata
+  const metaRes = await fetch(`${CLERK_API_BASE}/organizations/${orgId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${CLERK_SECRET_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ public_metadata: { archived: null } }),
+  })
+  if (!metaRes.ok) {
+    const err = await metaRes.json().catch(() => ({ errors: [{ message: 'Unknown error' }] }))
+    return jsonError(err?.errors?.[0]?.message ?? 'Failed to clear archived metadata', metaRes.status)
+  }
+
+  return jsonOk({
+    restored: true,
+    orgId,
+    tablesUpdated: ARCHIVABLE_TABLES.length,
+  })
 }
 
 async function handleImpersonateToken(

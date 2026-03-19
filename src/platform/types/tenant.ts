@@ -5,6 +5,7 @@ export interface Tenant {
   membersCount: number // Total members in the org
   createdAt: number    // Unix timestamp (ms) from Clerk
   imageUrl: string     // Org avatar URL
+  archived: boolean    // Whether the tenant is archived
 }
 
 export interface TenantDetail extends Tenant {
@@ -22,4 +23,18 @@ export interface CreateTenantPayload {
 export interface TenantListResponse {
   tenants: Tenant[]
   totalCount: number
+}
+
+export interface ArchiveTenantResponse {
+  archived: boolean
+  orgId: string
+  membersRemoved: number
+  tablesUpdated: number
+  archivedAt: string
+}
+
+export interface RestoreTenantResponse {
+  restored: boolean
+  orgId: string
+  tablesUpdated: number
 }

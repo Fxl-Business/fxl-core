@@ -10,7 +10,7 @@
  *   setClerkTokenGetter(() => session.getToken())
  *   const { tenants } = await listTenants()
  */
-import type { CreateTenantPayload, Tenant, TenantDetail, TenantListResponse } from '@platform/types/tenant'
+import type { CreateTenantPayload, Tenant, TenantDetail, TenantListResponse, ArchiveTenantResponse, RestoreTenantResponse } from '@platform/types/tenant'
 
 const FUNCTIONS_URL = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL ?? ''
 
@@ -47,12 +47,13 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 }
 
 /**
- * List all Clerk Organizations (tenants).
+ * List Clerk Organizations (tenants), filtered by status.
  *
+ * @param status - 'active' (default) or 'archived'
  * @returns { tenants: Tenant[], totalCount: number }
  */
-export async function listTenants(): Promise<TenantListResponse> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants`, {
+export async function listTenants(status: 'active' | 'archived' = 'active'): Promise<TenantListResponse> {
+  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?status=${status}`, {
     headers: await getAuthHeaders(),
   })
   if (!res.ok) throw new Error(`Failed to list tenants: ${res.status}`)
@@ -91,5 +92,44 @@ export async function createTenant(payload: CreateTenantPayload): Promise<Tenant
   return res.json() as Promise<TenantDetail>
 }
 
-// Re-export Tenant type for convenience
-export type { Tenant, TenantDetail, CreateTenantPayload, TenantListResponse }
+/**
+ * Archive a tenant (soft-delete).
+ * Sets archived_at on all org-scoped data, removes memberships, flags Clerk org.
+ *
+ * @param orgId - Clerk org ID (e.g., "org_xxx")
+ */
+export async function archiveTenant(orgId: string): Promise<ArchiveTenantResponse> {
+  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=archive`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify({ orgId }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
+    throw new Error(err.error ?? `Failed to archive tenant: ${res.status}`)
+  }
+  return res.json() as Promise<ArchiveTenantResponse>
+}
+
+/**
+ * Restore an archived tenant.
+ * Clears archived_at on all org-scoped data, removes archived flag from Clerk org.
+ * Does NOT restore memberships — admin re-adds manually.
+ *
+ * @param orgId - Clerk org ID (e.g., "org_xxx")
+ */
+export async function restoreTenant(orgId: string): Promise<RestoreTenantResponse> {
+  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=restore`, {
+    method: 'POST',
+    headers: await getAuthHeaders(),
+    body: JSON.stringify({ orgId }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
+    throw new Error(err.error ?? `Failed to restore tenant: ${res.status}`)
+  }
+  return res.json() as Promise<RestoreTenantResponse>
+}
+
+// Re-export types for convenience
+export type { Tenant, TenantDetail, CreateTenantPayload, TenantListResponse, ArchiveTenantResponse, RestoreTenantResponse }
