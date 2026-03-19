@@ -64,22 +64,22 @@ Requirements para resiliencia, observabilidade e CI/CD da plataforma.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ISO-01 | TBD | Pending |
-| ISO-02 | TBD | Pending |
-| ISO-03 | TBD | Pending |
-| OBS-01 | TBD | Pending |
-| OBS-02 | TBD | Pending |
-| CI-01 | TBD | Pending |
-| CI-02 | TBD | Pending |
-| CI-03 | TBD | Pending |
-| RES-01 | TBD | Pending |
-| RES-02 | TBD | Pending |
+| ISO-01 | Phase 125 | Pending |
+| ISO-02 | Phase 126 | Pending |
+| ISO-03 | Phase 126 | Pending |
+| OBS-01 | Phase 125 | Pending |
+| OBS-02 | Phase 125 | Pending |
+| CI-01 | Phase 127 | Pending |
+| CI-02 | Phase 127 | Pending |
+| CI-03 | Phase 127 | Pending |
+| RES-01 | Phase 128 | Pending |
+| RES-02 | Phase 128 | Pending |
 
 **Coverage:**
 - v9.0 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10
+- Mapped to phases: 10
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after initial definition*
+*Last updated: 2026-03-19 after roadmap creation (phases 125-128)*

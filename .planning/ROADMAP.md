@@ -29,6 +29,7 @@
 - **v6.0 Reestruturação de Módulos** - Phases 112-116 (shipped 2026-03-18) -- see milestones/v6.0-ROADMAP.md
 - **v7.0 Admin-Only Org Management** - Phases 117-120 (shipped 2026-03-18) -- see milestones/v7.0-ROADMAP.md
 - **v8.0 Estabilidade Multi-Tenant** - Phases 121-124 (shipped 2026-03-19) -- see milestones/v8.0-ROADMAP.md
+- **v9.0 Resiliencia de Plataforma** - Phases 125-128 (active) -- see milestones/v9.0-ROADMAP.md
 
 ## Quick Tasks
 
@@ -36,6 +37,17 @@
 |---|------------|------|
 | 13 | Remove light mode toggle, use local date format | 2026-03-13 |
 | 15 | Sidebar editor: grouped screens, context menus, pin support, widget picker | 2026-03-13 |
+
+---
+
+## v9.0 Resiliencia de Plataforma (Phases 125-128) — ACTIVE
+
+- [ ] **Phase 125: Error Boundaries + Sentry** - Isolar crashes de modulo e capturar erros de runtime em producao via Sentry
+- [ ] **Phase 126: Token Management Context** - Migrar token de org para React Context com abort de requests in-flight no org switch
+- [ ] **Phase 127: CI/CD Pipeline** - GitHub Actions com type-check e testes automaticos bloqueando merges com CI quebrado
+- [ ] **Phase 128: Retry & Resilience** - Retry com backoff exponencial no token exchange e wrapper reutilizavel para chamadas criticas
+
+See: milestones/v9.0-ROADMAP.md
 
 ---
 

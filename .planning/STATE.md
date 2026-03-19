@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: "v9.0"
 milestone_name: "Resiliencia de Plataforma"
-status: defining_requirements
+status: roadmap_ready
 stopped_at: ""
-last_updated: "2026-03-19T20:00:00.000Z"
+last_updated: "2026-03-19T20:30:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,14 +19,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** v9.0 Resiliencia de Plataforma — defining requirements
+**Current focus:** v9.0 Resiliencia de Plataforma — roadmap ready, planning phases
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (roadmap created, ready for phase planning)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-03-19 — Milestone v9.0 started
+Status: Roadmap ready
+Last activity: 2026-03-19 — Roadmap v9.0 created (phases 125-128)
+
+```
+Progress: [░░░░░░░░░░] 0/4 phases complete
+```
 
 ## Performance Metrics
 
@@ -44,6 +48,14 @@ Last activity: 2026-03-19 — Milestone v9.0 started
 
 Decisions are logged in PROJECT.md Key Decisions table.
 
+### Phase Notes
+
+- **Phase 125 (Error Boundaries + Sentry):** ISO-01 and OBS-01/02 are tightly coupled — error boundaries are the delivery mechanism for Sentry error reporting. Implement together.
+- **Phase 126 (Token Management Context):** ISO-02 and ISO-03 are the same refactor — introducing OrgTokenContext naturally enables AbortController usage at the point of org switch. Cannot ship ISO-02 without ISO-03 being addressable.
+- **Phase 127 (CI/CD Pipeline):** CI-01/02/03 are one unit — GitHub Actions workflow file, test runner config, and branch protection rule are all part of the same setup operation.
+- **Phase 128 (Retry & Resilience):** RES-01 (token exchange retry) and RES-02 (retry wrapper) should be implemented as wrapper-first so token exchange uses the same utility.
+- All 4 phases are independent and can run in parallel if using multi-agent workflow.
+
 ### Pending Todos
 
 (none)
@@ -60,7 +72,7 @@ None.
 
 ## Session Continuity
 
-Last activity: 2026-03-19 - Started milestone v9.0 Resiliencia de Plataforma
-Last session: 2026-03-19T20:00:00.000Z
-Stopped at: Defining requirements
-Next action: Define requirements and create roadmap
+Last activity: 2026-03-19 - Roadmap v9.0 created, 4 phases (125-128), 10/10 requirements mapped
+Last session: 2026-03-19T20:30:00.000Z
+Stopped at: Roadmap ready
+Next action: `/gsd:plan-phase 125` (or parallelize all 4 phases)
