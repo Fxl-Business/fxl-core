@@ -76,12 +76,15 @@ export async function withRetry<T>(
     try {
       return await fn()
     } catch (err) {
+      // Preserve the original error to maintain DOMException identity (name, instanceof)
+      // Only wrap non-Error values for the isRetryable check
       const error = err instanceof Error ? err : new Error(String(err))
       lastError = error
 
       // Don't retry if not retryable or last attempt
       if (!isRetryable(error) || attempt === maxRetries) {
-        throw error
+        // Throw the original error to preserve DOMException and other special types
+        throw err
       }
 
       const delay = baseDelay * Math.pow(backoffFactor, attempt)

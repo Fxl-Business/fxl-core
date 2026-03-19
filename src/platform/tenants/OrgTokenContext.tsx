@@ -156,8 +156,9 @@ export function OrgTokenProvider({ children, onOrgChange }: OrgTokenProviderProp
         prevOrgIdRef.current = activeOrg!.id
       } catch (err) {
         // Silently ignore abort errors — they are expected during org switch
-        // Use name check instead of instanceof to handle cross-realm DOMException
-        if (err instanceof Error && err.name === 'AbortError') {
+        // Check .name directly (not instanceof) to handle cross-realm DOMException
+        const errName = (err as { name?: string })?.name
+        if (errName === 'AbortError') {
           return
         }
         const message = err instanceof Error ? err.message : 'Token exchange failed'

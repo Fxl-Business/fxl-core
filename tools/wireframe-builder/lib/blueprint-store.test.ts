@@ -27,10 +27,15 @@ function wireDefaultMockChain() {
 
 wireDefaultMockChain()
 
-vi.mock('@/lib/supabase', () => ({
+vi.mock('@platform/supabase', () => ({
   supabase: {
     from: (table: string) => mockFrom(table),
   },
+}))
+
+// Mock project-resolver to avoid real Supabase calls during slug->project_id resolution
+vi.mock('./project-resolver', () => ({
+  resolveProjectId: vi.fn().mockResolvedValue(null),
 }))
 
 // Import after mock setup
