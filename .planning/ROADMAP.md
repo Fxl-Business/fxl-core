@@ -81,7 +81,10 @@ Plans:
   3. A sidebar de docs popula corretamente imediatamente apos login e imediatamente apos trocar de org
   4. Apos trocar de org, nenhum documento da org anterior aparece — cache e invalidado na troca
   5. Integration tests executam queries com JWTs de orgs diferentes e verificam que RLS isola corretamente os resultados
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 122-01-PLAN.md — Corrigir RLS (migration 020) + cache invalidation em useDocsNav
+- [ ] 122-02-PLAN.md — Integration tests RLS isolation (TEST-02)
 
 #### Phase 123: Modules & Org Lifecycle
 **Goal**: Modulos funcionam com opt-out por padrao, impersonation retorna dados reais, troca de org recarrega tudo sem reload manual
@@ -113,7 +116,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 121. Auth & Token Exchange | 0/4 | Planning done | — |
-| 122. Document Scoping & RLS | 0/? | Not started | — |
+| 122. Document Scoping & RLS | 0/2 | Planned | — |
 | 123. Modules & Org Lifecycle | 0/2 | Planned | — |
 | 124. Regression Guard | 0/? | Not started | — |
 
