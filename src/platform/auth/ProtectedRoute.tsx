@@ -54,12 +54,12 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     )
   }
 
-  // 4. Signed in but no org — redirect to onboarding.
+  // 4. Signed in but no org — redirect to request access.
   // Wait for activeOrg to settle: Clerk may briefly report empty memberships
   // after a full page reload before hydrating the real data. Only redirect
   // when both the list reports zero AND no active org is selected.
   if (userMemberships?.data?.length === 0 && !activeOrg) {
-    return <Navigate to="/criar-empresa" replace />
+    return <Navigate to="/solicitar-acesso" replace />
   }
 
   // 5. Token exchange failed — show error (never silently allow unauthenticated Supabase access)
