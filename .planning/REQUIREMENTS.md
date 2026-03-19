@@ -11,8 +11,8 @@ Requirements for Admin-Only Org Management milestone.
 
 - [ ] **ACC-01**: Self-service org creation (`/criar-empresa`) is removed — no client-side `createOrganization()` calls
 - [ ] **ACC-02**: Only super admin can create organizations (via admin panel)
-- [ ] **ACC-03**: User without org membership sees `/solicitar-acesso` screen with clear instructions
-- [ ] **ACC-04**: `/solicitar-acesso` screen has Nexo branding, message explaining how to request access, and sign out button
+- [x] **ACC-03**: User without org membership sees `/solicitar-acesso` screen with clear instructions
+- [x] **ACC-04**: `/solicitar-acesso` screen has Nexo branding, message explaining how to request access, and sign out button
 
 ### Admin User Management
 
@@ -64,8 +64,8 @@ Requirements for Admin-Only Org Management milestone.
 |-------------|-------|--------|
 | ACC-01 | Phase 117 | Pending |
 | ACC-02 | Phase 117 | Pending |
-| ACC-03 | Phase 117 | Pending |
-| ACC-04 | Phase 117 | Pending |
+| ACC-03 | Phase 117 | Complete |
+| ACC-04 | Phase 117 | Complete |
 | ADM-01 | Phase 118 | Pending |
 | ADM-02 | Phase 118 | Pending |
 | ADM-03 | Phase 118 | Pending |
