@@ -8,16 +8,9 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v7.0 Admin-Only Org Management
+## Latest Milestone: v7.0 Admin-Only Org Management (shipped 2026-03-18)
 
-**Goal:** Lock down organization creation to super admin only, add "request access" screen for unaffiliated users, and implement safe tenant archival (soft-delete with data preservation).
-
-**Target features:**
-- Remove self-service org creation (`/criar-empresa`)
-- "Solicitar acesso" screen for users without org membership
-- Admin panel: unaffiliated users filter/tab with quick org linking
-- Safe tenant archival (soft-delete) with restore capability
-- Admin dashboard improvements (unaffiliated users + archived tenants counts)
+**Delivered:** Locked down org creation to super admin only, added /solicitar-acesso holding screen, admin user management with unaffiliated filter and org-linking, tenant archival with soft-delete/restore, and admin dashboard metric cards.
 
 Previous: v6.0 Reestruturação de Módulos (shipped 2026-03-18)
 
@@ -199,14 +192,17 @@ Previous: v6.0 Reestruturação de Módulos (shipped 2026-03-18)
 - ✓ Navegação dinâmica via useNavItems() hook por módulo — v6.0
 - ✓ Tabela projects com client_id nullable + migração de dados — v6.0
 - ✓ Stores migrados de client_slug para project_id/project_slug — v6.0
+- ✓ Self-service org creation removed, admin-only org creation — v7.0
+- ✓ /solicitar-acesso holding screen for unaffiliated users with Nexo branding — v7.0
+- ✓ Admin unaffiliated users filter (Todos/Sem org/Com org) with org-linking dialog — v7.0
+- ✓ TenantDetailPage combobox for searching unaffiliated users when adding members — v7.0
+- ✓ Tenant archival: archived_at on 10 tables, RLS exclusion, Clerk metadata sync — v7.0
+- ✓ Tenant restore: reverse soft-delete, re-enable Clerk org — v7.0
+- ✓ Admin dashboard: unaffiliated users + archived tenants metric cards with navigation — v7.0
 
 ### Active
 
-- [ ] Remove self-service org creation, admin-only org creation
-- [ ] "Solicitar acesso" screen for unaffiliated users
-- [ ] Admin unaffiliated users management and org linking
-- [ ] Safe tenant archival with soft-delete and restore
-- [ ] Admin dashboard with unaffiliated/archived counts
+(No active requirements -- next milestone not yet planned)
 
 ### Out of Scope
 
@@ -244,7 +240,7 @@ Previous: v6.0 Reestruturação de Módulos (shipped 2026-03-18)
 
 ## Current State
 
-26 milestones shipped (v1.0 → v7.0). Phase 120 complete — admin dashboard now shows unaffiliated user count and archived tenant count with direct navigation to filtered views. v7.0 Admin-Only Org Management milestone complete.
+27 milestones shipped (v1.0 → v7.0). v7.0 Admin-Only Org Management complete — org creation locked to admin only, /solicitar-acesso holding screen for unaffiliated users, admin user management with filter/org-linking, tenant archival with soft-delete and restore, dashboard metric cards. 19+ Supabase migrations (001-019).
 
 ## Context
 
@@ -387,6 +383,13 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | ImpersonationContext as React context (not URL param) | State-based impersonation, no URL pollution, easy to exit | ✓ Good — amber banner UX clear |
 | Phase 109 as formal audit (no new migration needed) | blueprint_configs RLS already correct since migration 013 | ✓ Good — discovered existing policy was sufficient |
 | Gap closure phases 109-111 for audit traceability | Separate phases to close verification gaps vs reopen completed work | ✓ Good — clean audit trail |
+| Building2 icon for /solicitar-acesso holding screen | Muted, non-alarming style for "waiting for access" UX | ✓ Good — professional feel |
+| navigate('/login') after signOut | Explicit redirect control instead of relying on Clerk default | ✓ Good — predictable behavior |
+| Segmented filter (not shadcn Tabs) for UsersPage | Compact visual for 3 filter states, native button group | ✓ Good — fits admin panel density |
+| Command+Popover combobox for TenantDetailPage | shadcn pattern, filters to unaffiliated users only | ✓ Good — clean search UX |
+| archived_at column on all 10 org-scoped tables | Consistent soft-delete across all tenant data | ✓ Good — comprehensive archival |
+| RLS policies filtering archived_at IS NULL | Non-super-admin queries never surface archived data | ✓ Good — secure by default |
+| Edge function archive/restore with Clerk metadata sync | Single action archives DB + Clerk org in one call | ✓ Good — atomic operation |
 
 ---
-*Last updated: 2026-03-18 after v7.0 milestone shipped*
+*Last updated: 2026-03-18 after v7.0 milestone completed*

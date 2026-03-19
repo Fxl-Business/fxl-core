@@ -1,5 +1,24 @@
 # Milestones
 
+## v7.0 Admin-Only Org Management (Shipped: 2026-03-18)
+
+**Phases:** 4 (117-120) | **Plans:** 8 | **Requirements:** 16/16
+**Timeline:** 1 day (2026-03-18)
+**Git range:** 9c12a9b → 33aa840 | **Files:** 33 changed, +4,342 / -286
+
+**Delivered:** Locked down organization creation to super admin only, replaced self-service flow with branded "solicitar acesso" holding screen, added admin panel features for managing unaffiliated users (filter/search/org-linking), implemented safe tenant archival with soft-delete and restore, and surfaced at-a-glance counts on admin dashboard.
+
+**Key accomplishments:**
+
+1. Access Control Lockdown: removed /criar-empresa and createOrganization(), added /solicitar-acesso holding screen with Nexo branding and sign-out
+2. Admin User Management: segmented filter (Todos/Sem org/Com org) on UsersPage, "Vincular" org-assignment dialog, Command+Popover combobox for searching unaffiliated users on TenantDetailPage
+3. Tenant Archival: archived_at column on 10 org-scoped tables, RLS policies filtering archived rows, edge function archive/restore actions with Clerk metadata sync, Active/Archived tab bar on TenantsPage
+4. Admin Dashboard: unaffiliated users + archived tenants metric cards with amber styling and query-param navigation to filtered views
+
+**Archive:** [v7.0-ROADMAP.md](milestones/v7.0-ROADMAP.md) | [v7.0-REQUIREMENTS.md](milestones/v7.0-REQUIREMENTS.md)
+
+---
+
 ## v6.0 Reestruturação de Módulos (Shipped: 2026-03-18)
 
 **Phases:** 5 (112-116) | **Plans:** 1+ | **Tasks:** ~25 requirements
@@ -8,6 +27,7 @@
 **Delivered:** Separated Clientes (cadastro) from Projetos (briefing→blueprint→wireframe), implemented sidebar workspace with dropdown switcher and dynamic navigation per module. DB migration with projects table, code restructure with module rename, full CRUD for both modules, and workspace-aware sidebar.
 
 **Key accomplishments:**
+
 1. DB Migration: projects table with client_id nullable, clients extended with logo_url/status, project_id FKs on briefing_configs/blueprint_configs/comments/share_tokens, data migrated
 2. Code Restructure: src/modules/clients/ renamed to src/modules/projects/, new src/modules/clients/ created from scratch, pages parametrized by slug, module-ids.ts updated
 3. Projetos Module: /projetos/:slug/* routes (briefing, blueprint, wireframe, branding), stores migrated from client_slug to project_id, dynamic sidebar nav
@@ -23,6 +43,7 @@
 **Phases completed:** 7 phases, 13 plans, 5 tasks
 
 **Key accomplishments:**
+
 - (none recorded)
 
 ---
@@ -36,6 +57,7 @@
 **Delivered:** Fixed auth flow bugs, built custom Nexo login page, replaced broken Clerk client-side hooks with server-side edge functions for accurate admin metrics, and added full users management with org membership visibility.
 
 **Key accomplishments:**
+
 1. Custom Nexo login page (Login.tsx) with Google OAuth + email/password, replacing default Clerk SignIn component
 2. Fixed ProtectedRoute infinite loading for unauthenticated users + SSO callback route
 3. Admin dashboard metrics now use edge functions showing ALL Clerk orgs/users (not just current user's)
@@ -52,6 +74,7 @@
 **Phases completed:** 7 phases, 10 plans, 6 tasks
 
 **Key accomplishments:**
+
 - (none recorded)
 
 ---
@@ -65,6 +88,7 @@
 **Delivered:** Renamed product from "FXL Core" / "Nucleo FXL" to "Nexo" across all user-visible surfaces, meta files, and documentation. Zero functional changes.
 
 **Key accomplishments:**
+
 1. Renamed 10 files across UI (Login, TopNav, Home, AppRouter), meta (index.html), and docs (CLAUDE.md, PROJECT.md, spoke-onboarding, fase2, branding-collection)
 2. Preserved "FXL SDK" references (company name, not product)
 3. tsc --noEmit zero errors, npm run build clean (16.36s, 3448 modules)
@@ -83,6 +107,7 @@
 **Delivered:** Created generic connector module that consumes any spoke app via FxlAppManifest contract, rendering entities in tables/detail views and widgets (KPI, chart, table, list) with dynamic routing via catch-all `/apps/:appId/*`.
 
 **Key accomplishments:**
+
 1. Connector module foundation: CLAUDE.md, manifest, MODULE_IDS.CONNECTOR, catch-all route registration
 2. Contract types copied inline from SDK skill with ConnectorResult<T> discriminated union pattern
 3. connector-service with 5 fetch functions, 5s AbortController timeout, and 1min in-memory manifest cache
@@ -100,6 +125,7 @@
 **Phases completed:** 4 phases, 9 plans, 0 tasks
 
 **Key accomplishments:**
+
 - (none recorded)
 
 ---
@@ -113,6 +139,7 @@
 **Delivered:** Added dual-mode preview/compact toggle to the ComponentPicker dialog, allowing operators to see scaled mini-renders of all 28 section types in a 2-3 column grid before adding to the blueprint.
 
 **Key accomplishments:**
+
 1. Hardened defaultProps for all 28 section types with complete, Zod-valid sample data for visual rendering (6 previously empty types enriched, 17 renderability tests)
 2. SectionPreview component rendering any section type as scaled-down mini-preview using registry defaultProps + WireframeThemeProvider
 3. SectionPreviewCard with 25% CSS scale mini-previews, error boundary isolation, and usePickerMode hook with sessionStorage persistence
@@ -131,6 +158,7 @@
 **Delivered:** Replaced Sheet panels (Header, Sidebar, Filtros) with inline click-to-edit UX. Operators now click directly on any wireframe component to edit it via contextual PropertyPanel — same pattern as content blocks. AdminToolbar Layout buttons removed, 903 lines of dead code eliminated.
 
 **Key accomplishments:**
+
 1. Header inline editing: 4 clickable zones (logo, period, user, actions) with ZoneWrapper pattern and per-element PropertyPanel forms
 2. Sidebar inline editing: clickable groups, footer, widgets with SidebarPropertyPanel routing to 3 specialized forms
 3. Filter inline editing: clickable filter chips with FilterPropertyPanel, "+" button with 5 BI preset picker
@@ -150,6 +178,7 @@
 **Delivered:** Made sidebar, header, and filter bar of the wireframe fully configurable via visual editor panels. Added widget system for sidebar (WorkspaceSwitcher, UserMenu), extended HeaderConfig with brandLabel/periodType, and built per-screen filter bar editor with BI presets.
 
 **Key accomplishments:**
+
 1. SidebarWidget discriminated union (TypeScript + Zod) with backward-compatible schema extension and .passthrough() for forward-compat
 2. All HeaderConfig fields wired to conditional rendering in WireframeHeader across 4 call sites (period selector, user indicator, action buttons)
 3. Dashboard-level mutation infrastructure: updateWorkingConfig() helper + AdminToolbar Layout button group + 3 Sheet panels
@@ -171,6 +200,7 @@
 **Delivered:** Migrated all process/documentation content from static .md files to Supabase, with dynamic rendering in the app (DocRenderer, sidebar nav, search index all consuming database), bidirectional sync CLI for Claude Code workflow, and in-memory prefetch cache for instant navigation.
 
 **Key accomplishments:**
+
 1. Supabase `documents` table with B-tree indexes on parent_path/sort_order, anon-permissive RLS, and migration 007
 2. Seed script migrating all 62 docs with frontmatter extraction, custom tag preservation, and 15-point automated verification
 3. DocRenderer fetching from Supabase with skeleton loading, docs-service data access layer, and useDoc hook
@@ -191,6 +221,7 @@
 **Delivered:** Transformed FXL Core from monolithic app into modular framework shell with typed ModuleDefinition registry, cross-module extension architecture (slots + contracts), runtime module enable/disable, Home 2.0 control center, and admin panel for module management.
 
 **Key accomplishments:**
+
 1. Module Registry Foundation: zero-import `module-ids.ts` constants, `ModuleDefinition` extending `ModuleManifest` with extensions/badge/enabled, `useModuleEnabled` hook with localStorage persistence
 2. Slot Architecture & Contract Types: `SlotComponentProps`, `SLOT_IDS`, pure `resolveExtensions()` function, `ExtensionProvider`/`ExtensionSlot` React runtime wired into App.tsx provider stack
 3. Routing Refactor: sidebar driven by enabled modules via `useModuleEnabled` context, Home NavLink `end` prop exact-match fix
@@ -210,6 +241,7 @@
 **Delivered:** Expanded wireframe builder component library with 12 new chart/section types — 7 chartType sub-variants via Extension Point A, 4 standalone sections via Extension Point B, and 1 Sankey diagram — all with ComponentGallery entries, mock data, and light/dark mode validation.
 
 **Key accomplishments:**
+
 1. Extended ChartType union with 7 new literals (grouped-bar, bullet, step-line, lollipop, range-bar, bump, polar) and implemented all with ChartRenderer wiring
 2. Added 4 standalone section types (Pie Chart, Progress Grid, Heatmap, Sparkline Grid) via 5-file checklist pattern (type, schema, component, renderer, form, registry)
 3. Added Sankey diagram as 28th section type with Recharts Sankey export verification
@@ -230,6 +262,7 @@
 **Delivered:** Transformed FXL Core from monolithic system into modular platform with typed module registry, knowledge base with full-text search (Portuguese), task management with kanban board, and operational home page hub with cross-module activity feed.
 
 **Key accomplishments:**
+
 1. Module registry pattern: ModuleManifest type + MODULE_REGISTRY driving sidebar, routing, and home page — replaced 126-line hardcoded nav array
 2. Supabase migrations for knowledge_entries (tsvector/GIN FTS) and tasks (status/priority CHECK constraints) with anon-permissive RLS
 3. Knowledge Base module: list/detail/form/search pages with 4 entry types, ADR template for decisions, full-text search in Portuguese
@@ -250,6 +283,7 @@
 **Delivered:** Complete visual overhaul of all wireframe components with professional financial dashboard aesthetic — primary blue #1152d4, slate palette, Inter extrabold typography, dark sidebar, group-hover effects, backdrop-blur filter bar, and new CompositionBar chart type.
 
 **Key accomplishments:**
+
 1. Token foundation: slate + blue palette replacing stone/gold, --wf-primary as canonical accent, branding override pipeline with WireframeThemeProvider
 2. Sidebar & header chrome: dark slate sidebar with active/hover states, 3-column header with search/notifications/user chip
 3. KPI cards: icon slot with group-hover color inversion, rounded-full trend badges, extrabold values
@@ -270,6 +304,7 @@
 **Delivered:** Expanded wireframe builder with configurable sidebar/header driven by BlueprintConfig data, typed filter dispatch with 5 sub-components, 6 new chart variants (stacked-bar, stacked-area, horizontal-bar, bubble, gauge, composed), and gallery reorganized into 6 thematic sections.
 
 **Key accomplishments:**
+
 1. Schema foundation: SidebarConfig and HeaderConfig at dashboard level in BlueprintConfig, FilterOption.filterType discriminator
 2. Configurable sidebar: collapse rail, grouped sections with icons, badge counts, footer from config
 3. Configurable header: logo/brand slot, period selector, user/role indicator, action buttons
@@ -290,6 +325,7 @@
 **Delivered:** Complete visual redesign of FXL Core with slate + indigo palette, Inter/JetBrains Mono typography, frosted glass header, border-l rail navigation, dark-themed syntax-highlighted code blocks, right-side TOC with scroll tracking, and consistent visual language across all pages.
 
 **Key accomplishments:**
+
 1. Design foundation with slate + indigo CSS palette, Inter/JetBrains Mono fonts via @fontsource-variable, and wireframe --wf-* token isolation
 2. Frosted glass sticky header with viewport-level scrolling, input-styled search trigger, and page-delegated width constraints
 3. Sidebar border-l rail navigation with indigo-600 active states, uppercase section headers, and container-level sub-item indentation
@@ -310,6 +346,7 @@
 **Delivered:** Wireframe system evolved from static config files into a full DB-backed pipeline with semantic design tokens, 21 section types, structured briefing input, and AI-assisted blueprint generation from business context.
 
 **Key accomplishments:**
+
 1. Blueprint infrastructure: DB-only storage with Zod validation (21 section types), schema migration framework, and optimistic locking with conflict resolution
 2. Wireframe design system: --wf-* semantic tokens (warm stone grays + gold accent), dark/light mode toggle, client branding overrides without app theme collision
 3. Section registry pattern: single source of truth for 21 types replacing 5+ switch statements, with 6 new blocks and 5 new chart variants
@@ -330,6 +367,7 @@
 **Delivered:** FXL Core evolved from static documentation renderer into full operational platform with interactive wireframe editing, client feedback, structured branding, config pipeline, and automated BI dashboard spec generation.
 
 **Key accomplishments:**
+
 1. Documentation reorganized with 4-section taxonomy (Processo, Padroes, Ferramentas, Clientes) and operator onboarding
 2. Persistent wireframe comments with Supabase + Clerk auth + client share links
 3. 22 block specs as detailed component-generation prompts with synchronized gallery
@@ -347,4 +385,3 @@
 **Archive:** [v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md) | [v1.0-REQUIREMENTS.md](milestones/v1.0-REQUIREMENTS.md) | [v1.0-MILESTONE-AUDIT.md](milestones/v1.0-MILESTONE-AUDIT.md)
 
 ---
-

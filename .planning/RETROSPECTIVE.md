@@ -645,6 +645,45 @@
 - Sessions: 1 (phases 105-111 + audit + complete in sequence)
 - Notable: 3 of 7 phases were audit/documentation work that could have been eliminated with better verification hygiene during execution phases
 
+## Milestone: v7.0 — Admin-Only Org Management
+
+**Shipped:** 2026-03-18
+**Phases:** 4 | **Plans:** 8 | **Requirements:** 16/16
+
+### What Was Built
+- Access control lockdown: removed /criar-empresa, added /solicitar-acesso holding screen with Nexo branding
+- Admin user management: segmented filter (Todos/Sem org/Com org), "Vincular" org-assignment dialog, Command+Popover combobox on TenantDetailPage
+- Tenant archival: archived_at on 10 tables, RLS exclusion policies, edge function archive/restore with Clerk metadata sync, Active/Archived tabs
+- Admin dashboard: unaffiliated users + archived tenants metric cards with amber styling and query-param navigation
+
+### What Worked
+- **Single-commit phases (118, 119):** Bundling all plan work into one commit per phase reduced overhead
+- **Edge function extension pattern:** Adding archive/restore actions to existing admin-tenants function was cleaner than creating new functions
+- **Query param navigation:** Using ?filter= and ?tab= for dashboard card links enabled seamless filtered views without extra state management
+- **Promise.allSettled consistency:** Following the codebase rule prevented silent fetch failures in dashboard metrics
+
+### What Was Inefficient
+- **Missing VERIFICATION.md for phases 118 and 119:** Both phases were executed without generating verification artifacts, requiring the audit to verify code manually
+- **Missing SUMMARY.md for 5 plans:** Plans 118-01, 118-02, 119-01, 119-02, 119-03 have no summary files, losing execution history
+- **REQUIREMENTS.md checkboxes stale:** 12 of 16 requirements were not checked off despite being complete in code
+
+### Patterns Established
+- **Amber metric cards:** New pattern for "attention needed" dashboard indicators, distinct from indigo "informational" cards
+- **Segmented filter with count badges:** Native button group pattern for compact admin list filtering
+- **Soft-delete with Clerk metadata sync:** Archive pattern combining DB archived_at + Clerk org metadata for consistent state
+
+### Key Lessons
+1. **VERIFICATION.md and SUMMARY.md must be generated in the same session as execution** — phases 118 and 119 prove that skipping documentation creates audit debt
+2. **Single-commit per phase works for small phases** — when all plans are independent and simple, one commit with comprehensive message is sufficient
+3. **Soft-delete is always the right default for tenant data** — preserves compliance/recovery capability with minimal complexity
+
+### Cost Observations
+- Model mix: ~80% opus, ~20% sonnet
+- Sessions: 2 (execution + audit/completion)
+- Notable: Documentation debt from execution session required extra verification work in audit session
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -664,6 +703,7 @@
 | v2.3 | 1 session | 4 | 7 | Inline click-to-edit replacing Sheet panels, five-way selection mutex, per-element form registry |
 | v2.4 | 1 session | 2 | 4 | Component Picker dual-mode preview, scale-transform mini-renders, defaultProps as preview data |
 | v4.3 | 1 day | 4 | 8 | Custom auth, edge function data layer, autorun parallel execution, admin users management |
+| v7.0 | 1 day | 4 | 8 | Access control lockdown, admin user management, tenant archival, dashboard improvements |
 
 ### Cumulative Quality
 
@@ -682,6 +722,7 @@
 | v2.3 | ~283 tests | no new tests (UI refactor) | 1 (@radix-ui/react-context-menu via shadcn) |
 | v2.4 | ~316 tests | 33 new (SectionPreview 33 + renderability 17) | 0 |
 | v4.3 | ~316 tests | no new tests (edge functions + UI) | 0 |
+| v7.0 | ~316 tests | no new tests (admin UI + migration) | 0 |
 
 ### Velocity
 
@@ -700,6 +741,7 @@
 | v2.3 | 7 | ~19 min | ~2.7 min |
 | v2.4 | 4 | ~29 min | ~7.3 min |
 | v4.3 | 8 | ~5 min | ~0.6 min |
+| v7.0 | 8 | ~15 min | ~1.9 min |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -716,3 +758,4 @@
 11. UX consistency beats feature completeness — validate interaction model with user before building config UI (v2.2 Sheet panels replaced by inline editing in v2.3)
 12. Build new before removing old — safe migration: v2.3 built inline editing alongside Sheet panels, then removed old code in cleanup phase
 13. Run milestone audit at least once — v2.3 was first audit since v1.0; integration checker found visual gap and orphaned export missed by phase-level verification
+14. Verification artifacts are as important as code — v7.0 phases 118/119 shipped working code but missing VERIFICATION.md and SUMMARY.md, creating audit debt (verified across v5.3, v7.0)

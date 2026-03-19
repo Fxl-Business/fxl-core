@@ -27,14 +27,7 @@
 - **v5.2 Nexo Skill** - Phases 99-104 (shipped 2026-03-18) -- see milestones/v5.2-ROADMAP.md
 - **v5.3 UX Polish** - Phases 105-111 (shipped 2026-03-18) -- see milestones/v5.3-ROADMAP.md
 - **v6.0 Reestruturação de Módulos** - Phases 112-116 (shipped 2026-03-18) -- see milestones/v6.0-ROADMAP.md
-- **v7.0 Admin-Only Org Management** - Phases 117-120 (active)
-
-## Phases
-
-- [ ] **Phase 117: Access Control Lockdown** - Remove self-service org creation and add unaffiliated user screen
-- [ ] **Phase 118: Admin User Management** - Unaffiliated users filter, search, and org linking from admin panel
-- [ ] **Phase 119: Tenant Archival** - Soft-delete with restore capability and archived tenants visibility
-- [ ] **Phase 120: Admin Dashboard Improvements** - Unaffiliated and archived counts with quick action links
+- **v7.0 Admin-Only Org Management** - Phases 117-120 (shipped 2026-03-18) -- see milestones/v7.0-ROADMAP.md
 
 ## Quick Tasks
 
@@ -45,70 +38,17 @@
 
 ---
 
-## Phase Details
+<details>
+<summary>✅ v7.0 Admin-Only Org Management (Phases 117-120) — SHIPPED 2026-03-18</summary>
 
-### Phase 117: Access Control Lockdown
-**Goal**: Users without org membership can no longer create organizations themselves — they see a branded holding screen and must wait for admin intervention
-**Depends on**: Nothing (first phase of milestone)
-**Requirements**: ACC-01, ACC-02, ACC-03, ACC-04
-**Success Criteria** (what must be TRUE):
-  1. Navigating to `/criar-empresa` or clicking any "create org" flow no longer works — the route/button is absent
-  2. A user with no org membership is automatically redirected to `/solicitar-acesso` instead of the app
-  3. The `/solicitar-acesso` screen displays Nexo branding, a clear message explaining they need admin approval, and a functional sign out button
-  4. Only super admin can create a new organization (via the admin panel — no client-side `createOrganization()` call exists)
-**Plans**: 2 plans
+- [x] Phase 117: Access Control Lockdown (2/2 plans) — completed 2026-03-18
+- [x] Phase 118: Admin User Management (2/2 plans) — completed 2026-03-18
+- [x] Phase 119: Tenant Archival (3/3 plans) — completed 2026-03-18
+- [x] Phase 120: Admin Dashboard Improvements (1/1 plan) — completed 2026-03-18
 
-Plans:
-- [ ] 117-01-PLAN.md — Create SolicitarAcesso page (new branded holding screen)
-- [ ] 117-02-PLAN.md — Remove CriarEmpresa, update router and ProtectedRoute redirect
+See: milestones/v7.0-ROADMAP.md
 
-### Phase 118: Admin User Management
-**Goal**: Admin can identify all unaffiliated users at a glance and link them to organizations without leaving the users panel
-**Depends on**: Phase 117
-**Requirements**: ADM-01, ADM-02, ADM-03, ADM-04
-**Success Criteria** (what must be TRUE):
-  1. `/admin/users` shows a filter or tab that isolates users with zero org memberships
-  2. Admin can switch between "all", "unaffiliated", and "affiliated" views of the user list
-  3. From the unaffiliated users list, admin can assign a user to an existing organization without navigating away
-  4. When adding a member to a tenant via TenantDetailPage, admin can search existing unaffiliated users by name/email to find them quickly
-**Plans**: 2 plans
-
-Plans:
-- [ ] 118-01-PLAN.md — UsersPage filter (Todos/Sem org/Com org) and org assignment dialog
-- [ ] 118-02-PLAN.md — TenantDetailPage user search combobox replacing raw userId input
-
-### Phase 119: Tenant Archival
-**Goal**: Admin can safely archive a tenant — hiding it from normal operation while preserving all data — and can restore it later
-**Depends on**: Phase 117
-**Requirements**: ARC-01, ARC-02, ARC-03, ARC-04, ARC-05
-**Success Criteria** (what must be TRUE):
-  1. Admin can archive a tenant from the admin panel; after archiving, the tenant disappears from the active tenants list
-  2. Archived tenants have Clerk org metadata set to `archived=true` and no active org memberships remain
-  3. Normal application queries never surface data from archived tenants (RLS enforces `archived_at IS NULL`)
-  4. Admin can navigate to an "Archived" tab on the tenants page and see all archived tenants listed
-  5. Admin can restore an archived tenant, which re-enables the org, reverses the soft-delete, and makes the tenant active again
-**Plans**: TBD
-
-### Phase 120: Admin Dashboard Improvements
-**Goal**: Admin dashboard surfaces at-a-glance counts for unaffiliated users and archived tenants, with direct navigation to each view
-**Depends on**: Phase 118, Phase 119
-**Requirements**: DASH-01, DASH-02, DASH-03
-**Success Criteria** (what must be TRUE):
-  1. Admin dashboard metric cards include a count of users with zero org memberships
-  2. Admin dashboard metric cards include a count of archived tenants
-  3. Each new metric card links directly to the relevant filtered view (unaffiliated users tab, archived tenants tab)
-**Plans**: TBD
-
----
-
-## Progress Table
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 117. Access Control Lockdown | 0/2 | Not started | - |
-| 118. Admin User Management | 0/? | Not started | - |
-| 119. Tenant Archival | 0/? | Not started | - |
-| 120. Admin Dashboard Improvements | 0/? | Not started | - |
+</details>
 
 ---
 
