@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Building2, Users, Blocks, ArrowRight } from 'lucide-react'
+import { Building2, Users, Blocks, ArrowRight, UserX, Archive } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useSession } from '@clerk/react'
 import { MODULE_REGISTRY } from '@platform/module-loader/registry'
@@ -18,17 +18,21 @@ function MetricCard({
   icon: Icon,
   href,
   loading,
+  iconBg,
+  iconColor,
 }: {
   label: string
   value: number | string
   icon: React.ComponentType<{ className?: string }>
   href?: string
   loading?: boolean
+  iconBg?: string
+  iconColor?: string
 }) {
   const content = (
     <div className="rounded-xl border border-slate-200 bg-white p-6 transition-all hover:border-indigo-200 hover:shadow-sm dark:border-slate-700 dark:bg-card dark:hover:border-indigo-800">
       <div className="flex items-center justify-between">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${iconBg ?? 'bg-indigo-50 dark:bg-indigo-950/50'} ${iconColor ?? 'text-indigo-600 dark:text-indigo-400'}`}>
           <Icon className="h-5 w-5" />
         </div>
         {href && <ArrowRight className="h-4 w-4 text-slate-400 dark:text-slate-500" />}
@@ -59,6 +63,8 @@ export default function AdminDashboard() {
 
   const [tenantCount, setTenantCount] = useState(0)
   const [userCount, setUserCount] = useState(0)
+  const [unaffiliatedCount, setUnaffiliatedCount] = useState(0)
+  const [archivedTenantCount, setArchivedTenantCount] = useState(0)
   const [metricsLoading, setMetricsLoading] = useState(true)
 
   // Per-tenant module average from Supabase tenant_modules table
@@ -84,9 +90,10 @@ export default function AdminDashboard() {
       setMetricsLoading(true)
 
       // Fetch independently so one failure doesn't zero out the other
-      const [tenantsResult, usersResult] = await Promise.allSettled([
+      const [tenantsResult, usersResult, archivedResult] = await Promise.allSettled([
         listTenants(),
         listUsers(),
+        listTenants('archived'),
       ])
 
       if (!cancelled) {
@@ -98,8 +105,17 @@ export default function AdminDashboard() {
 
         if (usersResult.status === 'fulfilled') {
           setUserCount(usersResult.value.totalCount)
+          setUnaffiliatedCount(
+            (usersResult.value.users ?? []).filter(u => u.organizationMemberships.length === 0).length
+          )
         } else {
           console.error('Failed to fetch users:', usersResult.reason)
+        }
+
+        if (archivedResult.status === 'fulfilled') {
+          setArchivedTenantCount(archivedResult.value.totalCount)
+        } else {
+          console.error('Failed to fetch archived tenants:', archivedResult.reason)
         }
 
         setMetricsLoading(false)
@@ -179,7 +195,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Metrics grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <MetricCard
           label="Tenants"
           value={tenantCount}
@@ -200,6 +216,24 @@ export default function AdminDashboard() {
           icon={Blocks}
           href="/admin/modules"
           loading={modulesLoading}
+        />
+        <MetricCard
+          label="Usuarios sem org"
+          value={unaffiliatedCount}
+          icon={UserX}
+          href="/admin/users?filter=unaffiliated"
+          loading={isLoading}
+          iconBg="bg-amber-50 dark:bg-amber-950/50"
+          iconColor="text-amber-600 dark:text-amber-400"
+        />
+        <MetricCard
+          label="Tenants arquivados"
+          value={archivedTenantCount}
+          icon={Archive}
+          href="/admin/tenants?tab=archived"
+          loading={isLoading}
+          iconBg="bg-amber-50 dark:bg-amber-950/50"
+          iconColor="text-amber-600 dark:text-amber-400"
         />
       </div>
 
