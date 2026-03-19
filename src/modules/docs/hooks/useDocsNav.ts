@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAllDocuments, type DocumentRow } from '../services/docs-service'
+import { getAllDocuments, getDocsCacheVersion, type DocumentRow } from '../services/docs-service'
 import type { NavItem } from '@platform/module-loader/registry'
 
 /**
@@ -184,9 +184,24 @@ type UseDocsNavResult = {
 export function useDocsNav(): UseDocsNavResult {
   const [tenantItems, setTenantItems] = useState<NavItem[]>([])
   const [productItems, setProductItems] = useState<NavItem[]>([])
+  const [cacheVersion, setCacheVersion] = useState(() => getDocsCacheVersion())
+
+  // Listen for cache invalidation (org switch) by polling getDocsCacheVersion().
+  // When invalidateDocsCache() is called, cacheVersion increments, re-triggering the fetch effect.
+  useEffect(() => {
+    const id = setInterval(() => {
+      const v = getDocsCacheVersion()
+      setCacheVersion((prev) => (prev !== v ? v : prev))
+    }, 100)
+    return () => clearInterval(id)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
+
+    // Reset to empty while re-fetching (avoid showing stale docs from previous org)
+    setTenantItems([])
+    setProductItems([])
 
     getAllDocuments()
       .then((docs) => {
@@ -245,7 +260,7 @@ export function useDocsNav(): UseDocsNavResult {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [cacheVersion])
 
   return { tenantItems, productItems }
 }

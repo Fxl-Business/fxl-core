@@ -29,6 +29,18 @@ let docsCache: DocumentRow[] | null = null
 let docsCachePromise: Promise<DocumentRow[]> | null = null
 
 /**
+ * Monotonically increasing counter that increments when invalidateDocsCache()
+ * is called. Allows React hooks to detect cache invalidation (e.g., org switch)
+ * and re-fetch documents with the new JWT.
+ */
+let cacheVersion = 0
+
+/** Returns the current cache version. Used by useDocsNav to detect invalidation. */
+export function getDocsCacheVersion(): number {
+  return cacheVersion
+}
+
+/**
  * Ensures the full documents list is loaded exactly once.
  * Concurrent callers share the same in-flight promise; subsequent calls
  * resolve instantly from the populated cache.
@@ -71,6 +83,7 @@ function ensureCache(): Promise<DocumentRow[]> {
 export function invalidateDocsCache(): void {
   docsCache = null
   docsCachePromise = null
+  cacheVersion += 1
 }
 
 // ---------------------------------------------------------------------------

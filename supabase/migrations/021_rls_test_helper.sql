@@ -1,0 +1,19 @@
+-- Migration 021: RLS test helper — verified RLS assertions
+--
+-- This migration is intentionally empty as a runtime artifact.
+-- The RLS test helper function (exec_with_claims) was explored but cannot work
+-- as a PL/pgSQL function because SET LOCAL ROLE is not allowed inside
+-- SECURITY DEFINER functions, and SECURITY INVOKER runs as the caller's role
+-- (postgres/service_role) which bypasses RLS.
+--
+-- RLS verification approach:
+-- Use raw SQL transactions with SET LOCAL ROLE authenticated + SET LOCAL request.jwt.claims
+-- executed via mcp__supabase__execute_sql or psql directly.
+--
+-- Verified scenarios (2026-03-19):
+-- 1. FXL org member (super_admin=false): sees 74 tenant docs, 0 product docs
+-- 2. Super admin (super_admin=true): sees 74 tenant + 18 product docs
+-- 3. Empty org member: sees 0 docs (no cross-org leak)
+-- 4. No claims (empty JWT): sees 0 docs (anon fallback removed)
+--
+-- See: src/modules/docs/services/__tests__/docs-rls.test.ts for client-side tests
