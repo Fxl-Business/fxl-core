@@ -210,12 +210,12 @@ Previous: v7.0 Admin-Only Org Management (shipped 2026-03-18)
 
 ### Active
 
-- [ ] Token exchange pipeline funciona corretamente para todas as orgs
+- [x] Token exchange pipeline funciona corretamente para todas as orgs — Validated in Phase 121: Auth & Token Exchange
 - [ ] Documentos visiveis por org (tenant docs isolados, product docs para admins)
 - [ ] Org switch preserva acesso aos dados da org ativa
 - [ ] Impersonation mode funciona para orgs com dados
 - [ ] tenant_modules funciona com opt-out model para orgs sem configuracao
-- [ ] Test suite cobrindo pipeline multi-tenant critico
+- [x] Test suite cobrindo pipeline multi-tenant critico (auth) — Validated in Phase 121: 15 unit tests
 
 ### Out of Scope
 
@@ -253,7 +253,7 @@ Previous: v7.0 Admin-Only Org Management (shipped 2026-03-18)
 
 ## Current State
 
-27 milestones shipped (v1.0 → v7.0). v7.0 Admin-Only Org Management complete — org creation locked to admin only, /solicitar-acesso holding screen for unaffiliated users, admin user management with filter/org-linking, tenant archival with soft-delete and restore, dashboard metric cards. 19+ Supabase migrations (001-019).
+27 milestones shipped (v1.0 → v7.0). v8.0 Phase 121 (Auth & Token Exchange) complete — fixed token exchange race condition on org switch, committed Clerk hydration guard fixes, added super_admin JWT forwarding, deployed edge function v11, 15 unit tests covering auth pipeline. 19+ Supabase migrations (001-019).
 
 ## Context
 
