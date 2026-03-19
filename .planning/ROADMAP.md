@@ -109,7 +109,9 @@ Plans:
   1. Smoke test executa a sequencia: login → org ativa → sidebar com docs → troca de org → sidebar atualiza com docs da nova org
   2. Smoke test falha visivelmente com exit code != 0 e mensagem clara se qualquer passo produzir estado incorreto
   3. O smoke test pode ser executado localmente com um comando unico sem setup manual alem do .env
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 124-01-PLAN.md — Smoke test script + Makefile target + env docs
 
 ### Progress
 
@@ -118,7 +120,7 @@ Plans:
 | 121. Auth & Token Exchange | 0/4 | Planning done | — |
 | 122. Document Scoping & RLS | 0/2 | Planned | — |
 | 123. Modules & Org Lifecycle | 0/2 | Planned | — |
-| 124. Regression Guard | 0/? | Not started | — |
+| 124. Regression Guard | 0/1 | Planned | — |
 
 ---
 
