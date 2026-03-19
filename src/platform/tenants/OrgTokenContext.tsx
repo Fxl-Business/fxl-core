@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { useSession } from '@clerk/react'
 import { useActiveOrg } from './useActiveOrg'
 import { exchangeToken } from './token-exchange'
+import { withRetry } from '@platform/lib/retry'
 import { _setTokenGetter, _setSignalGetter } from '@platform/supabase'
 
 export interface OrgTokenState {
@@ -139,7 +140,10 @@ export function OrgTokenProvider({ children, onOrgChange }: OrgTokenProviderProp
           return
         }
 
-        const result = await exchangeToken(clerkToken, activeOrg!.id, abortControllerRef.current.signal)
+        const result = await withRetry(
+          () => exchangeToken(clerkToken, activeOrg!.id, abortControllerRef.current.signal),
+          { maxRetries: 3, baseDelay: 1000, backoffFactor: 2 },
+        )
         tokenRef.current = result.access_token
         setOrgToken(result.access_token)
         setIsReady(true)
@@ -152,7 +156,8 @@ export function OrgTokenProvider({ children, onOrgChange }: OrgTokenProviderProp
         prevOrgIdRef.current = activeOrg!.id
       } catch (err) {
         // Silently ignore abort errors — they are expected during org switch
-        if (err instanceof DOMException && err.name === 'AbortError') {
+        // Use name check instead of instanceof to handle cross-realm DOMException
+        if (err instanceof Error && err.name === 'AbortError') {
           return
         }
         const message = err instanceof Error ? err.message : 'Token exchange failed'
