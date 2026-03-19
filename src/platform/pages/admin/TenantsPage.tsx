@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSession } from '@clerk/react'
 import { Building2, Plus, RefreshCw, RotateCcw, Archive } from 'lucide-react'
 import { Button } from '@shared/ui/button'
@@ -18,7 +18,9 @@ export default function TenantsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
 
   // Archived state
-  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active')
+  const [searchParams] = useSearchParams()
+  const initialTab = searchParams.get('tab') === 'archived' ? 'archived' as const : 'active' as const
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>(initialTab)
   const [archivedTenants, setArchivedTenants] = useState<Tenant[]>([])
   const [archivedCount, setArchivedCount] = useState(0)
   const [archivedLoading, setArchivedLoading] = useState(false)
