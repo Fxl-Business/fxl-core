@@ -58,8 +58,9 @@ export function useOrgTokenExchange(options?: OrgTokenExchangeOptions): OrgToken
         setOrgAccessToken(result.access_token)
         setIsReady(true)
 
-        // Fire onOrgChange callback on org switch so callers can invalidate their caches
-        if (orgChanged && onOrgChangeRef.current) {
+        // Fire onOrgChange callback on org switch OR first exchange so callers
+        // can invalidate stale caches (e.g., docs cache populated before JWT was set)
+        if (onOrgChangeRef.current && (orgChanged || prevOrgIdRef.current === null)) {
           onOrgChangeRef.current()
         }
 

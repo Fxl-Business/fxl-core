@@ -77,7 +77,35 @@ Store: `project_slug`, `project_name`, `project_description`, `source`, `auth_de
 
 ## Stage 2: Context (MCP Integration)
 
-Before auditing or touching any file, gather context from the MCP knowledge base.
+Before auditing or touching any file, gather context from the MCP knowledge base
+AND from the platform MCPs (Clerk + Supabase).
+
+### GSD Codebase Mapping
+
+Before auditing files manually, run `gsd:map-codebase` inside the spoke project directory.
+This produces structured analysis documents in `.planning/codebase/` covering architecture,
+tech stack, quality, and concerns — which the audit stage uses as input.
+
+### Platform MCP Context
+
+Load Clerk patterns relevant to B2B/org refactor:
+
+```
+mcp__clerk__clerk_sdk_snippet(slug: "b2b-saas")
+mcp__clerk__list_clerk_sdk_snippets(tag: "organizations")
+```
+
+Invoke **clerk-orgs** and **clerk-setup** skills — authoritative source for
+Clerk JWT templates, org_id propagation, and React hooks.
+
+Load Supabase schema from the live project (if credentials are available):
+
+```
+mcp__supabase__list_tables()
+```
+
+This gives the real schema to audit against, instead of relying on file inspection alone.
+
 Follow `mcp-bridge/pre-operation.md` in full, then additionally:
 
 ```
@@ -192,17 +220,16 @@ bun run type-check        # zero errors in all packages
 
 ### GSD Integration
 
-After generating the roadmap, offer to initialize it as a GSD milestone:
+After generating the roadmap, initialize the GSD project structure inside the spoke:
 
-> "Do you want me to set this up as a GSD milestone so you can track progress with `/gsd:*` commands?"
+1. Run `gsd:new-project` inside the spoke directory — this creates `.planning/PROJECT.md`,
+   `STATE.md`, and `ROADMAP.md` using the audit findings as context
+2. Each refactor step from `sdk/refactor.md` maps to one GSD phase in `ROADMAP.md`
+3. From this point, all execution follows the GSD workflow:
+   `/gsd:discuss-phase N → /gsd:plan-phase N → /gsd:execute-phase N`
 
-If yes:
-1. Present the roadmap as phases to confirm with the user
-2. Prompt the user to run `/gsd:new-milestone` with the audit findings as context
-3. Each refactor step from `sdk/refactor.md` maps to one GSD phase
-
-If no:
-- Save the roadmap as `REFACTOR-PLAN.md` at project root and continue
+If the user prefers not to use GSD:
+- Save the roadmap as `REFACTOR-PLAN.md` at project root and continue manually
 
 ### Roadmap Output
 
@@ -241,6 +268,15 @@ Guide the user through each refactor phase in order. For each phase:
 4. **Capture** any unexpected issues as potential pitfalls for MCP
 
 ### Phase 4 Special Case: Auth Migration to Clerk
+
+Before starting, load Clerk patterns from the MCP:
+
+```
+mcp__clerk__clerk_sdk_snippet(slug: "b2b-saas")
+mcp__clerk__list_clerk_sdk_snippets(tag: "auth")
+```
+
+Invoke the **clerk-setup** and **clerk-orgs** skills for authoritative implementation guidance.
 
 If the user chose to migrate to Clerk, Phase 4 requires extra steps beyond `sdk/refactor.md`:
 
@@ -294,6 +330,17 @@ If the user chose to migrate to Clerk, Phase 4 requires extra steps beyond `sdk/
    - Follow `sdk/refactor.md` Step 4 for the migration SQL
    - Update RLS policies to use JWT `org_id` claim
    - Update all Supabase queries to filter by `org_id` instead of `user_id`
+
+### Phase 5 Special Case: Supabase Types
+
+After migrating the Supabase client, generate TypeScript types from the live schema:
+
+```
+mcp__supabase__generate_typescript_types()
+```
+
+Save to `shared/types/database.ts`. Use these types throughout backend services
+instead of declaring table types manually.
 
 ### Verification Gate
 

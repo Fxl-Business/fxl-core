@@ -104,7 +104,8 @@ function OrgModuleEnabledProvider({ children }: { children: ReactNode }) {
     fetchModules(effectiveOrgId)
 
     return () => { cancelled = true }
-  }, [activeOrg, orgLoading, refetchTick])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeOrg?.id, orgLoading, refetchTick])
 
   const toggleModule = useCallback(async (id: ModuleId) => {
     if (!activeOrg) return

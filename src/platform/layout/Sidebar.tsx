@@ -212,7 +212,7 @@ function DynamicNavContent({ useNavItems }: { useNavItems: () => UseNavItemsResu
           Nenhum documento encontrado para esta organização.
         </p>
         <p className="text-xs text-slate-400 dark:text-sidebar-muted-foreground">
-          Documentos são adicionados via <span className="font-medium">/admin/product-docs</span>.
+          Esta organização ainda não possui documentos próprios.
         </p>
       </div>
     )

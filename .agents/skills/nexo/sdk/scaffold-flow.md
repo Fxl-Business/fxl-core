@@ -85,6 +85,18 @@ them to replace it later.
 Before generating any files, gather context from the MCP knowledge base.
 Follow `mcp-bridge/spoke-planning.md` in full.
 
+### Step 2.0: Platform MCP Snippets (Clerk + Supabase)
+
+Before generating any files, load implementation patterns from the platform MCPs:
+
+```
+mcp__clerk__clerk_sdk_snippet(slug: "b2b-saas")
+mcp__clerk__list_clerk_sdk_snippets(tag: "organizations")
+```
+
+Also invoke the **clerk-orgs** and **clerk-setup** skills — these provide authoritative
+patterns for B2B auth, org_id propagation, and JWT templates.
+
 ### Step 2.1: Pre-Operation Context
 
 ```
@@ -622,6 +634,22 @@ fxlRoutes.get('/widgets/:id/data', /* stub */)
 fxlRoutes.get('/search', /* stub */)
 ```
 
+### Step 3.10b: Apply Migrations via Supabase MCP
+
+After creating migration files, apply them directly using the Supabase MCP:
+
+```
+mcp__supabase__apply_migration(name: "001_{entity_type_plural}", query: "<migration SQL>")
+```
+
+Then generate TypeScript types from the live schema:
+
+```
+mcp__supabase__generate_typescript_types()
+```
+
+Save the output to `shared/types/database.ts` — this is the source of truth for DB types.
+
 ### Step 3.11: Create Database Migrations
 
 For each entity from Stage 1, create a migration:
@@ -674,7 +702,15 @@ Add FXL-specific fields to the root `package.json`:
 }
 ```
 
-### Step 3.14: Initialize Git
+### Step 3.14: Initialize GSD Project Structure
+
+Inside the spoke directory, run `gsd:new-project` to set up the planning structure.
+Use the project name, description, and entities from Stage 1 as context.
+
+This creates `.planning/PROJECT.md`, `STATE.md`, and `ROADMAP.md` — enabling
+`/gsd:plan-phase` and `/gsd:execute-phase` for all future development in the spoke.
+
+### Step 3.16: Initialize Git
 
 ```bash
 git add -A
