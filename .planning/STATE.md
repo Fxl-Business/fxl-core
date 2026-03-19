@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 status: unknown
 stopped_at: Phase 120 context gathered
-last_updated: "2026-03-19T00:49:14.302Z"
+last_updated: "2026-03-19T00:53:53.234Z"
 progress:
   total_phases: 4
-  completed_phases: 1
-  total_plans: 7
-  completed_plans: 2
+  completed_phases: 2
+  total_plans: 8
+  completed_plans: 3
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-18)
 
 **Core value:** Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma
-**Current focus:** Phase 119 — Tenant Archival (COMPLETE)
+**Current focus:** Phase 120 — admin-dashboard-improvements
 
 ## Current Position
 
-Phase: 119 (Tenant Archival) — COMPLETE
-Plan: 3 of 3
+Phase: 120 (admin-dashboard-improvements) — EXECUTING
+Plan: 1 of 1
 
 ## Performance Metrics
 
