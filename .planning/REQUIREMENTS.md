@@ -21,16 +21,16 @@
 
 ### Modules & Org Lifecycle
 
-- [ ] **MORG-01**: Org sem tenant_modules = todos os modulos habilitados por padrao
-- [ ] **MORG-02**: Admin impersonando org vee dados daquela org (docs, clients, tasks, projects)
-- [ ] **MORG-03**: Trocar org via OrgPicker recarrega todos os dados da nova org sem reload manual
-- [ ] **MORG-04**: Org sem dados mostra empty states claros (nao sidebar vazia sem explicacao)
+- [x] **MORG-01**: Org sem tenant_modules = todos os modulos habilitados por padrao
+- [x] **MORG-02**: Admin impersonando org vee dados daquela org (docs, clients, tasks, projects)
+- [x] **MORG-03**: Trocar org via OrgPicker recarrega todos os dados da nova org sem reload manual
+- [x] **MORG-04**: Org sem dados mostra empty states claros (nao sidebar vazia sem explicacao)
 
 ### Test Suite
 
 - [ ] **TEST-01**: Unit tests para useOrgTokenExchange, useActiveOrg, token-exchange service
 - [ ] **TEST-02**: Integration tests executando queries SQL com JWTs de diferentes orgs, validando isolamento
-- [ ] **TEST-03**: Tests validando que dados mudam corretamente ao trocar de org (cache, sidebar, modules)
+- [x] **TEST-03**: Tests validando que dados mudam corretamente ao trocar de org (cache, sidebar, modules)
 - [ ] **TEST-04**: Smoke test login -> org ativa -> sidebar com docs -> troca org -> sidebar atualiza
 
 ## Future Requirements
@@ -58,13 +58,13 @@
 | DOCS-02 | Phase 122 | Pending |
 | DOCS-03 | Phase 122 | Pending |
 | DOCS-04 | Phase 122 | Pending |
-| MORG-01 | Phase 123 | Pending |
-| MORG-02 | Phase 123 | Pending |
-| MORG-03 | Phase 123 | Pending |
-| MORG-04 | Phase 123 | Pending |
+| MORG-01 | Phase 123 | Verified |
+| MORG-02 | Phase 123 | Verified |
+| MORG-03 | Phase 123 | Verified |
+| MORG-04 | Phase 123 | Verified |
 | TEST-01 | Phase 121 | Pending |
 | TEST-02 | Phase 122 | Pending |
-| TEST-03 | Phase 123 | Pending |
+| TEST-03 | Phase 123 | Verified |
 | TEST-04 | Phase 124 | Pending |
 
 **Coverage:**

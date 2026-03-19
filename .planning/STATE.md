@@ -4,12 +4,12 @@ milestone: v8.0
 milestone_name: Estabilidade Multi-Tenant
 status: unknown
 stopped_at: Roadmap created for v8.0
-last_updated: "2026-03-19T18:10:08.751Z"
+last_updated: "2026-03-19T18:18:24.515Z"
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 8
 ---
 
 # Project State
