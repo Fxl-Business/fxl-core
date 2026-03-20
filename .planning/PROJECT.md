@@ -8,16 +8,9 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v9.0 Resiliencia de Plataforma
+## Latest Milestone: v9.0 Resiliencia de Plataforma (shipped 2026-03-20)
 
-**Goal:** Eliminar gaps criticos de resiliencia, observabilidade e seguranca de dados na plataforma multi-tenant — error boundaries, token management seguro, CI/CD, monitoring e retry.
-
-**Target features:**
-- Error boundaries por modulo isolando crashes sem derrubar a plataforma inteira
-- Token management via React Context com abort de requests in-flight no org switch (eliminar risco de data leak entre tenants)
-- GitHub Actions CI pipeline com type-check e testes automaticos em PRs
-- Sentry no frontend para captura de erros em producao
-- Retry com backoff exponencial no token exchange para resiliencia de rede
+Shipped error boundaries, Sentry, token management via React Context, CI/CD pipeline, and retry with exponential backoff.
 
 Previous: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19)
 
@@ -213,14 +206,15 @@ Previous: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19)
 - ✓ Test suite cobrindo pipeline multi-tenant critico (auth, 15 unit tests) — v8.0
 - ✓ Pub/sub cache invalidation for docs and modules on org switch — v8.0
 - ✓ Programmatic smoke test validating token-exchange → RLS isolation (make smoke-test) — v8.0
+- ✓ Error boundary por modulo isolando crashes sem derrubar a plataforma — v9.0
+- ✓ Sentry integrado no frontend capturando erros em producao com contexto de modulo/org — v9.0
+- ✓ Token management via React Context com AbortController cancelando requests in-flight no org switch — v9.0
+- ✓ GitHub Actions CI com tsc + vitest rodando automaticamente em PRs, branch protection bloqueando merge — v9.0
+- ✓ Retry com backoff exponencial no token exchange e chamadas criticas (withRetry utility, 11 call sites) — v9.0
 
 ### Active
 
-- [x] Error boundary por modulo isolando crashes sem derrubar a plataforma — Validated in Phase 125
-- [x] Sentry integrado no frontend capturando erros em producao — Validated in Phase 125
-- [ ] Token management via React Context com abort de requests in-flight no org switch
-- [ ] GitHub Actions CI com tsc + vitest rodando automaticamente em PRs
-- [ ] Retry com backoff exponencial no token exchange e chamadas criticas
+(No active requirements — define next milestone with `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -258,7 +252,7 @@ Previous: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19)
 
 ## Current State
 
-28 milestones shipped (v1.0 → v8.0). v8.0 Phases 121-124 fixed multi-tenant isolation (auth, RLS, modules, smoke test). 24 Supabase migrations. Phase 125 complete: error boundaries per module + Sentry integrated for runtime error capture in production.
+29 milestones shipped (v1.0 → v9.0). v9.0 added error boundaries per module with Sentry, migrated token management to React Context with AbortController, set up GitHub Actions CI/CD with branch protection, and added retry with exponential backoff across critical services. 24 Supabase migrations. 435 tests passing.
 
 ## Context
 
@@ -410,4 +404,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function archive/restore with Clerk metadata sync | Single action archives DB + Clerk org in one call | ✓ Good — atomic operation |
 
 ---
-*Last updated: 2026-03-19 after Phase 125 complete*
+*Last updated: 2026-03-20 after v9.0 milestone complete*
