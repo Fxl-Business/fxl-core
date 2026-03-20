@@ -8,18 +8,11 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v10.0 Nexo Stack
+## Latest Milestone: v9.0 Resiliencia de Plataforma (shipped 2026-03-20)
 
-**Goal:** Mapear e documentar a arquitetura completa do Nexo como Product Docs — conceitos (modulos, fluxos, multi-tenancy) e arquitetura (Supabase, Clerk, CI/CD, resiliencia, padroes) — visivel na UI e sincronizado no repo.
+Shipped error boundaries, Sentry, token management via React Context, CI/CD pipeline, and retry with exponential backoff.
 
-**Target features:**
-- Secao "Nexo Stack" no Product Docs (tabela documents, slug stack/*)
-- Paginas de conceitos: modulos, fluxos do operador, modelo multi-tenant
-- Paginas de arquitetura: Supabase, Clerk, CI/CD, resiliencia, padroes de codigo
-- Sidebar navigation para a nova secao
-- Arquivos .md sincronizados no repo (docs/stack/)
-
-Previous: v9.0 Resiliencia de Plataforma (shipped 2026-03-20)
+Previous: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19)
 
 ## Requirements
 
@@ -411,4 +404,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function archive/restore with Clerk metadata sync | Single action archives DB + Clerk org in one call | ✓ Good — atomic operation |
 
 ---
-*Last updated: 2026-03-19 after v10.0 milestone start*
+*Last updated: 2026-03-20 after v9.0 milestone complete*
