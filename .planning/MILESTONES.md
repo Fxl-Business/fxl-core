@@ -1,5 +1,15 @@
 # Milestones
 
+## v9.0 Resiliencia de Plataforma (Shipped: 2026-03-20)
+
+**Phases completed:** 4 phases, 7 plans, 0 tasks
+
+**Key accomplishments:**
+
+- (none recorded)
+
+---
+
 ## v7.0 Admin-Only Org Management (Shipped: 2026-03-18)
 
 **Phases:** 4 (117-120) | **Plans:** 8 | **Requirements:** 16/16

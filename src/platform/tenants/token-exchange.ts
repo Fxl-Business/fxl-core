@@ -24,10 +24,15 @@ export interface TokenExchangeError {
  *
  * @param clerkToken - The Clerk session token (from session.getToken())
  * @param orgId - The active Clerk organization ID
+ * @param signal - Optional AbortSignal for cancelling the request on org switch
  * @returns Supabase JWT with org_id claims
  * @throws Error if the exchange fails or the token is invalid
  */
-export async function exchangeToken(clerkToken: string, orgId: string): Promise<TokenExchangeResult> {
+export async function exchangeToken(
+  clerkToken: string,
+  orgId: string,
+  signal?: AbortSignal,
+): Promise<TokenExchangeResult> {
   if (!FUNCTIONS_URL) {
     throw new Error(
       'VITE_SUPABASE_FUNCTIONS_URL is not set. ' +
@@ -44,6 +49,7 @@ export async function exchangeToken(clerkToken: string, orgId: string): Promise<
       Authorization: `Bearer ${clerkToken}`,
     },
     body: JSON.stringify({ org_id: orgId }),
+    signal,
   })
 
   if (!response.ok) {

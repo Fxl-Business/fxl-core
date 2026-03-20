@@ -1,8 +1,7 @@
 import { useAuth, useUser, RedirectToSignIn } from '@clerk/react'
 import { Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { useOrgTokenExchange } from '@platform/tenants/useOrgTokenExchange'
-import { invalidateDocsCache } from '@modules/docs/services/docs-service'
+import { useOrgToken } from '@platform/tenants/OrgTokenContext'
 
 const loadingStyle: React.CSSProperties = {
   display: 'flex',
@@ -21,7 +20,7 @@ export default function SuperAdminRoute({ children }: { children: ReactNode }) {
   const { isSignedIn, isLoaded: authLoaded } = useAuth()
   const { user, isLoaded: userLoaded } = useUser()
   // Ensure Supabase JWT is set for admin routes (same as ProtectedRoute)
-  const { isReady: tokenReady, error: tokenError } = useOrgTokenExchange({ onOrgChange: invalidateDocsCache })
+  const { isReady: tokenReady, error: tokenError } = useOrgToken()
 
   if (!authLoaded || !userLoaded) {
     return (

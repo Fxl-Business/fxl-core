@@ -10,6 +10,7 @@ import SolicitarAcesso from '@platform/pages/SolicitarAcesso'
 import Login from '@platform/auth/Login'
 import Profile from '@platform/auth/Profile'
 import { MODULE_REGISTRY } from '@platform/module-loader/registry'
+import { ModuleErrorBoundary } from '@platform/layout/ModuleErrorBoundary'
 import WireframeViewer from '@modules/projects/pages/WireframeViewer'
 
 const SharedWireframeView = lazy(() => import('@modules/wireframe/pages/SharedWireframeView'))
@@ -29,10 +30,6 @@ const UsersPage = lazy(() => import('@platform/pages/admin/UsersPage'))
 import TaskList from '@modules/tasks/pages/TaskList'
 const KanbanBoard = lazy(() => import('@modules/tasks/pages/KanbanBoard'))
 const TaskForm = lazy(() => import('@modules/tasks/pages/TaskForm'))
-
-const moduleRoutes = MODULE_REGISTRY
-  .flatMap(m => m.routeConfig ?? [])
-  .filter((cfg): cfg is RouteObject & { path: string } => cfg.path !== undefined)
 
 // Thin auth-only guard: checks isSignedIn only, NOT org membership.
 // Used for routes that must be accessible to signed-in users without an org (e.g. /solicitar-acesso).
@@ -57,25 +54,39 @@ export default function AppRouter() {
       <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
         <Route
           path="/projetos/:projectSlug/wireframe"
-          element={<WireframeViewer />}
+          element={<ModuleErrorBoundary moduleName="Wireframe"><WireframeViewer /></ModuleErrorBoundary>}
         />
       </Route>
 
       {/* Protected operator routes (inside Layout) */}
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         {/* Home */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<ModuleErrorBoundary moduleName="Home"><Home /></ModuleErrorBoundary>} />
 
-        {/* Module routes — derived from MODULE_REGISTRY manifests */}
-        {moduleRoutes.map(cfg => (
-          <Route key={cfg.path} path={cfg.path} element={cfg.element} />
-        ))}
+        {/* Module routes — derived from MODULE_REGISTRY manifests, each wrapped with error boundary */}
+        {MODULE_REGISTRY.map(m => {
+          const routes = (m.routeConfig ?? []).filter(
+            (cfg): cfg is RouteObject & { path: string } => cfg.path !== undefined,
+          )
+          if (routes.length === 0) return null
+          return routes.map(cfg => (
+            <Route
+              key={cfg.path}
+              path={cfg.path}
+              element={
+                <ModuleErrorBoundary moduleName={m.label}>
+                  {cfg.element}
+                </ModuleErrorBoundary>
+              }
+            />
+          ))
+        })}
 
         {/* Tasks — static routes before parametric */}
-        <Route path="/tarefas" element={<TaskList />} />
-        <Route path="/tarefas/kanban" element={<Suspense fallback={<div>Carregando...</div>}><KanbanBoard /></Suspense>} />
-        <Route path="/tarefas/new" element={<Suspense fallback={<div>Carregando...</div>}><TaskForm /></Suspense>} />
-        <Route path="/tarefas/:id/edit" element={<Suspense fallback={<div>Carregando...</div>}><TaskForm /></Suspense>} />
+        <Route path="/tarefas" element={<ModuleErrorBoundary moduleName="Tarefas"><TaskList /></ModuleErrorBoundary>} />
+        <Route path="/tarefas/kanban" element={<ModuleErrorBoundary moduleName="Tarefas"><Suspense fallback={<div>Carregando...</div>}><KanbanBoard /></Suspense></ModuleErrorBoundary>} />
+        <Route path="/tarefas/new" element={<ModuleErrorBoundary moduleName="Tarefas"><Suspense fallback={<div>Carregando...</div>}><TaskForm /></Suspense></ModuleErrorBoundary>} />
+        <Route path="/tarefas/:id/edit" element={<ModuleErrorBoundary moduleName="Tarefas"><Suspense fallback={<div>Carregando...</div>}><TaskForm /></Suspense></ModuleErrorBoundary>} />
 
       </Route>
 
@@ -87,14 +98,14 @@ export default function AppRouter() {
           </Suspense>
         </SuperAdminRoute>
       }>
-        <Route path="/admin" element={<Suspense fallback={<div>Carregando...</div>}><AdminDashboard /></Suspense>} />
-        <Route path="/admin/users" element={<Suspense fallback={<div>Carregando...</div>}><UsersPage /></Suspense>} />
-        <Route path="/admin/tenants" element={<Suspense fallback={<div>Carregando...</div>}><TenantsPage /></Suspense>} />
-        <Route path="/admin/tenants/:orgId" element={<Suspense fallback={<div>Carregando...</div>}><TenantDetailPage /></Suspense>} />
-        <Route path="/admin/modules" element={<Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense>} />
-        <Route path="/admin/connectors" element={<Suspense fallback={<div>Carregando...</div>}><ConnectorsPanel /></Suspense>} />
-        <Route path="/admin/product-docs" element={<Suspense fallback={<div>Carregando...</div>}><ProductDocsPage /></Suspense>} />
-        <Route path="/admin/settings" element={<Suspense fallback={<div>Carregando...</div>}><SettingsPanel /></Suspense>} />
+        <Route path="/admin" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><AdminDashboard /></Suspense></ModuleErrorBoundary>} />
+        <Route path="/admin/users" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><UsersPage /></Suspense></ModuleErrorBoundary>} />
+        <Route path="/admin/tenants" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><TenantsPage /></Suspense></ModuleErrorBoundary>} />
+        <Route path="/admin/tenants/:orgId" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><TenantDetailPage /></Suspense></ModuleErrorBoundary>} />
+        <Route path="/admin/modules" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense></ModuleErrorBoundary>} />
+        <Route path="/admin/connectors" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><ConnectorsPanel /></Suspense></ModuleErrorBoundary>} />
+        <Route path="/admin/product-docs" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><ProductDocsPage /></Suspense></ModuleErrorBoundary>} />
+        <Route path="/admin/settings" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><SettingsPanel /></Suspense></ModuleErrorBoundary>} />
       </Route>
 
       {/* SSO callback for OAuth redirect (Google login) */}

@@ -12,40 +12,61 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 /**
- * Org-scoped access token from the Edge Function token exchange.
- * Set after Clerk -> Supabase JWT swap completes.
+ * Token getter function — set by OrgTokenProvider on mount.
+ * The custom fetch wrapper reads the token from this getter
+ * instead of a module-level mutable variable.
+ * @internal Only OrgTokenProvider should call _setTokenGetter.
  */
-let orgAccessToken: string | null = null
+let _tokenGetter: () => string | null = () => null
 
 /**
- * Set the org-scoped access token from the Edge Function token exchange.
- * This updates the Authorization header used by the Supabase client.
+ * AbortSignal getter function — set by OrgTokenProvider on mount.
+ * The custom fetch wrapper injects the signal from this getter
+ * so all Supabase requests are automatically cancellable on org switch.
+ * @internal Only OrgTokenProvider should call _setSignalGetter.
  */
-export function setOrgAccessToken(token: string | null): void {
-  orgAccessToken = token
+let _signalGetter: () => AbortSignal | undefined = () => undefined
+
+/**
+ * Register the token getter (called by OrgTokenProvider on mount).
+ * @internal
+ */
+export function _setTokenGetter(getter: () => string | null): void {
+  _tokenGetter = getter
+}
+
+/**
+ * Register the AbortSignal getter (called by OrgTokenProvider on mount).
+ * @internal
+ */
+export function _setSignalGetter(getter: () => AbortSignal | undefined): void {
+  _signalGetter = getter
 }
 
 /**
  * Get the current org access token (for checking if token exchange has happened).
+ * Reads from the provider-controlled getter.
  */
 export function getOrgAccessToken(): string | null {
-  return orgAccessToken
+  return _tokenGetter()
 }
 
 /**
  * The Supabase client. Uses org-scoped JWT from token exchange for all requests.
+ * AbortSignal is automatically injected by the provider for request cancellation.
  */
 export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
   global: {
     headers: {},
     fetch: (input, init) => {
-      if (orgAccessToken) {
-        const headers = new Headers(init?.headers)
-        headers.set('Authorization', `Bearer ${orgAccessToken}`)
+      const token = _tokenGetter()
+      const signal = _signalGetter()
+      const headers = new Headers(init?.headers)
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`)
         headers.set('apikey', supabaseKey)
-        return fetch(input, { ...init, headers })
       }
-      return fetch(input, init)
+      return fetch(input, { ...init, headers, signal: init?.signal ?? signal })
     },
   },
 })

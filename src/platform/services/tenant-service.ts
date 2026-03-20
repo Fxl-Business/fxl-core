@@ -11,6 +11,7 @@
  *   const { tenants } = await listTenants()
  */
 import type { CreateTenantPayload, Tenant, TenantDetail, TenantListResponse, ArchiveTenantResponse, RestoreTenantResponse } from '@platform/types/tenant'
+import { withRetry } from '@platform/lib/retry'
 
 const FUNCTIONS_URL = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL ?? ''
 
@@ -53,11 +54,13 @@ async function getAuthHeaders(): Promise<HeadersInit> {
  * @returns { tenants: Tenant[], totalCount: number }
  */
 export async function listTenants(status: 'active' | 'archived' = 'active'): Promise<TenantListResponse> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?status=${status}`, {
-    headers: await getAuthHeaders(),
+  return withRetry(async () => {
+    const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?status=${status}`, {
+      headers: await getAuthHeaders(),
+    })
+    if (!res.ok) throw new Error(`Failed to list tenants: ${res.status}`)
+    return res.json() as Promise<TenantListResponse>
   })
-  if (!res.ok) throw new Error(`Failed to list tenants: ${res.status}`)
-  return res.json() as Promise<TenantListResponse>
 }
 
 /**
@@ -66,11 +69,13 @@ export async function listTenants(status: 'active' | 'archived' = 'active'): Pro
  * @param orgId - Clerk org ID (e.g., "org_xxx")
  */
 export async function getTenantDetail(orgId: string): Promise<TenantDetail> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants/${orgId}`, {
-    headers: await getAuthHeaders(),
+  return withRetry(async () => {
+    const res = await fetch(`${FUNCTIONS_URL}/admin-tenants/${orgId}`, {
+      headers: await getAuthHeaders(),
+    })
+    if (!res.ok) throw new Error(`Failed to get tenant: ${res.status}`)
+    return res.json() as Promise<TenantDetail>
   })
-  if (!res.ok) throw new Error(`Failed to get tenant: ${res.status}`)
-  return res.json() as Promise<TenantDetail>
 }
 
 /**
@@ -80,16 +85,18 @@ export async function getTenantDetail(orgId: string): Promise<TenantDetail> {
  * @returns The newly created TenantDetail
  */
 export async function createTenant(payload: CreateTenantPayload): Promise<TenantDetail> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify(payload),
+  return withRetry(async () => {
+    const res = await fetch(`${FUNCTIONS_URL}/admin-tenants`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(payload),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
+      throw new Error(err.error ?? `Failed to create tenant: ${res.status}`)
+    }
+    return res.json() as Promise<TenantDetail>
   })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
-    throw new Error(err.error ?? `Failed to create tenant: ${res.status}`)
-  }
-  return res.json() as Promise<TenantDetail>
 }
 
 /**
@@ -99,16 +106,18 @@ export async function createTenant(payload: CreateTenantPayload): Promise<Tenant
  * @param orgId - Clerk org ID (e.g., "org_xxx")
  */
 export async function archiveTenant(orgId: string): Promise<ArchiveTenantResponse> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=archive`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify({ orgId }),
+  return withRetry(async () => {
+    const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=archive`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ orgId }),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
+      throw new Error(err.error ?? `Failed to archive tenant: ${res.status}`)
+    }
+    return res.json() as Promise<ArchiveTenantResponse>
   })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
-    throw new Error(err.error ?? `Failed to archive tenant: ${res.status}`)
-  }
-  return res.json() as Promise<ArchiveTenantResponse>
 }
 
 /**
@@ -119,16 +128,18 @@ export async function archiveTenant(orgId: string): Promise<ArchiveTenantRespons
  * @param orgId - Clerk org ID (e.g., "org_xxx")
  */
 export async function restoreTenant(orgId: string): Promise<RestoreTenantResponse> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=restore`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify({ orgId }),
+  return withRetry(async () => {
+    const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=restore`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ orgId }),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
+      throw new Error(err.error ?? `Failed to restore tenant: ${res.status}`)
+    }
+    return res.json() as Promise<RestoreTenantResponse>
   })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
-    throw new Error(err.error ?? `Failed to restore tenant: ${res.status}`)
-  }
-  return res.json() as Promise<RestoreTenantResponse>
 }
 
 // Re-export types for convenience

@@ -17,6 +17,7 @@ import type {
   RemoveMemberResponse,
   ImpersonationTokenResponse,
 } from '@platform/types/admin'
+import { withRetry } from '@platform/lib/retry'
 
 const FUNCTIONS_URL = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL ?? ''
 
@@ -59,11 +60,13 @@ async function getAuthHeaders(): Promise<HeadersInit> {
  * @returns { users: AdminUser[], totalCount: number }
  */
 export async function listUsers(): Promise<AdminUserListResponse> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-users`, {
-    headers: await getAuthHeaders(),
+  return withRetry(async () => {
+    const res = await fetch(`${FUNCTIONS_URL}/admin-users`, {
+      headers: await getAuthHeaders(),
+    })
+    if (!res.ok) throw new Error(`Failed to list users: ${res.status}`)
+    return res.json() as Promise<AdminUserListResponse>
   })
-  if (!res.ok) throw new Error(`Failed to list users: ${res.status}`)
-  return res.json() as Promise<AdminUserListResponse>
 }
 
 /**
@@ -74,11 +77,13 @@ export async function listUsers(): Promise<AdminUserListResponse> {
  * @returns { members: OrgMember[], totalCount: number }
  */
 export async function listOrgMembers(orgId: string): Promise<OrgMemberListResponse> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants/${orgId}?include=members`, {
-    headers: await getAuthHeaders(),
+  return withRetry(async () => {
+    const res = await fetch(`${FUNCTIONS_URL}/admin-tenants/${orgId}?include=members`, {
+      headers: await getAuthHeaders(),
+    })
+    if (!res.ok) throw new Error(`Failed to list org members: ${res.status}`)
+    return res.json() as Promise<OrgMemberListResponse>
   })
-  if (!res.ok) throw new Error(`Failed to list org members: ${res.status}`)
-  return res.json() as Promise<OrgMemberListResponse>
 }
 
 /**
@@ -93,16 +98,18 @@ export async function addOrgMember(
   orgId: string,
   userId: string,
 ): Promise<AddMemberResponse> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=add-member`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify({ orgId, userId, role: 'org:member' }),
+  return withRetry(async () => {
+    const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=add-member`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ orgId, userId, role: 'org:member' }),
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
+      throw new Error(body.error ?? `Failed to add member: ${res.status}`)
+    }
+    return res.json() as Promise<AddMemberResponse>
   })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
-    throw new Error(body.error ?? `Failed to add member: ${res.status}`)
-  }
-  return res.json() as Promise<AddMemberResponse>
 }
 
 /**
@@ -117,16 +124,18 @@ export async function removeOrgMember(
   orgId: string,
   userId: string,
 ): Promise<RemoveMemberResponse> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=remove-member`, {
-    method: 'DELETE',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify({ orgId, userId }),
+  return withRetry(async () => {
+    const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=remove-member`, {
+      method: 'DELETE',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ orgId, userId }),
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
+      throw new Error(body.error ?? `Failed to remove member: ${res.status}`)
+    }
+    return res.json() as Promise<RemoveMemberResponse>
   })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
-    throw new Error(body.error ?? `Failed to remove member: ${res.status}`)
-  }
-  return res.json() as Promise<RemoveMemberResponse>
 }
 
 /**
@@ -139,16 +148,18 @@ export async function removeOrgMember(
 export async function getImpersonationToken(
   orgId: string,
 ): Promise<ImpersonationTokenResponse> {
-  const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=impersonate-token`, {
-    method: 'POST',
-    headers: await getAuthHeaders(),
-    body: JSON.stringify({ orgId }),
+  return withRetry(async () => {
+    const res = await fetch(`${FUNCTIONS_URL}/admin-tenants?action=impersonate-token`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ orgId }),
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
+      throw new Error(body.error ?? `Failed to get impersonation token: ${res.status}`)
+    }
+    return res.json() as Promise<ImpersonationTokenResponse>
   })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string }
-    throw new Error(body.error ?? `Failed to get impersonation token: ${res.status}`)
-  }
-  return res.json() as Promise<ImpersonationTokenResponse>
 }
 
 // Re-export types for convenience
