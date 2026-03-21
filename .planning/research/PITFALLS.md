@@ -1,394 +1,368 @@
 # Pitfalls Research
 
-**Domain:** Audit Logging — Adding to Existing Multi-Tenant Supabase System
-**Researched:** 2026-03-19
-**Confidence:** HIGH (system-specific pitfalls cross-referenced with Nexo migration history, Supabase official docs, and current community patterns)
+**Domain:** React admin panel — interactive graph visualization + module management refactor (v12.0)
+**Researched:** 2026-03-21
+**Confidence:** HIGH (based on direct codebase inspection + verified sources)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Applying the Existing Anon-Permissive RLS Pattern to audit_logs
+### Pitfall 1: Graph Library Bundle Blow-Up
 
 **What goes wrong:**
-Nexo uses `FOR ALL TO anon, authenticated USING (org_id = ...)` on tenant-scoped tables (see migrations 008, 013). If audit_logs inherits this pattern, every tenant can read every other tenant's audit trail. The `anon` role means anyone with the public Supabase URL and anon key can query raw audit logs — no authentication required.
+Adding a full-featured graph library (ReactFlow, cytoscape.js, vis-network) to the bundle for a single internal admin page inflates the initial load for all users — including non-admins who never visit `/admin/modules`. ReactFlow alone is ~200KB gzipped. For a platform whose primary use cases are docs and wireframes, this is disproportionate overhead on every page load.
 
 **Why it happens:**
-Developers copy the RLS block from an existing table (tasks, comments) as a starting point. The existing pattern was an acceptable tradeoff for operational tables where anon access was deliberate. Audit data was never part of that tradeoff.
+The library is installed globally and imported at the top of a component file. Vite/Rollup only tree-shakes at the module boundary — if the component file is in the main chunk, the library is in the main chunk. There is no automatic lazy boundary.
 
 **How to avoid:**
-- audit_logs must NOT grant SELECT to the `anon` role under any condition.
-- SELECT policy: `USING (org_id = (auth.jwt() -> 'org_id')::text)` granted to `authenticated` only.
-- Super admin bypass (existing JWT super_admin claim mechanism) is acceptable but must be explicit.
-- INSERT should come exclusively from service-role context (triggers or edge functions) — never from anon or authenticated client roles directly.
-- Add an explicit REVOKE statement in the migration: `REVOKE UPDATE, DELETE ON audit_logs FROM authenticated, anon`.
-- Add a migration comment: `-- audit_logs intentionally more restrictive than standard Nexo tables`.
+Use `React.lazy()` + `Suspense` to code-split the graph component into its own chunk. The diagram only loads when the admin visits `/admin/modules`. Alternatively: with only 6 modules, a custom SVG layout built with Tailwind and absolute positioning entirely avoids the library problem. Decide approach before writing any code.
+
+```tsx
+// Lazy-load only if using a graph library
+const ModulesOverviewPage = React.lazy(() => import('./ModulesOverviewPage'))
+// Wrap at route level with Suspense
+```
 
 **Warning signs:**
-- Migration draft that copies a policy block from tasks or comments without removing `TO anon`.
-- Any USING clause on SELECT that is `(true)` or does not reference org_id.
-- Frontend service calling Supabase directly with the anon key to INSERT audit logs (instead of trigger or edge function).
+- `npx vite-bundle-visualizer` shows the graph library in the main chunk
+- Build output shows a single JS file that is measurably larger after adding the import
+- `console.time` shows initial page load increased for the docs home page, not just /admin/modules
 
-**Phase to address:** Schema/Migration phase — catch at migration review before deploy.
+**Phase to address:** Phase 1 (Graph implementation decision) — choose approach before writing any code.
 
 ---
 
-### Pitfall 2: Logging PII in the metadata JSONB Column
+### Pitfall 2: Serializing React Components from MODULE_REGISTRY into Graph Node State
 
 **What goes wrong:**
-The `metadata` JSONB field captures context about the operation. If it naively serializes the full before/after state of a record, it captures emails, names, phone numbers, and other LGPD-regulated personal data. Under LGPD, audit logs containing PII fall under the same data subject rights as the data itself: right to deletion, right to access, right to correction. A user exercising their deletion right requires purging or sanitizing audit rows — which directly conflicts with the immutability guarantee that makes audit logs trustworthy.
+`ModuleDefinition.extensions[].injects` is typed as `Record<string, React.ComponentType<SlotComponentProps>>`. The `icon` field is a `LucideIcon` (also a React component). When extracting graph nodes from `MODULE_REGISTRY`, developers may copy the full `ModuleDefinition` object into React state as graph node data. React state must be serializable — storing function/component references causes stale closures, memory leaks, and "non-serializable value" warnings. If ReactFlow or similar is used, its internal store will also reject component references in node data.
 
 **Why it happens:**
-The `metadata` field is convenient — pass the whole object and let Postgres store it. The PII problem is invisible until a LGPD request arrives months later.
+`MODULE_REGISTRY` looks like plain data at the import site. The `icon` and `injects` fields are function types but are not visually distinguishable from data when reading the registry array.
 
 **How to avoid:**
-- Define an explicit allowlist of fields permitted in `metadata` for each action type. Example: for `TASK_UPDATED`, log `{ task_id, changed_fields: ['status'] }` — not `{ before: {...}, after: {...} }`.
-- Never log user-supplied free-text fields (names, descriptions, notes, email addresses) in metadata.
-- Store `actor_id` (opaque UUID) as the actor identifier. Never store `actor_email` in the audit row — resolve it at display time from Clerk.
-- Log IP addresses only if required for compliance, with an explicit 90-day retention window and a documented LGPD legal basis (`art. 7°, IX` — legitimate interest for security).
-- Write the metadata allowlist spec per action type before any capture code.
+Define a separate `GraphNode` and `GraphEdge` type containing only serializable primitives, and extract them from `MODULE_REGISTRY` once outside the component:
+
+```ts
+interface GraphNode {
+  id: ModuleId
+  label: string
+  status: ModuleStatus
+  description: string
+  extensionCount: number
+  // NO: icon, injects, routeConfig, useNavItems
+}
+
+interface GraphEdge {
+  source: ModuleId
+  target: ModuleId
+  extensionId: string
+  description: string
+}
+
+// Derive at module level, not inside the component
+const GRAPH_NODES: GraphNode[] = MODULE_REGISTRY.map(m => ({
+  id: m.id,
+  label: m.label,
+  status: m.status,
+  description: m.description,
+  extensionCount: m.extensions?.length ?? 0,
+}))
+```
+
+Render the icon separately by looking it up from `MODULE_REGISTRY` by ID at render time — do not store it in state.
 
 **Warning signs:**
-- An audit INSERT that spreads a full Supabase row: `metadata: { ...taskRow }`.
-- `actor_email` stored as a column or inside metadata.
-- IP address in metadata without a documented retention period.
+- `GraphNode` type includes `icon: LucideIcon` or `injects: Record<...ComponentType...>`
+- Full `ModuleDefinition` objects spread into graph node data
+- Browser console warns about non-serializable values in state or Redux store
 
-**Phase to address:** Schema design phase + capture design phase. The metadata allowlist must be written and reviewed before any capture implementation.
+**Phase to address:** Phase 1 (Graph data model) — define serializable types before implementing the diagram.
 
 ---
 
-### Pitfall 3: Circular Logging — Logging the Act of Reading Logs
+### Pitfall 3: Breaking the Existing Module Toggle Flow During Refactor
 
 **What goes wrong:**
-If the audit capture layer fires on ALL database operations (via an overly broad trigger, or an application-layer service wrapper that logs every Supabase call), querying the audit log itself generates new audit rows. Viewing 100 rows creates 100 new rows. The admin panel page load doubles the table size on every visit.
+`ModulesPanel` currently holds all Supabase state logic for reading/writing `tenant_modules`. Moving toggles to `TenantDetailPage` without first extracting this logic into a shared hook results in one of two failures:
+1. Logic is duplicated — two files do the same Supabase upsert with the same optimistic update pattern, diverging over time.
+2. Logic is moved but `TenantDetailPage` line 583-596 still has a "Gerenciar modulos" link pointing to `/admin/modules?org=...`. After the refactor, this link points to a page that no longer has toggles, confusing operators.
 
 **Why it happens:**
-A trigger defined too broadly (`FOR EACH STATEMENT` on all operations including SELECT, or on all tables), or an application-level `auditService` wrapper that intercepts every service call including reads from the audit table itself.
+The `TenantDetailPage` cross-link to `ModulesPanel` is at the bottom of a 650-line file. It is easy to miss during refactoring. The link is currently just a placeholder (`Gerencie os modulos ativos deste tenant na pagina de modulos`) and it feels harmless, so it survives the refactor unnoticed.
 
 **How to avoid:**
-- Triggers must fire only on `INSERT`, `UPDATE`, `DELETE` — PostgreSQL does not support AFTER SELECT triggers natively; any workaround using a wrapper function must explicitly exclude the `audit_logs` table.
-- In the application layer: `auditService.log(...)` must be a leaf node — it only writes, never reads in a way that triggers further writes.
-- The admin panel log viewer reads directly from Supabase with no audit side effect.
-- If "admin viewed audit log" is ever desired as a meta-audit event, write it as an explicit deliberate call — not as a side effect of the read.
-- Add the audit_logs table to an explicit exclusion list in any catch-all trigger or service wrapper.
+1. Extract the Supabase toggle logic into `useModuleStates(orgId: string)` hook before moving any UI.
+2. The hook owns: fetch from `tenant_modules`, optimistic update, upsert, revert on error.
+3. Both `ModulesPanel` (legacy) and `TenantModulesSection` (new) use the same hook.
+4. After moving toggles to TenantDetailPage, remove the "Gerenciar modulos" link and placeholder section (lines 577-596 in TenantDetailPage.tsx) entirely.
 
 **Warning signs:**
-- Audit log row count doubling after admin panel page load.
-- An `auditService` wrapper that intercepts all Supabase client calls (including `from('audit_logs').select(...)`).
-- A trigger defined as `FOR EACH ROW ON audit_logs AFTER INSERT` that calls back into audit_logs.
+- Two files both contain `supabase.from('tenant_modules').upsert(...)` with no shared hook
+- The "Gerenciar modulos" link on TenantDetailPage survives after toggles have been moved there
+- `grep -r "admin/modules" src/` returns a result inside TenantDetailPage.tsx after the refactor
 
-**Phase to address:** Trigger definition phase and service layer design — exclude audit_logs from any catch-all wrapper before writing a single capture line.
+**Phase to address:** Phase 2 (module toggle migration) — extract hook first, then migrate UI, then remove stale link.
 
 ---
 
-### Pitfall 4: Missing Events on Error Paths
+### Pitfall 4: TenantDetailPage Becomes a God Component
 
 **What goes wrong:**
-An operation fails mid-way (e.g., task update saves to Supabase but the audit insert fails with a network error), or the audit log call is placed only on the success path. The operation happened but leaves no audit trail. Conversely, if the audit INSERT is inside the same Supabase transaction as the operation, and the operation is rolled back, the audit row rolls back too — the attempted-but-failed operation vanishes from the record entirely.
+`TenantDetailPage.tsx` is already ~650 lines managing: tenant data fetching, member list, add/remove member, impersonation, archive confirmation, and a placeholder modules section. Adding real module toggle logic (Supabase state, optimistic update, revert on error) inline to this file pushes it past ~900 lines. Finding bugs becomes hard; testing becomes impractical.
 
 **Why it happens:**
-- Audit call placed only in the success branch: `if (!error) await auditLog(...)`.
-- Exception in audit insert silently swallowed: `try { await audit() } catch { /* ignore */ }`.
-- Trigger-based logging is semantically correct for "what committed" but records nothing about "what was attempted."
+The modules section feels like a "small addition" — `orgId` is already available from the parent, so developers inline the toggle state instead of extracting a component.
 
 **How to avoid:**
-- Decide the audit model upfront — "what committed" (triggers, simpler) vs. "what was attempted" (application layer with separate transaction). For v11.0, "what committed" via triggers is sufficient and correct.
-- Application-layer audit calls must use `try/catch` that reports to Sentry on failure but does NOT re-throw — a failed audit insert must never block the user-facing operation.
-- Place audit calls in a `finally` block pattern or after-settlement, not only in the success branch.
-- If trigger-based, document explicitly: "audit trail covers committed operations only; failed/rolled-back attempts are not captured."
+Enforce a strict component boundary: extract module management into `<TenantModulesSection orgId={orgId} />`, a self-contained component that owns its own state and Supabase calls. It takes only `orgId` as prop. TenantDetailPage renders it as a black box.
+
+```tsx
+// In TenantDetailPage — replace lines 577-596 with:
+<TenantModulesSection orgId={orgId} />
+
+// TenantModulesSection.tsx owns ALL module state
+export function TenantModulesSection({ orgId }: { orgId: string }) {
+  const { moduleStates, isLoading, handleToggle } = useModuleStates(orgId)
+  // ...rendering only
+}
+```
 
 **Warning signs:**
-- Audit call inside an `if (!error)` block with no corresponding call in the error branch.
-- No audit row exists for a known-failed operation when testing error scenarios.
-- `try/catch` around audit call that swallows errors with an empty catch block.
+- Module toggle state (`moduleStates`, `isLoadingModules`) is declared in `TenantDetailPage` rather than in a sub-component
+- TenantDetailPage exceeds 700 lines after the addition
+- `handleToggle` callback is defined in TenantDetailPage and passed down via props
 
-**Phase to address:** Capture strategy phase — the trigger-vs-application-layer decision must be made before writing any capture code.
+**Phase to address:** Phase 2 (TenantModulesSection extraction) — enforce boundary before writing toggle logic.
 
 ---
 
-### Pitfall 5: Missing Indexes Causing Admin Panel Query Timeouts
+### Pitfall 5: Graph Hover State Causes Full Re-Render of All Nodes
 
 **What goes wrong:**
-The audit_logs table has no indexes at creation. Early on, with < 1k rows, all queries are fast. After 3 months of moderate usage, the admin panel log page (which queries by org_id ordered by created_at DESC) does a full table scan. At 100k rows, the query takes 2-3 seconds. At 1M rows, it times out.
+Implementing "hover a node to highlight connected edges" with naive state management causes every node and every edge component to re-render on each mouseover event. With 6 modules this is invisible, but the pattern is wrong and scales poorly.
 
 **Why it happens:**
-"We'll add indexes later" — the table starts small and the problem is invisible until it isn't. Adding indexes to a large live table requires `CREATE INDEX CONCURRENTLY` and careful planning to avoid locking.
+`hoveredNodeId` state lives in the page component. Every node receives an `isHighlighted` prop derived from parent state. When any node is hovered, all nodes re-render to check whether their prop changed.
 
 **How to avoid:**
-- Add all required indexes in the same migration that creates the table:
-  - `CREATE INDEX ON audit_logs (org_id, created_at DESC)` — primary admin panel query pattern
-  - `CREATE INDEX ON audit_logs (actor_id, created_at DESC)` — "who did what" queries
-  - `CREATE INDEX ON audit_logs (resource_type, resource_id)` — "history of this record" queries
-- Use `BRIN` index on `created_at` as a secondary option for very large time-range scans.
-- Run `EXPLAIN ANALYZE` on the admin panel query before shipping the UI phase.
-- Add `LIMIT` enforcement on all queries from the admin panel — never unbounded SELECT on audit_logs.
+Use CSS-only hover highlights. For a small static graph (6 nodes), CSS hover with `group` modifiers in Tailwind and SVG edge coloring via CSS variables is the correct solution — zero JS state, zero re-renders:
+
+```tsx
+// SVG edges as absolute-positioned lines that respond to a parent CSS class
+// No React state needed for visual highlight
+<div className="group/node" data-module-id={node.id}>
+  {/* edges use group-hover/node:stroke-indigo-500 via CSS */}
+</div>
+```
+
+If click-to-lock highlight is needed (for navigation), store only the selected ID (`selectedNodeId`) as a single string — not a derived highlight map per node.
 
 **Warning signs:**
-- audit_logs migration creates the table but no `CREATE INDEX` statements follow.
-- Admin panel query running `Seq Scan` on audit_logs (visible in Supabase query analyzer).
-- Page load > 500ms on a table with < 10k rows.
+- `hoveredNodeId` state lives in the page component and is passed to each node as a prop
+- React DevTools Profiler shows all 6 nodes re-rendering on every mouseover
+- `isHighlighted` prop computed in the parent for each node
 
-**Phase to address:** Migration phase — indexes must be in the initial migration, not added later.
+**Phase to address:** Phase 1 (Graph interactivity) — decide hover strategy before wiring interactions.
 
 ---
 
-### Pitfall 6: Migration Risk — Adding Triggers to Live Production Tables
+### Pitfall 6: ModulesPanel URL Parameter Orphan After Refactor
 
 **What goes wrong:**
-Adding an `AFTER INSERT OR UPDATE OR DELETE` trigger to existing production tables (tasks, blueprint_configs, comments) via migration 025+ works correctly in isolation. The risk is: if the migration also includes a DDL change to those tables (e.g., adding a `NOT NULL` column without `DEFAULT`), it locks the table during migration and blocks all writes. On Supabase free/pro tiers, this can cause a timeout that leaves the migration partially applied and the table in a broken state.
+After the refactor, `/admin/modules` becomes a read-only overview page. But the current `ModulesPanel` reads `searchParams.get('org')` to pre-select a tenant. If the `useSearchParams` usage survives into the new overview page, it silently processes a meaningless `?org=` parameter from old bookmarks or links. Worse: any external link pointing to `/admin/modules?org=someId` with intent to manage modules will now land on the wrong page with no indication that the workflow moved.
 
 **Why it happens:**
-Combining trigger creation with table alteration in a single migration. Postgres table rewrites happen synchronously and hold an `ACCESS EXCLUSIVE` lock for the duration.
+URL parameter handling is at the top of the component and copied forward without auditing whether the new page still uses it.
 
 **How to avoid:**
-- Keep the audit_logs migration purely additive: CREATE TABLE + CREATE TRIGGER. Do not ALTER existing tables in the same migration.
-- Triggers added to existing tables are additive (no table rewrite, no lock) — safe.
-- If a column must be added to existing tables: use `DEFAULT` value or nullable column, separate migration, off-peak deploy.
-- Use `CREATE OR REPLACE TRIGGER` (idempotent) and `CREATE INDEX CONCURRENTLY IF NOT EXISTS`.
-- Test the migration against a local Supabase instance with the full 24-migration chain before deploying to production.
-- Document in the migration comment: `-- covers committed operations from: [deploy date]`. This is the known audit coverage gap.
+1. When rewriting `ModulesPanel` into the overview page, delete all `useSearchParams` usage entirely.
+2. Search for all stale cross-references: `grep -r "admin/modules" src/` before marking the phase done.
+3. If redirecting old links is needed, add a redirect in the router: `/admin/modules?org=:id` → `/admin/tenants/:id`.
 
 **Warning signs:**
-- Migration that ALTERs existing tables (tasks, comments, documents) in the same statement block as trigger creation.
-- `NOT NULL` column added without `DEFAULT` on a table with existing rows.
-- No test of the migration against local Supabase before production deploy.
+- `useSearchParams` still imported in the new ModulesPanel/overview component
+- `grep -r "admin/modules" src/` returns results indicating tenant-scoped links still point there
+- QA finds operator clicking "Gerenciar modulos" still navigates to the overview page instead of TenantDetailPage
 
-**Phase to address:** Migration review — the migration author must explicitly inspect all DDL for table locks before the final SQL is written.
+**Phase to address:** Phase 3 (New overview page) — remove `useSearchParams` and audit cross-references at implementation time.
 
 ---
 
-### Pitfall 7: Authenticated Users Can Delete Their Own Audit Rows
+### Pitfall 7: Module Cards on Overview Page Include Toggle Switches
 
 **What goes wrong:**
-If the RLS DELETE policy on audit_logs follows the standard Nexo pattern (`FOR ALL TO anon, authenticated USING (org_id = ...)`), any operator in a tenant can delete their own trace from the audit log. The audit trail becomes untrustworthy.
+The overview page's module cards are visually similar to `ModulesPanel`'s existing `ModuleCard` component (which has a `Switch`). If the overview cards are built by copying `ModuleCard` without removing the toggle, operators visiting the overview page can toggle modules without selecting a tenant — the toggle fires with `selectedOrgId === null`, which the existing `handleToggle` guard silently swallows (`if (!selectedOrgId) return`). The UI shows a toggle that does nothing, which is confusing and erodes trust.
 
 **Why it happens:**
-Standard Nexo tables grant authenticated users full CRUD via RLS. Copying this pattern to audit_logs is a logic error — audit data is append-only by design.
+`ModuleCard` is a convenient starting point for the new overview cards. Copy-paste with light editing leaves the `Switch` component in place.
 
 **How to avoid:**
-- No DELETE policy on audit_logs for any non-super_admin role.
-- No UPDATE policy on audit_logs for any role.
-- Super admin can trigger deletion only via a dedicated edge function with its own audit trail (log the deletion of logs).
-- Enforce at Postgres level: `REVOKE UPDATE, DELETE ON audit_logs FROM authenticated, anon`.
-- If LGPD data subject deletion requires removing audit rows, it must go through a controlled edge function with explicit justification, not a direct SQL call.
+Define a new `ModuleOverviewCard` component from scratch — not derived from `ModuleCard`. It is display-only: icon, label, status badge, description, extensions list. No `Switch`, no `onToggle` prop. TypeScript enforces this — the props interface has no toggle-related fields.
 
 **Warning signs:**
-- Migration that creates an UPDATE or DELETE policy on audit_logs for the authenticated role.
-- Service layer that calls `.delete()` directly on the Supabase client against audit_logs.
-- No explicit REVOKE statement in the migration.
+- New overview cards import `Switch` from `@shared/ui/switch`
+- `ModuleOverviewCard` props interface includes `isEnabled` or `onToggle`
+- A `Switch` component renders on `/admin/modules` after the refactor
 
-**Phase to address:** Migration phase — include REVOKE explicitly and document the intent inline.
+**Phase to address:** Phase 3 (New overview page) — new card component, no shared code with ModuleCard.
 
 ---
 
-### Pitfall 8: Client-Supplied or Ambiguous Timestamps
+### Pitfall 8: Extension Dependency Graph Edges Are Incorrect or Phantom
 
 **What goes wrong:**
-If the audit INSERT accepts a `timestamp` or `occurred_at` field from the client request payload, an actor can manipulate when an event appears to have occurred. More commonly: the React SPA generates a timestamp using `new Date()` (browser clock), which may be skewed by minutes on some devices. In the admin panel UI, displaying timestamps with `toLocaleString()` without a timezone parameter shows times 3 hours ahead of local time for operators in Brazil (UTC-3), causing confusion about "when did this happen."
+The `ModuleExtension.requires[]` array (in `registry.ts`) lists module IDs that must be enabled for the extension to activate. When deriving graph edges from this field to draw "module A depends on module B" lines, developers may misread the direction: `requires: ['tasks']` on a `clients` module extension means clients depends on tasks — the edge goes `clients → tasks`, not the reverse. Drawing the edge backwards makes the diagram actively misleading.
+
+Additionally, if `requires[]` contains a string that is not a valid `ModuleId` (e.g., a slot ID like `clients:tasks-sidebar`), the graph will show a phantom node or a broken edge pointing to a non-existent module.
 
 **Why it happens:**
-- Client-side timestamp generation is easier than relying on server DEFAULT.
-- `toLocaleString()` without timezone uses the browser's local timezone, which varies.
+`requires[]` is typed as `string[]`, not `ModuleId[]`. No validation fires at runtime. The graph rendering code maps over the array without checking whether each ID exists in `MODULE_REGISTRY`.
 
 **How to avoid:**
-- Always store timestamps as `TIMESTAMPTZ DEFAULT now()` — server clock, never client-provided.
-- Never accept a `timestamp` field from the client payload for audit_logs inserts (trigger-based logging inherits server clock automatically; edge function logging must explicitly exclude client-supplied timestamps).
-- In the React UI: use `Intl.DateTimeFormat` with `timeZone: 'America/Sao_Paulo'` — Nexo's operator base is in Brazil.
-- For correlating with Clerk JWT `iat` claims: normalize to milliseconds since epoch for comparison, not string comparison.
+1. When extracting edges, filter `requires` entries against `MODULE_REGISTRY.map(m => m.id)`:
+
+```ts
+const GRAPH_EDGES: GraphEdge[] = MODULE_REGISTRY.flatMap(mod =>
+  (mod.extensions ?? []).flatMap(ext =>
+    ext.requires
+      .filter(reqId => MODULE_REGISTRY.some(m => m.id === reqId))
+      .map(reqId => ({
+        source: mod.id,     // the module that HAS the extension
+        target: reqId as ModuleId,  // the module it REQUIRES
+        extensionId: ext.id,
+        description: ext.description,
+      }))
+  )
+)
+```
+
+2. Direction: source = module declaring the extension, target = required module. An arrow from source to target means "needs."
 
 **Warning signs:**
-- Any audit INSERT from a client React service that includes `timestamp` or `created_at` in the payload.
-- UI rendering timestamps with `.toLocaleString()` without a timezone parameter.
-- Admin panel showing audit events consistently 3 hours off from expected local time.
+- `GRAPH_EDGES` includes an edge whose `target` does not match any `id` in `MODULE_REGISTRY`
+- Diagram shows more nodes than `MODULE_REGISTRY.length`
+- Extension arrows point in the direction that suggests "provides to" rather than "requires"
 
-**Phase to address:** Migration phase (TIMESTAMPTZ DEFAULT now()) + UI rendering phase (explicit timezone via Intl.DateTimeFormat).
-
----
-
-### Pitfall 9: Edge Function Using Wrong Supabase Client Key
-
-**What goes wrong:**
-Edge functions that write to audit_logs need the service-role key to bypass RLS. If the edge function is initialized with `VITE_SUPABASE_PUBLISHABLE_KEY` (frontend env var, unavailable in Deno) or with the anon key, audit inserts either fail with 403 (if RLS is strict) or succeed with incorrect org_id context (if RLS is permissive). This is a variant of Nexo PITFALLS.md rule #2.
-
-**Why it happens:**
-Copy-paste from frontend service initialization code into edge function code. In the frontend, the anon key is correct. In a Deno edge function, `VITE_*` env vars do not exist — Deno reads from `Deno.env.get()` with Supabase-injected secrets.
-
-**How to avoid:**
-- Edge functions writing to audit_logs must use `SUPABASE_SERVICE_ROLE_KEY` (auto-injected by Supabase Edge Functions runtime, no manual secret needed).
-- Add an assertion at function startup: `if (!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')) throw new Error('Missing service role key')`.
-- The `org_id` written to audit_logs must come from the server-verified JWT claim — never from `req.body.org_id` (tenant spoofing prevention).
-- All new audit edge functions follow the same deploy pattern as existing admin edge functions: `verify_jwt: false`, deploy immediately, verify via `mcp__supabase__list_edge_functions`.
-
-**Warning signs:**
-- Edge function audit insert returning 403.
-- Edge function source containing `VITE_SUPABASE_*` env var references.
-- `org_id` in audit INSERT derived from request body rather than decoded JWT.
-
-**Phase to address:** Edge function implementation phase — mandatory code review check before deploy.
-
----
-
-### Pitfall 10: Storage Growth Without a Retention Plan
-
-**What goes wrong:**
-Audit logs are write-only and never expire by default. After 6 months of moderate usage the table can hold millions of rows. Supabase free/pro tiers have database size limits. Full table scans (even with indexes, if the org has a large log volume) slow admin queries. There is no built-in Supabase mechanism to auto-purge rows.
-
-**Why it happens:**
-"We'll deal with it later" is the default. Retention is deferred until the table is already large and pruning becomes a production risk — bulk DELETE on a large live table holds locks and can cause query timeouts.
-
-**How to avoid:**
-- Design the schema with retention in mind from the start: include a `retained_until TIMESTAMPTZ` column or equivalent, even if the pruning job isn't built in phase 1. This avoids a schema migration later.
-- Plan a `pg_cron` job (available in Supabase) or a scheduled edge function to delete rows older than 365 days. Document this as a required infra task even if deferred to v12.
-- For LGPD compliance: shorter retention may be required for certain action types (e.g., auth events: 90 days). Design for per-action-type retention from the start.
-- Monitor table size via Supabase dashboard after deploy.
-
-**Warning signs:**
-- Schema has no `retained_until` or equivalent column.
-- No pg_cron job or scheduled function planned.
-- Supabase database size growing > 10% per week after audit deploy.
-
-**Phase to address:** Migration phase (schema includes retention metadata) + post-launch infra phase (pg_cron job or scheduled function).
+**Phase to address:** Phase 1 (Graph data model) — validate edges during extraction, before rendering.
 
 ---
 
 ## Technical Debt Patterns
 
-Shortcuts that seem reasonable but create long-term problems.
-
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| `metadata: { ...fullRow }` — serialize the whole record | Zero metadata design effort | PII exposure; LGPD deletion requests break immutability; storage bloat | Never |
-| Copy anon-permissive RLS from tasks to audit_logs | Faster migration | Cross-tenant data leak; no compliance basis | Never |
-| Skip indexes at table creation, add later | Faster initial migration | Adding index to large live table requires CONCURRENTLY and careful timing; admin queries time out in the interim | Never — add indexes in the creation migration |
-| Client-generated timestamps in audit payload | No edge function needed | Clock skew, tamper risk, browser time manipulation | Never |
-| No retention policy | Zero upfront effort | Table bloat, DB size limits hit, bulk DELETE on large live table causes lock escalation | Only if table provably stays < 50k rows forever |
-| `FOR EACH STATEMENT` trigger on all operations | Simpler trigger definition | Circular logging, write amplification, SELECT triggers | Never — use `FOR EACH ROW` on INSERT/UPDATE/DELETE only |
-| Store `actor_email` instead of `actor_id` | Human-readable logs without a join | PII in audit table; email changes invalidate historical attribution; LGPD deletion required | Never — store UUID, resolve display name at render time |
+| Inline module toggle logic in TenantDetailPage | Faster to write | 900-line God component, impossible to test in isolation | Never — extract `TenantModulesSection` from day 1 |
+| Import full ReactFlow without lazy loading | Simpler import statement | ~200KB added to main bundle for all users | Never — admin pages must be lazy-loaded |
+| Copy full `ModuleDefinition` into graph node state | Less extraction code | Non-serializable React components in state; stale closures | Never — always derive a plain `GraphNode` type |
+| Copy-paste Supabase toggle logic from ModulesPanel | Faster to implement | Duplicate fetch/upsert logic diverges independently | Never — extract `useModuleStates` hook instead |
+| Copy `ModuleCard` and remove the toggle later | Faster card prototype | Toggle survives into production; overview page allows no-op mutations | Never — new `ModuleOverviewCard` from scratch |
+| CSS-only SVG graph without a library | Zero bundle cost | Limited interactivity, harder to extend to 20+ modules | Acceptable for 6 static nodes with simple hover |
 
 ---
 
 ## Integration Gotchas
 
-Common mistakes when connecting to external services in the Nexo context.
-
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Supabase client in Deno edge function | Using `VITE_SUPABASE_PUBLISHABLE_KEY` (frontend var, unavailable in Deno) | Use `SUPABASE_SERVICE_ROLE_KEY` auto-injected by Supabase Edge Functions runtime |
-| Clerk JWT in audit context | Reading org_id from client request body | Decode the Authorization header JWT in the edge function and read `org_id` from the verified payload |
-| Supabase triggers | `FOR EACH STATEMENT` produces one row per SQL statement, not per affected row | Use `FOR EACH ROW` to capture individual row data via `NEW` and `OLD` records |
-| Edge function redeploy | Redeploying an audit function without `verify_jwt: false` causes Clerk token rejection (see PITFALLS.md rule #9) | All Nexo edge functions that accept Clerk tokens must use `verify_jwt: false`; verify after every redeploy |
-| pg_cron for retention | Creating a cron job in migration without verifying pg_cron is enabled in the Supabase project | Check `SELECT * FROM pg_extension WHERE extname = 'pg_cron'` before migration; use scheduled edge function as fallback |
+| `MODULE_REGISTRY` as graph data source | Passing full `ModuleDefinition` (with React components) into graph node state | Extract serializable `GraphNode` fields — id, label, status, description, extensionCount |
+| `extension.requires[]` for graph edges | Treating slot IDs (e.g., `clients:tasks-sidebar`) as module IDs | Filter against `MODULE_REGISTRY.map(m => m.id)` before creating edges |
+| `tenant_modules` Supabase table | Re-fetching entire module list on every toggle | Use optimistic update already present in ModulesPanel — copy this pattern into the extracted `useModuleStates` hook |
+| `useSearchParams` in ModulesPanel | Keeping `?org=` param logic in the new overview page | Remove `useSearchParams` entirely from the overview page |
+| TenantDetailPage existing cross-link | Leaving "Gerenciar modulos" link pointing to `/admin/modules` after toggles are moved | Remove or replace that link section (lines 577-596) as part of Phase 2 |
 
 ---
 
 ## Performance Traps
 
-Patterns that work at small scale but fail as usage grows.
-
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| No index on `(org_id, created_at DESC)` | Admin panel log page slow; Supabase reports Seq Scan | Add composite index in the same migration that creates the table | > 50k rows |
-| Querying audit_logs without `org_id` filter | Full table scan across all tenants' data | RLS forces org_id filter; also add it explicitly in the service layer query | > 10k rows |
-| Unbounded SELECT — no LIMIT on log viewer queries | Large payload on each page load, potential timeout | Enforce pagination with LIMIT/OFFSET or cursor; max 100 rows per request | > 1k rows returned |
-| Fetching all columns including metadata JSONB for list view | Large payload for each page of results | SELECT only display columns (actor_id, action, resource_type, created_at); fetch metadata only on row expand | > 5k rows |
-| Synchronous trigger audit in high-frequency write path | Perceived latency on every write operation | Acceptable for v11 scale; for high-frequency future ops, consider async queue pattern | > 100 writes/second |
+| Graph library in main bundle | First load slower for all routes, not just /admin/modules | `React.lazy()` + dynamic import for the overview page | From first build with the library added |
+| Hover state at page level driving re-renders | All nodes re-render on every mouseover | CSS-only hover or graph-internal state; no `isHighlighted` prop per node | Visible with DevTools at any scale |
+| Mounting graph on every overview page render | Graph resets visual state on unrelated state changes | `useMemo` for node/edge arrays; `React.memo` on the graph container | Every parent state change |
+| Fetching `tenant_modules` on every TenantDetailPage mount with no cache | Supabase called on every `/admin/tenants/:id` navigation | `useModuleStates` hook caches result in a `useRef` with a short stale window | Frequent navigation between tenant detail pages |
 
 ---
 
 ## Security Mistakes
 
-Domain-specific security issues beyond general web security.
-
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Grant DELETE to authenticated role on audit_logs | Operator erases their own trail; audit becomes untrustworthy | `REVOKE DELETE ON audit_logs FROM authenticated, anon` explicitly in migration |
-| `org_id` taken from client request body | Tenant spoofing: actor logs an event under a different org | Always derive org_id from server-verified JWT claim, never from client payload |
-| Metadata includes full record before/after | PII exposure in audit storage; LGPD deletion conflicts with immutability | Define and enforce metadata allowlist per action type |
-| No rate limit on audit log export | Exfiltration of entire tenant audit history | Pagination limit (max 1000 rows per request); require explicit date range on export calls |
-| Super admin reads all tenants' raw audit data via direct Supabase query with no context | No legitimate cross-tenant read except via admin impersonation flow | Admin panel must use existing ImpersonationContext to scope queries; super admin RLS bypass is for the admin panel UI only, not arbitrary queries |
+| Overview page accidentally exposes toggle mutations | Operator disables modules for all tenants without selecting one | `ModuleOverviewCard` has no `Switch` — TypeScript enforces this via props interface |
+| Rendering extension descriptions from `ModuleExtension.description` via `dangerouslySetInnerHTML` | XSS if description ever comes from user input (it does not today, but the pattern is dangerous) | Always render as `{ext.description}` — never `dangerouslySetInnerHTML` |
+| Toggle mutations callable from the overview page without a selected tenant | No-op silently accepted; operator confused | `handleToggle` guard (`if (!orgId) return`) already exists in ModulesPanel — the hook must preserve this |
 
 ---
 
 ## UX Pitfalls
 
-Common user experience mistakes in audit log admin interfaces.
-
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Displaying raw action codes (`TASK_STATUS_CHANGED`) | Non-technical operators cannot parse the log | Display human-readable descriptions: "Status changed from In Progress to Done" |
-| Timestamps displayed in UTC without conversion | Operators see times 3 hours off from local time (Brazil UTC-3) | Display in `America/Sao_Paulo` with UTC offset indicator |
-| No filter controls — only full chronological list | Useless for compliance queries ("all logins for user X last month") | Minimum: filter by actor, action type, resource type, and date range |
-| Metadata collapsed with no expand | Inspector cannot see what changed without querying DB directly | Expandable row with formatted metadata diff view |
-| Log viewer itself generates audit events on load | Circular logging (see Pitfall 3); table grows on every admin visit | Read path must never trigger writes to audit_logs |
+| Diagram is purely decorative with no click-through | Operators see a graph but cannot navigate to the relevant tenant or module detail | Each node click navigates to `/admin/modules#module-id` anchor or to a focused card |
+| Module cards on overview include toggle switches | Operator confused: "which toggle is the real one?" (overview vs TenantDetailPage) | Overview page is display-only — no toggles anywhere |
+| Extension `requires` IDs displayed raw (e.g., `connector`) | Non-technical operator cannot understand what the extension needs | Resolve the ID to a human-readable module label from `MODULE_REGISTRY` |
+| Loading spinner blocks overview page while fetching per-tenant data | Overview renders blank on every visit | Overview page uses only static `MODULE_REGISTRY` — no async needed; render immediately with no loading state |
+| Graph with no legend | Operator does not understand what edge direction means | Include a legend: "arrow = module requires" with a small example |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-Things that appear complete but are missing critical pieces.
-
-- [ ] **RLS policy audit:** Run `SELECT * FROM pg_policies WHERE tablename = 'audit_logs'` — confirm no policy exists with `TO anon` or `USING (true)` for SELECT.
-- [ ] **Tamper protection verified:** Run `SELECT has_table_privilege('authenticated', 'audit_logs', 'DELETE')` — must return `false`.
-- [ ] **Trigger scope confirmed:** Trigger fires on DELETE as well as INSERT/UPDATE — verify with `SELECT * FROM pg_triggers WHERE tgrelid = 'tasks'::regclass`.
-- [ ] **Metadata PII review:** Metadata spec written and reviewed — verify no action type logs a full record object or email address.
-- [ ] **Retention field exists:** `retained_until` or equivalent column present in schema even if pruning job is deferred.
-- [ ] **Timezone handling correct:** Admin panel displays timestamps in `America/Sao_Paulo` — manual test with a known UTC timestamp.
-- [ ] **Edge function key verified:** Audit edge function uses `SUPABASE_SERVICE_ROLE_KEY` — grep for `VITE_SUPABASE` in function source (must return zero matches).
-- [ ] **Circular logging excluded:** audit_logs table is explicitly excluded from any catch-all trigger or service wrapper — manual test: load admin log page, verify row count does not increase.
-- [ ] **Indexes created:** Run `\d audit_logs` — confirm `(org_id, created_at DESC)` composite index exists.
-- [ ] **Error path coverage:** Audit call present in failure branches — grep for `auditLog(` next to early returns and catch blocks.
+- [ ] **Stale link removed:** `grep -r "admin/modules" src/` returns zero results inside TenantDetailPage.tsx
+- [ ] **No toggles on overview:** `grep -r "<Switch" src/platform/pages/admin/ModulesPanel` returns zero results after refactor
+- [ ] **Bundle impact checked:** `npx vite-bundle-visualizer` run after any graph library addition — confirms it is in a lazy chunk, not the main chunk
+- [ ] **Toggle parity:** Every toggle that existed in ModulesPanel is present and functional in TenantDetailPage's new `TenantModulesSection`
+- [ ] **useSearchParams removed:** `grep "useSearchParams" src/platform/pages/admin/ModulesPanel` returns zero results
+- [ ] **Graph edges validated:** No edge in `GRAPH_EDGES` has a `target` that does not match a `ModuleId` in `MODULE_REGISTRY`
+- [ ] **GraphNode is serializable:** `GraphNode` type has no `React.ComponentType` or `LucideIcon` fields
+- [ ] **Dark mode:** Graph diagram (SVG lines, node borders, status badges) renders correctly in dark mode — manual test in both modes
+- [ ] **TypeScript zero errors:** `npx tsc --noEmit` passes after all changes — no unused imports from removed logic in ModulesPanel
 
 ---
 
 ## Recovery Strategies
 
-When pitfalls occur despite prevention, how to recover.
-
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Cross-tenant leak via anon RLS | HIGH | Drop permissive policy immediately; add org-scoped policy; audit what was exposed; notify affected tenants per LGPD breach notification rules (72h window) |
-| PII in metadata discovered post-deploy | MEDIUM | Migration to NULLIFY or truncate metadata JSONB fields matching PII patterns; update allowlist; document in security log |
-| Circular logging detected (table growing exponentially) | MEDIUM | Drop the offending trigger or wrapper immediately; bulk-delete circular rows (identify by action matching internal audit actions); redeploy with corrected scope |
-| Missing events on error paths | LOW-MEDIUM | Add application-layer catch-all for failed operations; accept the historical gap; document audit coverage start date in STATE.md |
-| No retention policy and table approaching size limit | HIGH | Add `pg_cron` job with aggressive initial cleanup (delete rows > 180 days); use batch deletion (1000 rows at a time) to avoid lock escalation on large table |
-| Actor email stored as PII in actor column | MEDIUM | Migration to nullify or hash email column; add actor_id UUID reference; update display layer to resolve name from Clerk at render time |
-| Trigger added without testing against migration chain | MEDIUM | Drop trigger, fix migration, re-run full migration chain on local Supabase, verify before re-deploying to production |
+| Graph library in main bundle | LOW | Move import to lazy component, rebuild — no logic changes needed |
+| Duplicate toggle logic in two files | MEDIUM | Extract `useModuleStates` hook, replace both callsites — risk of subtle behavioral differences during extraction |
+| God component (TenantDetailPage 900+ lines) | MEDIUM | Extract `TenantModulesSection`, move state — requires careful props/state boundary audit |
+| Stale deep-link to old ModulesPanel | LOW | Find with grep, replace link target or remove — pure string change |
+| Non-serializable data in graph node state | LOW | Define `GraphNode` type, re-derive from registry — no architectural change, just a refactor of the extraction code |
+| Toggle switch visible on overview page | LOW | Remove `Switch` from `ModuleOverviewCard`, delete `onToggle` prop — component-level fix |
+| Phantom graph edge from invalid `requires[]` entry | LOW | Add filter step in edge extraction — one line of code change |
 
 ---
 
 ## Pitfall-to-Phase Mapping
 
-How roadmap phases should address these pitfalls.
-
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Anon-permissive RLS on audit_logs | Schema/Migration phase | `SELECT * FROM pg_policies WHERE tablename = 'audit_logs'` — no anon SELECT |
-| PII in metadata JSONB | Design phase (metadata spec before code) | Metadata allowlist document reviewed; no action type logs full record |
-| Circular logging | Capture layer design phase | Manual test: admin log page load does not increase row count |
-| Missing events on error paths | Capture strategy phase | Forced Supabase error test — verify audit row still created |
-| Missing indexes | Migration phase | `EXPLAIN ANALYZE SELECT ... FROM audit_logs WHERE org_id = '...' ORDER BY created_at DESC LIMIT 50` — index scan confirmed |
-| Migration risk on production tables | Migration review phase | Dry-run on local Supabase with full 24-migration chain; no DDL table locks |
-| Tamper protection | Migration phase | `SELECT has_table_privilege('authenticated', 'audit_logs', 'DELETE')` returns false |
-| Timezone ambiguity | UI rendering phase | Manual test comparing display to known UTC timestamp with -3h offset |
-| Edge function using wrong key | Edge function implementation phase | grep for `VITE_SUPABASE` in edge function source — zero matches |
-| Storage growth / retention | Schema design phase | `retained_until` or equivalent column exists; pg_cron job or scheduled function documented in STATE.md |
+| Graph library bundle blow-up | Phase 1 — Graph approach decision | `npx vite-bundle-visualizer` shows graph code in a lazy chunk |
+| Non-serializable `ModuleDefinition` in graph state | Phase 1 — Graph data model | `GraphNode` type has zero function or component fields |
+| Phantom graph edges from invalid `requires[]` | Phase 1 — Graph data model | Each `GRAPH_EDGES` entry has a `target` matching a real `ModuleId` |
+| Hover state O(n) re-renders | Phase 1 — Graph interactivity | React DevTools Profiler: only directly-affected elements re-render on mouseover |
+| Duplicate Supabase toggle logic | Phase 2 — Extract `useModuleStates` hook | Only one file imports `supabase.from('tenant_modules')` for toggle mutations |
+| TenantDetailPage God component | Phase 2 — `TenantModulesSection` extraction | TenantDetailPage < 700 lines after adding module section |
+| Stale "Gerenciar modulos" deep-link | Phase 2 — Post-migration link audit | `grep -r "admin/modules" src/` returns zero results from TenantDetailPage |
+| Toggle switches on overview page | Phase 3 — New overview page | No `<Switch` in ModulesPanel component tree |
+| `useSearchParams` orphan | Phase 3 — New overview page | `useSearchParams` absent from ModulesPanel after rewrite |
 
 ---
 
 ## Sources
 
-- [Supabase Auth Audit Logs](https://supabase.com/docs/guides/auth/audit-logs) — official Supabase docs
-- [Supabase Platform Audit Logs](https://supabase.com/docs/guides/security/platform-audit-logs) — official Supabase docs
-- [pganalyze: Postgres Auditing — Triggers vs pgAudit](https://pganalyze.com/blog/5mins-postgres-auditing-pgaudit-supabase-supa-audit) — trigger vs pgAudit tradeoffs, Supabase-specific
-- [Production-Ready Audit Logs in PostgreSQL](https://medium.com/@sehban.alam/lets-build-production-ready-audit-logs-in-postgresql-7125481713d8) — index strategy, patterns
-- [Tamper-Evident Audit Trails with Hash Chaining](https://appmaster.io/blog/tamper-evident-audit-trails-postgresql) — immutability patterns
-- [GDPR Log Management for Engineers](https://last9.io/blog/gdpr-log-management/) — PII in logs, retention obligations, LGPD alignment
-- [Supabase RLS Best Practices (MakerKit)](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices) — multi-tenant RLS patterns
-- [How to Implement Audit Logs in Supabase](https://bootstrapped.app/guide/how-to-implement-audit-logs-in-supabase) — Supabase-specific implementation guide
-- [Postgres Audit Logging Guide (Bytebase)](https://www.bytebase.com/blog/postgres-audit-logging/) — PostgreSQL audit patterns and index strategies
-- Nexo `.planning/PITFALLS.md` rules #2, #5, #9, #11 — existing Supabase/edge function integration pitfalls specific to this codebase
-- Nexo supabase/migrations/ — direct analysis of anon-permissive RLS patterns across migrations 001-024
+- Direct inspection of `src/platform/pages/admin/ModulesPanel.tsx` — current toggle logic, optimistic update pattern, `?org=` search param usage
+- Direct inspection of `src/platform/pages/admin/TenantDetailPage.tsx` (lines 577-596) — stale "Gerenciar modulos" link and placeholder modules section
+- Direct inspection of `src/platform/module-loader/registry.ts` — `ModuleDefinition` type including `React.ComponentType` fields in `extensions[].injects`
+- Direct inspection of `src/platform/module-loader/extension-registry.ts` — `resolveExtensions` as reference for correct edge direction from `requires[]`
+- [React Flow Performance Docs](https://reactflow.dev/learn/advanced-use/performance) — avoiding unnecessary re-renders in node-based UIs
+- [npm trends: react-flow vs d3.js vs react-graph-vis](https://npmtrends.com/d3.js-vs-react-flow-vs-react-graph-vis) — library adoption and download comparison
+- [React Docs: Sharing State Between Components](https://react.dev/learn/sharing-state-between-components) — state extraction patterns when moving features between components
+- [DEV: Ten React graph visualization libraries (2024)](https://dev.to/ably/top-react-graph-visualization-libraries-3gmn) — library landscape with bundle size context
 
 ---
-*Pitfalls research for: v11.0 — Audit Logging added to existing multi-tenant Supabase system*
-*Researched: 2026-03-19*
+*Pitfalls research for: v12.0 Admin Modules Overview — interactive graph + module management refactor*
+*Researched: 2026-03-21*

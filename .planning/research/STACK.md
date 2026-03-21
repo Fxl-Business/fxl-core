@@ -1,244 +1,190 @@
-# Stack Research — v11.0 Audit Logging
+# Stack Research — v12.0 Admin Modules Overview
 
-**Domain:** Audit Logging System — Multi-tenant React + Supabase SaaS platform
-**Researched:** 2026-03-19
-**Confidence:** HIGH (PostgreSQL patterns), MEDIUM (pg_partman managed availability)
+**Domain:** Interactive Module Dependency Diagram — React 18 + TypeScript admin panel feature
+**Researched:** 2026-03-21
+**Confidence:** HIGH (@xyflow/react — official docs verified), MEDIUM (@dagrejs/dagre — multiple sources corroborated)
 
-> This is an additive research document for v11.0. The base stack (React 18, TypeScript strict,
-> Tailwind CSS 3, Vite 5, Supabase, Clerk, shadcn/ui, Sentry, Zod 4.x) is validated and
-> unchanged. This document covers ONLY what is new or changed for v11.0.
+> This is an additive research document for v12.0. The base stack (React 18, TypeScript strict,
+> Tailwind CSS 3, Vite 5, Supabase, Clerk, shadcn/ui, lucide-react, recharts, Sentry, Zod 4.x)
+> is validated and unchanged. This document covers ONLY what is new for v12.0.
 
 ---
 
-## Executive Decision: Zero New npm Dependencies
+## Executive Decision: One New npm Dependency
 
-All audit logging features are implementable with:
-1. A new Supabase migration (SQL schema + indexes + triggers)
-2. An `audit-service.ts` service layer (app-layer logging)
-3. A new admin page using existing shadcn/ui primitives
-4. A pg_cron retention job (Supabase-native, no npm package)
+The interactive module dependency diagram requires a graph layout and rendering library.
+No existing dependency in the stack covers directed-graph visualization with interactive
+node/edge behavior (hover highlighting, click navigation, pan/zoom). A single library
+addition is justified.
 
-The existing stack covers every requirement.
+**Chosen:** `@xyflow/react` (React Flow v12) — the de-facto standard for node-based UIs in React.
 
 ---
 
 ## Already-Present Stack (Do Not Re-research)
 
-| Package | Version | Role in Audit Logging |
-|---------|---------|----------------------|
-| `@supabase/supabase-js` | ^2.98.0 | Insert/query audit_logs, RLS enforcement |
-| `@clerk/react` | ^6.0.1 | Actor context (user_id, email, org_id) for every log entry |
-| `zod` | ^4.3.6 | Validate AuditLog type at service boundaries |
-| `sonner` | ^2.0.7 | Toast feedback after export action |
-| `lucide-react` | ^0.460.0 | Icons in audit log timeline UI |
-| `@sentry/react` | ^10.45.0 | Already capturing errors; audit log write failures go here |
-| shadcn/ui via `@radix-ui/*` | various | Select, Input, Popover for filter UI — all installed |
-| `react-router-dom` | ^6.27.0 | URL search params for shareable filter state |
+| Package | Role in v12.0 |
+|---------|---------------|
+| React 18 + TypeScript 5 strict | Host environment for the diagram component |
+| Tailwind CSS 3 | Style custom node cards inside the diagram |
+| shadcn/ui + `@radix-ui/*` | Module overview cards, tooltips, status badges |
+| lucide-react | Icons inside custom node cards |
+| `react-router-dom` ^6 | `useNavigate()` for click-to-navigate from diagram nodes |
+| `MODULE_REGISTRY` typed constant | Source of truth for node definitions and dependency edges |
 
 ---
 
-## PostgreSQL Features to Use (Supabase-native, No Extensions Except pg_cron)
+## New Dependency: @xyflow/react
 
-### Core Table Design
+### Core Technologies (New for v12.0)
 
-```sql
-CREATE TABLE audit_logs (
-  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id       text NOT NULL,          -- tenant scope, matches RLS on all 10+ tables
-  actor_id     text NOT NULL,          -- Clerk user_id
-  actor_email  text,                   -- denormalized: readable after user deletion
-  action       text NOT NULL,          -- e.g. 'tenant.archived', 'module.disabled'
-  resource     text NOT NULL,          -- e.g. 'tenant', 'task', 'blueprint'
-  resource_id  text,                   -- affected record ID (nullable for global actions)
-  metadata     jsonb DEFAULT '{}',     -- flexible: IP, UA, diff, extra context
-  old_values   jsonb,                  -- before snapshot (trigger-captured only)
-  new_values   jsonb,                  -- after snapshot (trigger-captured only)
-  severity     text DEFAULT 'info',    -- 'info' | 'warning' | 'critical'
-  created_at   timestamptz NOT NULL DEFAULT now()
-);
-```
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| `@xyflow/react` | ^12.10.1 | Directed graph rendering — nodes, edges, pan/zoom, interaction | Standard library for node-based UIs in React; built-in TypeScript types; custom nodes are plain React components styled with Tailwind; official Tailwind integration documented; React 18 compatible |
+| `@dagrejs/dagre` | ^1.1.4 | Automatic graph layout (position calculation) | Dagre is the recommended layout engine for React Flow dependency trees; zero configuration required; calculates `x/y` positions from edge definitions so nodes don't need manual placement |
 
-**Why this schema:**
-- `org_id` first in composite indexes follows the existing RLS pattern across the entire codebase
-- `actor_email` denormalized — audit logs must remain readable after users are suspended/deleted (Clerk users can be removed)
-- JSONB for `metadata` avoids schema changes when new event types need extra fields
-- `old_values`/`new_values` nullable — only populated by DB triggers; app-layer events set them to NULL
-- `severity` enables filtering by urgency without full-text search
+### Why @xyflow/react Over Alternatives
 
-### Required Indexes
+**React Flow** is the right choice because:
 
-```sql
--- Primary access pattern: per-tenant timeline (most common admin query)
-CREATE INDEX audit_logs_org_time_idx
-  ON audit_logs (org_id, created_at DESC);
+1. **Custom nodes are React components.** Every module card is a `.tsx` component styled with Tailwind, shadcn/ui, and lucide-react — no canvas or SVG API required. This matches the existing codebase style completely.
 
--- Actor lookup: "what did this user do?"
-CREATE INDEX audit_logs_actor_idx
-  ON audit_logs (actor_id, created_at DESC);
+2. **Tailwind works natively.** React Flow UI components are built on shadcn/ui and support Tailwind class styling on custom nodes. Official documentation confirms the integration pattern.
 
--- Resource lookup: "what happened to this tenant/task/blueprint?"
-CREATE INDEX audit_logs_resource_idx
-  ON audit_logs (resource, resource_id);
+3. **Interaction model matches requirements.** Hover-based edge highlighting, click handlers on nodes, pan/zoom canvas — all first-class features with zero custom event wiring.
 
--- JSONB metadata containment search
-CREATE INDEX audit_logs_metadata_gin
-  ON audit_logs USING GIN (metadata);
-```
+4. **TypeScript types are built-in.** `Node<T>`, `Edge`, `ReactFlowProvider`, `useReactFlow` are all fully typed. No `@types/` package needed.
 
-**Confidence: HIGH** — index strategy mirrors the existing `tasks` and `knowledge_entries` tables in the codebase, which follow the same `(org_id, ...)` composite pattern.
+5. **Viewport rendering.** Only renders nodes in the viewport — the ~10 modules in MODULE_REGISTRY are trivially small, so performance is not a concern, but the library does not regress it.
 
-### RLS Policy
-
-```sql
-ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
-
--- Operators can read their own org's logs
-CREATE POLICY "audit_logs_select_org" ON audit_logs
-  FOR SELECT USING (org_id = (auth.jwt() ->> 'org_id'));
-
--- Inserts come from SECURITY DEFINER functions and triggers only (no direct client insert)
--- Super admin bypass handled via existing RLS bypass migration pattern (migration 009)
-```
-
-**Why no direct INSERT policy from client:** App-layer inserts go through an Edge Function that validates the Clerk JWT and sets actor context server-side. This prevents a rogue client from spoofing `actor_id` or `org_id`.
+6. **Version 12.x is stable and maintained** — last publish one month ago (March 2026), on npm as `@xyflow/react` (renamed from `reactflow` in v11).
 
 ---
 
-## Capture Strategy: Hybrid (App Layer Primary, DB Triggers Secondary)
-
-### Application Layer — Primary (90% of events)
-
-Direct inserts into `audit_logs` from Edge Functions and the service layer. This is the right approach because:
-- Only option for SELECT events (viewing sensitive records, exports)
-- Captures semantic intent (`"admin.impersonation.started"`) vs raw table mutation
-- Clerk actor context (user_id, email, org_id) is already available in Edge Function request context
-- Follows the established `tenant-service.ts` / `admin-service.ts` pattern
-
-**New service:** `src/modules/admin/services/audit-service.ts`
-
-```typescript
-interface AuditLogEntry {
-  action: string;     // 'tenant.created' | 'tenant.archived' | 'module.toggled' | ...
-  resource: string;   // 'tenant' | 'task' | 'blueprint' | ...
-  resource_id?: string;
-  metadata?: Record<string, unknown>;
-  severity?: 'info' | 'warning' | 'critical';
-}
-```
-
-**Confidence: HIGH** — mirrors existing service layer patterns in codebase.
-
-### Database Triggers — Secondary (critical tables only)
-
-`AFTER INSERT/UPDATE/DELETE` triggers for tables where bypass-proof capture is required even if the Edge Function fails after the DB write:
-
-| Table | Why Trigger |
-|-------|-------------|
-| `tenants` | Tenant creation/archival is a compliance event; must be captured even on partial Edge Function failure |
-| `tenant_modules` | Module enable/disable affects feature access platform-wide; silent loss unacceptable |
-
-Do NOT add triggers to high-write tables (`tasks`, `wireframe_comments`, `blueprint_configs`). Triggers add overhead to every write operation and the write amplification is not justified. App-layer logging is sufficient.
-
-**Key implementation detail:** Triggers run as the table owner and can write to `audit_logs` by using a `SECURITY DEFINER` wrapper function. This is necessary because `audit_logs` has RLS enabled and the trigger context does not carry a Clerk JWT.
-
-**Confidence: HIGH** — SECURITY DEFINER pattern for audit triggers is well-documented in PostgreSQL wiki and confirmed by multiple sources.
-
----
-
-## Retention Policy via pg_cron (Supabase-native)
-
-**pg_cron** is available on Supabase managed platform (version 1.6.4, documented officially).
-
-```sql
--- Enable once per project (already enabled if used elsewhere; safe to re-run)
-CREATE EXTENSION IF NOT EXISTS pg_cron;
-
--- Delete logs older than configured retention window, runs daily at 3am UTC
-SELECT cron.schedule(
-  'audit-log-retention',
-  '0 3 * * *',
-  $$DELETE FROM audit_logs WHERE created_at < now() - interval '90 days'$$
-);
-```
-
-**Make it configurable:** Store `audit_retention_days` as a `platform_settings` key (table already exists from v4.1). The cron job reads this setting, so super admin can change retention without a migration.
-
-**Why not pg_partman:** Monthly range partitioning with pg_partman would allow instant partition drops rather than row-level DELETEs. However:
-- pg_partman has intermittent availability reports on Supabase managed (MEDIUM confidence on availability)
-- Partitioned tables have different behavior for FK constraints, and some RLS policies need adjustment
-- A `pg_cron` DELETE with proper indexes handles retention cleanly for the expected scale (< 1M rows/year for an SMB platform)
-- pg_partman can be added later if audit_logs grows past 5M rows
-
-**Confidence: HIGH for pg_cron** (officially documented, version confirmed), **MEDIUM for pg_partman skip** (availability risk is based on community reports, not official documentation).
-
----
-
-## Export (No New Library — Native Browser APIs)
-
-```typescript
-// CSV export — zero dependencies, ~15 lines
-function exportToCSV(rows: AuditLog[], filename: string) {
-  const headers = ['Date', 'Actor', 'Action', 'Resource', 'Severity'];
-  const lines = rows.map(r => [
-    r.created_at, r.actor_email ?? r.actor_id, r.action, r.resource, r.severity
-  ].join(','));
-  const csv = [headers.join(','), ...lines].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
-// JSON export — trivially JSON.stringify(rows, null, 2)
-```
-
-**Why no library (`react-csv`, `papaparse`):** The feature is covered in under 20 lines. `papaparse` is 40KB minified, `react-csv` adds 30KB. The project constraint is explicit: "never add dependencies without documenting here." This is not a case that justifies a dependency.
-
-**Confidence: HIGH** — native `Blob` + `URL.createObjectURL` works in all modern browsers; confirmed by MDN.
-
----
-
-## Frontend Filtering (No New Library)
-
-The audit log admin page needs: date range, action type, actor, severity, and resource filters. All implementable with installed packages:
-
-| Filter Type | Component | Already Installed |
-|-------------|-----------|-------------------|
-| Action type dropdown | shadcn `Select` | Yes (`@radix-ui/react-select` ^2.2.6) |
-| Severity filter | shadcn `Select` or button group | Yes |
-| Date range | Two `<input type="date">` native inputs | Yes (HTML native) |
-| Actor search | shadcn `Input` + Supabase `ilike` query | Yes |
-| Shareable filter URL | `react-router-dom` URLSearchParams | Yes |
-
-**Do NOT add TanStack Table:** The admin panel uses standard HTML table patterns throughout. TanStack Table is a headless utility designed for complex interactive grids (sorting, grouping, column reorder). The audit log view is a read-only timeline with server-side filtering — a `<table>` with Tailwind is the right tool.
-
-**Confidence: HIGH** — existing admin pages (`/admin/users`, `/admin/tenants`) use the same pattern successfully.
-
----
-
-## No New npm Packages
+## Installation
 
 ```bash
-# Zero new packages for v11.0
-# All capabilities present in:
-# - PostgreSQL (Supabase-native): triggers, SECURITY DEFINER, GIN indexes, pg_cron
-# - Existing installed packages: @supabase/supabase-js, @clerk/react, shadcn/ui, zod
-# - Browser native APIs: Blob, URL.createObjectURL for export
+# New dependencies for v12.0
+npm install @xyflow/react @dagrejs/dagre
+
+# Type definitions for dagre (not bundled)
+npm install -D @types/dagre
 ```
+
+---
+
+## Integration Pattern with Existing Stack
+
+### CSS import
+
+React Flow requires its base stylesheet. In the Tailwind-based project, import it **before** Tailwind in `src/index.css`:
+
+```css
+/* src/index.css — add before @tailwind directives */
+@import '@xyflow/react/dist/style.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+This ordering is required. Tailwind overrides must come after React Flow's base styles.
+
+### Custom node — plain React + Tailwind
+
+Custom nodes are standard React components. They receive `NodeProps<T>` and can use any installed library:
+
+```typescript
+import { NodeProps, Handle, Position } from '@xyflow/react';
+import { ModuleDefinition } from '@/modules/admin/constants/module-registry';
+
+type ModuleNode = Node<{ module: ModuleDefinition }, 'module'>;
+
+function ModuleNodeCard({ data }: NodeProps<ModuleNode>) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm w-48">
+      <Handle type="target" position={Position.Top} />
+      <p className="text-sm font-semibold text-foreground">{data.module.label}</p>
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  );
+}
+```
+
+No SVG, no canvas API, no D3 — just Tailwind classes on a div.
+
+### Dagre layout — convert MODULE_REGISTRY to positioned nodes
+
+```typescript
+import dagre from '@dagrejs/dagre';
+import { Node, Edge } from '@xyflow/react';
+
+const NODE_WIDTH = 192;
+const NODE_HEIGHT = 80;
+
+function getLayoutedElements(nodes: Node[], edges: Edge[]) {
+  const g = new dagre.graphlib.Graph();
+  g.setDefaultEdgeLabel(() => ({}));
+  g.setGraph({ rankdir: 'TB', ranksep: 60, nodesep: 40 });
+
+  nodes.forEach(n => g.setNode(n.id, { width: NODE_WIDTH, height: NODE_HEIGHT }));
+  edges.forEach(e => g.setEdge(e.source, e.target));
+
+  dagre.layout(g);
+
+  return {
+    nodes: nodes.map(n => {
+      const pos = g.node(n.id);
+      return { ...n, position: { x: pos.x - NODE_WIDTH / 2, y: pos.y - NODE_HEIGHT / 2 } };
+    }),
+    edges,
+  };
+}
+```
+
+This function runs once on mount (MODULE_REGISTRY is static). No re-layout needed.
+
+### Hover highlighting — built-in edge styling
+
+React Flow supports dynamic edge className/style via props. Highlight connected edges on node hover using `useReactFlow().setEdges()`:
+
+```typescript
+function onNodeMouseEnter(_: React.MouseEvent, node: Node) {
+  setEdges(edges =>
+    edges.map(e => ({
+      ...e,
+      className: e.source === node.id || e.target === node.id ? 'stroke-primary' : 'opacity-30',
+    }))
+  );
+}
+```
+
+No extra library, no custom SVG — this is the idiomatic React Flow pattern.
+
+### Click navigation — useNavigate + node onClick
+
+```typescript
+import { useNavigate } from 'react-router-dom';
+
+function onNodeClick(_: React.MouseEvent, node: Node) {
+  navigate(`/admin/modules/${node.id}`);
+}
+```
+
+`react-router-dom` is already installed. No new routing infrastructure.
 
 ---
 
 ## Alternatives Considered
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| Log retention | `pg_cron` DELETE job | `pg_partman` monthly partitions | Managed availability uncertain (MEDIUM confidence); FK + RLS complexity; overkill at < 1M rows/year |
-| Export | Native Blob API | `react-csv` / `papaparse` | 30-80KB for 15 lines of native code; project constraint against unjustified dependencies |
-| Filter/table UI | shadcn `<table>` + Tailwind | `@tanstack/react-table` | No prior usage; overkill for read-only timeline; adds dependency for zero benefit at this scale |
-| Log transport | Direct Supabase insert via Edge Function | External service (Datadog, LogTail, Axiom) | Extra cost and dependency; PostgreSQL queryable logs sufficient for SMB compliance; Sentry already handles runtime errors |
-| Capture strategy | App layer primary + selective triggers | All-trigger approach | Triggers cannot capture SELECT events, semantic intent, or partial failures after DB write |
-| Auth for log writes | Edge Function with Clerk JWT validation | Direct client insert | Direct client insert allows actor_id spoofing; Edge Function maintains audit integrity |
+| Recommended | Alternative | Why Not |
+|-------------|-------------|---------|
+| `@xyflow/react` | `reagraph` | WebGL-based; overkill for ~10 static nodes; custom node styling requires canvas API instead of Tailwind; React Flow has better DX for this use case |
+| `@xyflow/react` | `cytoscape.js` + `react-cytoscapejs` | Canvas rendering; styling uses Cytoscape's own selector language, not Tailwind; requires two packages; the React wrapper is community-maintained and less active |
+| `@xyflow/react` | `d3` + custom SVG | Maximum customization but requires writing 300+ lines of D3 position/force calculation, drag, zoom, and hover logic manually; no justification for this complexity at ~10 static nodes |
+| `@xyflow/react` | `vis-network` | jQuery-era library; not React-native; no TypeScript types built-in; has fallen behind React Flow in community adoption |
+| `@dagrejs/dagre` | `elkjs` | ELK is more powerful (handles compound graphs, routing constraints) but ~10x more complex to configure; overkill for a flat dependency tree with ~10 nodes |
+| `@dagrejs/dagre` | Manual x/y positions | MODULE_REGISTRY may change across milestones; hardcoded positions break on every addition; dagre auto-layout is zero maintenance |
 
 ---
 
@@ -246,39 +192,55 @@ The audit log admin page needs: date range, action type, actor, severity, and re
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| `react-csv` / `papaparse` | 30-80KB for functionality covered by 15 lines of native code | Browser `Blob` + `URL.createObjectURL` |
-| `@tanstack/react-table` | No prior usage; overkill for read-only admin list | shadcn `<table>` + Tailwind (matches existing admin pages) |
-| `pg_partman` | Managed availability risk; complexity not justified at current scale | `pg_cron` DELETE job with proper indexing |
-| External log services (Datadog, Axiom, LogTail) | Extra cost; PostgreSQL is queryable; Sentry already captures runtime errors | `audit_logs` table in Supabase |
-| `pgaudit` extension | Statement-level DBA logging, not semantic application audit trails | App-layer semantic logging with typed action strings |
-| Direct client-side `audit_logs` INSERT | Actor context can be spoofed by a rogue client | Edge Function with Clerk JWT validation |
+| `d3` or `d3-force` | 50KB+ for force simulation that produces unstable organic layouts; wrong rendering model for an admin diagram (nodes should be stable and structured, not physics-simulated) | `@dagrejs/dagre` for deterministic hierarchical layout |
+| `cytoscape` + `react-cytoscapejs` | Canvas rendering bypasses Tailwind entirely; community React wrapper has maintenance gaps; two packages for one feature | `@xyflow/react` where custom nodes are React components |
+| `reagraph` | WebGL renderer is correct for graphs with 1000+ nodes; at ~10 nodes it adds complexity (canvas event handling) without benefit | `@xyflow/react` |
+| `elkjs` | Complex to configure; async layout algorithm; asynchronous position calculation complicates React state management | `@dagrejs/dagre` |
+| `mermaid` or `mermaid-js/react` | Static SVG output; no interactive hover/click events; theming conflicts with dark mode CSS vars | `@xyflow/react` |
+| `sigma.js` | WebGL network graphs for social network-scale data; not suited for ~10 node admin diagrams | `@xyflow/react` |
+
+---
+
+## Stack Patterns
+
+**For the dependency diagram specifically:**
+- Use `@xyflow/react` ReactFlow component with `nodeTypes` map pointing to custom TSX components
+- Run dagre layout once on mount (MODULE_REGISTRY is static)
+- Keep diagram state local — no Supabase persistence needed (MODULE_REGISTRY is a constant)
+- Wrap in `ReactFlowProvider` only if the component tree needs `useReactFlow()` outside the main `<ReactFlow>` component
+
+**For the module overview cards (outside the diagram):**
+- Use existing shadcn/ui `Card` component — no React Flow involvement
+- Grid layout via Tailwind `grid grid-cols-2 lg:grid-cols-3`
+- These are independent from the diagram and share no state with it
 
 ---
 
 ## Version Compatibility
 
-| Package | Current Version | Audit Logging Usage | Notes |
-|---------|----------------|---------------------|-------|
-| `@supabase/supabase-js` | ^2.98.0 | All reads/writes | No changes needed |
-| `@clerk/react` | ^6.0.1 | `useUser()` for actor_id + email | Already used in admin module |
-| `zod` | ^4.3.6 | AuditLog schema validation | No upgrade needed |
-| `react-router-dom` | ^6.27.0 | URLSearchParams for filter state | No changes needed |
-| pg_cron (Supabase extension) | 1.6.4 | Retention cron job | Enable via SQL, no npm package |
+| Package | Version | Compatible With | Notes |
+|---------|---------|----------------|-------|
+| `@xyflow/react` | ^12.10.1 | React 18, TypeScript 5, Vite 5, Tailwind 3 | v12 is the current stable release (renamed from `reactflow`); Tailwind 4 support added in UI components but Tailwind 3 continues to work with CSS import ordering fix |
+| `@dagrejs/dagre` | ^1.1.4 | `@xyflow/react` any version | Dagre is layout-only (pure JS graph algorithm); no React dependency; TypeScript types via `@types/dagre` |
+| `@types/dagre` | ^0.7.3 | `@dagrejs/dagre` | Dev-only type declarations for dagre's graphlib API |
+
+**Note on Tailwind 3 + React Flow CSS:** React Flow's UI component system was updated for Tailwind 4 in late 2025, but the core `@xyflow/react` library works correctly with Tailwind 3. The only requirement is importing `@xyflow/react/dist/style.css` before Tailwind's entry point in `src/index.css`.
 
 ---
 
 ## Sources
 
-- [Supabase Auth Audit Logs (official docs)](https://supabase.com/docs/guides/auth/audit-logs) — Confirmed native Supabase audit is auth-only; application events require a custom table. HIGH confidence.
-- [Supabase pg_cron extension (official docs)](https://supabase.com/docs/guides/database/extensions/pg_cron) — pg_cron v1.6.4 available and documented on Supabase managed. HIGH confidence.
-- [Supabase pg_partman migration guide (official docs)](https://supabase.com/docs/guides/database/migrating-to-pg-partman) — pg_partman is documented but community reports of availability issues on managed platform. MEDIUM confidence on managed availability.
-- [PostgreSQL Audit Logging Guide — Bytebase](https://www.bytebase.com/blog/postgres-audit-logging/) — Comparative analysis of trigger vs app-layer vs pgaudit approaches; JSONB schema recommendations. MEDIUM confidence.
-- [Performance differences: normal vs generic audit triggers — CYBERTEC](https://www.cybertec-postgresql.com/en/performance-differences-between-normal-and-generic-audit-triggers/) — Triggers add meaningful overhead on write-heavy tables; selective auditing is the recommended approach. MEDIUM confidence.
-- [Auto-archiving and Data Retention with pg_partman — Crunchy Data](https://www.crunchydata.com/blog/auto-archiving-and-data-retention-management-in-postgres-with-pg_partman) — pg_cron DELETE vs partition drop tradeoffs at scale. MEDIUM confidence.
-- [TanStack Table pagination guide (official docs)](https://tanstack.com/table/latest/docs/guide/pagination) — Confirmed server-side pagination capability; overkill for read-only admin list. HIGH confidence.
-- Project `package.json` — all installed packages confirmed (HIGH — direct read).
+- [@xyflow/react on npm](https://www.npmjs.com/package/@xyflow/react) — Version 12.10.1 confirmed, last publish date verified. HIGH confidence.
+- [React Flow installation docs (reactflow.dev)](https://reactflow.dev/learn/getting-started/installation-and-requirements) — Peer dependency requirements, TypeScript support, Vite template. HIGH confidence.
+- [React Flow + Tailwind CSS example (reactflow.dev)](https://reactflow.dev/examples/styling/tailwind) — CSS import ordering requirement confirmed. HIGH confidence.
+- [React Flow Dagre layout example (reactflow.dev)](https://reactflow.dev/examples/layout/dagre) — `getLayoutedElements` pattern with `@dagrejs/dagre`. HIGH confidence.
+- [React Flow TypeScript guide (reactflow.dev)](https://reactflow.dev/learn/advanced-use/typescript) — `Node<T>`, `Edge`, `NodeProps<T>` type usage confirmed. HIGH confidence.
+- [React Flow UI — Tailwind 4 update announcement (reactflow.dev)](https://reactflow.dev/whats-new/2025-10-28) — Confirmed Tailwind 3 backward compatibility and CSS import order change for Tailwind 4. MEDIUM confidence (changelog, not migration guide).
+- [Dagre layout in React Flow — ncoughlin.com](https://ncoughlin.com/posts/react-flow-dagre-custom-nodes) — Community walkthrough of dagre + custom nodes integration. MEDIUM confidence.
+- [Ten React graph visualization libraries — DEV Community](https://dev.to/ably/top-react-graph-visualization-libraries-3gmn) — Comparative survey; confirmed reagraph/cytoscape/d3 tradeoffs. MEDIUM confidence.
+- Cambridge Intelligence comparative guide — confirmed React Flow recommendation for workflow/admin UI use cases vs reagraph/cytoscape for large-scale network analysis. MEDIUM confidence.
 
 ---
 
-*Stack research for: v11.0 Audit Logging — Nexo multi-tenant platform*
-*Researched: 2026-03-19*
+*Stack research for: v12.0 Admin Modules Overview — interactive dependency diagram*
+*Researched: 2026-03-21*
