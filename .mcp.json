@@ -3,13 +3,6 @@
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=cbkuibeppojtzhiwkvxb"
-    },
-    "fxl-sdk": {
-      "type": "http",
-      "url": "https://fxl-sdk-mcp.cauetpinciara.workers.dev/mcp",
-      "headers": {
-        "Authorization": "Bearer 0bc9fe52650e954f944aec8f9e748a0975c83a3f25e0dd624349b7db1df03e4c"
-      }
     }
   }
 }

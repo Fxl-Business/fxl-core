@@ -8,9 +8,21 @@
 
 // @ts-nocheck — Deno runtime, not checked by project tsc
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { logAuditEvent, extractAuditContext } from '../_shared/audit.ts'
 
 const CLERK_SECRET_KEY = Deno.env.get('CLERK_SECRET_KEY')
 const CLERK_API_BASE = 'https://api.clerk.com/v1'
+
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+function getSupabaseAdmin() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not configured')
+  }
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -57,6 +69,9 @@ serve(async (req: Request) => {
   }
 
   // Route: only GET /admin-users is supported
+  // TODO(CAPT-02): When user create/update/delete mutations are added,
+  // instrument them with logAuditEvent() following admin-tenants pattern.
+  // The logAuditEvent and extractAuditContext helpers are already imported.
   if (req.method === 'GET') {
     return handleListUsers()
   }

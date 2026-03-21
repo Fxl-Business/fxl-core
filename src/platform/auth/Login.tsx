@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useSignIn } from '@clerk/react/legacy'
+import { useAuth } from '@clerk/react'
 import { isClerkAPIResponseError } from '@clerk/react/errors'
 import { useNavigate, Link } from 'react-router-dom'
+import { logAuthEvent } from '@platform/services/audit-auth-service'
 import { Button } from '@shared/ui/button'
 import { Input } from '@shared/ui/input'
 import { Label } from '@shared/ui/label'
@@ -10,6 +12,7 @@ import { Separator } from '@shared/ui/separator'
 
 export default function Login() {
   const { signIn, isLoaded, setActive } = useSignIn()
+  const { getToken } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -46,6 +49,10 @@ export default function Login() {
       const result = await signIn.create({ identifier: email, password })
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
+        // Fire-and-forget audit log — getToken() works after setActive() completes
+        getToken().then((token) => {
+          if (token) logAuthEvent('sign_in', token)
+        }).catch(() => {})
         navigate('/')
       } else if (result.status === 'needs_second_factor') {
         setError('Autenticacao de dois fatores necessaria. Use o login padrao.')

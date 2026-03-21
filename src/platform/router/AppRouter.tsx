@@ -25,6 +25,7 @@ const ConnectorsPanel = lazy(() => import('@platform/pages/admin/ConnectorsPanel
 const SettingsPanel = lazy(() => import('@platform/pages/admin/SettingsPanel'))
 const ProductDocsPage = lazy(() => import('@platform/pages/admin/ProductDocsPage'))
 const UsersPage = lazy(() => import('@platform/pages/admin/UsersPage'))
+const AuditLogsPage = lazy(() => import('@platform/pages/admin/AuditLogsPage'))
 
 // Tasks pages — TaskList is non-lazy (lightweight); KanbanBoard and TaskForm are lazy
 import TaskList from '@modules/tasks/pages/TaskList'
@@ -105,10 +106,14 @@ export default function AppRouter() {
         <Route path="/admin/modules" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><ModulesPanel /></Suspense></ModuleErrorBoundary>} />
         <Route path="/admin/connectors" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><ConnectorsPanel /></Suspense></ModuleErrorBoundary>} />
         <Route path="/admin/product-docs" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><ProductDocsPage /></Suspense></ModuleErrorBoundary>} />
+        <Route path="/admin/audit-logs" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><AuditLogsPage /></Suspense></ModuleErrorBoundary>} />
         <Route path="/admin/settings" element={<ModuleErrorBoundary moduleName="Admin"><Suspense fallback={<div>Carregando...</div>}><SettingsPanel /></Suspense></ModuleErrorBoundary>} />
       </Route>
 
-      {/* SSO callback for OAuth redirect (Google login) */}
+      {/* SSO callback for OAuth redirect (Google login)
+          TODO(CAPT-03): Auth audit logging for OAuth sign-in requires wrapping
+          AuthenticateWithRedirectCallback — deferred to future iteration.
+          Email/password sign-in and sign-out are covered. */}
       <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
 
       {/* Auth pages — public, full screen */}

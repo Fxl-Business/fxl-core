@@ -1,7 +1,7 @@
 ---
 title: CI/CD e Deploy
 badge: SDK
-description: GitHub Actions, Vercel, fxl-doctor e configuracao de deploy
+description: GitHub Actions, Vercel, vitest e configuracao de deploy
 scope: product
 sort_order: 70
 ---
@@ -14,28 +14,24 @@ Todo spoke FXL usa GitHub Actions para integracao continua e Vercel para deploy.
 
 ### Workflow CI
 
-O workflow roda automaticamente em:
-
-- **Push** para `main`
-- **Pull request** targeting `main`
+O workflow roda automaticamente em **Pull Requests** targeting `main`.
 
 ```yaml
-name: FXL Doctor CI
+name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened]
 
-permissions:
-  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  check:
-    name: FXL Doctor
+  type-check-and-test:
+    name: Type Check & Test
     runs-on: ubuntu-latest
-    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -44,31 +40,61 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: 20
+          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --ignore-scripts
 
-      - name: Run FXL Doctor
-        run: bash fxl-doctor.sh
+      - name: Type check
+        run: npx tsc --noEmit
 
-      - name: Build
-        run: npm run build
+      - name: Run tests
+        run: npx vitest run
+        env:
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
+          VITE_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
 ```
+
+### Concurrency
+
+O workflow usa `concurrency` para cancelar execucoes anteriores quando um novo push chega na mesma PR:
+
+```yaml
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+Isso economiza minutos de CI e evita resultados desatualizados no check do PR.
 
 ### Detalhes dos Steps
 
 | Step | Comando | Proposito |
 |------|---------|----------|
 | Checkout | `actions/checkout@v4` | Clona o repositorio |
-| Setup Node | `actions/setup-node@v4` | Configura Node.js 18 com cache npm |
-| Install | `npm ci` | Instala dependencias do lockfile (reprodutivel) |
-| FXL Doctor | `bash fxl-doctor.sh` | Roda as 5 verificacoes de qualidade |
-| Build | `npm run build` | Verifica que o build Vite produz output valido |
+| Setup Node | `actions/setup-node@v4` | Configura Node.js 20 com cache npm |
+| Install | `npm install --ignore-scripts` | Instala dependencias sem rodar scripts de build |
+| Type check | `npx tsc --noEmit` | Verifica tipos TypeScript |
+| Tests | `npx vitest run` | Roda testes unitarios com vitest |
 
 {% callout type="info" %}
-Usar `npm ci` (nao `npm install`) no CI garante que as dependencias sao identicas ao lockfile. Isso previne "funciona na minha maquina" por versoes diferentes.
+O pipeline usa `npm install --ignore-scripts` em vez de `npm ci` para evitar falhas causadas por lockfile desatualizado em PRs de dependencia. O flag `--ignore-scripts` pula scripts de postinstall para maior seguranca.
+{% /callout %}
+
+## Variaveis de Ambiente no CI
+
+O step de testes usa placeholders para as variaveis de ambiente obrigatorias. Isso permite que testes importem modulos que referenciam `import.meta.env.VITE_*` sem falhar.
+
+| Variavel | Valor Placeholder | Proposito |
+|----------|------------------|-----------|
+| `VITE_SUPABASE_URL` | `https://placeholder.supabase.co` | URL do Supabase (nao acessada em testes unitarios) |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | JWT placeholder | Chave anon (nao usada em testes unitarios) |
+| `VITE_CLERK_PUBLISHABLE_KEY` | `pk_test_placeholder` | Chave Clerk (nao usada em testes unitarios) |
+
+{% callout type="warning" %}
+Esses valores sao placeholders — nao apontam para nenhum servico real. Testes unitarios nao devem fazer chamadas de rede. Se um teste precisa de Supabase real, use um projeto de teste dedicado.
 {% /callout %}
 
 ## fxl-doctor.sh
@@ -208,7 +234,7 @@ Configurar em Vercel Dashboard > Project > Settings > Environment Variables:
 | Variavel | Ambientes | Notas |
 |----------|----------|-------|
 | `VITE_SUPABASE_URL` | Production, Preview, Development | URL do projeto Supabase |
-| `VITE_SUPABASE_ANON_KEY` | Production, Preview, Development | Chave anon publica |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Production, Preview, Development | Chave publica do Supabase |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Production, Preview, Development | Chave publica Clerk |
 
 **Nunca configurar no Vercel (server-side only):**
@@ -294,8 +320,8 @@ Separar vendors em chunks reduz o tamanho do bundle principal e melhora cache hi
 
 ### CI falha mas local funciona
 
-- Verificar que a versao do Node.js e 18 (mesma do CI)
-- Rodar `npm ci` localmente (nao `npm install`) para replicar o lockfile
+- Verificar que a versao do Node.js e 20 (mesma do CI)
+- Rodar `npm install --ignore-scripts` localmente para replicar o CI
 - Verificar que `.env.local` nao e necessaria para type-check/build
 
 ### Erros de tipo apenas no CI

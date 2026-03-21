@@ -1,17 +1,17 @@
 # Project Research Summary
 
-**Project:** FXL Core v2.2 — Wireframe Builder Configurable Layout Components
-**Domain:** Wireframe builder editor extension — sidebar widgets, header config panels, filter bar editor
-**Researched:** 2026-03-13
+**Project:** Nexo v11.0 — Enterprise Audit Logging
+**Domain:** Append-only audit trail system for multi-tenant React + Supabase SaaS platform
+**Researched:** 2026-03-19
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This milestone extends an existing, working visual editor (AdminToolbar, PropertyPanel, ScreenManager, 28 section types) to cover layout-level configuration: the sidebar chrome, the header chrome, and the per-screen filter bar. The base stack is fully validated — React 18, TypeScript strict, Tailwind CSS 3, Vite 5, Supabase, Clerk, @dnd-kit, Zod 4.x. No new npm packages are required; the only additions are two shadcn/ui component files (`tooltip.tsx` and `sidebar.tsx`) that wrap Radix packages already installed. Zero new Supabase tables are needed — all new config is stored as optional JSONB fields in the existing `blueprints.config` column.
+v11.0 adds an enterprise-grade audit logging system to the Nexo platform. The research is unusually high confidence because the entire implementation stays within the existing stack — zero new npm dependencies — and the architecture is derived directly from the codebase's established service layer patterns. The recommended approach is a hybrid capture strategy: PostgreSQL triggers on critical tables (`tenants`, `tenant_modules`) for bypass-proof data mutation capture, plus explicit `logAuditEvent()` calls in existing Edge Functions for Clerk-only admin operations (archive tenant, impersonate, invite user) that leave no database footprint. Both paths write to a new append-only `audit_logs` table in migration 025.
 
-The recommended approach follows the existing architectural pattern throughout: schema extension first (Zod and TypeScript in lockstep), then render wiring, then editor panels. New layout panels use the established Sheet pattern but are NOT routed through `SECTION_REGISTRY` — they operate at config-root level (`workingConfig.sidebar`, `workingConfig.header`) or screen level (`screen.filters[]`), requiring a new `updateWorkingDashboard` helper alongside the existing `updateWorkingScreen`. Critically, `WireframeHeader` must have its render layer wired to the full `HeaderConfig` schema before any header property panel is built, because `showPeriodSelector`, `showUserIndicator`, and `actions.*` already exist in the schema and in Supabase but are currently ignored by the component.
+The primary risk is not technical complexity — it is copying the wrong RLS pattern. Nexo's existing tables use an anon-permissive RLS pattern acceptable for operational data. Audit logs require the opposite: no INSERT or DELETE for any client role, SELECT only for super admin (authenticated, super_admin JWT claim), and writes exclusively through SECURITY DEFINER triggers and service-role Edge Functions. A secondary risk is PII in the `metadata` JSONB column — storing full row before/after snapshots would capture emails and personal data regulated under LGPD, conflicting with audit immutability. The mitigation is an explicit metadata allowlist per action type, defined before any capture code is written.
 
-The key risks center on two silent failure modes: Zod stripping new sidebar fields on save because `SidebarConfigSchema` lacks `.passthrough()` (data disappears after reload with no error), and confusion between two filter taxonomies (`FilterOption` for the sticky bar with 5 filterType variants vs `FilterConfigSection` for the section block with 3 variants). Both risks have clear prevention strategies: always update TypeScript type and Zod schema in the same commit, and build a dedicated `FilterBarEditor` that never touches `filter-config` section data. The build order is deterministic and dependency-verified — this is an extension of known patterns, not a new domain.
+The feature scope is clearly bounded: the v11.0 core delivers the schema, capture layer, and admin panel UI (`/admin/audit-logs`). Per-tenant views, anomaly detection, and external log shipping are explicitly deferred to v12+. The build order is fixed by a single critical dependency chain: the `audit_logs` table must exist before everything else; then the capture layer (triggers and `logAuditEvent()`); then the Edge Function read path; then the admin UI. Phases 2 and 3 in the capture layer are independent after Phase 1 and can be parallelized.
 
 ---
 
@@ -19,153 +19,135 @@ The key risks center on two silent failure modes: Zod stripping new sidebar fiel
 
 ### Recommended Stack
 
-The base stack is unchanged and fully sufficient for v2.2. Two shadcn/ui component files need to be installed (`npx shadcn add tooltip` and `npx shadcn add sidebar`) — but their underlying Radix packages are already in `package.json`. The shadcn `sidebar` component is used only as a visual reference for compound widget patterns (workspace switcher, user menu); it must NOT be used as structural infrastructure in `WireframeViewer` due to CSS variable collision risk between `--sidebar-*` (shadcn) and `--wf-sidebar-*` (wireframe).
+All v11.0 requirements are met by the existing stack. The decision to add zero new npm packages is firm and backed by specific analysis: CSV export is 15 lines of native `Blob` API; filter UI reuses installed shadcn/ui `Select` and `Input` components; table rendering follows the existing admin page pattern (`/admin/tenants`, `/admin/users`) without TanStack Table; retention uses `pg_cron` (Supabase-native, version 1.6.4, officially documented). The only new moving part is enabling `pg_cron` via a SQL `CREATE EXTENSION IF NOT EXISTS pg_cron` statement.
 
-**Core technologies relevant to v2.2:**
-- `shadcn/ui sidebar.tsx`: Compound widget visual reference (team-switcher, nav-user patterns) — install as component file, use as visual reference only
-- `shadcn/ui tooltip.tsx`: Required internally by sidebar for collapsed-state icon labels — wrapper file missing, Radix package already installed
-- `Zod 4.3.6`: Discriminated union for `SidebarWidget` type narrowing — no upgrade needed
-- `@dnd-kit/sortable`: Filter option reordering in editor — already installed and used in `BlueprintRenderer`
-- `@radix-ui/react-switch`: Boolean toggles in header and sidebar config panels — already installed
+**Core technologies:**
+- `@supabase/supabase-js` ^2.98.0: audit_logs insert/query, RLS enforcement — already installed
+- `@clerk/react` ^6.0.1: actor context (user_id, email, org_id) for every log entry — already installed
+- `zod` ^4.3.6: AuditLog schema validation at service boundaries — already installed
+- PostgreSQL triggers (SECURITY DEFINER): bypass-proof row-level mutation capture — Supabase-native, no npm install
+- `pg_cron` 1.6.4: daily retention deletion job — Supabase-native, enable via SQL only
+- `react-router-dom` ^6.27.0: URLSearchParams for shareable filter state — already installed
+- shadcn/ui (`Select`, `Input`, `Popover`, `Sheet`): filter UI and detail drawer — all installed
 
-**Explicitly rejected additions:** `cookies-next` (Next.js only), `react-beautiful-dnd` (archived), shadcn Sidebar as app shell infrastructure, Recharts 3.x, React 19, Tailwind v4 — all explicitly deferred per `PROJECT.md`.
+**Critical version constraint:** pg_partman (alternative to pg_cron for retention) has MEDIUM confidence on managed Supabase availability — do not use. Use pg_cron DELETE with proper indexes at current scale (< 1M rows/year).
 
 ### Expected Features
 
-**Must have (table stakes — v2.2 core):**
-- Wire `showPeriodSelector`, `showUserIndicator`, `actions.*` in `WireframeHeader` render — prerequisite for header editor to have any visible effect; these fields exist in schema but are ignored by the component
-- `updateWorkingDashboard()` helper for config-root mutations — prerequisite for sidebar and header panels to commit changes
-- Header Config Panel (Sheet, boolean toggles for all `HeaderConfig` fields) — opened from AdminToolbar in edit mode
-- Sidebar Config Panel (Sheet, groups editor + footer text field + widget list manager) — opened from AdminToolbar in edit mode
-- Filter Bar Editor Panel (Sheet, add/remove/configure `FilterOption[]` per screen) — opened via AdminToolbar "Filtros" button
-- `SidebarConfig` schema extension: `widgets?: SidebarWidget[]` (Zod + TypeScript, additive, backward-compatible)
-- Workspace Switcher widget renderer in sidebar header zone (decorative dropdown chip)
-- User Menu widget renderer in sidebar footer zone (avatar + name/role, replaces status chip as a toggle option)
+**Must have (table stakes — P1, v11.0 core):**
+- `audit_logs` table with enterprise schema: `id`, `occurred_at`, `org_id`, `actor_id`, `actor_email`, `action`, `resource_type`, `resource_id`, `metadata JSONB`, `ip_address`, `user_agent`, `severity`, `outcome` — immutable via RLS (DENY UPDATE/DELETE for all client roles)
+- Composite indexes in same migration: `(org_id, occurred_at DESC)`, `(actor_id, occurred_at DESC)`, `(resource_type, resource_id)`, GIN on `metadata`
+- Application-layer logging for: tenant create/update/archive/restore, user add/remove/role-change, module enable/disable, platform settings change, impersonation start/stop, auth sign-in/sign-out
+- DB triggers on `tasks` and `tenant_modules` for INSERT/UPDATE/DELETE with before/after JSONB via `OLD`/`NEW`
+- Admin panel `/admin/audit-logs`: paginated timeline (timestamp, actor, action, resource, org, IP)
+- Filters: date range, action type (multi-select), actor (searchable), resource type
+- Log detail right-side Sheet (shadcn): all fields, before/after diff for UPDATE events
+- Export to CSV with current filters applied (immediate for <1000 rows)
 
-**Should have (differentiators — v2.2 polish):**
-- Search widget in sidebar nav area (decorative disabled input, `showSearch: boolean`)
-- Account Selector widget in sidebar header (secondary slot below workspace switcher)
-- Filter "add from library" presets (hardcoded `FilterOption` templates: Período, Empresa, Produto, Status, Responsável)
-- Header `brandLabel` override field in Header Config Panel
-- Explicit AdminToolbar "Layout" button group (Sidebar, Header, Filtros) visible only in edit mode
+**Should have (P2, v11.x):**
+- Org filter combobox on global admin view
+- JSON export alongside CSV
+- Retention policy setting in Platform Settings + pg_cron enforcement job
+- DB triggers on `blueprint_configs` and `briefing_configs`
+- Resource and actor quick-links from detail drawer
 
-**Defer to v2.3+:**
-- Header `periodType` at dashboard level
-- Sidebar icon assignment via config panel (currently only via ScreenManager per-screen)
-- Sidebar badge count configuration per screen
-- Mobile sidebar drawer mode (explicitly out of scope per `PROJECT.md`)
+**Defer (v12+):**
+- Per-tenant audit log view for org operators (not just super admin)
+- Anomaly detection / alert rules
+- Inline audit history per entity page
+- External log shipping (Sentry/Datadog/Papertrail)
+- Hash chaining for tamper-evident chain (SOX-grade)
 
-**Anti-features (do not build):**
-- Drag-and-drop screens between sidebar groups — DnD context conflict with ScreenManager's existing sortable context
-- Replace custom WireframeViewer sidebar with shadcn `SidebarProvider` — breaking layout restructure with CSS var collision
-- Per-screen header config overrides — scope creep; header is intentionally global chrome
-- Live filter logic dispatching across 28 section types — product-level scope, not wireframe tool scope
+**Anti-features — explicitly do not build:**
+- SELECT-level logging (volume explosion, signal:noise collapse)
+- Real-time live-tail view (no compliance value, adds WebSocket complexity)
+- Full row snapshots for all table mutations (PII risk, storage bloat)
+- Mutable audit logs with correction mechanism (destroys integrity guarantee)
+- Audit writes from React components or hooks (re-render side effects, actor context unavailable in browser)
 
 ### Architecture Approach
 
-`WireframeViewer.tsx` remains the single state orchestrator. The critical addition is `openPanel: 'sidebar' | 'header' | 'filter' | null` exclusive panel state, plus three new panel components rendered as sibling Sheets alongside the existing `PropertyPanel`. Layout widgets (sidebar compound components) get their own `SIDEBAR_WIDGET_REGISTRY` separate from `SECTION_REGISTRY` — correct taxonomy separation since widgets are layout-level concerns, not content-row elements. All mutations flow through `workingConfig` to a single `handleSave` / `saveBlueprint` call site — no parallel save paths.
+The architecture adds three new modules to the existing platform, all following established codebase patterns. A new `audit-service.ts` in `src/platform/services/` provides the write path (`logAuditEvent()`) and read path (`queryAuditLogs()`), matching the structure of `tenant-service.ts` and `admin-service.ts`. A new `audit-logs` Edge Function handles paginated queries with the service-role client — consistent with the principle that all admin data reads go through Edge Functions. A new migration (025) creates the `audit_logs` table, DB triggers, RLS policies, and indexes in one atomic deploy. The React SPA cannot write to or read `audit_logs` directly — by design.
 
-**Major components — new and modified:**
-1. `WireframeViewer.tsx` (MODIFY) — `openPanel` state, `updateWorkingDashboard` helper, sidebar widget zones, full `HeaderConfig` prop pass-through
-2. `WireframeHeader.tsx` (MODIFY) — consume all `HeaderConfig` fields (currently only `showLogo` is wired)
-3. `AdminToolbar.tsx` (MODIFY) — "Layout" button group (Sidebar, Header, Filtros) in edit mode
-4. `editor/HeaderConfigPanel.tsx` (NEW) — Sheet with boolean toggles for all `HeaderConfig` fields
-5. `editor/SidebarConfigPanel.tsx` (NEW) — Sheet with groups editor, footer input, widget list manager
-6. `editor/FilterBarEditor.tsx` (NEW) — Sheet with `FilterOption[]` CRUD for the active screen
-7. `editor/SidebarWidgetPicker.tsx` (NEW) — widget type picker sub-component inside `SidebarConfigPanel`
-8. `lib/sidebar-widget-registry.tsx` (NEW) — `SIDEBAR_WIDGET_REGISTRY` with renderer + defaultProps per widget type
-9. `components/sidebar-widgets/` (NEW FOLDER) — four widget renderer components (WorkspaceSwitcher, AccountSelector, UserMenu, Search)
-10. `types/blueprint.ts` + `lib/blueprint-schema.ts` (MODIFY) — `SidebarWidget` type, `SidebarWidgetSchema`, extended `SidebarConfig`
+**Major components:**
+1. `supabase/migrations/025_audit_logs.sql` — table + triggers + RLS + indexes; the non-negotiable foundation; everything else depends on this
+2. `src/platform/services/audit-service.ts` — `logAuditEvent()` (write, never throws) + `queryAuditLogs()` (read, proxied through Edge Function)
+3. `src/platform/types/audit.ts` — `AuditLogEntry`, `AuditEventInput`, `AuditMetadata` discriminated union; shared by service and edge function
+4. `supabase/functions/audit-logs/index.ts` — paginated query endpoint; validates super_admin JWT; uses service-role client
+5. `src/platform/pages/admin/AuditLogsPage.tsx` — timeline, filter bar, detail Sheet, CSV export; reads via `queryAuditLogs()`
+6. Modified: `admin-tenants` and `admin-users` edge functions — add `logAuditEvent()` calls for Clerk-only admin operations
+7. Modified: `AdminSidebar.tsx` + `AppRouter.tsx` — add nav item (ShieldCheck icon) and lazy route for `/admin/audit-logs`
 
 ### Critical Pitfalls
 
-1. **FilterType enum divergence** — `FilterOptionSchema` (screen-level sticky bar) has 5 filterType variants; `FilterConfigSectionSchema` (section block) has 3. Never reuse `FilterConfigForm.tsx` for the screen-level filter bar. Build a dedicated `FilterBarEditor` targeting `screen.filters[]` (5-variant set) exclusively.
+1. **Anon-permissive RLS copied from existing tables** — audit_logs must explicitly `REVOKE UPDATE, DELETE ON audit_logs FROM authenticated, anon` and grant SELECT only to authenticated with super_admin JWT claim. Add a migration comment marking the intentional deviation from the standard Nexo RLS pattern.
 
-2. **WireframeSidebar.tsx is a ghost component** — `WireframeSidebar.tsx` exists but is never imported by `WireframeViewer`. All sidebar widget work must be done in the inline `<aside>` block in `WireframeViewer.tsx` (lines 764–944). Widget code added to `WireframeSidebar.tsx` has zero effect on the actual viewer.
+2. **PII in metadata JSONB** — define a metadata allowlist per action type before writing any capture code. Never store full row objects, `actor_email`, or user-supplied free-text. Store `actor_id` (opaque UUID); resolve display name from Clerk at render time. LGPD deletion requests against immutable audit logs are a structural conflict if PII was stored in metadata.
 
-3. **Zod silent stripping of new sidebar fields** — `SidebarConfigSchema` lacks `.passthrough()`. New widget fields not added to Zod are silently stripped on save — no error, data disappears on reload. Always update `types/blueprint.ts` AND `lib/blueprint-schema.ts` in the same commit. Add `.passthrough()` to `SidebarConfigSchema`.
+3. **Missing indexes at table creation** — all composite indexes must be in migration 025 alongside the `CREATE TABLE`. Adding indexes to a large live table later requires `CREATE INDEX CONCURRENTLY` with window risk. The `(org_id, occurred_at DESC)` index is the primary query pattern and is non-negotiable.
 
-4. **Header props are schema-present but render-absent** — `showPeriodSelector`, `showUserIndicator`, `actions.*` exist in `HeaderConfig` schema but `WireframeHeader.tsx` ignores them (only `showLogo` is consumed). Wire the render before building the header editor panel or the panel will produce no visible effect — a misleading "done" state.
+4. **Edge function using wrong Supabase client key** — Edge Functions must use `SUPABASE_SERVICE_ROLE_KEY` (auto-injected by Supabase runtime), not `VITE_SUPABASE_PUBLISHABLE_KEY` (frontend env var, unavailable in Deno). The `org_id` in audit inserts must come from the server-verified JWT claim, never from the client request body.
 
-5. **No mutation helpers for dashboard-level config** — `updateWorkingScreen` exists but sidebar/header mutations need a new `updateWorkingDashboard(key, value)` helper. Using `handlePropertyChange` for dashboard-level edits will no-op or silently corrupt screen data.
-
-6. **Schema version risk** — `CURRENT_SCHEMA_VERSION = 1`. All new fields must be `.optional()`. Run `BlueprintConfigSchema.safeParse` against the actual stored `financeiro-conta-azul` blueprint JSON before any schema change is merged. A non-optional field on an existing blueprint causes `loadBlueprint` to return `null` for every client.
+5. **Circular logging** — the `audit_logs` table must be explicitly excluded from any catch-all trigger or service wrapper. `logAuditEvent()` must be a leaf node (writes only, never triggers further writes). The admin log page read path must have zero audit side effects. Test: load admin log page, verify row count does not increase.
 
 ---
 
 ## Implications for Roadmap
 
-The build order is deterministic and dependency-driven. Schema must precede render; render must precede editor; prerequisite helpers must precede panels. All 7 phases follow the dependency chain directly.
+The build order is strictly constrained by a single dependency chain. The architecture research provides an explicit 8-step sequence that consolidates into 5 execution-ready phases below.
 
 ### Phase 1: Schema Foundation
+**Rationale:** Everything depends on the `audit_logs` table. No capture, query, or UI can be built without it. This phase is the unblock for all subsequent work and must ship first.
+**Delivers:** Migration 025 — `audit_logs` table, all composite indexes (in the same migration, not deferred), RLS policies (SELECT super_admin only, no INSERT/UPDATE/DELETE for client roles), explicit REVOKE statements, `retained_until` column for future retention enforcement.
+**Addresses:** Table stakes feature (schema with immutability), P1 index requirement.
+**Avoids:** Anon-permissive RLS pitfall, missing indexes pitfall, tamper protection gap, storage growth risk.
 
-**Rationale:** All subsequent phases depend on TypeScript types and Zod schemas being in sync. `SidebarWidget` type and `SidebarConfigSchema` update cannot happen after components try to use them. This is the hardest dependency in the chain — nothing compiles correctly without it.
-**Delivers:** `SidebarWidget`, `SidebarWidgetType` types in `blueprint.ts`; `SidebarConfigSchema` updated with `SidebarWidgetSchema` discriminated union and `.passthrough()`; `tsc --noEmit` at zero errors; round-trip test confirming new fields survive `BlueprintConfigSchema.parse()`.
-**Addresses:** Schema extension prerequisite for all other phases
-**Avoids:** Pitfalls 3 (Zod stripping) and 6 (schema version risk)
+### Phase 2: Capture Layer (parallel tracks after Phase 1)
+**Rationale:** Phases 2a and 2b are independent after Phase 1 and can be built in parallel by separate agents. Both write to the audit_logs table. Getting data flowing before the UI is built maximizes historical data available at UI launch.
+**Delivers (2a — DB Triggers):** `audit_log_mutation()` SECURITY DEFINER trigger function on `tasks` and `tenant_modules` — bypass-proof mutation capture with before/after JSONB from `OLD`/`NEW`.
+**Delivers (2b — Write Service):** `src/platform/types/audit.ts` (TypeScript types with `AuditMetadata` discriminated union) + `logAuditEvent()` write function in `audit-service.ts` — application-layer capture that never throws, reports audit failures to Sentry without blocking the main operation.
+**Addresses:** DB trigger coverage, application-layer foundation, impersonation context tagging support.
+**Avoids:** Trigger-only gap (misses Clerk-only admin operations), PII in metadata (define allowlist before code), error path gap (audit call never blocks main operation), circular logging (exclude audit_logs from any wrapper).
 
-### Phase 2: Header Render Wiring
+### Phase 3: Instrument Existing Edge Functions
+**Rationale:** With `logAuditEvent()` available from Phase 2b, existing Edge Functions are instrumented. This captures Clerk-only admin operations that have no DB trigger coverage — archive, restore, impersonate, user invite/remove. These are the highest-risk events the audit system must record.
+**Delivers:** `logAuditEvent()` calls in `admin-tenants` and `admin-users` edge functions for all admin actions. Auth event capture (sign-in/sign-out). Impersonation context threading (`impersonator_id` in metadata for all log writes during an active session).
+**Addresses:** P1 feature — admin action capture, impersonation context tagging.
+**Avoids:** Edge function wrong key pitfall — enforce checklist: grep for `VITE_SUPABASE` in function source must return zero matches; `org_id` sourced from verified JWT only.
 
-**Rationale:** `showPeriodSelector`, `showUserIndicator`, and `actions.*` are dead schema — they exist but `WireframeHeader` ignores them. Building the header editor before this wiring produces a panel with no visible effect. This phase is low-effort (3-4 prop additions + conditional renders) with high payoff and zero risk of regression when fields are undefined.
-**Delivers:** `WireframeHeader.tsx` accepting and conditionally rendering all `HeaderConfig` fields; `WireframeViewer.tsx` passing full `activeConfig.header` as props; browser visual regression test confirming existing render is unchanged when fields are undefined.
-**Addresses:** Table stakes prerequisite — render before editor
-**Avoids:** Pitfall 4 (header render-absent)
+### Phase 4: Query Edge Function and Service Read Path
+**Rationale:** The UI requires a read endpoint. This phase depends only on Phase 1 (table must exist) and can overlap with Phase 3. The `audit-logs` Edge Function provides paginated, filtered query capability. `queryAuditLogs()` wraps it with TypeScript types.
+**Delivers:** `supabase/functions/audit-logs/index.ts` — paginated query (LIMIT/OFFSET, max 100 rows per request), filters (org_id, actor_id, action, date range, resource_type), returns `{ logs: AuditLogEntry[], totalCount: number }`. `queryAuditLogs()` in `audit-service.ts`.
+**Uses:** Supabase service-role client (pattern from existing admin edge functions), URLSearchParams for shareable filter state.
+**Avoids:** Direct client read of audit_logs anti-pattern, unbounded SELECT performance trap (enforce LIMIT), fat JSONB in list view (SELECT display columns only; fetch full metadata only on row expand).
 
-### Phase 3: Dashboard Mutation Infrastructure + Editor Entry Points
-
-**Rationale:** `updateWorkingDashboard` helper and `openPanel` exclusive state must exist before any layout config panel can commit changes. AdminToolbar Layout button group provides the UX surface. These are isolated changes but are hard blockers for all panel phases.
-**Delivers:** `updateWorkingDashboard<K extends 'sidebar' | 'header'>` helper in `WireframeViewer`; `openPanel: 'sidebar' | 'header' | 'filter' | null` state; AdminToolbar "Layout" button group visible only in edit mode; `onOpenSidebarPanel`, `onOpenHeaderPanel`, `onOpenFilterPanel` callbacks wired to Viewer.
-**Addresses:** Table stakes prerequisite — mutation helpers and entry points before panels
-**Avoids:** Pitfall 5 (wrong mutation helper for dashboard-level edits)
-
-### Phase 4: Header Config Panel
-
-**Rationale:** Simplest editor panel — boolean toggles only, no CRUD lists. With render wiring done in Phase 2 and mutation infrastructure in Phase 3, this phase is a straightforward form composition. Good confidence-building phase before the more complex sidebar and filter panels.
-**Delivers:** `editor/HeaderConfigPanel.tsx` Sheet with Switch toggles for `showLogo`, `showPeriodSelector`, `showUserIndicator`, `actions.manage/share/export`; wired to `updateWorkingDashboard('header', ...)` on change; opened from AdminToolbar.
-**Uses:** `switch.tsx` (already installed), existing Sheet pattern as established by 28 section property forms
-**Avoids:** Pitfall 4 (header toggles would have no visual effect without Phase 2)
-
-### Phase 5: Sidebar Widget Renderers
-
-**Rationale:** Widget rendering must exist before the sidebar config panel can show meaningful visual feedback. Building renderers first validates the `SIDEBAR_WIDGET_REGISTRY` pattern and confirms the inline sidebar widget zones in `WireframeViewer` work correctly before an editor surface can add or remove widgets.
-**Delivers:** `lib/sidebar-widget-registry.tsx` with 4 widget type registrations; `components/sidebar-widgets/` with WorkspaceSwitcherWidget, UserMenuWidget, SearchWidget, AccountSelectorWidget; top/bottom widget zones added to WireframeViewer inline `<aside>`; collapsed icon-only rendering per widget when sidebar is in rail mode.
-**Uses:** `SidebarWidget` type from Phase 1; `SIDEBAR_WIDGET_REGISTRY` separate from `SECTION_REGISTRY`
-**Avoids:** Pitfall 2 (widget code in `WireframeSidebar.tsx` ghost component — all work in inline `<aside>`)
-
-### Phase 6: Sidebar Config Panel
-
-**Rationale:** With schema (Phase 1), mutation helpers (Phase 3), and widget renderers (Phase 5) complete, the sidebar editor panel has immediate visual feedback. This is the most complex editor panel in the milestone due to group CRUD + screen assignment + widget list management.
-**Delivers:** `editor/SidebarConfigPanel.tsx` Sheet with footer text input, group create/rename/delete with screen assignment (checkbox per screen), widget list manager (add/remove via type picker); `editor/SidebarWidgetPicker.tsx` sub-component; all changes routed through `updateWorkingDashboard('sidebar', ...)`.
-**Implements:** SidebarConfigPanel, SidebarWidgetPicker architecture components
-**Avoids:** Pitfall 3 (Zod stripping — schema already updated in Phase 1 with `.passthrough()`)
-
-### Phase 7: Filter Bar Editor
-
-**Rationale:** Filter bar editing targets `screen.filters[]` via the existing `updateWorkingScreen` — entirely independent from the dashboard-level mutation path. Isolated by design, can run after Phase 3 (entry point) without depending on Phases 4-6. The filterType taxonomy risk must be addressed here with a purpose-built `FilterBarEditor` that never touches `filter-config` section data.
-**Delivers:** `editor/FilterBarEditor.tsx` Sheet with `FilterOption[]` CRUD for the active screen (add/remove rows, label input, filterType select covering all 5 variants, options configuration); "add from library" presets; wired to `updateWorkingScreen(s => ({ ...s, filters }))` exclusively.
-**Uses:** `FilterOptionSchema` 5-variant filterType set; `@dnd-kit/sortable` for filter reorder if needed
-**Avoids:** Pitfall 1 (FilterType enum divergence — dedicated form for screen-level path only)
+### Phase 5: Admin UI
+**Rationale:** The visible deliverable. All data dependencies are satisfied by Phases 1-4. The UI follows the established admin page pattern exactly — same `AdminLayout`, same `SuperAdminRoute` guard, same lazy import pattern as `TenantsPage.tsx` and `UsersPage.tsx`.
+**Delivers:** `AuditLogsPage.tsx` — paginated timeline table, filter bar (date range + action type + actor + resource type), log detail right-side Sheet with before/after diff view, CSV export (native Blob API, filtered results). Wire into `AdminSidebar.tsx` (ShieldCheck icon) and `AppRouter.tsx` (lazy route `/admin/audit-logs`).
+**Addresses:** All P1 features complete. Core v11.0 milestone achieved.
+**Avoids:** UTC timestamp display pitfall — use `Intl.DateTimeFormat` with `America/Sao_Paulo`; raw action codes in UI — display human-readable descriptions; metadata collapsed with no expand — detail Sheet shows formatted diff.
 
 ### Phase Ordering Rationale
 
-- Schema first: Phase 1 is a hard dependency for all subsequent phases. No component can import `SidebarWidget` type or validate `SidebarWidget` objects before it.
-- Render before editor: Phase 2 must precede Phase 4. Building a settings panel for a field that the component ignores is the single most common mistake in this domain.
-- Infrastructure before panels: Phase 3 (mutation helpers + entry points) must precede Phases 4, 6, and 7. Panel forms without a mutation path do nothing.
-- Renderers before panel: Phase 5 (widget renderers) before Phase 6 (sidebar config panel) enables immediate visual validation of widget add/remove during development.
-- Filter bar is independent: Phase 7 depends only on Phase 3 (entry point) and uses `updateWorkingScreen` — it can be parallelized with Phases 4-6 if needed.
+- Phase 1 is strictly first — all other phases depend on the table existing.
+- Phases 2a (DB triggers) and 2b (write service) are independent after Phase 1 and should be assigned to parallel agents.
+- Phase 3 (instrument edge functions) depends on Phase 2b — `logAuditEvent()` must exist before it can be called.
+- Phase 4 (query edge function) depends only on Phase 1 and can overlap with Phases 2-3.
+- Phase 5 (UI) depends on Phase 4 (`queryAuditLogs()` must be available).
+
+This ordering maximizes historical data accumulation: data is flowing from Phase 2 onward, before the UI exists. The admin page in Phase 5 has real data to display from day one.
 
 ### Research Flags
 
-Phases with standard patterns — skip additional research during planning:
-- **Phase 1 (Schema):** Standard Zod extension + TypeScript type addition. Fully analyzed, implementation is mechanical.
-- **Phase 2 (Header render):** 3-4 prop additions + conditional renders in a single component. Fully analyzed.
-- **Phase 3 (Mutation infrastructure):** Copy of existing `updateWorkingScreen` pattern. No unknowns.
-- **Phase 4 (Header Config Panel):** Established Sheet + Switch toggle form pattern; 28 existing section forms as reference.
-- **Phase 7 (Filter Bar Editor):** Data path fully analyzed; `FilterOptionSchema` verified; `FilterConfigForm` identified as negative reference (do not reuse).
+**Phases with standard patterns — skip research-phase:**
+- **Phase 1 (Schema):** Exact SQL is specified in STACK.md and ARCHITECTURE.md; HIGH confidence; no research needed.
+- **Phase 2 (Capture Layer):** SECURITY DEFINER trigger pattern and service layer pattern are directly from codebase analysis; HIGH confidence.
+- **Phase 3 (Instrument Edge Functions):** Follows established `admin-service.ts` and `admin-tenants` pattern exactly; no unknowns.
+- **Phase 4 (Query Edge Function):** Same pattern as existing admin edge functions; no research needed.
+- **Phase 5 (Admin UI):** Follows `TenantsPage.tsx`/`UsersPage.tsx` pattern; all shadcn components installed; no research needed.
 
-Phases that may benefit from brief planning review:
-- **Phase 5 (Sidebar Widget Renderers):** Widget collapsed/expanded rendering in rail mode has UX nuance. Review shadcn sidebar-07 visual reference before deciding collapsed icon treatment per widget type.
-- **Phase 6 (Sidebar Config Panel):** Group-to-screen assignment UX (radio buttons per screen vs checkboxes per group) needs a design decision during phase planning. Recommendation: radio buttons to enforce single-group membership structurally.
+**Phases that may need research-phase:**
+- **Phase 6 / v11.x (Retention + pg_cron):** pg_cron basic usage is HIGH confidence, but configurable per-action-type retention (different windows for auth events vs. admin events) adds complexity not fully specified in research. If per-action-type retention is pursued, a targeted research-phase is warranted before implementation.
 
 ---
 
@@ -173,44 +155,52 @@ Phases that may benefit from brief planning review:
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All packages verified against live `package.json`; Radix versions confirmed; zero new npm packages needed; two shadcn component file paths verified |
-| Features | HIGH | Table stakes derived from direct schema and component analysis; UX conventions (widget collapsed states, group assignment UX) rated MEDIUM |
-| Architecture | HIGH | All findings from direct source analysis: `blueprint-schema.ts`, `types/blueprint.ts`, `WireframeViewer.tsx` line numbers cited; `SIDEBAR_WIDGET_REGISTRY` pattern derived from existing `SECTION_REGISTRY` precedent |
-| Pitfalls | HIGH | All 7 pitfalls identified from live codebase gaps with specific file/line references; warning signs and recovery steps concrete; Zod stripping confirmed by direct `blueprint-store.ts` read |
+| Stack | HIGH | Zero new dependencies; all packages confirmed via direct `package.json` read; pg_cron v1.6.4 confirmed in official Supabase docs. Only caveat: pg_partman skip is MEDIUM confidence (community reports, not official) — irrelevant since pg_cron is the firm recommendation. |
+| Features | HIGH | Schema design, event taxonomy, and UI patterns verified across 15+ sources including Adobe Experience Platform, ABP Framework, Stripe, Microsoft 365, HighLevel, WorkOS. SOC2 and LGPD compliance requirements cross-referenced with official frameworks. |
+| Architecture | HIGH | Derived entirely from direct codebase analysis: `admin-service.ts`, `tenant-service.ts`, `admin-tenants` edge function, RLS migration patterns (migrations 001-024), `AppRouter.tsx` lazy route pattern. No inference — all findings from actual source files. |
+| Pitfalls | HIGH | 10 concrete pitfalls with specific file-level detection checklists, warning signs, and recovery strategies. Cross-referenced with Nexo `PITFALLS.md` rules #2, #5, #9, #11 and direct migration analysis. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Sidebar collapsed icon rendering per widget type:** The collapsed sidebar rail renders screen items as icon-only buttons. Exactly which icon represents each widget type (workspace switcher, user menu, search, account selector) in the collapsed state is not specified. Recommend resolving during Phase 5 planning — use the widget's registered `icon` from `SIDEBAR_WIDGET_REGISTRY` (e.g., `LayoutGrid` for workspace switcher, `CircleUser` for user menu, `Search` for search, `Building2` for account selector).
+- **Metadata allowlist per action type:** Research identified the principle (no PII in metadata) and the risk (LGPD deletion vs. immutability), but the specific allowlist for each of the ~15 action types is not defined. This must be written as a design artifact before Phase 2 capture code is written. It is a design decision, not a research gap.
 
-- **Group-to-screen assignment interaction in Sidebar Config Panel:** A screen can currently be in at most one group. The interaction model for assigning/unassigning screens to groups needs a design decision before Phase 6 implementation: radio buttons per screen (enforces single-group), or checkboxes per group (allows multi-group assignment). Single-group is the current schema behavior; recommend radio buttons.
+- **DB trigger metadata filtering per table:** DB triggers capture full `to_jsonb(OLD)` and `to_jsonb(NEW)` rows, which may include PII fields. The trigger implementation must filter or truncate the JSONB before inserting into `metadata`. The exact field inclusion list per instrumented table is not specified in research — it is a per-table design decision for the migration phase.
 
-- **`partitionScreensByGroups` called twice per render (minor performance):** PITFALLS.md flags this (WireframeViewer lines 897–898) — doubled computation on every re-render. Not a v2.2 blocker at current blueprint scale, but should be noted as a quick-win cleanup opportunity.
+- **pg_cron per-action-type retention:** The 90-day default is validated. Whether to implement different retention windows per action type (e.g., auth events shorter, admin events longer) is an unresolved product decision. Default to a single configurable retention value for v11.0 and revisit in v11.x.
 
 ---
 
 ## Sources
 
-### Primary (HIGH confidence — direct codebase inspection)
-- `tools/wireframe-builder/types/blueprint.ts` — `SidebarConfig`, `HeaderConfig`, `FilterOption`, `BlueprintScreen` types (direct read)
-- `tools/wireframe-builder/lib/blueprint-schema.ts` — Zod schemas, `.passthrough()` on `HeaderConfigSchema` only, 3-variant vs 5-variant filterType divergence (direct read)
-- `src/pages/clients/WireframeViewer.tsx` — inline sidebar block lines 764–944, `updateWorkingScreen` pattern, `WireframeHeader` call site lines 957–961 (direct read)
-- `tools/wireframe-builder/components/WireframeHeader.tsx` — confirmed only `showLogo` consumed; remaining `HeaderConfig` fields absent from props (direct read)
-- `tools/wireframe-builder/lib/blueprint-store.ts` — `BlueprintConfigSchema.parse()` strips unknown fields; `safeParse` failure returns `null` (direct read)
-- `tools/wireframe-builder/lib/blueprint-migrations.ts` — `CURRENT_SCHEMA_VERSION = 1`, single `v0 → v1` migrator (direct read)
-- `package.json` — all Radix packages confirmed present, zero new npm packages needed (direct read)
-- `src/components/ui/` directory listing — `tooltip.tsx` confirmed absent, `sheet.tsx` confirmed present (direct ls)
-- `tools/wireframe-builder/components/editor/PropertyPanel.tsx` — Sheet pattern for section property panels (direct read)
-- `tools/wireframe-builder/components/editor/property-forms/FilterConfigForm.tsx` — operates on `FilterConfigSection.filters[]`, 3-variant filterType (direct read)
+### Primary (HIGH confidence)
+- Project `package.json` — all installed packages confirmed via direct read
+- `src/platform/services/admin-service.ts` — service layer pattern (direct codebase analysis)
+- `src/platform/services/tenant-service.ts` — confirms pattern consistency (direct codebase analysis)
+- `supabase/migrations/019_tenant_archival.sql` — RLS policy pattern (direct codebase analysis)
+- `src/platform/router/AppRouter.tsx` — lazy admin route registration (direct codebase analysis)
+- `src/platform/layout/AdminSidebar.tsx` — adminNavItems pattern (direct codebase analysis)
+- `.planning/PROJECT.md` — existing platform capabilities, v11.0 milestone scope
+- [Supabase pg_cron extension (official docs)](https://supabase.com/docs/guides/database/extensions/pg_cron) — v1.6.4 confirmed on managed
+- [Supabase Auth Audit Logs (official docs)](https://supabase.com/docs/guides/auth/audit-logs) — native audit is auth-only; custom table required
+- [Audit Logs Overview — Adobe Experience Platform](https://experienceleague.adobe.com/en/docs/experience-platform/landing/governance-privacy-security/audit-logs/overview) — filter and export pattern reference
+- [Audit Logging UI — ABP.IO](https://abp.io/modules/Volo.AuditLogging.Ui) — most complete open-source reference for before/after diff UI
 
 ### Secondary (MEDIUM confidence)
-- [shadcn/ui Sidebar blocks — sidebar-07](https://ui.shadcn.com/blocks/sidebar) — team-switcher and nav-user compound widget visual patterns as reference
-- [shadcn/ui Sidebar docs](https://ui.shadcn.com/docs/components/sidebar) — SidebarProvider, useSidebar hook structure
-- [Achromatic: Using the new Shadcn Sidebar](https://www.achromatic.dev/blog/shadcn-sidebar) — no `cookies-next` for Vite, internal deps confirmed against installed packages
-- [shadcn/ui Sidebar Vite issue #7696](https://github.com/shadcn-ui/ui/issues/7696) — `class-variance-authority` import Vite gotcha (already resolved in project)
-- `.planning/PROJECT.md` — v2.2 milestone goals, out-of-scope constraints, existing validated requirements
+- [PostgreSQL Audit Logging Guide — Bytebase](https://www.bytebase.com/blog/postgres-audit-logging/) — trigger vs. app-layer vs. pgaudit tradeoffs; JSONB schema recommendations
+- [CYBERTEC: Performance of audit triggers](https://www.cybertec-postgresql.com/en/performance-differences-between-normal-and-generic-audit-triggers/) — trigger overhead on write-heavy tables
+- [LGPD Compliance Guide — SecurePrivacy](https://secureprivacy.ai/blog/lgpd-compliance-requirements) — LGPD Art. 6/7 requirements for audit trails
+- [SOC2 Data Security — Bytebase](https://www.bytebase.com/blog/soc2-data-security-and-retention-requirements/) — retention and tamper-proof requirements
+- [Supabase RLS Best Practices — MakerKit](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices) — multi-tenant RLS patterns
+- [Supabase pg_partman migration guide](https://supabase.com/docs/guides/database/migrating-to-pg-partman) — availability uncertainty on managed; confirms pg_cron choice
+- Nexo `.planning/PITFALLS.md` rules #2, #5, #9, #11 — existing Supabase/edge function pitfalls specific to this codebase
+- [Audit Logs: New Design Experience — HighLevel](https://help.gohighlevel.com/support/solutions/articles/155000006667-audit-logs-introducing-the-new-design-experience) — right-side drawer UX pattern
+- [Exporting Events — WorkOS Docs](https://workos.com/docs/audit-logs/exporting-events) — B2B SaaS export pattern reference
+
+### Tertiary (LOW confidence — not used for decisions)
+- Community reports of pg_partman availability issues on Supabase managed — confirms pg_cron choice; no action required beyond the recommendation already made
 
 ---
-*Research completed: 2026-03-13*
+*Research completed: 2026-03-19*
 *Ready for roadmap: yes*

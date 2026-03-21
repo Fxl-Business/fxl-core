@@ -1,0 +1,191 @@
+# Plan 137.1: queryAuditLogs() typed service function
+
+```yaml
+wave: 1
+depends_on: []
+files_modified:
+  - src/modules/admin/services/audit-service.ts
+  - src/modules/admin/types/audit.ts
+requirements_addressed: [QUERY-02]
+autonomous: true
+```
+
+<objective>
+Create the queryAuditLogs() read-path function in audit-service.ts with typed filter parameters and typed AuditLog[] return. This function queries the audit_logs table in Supabase with server-side filtering and pagination, enforcing a max 100 rows per request.
+</objective>
+
+## Tasks
+
+### Task 1: Define AuditLog types and query parameter interface
+
+<read_first>
+- src/modules/admin/services/audit-service.ts (if exists — Phase 135 creates the write-path here)
+- src/modules/admin/types/ (check if audit.ts or similar exists)
+- src/lib/supabase.ts (Supabase client pattern)
+</read_first>
+
+<action>
+Create or extend `src/modules/admin/types/audit.ts` with the following types:
+
+```ts
+export interface AuditLog {
+  id: string
+  org_id: string
+  actor_id: string
+  actor_email: string | null
+  actor_type: 'user' | 'system' | 'trigger'
+  action: 'create' | 'update' | 'delete' | 'archive' | 'restore' | 'sign_in' | 'sign_out' | 'impersonate'
+  resource_type: string
+  resource_id: string | null
+  resource_label: string | null
+  ip_address: string | null
+  user_agent: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+export interface AuditLogQueryParams {
+  org_id?: string
+  actor_id?: string
+  action?: string
+  resource_type?: string
+  limit?: number
+  offset?: number
+}
+
+export interface AuditLogQueryResult {
+  data: AuditLog[]
+  total: number
+  limit: number
+  offset: number
+}
+```
+
+If the file already exists (from Phase 135), append these types. If it doesn't exist, create it with these types.
+</action>
+
+<acceptance_criteria>
+- `src/modules/admin/types/audit.ts` contains `export interface AuditLog`
+- `src/modules/admin/types/audit.ts` contains `export interface AuditLogQueryParams`
+- `src/modules/admin/types/audit.ts` contains `export interface AuditLogQueryResult`
+- AuditLog interface has fields: id, org_id, actor_id, actor_email, actor_type, action, resource_type, resource_id, resource_label, ip_address, user_agent, metadata, created_at
+- actor_type uses union type `'user' | 'system' | 'trigger'` (not string)
+- action uses union type with all 8 values (not string)
+- metadata typed as `Record<string, unknown>` (not `any`)
+- No `any` type anywhere in the file
+</acceptance_criteria>
+
+### Task 2: Implement queryAuditLogs() function
+
+<read_first>
+- src/modules/admin/services/audit-service.ts (current state — may have logAuditEvent from Phase 135)
+- src/modules/admin/types/audit.ts (types just created in Task 1)
+- src/lib/supabase.ts (Supabase client import pattern)
+</read_first>
+
+<action>
+Add `queryAuditLogs()` to `src/modules/admin/services/audit-service.ts`. If the file doesn't exist yet, create it with only this function (Phase 135 will add logAuditEvent later or already added it).
+
+```ts
+import { supabase } from '@/lib/supabase'
+import type { AuditLogQueryParams, AuditLogQueryResult, AuditLog } from '../types/audit'
+
+const MAX_LIMIT = 100
+
+export async function queryAuditLogs(params: AuditLogQueryParams): Promise<AuditLogQueryResult> {
+  const limit = Math.min(params.limit ?? 50, MAX_LIMIT)
+  const offset = params.offset ?? 0
+
+  let query = supabase
+    .from('audit_logs')
+    .select('*', { count: 'exact' })
+
+  // Apply filters
+  if (params.org_id) {
+    query = query.eq('org_id', params.org_id)
+  }
+  if (params.actor_id) {
+    query = query.eq('actor_id', params.actor_id)
+  }
+  if (params.action) {
+    query = query.eq('action', params.action)
+  }
+  if (params.resource_type) {
+    query = query.eq('resource_type', params.resource_type)
+  }
+
+  // Apply pagination and ordering
+  query = query
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  const { data, count, error } = await query
+
+  if (error) {
+    throw new Error(`Failed to query audit logs: ${error.message}`)
+  }
+
+  return {
+    data: (data ?? []) as AuditLog[],
+    total: count ?? 0,
+    limit,
+    offset,
+  }
+}
+```
+
+Key implementation details:
+- MAX_LIMIT = 100 enforced server-side via Math.min
+- Default limit = 50, default offset = 0
+- Uses `select('*', { count: 'exact' })` to get total count for pagination
+- Orders by created_at DESC (newest first)
+- Uses `.range()` for offset pagination
+- Throws on error (edge function will catch and return 500)
+- No `any` — uses typed AuditLog[] cast on Supabase response
+</action>
+
+<acceptance_criteria>
+- `src/modules/admin/services/audit-service.ts` contains `export async function queryAuditLogs(`
+- Function parameter is typed as `AuditLogQueryParams` (not any, not inline)
+- Return type is `Promise<AuditLogQueryResult>` (not any)
+- `MAX_LIMIT` constant equals 100
+- `Math.min(params.limit ?? 50, MAX_LIMIT)` enforces server-side cap
+- Query uses `.eq('org_id', params.org_id)` when org_id is provided
+- Query uses `.eq('actor_id', params.actor_id)` when actor_id is provided
+- Query uses `.eq('action', params.action)` when action is provided
+- Query uses `.eq('resource_type', params.resource_type)` when resource_type is provided
+- Query uses `.order('created_at', { ascending: false })`
+- Query uses `.range(offset, offset + limit - 1)`
+- `data ?? []` fallback applied (PITFALLS.md rule #6)
+- `npx tsc --noEmit` passes with zero errors
+</acceptance_criteria>
+
+## Verification
+
+```bash
+# Types exist and are correct
+grep "export interface AuditLog" src/modules/admin/types/audit.ts
+grep "export interface AuditLogQueryParams" src/modules/admin/types/audit.ts
+grep "export interface AuditLogQueryResult" src/modules/admin/types/audit.ts
+
+# Function exists with correct signature
+grep "export async function queryAuditLogs" src/modules/admin/services/audit-service.ts
+grep "MAX_LIMIT = 100" src/modules/admin/services/audit-service.ts
+
+# No any types
+! grep -n "any" src/modules/admin/types/audit.ts
+! grep -n ": any" src/modules/admin/services/audit-service.ts
+
+# TypeScript compiles
+npx tsc --noEmit
+```
+
+## must_haves
+
+- [ ] AuditLog interface with all 13 enterprise fields (no any)
+- [ ] AuditLogQueryParams with org_id, actor_id, action, resource_type, limit, offset
+- [ ] queryAuditLogs() function with typed params and typed return
+- [ ] MAX_LIMIT = 100 enforced server-side
+- [ ] Filters applied conditionally (only when param is provided)
+- [ ] Pagination via limit/offset with total count
+- [ ] Zero TypeScript errors
