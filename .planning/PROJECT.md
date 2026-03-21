@@ -8,7 +8,14 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: Planning next milestone
+## Current Milestone: v12.0 Admin Modules Overview
+
+**Goal:** Transformar a pagina /admin/modules de gerenciamento por tenant em uma visao geral da plataforma — diagrama interativo de conexoes entre modulos, cards com funcionalidades/status/extensions, e mover gerenciamento per-tenant para TenantDetailPage.
+
+**Target features:**
+- Diagrama interativo de conexoes entre modulos (hover destaca, click navega)
+- Grid de cards por modulo com funcionalidades, status, extensions
+- Gerenciamento de modulos por tenant movido para TenantDetailPage
 
 Previous: v11.0 Audit Logging (shipped 2026-03-21)
 
@@ -221,9 +228,7 @@ Previous: v11.0 Audit Logging (shipped 2026-03-21)
 
 ### Active
 
-<!-- No active milestone — run /gsd:new-milestone to start next -->
-
-(No active requirements — define with next milestone)
+<!-- v12.0 Admin Modules Overview — requirements defined in REQUIREMENTS.md -->
 
 ### Out of Scope
 
@@ -424,4 +429,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function archive/restore with Clerk metadata sync | Single action archives DB + Clerk org in one call | ✓ Good — atomic operation |
 
 ---
-*Last updated: 2026-03-21 after v11.0 milestone completed*
+*Last updated: 2026-03-21 after v12.0 milestone started*
