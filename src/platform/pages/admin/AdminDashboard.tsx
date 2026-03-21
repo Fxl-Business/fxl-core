@@ -272,7 +272,7 @@ export default function AdminDashboard() {
             <Blocks className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             <div>
               <p className="text-sm font-medium text-slate-900 dark:text-foreground">Modulos</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Habilitar e configurar modulos por tenant</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Visao geral dos modulos da plataforma</p>
             </div>
           </Link>
         </div>
