@@ -1,5 +1,36 @@
 # Milestones
 
+## v11.0 Audit Logging (Shipped: 2026-03-21)
+
+**Phases:** 5 (134-138) | **Plans:** 10 | **Tasks:** 17
+**Timeline:** 2 days (2026-03-19 → 2026-03-20)
+**Requirements:** 14/14
+
+**Delivered:** Complete enterprise audit logging system — immutable append-only table with triggers, never-throw capture service with impersonation tagging, instrumented edge functions, paginated query API, and full admin UI with filters, detail drawer with before/after diff, CSV export, and configurable retention policy with pg_cron cleanup.
+
+**Key accomplishments:**
+
+1. Append-only `audit_logs` table with 13-column enterprise schema, immutable RLS (INSERT+SELECT only), 5 composite indexes (migration 025)
+2. SECURITY DEFINER triggers on `tasks` and `tenant_modules` capturing INSERT/UPDATE with before/after JSONB snapshots (migration 026)
+3. `logAuditEvent()` service with never-throw guarantee, Sentry error reporting, and automatic impersonation session tagging
+4. Edge function instrumentation: admin-tenants, admin-users, and auth events (sign-in/sign-out with IP + user-agent)
+5. GET `/audit-logs` edge function with super_admin JWT gate, server-enforced pagination (max 100), and 6 optional filters
+6. Admin UI at `/admin/audit-logs`: paginated table, composable filters, detail Sheet with before/after diff, CSV export, retention policy with pg_cron daily cleanup
+
+**Archive:** [v11.0-ROADMAP.md](milestones/v11.0-ROADMAP.md) | [v11.0-REQUIREMENTS.md](milestones/v11.0-REQUIREMENTS.md)
+
+---
+
+## v10.0 SDK Expansion (Shipped: 2026-03-20)
+
+**Phases completed:** 5 phases, 12 plans, 0 tasks
+
+**Key accomplishments:**
+
+- (none recorded)
+
+---
+
 ## v9.0 Resiliencia de Plataforma (Shipped: 2026-03-20)
 
 **Phases completed:** 4 phases, 7 plans, 0 tasks

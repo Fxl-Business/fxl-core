@@ -1,37 +1,31 @@
 # Feature Research
 
-**Domain:** Wireframe builder — configurable layout components (sidebar widgets, header configurator, filter bar editor)
-**Researched:** 2026-03-13
-**Confidence:** HIGH (based on direct codebase analysis) / MEDIUM (for UX pattern conventions)
+**Domain:** Enterprise audit logging for multi-tenant SaaS admin panel
+**Researched:** 2026-03-19
+**Confidence:** HIGH (schema design, event taxonomy, UI patterns verified across multiple sources) / MEDIUM (compliance specifics for LGPD)
 
 ---
 
 ## Context: What Already Exists vs What Is New
 
-This research is scoped to **v2.2 additions only**. The visual editor already exists and works
-(AdminToolbar, PropertyPanel via Sheet, ScreenManager, EditableSectionWrapper, 28 property forms).
-The goal is to extend it to cover layout-level config: sidebar, header, and filter bar.
+This research is scoped to v11.0 additions. The platform already has:
 
 ### Already built (not in scope)
+- `created_at` / `updated_at` timestamps on all tables
+- `created_by` / `updated_by` on tasks, briefing_configs, blueprint_configs
+- `archived_at` soft-delete on 10 tables with RLS exclusion
+- Activity feed showing recent task updates (cross-module, home page)
+- Tenant archive/restore with Clerk metadata sync
+- Super admin panel: dashboard, tenant management, user management
+- ImpersonationContext tracking who is impersonating which org
+- JWT `super_admin` claim driving access control
 
-- PropertyPanel system (Sheet, section-registry-driven property forms)
-- ScreenManager (add/rename/delete/reorder screens in sidebar)
-- AdminToolbar (edit mode toggle, save, share, comments)
-- SidebarConfig schema: `footer?: string`, `groups?: SidebarGroup[]`
-- HeaderConfig schema: `showLogo`, `showPeriodSelector`, `showUserIndicator`, `actions.*`
-- FilterOption[] per screen (rendered by WireframeFilterBar — select, date-range, multi-select, search, toggle)
-- filter-config section block (editable via PropertyPanel)
-- WireframeViewer renders sidebar groups and footer from `config.sidebar`
-- WireframeHeader renders logo from `config.header.showLogo` + branding.logoUrl
-
-### Not yet built (v2.2 scope)
-
-- Compound sidebar widgets (workspace switcher, account selector, user menu, search)
-- SidebarConfig schema extensions for widget fields
-- Visual editor panels to edit SidebarConfig (footer text, groups, widgets)
-- Visual editor panels to edit HeaderConfig (all fields as toggles/inputs)
-- Visual editor to add/remove/configure FilterOption[] per screen (sticky bar filters)
-- WireframeHeader wired to respect showPeriodSelector and showUserIndicator (schema exists, render ignores them)
+### What v11.0 adds
+- Dedicated `audit_logs` table with enterprise-grade schema
+- Automatic capture of critical operations (triggers and application layer)
+- Admin panel page with filters, search, timeline view, and export
+- Per-tenant scoped logs + super admin global view
+- Retention policy enforcement and export (CSV/JSON)
 
 ---
 
@@ -39,122 +33,144 @@ The goal is to extend it to cover layout-level config: sidebar, header, and filt
 
 ### Table Stakes (Users Expect These)
 
-Features a wireframe builder operator expects when "configuring the sidebar/header/filter bar."
-Missing any of these means the config feels incomplete or read-only.
+Features that any admin reviewing audit logs expects. Missing these makes the audit system feel incomplete or unusable.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Toggle header fields on/off (showLogo, showPeriodSelector, showUserIndicator) | HeaderConfig already has these booleans — they should be editable, not dead schema | LOW | Schema exists. Needs: Sheet panel with toggle switches per field. WireframeHeader already reads `showLogo`. `showPeriodSelector` and `showUserIndicator` are schema-only today — render doesn't use them. Need render wiring before editor panel is useful. |
-| Toggle header action buttons (manage, share, export) | `actions.*` already in schema — operators want to control which buttons appear in the demo header | LOW | Same gap: schema exists, WireframeHeader render ignores `actions.*`. Need: render wiring + editor panel. |
-| Edit sidebar footer text | `footer?: string` is in SidebarConfig and already rendered in WireframeViewer. Operator needs to change it without editing the config file. | LOW | Single text input in sidebar config panel. Already rendered at line 939 of WireframeViewer. |
-| Edit sidebar group labels and membership | `groups?: SidebarGroup[]` is in schema and rendered. Needs a visual editor to create/rename groups and assign screens. | MEDIUM | Create/delete group. Rename group label. Assign screens by checkbox or select (no drag-and-drop required — a multi-select per group is sufficient). |
-| Add/remove filter controls per screen | FilterOption[] lives on each BlueprintScreen. Operators should be able to add a new filter (select type, key, label, options) and remove existing ones for the currently active screen. | MEDIUM | Panel opens for current screen. "Add filter" button adds a new row. Delete per item. Existing WireframeFilterBar already renders all filterTypes correctly — no render changes needed. |
-| Configure filter label and options | Each FilterOption has label, options[], filterType. These need to be editable inline. | MEDIUM | Inline editable rows in filter bar panel. Label text input, filterType select, options as comma-separated or add-one-at-a-time tags. |
-| Workspace switcher widget in sidebar header | shadcn sidebar-07 (team-switcher.tsx) pattern: a dropdown chip in the sidebar header showing org/workspace name. For wireframes this is decorative — operator sets the label text. | LOW-MEDIUM | Schema: new `headerWidget?: 'workspace-switcher' \| 'none'` + `workspaceName?: string` in SidebarConfig. Renderer: static mock dropdown chip in sidebar header. Editor: toggle + label input. |
-| User menu widget in sidebar footer | shadcn sidebar-07 (nav-user.tsx) pattern: avatar + name + role + dropdown chevron in sidebar footer. For wireframes uses mock data or config-level label. | LOW | Schema: `footerWidget?: 'user-menu' \| 'status' \| 'none'`. Currently footer renders a "Sistema Ativo" status chip (line 931-944 of WireframeViewer). Operator should toggle between status chip and user menu. |
+| Dedicated `audit_logs` table with standard schema | Foundation for everything else; without a dedicated table, logs are derived from `updated_at` diffs which are insufficient | MEDIUM | Schema: `id`, `org_id`, `actor_id`, `actor_email`, `actor_type` (human/system), `action`, `resource_type`, `resource_id`, `resource_label`, `ip_address`, `user_agent`, `metadata` (JSONB), `created_at`. See Architecture section. |
+| Capture CRUD operations on critical tables | Super admins need to know what changed, when, and by whom across tenants, tasks, users, modules | MEDIUM | Application layer (service functions) logs on: tenant create/update/archive/restore, user add/remove/role-change, module enable/disable, platform settings change. Supabase triggers for task/briefing/blueprint mutations. |
+| Capture auth events | Login/logout events are mandatory for any SOC2-adjacent compliance claim and for security investigation | LOW | Clerk webhook or frontend capture on sign-in/sign-out. Fields: actor_id, ip_address, user_agent, action (`auth.sign_in` / `auth.sign_out`). |
+| Capture admin actions | Super admin operations (impersonation start/stop, org archival, member management) are the highest-risk actions and must be logged | LOW-MEDIUM | Captured at application layer in admin-service.ts and admin edge functions. Impersonation events must tag `impersonator_id` separately. |
+| Paginated log table in admin panel | Audit logs can be thousands of rows; infinite scroll or paginated table with server-side filtering is non-negotiable | MEDIUM | Table columns: timestamp, actor, action, resource, org, IP. Click row to open detail drawer. |
+| Filter by date range | Every audit system in production provides date range filtering; without it, logs are unsearchable | LOW | Standard shadcn DateRangePicker component. Server-side filter on `created_at`. |
+| Filter by action type | "Show me all DELETE operations" is the most common audit investigation query | LOW | Multi-select filter: CREATE, UPDATE, DELETE, ARCHIVE, RESTORE, AUTH, ADMIN. Drives `action` column filter. |
+| Filter by actor (user) | "What did user X do?" is the second most common query | LOW | Searchable actor dropdown filtered by actor_email. |
+| Filter by resource type | "Show me all tenant-related events" narrows investigation scope | LOW | Multi-select: tenant, user, task, blueprint, document, module, platform_settings. |
+| Log detail drawer with full metadata | Clicking a row must show the full event payload: before/after diff, IP, user-agent, request context | MEDIUM | Right-side Sheet (shadcn) showing all fields. Before/after diff from `metadata.before` and `metadata.after` JSONB. Formatted diff view, not raw JSON. |
+| Immutability: no UPDATE or DELETE on audit_logs | Audit logs lose all compliance value if they can be modified; this is a hard requirement | LOW | RLS policy: DENY UPDATE and DELETE on `audit_logs` for all roles. Only INSERT allowed via service role. Application role never has UPDATE/DELETE on this table. |
+| Export to CSV | Every compliance review requires exporting a date range of logs; CSV is the universal format | MEDIUM | Export applies current filters. For large ranges (>5000 rows), background job with download link. For small ranges, immediate download. |
 
 ### Differentiators (Competitive Advantage)
 
-Features beyond table stakes that improve the operator's iteration speed or expand wireframe fidelity.
+Features that elevate the audit system from "checkbox" to genuinely useful for the Nexo operator team.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Account selector widget (sidebar secondary slot) | Lets operators mock a "client/account" switcher below the workspace switcher — common in SaaS BI products that support multi-tenant views. Useful for demos. | MEDIUM | Schema: `accountSelector?: { label: string; options?: string[] }` in SidebarConfig. Renderer: a compact dropdown chip in sidebar header, stacked below workspace switcher. Editor: toggle + label + options list. |
-| Search widget in sidebar nav | A disabled search box inside the sidebar nav area (above screens list). shadcn sidebar-07 includes this. Purely decorative in wireframe context but signals "this is a real product." | LOW | Schema: `showSearch?: boolean` in SidebarConfig. Renderer: a disabled input with Search icon above the nav list. No state needed. |
-| Filter "add from library" presets | Quick-add common BI filter presets: "Período Mensal", "Empresa", "Produto", "Status", "Responsável". Saves operator time vs configuring from scratch. | LOW | Just hardcoded FilterOption templates in the filter editor panel. One-click adds pre-filled rows. No schema change. |
-| Header brandLabel override | Currently brandLabel shown in WireframeHeader comes from `config.label`. Operator may want a shorter display name without renaming the whole blueprint. | LOW | Schema: `header.brandLabel?: string`. Editor: text input that falls back to config.label. WireframeHeader already accepts `brandLabel` prop — needs to read from config instead of always using config.label. |
-| Period selector type at dashboard level | `hasCompareSwitch` and `periodType` are per-screen. A dashboard-level `header.periodType` lets the header period selector match the default without per-screen override. | LOW | Schema: `header.periodType?: 'mensal' \| 'anual'`. Editor: radio/select in header panel. Improves wireframe coherence for demos. |
+| Before/after value diff for UPDATE operations | Shows exactly what field changed from what to what — turns "something was updated" into actionable investigation evidence | HIGH | Requires capturing `metadata.before` and `metadata.after` as JSONB snapshots for UPDATE events. Postgres trigger captures `OLD` and `NEW` row. Application layer captures only relevant fields (not entire row dump). Detail drawer renders side-by-side diff with field names and values. |
+| Impersonation context tagging | When a super admin impersonates a tenant and performs actions, both the original actor and impersonated org must be logged — critical for accountability in multi-tenant platforms | MEDIUM | `metadata.impersonator_id` and `metadata.impersonated_org_id` fields. All logs emitted during an active impersonation session carry this context. ImpersonationContext already exists in React — service calls must thread this through. |
+| Per-tenant filtered view | Tenant admins (not just super admins) need to see logs scoped to their org — enterprise customers require this for their own compliance documentation | MEDIUM | Two views: `/admin/audit-logs` (global, super admin only, all orgs) and `/audit-logs` (per-tenant, future — show org_id = current org only). For v11.0, focus on super admin global view with org filter. |
+| Org filter on global view | Super admin investigation often starts with "show me everything that happened to Tenant X" | LOW | Tenant combobox filter on `/admin/audit-logs`. Drives `org_id` server filter. Reuses existing tenant list from admin-tenants edge function. |
+| Configurable retention policy | Platform settings allow super admin to set log retention (e.g., 90 days, 1 year). Older logs auto-archived or purged by a scheduled job. | MEDIUM | `platform_settings` table already exists. Add `audit_log_retention_days` setting. Supabase pg_cron job to delete/archive rows older than retention period. UI: retention selector in Platform Settings page. |
+| Resource quick-link | In the detail drawer, resource_id links directly to the affected entity (e.g., clicking a task ID opens that task) | LOW | Requires a route map from `resource_type` to URL pattern. Simple lookup: `task → /tarefas/:id`, `tenant → /admin/tenants/:id`. |
+| Actor quick-link | In the detail drawer, actor_id links to the user's profile in the admin user management page | LOW | Link to `/admin/users?user=actor_id`. |
+| JSON export for programmatic analysis | Alongside CSV, JSON export allows the operator team to process logs programmatically or ingest into external tools (Sentry, Datadog) | LOW | Same export mechanism as CSV, different serialization. Toggle in export dialog. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Drag-and-drop screens between sidebar groups | Intuitive visual reorganization | Requires a second @dnd-kit context inside the sidebar config panel, layered on top of the existing ScreenManager DnD. Adds interaction complexity, testing surface, and conflicts with the existing DnD sortable context in ScreenManager. | Multi-select assign: a simple "Grupo" select or checkbox per screen in the group editor. Same end state, zero DnD complexity. |
-| Replace custom sidebar with shadcn SidebarProvider | Code consistency with shadcn sidebar-07 | WireframeViewer sidebar is intentionally a custom fixed-position layout outside the app theme. Switching would require restructuring the entire WireframeViewer layout tree and break the `--wf-sidebar-*` CSS var system and dark chrome. | Use shadcn sidebar-07 as a visual widget reference only, not as structural infrastructure. |
-| Full shadcn Sidebar component integration | "Use the component we already have" | The app uses one sidebar (the FXL Core navigation); the wireframe uses a second custom sidebar. Two Sidebar infrastructure systems in the same app creates CSS var collision between `--sidebar-*` (shadcn) and `--wf-sidebar-*` (wireframe). | Design reference only: adopt the visual widget patterns (workspace switcher appearance, user menu appearance) without adopting shadcn Sidebar primitives. |
-| Per-screen header config overrides | Flexibility | Adds schema complexity (array of per-screen overrides vs single dashboard-level config), increases PropertyPanel surface area, and the wireframe header is intentionally global chrome. | Dashboard-level HeaderConfig is the right boundary. Screen-level variation belongs in the filter bar, not the header. |
-| Live filter logic (filtering actual section content) | Looks "real" | Wireframes use mock data. Implementing real filter dispatch across 28 section types would require connecting all components to a filter context, which is product-level scope (the generated dashboard, not the wireframe tool). | Keep filters as interactive UI decorations: correct visual states (toggles toggle, selects open) without affecting mock data. |
-| Sidebar widget drag reordering between zones | Power-user flexibility | The sidebar has three fixed zones (header widget, nav, footer widget). Allowing free zone reorder adds complex config with no meaningful wireframe fidelity gain. | Fixed zone positions (header / nav / footer) with per-zone configuration options. Simple and sufficient for dashboard wireframe demonstrations. |
+| Capturing ALL database reads (SELECT logging) | "Full audit trail, nothing escapes" | Volume explosion — read events on a busy platform can be 100x write events, making logs unsearchable and storage costs prohibitive. Audit logs lose signal:noise ratio. | Capture reads only for sensitive operations: data export downloads, impersonation initiation, and admin-level LIST queries (e.g., super admin listing all tenants). |
+| Real-time streaming log view (live tail) | "See events as they happen" in an auto-scrolling terminal | Adds WebSocket complexity, has no compliance value (logs are reviewed after the fact), and creates visual noise. No enterprise audit tool does live tailing for compliance logs. | Refresh button + auto-refresh toggle (every 30s). Covers investigation use case without infra complexity. |
+| Per-field row-level diff for all tables | "Show me every single field change" | Storing full row snapshots for all tables doubles database write load and creates JSONB blobs that are unwieldy to display and query. For most tables, the change metadata is sufficient context. | Selective diff: only capture before/after on high-value entities (tenant config, platform settings, blueprint). For lower-value entities (tasks), capture only the changed fields by name, not full row snapshots. |
+| Storing raw HTTP request bodies in audit logs | "Full forensic trace" | Contains PII, secrets, and potentially large payloads. Violates data minimization principles under LGPD/GDPR. Creates compliance liability rather than reducing it. | Store sanitized summaries: action type, resource ID, key changed fields. Never log passwords, tokens, or API keys — always redact before storing. |
+| Blocking application operations to wait for audit log write | "Guaranteed synchronous audit trail" | Makes every DB operation slower and can cause cascading failures if the audit table is temporarily unavailable. | Audit log writes are best-effort in the same transaction for critical operations. For high-throughput operations, use an async queue (Supabase `pg_net` or background job). The audit system should never take down the core platform. |
+| Mutable audit logs (allowing corrections) | "We need to fix a wrong entry" | Destroys the integrity guarantee that makes audit logs valuable. SOC2 reviewers specifically check for tamper protection. | Append-only correction: write a new event of type `audit.correction` that references the original event ID and describes what was wrong. The original entry is preserved. |
+| User-facing audit log in every module page | "Transparency for end users" | Premature. Multi-audience audit logs (admin + user) require different filtering, scoping, and UI surfaces. Building it everywhere at once creates scope explosion. | Phase 1: super admin global audit page. Phase 2: tenant admin scoped audit page. Phase 3: per-resource audit history inline. Ship these as sequential milestones. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[Header Config Panel]
-    └──requires──> [WireframeHeader wires showPeriodSelector + showUserIndicator + actions.* to render]
-                       (currently schema only — renderer ignores these fields entirely)
-                       (without this wiring, the panel edits fields with no visual effect)
+[audit_logs table + schema]
+    └──required by──> ALL other features
+                         (nothing works without the table)
 
-[Filter Bar Editor Panel]
-    └──requires──> [updateWorkingScreen() — already exists in WireframeViewer]
-                       (same mutation pattern as section operations, just mutates screen.filters instead)
-    └──requires──> [Editor entry point in edit mode]
-                       (how does the operator open the panel? most natural: click on WireframeFilterBar
-                        area in edit mode shows "Configure filtros desta tela" Sheet)
+[Application-layer logging in service functions]
+    └──required for──> [Admin action events]
+    └──required for──> [Auth events]
+    └──required for──> [Impersonation context tagging]
+    └──requires──> [audit_logs table]
 
-[Sidebar Config Panel]
-    └──requires──> [updateWorkingConfig() helper for top-level (non-screen) mutations]
-                       (currently only updateWorkingScreen() exists — need a config-root patcher)
-    └──requires──> [SidebarConfig schema extension for widget fields]
+[Postgres trigger-based logging]
+    └──required for──> [Before/after diff on task/blueprint mutations]
+    └──requires──> [audit_logs table]
+    └──enhances──> [Application-layer logging]
+                       (triggers catch mutations that bypass service layer)
 
-[SidebarConfig schema extension]
-    └──requires──> [Zod schema update in blueprint-schema.ts + TypeScript type update in blueprint.ts]
-                       (additive — no breaking change to existing fields)
+[Admin panel audit log page]
+    └──requires──> [audit_logs table with data]
+    └──requires──> [Super admin RLS policy on audit_logs (read own org)]
 
-[Sidebar widget renderers]
-    └──requires──> [SidebarConfig schema extension for widgets]
-    └──requires──> [WireframeViewer sidebar inline render updated to conditionally show widget slots]
+[Filter by date range / actor / action / resource]
+    └──requires──> [Admin panel audit log page]
+    └──requires──> [Index on audit_logs(created_at, org_id, actor_id, action)]
 
-[Account Selector widget]
-    └──enhances──> [Workspace Switcher widget]
-                       (they occupy different sidebar header slots — stacked vertically, same panel)
+[Log detail drawer with before/after diff]
+    └──requires──> [Admin panel audit log page]
+    └──requires──> [metadata.before + metadata.after populated by triggers/services]
 
-[Filter "add from library" presets]
-    └──enhances──> [Filter Bar Editor Panel]
-                       (preset templates — convenience layer, no schema dependency)
+[Export to CSV/JSON]
+    └──requires──> [Admin panel audit log page (filtered state)]
+    └──enhances──> [Filter by date range / actor / action] (filters apply to export)
+
+[Retention policy enforcement]
+    └──requires──> [audit_logs table]
+    └──requires──> [platform_settings audit_log_retention_days setting]
+    └──requires──> [Supabase pg_cron or scheduled Postgres function]
+
+[Impersonation context tagging]
+    └──requires──> [Application-layer logging]
+    └──enhances──> [ImpersonationContext] (already exists in platform/)
+                       (threads impersonator_id through to all log writes during session)
+
+[Per-tenant view]
+    └──requires──> [admin panel audit log page working]
+    └──requires──> [org_id column on audit_logs with RLS]
+    └──enhances──> [Org filter on global view]
 ```
 
 ### Dependency Notes
 
-- **WireframeHeader render wiring is the critical first step for header config:** `showPeriodSelector` and `showUserIndicator` exist in HeaderConfig schema but WireframeHeader currently only reads `showLogo`. The header config panel has zero visual effect until the renderer is wired. This is a prerequisite, not an assumption.
-- **updateWorkingConfig() is the critical first step for sidebar/header panels:** Currently only `updateWorkingScreen()` mutates the working config. Header and sidebar config live at the config root level, not inside a screen. A new helper patching `workingConfig.sidebar` / `workingConfig.header` follows the identical pattern and must exist before any panel can commit changes.
-- **Filter Bar Editor uses existing updateWorkingScreen:** Unlike sidebar/header, filters live on each BlueprintScreen (`screen.filters: FilterOption[]`). The existing `updateWorkingScreen()` can mutate this directly — no new helper needed.
-- **Schema extension must precede all new renderers and editor panels:** Any new field on SidebarConfig or HeaderConfig must first be added to blueprint-schema.ts (Zod) and blueprint.ts (TypeScript type). Only then can renderers read it and panels write it. This is a single-file change per schema file — low cost, but the order matters.
-- **shadcn sidebar-07 is a visual reference, not a code dependency:** The compound widget patterns (workspace switcher = team-switcher.tsx, user menu = nav-user.tsx) inform what the wireframe widgets should look like, but their code should not be imported — the wireframe uses custom components with `--wf-*` tokens.
+- **The table schema is the critical foundation:** Every other feature depends on the `audit_logs` schema being correct from day 1. Changing the schema after data exists requires migrations. Design it enterprise-grade upfront.
+- **Application-layer logging before trigger-based logging:** Triggers catch all mutations but produce lower-quality metadata (no IP, no user agent, no impersonation context). Start with application-layer for admin actions (richer context), then add triggers for completeness on high-value tables.
+- **Indexes must be created with the table:** `CREATE INDEX CONCURRENTLY` after the fact on a large audit table is expensive. Create indexes for `created_at`, `org_id`, `actor_id`, `action`, and `resource_type` in the same migration as the table.
+- **Immutability via RLS must be set before any data exists:** Once you have logs, you cannot retroactively claim they were immutable. The DENY UPDATE/DELETE policies must be in the initial migration.
+- **Before/after diff requires trigger capture, not application-layer:** Application code does not always have access to the "before" state without an extra SELECT. Postgres triggers get `OLD` and `NEW` automatically with zero extra queries.
 
 ---
 
 ## MVP Definition
 
-### Launch With (v2.2 core)
+### Launch With (v11.0 core)
 
-Minimum viable — makes sidebar, header, and filter bar feel actually configurable, not hardcoded schema.
+Minimum viable audit system — sufficient for operational investigation and SOC2 readiness.
 
-- [ ] Wire `showPeriodSelector` and `showUserIndicator` in WireframeHeader render — prerequisite for header config panel to have any visual effect
-- [ ] Wire `actions.*` in WireframeHeader render — actions.manage/share/export toggle visibility
-- [ ] `updateWorkingConfig()` helper in WireframeViewer for config-level (sidebar/header) mutations
-- [ ] SidebarConfig schema extension: `headerWidget`, `workspaceName`, `footerWidget`, `showSearch` fields (Zod + TypeScript)
-- [ ] Header Config Panel (Sheet) — toggles for showLogo, showPeriodSelector, showUserIndicator, actions.manage/share/export — opened from AdminToolbar in edit mode
-- [ ] Sidebar Config Panel (Sheet) — text input for footer, group editor (create/rename/delete groups, assign screens by checkbox)
-- [ ] Filter Bar Editor Panel (Sheet) — add/remove FilterOption rows per screen, configure key/label/filterType/options — opened by clicking WireframeFilterBar in edit mode
-- [ ] Workspace Switcher widget renderer in sidebar header (decorative — dropdown chip with label + chevron)
-- [ ] User Menu widget renderer in sidebar footer (alternate to status chip — shows avatar initials + name/role)
+- [ ] `audit_logs` table with enterprise-grade schema (id, org_id, actor_id, actor_email, actor_type, action, resource_type, resource_id, resource_label, ip_address, user_agent, metadata JSONB, created_at) — immutable via RLS
+- [ ] Indexes: created_at (BRIN), org_id (BTREE), actor_id (BTREE), action (BTREE), resource_type (BTREE)
+- [ ] Application-layer logging for: tenant create/update/archive/restore, user add/remove/role-change, module enable/disable, platform settings change, impersonation start/stop, auth sign-in/sign-out
+- [ ] Postgres trigger on `tasks` table: capture INSERT/UPDATE/DELETE with before/after JSONB
+- [ ] Admin panel `/admin/audit-logs` page: paginated table (timestamp, actor, action, resource, org, IP)
+- [ ] Filters: date range, action type (multi-select), actor (searchable dropdown), resource type
+- [ ] Log detail right-side Sheet: all fields displayed, before/after diff for UPDATE events
+- [ ] Export to CSV (current filters applied, immediate download for <1000 rows)
 
-### Add After Core Is Working (v2.2 polish)
+### Add After Core Is Working (v11.x)
 
-- [ ] Search widget in sidebar nav top (showSearch: boolean, decorative disabled input above nav)
-- [ ] Account Selector widget in sidebar header (secondary slot below workspace switcher)
-- [ ] Filter "add from library" presets (Período, Empresa, Produto, Status, Responsável templates)
-- [ ] Header brandLabel override field in Header Config Panel
-- [ ] AdminToolbar explicit buttons for sidebar and header panels (visible in edit mode alongside "Editar")
+- [ ] Org filter on global admin view (tenant combobox)
+- [ ] JSON export format option alongside CSV
+- [ ] Retention policy setting in Platform Settings page + pg_cron enforcement job
+- [ ] Postgres triggers on `blueprint_configs`, `briefing_configs` for before/after diff
+- [ ] Resource quick-link from detail drawer to affected entity
+- [ ] Background export job for large date ranges (>5000 rows) with download link
 
-### Future Consideration (v2.3+)
+### Future Consideration (v12+)
 
-- [ ] Header periodType at dashboard level (header.periodType: 'mensal' | 'anual')
-- [ ] Sidebar icon assignment via sidebar config panel (currently only via ScreenManager per-screen)
-- [ ] Sidebar badge count configuration per screen (currently schema-only, not editable)
-- [ ] Mobile sidebar drawer mode (responsive — explicitly out of scope per PROJECT.md)
+- [ ] Per-tenant audit log view scoped to org (for tenant admins, not just super admin)
+- [ ] Anomaly detection alerts (actor performing unusual volume of DELETEs)
+- [ ] Inline audit history within entity pages (e.g., show last 5 changes to a task in the task detail)
+- [ ] External log shipping to Sentry / Datadog / Papertrail
+- [ ] Hash chaining for tamper-evident log chain (SOX-grade integrity proof)
 
 ---
 
@@ -162,107 +178,150 @@ Minimum viable — makes sidebar, header, and filter bar feel actually configura
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Wire showPeriodSelector / showUserIndicator / actions.* in WireframeHeader | HIGH — blocks all header config having any visual effect | LOW (3-4 conditional renders in WireframeHeader.tsx) | P1 |
-| updateWorkingConfig() for top-level mutations | HIGH — blocks sidebar + header panels from working | LOW (copy updateWorkingScreen pattern, targets config root) | P1 |
-| Filter Bar Editor Panel | HIGH — filter bar is the most per-screen-variable element | MEDIUM (list CRUD + filterType dispatch in Sheet) | P1 |
-| SidebarConfig schema extension for widget fields | HIGH — blocks widget renderers from compiling | LOW (additive Zod + TypeScript fields) | P1 |
-| Header Config Panel | HIGH — operators need to control logo/period/user/actions visibility | LOW (4-6 toggles in Sheet) | P1 |
-| Sidebar Config Panel (footer + groups) | HIGH — groups and footer text are schema-only today | MEDIUM (group CRUD with screen assignment checkboxes) | P1 |
-| Workspace Switcher widget renderer | MEDIUM — visible sidebar widget for demos | LOW (static dropdown mock in sidebar header zone) | P2 |
-| User Menu widget renderer | MEDIUM — sidebar footer alt to status chip | LOW (static avatar chip, replaces status chip) | P2 |
-| Search widget in sidebar | LOW — decorative, purely visual | LOW (disabled input) | P2 |
-| Filter "add from library" presets | MEDIUM — saves operator time | LOW (hardcoded templates, no schema change) | P2 |
-| Account Selector widget | LOW — secondary sidebar slot, niche use | MEDIUM (new schema slot + renderer) | P3 |
-| Header brandLabel override | LOW — rarely needed separately from config.label | LOW | P3 |
-| Header periodType at dashboard level | LOW — per-screen periodType is sufficient | LOW | P3 |
+| audit_logs table + schema + immutability RLS | HIGH — foundation of everything | LOW (single migration) | P1 |
+| Indexes on audit_logs | HIGH — without indexes, queries on 100k+ rows take seconds | LOW (same migration as table) | P1 |
+| Application-layer logging for admin actions | HIGH — admin operations are highest-risk events | MEDIUM (thread through 6-8 service functions + edge functions) | P1 |
+| Admin panel audit log page (paginated table) | HIGH — no value without a UI to view logs | MEDIUM (new page, server-side query, pagination) | P1 |
+| Date range + action type filters | HIGH — logs are unusable without filtering | LOW (UI components + query params) | P1 |
+| Log detail drawer | HIGH — row in table is not enough context | MEDIUM (Sheet with metadata rendering + diff view) | P1 |
+| Export to CSV | MEDIUM — needed for compliance reviews | MEDIUM (filtered query → CSV serialization) | P1 |
+| Auth event capture | MEDIUM — sign-in/sign-out events complete the picture | LOW (Clerk webhook or frontend capture) | P2 |
+| Impersonation context tagging | MEDIUM — critical for accountability, ImpersonationContext already exists | LOW (thread impersonator_id through existing context) | P2 |
+| Actor + resource type filters | MEDIUM — second-tier investigation queries | LOW (additional filter UI components) | P2 |
+| Postgres triggers for task mutations | MEDIUM — catches mutations that bypass service layer | MEDIUM (trigger function + connection to audit_logs) | P2 |
+| Org filter on global admin view | LOW (v11 only has one real tenant) — HIGH (as platform grows) | LOW (combobox + query param) | P2 |
+| Retention policy + pg_cron job | MEDIUM — needed before log table grows large | MEDIUM (platform_settings key + scheduled function) | P3 |
+| JSON export | LOW — CSV sufficient for most cases | LOW (serialize differently) | P3 |
+| Resource quick-link | LOW — nice UX touch | LOW (route map lookup) | P3 |
 
 **Priority key:**
-- P1: Must have for v2.2 — milestone is incomplete without these
-- P2: Should have — improves operator experience noticeably
-- P3: Nice to have — defer to v2.3 if time-constrained
+- P1: Must have for v11.0 — milestone is incomplete without these
+- P2: Should have — adds meaningful audit coverage
+- P3: Nice to have — defer to v11.x if time-constrained
 
 ---
 
-## Existing Editor Architecture (Dependency Context)
+## Real-World Reference Patterns
 
-Understanding the existing patterns is critical — new features must follow them exactly to maintain consistency.
+### What enterprise platforms capture
 
-### Pattern: Sheet-based property panels
+**Stripe** — Logs sensitive account actions (login from unknown IP, bank account changes, API key creation/deletion). Provides request log retention. Dashboard UI: table with timestamp, event type, IP, and status. No before/after diff shown — focus on event-level actions.
 
-PropertyPanel uses shadcn `<Sheet side="right">`. New sidebar/header/filter panels follow the
-same pattern: a `<Sheet>` opened by a trigger in AdminToolbar or by clicking the respective chrome
-area in edit mode. Each Sheet renders a form that calls an `onChange`/`onUpdate` callback with the
-updated config object. All existing 28 property forms follow this contract.
+**Adobe Experience Platform** — Full filter set: category, action, user, status, date (90-day lookback). Export: CSV or JSON, max 10,000 records per export. 365-day retention. Read-only UI — no mutation allowed.
 
-### Pattern: updateWorkingScreen for screen-level mutations
+**Clerk (auth platform)** — Audit logs are planned (not yet shipped as of 2026). Current: organization activity report per org. WorkOS (competitor) ships full audit log API as a product feature for B2B SaaS.
 
-```typescript
-// Existing (in WireframeViewer.tsx line ~458)
-function updateWorkingScreen(updater: (screen: BlueprintScreen) => BlueprintScreen) {
-  setWorkingConfig(prev => {
-    if (!prev) return prev
-    const newScreens = [...prev.screens]
-    newScreens[safeActiveIndex] = updater(newScreens[safeActiveIndex])
-    return { ...prev, screens: newScreens }
-  })
-  setEditMode(prev => ({ ...prev, dirty: true }))
-}
+**ABP Framework** — Most complete open-source reference: three-tab detail view (Overall → Actions → Changes), property-level change tracking with old/new values, HTTP method + status code + execution time per request, advanced filtering by user/date/URL/status/HTTP method.
 
-// New: updateWorkingConfig for root-level mutations (sidebar, header)
-function updateWorkingConfig(updater: (config: BlueprintConfig) => BlueprintConfig) {
-  setWorkingConfig(prev => prev ? updater(prev) : prev)
-  setEditMode(prev => ({ ...prev, dirty: true }))
-}
+**Microsoft 365 Audit** — 90-day standard, 1-year premium retention. Up to 50,000–100,000 records per CSV export. Column customization. Five filter controls. Separate `core events` and `enhanced events` (success/failure outcomes).
+
+**HighLevel** — Recent UI redesign (2024): right-side drawer replacing full-page detail view. Keyboard navigation between log entries with drawer open (←/→ arrows). Prioritizes keeping table context visible while reading details.
+
+### UI pattern consensus
+
+1. **Table as primary surface** — timestamp, actor, action, resource, status. Sortable by timestamp desc by default.
+2. **Filter bar above table** — date range (always), action type (multi-select), actor (searchable), resource type (multi-select). Filters compose (AND logic).
+3. **Right-side detail drawer** — opens on row click. Shows full metadata, before/after diff for updates, IP, user agent, impersonation context if applicable. Drawer keeps table visible (overlay pattern, not inline).
+4. **Export applies current filters** — "Export what I'm looking at" is the mental model. Not "export all logs."
+5. **Immutable display** — no edit buttons anywhere on audit log UI. Read-only is a visible guarantee.
+
+---
+
+## Compliance Considerations
+
+### SOC2 Type II (relevant for enterprise customer requirements)
+
+- Requires evidence of access control monitoring (who accessed what, when)
+- Requires log integrity (tamper-proof — immutability via RLS satisfies this)
+- Requires defined retention policy (12 months minimum recommended)
+- Requires logs cover authentication events, data modifications, and admin actions
+- Does not specify exact schema — the structure designed for v11.0 satisfies all criteria
+
+### LGPD (Brazil — Lei Geral de Proteção de Dados)
+
+- Article 6, X requires organizations to demonstrate effective data protection measures
+- Requires records of data processing activities (who processed what personal data, when, under which legal basis)
+- Data subject requests must be fulfilled within 15 days — audit logs help trace what data was accessed/modified
+- Breach notification within 72 hours — audit logs are the evidence trail for ANPD reporting
+- Data minimization principle: do NOT store raw request bodies or PII beyond what audit requires
+- The `actor_email` field in audit_logs is itself personal data under LGPD — include it in the org's data retention policy
+
+### Practical for v11.0
+
+- Immutability (RLS DENY UPDATE/DELETE) — satisfies tamper-proof requirement
+- 90-day hot retention as default, configurable up to 1 year — covers SOC2 and LGPD adequately
+- Never log passwords, tokens, API keys — redact before storing metadata
+- `actor_email` stored but covered by the same data retention policy as user accounts
+
+---
+
+## Schema Design Reference
+
+The canonical schema for `audit_logs`, validated against Supabase/Postgres best practices:
+
+```sql
+CREATE TABLE audit_logs (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id       uuid REFERENCES organizations(id) ON DELETE SET NULL,
+  actor_id     text NOT NULL,         -- Clerk user ID or 'system'
+  actor_email  text,                  -- denormalized for query convenience
+  actor_type   text NOT NULL,         -- 'user' | 'system' | 'super_admin'
+  action       text NOT NULL,         -- 'tenant.create' | 'task.delete' | 'auth.sign_in' etc.
+  resource_type text,                 -- 'tenant' | 'task' | 'user' | 'blueprint' etc.
+  resource_id  text,                  -- UUID or slug of affected resource
+  resource_label text,               -- human-readable name of affected resource
+  ip_address   inet,
+  user_agent   text,
+  metadata     jsonb DEFAULT '{}',   -- before, after, impersonator_id, etc.
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+
+-- Immutability enforcement
+CREATE POLICY "audit_logs: no updates"  ON audit_logs FOR UPDATE USING (false);
+CREATE POLICY "audit_logs: no deletes"  ON audit_logs FOR DELETE USING (false);
+CREATE POLICY "audit_logs: super admin read all" ON audit_logs FOR SELECT USING (is_super_admin());
+CREATE POLICY "audit_logs: tenant read own" ON audit_logs FOR SELECT USING (org_id = current_org_id());
+
+-- Performance indexes
+CREATE INDEX audit_logs_created_at_idx ON audit_logs USING BRIN (created_at);
+CREATE INDEX audit_logs_org_id_idx     ON audit_logs (org_id);
+CREATE INDEX audit_logs_actor_id_idx   ON audit_logs (actor_id);
+CREATE INDEX audit_logs_action_idx     ON audit_logs (action);
+CREATE INDEX audit_logs_resource_type_idx ON audit_logs (resource_type);
 ```
 
-### Pattern: section-registry for section property forms
-
-Section-level edit forms live in `components/editor/property-forms/`. Each is a standalone
-component accepting `section` and `onChange` props. The section-registry maps `section.type →
-form component`.
-
-New config panels (header, sidebar, filter bar) operate at config or screen level, not section
-level. They are **not** routed through section-registry. They are separate Sheet components opened
-from AdminToolbar buttons or chrome click targets in edit mode.
-
-### Pattern: SidebarConfig rendering in WireframeViewer
-
-The sidebar is inline in WireframeViewer, not a separate component. Key zones:
-- Line ~783: sidebar header (label + collapse toggle) — workspace switcher widget goes here
-- Line ~839: nav area with ScreenManager / partitionScreensByGroups — search widget goes above this
-- Line ~930: footer block showing status chip — user menu widget replaces/alternates this
-
-New widget slots are added inline in the same sidebar `<aside>` block, conditionally rendered
-based on `activeConfig.sidebar.headerWidget`, `activeConfig.sidebar.showSearch`, and
-`activeConfig.sidebar.footerWidget`.
-
-### Pattern: WireframeHeader props gap
-
-Currently WireframeHeader accepts: `title`, `logoUrl`, `brandLabel`, `showLogo`.
-The fields `showPeriodSelector`, `showUserIndicator`, and `actions.*` exist in HeaderConfig
-schema but are never passed to WireframeHeader. The fix:
-1. Add these as optional props to WireframeHeader
-2. Pass them from WireframeViewer (`activeConfig.header.showPeriodSelector` etc.)
-3. Apply conditional renders inside WireframeHeader
-
-This is a small change (3-4 prop additions + conditional wraps) but it must happen before
-building the Header Config Panel or the panel's toggles have no visible effect.
+`metadata` JSONB structure for UPDATE events:
+```json
+{
+  "before": { "status": "active", "name": "Acme Corp" },
+  "after":  { "status": "archived", "name": "Acme Corp" },
+  "changed_fields": ["status"],
+  "impersonator_id": "user_2abc...",
+  "impersonated_org_id": "org_xyz..."
+}
+```
 
 ---
 
 ## Sources
 
-- Codebase analysis: `tools/wireframe-builder/lib/blueprint-schema.ts` — SidebarConfigSchema, HeaderConfigSchema, FilterOptionSchema (lines 50–76)
-- Codebase analysis: `tools/wireframe-builder/types/blueprint.ts` — SidebarConfig, HeaderConfig, BlueprintScreen types (lines 397–425)
-- Codebase analysis: `src/pages/clients/WireframeViewer.tsx` — updateWorkingScreen pattern (line ~458), sidebar render zones (lines 764–944), WireframeHeader invocation (line 957-961)
-- Codebase analysis: `tools/wireframe-builder/components/WireframeHeader.tsx` — current props accepted vs schema fields (props: title, logoUrl, brandLabel, showLogo only)
-- Codebase analysis: `tools/wireframe-builder/components/WireframeFilterBar.tsx` — FilterOption rendering, 5 filter sub-components
-- Codebase analysis: `tools/wireframe-builder/components/editor/PropertyPanel.tsx` — Sheet pattern for property panels
-- Codebase analysis: `tools/wireframe-builder/components/editor/AdminToolbar.tsx` — existing edit mode entry points
-- [shadcn/ui sidebar blocks — sidebar-07 compound widget reference (team-switcher.tsx, nav-user.tsx)](https://ui.shadcn.com/blocks/sidebar)
-- .planning/PROJECT.md — milestone scope, out-of-scope constraints, existing validated requirements
+- [Guide to Building Audit Logs for Application Software — Infisical / Medium](https://medium.com/@tony.infisical/guide-to-building-audit-logs-for-application-software-b0083bb58604)
+- [Comprehensive Research: Audit Log Paradigms & Go/PostgreSQL/GORM Design Patterns — DEV](https://dev.to/akkaraponph/comprehensive-research-audit-log-paradigms-gopostgresqlgorm-design-patterns-1jmm)
+- [Postgres Auditing in 150 lines of SQL — Supabase Blog](https://supabase.com/blog/postgres-audit)
+- [PGAudit: Postgres Auditing — Supabase Docs](https://supabase.com/docs/guides/database/extensions/pgaudit)
+- [Audit Logs Overview — Adobe Experience Platform](https://experienceleague.adobe.com/en/docs/experience-platform/landing/governance-privacy-security/audit-logs/overview)
+- [Audit Logging UI — ABP.IO](https://abp.io/modules/Volo.AuditLogging.Ui)
+- [Audit Logs for SaaS Enterprise Customers — Frontegg](https://frontegg.com/blog/audit-logs-for-saas-enterprise-customers)
+- [Best practices for audit logging in a SaaS business — Chris Dermody](https://chrisdermody.com/best-practices-for-audit-logging-in-a-saas-business-app/)
+- [SOC 2 Data Security and Retention Requirements — Bytebase](https://www.bytebase.com/blog/soc2-data-security-and-retention-requirements/)
+- [LGPD Compliance: Practical Guide — SecurePrivacy](https://secureprivacy.ai/blog/lgpd-compliance-requirements)
+- [Audit Logs: Introducing the New Design Experience — HighLevel](https://help.gohighlevel.com/support/solutions/articles/155000006667-audit-logs-introducing-the-new-design-experience)
+- [Exporting Events — Audit Logs — WorkOS Docs](https://workos.com/docs/audit-logs/exporting-events)
+- [Security log retention: Best practices — Optro AI](https://optro.ai/blog/security-log-retention-best-practices-guide)
+- [Immutable Audit Trails: A Complete Guide — HubiFi](https://www.hubifi.com/blog/immutable-audit-log-basics)
+- .planning/PROJECT.md — existing platform capabilities, v11.0 milestone scope
 
 ---
 
-*Feature research for: v2.2 Wireframe Builder — Configurable Layout Components*
-*Researched: 2026-03-13*
+*Feature research for: v11.0 Enterprise Audit Logging — Nexo multi-tenant platform*
+*Researched: 2026-03-19*

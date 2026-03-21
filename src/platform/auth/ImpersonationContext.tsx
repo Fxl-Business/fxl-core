@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { useOrgToken } from '@platform/tenants/OrgTokenContext'
 import { getImpersonationToken, setAdminClerkTokenGetter } from '@platform/services/admin-service'
+import { setAuditImpersonatorId } from '@platform/services/audit-service'
 import { invalidateDocsCache } from '@modules/docs/services/docs-service'
 import { invalidateModules, setImpersonationOrgId } from '@platform/module-loader/module-signals'
 import { useSession } from '@clerk/react'
@@ -61,6 +62,9 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
         setImpersonatedOrgId(orgId)
         setImpersonatedOrgName(orgName)
         setIsImpersonating(true)
+
+        // Tag audit logs with impersonator's admin user ID
+        setAuditImpersonatorId(session.user.id)
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Impersonation failed'
         setImpersonationError(message)
@@ -85,6 +89,9 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
     setImpersonatedOrgId(null)
     setImpersonatedOrgName(null)
     setImpersonationError(null)
+
+    // Clear impersonator tag from audit logs
+    setAuditImpersonatorId(null)
   }, [clearTokenOverride])
 
   return (

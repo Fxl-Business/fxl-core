@@ -1,484 +1,455 @@
 # Architecture Research
 
-**Domain:** Configurable wireframe layout components — sidebar widgets, header config, filter bar editor
-**Researched:** 2026-03-13
-**Confidence:** HIGH (all findings derived from direct codebase analysis, not training data)
+**Domain:** Audit Logging — integration into existing multi-tenant platform (Nexo v11.0)
+**Researched:** 2026-03-19
+**Confidence:** HIGH (all findings derived from direct codebase analysis)
 
 ## Standard Architecture
 
 ### System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          WireframeViewer.tsx                             │
-│  (orchestrator: BlueprintConfig state, editMode, workingConfig, save)    │
-├───────────────────────────────┬─────────────────────────────────────────┤
-│          AdminToolbar         │  edit mode toggle, save, branding, share │
-├───────────────┬───────────────┴──────────────────────────┬──────────────┤
-│  <aside>      │          <main>                          │  PropertyPanel│
-│  sidebar      │  WireframeHeader      BlueprintRenderer  │  (Sheet right)│
-│  (inline)     │  WireframeFilterBar   (per-screen rows)  │               │
-│               │                                          │               │
-│  ScreenManager│  FilterBar: activeScreen.filters[]       │  section forms│
-│  (screens[])  │  Header: activeConfig.header (partial)   │  via registry │
-└───────────────┴──────────────────────────────────────────┴──────────────┘
-                              ↓
-                   Supabase (blueprints table)
-                   BlueprintConfig (Zod-validated JSONB)
+┌──────────────────────────────────────────────────────────────────────┐
+│  React 18 SPA (Vercel)                                               │
+│  ┌─────────────────────┐  ┌───────────────────────────────────────┐  │
+│  │  Operator Modules    │  │  Admin Panel (/admin/*)               │  │
+│  │  src/modules/*       │  │  src/platform/pages/admin/*           │  │
+│  │  (tasks, docs, etc.) │  │  + /admin/audit-logs  [NEW]           │  │
+│  └──────────┬──────────┘  └───────────────────────┬───────────────┘  │
+│             │                                      │                  │
+│  ┌──────────┴──────────────────────────────────────┴───────────────┐  │
+│  │  Service Layer  src/platform/services/                           │  │
+│  │  audit-service.ts [NEW]  admin-service.ts  tenant-service.ts    │  │
+│  └──────────────────────────────────┬────────────────────────────── ┘  │
+└─────────────────────────────────────┼────────────────────────────────┘
+                                      │
+┌─────────────────────────────────────┼────────────────────────────────┐
+│  Supabase Edge Functions            │                                 │
+│  ┌────────────────────┐  ┌──────────┴──────────┐                     │
+│  │  auth-token-exchange│  │  audit-logs [NEW]   │                     │
+│  │  admin-tenants      │  │  (query + export)   │                     │
+│  │  admin-users        │  └─────────────────────┘                     │
+│  └────────────────────┘                                               │
+└──────────────────────────────────────────────────────────────────────┘
+                                      │
+┌─────────────────────────────────────┼────────────────────────────────┐
+│  Supabase PostgreSQL                                                  │
+│                                                                       │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │  audit_logs table  [NEW — migration 025]                      │    │
+│  │  id, occurred_at, org_id, actor_id, actor_email, action,      │    │
+│  │  resource_type, resource_id, metadata JSONB, ip_address,      │    │
+│  │  user_agent, severity, outcome                                │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+│                                                                       │
+│  DB Triggers [NEW]           Existing Tables                          │
+│  ┌──────────────────────┐    ┌───────────┐  ┌───────────────────┐    │
+│  │  AFTER INSERT/UPDATE/│    │  tasks    │  │ blueprint_configs  │    │
+│  │  DELETE on critical  │    │  clients  │  │ tenant_modules     │    │
+│  │  tables → INSERT into│    │  projects │  │ documents          │    │
+│  │  audit_logs          │    └───────────┘  └───────────────────┘    │
+│  └──────────────────────┘                                             │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Component Responsibilities
 
-| Component | Responsibility | Existing State |
-|-----------|----------------|----------------|
-| `WireframeViewer.tsx` | Orchestrates all state: config, editMode, workingConfig, save | Existing — central orchestrator |
-| `AdminToolbar` | Edit mode toggle, save button, branding popover, share | Existing |
-| `<aside>` (inline in Viewer) | Sidebar chrome, collapse, screen nav via ScreenManager | Existing (inline JSX, not WireframeSidebar.tsx) |
-| `WireframeHeader` | Header chrome: logo, search (decorative), user chip | Existing — only consumes `showLogo` |
-| `WireframeFilterBar` | Filter bar for active screen; driven by `activeScreen.filters` | Existing |
-| `ScreenManager` | Screen list, add/delete/rename/reorder in edit mode | Existing |
-| `PropertyPanel` | Right-side Sheet; delegates to per-type forms via section-registry | Existing |
-| `SECTION_REGISTRY` | Single source of truth: renderer + propertyForm + schema + defaultProps per section type | Existing in `section-registry.tsx` |
-| `BlueprintConfig` | Top-level schema: `sidebar?`, `header?`, `screens[]` | Existing |
-| `SidebarConfig` | `footer?: string`, `groups?: SidebarGroup[]` | Existing — minimal |
-| `HeaderConfig` | `showLogo`, `showPeriodSelector`, `showUserIndicator`, `actions.*` | Existing — schema only, not fully rendered |
+| Component | Responsibility | Location | Status |
+|-----------|----------------|----------|--------|
+| `audit_logs` table | Immutable append-only event store | Supabase migration 025 | NEW |
+| DB triggers | Capture row-level mutations without app-layer trust | Migration 025 | NEW |
+| `audit-service.ts` (write path) | `logAuditEvent()` — application-layer event capture | `src/platform/services/audit-service.ts` | NEW |
+| `audit-service.ts` (read path) | `queryAuditLogs()` — fetches from edge function | Same file | NEW |
+| `audit-logs` edge function | Secure query endpoint — service role reads with super_admin JWT gate | `supabase/functions/audit-logs/` | NEW |
+| `AuditLogsPage.tsx` | Admin panel page at `/admin/audit-logs` — timeline, filters, export | `src/platform/pages/admin/AuditLogsPage.tsx` | NEW |
+| `AdminSidebar.tsx` | Add "Audit Logs" nav item | `src/platform/layout/AdminSidebar.tsx` | MODIFY |
+| `AppRouter.tsx` | Add `/admin/audit-logs` route | `src/platform/router/AppRouter.tsx` | MODIFY |
+| `admin-tenants` edge function | Add `logAuditEvent` calls for archive/restore/impersonate | `supabase/functions/admin-tenants/` | MODIFY |
+| `admin-users` edge function | Add `logAuditEvent` calls for user invite/remove | `supabase/functions/admin-users/` | MODIFY |
 
-## Critical Existing Gaps
+## Recommended Project Structure
 
-These gaps are what v2.2 must close. Understanding them drives the build order.
+```
+src/platform/
+├── services/
+│   └── audit-service.ts           # NEW — logAuditEvent() + queryAuditLogs()
+├── types/
+│   └── audit.ts                   # NEW — AuditLogEntry, AuditEventInput, AuditMetadata
+├── pages/admin/
+│   ├── AuditLogsPage.tsx           # NEW — timeline, filters, search, export
+│   └── [existing pages unchanged]
+├── layout/
+│   └── AdminSidebar.tsx            # MODIFY — add ShieldCheck + "Audit Logs" nav item
+└── router/
+    └── AppRouter.tsx               # MODIFY — add /admin/audit-logs lazy route
 
-### Gap 1: WireframeHeader only reads `showLogo`
+supabase/
+├── migrations/
+│   └── 025_audit_logs.sql          # NEW — table + triggers + RLS + indexes
+└── functions/
+    └── audit-logs/
+        └── index.ts                # NEW — paginated query with filters
+```
 
-`WireframeViewer.tsx` lines 957–961 pass only `logoUrl` and `showLogo` to `WireframeHeader`.
-The `HeaderConfig` fields `showPeriodSelector`, `showUserIndicator`, and `actions.*` are stored in
-the schema and in Supabase, but have zero effect on render. The period selector, user chip, and
-action buttons are hardcoded in `WireframeHeader.tsx` — they never consult `config.header`.
+### Structure Rationale
 
-### Gap 2: WireframeSidebar.tsx is an unused component
+- **`audit-service.ts` in platform/services/:** Matches the established service layer pattern. Both `tenant-service.ts` and `admin-service.ts` follow the same structure: module-level token getter, `getAuthHeaders()`, named async functions. All data access is a named TypeScript function — no raw Supabase client calls in components.
+- **Separate `src/platform/types/audit.ts`:** Keeps audit types isolated from the growing `admin.ts` types file. The edge function and the service share the same TypeScript types via this file.
+- **`AuditLogsPage.tsx` in platform/pages/admin/:** Consistent with `TenantsPage.tsx`, `UsersPage.tsx`. Same `AdminLayout`, same `SuperAdminRoute` guard, same lazy import in `AppRouter.tsx`.
+- **Edge function for queries:** Direct client reads of `audit_logs` risk cross-org exposure if RLS has any misconfiguration. The edge function pattern is the established secure approach — all admin data goes through edge functions (confirmed by `admin-service.ts` and `tenant-service.ts`).
 
-`WireframeSidebar.tsx` exists as a standalone preview component (used in ComponentGallery) but is
-never imported by `WireframeViewer.tsx`. The actual sidebar in the Viewer is inline JSX. These
-are two separate concerns and should remain separate.
+## Architectural Patterns
 
-### Gap 3: No editor entry points for sidebar, header, or filter
+### Pattern 1: Hybrid DB Trigger + Application Layer
 
-AdminToolbar has no buttons for "Edit Sidebar", "Edit Header", or "Edit Filtros". ScreenManager
-is the only editor surface. `SidebarConfig` and `HeaderConfig` have no property panels and no
-visual editor access.
+**What:** DB triggers capture row-level mutations (INSERT/UPDATE/DELETE) with access to `OLD`/`NEW` row data. The application layer explicitly logs high-level business events that have no DB footprint — admin operations on Clerk (archive tenant, invite user, impersonate).
 
-### Gap 4: Filter editing is view-only
+**When to use:** Always for audit systems in this architecture. Pure trigger-only coverage misses all Clerk-side admin actions. Pure application-layer coverage has no guarantee — a future code path could bypass the logging call.
 
-`WireframeFilterBar` renders `activeScreen.filters[]` correctly but there is no mechanism
-to add, remove, or reconfigure `FilterOption` items through the visual editor.
+**Trade-offs:**
+- Triggers guarantee capture of all data mutations even if application code changes
+- Triggers add < 1ms per write on the instrumented tables — acceptable at current scale
+- Triggers cannot see Clerk actor identity; only the JWT `org_id` and `actor_id` set via `SET LOCAL` by the application
+- Two capture paths require discipline: avoid double-logging the same event
 
-### Gap 5: No widget concept in SidebarConfig
+**Example — trigger function:**
+```sql
+CREATE OR REPLACE FUNCTION public.audit_log_mutation()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_actor_id TEXT;
+  v_org_id   TEXT;
+BEGIN
+  v_actor_id := COALESCE(current_setting('app.actor_id', true), 'system');
+  v_org_id   := COALESCE(
+    nullif(current_setting('request.jwt.claims', true), '')::jsonb->>'org_id',
+    'system'
+  );
 
-The v2.2 milestone targets compound widgets (workspace switcher, account selector, user menu)
-in the sidebar. `SidebarConfig` today only has `footer` and `groups[]`. A typed `widgets[]`
-array does not exist yet.
+  INSERT INTO public.audit_logs (
+    org_id, actor_id, action, resource_type, resource_id, metadata, outcome
+  ) VALUES (
+    v_org_id,
+    v_actor_id,
+    TG_OP,                          -- 'INSERT' | 'UPDATE' | 'DELETE'
+    TG_TABLE_NAME,                  -- e.g., 'tasks', 'clients'
+    COALESCE(NEW.id::text, OLD.id::text),
+    jsonb_build_object('old', to_jsonb(OLD), 'new', to_jsonb(NEW)),
+    'success'
+  );
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
 
-## Recommended Architecture for v2.2
-
-### Data Model Changes
-
-Three schema extensions are needed. All must be backward-compatible (optional fields only).
-
-**1. SidebarConfig — add `widgets[]`**
-
+**Example — application layer write (service function):**
 ```typescript
-// tools/wireframe-builder/types/blueprint.ts
-
-export type SidebarWidgetType =
-  | 'workspace-switcher'
-  | 'account-selector'
-  | 'user-menu'
-  | 'search'
-
-export type SidebarWidget = {
-  type: SidebarWidgetType
-  position: 'top' | 'bottom'    // placement relative to nav items
-  label?: string                  // display label override
-  options?: string[]              // workspace names, account names, etc.
-}
-
-export type SidebarConfig = {
-  footer?: string
-  groups?: SidebarGroup[]
-  widgets?: SidebarWidget[]       // NEW — compound widgets
-}
-```
-
-The Zod schema in `blueprint-schema.ts` must mirror this with a new `SidebarWidgetSchema`
-and update `SidebarConfigSchema`. The `HeaderConfigSchema` already uses `.passthrough()`
-for forward-compat. Apply the same to `SidebarConfigSchema`.
-
-**2. HeaderConfig — no new fields needed**
-
-All needed fields already exist in the schema. The work is purely in the render layer
-and property panel — `WireframeHeader` must consume all existing `HeaderConfig` fields.
-
-**3. FilterOption — no new schema fields needed**
-
-`FilterOption` already has `filterType` discriminator with five variants. The work is
-a new editor UI surface to add/remove/edit `filters[]` per screen.
-
-### Component Boundaries — New vs Modified
-
-| Component | Action | Rationale |
-|-----------|--------|-----------|
-| `types/blueprint.ts` | MODIFY — add `SidebarWidget`, `SidebarWidgetType`, extend `SidebarConfig.widgets` | Schema source of truth |
-| `lib/blueprint-schema.ts` | MODIFY — add `SidebarWidgetSchema`, update `SidebarConfigSchema` | Runtime Zod validation |
-| `WireframeHeader.tsx` | MODIFY — accept and render all `HeaderConfig` fields | Close Gap 1 |
-| `WireframeViewer.tsx` | MODIFY — pass full `HeaderConfig`; add `openPanel` state; add `updateWorkingDashboard` helper; render widget zones in sidebar | Close Gaps 1, 3, 5 |
-| `AdminToolbar.tsx` | MODIFY — add "Layout" button group in edit mode: Sidebar, Header, Filtros buttons | Close Gap 3 |
-| `editor/SidebarConfigPanel.tsx` | NEW — Sheet for editing `SidebarConfig` (groups, footer, widgets) | Gap 3 — sidebar editor |
-| `editor/HeaderConfigPanel.tsx` | NEW — Sheet for editing `HeaderConfig` (boolean toggles, action flags) | Gap 3 — header editor |
-| `editor/FilterBarEditor.tsx` | NEW — Sheet for editing `activeScreen.filters[]` (add/remove/reorder `FilterOption`) | Gap 4 — filter editor |
-| `editor/SidebarWidgetPicker.tsx` | NEW — sub-component inside SidebarConfigPanel for adding widget types | Supports compound widgets |
-| `lib/sidebar-widget-registry.tsx` | NEW — `SIDEBAR_WIDGET_REGISTRY` with renderer + defaultProps per widget type | Separate registry for layout widgets |
-| `components/sidebar-widgets/` | NEW FOLDER — four widget renderer components | Render compound sidebar widgets |
-
-### Editor Entry Point Pattern
-
-AdminToolbar currently shows in edit mode: `Cores | Compartilhar | Comentarios | Theme | Salvar | Editar`.
-
-In edit mode, add a "Layout" button group:
-
-```
-[Sidebar] [Header] [Filtros]   (visible only when editMode.active)
-```
-
-Each button sets `openPanel` state. Only one panel can be open at a time (exclusive).
-`WireframeViewer` manages `openPanel: 'sidebar' | 'header' | 'filter' | null`.
-
-AdminToolbar receives three new callbacks: `onOpenSidebarPanel`, `onOpenHeaderPanel`, `onOpenFilterPanel`.
-This is consistent with how `onOpenShare` and `onOpenComments` already work — callbacks, not shared state.
-
-### Property Panel Taxonomy
-
-The existing `PropertyPanel` handles per-section editing via `SECTION_REGISTRY`. It is triggered by
-selecting a section cell (rowIndex + cellIndex).
-
-New layout panels are NOT section types. They edit dashboard-level config (`SidebarConfig`, `HeaderConfig`)
-or screen-level config (`filters[]`). They must NOT go through `SECTION_REGISTRY`.
-
-Use three separate Sheet components with their own forms:
-
-```typescript
-// In WireframeViewer.tsx render — outside WireframeThemeProvider, like PropertyPanel
-
-<SidebarConfigPanel
-  open={openPanel === 'sidebar'}
-  config={workingConfig?.sidebar ?? {}}
-  screens={screens}
-  onChange={(updated) => updateWorkingDashboard('sidebar', updated)}
-  onClose={() => setOpenPanel(null)}
-/>
-
-<HeaderConfigPanel
-  open={openPanel === 'header'}
-  config={workingConfig?.header ?? {}}
-  onChange={(updated) => updateWorkingDashboard('header', updated)}
-  onClose={() => setOpenPanel(null)}
-/>
-
-<FilterBarEditor
-  open={openPanel === 'filter'}
-  filters={activeScreen?.filters ?? []}
-  onChange={(filters) => updateWorkingScreen(s => ({ ...s, filters }))}
-  onClose={() => setOpenPanel(null)}
-/>
-```
-
-### Widget Registry Pattern
-
-Sidebar widgets are typed compound components — distinct from section types.
-They do NOT go through `SECTION_REGISTRY` (which is for content sections inside screen rows).
-
-A separate `SIDEBAR_WIDGET_REGISTRY` is appropriate:
-
-```typescript
-// tools/wireframe-builder/lib/sidebar-widget-registry.tsx
-
-export type SidebarWidgetRendererProps = {
-  widget: SidebarWidget
-  collapsed: boolean
-}
-
-export type SidebarWidgetRegistration = {
-  type: SidebarWidgetType
-  label: string
-  icon: ComponentType<{ className?: string }>
-  renderer: ComponentType<SidebarWidgetRendererProps>
-  defaultProps: () => SidebarWidget
-}
-
-export const SIDEBAR_WIDGET_REGISTRY: Record<
-  SidebarWidgetType,
-  SidebarWidgetRegistration
-> = {
-  'workspace-switcher': { ... },
-  'account-selector': { ... },
-  'user-menu': { ... },
-  'search': { ... },
-}
-```
-
-Widget renderers live in `tools/wireframe-builder/components/sidebar-widgets/`.
-In collapsed rail mode, each widget renders as an icon-only button — the `collapsed` prop
-controls this condensed rendering, matching the existing collapsed icon behavior of screen items.
-
-### Data Flow for Layout Config Edits
-
-```
-[AdminToolbar "Sidebar" / "Header" / "Filtros" button click]
-         ↓
-[WireframeViewer: setOpenPanel('sidebar' | 'header' | 'filter')]
-         ↓
-[Panel component opens as Sheet]
-         ↓
-[User edits fields in panel form]
-         ↓
-[onChange callback fires with updated config fragment]
-         ↓
-[WireframeViewer: updateWorkingDashboard() or updateWorkingScreen()]
-         ↓
-[editMode.dirty = true]
-         ↓
-[User clicks Save — handleSave() → saveBlueprintToDb() → Supabase]
-```
-
-The key insight: `updateWorkingScreen` already exists for per-screen mutations.
-Dashboard-level mutations need the same pattern targeting `workingConfig.sidebar` or
-`workingConfig.header` directly:
-
-```typescript
-function updateWorkingDashboard<K extends 'sidebar' | 'header'>(
-  key: K,
-  value: BlueprintConfig[K],
-) {
-  setWorkingConfig((prev) => {
-    if (!prev) return prev
-    return { ...prev, [key]: value }
+// src/platform/services/audit-service.ts
+// Never throws — audit failure must not break the main operation
+export async function logAuditEvent(event: AuditEventInput): Promise<void> {
+  const { error } = await supabase.from('audit_logs').insert({
+    org_id: event.orgId,
+    actor_id: event.actorId,
+    actor_email: event.actorEmail ?? null,
+    action: event.action,           // semantic name: 'tenant.archived', 'user.invited'
+    resource_type: event.resourceType,
+    resource_id: event.resourceId ?? null,
+    metadata: event.metadata ?? {},
+    ip_address: event.ipAddress ?? null,
+    user_agent: event.userAgent ?? null,
+    severity: event.severity ?? 'info',
+    outcome: event.outcome ?? 'success',
   })
-  setEditMode((prev) => ({ ...prev, dirty: true }))
-}
-```
-
-### WireframeHeader Props Extension
-
-`WireframeHeader.tsx` must accept and render all `HeaderConfig` fields:
-
-```typescript
-type Props = {
-  title: string
-  logoUrl?: string
-  brandLabel?: string
-  // Extended — previously all hardcoded/ignored
-  showLogo?: boolean
-  showPeriodSelector?: boolean    // NEW — was always rendered
-  showUserIndicator?: boolean     // NEW — was always rendered
-  actions?: {
-    manage?: boolean
-    share?: boolean
-    export?: boolean
+  if (error) {
+    console.error('[audit] Failed to log event:', error.message)
+    // Intentionally not throwing — audit failure is non-blocking
   }
 }
 ```
 
-The caller in `WireframeViewer.tsx` spreads `activeConfig?.header` into these props.
-Default behavior (all true) is preserved when `header` is undefined.
+### Pattern 2: Append-Only Table with SECURITY DEFINER Write Path
 
-### Sidebar Widget Rendering Zones
+**What:** `audit_logs` has RLS enabled. No INSERT policy exists for the `authenticated` or `anon` roles — only the `SECURITY DEFINER` trigger function can write rows directly. Application-layer writes from Edge Functions use the Supabase service role key (which bypasses RLS).
 
-Widgets with `position: 'top'` render above the nav items; `position: 'bottom'` render above the footer.
-The sidebar `<aside>` in WireframeViewer has three content zones:
+**When to use:** Always for audit tables. Preventing direct client inserts closes the risk of fabricated audit events.
 
-```
-[sidebar header: label + collapse toggle]
-[top widgets]          ← NEW zone: SidebarWidget[] where position === 'top'
-[nav: ScreenManager or grouped screen list]
-[bottom widgets]       ← NEW zone: SidebarWidget[] where position === 'bottom'
-[footer]
-```
+**Trade-offs:**
+- Trigger writes go through `SECURITY DEFINER` — standard PostgreSQL pattern for audit tables
+- Edge Function writes use the service role key (already the pattern for all admin Edge Functions)
+- The React SPA cannot write to `audit_logs` at all — by design
 
-Widget renderers receive `collapsed: boolean` and handle their own icon-only condensed rendering.
+**Example RLS:**
+```sql
+-- Read: super_admin sees all rows
+CREATE POLICY "audit_logs_super_admin_read" ON public.audit_logs
+  FOR SELECT TO authenticated
+  USING (
+    COALESCE(
+      nullif(current_setting('request.jwt.claims', true), '')::jsonb->>'super_admin',
+      'false'
+    ) = 'true'
+  );
 
-## Recommended File Structure
-
-```
-tools/wireframe-builder/
-├── types/
-│   └── blueprint.ts                  MODIFY — SidebarWidget, SidebarWidgetType, SidebarConfig.widgets
-├── lib/
-│   ├── blueprint-schema.ts           MODIFY — SidebarWidgetSchema, update SidebarConfigSchema
-│   ├── section-registry.tsx          NO CHANGE — sections only
-│   └── sidebar-widget-registry.tsx   NEW — SIDEBAR_WIDGET_REGISTRY
-├── components/
-│   ├── WireframeHeader.tsx           MODIFY — consume full HeaderConfig
-│   ├── sidebar-widgets/              NEW FOLDER
-│   │   ├── WorkspaceSwitcherWidget.tsx
-│   │   ├── AccountSelectorWidget.tsx
-│   │   ├── UserMenuWidget.tsx
-│   │   └── SearchWidget.tsx
-│   └── editor/
-│       ├── AdminToolbar.tsx          MODIFY — Layout button group in edit mode
-│       ├── SidebarConfigPanel.tsx    NEW — Sheet for SidebarConfig editing
-│       ├── HeaderConfigPanel.tsx     NEW — Sheet for HeaderConfig editing
-│       ├── FilterBarEditor.tsx       NEW — Sheet for filters[] editing
-│       └── SidebarWidgetPicker.tsx   NEW — widget type picker (child of SidebarConfigPanel)
-│
-src/pages/clients/
-└── WireframeViewer.tsx               MODIFY — openPanel state, pass full HeaderConfig,
-                                               updateWorkingDashboard helper, widget zone rendering
+-- No INSERT/UPDATE/DELETE policies — only SECURITY DEFINER functions and service role can write
 ```
 
-## Architectural Patterns
+### Pattern 3: JSONB Metadata Envelope
 
-### Pattern 1: Registry-per-concern
+**What:** The `metadata` column is `JSONB NOT NULL DEFAULT '{}'`. All event-specific contextual data (changed fields, before/after snapshot, error messages) goes into `metadata`. The outer row schema remains stable across all event types.
 
-**What:** Separate registries for section types (content) vs sidebar widget types (layout).
-**When to use:** When two taxonomies have different props interfaces and different editor surfaces.
-**Trade-offs:** More files, but no registry pollution. Section registry stays clean.
+**When to use:** Always for audit log tables — every event type carries different context.
 
-`SECTION_REGISTRY` handles: `renderer | propertyForm | schema | defaultProps | catalogEntry | label`.
-`SIDEBAR_WIDGET_REGISTRY` handles: `renderer | label | icon | defaultProps` (no propertyForm — editing is inline inside `SidebarConfigPanel`, not in a separate Sheet per widget).
+**Trade-offs:**
+- A GIN index on `metadata` enables key-level queries but is less efficient than B-tree
+- Schema validation is the application's responsibility (TypeScript discriminated union, Zod on read)
+- Avoids ALTER TABLE migrations every time a new event type needs additional context fields
 
-### Pattern 2: Exclusive-panel state via union type
+**Example typed metadata:**
+```typescript
+// src/platform/types/audit.ts
+export type AuditMetadata =
+  | { changed_fields: string[]; before: Record<string, unknown>; after: Record<string, unknown> }  // trigger
+  | { reason?: string; archived_by: string }            // tenant.archived
+  | { method: 'google' | 'email' }                      // user.login
+  | { role: string }                                     // user.invited
+  | Record<string, unknown>                              // fallback for unknown events
+```
 
-**What:** `openPanel: 'sidebar' | 'header' | 'filter' | null` controls which layout config panel is open. Only one panel open at a time.
-**When to use:** Panels target different data; double-open causes confusion and conflicting saves.
-**Trade-offs:** Slightly more state in Viewer, prevents double-open UX issues.
+## Data Flow
 
-This mirrors how `shareOpen` and `managerOpen` are boolean per-panel. The union here is appropriate because these three panels are mutually exclusive — unlike comments/share which can coexist.
+### Event Capture — DB Trigger Path
 
-### Pattern 3: Config fragment updater (dashboard-level)
+```
+Module service function (e.g., tasks update)
+    ↓
+supabase.from('tasks').update(...)
+    ↓
+PostgreSQL executes UPDATE on tasks table
+    ↓
+AFTER UPDATE trigger fires → audit_log_mutation()
+    ↓  (SECURITY DEFINER — bypasses RLS)
+INSERT into audit_logs committed in same transaction
+```
 
-**What:** `updateWorkingDashboard(key, value)` mirrors `updateWorkingScreen` for dashboard-level config.
-**When to use:** Any mutation to `workingConfig.sidebar` or `workingConfig.header`.
-**Trade-offs:** Adds a new helper in WireframeViewer but keeps the mutation pattern consistent.
+### Event Capture — Application Layer Path (Edge Functions)
 
-The function is generic over the key to preserve type safety without `any`.
+```
+Admin action in Edge Function (e.g., archive tenant)
+    ↓
+Clerk API call + Supabase update
+    ↓
+logAuditEvent({ action: 'tenant.archived', actorId, orgId, ... })
+    ↓  (supabase admin client — service role, bypasses RLS)
+INSERT into audit_logs
+```
 
-### Pattern 4: Backward-compatible schema extension
+### Audit Log Query Flow
 
-**What:** All new fields on `SidebarConfig` are optional. Existing blueprints without `widgets`
-still parse and render correctly.
-**When to use:** Any schema addition to Supabase-stored JSONB data.
-**Trade-offs:** No migration needed. Old data reads as `{ widgets: undefined }` and renders without widgets.
+```
+AuditLogsPage component (filter state: org, action, date range, search)
+    ↓
+queryAuditLogs(filters) in audit-service.ts
+    ↓  (fetch with Authorization: Bearer <Clerk super_admin JWT>)
+audit-logs edge function validates super_admin claim
+    ↓
+Supabase admin client (service role) → SELECT with WHERE clauses
+    ↓  (pagination: limit/offset, ORDER BY occurred_at DESC)
+Returns { logs: AuditLogEntry[], totalCount: number }
+    ↓
+AuditLogsPage renders timeline + pagination
+```
 
-`HeaderConfigSchema` already uses `.passthrough()` for forward-compat. Apply same to `SidebarConfigSchema`.
+### Key Data Flows
 
-## Integration Points with Existing Architecture
+1. **Trigger capture:** Mutations on `tasks`, `clients`, `projects`, `blueprint_configs`, `documents`, `tenant_modules` automatically produce audit rows — no per-table application code after initial trigger setup.
+2. **High-level event capture:** Admin actions in `admin-tenants` and `admin-users` Edge Functions call `logAuditEvent()` explicitly. These capture events that have no corresponding Supabase row change (Clerk-only operations).
+3. **Audit page reads:** Always proxied through the `audit-logs` Edge Function — consistent with the established pattern for all admin data. The React SPA never reads `audit_logs` directly.
+
+## Audit Log Table Schema
+
+```sql
+-- Migration 025
+CREATE TABLE public.audit_logs (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  occurred_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  -- Multi-tenant isolation
+  org_id         TEXT NOT NULL,           -- Clerk org_id or 'system' for super_admin actions
+
+  -- Actor (who did it)
+  actor_id       TEXT NOT NULL,           -- Clerk user_id or 'system' for automated operations
+  actor_email    TEXT,                    -- Denormalized: avoids Clerk API lookup on log render
+
+  -- Event semantics
+  action         TEXT NOT NULL,           -- e.g., 'INSERT', 'tasks.created', 'tenant.archived'
+  resource_type  TEXT NOT NULL,           -- e.g., 'tasks', 'tenants', 'blueprint_configs'
+  resource_id    TEXT,                    -- UUID or slug of the affected resource
+
+  -- Enriched context
+  metadata       JSONB NOT NULL DEFAULT '{}',
+  ip_address     INET,
+  user_agent     TEXT,
+  severity       TEXT NOT NULL DEFAULT 'info'
+                   CHECK (severity IN ('info', 'warning', 'critical')),
+  outcome        TEXT NOT NULL DEFAULT 'success'
+                   CHECK (outcome IN ('success', 'failure'))
+);
+
+-- Indexes
+CREATE INDEX idx_audit_occurred_at    ON public.audit_logs (occurred_at DESC);
+CREATE INDEX idx_audit_org_time       ON public.audit_logs (org_id, occurred_at DESC);
+CREATE INDEX idx_audit_actor_time     ON public.audit_logs (actor_id, occurred_at DESC);
+CREATE INDEX idx_audit_action         ON public.audit_logs (action, occurred_at DESC);
+CREATE INDEX idx_audit_resource       ON public.audit_logs (resource_type, resource_id);
+CREATE INDEX idx_audit_metadata_gin   ON public.audit_logs USING GIN (metadata);
+
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+```
+
+**Schema decisions:**
+- No `archived_at` column — audit logs are append-only by definition. Retention is handled by scheduled DELETE or partition drop, not soft-delete.
+- `actor_email` is denormalized intentionally to avoid Clerk API calls when rendering hundreds of log rows.
+- `occurred_at DESC` is the primary query pattern. The composite `(org_id, occurred_at DESC)` covers the most common admin filter: "all events for this tenant."
+- No table partitioning for v11.0 — at current scale (< 100K rows/month) a single table with these indexes is sufficient. Revisit at 10M+ rows.
+
+## RLS Policy Decision: Super Admin Only (v11.0)
+
+The `audit_logs` table is **super_admin-only read** for v11.0. Org-scoped operators do not have a read policy.
+
+**Rationale:** The audit page lives in `/admin/*` which is already gated by `SuperAdminRoute`. There is no use case in v11.0 for org operators to see their own audit trail — that is a future compliance feature. Starting with super_admin-only keeps the RLS policy simple and avoids accidentally exposing cross-org metadata.
+
+**Future extension:** Add a second RLS branch for org-scoped read when a "My Organization Activity" feature is needed:
+```sql
+-- Future: org-scoped read policy (add this later, do not build now)
+CREATE POLICY "audit_logs_org_read" ON public.audit_logs
+  FOR SELECT TO authenticated
+  USING (
+    (nullif(current_setting('request.jwt.claims', true), '')::jsonb->>'org_id') = org_id
+  );
+```
+
+## Scaling Considerations
+
+| Scale | Architecture Adjustments |
+|-------|--------------------------|
+| < 1M rows | Single table, current indexes sufficient. No action needed. |
+| 1M–50M rows | Add range partitioning by `occurred_at` (monthly). Drop old partitions for retention. Supabase supports `PARTITION BY RANGE`. |
+| 50M+ rows | Separate read replica for audit queries. Consider Timescale or ClickHouse for analytics. Export cold logs to object storage. |
+
+### Scaling Priorities
+
+1. **First bottleneck:** Trigger overhead on high-write tables. At current FXL scale (< 50 tenants, < 1000 writes/day) this is not measurable. Monitor `pg_stat_user_tables` if needed.
+2. **Second bottleneck:** Audit page query time as rows accumulate. The composite index `(org_id, occurred_at DESC)` handles this up to ~5M rows efficiently.
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Logging From React Components or Hooks
+
+**What people do:** Call `supabase.from('audit_logs').insert(...)` from `useEffect`, event handlers, or custom React hooks.
+
+**Why it's wrong:** React components re-render unpredictably. Effects fire twice in StrictMode. Actor context (IP address, user_agent, actor_email) is not available in the browser. The anon Supabase key should not have INSERT permissions on `audit_logs`. Result: duplicate entries and missing context.
+
+**Do this instead:** All application-layer audit writes go through `logAuditEvent()` in service layer functions or Edge Functions where execution is deterministic and actor context is fully available.
+
+### Anti-Pattern 2: Trigger-Only Coverage
+
+**What people do:** Set up triggers on all tables and assume all security-relevant events are captured.
+
+**Why it's wrong:** The most sensitive admin operations (archive tenant, invite user, impersonate, remove member) go through Clerk API via Edge Functions — they have no Supabase row mutation to trigger on. These are exactly the events a security audit needs.
+
+**Do this instead:** DB triggers for data mutations + explicit `logAuditEvent()` calls in every Edge Function that performs a Clerk API operation.
+
+### Anti-Pattern 3: Direct Client Read of audit_logs
+
+**What people do:** `supabase.from('audit_logs').select('*')` in `AuditLogsPage.tsx` directly.
+
+**Why it's wrong:** Inconsistent with the established pattern for admin data. If RLS has a bug, it exposes cross-org logs. The React client uses the anon key which is published in the JavaScript bundle. All admin data reads in this codebase go through Edge Functions with the Clerk JWT.
+
+**Do this instead:** Route all reads through the `audit-logs` Edge Function using the Clerk super_admin JWT — the same pattern as `admin-service.ts` and `tenant-service.ts`.
+
+### Anti-Pattern 4: Fat JSONB Without a Typed Envelope
+
+**What people do:** Serialize entire Supabase response objects into `metadata`, including internal fields, nulls, pagination state, and Supabase error objects.
+
+**Why it's wrong:** Logs become unreadable. Storage grows unnecessarily. Future automation (alerting, anomaly detection) has no stable field contract to rely on.
+
+**Do this instead:** Define a typed `AuditMetadata` discriminated union per action category. Capture only the minimum relevant context: changed fields list, not full row snapshots.
+
+### Anti-Pattern 5: Throwing From logAuditEvent
+
+**What people do:** `throw new Error(...)` inside `logAuditEvent()` when the Supabase INSERT fails.
+
+**Why it's wrong:** An audit failure should never block the main operation. If `archiveTenant()` successfully archives the tenant but then `logAuditEvent()` throws, the tenant archival gets rolled back or left in an inconsistent state from the caller's perspective.
+
+**Do this instead:** `logAuditEvent()` logs the error to `console.error` and returns silently. The main operation continues regardless.
+
+## Integration Points
+
+### New Components
+
+| Component | Type | Integrates With |
+|-----------|------|-----------------|
+| `audit_logs` table | Supabase migration 025 | All instrumented tables via triggers |
+| `logAuditEvent()` | Service function (write path) | Edge Functions that perform admin operations |
+| `queryAuditLogs()` | Service function (read path) | `audit-logs` Edge Function |
+| `audit-logs` edge function | Supabase Edge Function | Supabase service role client |
+| `AuditLogsPage.tsx` | React page component | AdminLayout, SuperAdminRoute |
+
+### Modified Components
+
+| Component | What Changes | Why |
+|-----------|-------------|-----|
+| `AdminSidebar.tsx` | Add `{ label: 'Audit Logs', href: '/admin/audit-logs', icon: ShieldCheck }` to `adminNavItems` | Expose new page in navigation |
+| `AppRouter.tsx` | Add `<Route path="/admin/audit-logs">` with lazy `AuditLogsPage` import | Wire page into protected admin routes |
+| `admin-tenants` edge function | Call `logAuditEvent` for archive, restore, impersonate, add-member, remove-member actions | These are Clerk-only operations with no DB trigger coverage |
+| `admin-users` edge function | Call `logAuditEvent` for user-related admin actions | Same — Clerk-only |
 
 ### Internal Boundaries
 
 | Boundary | Communication | Notes |
 |----------|---------------|-------|
-| `WireframeViewer` ↔ `AdminToolbar` | New props: `onOpenSidebarPanel`, `onOpenHeaderPanel`, `onOpenFilterPanel` callbacks | Consistent with existing `onOpenShare`, `onOpenComments` pattern |
-| `WireframeViewer` ↔ `SidebarConfigPanel` | Props: `open`, `config`, `screens`, `onChange`, `onClose` | Same interface as PropertyPanel |
-| `WireframeViewer` ↔ `HeaderConfigPanel` | Props: `open`, `config`, `onChange`, `onClose` | Same interface |
-| `WireframeViewer` ↔ `FilterBarEditor` | Props: `open`, `filters`, `onChange`, `onClose` | Per-screen; `onChange` → `updateWorkingScreen` |
-| `WireframeViewer` ↔ `WireframeHeader` | Extended props from `activeConfig?.header` spread | No breaking change — all new props optional |
-| `<aside>` (Viewer) ↔ `SIDEBAR_WIDGET_REGISTRY` | Direct import in Viewer; render widget.type lookup | No new context needed |
-| `SidebarConfigPanel` ↔ `SidebarWidgetPicker` | Child component rendered inline in panel | Picker returns `SidebarWidget` via callback |
-
-### Supabase Impact
-
-No new tables required. `SidebarWidget[]` is stored as part of `BlueprintConfig.sidebar.widgets`
-in the existing `blueprints.config` JSONB column. The Zod schema ensures valid shape on read.
-
-The `blueprint-migrations.ts` utility handles forward-compatibility if needed, but since all
-new fields are optional additions, no migration script is required for v2.2.
-
-### What Does Not Change
-
-- `SECTION_REGISTRY` — no new section types needed for this milestone
-- `BlueprintScreen` shape — only `filters[]` editing, no new screen fields
-- `ScreenManager` — no changes needed
-- `PropertyPanel` — no changes needed; it is for section-level editing only
-- Supabase schema (`blueprints` table) — JSONB column absorbs new fields transparently
-- `WireframeSidebar.tsx` — remains as gallery preview component, untouched
+| `AuditLogsPage` → `audit-service.ts` | Direct function import (`queryAuditLogs`) | Follows existing service layer pattern |
+| `audit-service.ts` → `audit-logs` edge function | `fetch()` with `Authorization: Bearer <Clerk JWT>` | Same pattern as `tenant-service.ts` and `admin-service.ts` |
+| `audit-logs` edge function → `audit_logs` table | Supabase service role client (bypasses RLS) | Required — established pattern for all admin edge functions |
+| DB triggers → `audit_logs` | `SECURITY DEFINER` INSERT | Bypasses RLS; actor context injected via `SET LOCAL` where possible |
+| `logAuditEvent()` → `audit_logs` | Supabase service role client (in edge function context) | Application-layer writes always from edge functions, never from SPA |
 
 ## Suggested Build Order
 
-Build order follows schema-first, then render, then editor — matching the dependency graph.
+Phase ordering is driven by three dependency constraints:
+1. The `audit_logs` table must exist before triggers, edge function, service layer, or UI can be built.
+2. The `audit-logs` edge function (read path) must exist before `queryAuditLogs()` in the service layer.
+3. Application-layer capture (instrumenting existing edge functions) requires the table and `logAuditEvent()` but does not block the UI.
 
-**Phase A: Schema extension (foundation)**
-1. `types/blueprint.ts` — add `SidebarWidget`, `SidebarWidgetType`, extend `SidebarConfig`
-2. `lib/blueprint-schema.ts` — add `SidebarWidgetSchema`, update `SidebarConfigSchema`
-3. `tsc --noEmit` — confirm zero type errors before proceeding
+**Recommended phase sequence:**
 
-**Phase B: Render layer — header config functional**
-4. `WireframeHeader.tsx` — consume all `HeaderConfig` fields (showPeriodSelector, showUserIndicator, actions)
-5. `WireframeViewer.tsx` — pass full `header` config to `WireframeHeader`
-6. Visual validation: `financeiro-conta-azul` wireframe renders same as before (no regressions)
+| Phase | What to Build | Depends On | Can Parallelize With |
+|-------|--------------|------------|----------------------|
+| 1 | Migration 025: `audit_logs` table + RLS + indexes | Nothing | — |
+| 2 | DB triggers on critical tables (tasks, clients, projects, blueprint_configs) | Phase 1 | Phase 3 |
+| 3 | `logAuditEvent()` write function + TypeScript types (`src/platform/types/audit.ts`) | Phase 1 | Phase 2 |
+| 4 | Instrument existing edge functions (admin-tenants, admin-users) | Phase 3 | Phase 5 |
+| 5 | `audit-logs` edge function (paginated query with filters) | Phase 1 | Phase 4 |
+| 6 | `queryAuditLogs()` read function in `audit-service.ts` | Phase 5 | — |
+| 7 | `AuditLogsPage.tsx` (timeline, filters, pagination) | Phase 6 | — |
+| 8 | Wire into `AdminSidebar.tsx` + `AppRouter.tsx` + lazy import | Phase 7 | — |
 
-**Phase C: Sidebar widget render layer**
-7. `lib/sidebar-widget-registry.tsx` — create registry with four widget types
-8. `components/sidebar-widgets/` — four widget renderer components
-9. `WireframeViewer.tsx` `<aside>` — add top/bottom widget zones, render from registry by position
-10. Visual validation: sidebar renders correctly with and without `widgets` in config
-
-**Phase D: Editor panels**
-11. `AdminToolbar.tsx` — add Layout button group (Sidebar, Header, Filtros) visible only in edit mode
-12. `WireframeViewer.tsx` — add `openPanel` state + `updateWorkingDashboard` helper
-13. `editor/HeaderConfigPanel.tsx` — toggle form for all `HeaderConfig` boolean fields
-14. `editor/SidebarConfigPanel.tsx` — groups editor + footer field + widget list management
-15. `editor/SidebarWidgetPicker.tsx` — sub-component used inside SidebarConfigPanel
-16. `editor/FilterBarEditor.tsx` — add/remove/reorder `FilterOption[]` with filterType discriminator
-17. Wire all panels via `openPanel` state in WireframeViewer
-
-**Phase E: Integration validation**
-18. Manual test: HeaderConfigPanel toggles → header re-renders → save → reload persists
-19. Manual test: add workspace-switcher widget → renders in sidebar → save → reload
-20. Manual test: add/remove filter option per screen → FilterBar updates immediately
-21. `tsc --noEmit` — zero errors required before task close
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Adding layout widgets to SECTION_REGISTRY
-
-**What people do:** Make sidebar widgets follow the same path as kpi-grid or bar-line-chart.
-**Why it's wrong:** Sidebar widgets are layout concerns rendered outside the main content area. They have different props, different lifecycles, and no `rows[]` placement. Forcing them through SECTION_REGISTRY pollutes the content/section taxonomy.
-**Do this instead:** Use a separate `SIDEBAR_WIDGET_REGISTRY` with its own type hierarchy.
-
-### Anti-Pattern 2: Making FilterBarEditor a section type
-
-**What people do:** Treat filter editing as a PropertyPanel triggered by clicking the filter bar in edit mode.
-**Why it's wrong:** Filters are per-screen config (`BlueprintScreen.filters[]`), not a section inside `rows[]`. There is no rowIndex/cellIndex for a filter bar — it belongs to the screen, not a row.
-**Do this instead:** Open FilterBarEditor via the AdminToolbar "Filtros" button. It reads `activeScreen.filters` and writes back via `updateWorkingScreen`.
-
-### Anti-Pattern 3: Merging WireframeSidebar.tsx with the Viewer sidebar
-
-**What people do:** Add widget support to the existing `WireframeSidebar.tsx` component.
-**Why it's wrong:** `WireframeSidebar.tsx` is the standalone gallery preview component with a minimal prop interface (`screens[]`). The actual Viewer sidebar is inline JSX with full state access. They serve different purposes.
-**Do this instead:** Enhance the inline `<aside>` in `WireframeViewer.tsx` directly. `WireframeSidebar.tsx` can remain as the gallery component.
-
-### Anti-Pattern 4: Moving openPanel to a context
-
-**What people do:** Create a `LayoutEditorContext` to share panel open state across components.
-**Why it's wrong:** Only `WireframeViewer.tsx` consumes this state — AdminToolbar receives callbacks, panels receive open/onClose props. No deep subscribers exist.
-**Do this instead:** Keep `openPanel` as a `useState` in `WireframeViewer.tsx`, pass callbacks as props. This is consistent with how `editMode`, `shareOpen`, and `managerOpen` are handled today.
-
-### Anti-Pattern 5: Per-widget property Sheet panels
-
-**What people do:** Create a separate Sheet panel per widget type (WorkspaceSwitcherPanel, AccountSelectorPanel, etc.) opened by clicking the widget in the sidebar.
-**Why it's wrong:** Widgets are few (4 types), their config is simple (position, label, options), and they are always edited as part of the sidebar's config. A dedicated Sheet per widget type over-engineers the editor surface.
-**Do this instead:** Edit all widgets inline within `SidebarConfigPanel`. The panel shows a list of added widgets with inline controls for each widget's fields.
+**Rationale:**
+- Phases 1-4 (DB + capture layer) can be shipped and accumulating real log data before the UI exists. This maximizes the historical data available when the page goes live.
+- Phases 2 and 3 are independent after Phase 1 completes — they can be built in the same phase or parallel agents.
+- Phases 4 and 5 are independent after their respective dependencies — can also run in parallel.
+- The UI (Phases 7-8) is the visible deliverable but has no blocking dependency on any production data.
 
 ## Sources
 
-- Direct analysis: `tools/wireframe-builder/types/blueprint.ts` (SidebarConfig, HeaderConfig, FilterOption types) — HIGH confidence
-- Direct analysis: `tools/wireframe-builder/lib/blueprint-schema.ts` (Zod schemas, .passthrough() on HeaderConfigSchema) — HIGH confidence
-- Direct analysis: `src/pages/clients/WireframeViewer.tsx` (inline sidebar, header usage lines 957–961, updateWorkingScreen pattern) — HIGH confidence
-- Direct analysis: `tools/wireframe-builder/components/WireframeHeader.tsx` (showLogo only consumed) — HIGH confidence
-- Direct analysis: `tools/wireframe-builder/lib/section-registry.tsx` (SectionRegistration type, SECTION_REGISTRY pattern) — HIGH confidence
-- Direct analysis: `tools/wireframe-builder/components/editor/PropertyPanel.tsx` (Sheet pattern, registry delegation) — HIGH confidence
-- Direct analysis: `tools/wireframe-builder/components/editor/AdminToolbar.tsx` (edit mode button layout, callback props) — HIGH confidence
-- Direct analysis: `tools/wireframe-builder/components/editor/ScreenManager.tsx` (DnD reorder, dialog add pattern) — HIGH confidence
-- `.planning/PROJECT.md` — v2.2 milestone goals and constraints — HIGH confidence
+- Direct codebase analysis: `src/platform/services/admin-service.ts` — service layer pattern with token getter, `getAuthHeaders()`, `withRetry` wrapper
+- Direct codebase analysis: `src/platform/services/tenant-service.ts` — confirms pattern consistency
+- Direct codebase analysis: `supabase/migrations/019_tenant_archival.sql` — RLS policy pattern: `super_admin bypass OR (org_id match AND condition)`
+- Direct codebase analysis: `src/platform/router/AppRouter.tsx` — lazy admin route registration pattern
+- Direct codebase analysis: `src/platform/layout/AdminSidebar.tsx` — hardcoded `adminNavItems` array, `NavLink` pattern
+- Direct codebase analysis: `src/platform/lib/retry.ts` — `withRetry` pattern used in all service functions
+- Direct codebase analysis: `.planning/PROJECT.md` — Key Decisions table: "Super admin via JWT claim", "Supabase Edge Function as Clerk API proxy"
 
 ---
-*Architecture research for: FXL Core v2.2 — Configurable Layout Components (Sidebar Widgets, Header Config, Filter Bar Editor)*
-*Researched: 2026-03-13*
+*Architecture research for: Audit Logging integration into Nexo multi-tenant platform (v11.0)*
+*Researched: 2026-03-19*

@@ -684,6 +684,52 @@
 
 ---
 
+## Milestone: v11.0 — Audit Logging
+
+**Shipped:** 2026-03-21
+**Phases:** 5 | **Plans:** 10 | **Requirements:** 14/14
+
+### What Was Built
+- Immutable `audit_logs` table with 13-column enterprise schema, append-only RLS, 5 composite indexes (migrations 025-026)
+- SECURITY DEFINER triggers on `tasks` and `tenant_modules` auto-capturing INSERT/UPDATE with before/after JSONB
+- `logAuditEvent()` never-throw service with Sentry error reporting and automatic impersonation session tagging
+- Edge function instrumentation: admin-tenants, admin-users, and auth events (sign-in/sign-out with IP + user-agent)
+- GET `/audit-logs` edge function with super_admin JWT gate, server-enforced pagination (max 100), 6 filters
+- Admin UI at `/admin/audit-logs`: paginated table, composable filters, detail Sheet with before/after diff, CSV export
+- Configurable retention policy (30-365 days) with pg_cron daily cleanup at 03:00 UTC
+
+### What Worked
+- **DB-layer triggers for critical tables:** Zero application-level instrumentation needed for tasks/tenant_modules — triggers capture everything automatically
+- **Never-throw pattern for audit service:** logAuditEvent() wraps everything in try/catch + Sentry, so call sites are clean with no error handling boilerplate
+- **Module-level setter for ImpersonationContext:** Bypassed React hook constraint elegantly — service can access impersonation state without being a React component
+- **Shared audit helper pattern:** Single helper function reused across admin-tenants and admin-users edge functions, consistent logging format
+- **Client-side CSV export:** Native Blob API avoids needing a server endpoint, keeps architecture simple
+
+### What Was Inefficient
+- **REQUIREMENTS.md traceability stale:** 3 of 14 requirements (UI-03, UI-04, OPS-01) were not checked off despite being complete — same pattern as v7.0
+- **Some SUMMARY.md one-liners empty:** Plans 136-01, 136-02, 138-02, 138-03 had null one-liners, degrading automated milestone reporting
+- **No milestone audit:** Skipped `/gsd:audit-milestone` — should have caught the traceability gap earlier
+
+### Patterns Established
+- **Append-only RLS pattern:** No UPDATE/DELETE policies on audit_logs — RLS denies by default, simpler than explicit DENY rules
+- **SECURITY DEFINER for cross-table triggers:** Required pattern when triggers write to RLS-protected tables
+- **audit-auth edge function returning 200 always:** Auth audit failures must never block sign-in flow
+- **DiffView component:** Reusable before/after comparison with color-coded changed-keys filtering
+- **Detail Sheet drawer pattern:** Click table row → Sheet with full details, reusable for any admin data inspection
+
+### Key Lessons
+1. **Traceability maintenance continues to be the weakest link** — 3rd milestone where checkboxes drifted (v1.0, v7.0, v11.0). Consider automation.
+2. **SUMMARY.md one-liner should be required, not optional** — empty one-liners break milestone reporting; executor agents should always extract one
+3. **pg_cron + SECURITY DEFINER is the right pattern for maintenance jobs** — RLS-protected cleanup requires explicit bypass
+4. **Client-side filtering is a valid tradeoff** — multi-action filter in UI vs single-action API keeps API simple while UX stays rich
+
+### Cost Observations
+- Model mix: ~70% sonnet (executor), ~30% opus (planner/orchestrator)
+- Sessions: ~3 (planning + execution + completion)
+- Notable: 5 phases completed in 2 days including full admin UI — edge function + service layer patterns are mature enough for fast delivery
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -704,6 +750,7 @@
 | v2.4 | 1 session | 2 | 4 | Component Picker dual-mode preview, scale-transform mini-renders, defaultProps as preview data |
 | v4.3 | 1 day | 4 | 8 | Custom auth, edge function data layer, autorun parallel execution, admin users management |
 | v7.0 | 1 day | 4 | 8 | Access control lockdown, admin user management, tenant archival, dashboard improvements |
+| v11.0 | 2 days | 5 | 10 | Enterprise audit logging, DB triggers, never-throw service, admin UI with diff/export/retention |
 
 ### Cumulative Quality
 
@@ -723,6 +770,7 @@
 | v2.4 | ~316 tests | 33 new (SectionPreview 33 + renderability 17) | 0 |
 | v4.3 | ~316 tests | no new tests (edge functions + UI) | 0 |
 | v7.0 | ~316 tests | no new tests (admin UI + migration) | 0 |
+| v11.0 | ~435 tests | no new tests (edge functions + UI + migrations) | 1 (pg_cron extension) |
 
 ### Velocity
 
@@ -742,6 +790,7 @@
 | v2.4 | 4 | ~29 min | ~7.3 min |
 | v4.3 | 8 | ~5 min | ~0.6 min |
 | v7.0 | 8 | ~15 min | ~1.9 min |
+| v11.0 | 10 | ~14 min | ~1.4 min |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -759,3 +808,5 @@
 12. Build new before removing old — safe migration: v2.3 built inline editing alongside Sheet panels, then removed old code in cleanup phase
 13. Run milestone audit at least once — v2.3 was first audit since v1.0; integration checker found visual gap and orphaned export missed by phase-level verification
 14. Verification artifacts are as important as code — v7.0 phases 118/119 shipped working code but missing VERIFICATION.md and SUMMARY.md, creating audit debt (verified across v5.3, v7.0)
+15. Traceability checkboxes drift is a recurring pattern — v1.0, v7.0, and v11.0 all had unchecked requirements despite complete code; consider automating traceability updates during plan execution
+16. Never-throw service pattern is production-ready — logAuditEvent() in v11.0 proved that wrapping entire service in try/catch + Sentry is the right default for non-critical side effects

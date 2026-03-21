@@ -1,288 +1,394 @@
 # Pitfalls Research
 
-**Domain:** Configurable layout components in existing wireframe builder (sidebar widgets, header editor panels, filter bar editing)
-**Researched:** 2026-03-13
-**Confidence:** HIGH — based on direct codebase analysis of WireframeViewer.tsx, blueprint-schema.ts, types/blueprint.ts, WireframeSidebar.tsx, WireframeHeader.tsx, WireframeFilterBar.tsx, blueprint-store.ts, blueprint-migrations.ts, editor property-forms, and the FilterConfigRenderer/Form pair
+**Domain:** Audit Logging — Adding to Existing Multi-Tenant Supabase System
+**Researched:** 2026-03-19
+**Confidence:** HIGH (system-specific pitfalls cross-referenced with Nexo migration history, Supabase official docs, and current community patterns)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: FilterType Enum Divergence Between Schema Layers
+### Pitfall 1: Applying the Existing Anon-Permissive RLS Pattern to audit_logs
 
 **What goes wrong:**
-`FilterConfigSectionSchema` (blueprint-schema.ts line 306) uses `filterType: z.enum(['period', 'select', 'date-range'])` — 3 variants. `FilterOptionSchema` (blueprint-schema.ts line 50), which drives `BlueprintScreen.filters[]` and `WireframeFilterBar`, uses `filterType: z.enum(['select', 'date-range', 'multi-select', 'search', 'toggle'])` — 5 variants. When building the sticky filter bar editor (edits `screen.filters[]`), these two enums look similar but serve different data paths. If a developer builds a property panel that lets users pick `multi-select` or `search` filter types, then accidentally writes the result into a `filter-config` section instead of `screen.filters[]`, Zod validation will reject the save. The error message mentions a path like `screens[0].sections[N].filters[0].filterType` — leading the developer to chase the wrong bug.
+Nexo uses `FOR ALL TO anon, authenticated USING (org_id = ...)` on tenant-scoped tables (see migrations 008, 013). If audit_logs inherits this pattern, every tenant can read every other tenant's audit trail. The `anon` role means anyone with the public Supabase URL and anon key can query raw audit logs — no authentication required.
 
 **Why it happens:**
-Both schemas use the word "filter" and share the same field name `filterType`. `FilterOption` (component-level, used by WireframeFilterBar) and `filter-config` (a section block, used by FilterConfigRenderer) were built at different milestones for different purposes. The naming collision causes developers to conflate them, especially when building the filter bar editor for the first time.
+Developers copy the RLS block from an existing table (tasks, comments) as a starting point. The existing pattern was an acceptable tradeoff for operational tables where anon access was deliberate. Audit data was never part of that tradeoff.
 
 **How to avoid:**
-The sticky filter bar editor must operate exclusively on `screen.filters: FilterOption[]` using `FilterOptionSchema` (5-variant set). Never write filter bar edits into a `filter-config` section block. Any property panel for the filter bar must produce `FilterOption` objects (`key`, `label`, `options?`, `filterType` from the 5-variant set). The existing `FilterConfigForm.tsx` is for `filter-config` section blocks only — do not reuse it for the screen-level filter bar. Build a separate `FilterBarForm` or equivalent that knows it targets `screen.filters[]`.
+- audit_logs must NOT grant SELECT to the `anon` role under any condition.
+- SELECT policy: `USING (org_id = (auth.jwt() -> 'org_id')::text)` granted to `authenticated` only.
+- Super admin bypass (existing JWT super_admin claim mechanism) is acceptable but must be explicit.
+- INSERT should come exclusively from service-role context (triggers or edge functions) — never from anon or authenticated client roles directly.
+- Add an explicit REVOKE statement in the migration: `REVOKE UPDATE, DELETE ON audit_logs FROM authenticated, anon`.
+- Add a migration comment: `-- audit_logs intentionally more restrictive than standard Nexo tables`.
 
 **Warning signs:**
-- A form allows picking `multi-select` or `search` but save fails with Zod error mentioning `filter-config.filters[N].filterType`
-- The property panel in focus reads `section.type === 'filter-config'` when the goal is to edit the sticky filter bar
-- `BlueprintConfigSchema.parse()` throwing on configs that contain valid `FilterOption` filterType values written to the wrong path
+- Migration draft that copies a policy block from tasks or comments without removing `TO anon`.
+- Any USING clause on SELECT that is `(true)` or does not reference org_id.
+- Frontend service calling Supabase directly with the anon key to INSERT audit logs (instead of trigger or edge function).
 
-**Phase to address:**
-Filter bar editor phase — the first task must be a comment or ADR clarifying which data path the editor targets.
+**Phase to address:** Schema/Migration phase — catch at migration review before deploy.
 
 ---
 
-### Pitfall 2: WireframeSidebar Component Is a Ghost — Sidebar Renders Inline in WireframeViewer
+### Pitfall 2: Logging PII in the metadata JSONB Column
 
 **What goes wrong:**
-`WireframeSidebar.tsx` exists with a simple `screens: Screen[]` prop API. However, `WireframeViewer.tsx` renders the sidebar entirely inline (lines 764–944) with full logic: collapse state, icon rail, `partitionScreensByGroups()`, footer from `activeConfig.sidebar.footer`, and fixed positioning. `WireframeSidebar.tsx` is not imported anywhere in `WireframeViewer`. Any sidebar widget code (workspace switcher, account selector, user menu) built inside or against `WireframeSidebar.tsx` will have zero effect on the actual rendered viewer.
+The `metadata` JSONB field captures context about the operation. If it naively serializes the full before/after state of a record, it captures emails, names, phone numbers, and other LGPD-regulated personal data. Under LGPD, audit logs containing PII fall under the same data subject rights as the data itself: right to deletion, right to access, right to correction. A user exercising their deletion right requires purging or sanitizing audit rows — which directly conflicts with the immutability guarantee that makes audit logs trustworthy.
 
 **Why it happens:**
-`WireframeSidebar.tsx` was an early prototype. As the sidebar grew complex, it was implemented directly in `WireframeViewer` because the component's API was too limited. The file was never removed or deprecated, creating an apparent (but unused) implementation target.
+The `metadata` field is convenient — pass the whole object and let Postgres store it. The PII problem is invisible until a LGPD request arrives months later.
 
 **How to avoid:**
-All sidebar widget additions must be made inside the inline sidebar block in `WireframeViewer.tsx` (lines 764–944). Before writing any sidebar widget code, confirm the rendering site by checking what `WireframeViewer` actually renders. If the inline sidebar block is extracted to a `WireframeViewerSidebar` component during this milestone, that extraction must happen as its own discrete step before any widget additions — not interwoven with them.
+- Define an explicit allowlist of fields permitted in `metadata` for each action type. Example: for `TASK_UPDATED`, log `{ task_id, changed_fields: ['status'] }` — not `{ before: {...}, after: {...} }`.
+- Never log user-supplied free-text fields (names, descriptions, notes, email addresses) in metadata.
+- Store `actor_id` (opaque UUID) as the actor identifier. Never store `actor_email` in the audit row — resolve it at display time from Clerk.
+- Log IP addresses only if required for compliance, with an explicit 90-day retention window and a documented LGPD legal basis (`art. 7°, IX` — legitimate interest for security).
+- Write the metadata allowlist spec per action type before any capture code.
 
 **Warning signs:**
-- `WireframeSidebar` import appears in `WireframeViewer.tsx` (it is currently absent — any new import is a red flag)
-- A sidebar widget renders correctly in isolation (Storybook / component gallery) but never appears in the wireframe viewer
-- New props added to `WireframeSidebar.tsx` that `WireframeViewer` never passes
+- An audit INSERT that spreads a full Supabase row: `metadata: { ...taskRow }`.
+- `actor_email` stored as a column or inside metadata.
+- IP address in metadata without a documented retention period.
 
-**Phase to address:**
-Sidebar widgets phase, day one — audit the rendering site before writing a single line of widget code.
+**Phase to address:** Schema design phase + capture design phase. The metadata allowlist must be written and reviewed before any capture implementation.
 
 ---
 
-### Pitfall 3: No Mutation Helpers Exist for Dashboard-Level Config (sidebar, header)
+### Pitfall 3: Circular Logging — Logging the Act of Reading Logs
 
 **What goes wrong:**
-All existing edit-mode mutation helpers in `WireframeViewer` (`updateWorkingScreen`, `handlePropertyChange`, `handleAddSection`, `handleReorderRows`, etc.) operate on `workingConfig.screens[safeActiveIndex]`. There are zero helpers for mutating `workingConfig.sidebar` or `workingConfig.header`. When adding sidebar and header property panels, the developer must either (a) build new mutation helpers that touch the top-level config, or (b) misuse `updateWorkingScreen` / `handlePropertyChange` for top-level mutations — which will target the wrong path and no-op or corrupt screen data.
+If the audit capture layer fires on ALL database operations (via an overly broad trigger, or an application-layer service wrapper that logs every Supabase call), querying the audit log itself generates new audit rows. Viewing 100 rows creates 100 new rows. The admin panel page load doubles the table size on every visit.
 
 **Why it happens:**
-The editor was built exclusively for section-level editing. Dashboard-level config (`sidebar`, `header`) was added to the BlueprintConfig schema in v1.3 but no editor UI or mutation path was wired up — those fields are schema-present but editor-absent.
+A trigger defined too broadly (`FOR EACH STATEMENT` on all operations including SELECT, or on all tables), or an application-level `auditService` wrapper that intercepts every service call including reads from the audit table itself.
 
 **How to avoid:**
-Add dedicated helpers before building any property panels:
-
-```typescript
-function updateWorkingConfig(updater: (config: BlueprintConfig) => BlueprintConfig) {
-  setWorkingConfig((prev) => {
-    if (!prev) return prev
-    return updater(prev)
-  })
-  setEditMode((prev) => ({ ...prev, dirty: true }))
-}
-
-function updateWorkingSidebar(patch: Partial<SidebarConfig>) {
-  updateWorkingConfig((cfg) => ({ ...cfg, sidebar: { ...cfg.sidebar, ...patch } }))
-}
-
-function updateWorkingHeader(patch: Partial<HeaderConfig>) {
-  updateWorkingConfig((cfg) => ({ ...cfg, header: { ...cfg.header, ...patch } }))
-}
-```
-
-Follow the same pattern as `updateWorkingScreen`: functional update, always sets `dirty: true`.
+- Triggers must fire only on `INSERT`, `UPDATE`, `DELETE` — PostgreSQL does not support AFTER SELECT triggers natively; any workaround using a wrapper function must explicitly exclude the `audit_logs` table.
+- In the application layer: `auditService.log(...)` must be a leaf node — it only writes, never reads in a way that triggers further writes.
+- The admin panel log viewer reads directly from Supabase with no audit side effect.
+- If "admin viewed audit log" is ever desired as a meta-audit event, write it as an explicit deliberate call — not as a side effect of the read.
+- Add the audit_logs table to an explicit exclusion list in any catch-all trigger or service wrapper.
 
 **Warning signs:**
-- A sidebar property panel that calls `handlePropertyChange` — that function expects `editMode.selectedSection.rowIndex/cellIndex` and will no-op or throw for dashboard-level changes
-- `dirty` flag not set after a sidebar/header edit
-- Config saved to Supabase shows `sidebar: undefined` or `header: undefined` despite edits
+- Audit log row count doubling after admin panel page load.
+- An `auditService` wrapper that intercepts all Supabase client calls (including `from('audit_logs').select(...)`).
+- A trigger defined as `FOR EACH ROW ON audit_logs AFTER INSERT` that calls back into audit_logs.
 
-**Phase to address:**
-Header editor phase and sidebar editor phase — add the missing mutation helpers as the first task, before building any property panels.
+**Phase to address:** Trigger definition phase and service layer design — exclude audit_logs from any catch-all wrapper before writing a single capture line.
 
 ---
 
-### Pitfall 4: Zod Schema Strips Unknown Fields Silently — New Config Fields Lost on Save
+### Pitfall 4: Missing Events on Error Paths
 
 **What goes wrong:**
-`saveBlueprint` calls `BlueprintConfigSchema.parse(config)` (blueprint-store.ts line 85) before writing to Supabase. Zod strips unknown keys by default. `HeaderConfigSchema` has `.passthrough()` to preserve forward-compat fields (line 76 of blueprint-schema.ts), but `SidebarConfigSchema` does not. If any new sidebar widget field (e.g., `widgets`, `showSearch`, `showWorkspaceSwitcher`) is added to the `SidebarConfig` TypeScript type but not to `SidebarConfigSchema`, the field will be silently stripped during save — the user configures the sidebar, clicks Salvar, and the data disappears on the next page load.
+An operation fails mid-way (e.g., task update saves to Supabase but the audit insert fails with a network error), or the audit log call is placed only on the success path. The operation happened but leaves no audit trail. Conversely, if the audit INSERT is inside the same Supabase transaction as the operation, and the operation is rolled back, the audit row rolls back too — the attempted-but-failed operation vanishes from the record entirely.
 
 **Why it happens:**
-`types/blueprint.ts` (TypeScript types) and `lib/blueprint-schema.ts` (Zod validation) are maintained separately. It is easy to update the TypeScript type for autocomplete and forget to update the Zod schema. Zod strips silently — there is no warning, no error, and the save returns `{ success: true }`.
+- Audit call placed only in the success branch: `if (!error) await auditLog(...)`.
+- Exception in audit insert silently swallowed: `try { await audit() } catch { /* ignore */ }`.
+- Trigger-based logging is semantically correct for "what committed" but records nothing about "what was attempted."
 
 **How to avoid:**
-Every new field added to `SidebarConfig`, `HeaderConfig`, or any nested config type must be added to both `types/blueprint.ts` and `lib/blueprint-schema.ts` in the same commit. Use a task checklist: "Updated TypeScript type? Updated Zod schema? Added round-trip test?". If adding optional dashboard-level config fields that may grow, add `.passthrough()` to `SidebarConfigSchema`. Write a test in `blueprint-schema.test.ts` that round-trips the new field: `expect(BlueprintConfigSchema.parse({ ...config, sidebar: { footer: 'v1', widgets: [...] } })).toMatchObject({ sidebar: { widgets: [...] } })`.
+- Decide the audit model upfront — "what committed" (triggers, simpler) vs. "what was attempted" (application layer with separate transaction). For v11.0, "what committed" via triggers is sufficient and correct.
+- Application-layer audit calls must use `try/catch` that reports to Sentry on failure but does NOT re-throw — a failed audit insert must never block the user-facing operation.
+- Place audit calls in a `finally` block pattern or after-settlement, not only in the success branch.
+- If trigger-based, document explicitly: "audit trail covers committed operations only; failed/rolled-back attempts are not captured."
 
 **Warning signs:**
-- New sidebar widget config saves successfully (no error, no toast) but fields are `undefined` after reload
-- `console.log(validated)` inside `saveBlueprint` shows missing fields that existed in the input `config` argument
-- A TypeScript type has a field with no corresponding Zod schema entry
+- Audit call inside an `if (!error)` block with no corresponding call in the error branch.
+- No audit row exists for a known-failed operation when testing error scenarios.
+- `try/catch` around audit call that swallows errors with an empty catch block.
 
-**Phase to address:**
-Any phase that extends the schema. Run `blueprint-schema.test.ts` after every schema change before considering the phase complete.
+**Phase to address:** Capture strategy phase — the trigger-vs-application-layer decision must be made before writing any capture code.
 
 ---
 
-### Pitfall 5: Header Props Are Schema-Present But Render-Absent in WireframeHeader
+### Pitfall 5: Missing Indexes Causing Admin Panel Query Timeouts
 
 **What goes wrong:**
-`HeaderConfig` has `showPeriodSelector`, `showUserIndicator`, and `actions.{manage, share, export}` in both the TypeScript type and the Zod schema. However, `WireframeHeader.tsx` currently only reads `showLogo` from props. `showPeriodSelector`, `showUserIndicator`, and all `actions.*` fields are passed through to `WireframeViewer` and read from `activeConfig.header`, but `WireframeViewer` passes only `showLogo` to `WireframeHeader` (line 958–961). If a header property panel is built that lets operators toggle `showPeriodSelector: false`, the change will persist to Supabase correctly — but nothing will change visually, because the header never reads that field.
+The audit_logs table has no indexes at creation. Early on, with < 1k rows, all queries are fast. After 3 months of moderate usage, the admin panel log page (which queries by org_id ordered by created_at DESC) does a full table scan. At 100k rows, the query takes 2-3 seconds. At 1M rows, it times out.
 
 **Why it happens:**
-`SidebarConfig` and `HeaderConfig` were added to the schema as stubs in v1.3 with the intent of wiring them up in a future milestone. The schema was designed ahead of the render implementation. The fields are present in the data layer but the presentation layer has not caught up.
+"We'll add indexes later" — the table starts small and the problem is invisible until it isn't. Adding indexes to a large live table requires `CREATE INDEX CONCURRENTLY` and careful planning to avoid locking.
 
 **How to avoid:**
-Before building the header property panel, wire up all header fields in `WireframeHeader.tsx`. Specifically:
-- `showPeriodSelector` should show/hide the period selector in the center column
-- `showUserIndicator` should show/hide the user chip on the right
-- `actions.manage` / `actions.share` / `actions.export` should show/hide the corresponding action buttons
-
-Only after the render is wired should a property panel be built — otherwise the header editor "works" but has no visible effect, which is misleading.
+- Add all required indexes in the same migration that creates the table:
+  - `CREATE INDEX ON audit_logs (org_id, created_at DESC)` — primary admin panel query pattern
+  - `CREATE INDEX ON audit_logs (actor_id, created_at DESC)` — "who did what" queries
+  - `CREATE INDEX ON audit_logs (resource_type, resource_id)` — "history of this record" queries
+- Use `BRIN` index on `created_at` as a secondary option for very large time-range scans.
+- Run `EXPLAIN ANALYZE` on the admin panel query before shipping the UI phase.
+- Add `LIMIT` enforcement on all queries from the admin panel — never unbounded SELECT on audit_logs.
 
 **Warning signs:**
-- A header property panel ships but toggling `showPeriodSelector` produces no visual change
-- `WireframeHeader` props only include `title`, `logoUrl`, `brandLabel`, `showLogo` — the other HeaderConfig fields are never passed as props
-- Header editor is "completed" without a browser visual test confirming each toggle affects the render
+- audit_logs migration creates the table but no `CREATE INDEX` statements follow.
+- Admin panel query running `Seq Scan` on audit_logs (visible in Supabase query analyzer).
+- Page load > 500ms on a table with < 10k rows.
 
-**Phase to address:**
-Header editor phase — wire render before building the editor.
+**Phase to address:** Migration phase — indexes must be in the initial migration, not added later.
 
 ---
 
-### Pitfall 6: Schema Version Not Bumped for Structurally Breaking Changes
+### Pitfall 6: Migration Risk — Adding Triggers to Live Production Tables
 
 **What goes wrong:**
-`CURRENT_SCHEMA_VERSION = 1` (blueprint-migrations.ts). The migration chain has a single `v0 → v1` migrator. If new sidebar widget fields are added as non-optional (`z.string()` instead of `z.string().optional()`), all existing blueprints stored in Supabase — including the pilot `financeiro-conta-azul` — will fail `BlueprintConfigSchema.safeParse()` on load. `loadBlueprint` returns `null` when safeParse fails (line 67–69 of blueprint-store.ts). The wireframe viewer shows "Nenhum blueprint encontrado para este cliente" for every existing client immediately after the change is deployed.
+Adding an `AFTER INSERT OR UPDATE OR DELETE` trigger to existing production tables (tasks, blueprint_configs, comments) via migration 025+ works correctly in isolation. The risk is: if the migration also includes a DDL change to those tables (e.g., adding a `NOT NULL` column without `DEFAULT`), it locks the table during migration and blocks all writes. On Supabase free/pro tiers, this can cause a timeout that leaves the migration partially applied and the table in a broken state.
 
 **Why it happens:**
-Adding schema fields feels like a safe additive change. The risk is invisible until the stored record is validated against the new schema. There is no CI test that validates the actual stored blueprint shape against the schema before deployment.
+Combining trigger creation with table alteration in a single migration. Postgres table rewrites happen synchronously and hold an `ACCESS EXCLUSIVE` lock for the duration.
 
 **How to avoid:**
-Two rules:
-1. Every new schema field must be `.optional()` unless a migrator is written and `CURRENT_SCHEMA_VERSION` is bumped.
-2. Before merging any schema change, run `BlueprintConfigSchema.safeParse(existingBlueprint)` against the actual shape of the stored `financeiro-conta-azul` blueprint. The easiest way: copy the stored JSON from Supabase and add a test case in `blueprint-schema.test.ts`.
+- Keep the audit_logs migration purely additive: CREATE TABLE + CREATE TRIGGER. Do not ALTER existing tables in the same migration.
+- Triggers added to existing tables are additive (no table rewrite, no lock) — safe.
+- If a column must be added to existing tables: use `DEFAULT` value or nullable column, separate migration, off-peak deploy.
+- Use `CREATE OR REPLACE TRIGGER` (idempotent) and `CREATE INDEX CONCURRENTLY IF NOT EXISTS`.
+- Test the migration against a local Supabase instance with the full 24-migration chain before deploying to production.
+- Document in the migration comment: `-- covers committed operations from: [deploy date]`. This is the known audit coverage gap.
 
 **Warning signs:**
-- `loadBlueprint` returning `null` for `financeiro-conta-azul` after a schema change
-- Zod error messages mentioning a new field as `Required` at a path in a stored config
-- `blueprint-schema.test.ts` passes on newly constructed test objects but no test covers the stored shape
+- Migration that ALTERs existing tables (tasks, comments, documents) in the same statement block as trigger creation.
+- `NOT NULL` column added without `DEFAULT` on a table with existing rows.
+- No test of the migration against local Supabase before production deploy.
 
-**Phase to address:**
-Any phase that extends `BlueprintConfigSchema`, `SidebarConfigSchema`, or `HeaderConfigSchema`.
+**Phase to address:** Migration review — the migration author must explicitly inspect all DDL for table locks before the final SQL is written.
 
 ---
 
-### Pitfall 7: Filter Bar Sticky Positioning Broken by Container Overflow Changes
+### Pitfall 7: Authenticated Users Can Delete Their Own Audit Rows
 
 **What goes wrong:**
-`WireframeFilterBar` uses `position: sticky, top: 0, zIndex: 9` to stick inside the scrolling area. Its `top: 0` is relative to the nearest ancestor with `overflow-y: auto` — currently the `<div style={{ flex: 1, overflowY: 'auto', padding: '12px 32px 32px' }}` wrapping `BlueprintRenderer` in `WireframeViewer` (line 984–986). If the filter bar editor adds a new wrapping element around `BlueprintRenderer` (e.g., a container div for the editor overlay, a panel wrapper), and that wrapper has any `overflow` property set, the sticky context breaks: the filter bar either stops sticking or sticks to the wrong ancestor.
+If the RLS DELETE policy on audit_logs follows the standard Nexo pattern (`FOR ALL TO anon, authenticated USING (org_id = ...)`), any operator in a tenant can delete their own trace from the audit log. The audit trail becomes untrustworthy.
 
 **Why it happens:**
-CSS sticky positioning is context-sensitive. Any intermediate `overflow` value (including `overflow: hidden` set as part of a layout fix) creates a new scroll container, invalidating the sticky behavior of descendants. This is a known CSS gotcha that is easy to introduce accidentally when adding layout chrome.
+Standard Nexo tables grant authenticated users full CRUD via RLS. Copying this pattern to audit_logs is a logic error — audit data is append-only by design.
 
 **How to avoid:**
-When adding editor overlay elements around `BlueprintRenderer`, verify that no new ancestor gains `overflow: hidden`, `overflow: auto`, or `overflow: scroll`. If an editor panel wrapper is needed, use `position: absolute` or `position: fixed` layering rather than a block-level wrapper with overflow. After any layout change, test the filter bar by scrolling the content area and confirming the bar sticks.
+- No DELETE policy on audit_logs for any non-super_admin role.
+- No UPDATE policy on audit_logs for any role.
+- Super admin can trigger deletion only via a dedicated edge function with its own audit trail (log the deletion of logs).
+- Enforce at Postgres level: `REVOKE UPDATE, DELETE ON audit_logs FROM authenticated, anon`.
+- If LGPD data subject deletion requires removing audit rows, it must go through a controlled edge function with explicit justification, not a direct SQL call.
 
 **Warning signs:**
-- Filter bar scrolls away with content after adding a wrapper element
-- `position: sticky` visually stops working after a layout change
-- A wrapper element has `overflow: hidden` added as part of a layout constraint fix
+- Migration that creates an UPDATE or DELETE policy on audit_logs for the authenticated role.
+- Service layer that calls `.delete()` directly on the Supabase client against audit_logs.
+- No explicit REVOKE statement in the migration.
 
-**Phase to address:**
-Filter bar editor phase — after any layout changes, visual sticky test before considering the phase done.
+**Phase to address:** Migration phase — include REVOKE explicitly and document the intent inline.
+
+---
+
+### Pitfall 8: Client-Supplied or Ambiguous Timestamps
+
+**What goes wrong:**
+If the audit INSERT accepts a `timestamp` or `occurred_at` field from the client request payload, an actor can manipulate when an event appears to have occurred. More commonly: the React SPA generates a timestamp using `new Date()` (browser clock), which may be skewed by minutes on some devices. In the admin panel UI, displaying timestamps with `toLocaleString()` without a timezone parameter shows times 3 hours ahead of local time for operators in Brazil (UTC-3), causing confusion about "when did this happen."
+
+**Why it happens:**
+- Client-side timestamp generation is easier than relying on server DEFAULT.
+- `toLocaleString()` without timezone uses the browser's local timezone, which varies.
+
+**How to avoid:**
+- Always store timestamps as `TIMESTAMPTZ DEFAULT now()` — server clock, never client-provided.
+- Never accept a `timestamp` field from the client payload for audit_logs inserts (trigger-based logging inherits server clock automatically; edge function logging must explicitly exclude client-supplied timestamps).
+- In the React UI: use `Intl.DateTimeFormat` with `timeZone: 'America/Sao_Paulo'` — Nexo's operator base is in Brazil.
+- For correlating with Clerk JWT `iat` claims: normalize to milliseconds since epoch for comparison, not string comparison.
+
+**Warning signs:**
+- Any audit INSERT from a client React service that includes `timestamp` or `created_at` in the payload.
+- UI rendering timestamps with `.toLocaleString()` without a timezone parameter.
+- Admin panel showing audit events consistently 3 hours off from expected local time.
+
+**Phase to address:** Migration phase (TIMESTAMPTZ DEFAULT now()) + UI rendering phase (explicit timezone via Intl.DateTimeFormat).
+
+---
+
+### Pitfall 9: Edge Function Using Wrong Supabase Client Key
+
+**What goes wrong:**
+Edge functions that write to audit_logs need the service-role key to bypass RLS. If the edge function is initialized with `VITE_SUPABASE_PUBLISHABLE_KEY` (frontend env var, unavailable in Deno) or with the anon key, audit inserts either fail with 403 (if RLS is strict) or succeed with incorrect org_id context (if RLS is permissive). This is a variant of Nexo PITFALLS.md rule #2.
+
+**Why it happens:**
+Copy-paste from frontend service initialization code into edge function code. In the frontend, the anon key is correct. In a Deno edge function, `VITE_*` env vars do not exist — Deno reads from `Deno.env.get()` with Supabase-injected secrets.
+
+**How to avoid:**
+- Edge functions writing to audit_logs must use `SUPABASE_SERVICE_ROLE_KEY` (auto-injected by Supabase Edge Functions runtime, no manual secret needed).
+- Add an assertion at function startup: `if (!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')) throw new Error('Missing service role key')`.
+- The `org_id` written to audit_logs must come from the server-verified JWT claim — never from `req.body.org_id` (tenant spoofing prevention).
+- All new audit edge functions follow the same deploy pattern as existing admin edge functions: `verify_jwt: false`, deploy immediately, verify via `mcp__supabase__list_edge_functions`.
+
+**Warning signs:**
+- Edge function audit insert returning 403.
+- Edge function source containing `VITE_SUPABASE_*` env var references.
+- `org_id` in audit INSERT derived from request body rather than decoded JWT.
+
+**Phase to address:** Edge function implementation phase — mandatory code review check before deploy.
+
+---
+
+### Pitfall 10: Storage Growth Without a Retention Plan
+
+**What goes wrong:**
+Audit logs are write-only and never expire by default. After 6 months of moderate usage the table can hold millions of rows. Supabase free/pro tiers have database size limits. Full table scans (even with indexes, if the org has a large log volume) slow admin queries. There is no built-in Supabase mechanism to auto-purge rows.
+
+**Why it happens:**
+"We'll deal with it later" is the default. Retention is deferred until the table is already large and pruning becomes a production risk — bulk DELETE on a large live table holds locks and can cause query timeouts.
+
+**How to avoid:**
+- Design the schema with retention in mind from the start: include a `retained_until TIMESTAMPTZ` column or equivalent, even if the pruning job isn't built in phase 1. This avoids a schema migration later.
+- Plan a `pg_cron` job (available in Supabase) or a scheduled edge function to delete rows older than 365 days. Document this as a required infra task even if deferred to v12.
+- For LGPD compliance: shorter retention may be required for certain action types (e.g., auth events: 90 days). Design for per-action-type retention from the start.
+- Monitor table size via Supabase dashboard after deploy.
+
+**Warning signs:**
+- Schema has no `retained_until` or equivalent column.
+- No pg_cron job or scheduled function planned.
+- Supabase database size growing > 10% per week after audit deploy.
+
+**Phase to address:** Migration phase (schema includes retention metadata) + post-launch infra phase (pg_cron job or scheduled function).
 
 ---
 
 ## Technical Debt Patterns
 
+Shortcuts that seem reasonable but create long-term problems.
+
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Updating TypeScript type for new sidebar field but not Zod schema | Autocomplete works, no tsc errors | Zod strips the field on save; silent data loss; discovered only after a reload | Never — always update both files in the same commit |
-| Reusing `FilterConfigForm` for the screen-level filter bar editor | Single form, less code | filterType enums diverge; users can set invalid filterType values; Zod rejects the save | Never — these are distinct data paths, build a separate form |
-| Sidebar widget state kept in local component state (not in workingConfig) | Faster to build | Widget config lost on screen navigation or page reload; not persisted to Supabase | Never — all persistent widget config must round-trip through workingConfig → save → load |
-| Adding sidebar widget rendering inline to WireframeViewer without extracting to a component | Avoids refactor complexity | WireframeViewer grows past 1200 LOC; sidebar logic is impossible to test in isolation | Acceptable for v2.2 if scope is limited; plan extraction in next milestone |
-| Not wiring header fields to render before building header property panel | Editor ships faster | Header property panel "works" but produces no visible change; misleading to operators | Never — wire render before building editor |
+| `metadata: { ...fullRow }` — serialize the whole record | Zero metadata design effort | PII exposure; LGPD deletion requests break immutability; storage bloat | Never |
+| Copy anon-permissive RLS from tasks to audit_logs | Faster migration | Cross-tenant data leak; no compliance basis | Never |
+| Skip indexes at table creation, add later | Faster initial migration | Adding index to large live table requires CONCURRENTLY and careful timing; admin queries time out in the interim | Never — add indexes in the creation migration |
+| Client-generated timestamps in audit payload | No edge function needed | Clock skew, tamper risk, browser time manipulation | Never |
+| No retention policy | Zero upfront effort | Table bloat, DB size limits hit, bulk DELETE on large live table causes lock escalation | Only if table provably stays < 50k rows forever |
+| `FOR EACH STATEMENT` trigger on all operations | Simpler trigger definition | Circular logging, write amplification, SELECT triggers | Never — use `FOR EACH ROW` on INSERT/UPDATE/DELETE only |
+| Store `actor_email` instead of `actor_id` | Human-readable logs without a join | PII in audit table; email changes invalidate historical attribution; LGPD deletion required | Never — store UUID, resolve display name at render time |
 
 ---
 
 ## Integration Gotchas
 
+Common mistakes when connecting to external services in the Nexo context.
+
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Supabase blueprint save | New TypeScript type field not in Zod schema; Zod strips it silently | Update both `types/blueprint.ts` and `lib/blueprint-schema.ts` in same commit; add round-trip test |
-| Optimistic locking | Adding a secondary "save sidebar" button that calls `saveBlueprint` independently | All edits flow into `workingConfig` via mutation helpers; single AdminToolbar save button |
-| WireframeHeader | Assuming `showPeriodSelector`, `showUserIndicator`, `actions.*` are wired to render | They are not — only `showLogo` is read; wire the remaining fields before building the header editor |
-| FilterOption vs FilterConfigSection | Building the sticky filter bar editor using `FilterConfigForm` or targeting `filter-config` section | Screen-level filter bar edits `screen.filters[]` (FilterOption type, 5-variant filterType); section-level `filter-config` blocks are separate |
-| Zod schema + .passthrough() | Forgetting `.passthrough()` on new schema objects for forward-compat | `HeaderConfigSchema` already uses `.passthrough()`; add it to `SidebarConfigSchema` if new widget fields may grow beyond v2.2 |
+| Supabase client in Deno edge function | Using `VITE_SUPABASE_PUBLISHABLE_KEY` (frontend var, unavailable in Deno) | Use `SUPABASE_SERVICE_ROLE_KEY` auto-injected by Supabase Edge Functions runtime |
+| Clerk JWT in audit context | Reading org_id from client request body | Decode the Authorization header JWT in the edge function and read `org_id` from the verified payload |
+| Supabase triggers | `FOR EACH STATEMENT` produces one row per SQL statement, not per affected row | Use `FOR EACH ROW` to capture individual row data via `NEW` and `OLD` records |
+| Edge function redeploy | Redeploying an audit function without `verify_jwt: false` causes Clerk token rejection (see PITFALLS.md rule #9) | All Nexo edge functions that accept Clerk tokens must use `verify_jwt: false`; verify after every redeploy |
+| pg_cron for retention | Creating a cron job in migration without verifying pg_cron is enabled in the Supabase project | Check `SELECT * FROM pg_extension WHERE extname = 'pg_cron'` before migration; use scheduled edge function as fallback |
 
 ---
 
 ## Performance Traps
 
+Patterns that work at small scale but fail as usage grows.
+
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| `partitionScreensByGroups` called twice per render | Doubled computation on every re-render | Call once, store in a local const; memoize with `useMemo` | Already present at WireframeViewer lines 897–898; visible above ~20 screens |
-| Full `structuredClone(config)` on every `workingConfig` mutation | Slow edit mode with large blueprints | Accept for v2.2 (blueprint is small); plan for incremental patch approach if blueprints grow | Noticeable above ~50 screens with deep section data |
-| Sidebar widget with per-widget local state that resets on screen navigation | Widget config disappears when user navigates between screens | Lift widget state into `workingConfig.sidebar` or `WireframeViewer` state; never keep persistent config in component-local `useState` | Immediately visible on first screen navigation after configuring a widget |
-| Filter bar editor opening a PropertyPanel drawer for a non-section entity | Right-sheet panel appears, user configures filter bar, PropertyPanel's `section` prop is null causing the form to render nothing | Render filter bar editor through a dedicated panel component, not through `PropertyPanel` which expects a `BlueprintSection | null` | Immediately visible — PropertyPanel only renders when `section` is non-null |
+| No index on `(org_id, created_at DESC)` | Admin panel log page slow; Supabase reports Seq Scan | Add composite index in the same migration that creates the table | > 50k rows |
+| Querying audit_logs without `org_id` filter | Full table scan across all tenants' data | RLS forces org_id filter; also add it explicitly in the service layer query | > 10k rows |
+| Unbounded SELECT — no LIMIT on log viewer queries | Large payload on each page load, potential timeout | Enforce pagination with LIMIT/OFFSET or cursor; max 100 rows per request | > 1k rows returned |
+| Fetching all columns including metadata JSONB for list view | Large payload for each page of results | SELECT only display columns (actor_id, action, resource_type, created_at); fetch metadata only on row expand | > 5k rows |
+| Synchronous trigger audit in high-frequency write path | Perceived latency on every write operation | Acceptable for v11 scale; for high-frequency future ops, consider async queue pattern | > 100 writes/second |
+
+---
+
+## Security Mistakes
+
+Domain-specific security issues beyond general web security.
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Grant DELETE to authenticated role on audit_logs | Operator erases their own trail; audit becomes untrustworthy | `REVOKE DELETE ON audit_logs FROM authenticated, anon` explicitly in migration |
+| `org_id` taken from client request body | Tenant spoofing: actor logs an event under a different org | Always derive org_id from server-verified JWT claim, never from client payload |
+| Metadata includes full record before/after | PII exposure in audit storage; LGPD deletion conflicts with immutability | Define and enforce metadata allowlist per action type |
+| No rate limit on audit log export | Exfiltration of entire tenant audit history | Pagination limit (max 1000 rows per request); require explicit date range on export calls |
+| Super admin reads all tenants' raw audit data via direct Supabase query with no context | No legitimate cross-tenant read except via admin impersonation flow | Admin panel must use existing ImpersonationContext to scope queries; super admin RLS bypass is for the admin panel UI only, not arbitrary queries |
 
 ---
 
 ## UX Pitfalls
 
+Common user experience mistakes in audit log admin interfaces.
+
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Filter bar not selectable in edit mode (no EditableSectionWrapper around it) | Operator in edit mode cannot click the filter bar to open an editor | Add an explicit "Edit Filter Bar" affordance in edit mode — either a click target on the filter bar itself, or a dedicated button in AdminToolbar |
-| Sidebar editor opening in the right-side PropertyPanel drawer | Spatial dissonance — user edits left sidebar from a right panel | Prefer inline sidebar editing or a top/centered modal for sidebar config; right-sheet works for section properties that appear in the main content area |
-| Saving a header change also discards unsaved section property panel edits | User thinks they only toggled `showLogo` but any section panel edits are bundled into the same save | This is actually correct behavior with the single-save pattern; becomes a problem only if parallel save paths are introduced |
-| Sidebar footer hardcoded to "Desenvolvido por FXL" when `sidebar.footer` is undefined | Operators who want to customize the footer text have no editor for it | Include `footer` text field in the sidebar config editor; it is already read from `activeConfig.sidebar.footer` (line 939 of WireframeViewer) |
+| Displaying raw action codes (`TASK_STATUS_CHANGED`) | Non-technical operators cannot parse the log | Display human-readable descriptions: "Status changed from In Progress to Done" |
+| Timestamps displayed in UTC without conversion | Operators see times 3 hours off from local time (Brazil UTC-3) | Display in `America/Sao_Paulo` with UTC offset indicator |
+| No filter controls — only full chronological list | Useless for compliance queries ("all logins for user X last month") | Minimum: filter by actor, action type, resource type, and date range |
+| Metadata collapsed with no expand | Inspector cannot see what changed without querying DB directly | Expandable row with formatted metadata diff view |
+| Log viewer itself generates audit events on load | Circular logging (see Pitfall 3); table grows on every admin visit | Read path must never trigger writes to audit_logs |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Header fields wired to render:** After header editor phase, toggle each field (`showPeriodSelector: false`, `showUserIndicator: false`, `actions.export: true`) and confirm the change is visible in `WireframeHeader` in the browser — not just stored in the schema.
-- [ ] **Sidebar footer editable:** A sidebar config editor that omits the `footer` field will leave it permanently showing the hardcoded fallback. Verify `footer` is included in the sidebar editor form.
-- [ ] **FilterOption round-trip through Zod:** After saving a screen with `filterType: 'multi-select'` in `screen.filters[]`, reload the page and confirm the filter bar still shows the multi-select control. Silent Zod stripping is invisible until reload.
-- [ ] **Sidebar groups editor affects render:** If a sidebar groups editor writes to `workingConfig.sidebar.groups`, reload and confirm `partitionScreensByGroups` renders the correct group headings and screen assignments.
-- [ ] **WireframeSidebar.tsx not confused with inline sidebar:** After the sidebar widgets phase, search for any new imports of `WireframeSidebar` in `WireframeViewer.tsx` — there must be none.
-- [ ] **Schema migration coverage:** After any `BlueprintConfigSchema` change, run `blueprint-schema.test.ts` with the actual stored `financeiro-conta-azul` blueprint shape as a test case. The parse must succeed without a migration.
-- [ ] **Filter bar editor targets `screen.filters[]`:** After implementing the filter bar editor, inspect `workingConfig.screens[0].filters` in React DevTools — must show updated `FilterOption[]`, not updated `BlueprintSection[]`.
-- [ ] **No new parallel save paths:** After all editor phases, search for `saveBlueprint` call sites in the codebase — must be exactly one call site in `WireframeViewer.handleSave`.
+Things that appear complete but are missing critical pieces.
+
+- [ ] **RLS policy audit:** Run `SELECT * FROM pg_policies WHERE tablename = 'audit_logs'` — confirm no policy exists with `TO anon` or `USING (true)` for SELECT.
+- [ ] **Tamper protection verified:** Run `SELECT has_table_privilege('authenticated', 'audit_logs', 'DELETE')` — must return `false`.
+- [ ] **Trigger scope confirmed:** Trigger fires on DELETE as well as INSERT/UPDATE — verify with `SELECT * FROM pg_triggers WHERE tgrelid = 'tasks'::regclass`.
+- [ ] **Metadata PII review:** Metadata spec written and reviewed — verify no action type logs a full record object or email address.
+- [ ] **Retention field exists:** `retained_until` or equivalent column present in schema even if pruning job is deferred.
+- [ ] **Timezone handling correct:** Admin panel displays timestamps in `America/Sao_Paulo` — manual test with a known UTC timestamp.
+- [ ] **Edge function key verified:** Audit edge function uses `SUPABASE_SERVICE_ROLE_KEY` — grep for `VITE_SUPABASE` in function source (must return zero matches).
+- [ ] **Circular logging excluded:** audit_logs table is explicitly excluded from any catch-all trigger or service wrapper — manual test: load admin log page, verify row count does not increase.
+- [ ] **Indexes created:** Run `\d audit_logs` — confirm `(org_id, created_at DESC)` composite index exists.
+- [ ] **Error path coverage:** Audit call present in failure branches — grep for `auditLog(` next to early returns and catch blocks.
 
 ---
 
 ## Recovery Strategies
 
+When pitfalls occur despite prevention, how to recover.
+
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Zod strips new sidebar widget fields on save | HIGH | Add field to `SidebarConfigSchema` with `.optional()`; re-enter data manually (no recovery from Supabase after a save stripped it) |
-| Schema version not bumped — existing blueprints return null on load | MEDIUM | Add migrator `v1 → v2` that sets new fields to defaults; bump `CURRENT_SCHEMA_VERSION`; test against the stored `financeiro-conta-azul` shape |
-| Sidebar widget code in `WireframeSidebar.tsx` (wrong rendering site) | LOW | Move code to the inline sidebar block in `WireframeViewer` or to an extracted component; no data impact |
-| Parallel save path introduced — optimistic locking conflicts appear within same session | MEDIUM | Remove secondary save button; redirect all mutations through `workingConfig`; confirm single `saveBlueprint` call site |
-| FilterType enum mismatch causes save failures for screen-level filters | MEDIUM | Confirm `FilterOptionSchema` already has the 5-variant set (it does); ensure filter bar editor writes to `screen.filters[]`, not `filter-config.filters[]` |
-| Header props not wired to render — editor has no visible effect | LOW | Wire missing props in `WireframeHeader.tsx`; visual-only fix, no data migration needed |
-| Sticky filter bar stops sticking after layout change | LOW | Remove `overflow` property from any new ancestor wrapper element; test sticky behavior in the scroll container |
+| Cross-tenant leak via anon RLS | HIGH | Drop permissive policy immediately; add org-scoped policy; audit what was exposed; notify affected tenants per LGPD breach notification rules (72h window) |
+| PII in metadata discovered post-deploy | MEDIUM | Migration to NULLIFY or truncate metadata JSONB fields matching PII patterns; update allowlist; document in security log |
+| Circular logging detected (table growing exponentially) | MEDIUM | Drop the offending trigger or wrapper immediately; bulk-delete circular rows (identify by action matching internal audit actions); redeploy with corrected scope |
+| Missing events on error paths | LOW-MEDIUM | Add application-layer catch-all for failed operations; accept the historical gap; document audit coverage start date in STATE.md |
+| No retention policy and table approaching size limit | HIGH | Add `pg_cron` job with aggressive initial cleanup (delete rows > 180 days); use batch deletion (1000 rows at a time) to avoid lock escalation on large table |
+| Actor email stored as PII in actor column | MEDIUM | Migration to nullify or hash email column; add actor_id UUID reference; update display layer to resolve name from Clerk at render time |
+| Trigger added without testing against migration chain | MEDIUM | Drop trigger, fix migration, re-run full migration chain on local Supabase, verify before re-deploying to production |
 
 ---
 
 ## Pitfall-to-Phase Mapping
 
+How roadmap phases should address these pitfalls.
+
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| FilterType enum divergence | Filter bar editor phase | Save a `screen.filters[]` entry with `filterType: 'multi-select'`; confirm Zod accepts it and filter bar renders a multi-select control after reload |
-| WireframeSidebar ghost component | Sidebar widgets phase — day one | Grep for `WireframeSidebar` imports in `WireframeViewer.tsx`; must be zero |
-| Missing workingConfig mutation helpers | Header editor phase + sidebar editor phase | Trace an edit from property panel `onChange` through `updateWorkingSidebar` or `updateWorkingHeader` to `dirty: true` in React DevTools |
-| Zod schema/TypeScript type divergence | Any schema extension phase | Round-trip test: config with new fields → `BlueprintConfigSchema.parse()` → confirm fields survive; run before and after each schema extension |
-| Header fields dead (schema present, render absent) | Header editor phase | Browser visual test: set `showPeriodSelector: false`, reload, confirm period selector absent in `WireframeHeader` |
-| Optimistic locking conflict from parallel saves | All editor phases | Single search for `saveBlueprint` call sites — exactly one must exist |
-| Schema version not bumped for breaking changes | Any schema extension phase | Run `BlueprintConfigSchema.safeParse` against the stored `financeiro-conta-azul` JSON before and after each schema change |
-| Filter bar sticky positioning broken | Filter bar editor phase | Scroll test in the main content area after any layout changes — confirm filter bar sticks at top |
-| Filter bar editor targeting wrong data path | Filter bar editor phase | React DevTools inspection of `workingConfig.screens[0].filters` after using the editor — must show updated `FilterOption[]` |
+| Anon-permissive RLS on audit_logs | Schema/Migration phase | `SELECT * FROM pg_policies WHERE tablename = 'audit_logs'` — no anon SELECT |
+| PII in metadata JSONB | Design phase (metadata spec before code) | Metadata allowlist document reviewed; no action type logs full record |
+| Circular logging | Capture layer design phase | Manual test: admin log page load does not increase row count |
+| Missing events on error paths | Capture strategy phase | Forced Supabase error test — verify audit row still created |
+| Missing indexes | Migration phase | `EXPLAIN ANALYZE SELECT ... FROM audit_logs WHERE org_id = '...' ORDER BY created_at DESC LIMIT 50` — index scan confirmed |
+| Migration risk on production tables | Migration review phase | Dry-run on local Supabase with full 24-migration chain; no DDL table locks |
+| Tamper protection | Migration phase | `SELECT has_table_privilege('authenticated', 'audit_logs', 'DELETE')` returns false |
+| Timezone ambiguity | UI rendering phase | Manual test comparing display to known UTC timestamp with -3h offset |
+| Edge function using wrong key | Edge function implementation phase | grep for `VITE_SUPABASE` in edge function source — zero matches |
+| Storage growth / retention | Schema design phase | `retained_until` or equivalent column exists; pg_cron job or scheduled function documented in STATE.md |
 
 ---
 
 ## Sources
 
-- Direct codebase analysis: `tools/wireframe-builder/lib/blueprint-schema.ts` — `FilterOptionSchema` (line 50, 5-variant filterType) vs `FilterConfigSectionSchema` (line 306, 3-variant filterType); `HeaderConfigSchema.passthrough()` (line 76); `SidebarConfigSchema` lacks passthrough
-- Direct codebase analysis: `src/pages/clients/WireframeViewer.tsx` — sidebar rendered inline (lines 764–944); `WireframeSidebar` not imported; `WireframeHeader` called with only `title`, `logoUrl`, `showLogo` (lines 957–961); `partitionScreensByGroups` called twice in same render expression (lines 897–898); `saveBlueprint` called from a single site (`handleSave`)
-- Direct codebase analysis: `tools/wireframe-builder/components/WireframeSidebar.tsx` — minimal 2-prop API (`screens`, `onSelect`), not used in viewer
-- Direct codebase analysis: `tools/wireframe-builder/components/WireframeHeader.tsx` — only `showLogo` prop read; `showPeriodSelector`, `showUserIndicator`, `actions.*` absent from component props and render
-- Direct codebase analysis: `tools/wireframe-builder/lib/blueprint-store.ts` — `BlueprintConfigSchema.parse(config)` (line 85) strips unknown fields; `safeParse` failure returns `null` (lines 67–69)
-- Direct codebase analysis: `tools/wireframe-builder/lib/blueprint-migrations.ts` — `CURRENT_SCHEMA_VERSION = 1`, single `v0 → v1` migrator
-- Direct codebase analysis: `tools/wireframe-builder/components/editor/PropertyPanel.tsx` — renders only when `section: BlueprintSection | null` is non-null; not suitable for non-section editors
-- Direct codebase analysis: `tools/wireframe-builder/components/editor/property-forms/FilterConfigForm.tsx` — operates on `FilterConfigSection.filters[]` (3-variant filterType), separate from screen-level `FilterOption[]`
-- Direct codebase analysis: `tools/wireframe-builder/components/BlueprintRenderer.tsx` — filter bar rendered via `WireframeFilterBar` before the row grid (lines 146–156); filter bar has no `EditableSectionWrapper` equivalent in edit mode
+- [Supabase Auth Audit Logs](https://supabase.com/docs/guides/auth/audit-logs) — official Supabase docs
+- [Supabase Platform Audit Logs](https://supabase.com/docs/guides/security/platform-audit-logs) — official Supabase docs
+- [pganalyze: Postgres Auditing — Triggers vs pgAudit](https://pganalyze.com/blog/5mins-postgres-auditing-pgaudit-supabase-supa-audit) — trigger vs pgAudit tradeoffs, Supabase-specific
+- [Production-Ready Audit Logs in PostgreSQL](https://medium.com/@sehban.alam/lets-build-production-ready-audit-logs-in-postgresql-7125481713d8) — index strategy, patterns
+- [Tamper-Evident Audit Trails with Hash Chaining](https://appmaster.io/blog/tamper-evident-audit-trails-postgresql) — immutability patterns
+- [GDPR Log Management for Engineers](https://last9.io/blog/gdpr-log-management/) — PII in logs, retention obligations, LGPD alignment
+- [Supabase RLS Best Practices (MakerKit)](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices) — multi-tenant RLS patterns
+- [How to Implement Audit Logs in Supabase](https://bootstrapped.app/guide/how-to-implement-audit-logs-in-supabase) — Supabase-specific implementation guide
+- [Postgres Audit Logging Guide (Bytebase)](https://www.bytebase.com/blog/postgres-audit-logging/) — PostgreSQL audit patterns and index strategies
+- Nexo `.planning/PITFALLS.md` rules #2, #5, #9, #11 — existing Supabase/edge function integration pitfalls specific to this codebase
+- Nexo supabase/migrations/ — direct analysis of anon-permissive RLS patterns across migrations 001-024
 
 ---
-*Pitfalls research for: v2.2 — Configurable Layout Components (sidebar widgets, header editor, filter bar editing)*
-*Researched: 2026-03-13*
+*Pitfalls research for: v11.0 — Audit Logging added to existing multi-tenant Supabase system*
+*Researched: 2026-03-19*

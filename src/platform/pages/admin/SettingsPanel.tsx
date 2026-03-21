@@ -17,12 +17,23 @@ function isBooleanSetting(value: string): boolean {
   return value === 'true' || value === 'false'
 }
 
+function validateSettingValue(key: string, value: string): string | null {
+  if (key === 'audit_retention_days') {
+    const num = parseInt(value, 10)
+    if (isNaN(num)) return 'Must be a number'
+    if (num < 30) return 'Minimum 30 days'
+    if (num > 365) return 'Maximum 365 days'
+  }
+  return null
+}
+
 export default function SettingsPanel() {
   const [settings, setSettings] = useState<PlatformSetting[]>([])
   const [editedValues, setEditedValues] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [savingKeys, setSavingKeys] = useState<Set<string>>(new Set())
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
   async function fetchSettings() {
     setLoading(true)
@@ -144,30 +155,43 @@ export default function SettingsPanel() {
                     }
                   />
                 ) : (
-                  <>
-                    <Input
-                      className="h-8 w-32 text-sm"
-                      value={currentValue}
-                      onChange={e =>
-                        setEditedValues(prev => ({
-                          ...prev,
-                          [setting.key]: e.target.value,
-                        }))
-                      }
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={!hasChanged || isSaving}
-                      onClick={() => updateSetting(setting.key, currentValue)}
-                    >
-                      {isSaving ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Save className="h-3.5 w-3.5" />
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        className="h-8 w-32 text-sm"
+                        value={currentValue}
+                        onChange={e => {
+                          const newVal = e.target.value
+                          setEditedValues(prev => ({ ...prev, [setting.key]: newVal }))
+                          const err = validateSettingValue(setting.key, newVal)
+                          setValidationErrors(prev => {
+                            const next = { ...prev }
+                            if (err) next[setting.key] = err
+                            else delete next[setting.key]
+                            return next
+                          })
+                        }}
+                      />
+                      {setting.key === 'audit_retention_days' && (
+                        <span className="text-sm text-slate-500 dark:text-slate-400">dias</span>
                       )}
-                    </Button>
-                  </>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={!hasChanged || isSaving || !!validationErrors[setting.key]}
+                        onClick={() => updateSetting(setting.key, currentValue)}
+                      >
+                        {isSaving ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Save className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                    </div>
+                    {validationErrors[setting.key] && (
+                      <p className="text-xs text-red-500 dark:text-red-400 mt-1">{validationErrors[setting.key]}</p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

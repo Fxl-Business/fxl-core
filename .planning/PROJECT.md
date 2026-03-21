@@ -8,11 +8,9 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Latest Milestone: v9.0 Resiliencia de Plataforma (shipped 2026-03-20)
+## Current Milestone: Planning next milestone
 
-Shipped error boundaries, Sentry, token management via React Context, CI/CD pipeline, and retry with exponential backoff.
-
-Previous: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19)
+Previous: v11.0 Audit Logging (shipped 2026-03-21)
 
 ## Requirements
 
@@ -211,10 +209,21 @@ Previous: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19)
 - ✓ Token management via React Context com AbortController cancelando requests in-flight no org switch — v9.0
 - ✓ GitHub Actions CI com tsc + vitest rodando automaticamente em PRs, branch protection bloqueando merge — v9.0
 - ✓ Retry com backoff exponencial no token exchange e chamadas criticas (withRetry utility, 11 call sites) — v9.0
+- ✓ Tabela audit_logs com schema enterprise (13 colunas), RLS imutavel (append-only), 5 indexes compostos — v11.0
+- ✓ DB triggers SECURITY DEFINER em tasks e tenant_modules capturando INSERT/UPDATE com before/after JSONB — v11.0
+- ✓ logAuditEvent() service com never-throw guarantee, Sentry error reporting, impersonation tagging automatico — v11.0
+- ✓ Edge functions admin-tenants e admin-users instrumentados com audit logging para todas as acoes admin — v11.0
+- ✓ Captura de auth events (sign-in/sign-out) com IP e user-agent via audit-auth edge function — v11.0
+- ✓ GET /audit-logs edge function com super_admin JWT gate, paginacao server-side (max 100), 6 filtros — v11.0
+- ✓ queryAuditLogs() tipado em audit-service.ts como read path para UI — v11.0
+- ✓ Pagina /admin/audit-logs com tabela paginada, filtros composiveis, detail Sheet com before/after diff, export CSV — v11.0
+- ✓ Retention policy configuravel (30-365 dias) com pg_cron job de limpeza automatica diaria — v11.0
 
 ### Active
 
-(No active requirements — define next milestone with `/gsd:new-milestone`)
+<!-- No active milestone — run /gsd:new-milestone to start next -->
+
+(No active requirements — define with next milestone)
 
 ### Out of Scope
 
@@ -252,7 +261,7 @@ Previous: v8.0 Estabilidade Multi-Tenant (shipped 2026-03-19)
 
 ## Current State
 
-29 milestones shipped (v1.0 → v9.0). v9.0 added error boundaries per module with Sentry, migrated token management to React Context with AbortController, set up GitHub Actions CI/CD with branch protection, and added retry with exponential backoff across critical services. 24 Supabase migrations. 435 tests passing.
+30 milestones shipped (v1.0 → v11.0). v11.0 added enterprise audit logging — immutable append-only table with SECURITY DEFINER triggers, never-throw capture service with impersonation tagging, instrumented edge functions, paginated query API, admin UI with composable filters/detail drawer/CSV export, and configurable retention policy with pg_cron cleanup. 29 Supabase migrations (025-029 for audit logging). 435 tests passing.
 
 ## Context
 
@@ -391,6 +400,17 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | admin-users edge function minimal for Phase 86, expanded in 87 | Intentional phasing: totalCount first, then full user data + org memberships | ✓ Good — incremental delivery |
 | admin-service.ts as separate service (not extending tenant-service) | Separation of concerns: tenant vs user operations in distinct services | ✓ Good — clean module boundaries |
 | Edge function members endpoint via admin-tenants (not admin-users) | Members are org-scoped, fits naturally in tenants function | ✓ Good — logical API grouping |
+| Append-only RLS on audit_logs (no UPDATE/DELETE policies) | RLS denies by default when enabled, no explicit deny needed | ✓ Good — immutable audit trail |
+| SECURITY DEFINER triggers for audit_logs writes | Triggers need to bypass RLS to insert into protected table | ✓ Good — required for DB-level capture |
+| logAuditEvent() never throws (try/catch + Sentry) | Audit failure must never block business operations | ✓ Good — zero impact on main flow |
+| Module-level setter for ImpersonationContext in audit service | Cannot use React hooks in plain service module | ✓ Good — clean coupling pattern |
+| audit-auth edge function always returns 200 | Auth audit failure must never block sign-in flow | ✓ Good — resilient auth |
+| Service role client for audit-logs reads (bypasses RLS) | super_admin JWT claim is sole access gate, RLS complicates query | ✓ Good — simpler query logic |
+| SECURITY DEFINER for retention cleanup function | RLS denies DELETE on audit_logs, cleanup needs bypass | ✓ Good — required for retention |
+| pg_cron daily at 03:00 UTC for retention cleanup | Off-peak hours, minimal impact on production | ✓ Good — safe scheduling |
+| Client-side filtering for multi-action selection | API supports single action filter only, multi-select in UI | ✓ Good — pragmatic tradeoff |
+| DiffView filters to only changed keys | Cleaner presentation, reduces noise in before/after comparison | ✓ Good — focused diff |
+| CSV export via native Blob API (no server endpoint) | Client-side generation, no additional edge function needed | ✓ Good — simpler architecture |
 | useOrgTokenExchange onOrgChange callback pattern | Avoid platform→modules import boundary violation for docs cache | ✓ Good — clean boundary, cache invalidation works |
 | ImpersonationContext as React context (not URL param) | State-based impersonation, no URL pollution, easy to exit | ✓ Good — amber banner UX clear |
 | Phase 109 as formal audit (no new migration needed) | blueprint_configs RLS already correct since migration 013 | ✓ Good — discovered existing policy was sufficient |
@@ -404,4 +424,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function archive/restore with Clerk metadata sync | Single action archives DB + Clerk org in one call | ✓ Good — atomic operation |
 
 ---
-*Last updated: 2026-03-20 after v9.0 milestone complete*
+*Last updated: 2026-03-21 after v11.0 milestone completed*

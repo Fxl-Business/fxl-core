@@ -59,16 +59,34 @@ Cada spoke:
 | [Checklists](/sdk/checklists) | 5 checklists de qualidade | Completo |
 | [CI/CD e Deploy](/sdk/ci-cd) | GitHub Actions, Vercel, fxl-doctor | Completo |
 
-### Em Construcao
+### Padroes e Seguranca
 
-| Secao | Descricao | Previsao |
-|-------|-----------|----------|
-| [Padroes de Codigo](/sdk/code-standards) | Convencoes, naming, lint | v5.1+ |
-| [Banco de Dados](/sdk/database) | Migrations, RLS, modelagem | v5.1+ |
-| [Seguranca](/sdk/security) | Auth, headers, env vars, API keys | v5.1+ |
-| [Analytics](/sdk/analytics) | Metricas, extracao, dashboards | v5.1+ |
-| [Infraestrutura](/sdk/infrastructure) | Docker, K8s, ambientes | v5.1+ |
-| [Mobile](/sdk/mobile) | React Native, padroes mobile | v5.2+ |
-| [Documentacao](/sdk/documentation) | Processos obrigatorios | v5.1+ |
-| [MCP Server](/sdk/mcp-server) | Cerebro central de conhecimento | v5.1 |
-| [Nexo Skill](/sdk/nexo-skill) | Skill unificada do Claude Code | v5.2 |
+| Secao | Descricao | Status |
+|-------|-----------|--------|
+| [Padroes de Codigo](/sdk/code-standards) | Convencoes, naming, lint, TypeScript strict | Completo |
+| [Banco de Dados](/sdk/database) | Migrations, RLS, modelagem Supabase | Completo |
+| [Seguranca](/sdk/security) | Auth Clerk, JWT bridge, RLS, env vars | Completo |
+| [Documentacao](/sdk/documentation) | README obrigatorio, CLAUDE.md, changelog | Completo |
+
+### Operacional
+
+| Secao | Descricao | Status |
+|-------|-----------|--------|
+| [Analytics](/sdk/analytics) | Metricas, extracao de dados, dashboards | Completo |
+| [Infraestrutura](/sdk/infrastructure) | Ambientes, Sentry, Vercel deploy | Completo |
+| [Mobile](/sdk/mobile) | React Native/Expo, push notifications | Completo |
+
+### Ferramentas
+
+| Secao | Descricao | Status |
+|-------|-----------|--------|
+| [MCP Server](/sdk/mcp-server) | Cerebro central de conhecimento | Completo |
+| [Nexo Skill](/sdk/nexo-skill) | Skill unificada do Claude Code | Completo |
+
+### Resiliencia (v9.0)
+
+| Secao | Descricao | Status |
+|-------|-----------|--------|
+| [Error Boundaries](/sdk/error-boundaries) | Isolamento de erros por modulo com fallback UI | Completo |
+| [Observabilidade](/sdk/observabilidade) | Setup Sentry para frontend com contexto de modulo e org | Completo |
+| [Retry com Backoff](/sdk/retry-backoff) | Utility withRetry para retry com backoff exponencial | Completo |

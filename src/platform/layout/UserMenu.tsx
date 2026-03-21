@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { LogOut } from 'lucide-react'
-import { useUser, useClerk } from '@clerk/react'
+import { useUser, useClerk, useAuth } from '@clerk/react'
+import { logAuthEvent } from '@platform/services/audit-auth-service'
 
 /**
  * User avatar + logout dropdown for TopNav.
@@ -12,6 +13,7 @@ import { useUser, useClerk } from '@clerk/react'
 export function UserMenu() {
   const { user } = useUser()
   const { signOut } = useClerk()
+  const { getToken } = useAuth()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -41,7 +43,14 @@ export function UserMenu() {
     return fullName.slice(0, 2).toUpperCase()
   })()
 
-  function handleSignOut() {
+  async function handleSignOut() {
+    // Fire-and-forget audit log before sign-out destroys the session
+    try {
+      const token = await getToken()
+      if (token) logAuthEvent('sign_out', token)
+    } catch {
+      // Never block sign-out
+    }
     void signOut({ redirectUrl: '/login' })
   }
 
