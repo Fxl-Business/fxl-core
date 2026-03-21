@@ -730,6 +730,48 @@
 
 ---
 
+## Milestone: v12.0 — Admin Modules Overview
+
+**Shipped:** 2026-03-21
+**Phases:** 4 | **Plans:** 8 | **Tasks:** 21
+
+### What Was Built
+- TenantModulesSection component with Supabase optimistic upsert for per-tenant module management
+- ModulesPanel transformed from 320-line toggle page to read-only platform overview
+- Custom SVG module dependency diagram with 6 nodes, hover edge highlighting, dark/light mode
+- ModuleOverviewCard grid with features, extensions, status badges per module
+- Click-to-scroll navigation from diagram nodes to cards with 2s ring highlight animation
+- Full QA pass: zero stale refs, zero toggles, zero TS errors
+
+### What Worked
+- **Parallel phase execution:** Phases 139 and 140 ran in parallel (independent), saving ~50% planning time
+- **Custom SVG over library:** Avoided ~200KB @xyflow/react dependency for 6 static nodes — the SVG approach was simpler and faster
+- **MODULE_REGISTRY as sole data source:** No Supabase calls, no loading states, immediate render
+- **Separate GraphNode type:** Clean serializable primitives prevented LucideIcon/ComponentType leakage into data layer
+- **Build from scratch pattern:** ModuleOverviewCard with zero toggle fields structurally prevented toggle survival
+
+### What Was Inefficient
+- **STATUS_LABELS/STATUS_CLASSES duplication:** Same constants duplicated in 3 files (TenantModulesSection, ModuleDiagram, ModulesPanel) instead of importing from shared module-status-constants.ts
+- **Zero cross-module edges:** All `requires[]` arrays self-reference, making the diagram's edge highlighting feature unobservable until a real cross-module dependency is added
+- **Nyquist validation missing:** All 4 phases had MISSING nyquist compliance — validation added retroactively
+
+### Patterns Established
+- Serializable graph types pattern: separate display types from React-dependent module definitions
+- Click-to-scroll with highlight: `scrollIntoView` + `ring-2 ring-primary` with 2s setTimeout reset
+- Read-only overview card pattern: props interface with zero toggle fields prevents feature creep
+
+### Key Lessons
+1. **Custom SVG is the right default for <15 nodes** — libraries add weight without value for small static graphs
+2. **Retroactive Nyquist validation is a smell** — if 4/4 phases are MISSING, the workflow should catch this during execution
+3. **Constant duplication across 3 files is a tech debt signal** — should have extracted to shared module on first reuse
+
+### Cost Observations
+- Model mix: ~60% sonnet (executor), ~40% opus (planner/orchestrator)
+- Sessions: ~2 (planning+execution + completion)
+- Notable: 4 phases + 8 plans in 1 day — mature admin panel patterns enable fast delivery
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -751,6 +793,7 @@
 | v4.3 | 1 day | 4 | 8 | Custom auth, edge function data layer, autorun parallel execution, admin users management |
 | v7.0 | 1 day | 4 | 8 | Access control lockdown, admin user management, tenant archival, dashboard improvements |
 | v11.0 | 2 days | 5 | 10 | Enterprise audit logging, DB triggers, never-throw service, admin UI with diff/export/retention |
+| v12.0 | 1 day | 4 | 8 | Custom SVG diagram, read-only overview cards, click-to-scroll, toggle extraction to TenantDetailPage |
 
 ### Cumulative Quality
 
@@ -771,6 +814,7 @@
 | v4.3 | ~316 tests | no new tests (edge functions + UI) | 0 |
 | v7.0 | ~316 tests | no new tests (admin UI + migration) | 0 |
 | v11.0 | ~435 tests | no new tests (edge functions + UI + migrations) | 1 (pg_cron extension) |
+| v12.0 | ~435 tests | no new tests (SVG + UI components) | 0 |
 
 ### Velocity
 
@@ -791,6 +835,7 @@
 | v4.3 | 8 | ~5 min | ~0.6 min |
 | v7.0 | 8 | ~15 min | ~1.9 min |
 | v11.0 | 10 | ~14 min | ~1.4 min |
+| v12.0 | 8 | ~10 min | ~1.3 min |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -810,3 +855,4 @@
 14. Verification artifacts are as important as code — v7.0 phases 118/119 shipped working code but missing VERIFICATION.md and SUMMARY.md, creating audit debt (verified across v5.3, v7.0)
 15. Traceability checkboxes drift is a recurring pattern — v1.0, v7.0, and v11.0 all had unchecked requirements despite complete code; consider automating traceability updates during plan execution
 16. Never-throw service pattern is production-ready — logAuditEvent() in v11.0 proved that wrapping entire service in try/catch + Sentry is the right default for non-critical side effects
+17. Custom SVG over libraries for small static graphs — 6 nodes don't justify ~200KB library, validated in v12.0 diagram

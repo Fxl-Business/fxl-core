@@ -1,5 +1,28 @@
 # Milestones
 
+## v12.0 Admin Modules Overview (Shipped: 2026-03-21)
+
+**Phases:** 4 (139-142) | **Plans:** 8 | **Tasks:** 21
+**Timeline:** 1 day (2026-03-21)
+**Requirements:** 11/11
+
+**Delivered:** Transformed /admin/modules from tenant toggle management into a platform overview page — interactive SVG dependency diagram with hover highlighting, read-only module cards with features/extensions/status, click-to-scroll diagram-to-card navigation, and module toggle logic extracted into TenantDetailPage.
+
+**Key accomplishments:**
+
+1. TenantModulesSection component with Supabase optimistic upsert, wired into TenantDetailPage replacing the "Gerenciar modulos" deep-link
+2. ModulesPanel stripped from 320-line toggle page to 50-line scaffold, then rebuilt as read-only overview
+3. Custom SVG module dependency diagram with 6 nodes, hover edge highlighting, dark/light mode support
+4. ModuleOverviewCard grid showing name, description, status badge, features list, and extensions per module
+5. Click-to-scroll from diagram nodes to cards with 2-second ring highlight animation
+6. Full QA pass: zero stale refs, zero toggles in ModulesPanel, zero TS errors
+
+**Tech Debt:** STATUS_LABELS/STATUS_CLASSES duplicated in 3 files (TenantModulesSection, ModuleDiagram, ModulesPanel) instead of shared import. Zero cross-module edges (all `requires[]` self-reference).
+
+**Archive:** [v12.0-ROADMAP.md](milestones/v12.0-ROADMAP.md) | [v12.0-REQUIREMENTS.md](milestones/v12.0-REQUIREMENTS.md)
+
+---
+
 ## v11.0 Audit Logging (Shipped: 2026-03-21)
 
 **Phases:** 5 (134-138) | **Plans:** 10 | **Tasks:** 17

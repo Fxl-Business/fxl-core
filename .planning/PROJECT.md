@@ -8,16 +8,9 @@ Plataforma multi-tenant modular (hub) para gestao operacional de empresas. Combi
 
 Nexo e o hub central multi-tenant — cada empresa ve tudo sobre si mesma (modulos nativos + dados de apps externas) para que operadores e IA tenham contexto 360 graus.
 
-## Current Milestone: v12.0 Admin Modules Overview
+## Current Milestone: Planning next milestone
 
-**Goal:** Transformar a pagina /admin/modules de gerenciamento por tenant em uma visao geral da plataforma — diagrama interativo de conexoes entre modulos, cards com funcionalidades/status/extensions, e mover gerenciamento per-tenant para TenantDetailPage.
-
-**Target features:**
-- Diagrama interativo de conexoes entre modulos (hover destaca, click navega)
-- Grid de cards por modulo com funcionalidades, status, extensions
-- Gerenciamento de modulos por tenant movido para TenantDetailPage
-
-Previous: v11.0 Audit Logging (shipped 2026-03-21)
+Previous: v12.0 Admin Modules Overview (shipped 2026-03-21)
 
 ## Requirements
 
@@ -225,10 +218,15 @@ Previous: v11.0 Audit Logging (shipped 2026-03-21)
 - ✓ queryAuditLogs() tipado em audit-service.ts como read path para UI — v11.0
 - ✓ Pagina /admin/audit-logs com tabela paginada, filtros composiveis, detail Sheet com before/after diff, export CSV — v11.0
 - ✓ Retention policy configuravel (30-365 dias) com pg_cron job de limpeza automatica diaria — v11.0
+- ✓ TenantModulesSection com Supabase optimistic upsert, inline na TenantDetailPage — v12.0
+- ✓ ModulesPanel transformado de toggle page para overview read-only — v12.0
+- ✓ Diagrama SVG interativo de dependencias entre modulos com hover highlighting — v12.0
+- ✓ ModuleOverviewCard grid com features, extensions, status badge por modulo — v12.0
+- ✓ Click-to-scroll de diagram node para card com ring highlight animation — v12.0
 
 ### Active
 
-<!-- v12.0 Admin Modules Overview — requirements defined in REQUIREMENTS.md -->
+<!-- Next milestone requirements will be defined in REQUIREMENTS.md -->
 
 ### Out of Scope
 
@@ -266,7 +264,7 @@ Previous: v11.0 Audit Logging (shipped 2026-03-21)
 
 ## Current State
 
-30 milestones shipped (v1.0 → v11.0). v11.0 added enterprise audit logging — immutable append-only table with SECURITY DEFINER triggers, never-throw capture service with impersonation tagging, instrumented edge functions, paginated query API, admin UI with composable filters/detail drawer/CSV export, and configurable retention policy with pg_cron cleanup. 29 Supabase migrations (025-029 for audit logging). 435 tests passing.
+31 milestones shipped (v1.0 → v12.0). v12.0 transformed /admin/modules from tenant toggle management into a platform overview page with interactive SVG dependency diagram, read-only module cards with features/extensions/status, and click-to-scroll diagram-to-card navigation. Module toggle logic extracted into TenantModulesSection on TenantDetailPage. 29 Supabase migrations. 435 tests passing.
 
 ## Context
 
@@ -416,6 +414,11 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Client-side filtering for multi-action selection | API supports single action filter only, multi-select in UI | ✓ Good — pragmatic tradeoff |
 | DiffView filters to only changed keys | Cleaner presentation, reduces noise in before/after comparison | ✓ Good — focused diff |
 | CSV export via native Blob API (no server endpoint) | Client-side generation, no additional edge function needed | ✓ Good — simpler architecture |
+| Custom SVG instead of @xyflow/react | 6 static nodes don't justify ~200KB library | ✓ Good — lightweight, fast render |
+| MODULE_REGISTRY as sole data source for overview | No Supabase calls, immediate render, no loading states | ✓ Good — instant UX |
+| Separate GraphNode type (serializable only) | ModuleDefinition has LucideIcon/ComponentType fields | ✓ Good — clean data/render separation |
+| ModuleOverviewCard built from scratch (not ModuleCard) | Zero toggle fields in props, structurally prevents toggle survival | ✓ Good — clean separation |
+| Edge direction: source = declarer, target = required | Consistent with "X extends Y" semantics | ✓ Good — intuitive reading |
 | useOrgTokenExchange onOrgChange callback pattern | Avoid platform→modules import boundary violation for docs cache | ✓ Good — clean boundary, cache invalidation works |
 | ImpersonationContext as React context (not URL param) | State-based impersonation, no URL pollution, easy to exit | ✓ Good — amber banner UX clear |
 | Phase 109 as formal audit (no new migration needed) | blueprint_configs RLS already correct since migration 013 | ✓ Good — discovered existing policy was sufficient |
@@ -429,4 +432,4 @@ Pilot client: financeiro-conta-azul (10 screens, complete briefing + blueprint +
 | Edge function archive/restore with Clerk metadata sync | Single action archives DB + Clerk org in one call | ✓ Good — atomic operation |
 
 ---
-*Last updated: 2026-03-21 after v12.0 milestone started*
+*Last updated: 2026-03-21 after v12.0 milestone completed*
