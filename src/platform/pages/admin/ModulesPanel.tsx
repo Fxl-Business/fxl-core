@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@shared/ui/select'
 import { Loader2 } from 'lucide-react'
+import ModuleDiagram from './components/ModuleDiagram'
 
 const ALL_MODULE_IDS: ModuleId[] = Object.values(MODULE_IDS)
 
@@ -252,6 +253,14 @@ export default function ModulesPanel() {
             {activeCount} de {total} ativos
           </span>
         )}
+      </div>
+
+      {/* Module dependency diagram — platform overview */}
+      <div className="rounded-xl border bg-white p-5 dark:bg-card dark:border-slate-700">
+        <h2 className="text-sm font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4">
+          Arquitetura de Modulos
+        </h2>
+        <ModuleDiagram />
       </div>
 
       {/* Tenant selector */}
