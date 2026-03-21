@@ -52,7 +52,7 @@
   2. ModulesPanel no longer contains a tenant selector dropdown or module toggle switches
   3. The "Gerenciar modulos" deep-link from TenantDetailPage to /admin/modules is removed
   4. TenantModulesSection accepts an orgId prop and manages all Supabase state internally
-**Plans**: TBD
+**Plans**: 139-01 (create TenantModulesSection + wire into TenantDetailPage), 139-02 (strip ModulesPanel to scaffold)
 
 ### Phase 140: Dependency Diagram
 **Goal**: Admin can see and interact with a custom SVG diagram showing all platform modules and their extension dependencies
@@ -74,7 +74,10 @@
   2. Admin can read the list of main features for each module directly on its card
   3. Admin can see which extensions each module provides and which slots it injects into, displayed on the card
   4. Cards are arranged in a responsive grid that reflows correctly from 1 to 3 columns across viewport sizes
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 141-01-PLAN.md -- Type changes, shared constants, manifest features
+- [ ] 141-02-PLAN.md -- ModuleOverviewCard component and ModulesPanel transformation
 
 ### Phase 142: Integration and QA
 **Goal**: The diagram and card grid are fully connected — clicking a node scrolls to its card — and the complete page passes TypeScript and visual QA
@@ -85,16 +88,16 @@
   2. `grep -r "admin/modules" src/` returns zero results inside TenantDetailPage.tsx
   3. `grep -r "<Switch" src/platform/pages/admin/ModulesPanel` returns zero results
   4. `npx tsc --noEmit` passes with zero errors after all changes
-**Plans**: TBD
+**Plans**: 142-01 (click-to-scroll wiring), 142-02 (full QA pass)
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 139. Toggle Extraction | 0/? | Not started | - |
+| 139. Toggle Extraction | 0/2 | Planned | - |
 | 140. Dependency Diagram | 0/? | Not started | - |
-| 141. Module Overview Cards | 0/? | Not started | - |
-| 142. Integration and QA | 0/? | Not started | - |
+| 141. Module Overview Cards | 0/2 | Planned | - |
+| 142. Integration and QA | 0/2 | Planned | - |
 
 ---
 *v12.0 milestone — 4 phases (139-142) — 11 requirements*
