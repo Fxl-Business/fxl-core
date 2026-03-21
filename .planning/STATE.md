@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v12.0
 milestone_name: Admin Modules Overview
-status: roadmap_ready
+status: executing
 last_updated: "2026-03-21"
 last_activity: 2026-03-21
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 8
+  completed_plans: 2
 ---
 
 # Project State
@@ -23,12 +23,12 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 
 ## Current Position
 
-Phase: 139 (Toggle Extraction) — Not started
-Plan: —
-Status: Roadmap approved, ready to plan Phase 139
-Last activity: 2026-03-21 — Roadmap created for v12.0
+Phase: 140 (Dependency Diagram) — Complete
+Plan: 140-02 (complete)
+Status: Phase 140 complete, Phase 141 next
+Last activity: 2026-03-21 — Phase 140 executed (2 plans)
 
-Progress: ░░░░░░░░░░ 0/4 phases (0%)
+Progress: ██░░░░░░░░ 1/4 phases (25%)
 
 ## Accumulated Context
 
@@ -43,11 +43,12 @@ Progress: ░░░░░░░░░░ 0/4 phases (0%)
 
 ### Phase Notes
 
-(none yet — phases not started)
+- Phase 140 complete: SVG diagram with 6 nodes, hover interaction, dark/light mode. Currently 0 cross-module edges (tasks and connector self-reference in requires[]). Edges will appear automatically when cross-module deps are added.
+- Verified: requires[] in manifests contain self-references only (todo resolved)
 
 ### Pending Todos
 
-- Verify actual `requires[]` contents in manifests before Phase 140 — may contain self-references rather than cross-module dependencies, which affects edge count in diagram
+- ~~Verify actual `requires[]` contents in manifests before Phase 140~~ — DONE: self-references only, 0 cross-module edges
 - Verify current line numbers for stale "Gerenciar modulos" link in TenantDetailPage before Phase 139 (research cited lines 577-596 but file may have shifted)
 - Decide where STATUS_LABELS / STATUS_CLASSES constants live (shared file or inline per component) before Phase 141 to avoid duplication between TenantModulesSection and ModuleOverviewCard
 
@@ -58,5 +59,5 @@ None.
 ## Session Continuity
 
 To resume: read `.planning/PROJECT.md` for milestone goals, `.planning/ROADMAP.md` for phase details and success criteria.
-Next action: Run `/gsd:plan-phase 139` to plan Toggle Extraction
-Last activity: 2026-03-21 — Roadmap created
+Next action: Execute Phase 141 (Module Overview Cards) — requires Phase 139 complete
+Last activity: 2026-03-21 — Phase 140 executed (diagram types, buildGraph, ModuleDiagram SVG component)

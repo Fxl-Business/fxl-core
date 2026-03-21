@@ -63,7 +63,7 @@
   2. Admin can hover over a module node and see its connecting edges highlighted while unrelated edges dim
   3. The diagram renders with correct node colors and edge styles in both dark and light mode
   4. The GraphNode type contains only serializable primitives (no LucideIcon or React.ComponentType fields)
-**Plans**: TBD
+**Plans**: 140-01 (graph types + buildGraph), 140-02 (ModuleDiagram SVG + integration)
 
 ### Phase 141: Module Overview Cards
 **Goal**: Admin can read complete module information from a card grid on /admin/modules without any toggle controls
@@ -95,7 +95,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 139. Toggle Extraction | 0/2 | Planned | - |
-| 140. Dependency Diagram | 0/? | Not started | - |
+| 140. Dependency Diagram | 2/2 | Complete | 2026-03-21 |
 | 141. Module Overview Cards | 0/2 | Planned | - |
 | 142. Integration and QA | 0/2 | Planned | - |
 
