@@ -32,14 +32,14 @@
 - ✅ **v9.0 Resiliencia de Plataforma** - Phases 125-128 (shipped 2026-03-20) -- see milestones/v9.0-ROADMAP.md
 - ✅ **v10.0 SDK Expansion** - Phases 129-133 (shipped 2026-03-20) -- see milestones/v10.0-ROADMAP.md
 - ✅ **v11.0 Audit Logging** - Phases 134-138 (shipped 2026-03-21) -- see milestones/v11.0-ROADMAP.md
-- 🔄 **v12.0 Admin Modules Overview** - Phases 139-142 (active)
+- ✅ **v12.0 Admin Modules Overview** - Phases 139-142 (shipped 2026-03-21)
 
 ## Phases
 
 - [x] **Phase 139: Toggle Extraction** - Extract module toggle logic into TenantModulesSection component and wire into TenantDetailPage
 - [x] **Phase 140: Dependency Diagram** - Build interactive SVG module dependency diagram with hover edge highlighting
 - [x] **Phase 141: Module Overview Cards** - Build read-only ModuleOverviewCard grid and transform ModulesPanel scaffold
-- [ ] **Phase 142: Integration and QA** - Wire diagram click-to-scroll navigation and complete full system QA pass
+- [x] **Phase 142: Integration and QA** - Wire diagram click-to-scroll navigation and complete full system QA pass
 
 ## Phase Details
 
@@ -97,7 +97,7 @@ Plans:
 | 139. Toggle Extraction | 2/2 | Complete | 2026-03-21 |
 | 140. Dependency Diagram | 2/2 | Complete | 2026-03-21 |
 | 141. Module Overview Cards | 2/2 | Complete | 2026-03-21 |
-| 142. Integration and QA | 0/2 | Planned | - |
+| 142. Integration and QA | 2/2 | Complete | 2026-03-21 |
 
 ---
 *v12.0 milestone — 4 phases (139-142) — 11 requirements*

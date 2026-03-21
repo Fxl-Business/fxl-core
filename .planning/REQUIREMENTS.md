@@ -11,7 +11,7 @@ Requirements for Admin Modules Overview milestone. Each maps to roadmap phases.
 
 - [x] **DIAG-01**: Admin pode ver diagrama visual com todos os modulos como nos conectados por arestas de extension/slot
 - [x] **DIAG-02**: Admin pode passar hover em um modulo no diagrama e ver suas conexoes destacadas
-- [ ] **DIAG-03**: Admin pode clicar em um modulo no diagrama e a pagina rola ate o card correspondente
+- [x] **DIAG-03**: Admin pode clicar em um modulo no diagrama e a pagina rola ate o card correspondente
 - [x] **DIAG-04**: Diagrama renderiza corretamente em dark mode e light mode
 
 ### Cards de Modulo
@@ -54,7 +54,7 @@ Requirements for Admin Modules Overview milestone. Each maps to roadmap phases.
 |-------------|-------|--------|
 | DIAG-01 | Phase 140 | Complete |
 | DIAG-02 | Phase 140 | Complete |
-| DIAG-03 | Phase 142 | Pending |
+| DIAG-03 | Phase 142 | Complete |
 | DIAG-04 | Phase 140 | Complete |
 | CARD-01 | Phase 141 | Complete |
 | CARD-02 | Phase 141 | Complete |
@@ -71,4 +71,4 @@ Requirements for Admin Modules Overview milestone. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-21 — CARD-01/02/03/04 marked complete after Phase 141*
+*Last updated: 2026-03-21 — DIAG-03 marked complete after Phase 142 (all 11/11 complete)*
