@@ -12,6 +12,11 @@ import { useProjectsNav } from './hooks/useProjectsNav'
 export const projectsManifest: ModuleDefinition = {
   id: MODULE_IDS.PROJECTS,
   description: 'Workspaces de projetos com docs, briefing, blueprint e wireframe.',
+  features: [
+    'Gestao de projetos por cliente',
+    'Acompanhamento de status e timeline',
+    'Vinculacao com wireframes e entregas',
+  ],
   tenantScoped: true,
   label: 'Projetos',
   route: '/projetos',

@@ -6,6 +6,12 @@ import { MODULE_IDS } from '@platform/module-loader/module-ids'
 export const ferramentasManifest: ModuleDefinition = {
   id: MODULE_IDS.FERRAMENTAS,
   description: 'Crie e edite wireframes interativos para clientes.',
+  features: [
+    'Galeria de componentes com preview interativo',
+    'Viewer publico de wireframes com compartilhamento',
+    'Suporte a branding customizado por cliente',
+    '20+ blocos de dashboard (KPI, graficos, tabelas)',
+  ],
   tenantScoped: true,
   label: 'Ferramentas',
   route: '/ferramentas/index',

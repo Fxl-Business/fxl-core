@@ -6,6 +6,11 @@ import { RecentTasksWidget } from './extensions/RecentTasksWidget'
 export const tasksManifest: ModuleDefinition = {
   id: MODULE_IDS.TASKS,
   description: 'Gestao de tarefas e kanban por cliente e projeto.',
+  features: [
+    'Kanban de tarefas por projeto',
+    'Widget de tarefas recentes no Home',
+    'Atribuicao e acompanhamento de responsaveis',
+  ],
   tenantScoped: true,
   label: 'Tarefas',
   route: '/tarefas',

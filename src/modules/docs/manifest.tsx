@@ -7,6 +7,12 @@ import { useDocsNavItems } from './hooks/useDocsNavItems'
 export const docsManifest: ModuleDefinition = {
   id: MODULE_IDS.DOCS,
   description: 'Processo, ferramentas e padroes tecnicos da FXL.',
+  features: [
+    'Documentacao de processo, padroes e ferramentas',
+    'Parser de markdown com tags customizadas',
+    'Busca integrada (Cmd+K) em todos os docs',
+    'Navegacao hierarquica com sidebar dinamica',
+  ],
   tenantScoped: true,
   label: 'Processo',
   route: '/processo/index',

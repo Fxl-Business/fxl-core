@@ -8,6 +8,11 @@ import ConnectorList from './pages/ConnectorList'
 export const connectorManifest: ModuleDefinition = {
   id: MODULE_IDS.CONNECTOR,
   description: 'Conecta apps externos (spokes) via contrato padronizado FXL.',
+  features: [
+    'Integracao com APIs externas via conectores',
+    'Configuracao visual de conexoes',
+    'Widget de conectores ativos no Home',
+  ],
   tenantScoped: true,
   label: 'Conectores',
   route: '/apps',

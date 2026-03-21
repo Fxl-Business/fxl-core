@@ -8,6 +8,12 @@ import ClientProfile from './pages/ClientProfile'
 export const clientsManifest: ModuleDefinition = {
   id: MODULE_IDS.CLIENTS,
   description: 'Cadastro e gestao de clientes da organizacao.',
+  features: [
+    'Cadastro e gestao de clientes',
+    'Workspace dedicado por cliente',
+    'Historico de interacoes e entregas',
+    'Branding e configuracoes por cliente',
+  ],
   label: 'Clientes',
   route: '/clientes',
   icon: Users,
