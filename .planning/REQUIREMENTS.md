@@ -16,10 +16,10 @@ Requirements for Admin Modules Overview milestone. Each maps to roadmap phases.
 
 ### Cards de Modulo
 
-- [ ] **CARD-01**: Admin pode ver card de cada modulo com nome, descricao e status badge (Active/Beta/Coming Soon)
-- [ ] **CARD-02**: Admin pode ver lista de funcionalidades principais de cada modulo no card
-- [ ] **CARD-03**: Admin pode ver quais extensions cada modulo oferece e em quais slots injeta
-- [ ] **CARD-04**: Cards organizados em grid responsivo na pagina /admin/modules
+- [x] **CARD-01**: Admin pode ver card de cada modulo com nome, descricao e status badge (Active/Beta/Coming Soon)
+- [x] **CARD-02**: Admin pode ver lista de funcionalidades principais de cada modulo no card
+- [x] **CARD-03**: Admin pode ver quais extensions cada modulo oferece e em quais slots injeta
+- [x] **CARD-04**: Cards organizados em grid responsivo na pagina /admin/modules
 
 ### Migracao de Toggles
 
@@ -56,10 +56,10 @@ Requirements for Admin Modules Overview milestone. Each maps to roadmap phases.
 | DIAG-02 | Phase 140 | Complete |
 | DIAG-03 | Phase 142 | Pending |
 | DIAG-04 | Phase 140 | Complete |
-| CARD-01 | Phase 141 | Pending |
-| CARD-02 | Phase 141 | Pending |
-| CARD-03 | Phase 141 | Pending |
-| CARD-04 | Phase 141 | Pending |
+| CARD-01 | Phase 141 | Complete |
+| CARD-02 | Phase 141 | Complete |
+| CARD-03 | Phase 141 | Complete |
+| CARD-04 | Phase 141 | Complete |
 | TOGL-01 | Phase 139 | Complete |
 | TOGL-02 | Phase 139 | Complete |
 | TOGL-03 | Phase 139 | Complete |
@@ -71,4 +71,4 @@ Requirements for Admin Modules Overview milestone. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-21 — traceability mapped after roadmap creation*
+*Last updated: 2026-03-21 — CARD-01/02/03/04 marked complete after Phase 141*

@@ -38,7 +38,7 @@
 
 - [x] **Phase 139: Toggle Extraction** - Extract module toggle logic into TenantModulesSection component and wire into TenantDetailPage
 - [x] **Phase 140: Dependency Diagram** - Build interactive SVG module dependency diagram with hover edge highlighting
-- [ ] **Phase 141: Module Overview Cards** - Build read-only ModuleOverviewCard grid and transform ModulesPanel scaffold
+- [x] **Phase 141: Module Overview Cards** - Build read-only ModuleOverviewCard grid and transform ModulesPanel scaffold
 - [ ] **Phase 142: Integration and QA** - Wire diagram click-to-scroll navigation and complete full system QA pass
 
 ## Phase Details
@@ -76,8 +76,8 @@
   4. Cards are arranged in a responsive grid that reflows correctly from 1 to 3 columns across viewport sizes
 **Plans**: 2 plans
 Plans:
-- [ ] 141-01-PLAN.md -- Type changes, shared constants, manifest features
-- [ ] 141-02-PLAN.md -- ModuleOverviewCard component and ModulesPanel transformation
+- [x] 141-01-PLAN.md -- Type changes, shared constants, manifest features
+- [x] 141-02-PLAN.md -- ModuleOverviewCard component and ModulesPanel transformation
 
 ### Phase 142: Integration and QA
 **Goal**: The diagram and card grid are fully connected — clicking a node scrolls to its card — and the complete page passes TypeScript and visual QA
@@ -96,7 +96,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 139. Toggle Extraction | 2/2 | Complete | 2026-03-21 |
 | 140. Dependency Diagram | 2/2 | Complete | 2026-03-21 |
-| 141. Module Overview Cards | 0/2 | Planned | - |
+| 141. Module Overview Cards | 2/2 | Complete | 2026-03-21 |
 | 142. Integration and QA | 0/2 | Planned | - |
 
 ---
