@@ -98,9 +98,10 @@ interface DiagramNodeProps {
   isDark: boolean
   onMouseEnter: () => void
   onMouseLeave: () => void
+  onClick?: () => void
 }
 
-function DiagramNode({ node, isHovered, isDimmed, isDark, onMouseEnter, onMouseLeave }: DiagramNodeProps) {
+function DiagramNode({ node, isHovered, isDimmed, isDark, onMouseEnter, onMouseLeave, onClick }: DiagramNodeProps) {
   const rectFill = isDark ? '#1e293b' : '#ffffff'
   const rectStroke = isHovered ? '#6366f1' : (isDark ? '#334155' : '#e2e8f0')
   const rectStrokeWidth = isHovered ? 2 : 1
@@ -125,6 +126,7 @@ function DiagramNode({ node, isHovered, isDimmed, isDark, onMouseEnter, onMouseL
       style={{ cursor: 'pointer', opacity, transition: 'opacity 200ms' }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onClick={onClick}
     >
       {/* Node rectangle */}
       <rect
@@ -180,7 +182,11 @@ function DiagramNode({ node, isHovered, isDimmed, isDark, onMouseEnter, onMouseL
 // ModuleDiagram
 // ---------------------------------------------------------------------------
 
-export default function ModuleDiagram() {
+interface ModuleDiagramProps {
+  onNodeClick?: (moduleId: string) => void
+}
+
+export default function ModuleDiagram({ onNodeClick }: ModuleDiagramProps) {
   const { nodes, edges } = useMemo(() => buildGraph(MODULE_REGISTRY), [])
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
   const isDark = useDarkMode()
@@ -262,6 +268,7 @@ export default function ModuleDiagram() {
             isDark={isDark}
             onMouseEnter={() => setHoveredNodeId(node.id)}
             onMouseLeave={() => setHoveredNodeId(null)}
+            onClick={() => onNodeClick?.(node.id)}
           />
         )
       })}

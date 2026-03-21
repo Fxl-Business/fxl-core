@@ -3,16 +3,17 @@ import type { ModuleDefinition } from '@platform/module-loader/registry'
 
 type ModuleOverviewCardProps = {
   mod: ModuleDefinition
+  highlighted?: boolean
 }
 
-export function ModuleOverviewCard({ mod }: ModuleOverviewCardProps) {
+export function ModuleOverviewCard({ mod, highlighted }: ModuleOverviewCardProps) {
   const Icon = mod.icon
 
   return (
     <div
       id={`module-card-${mod.id}`}
       data-module-id={mod.id}
-      className="rounded-xl border bg-white p-5 dark:bg-card dark:border-slate-700 transition-shadow"
+      className={`rounded-xl border bg-white p-5 dark:bg-card dark:border-slate-700 transition-shadow duration-300${highlighted ? ' ring-2 ring-indigo-500 dark:ring-indigo-400' : ''}`}
     >
       {/* Header: icon + label + status badge */}
       <div className="flex items-start gap-3">
