@@ -52,23 +52,23 @@ Requirements for Admin Modules Overview milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DIAG-01 | TBD | Pending |
-| DIAG-02 | TBD | Pending |
-| DIAG-03 | TBD | Pending |
-| DIAG-04 | TBD | Pending |
-| CARD-01 | TBD | Pending |
-| CARD-02 | TBD | Pending |
-| CARD-03 | TBD | Pending |
-| CARD-04 | TBD | Pending |
-| TOGL-01 | TBD | Pending |
-| TOGL-02 | TBD | Pending |
-| TOGL-03 | TBD | Pending |
+| DIAG-01 | Phase 140 | Pending |
+| DIAG-02 | Phase 140 | Pending |
+| DIAG-03 | Phase 142 | Pending |
+| DIAG-04 | Phase 140 | Pending |
+| CARD-01 | Phase 141 | Pending |
+| CARD-02 | Phase 141 | Pending |
+| CARD-03 | Phase 141 | Pending |
+| CARD-04 | Phase 141 | Pending |
+| TOGL-01 | Phase 139 | Pending |
+| TOGL-02 | Phase 139 | Pending |
+| TOGL-03 | Phase 139 | Pending |
 
 **Coverage:**
 - v12.0 requirements: 11 total
-- Mapped to phases: 0
-- Unmapped: 11 ⚠️
+- Mapped to phases: 11
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-21 after initial definition*
+*Last updated: 2026-03-21 — traceability mapped after roadmap creation*

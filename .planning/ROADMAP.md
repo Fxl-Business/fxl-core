@@ -32,10 +32,69 @@
 - ✅ **v9.0 Resiliencia de Plataforma** - Phases 125-128 (shipped 2026-03-20) -- see milestones/v9.0-ROADMAP.md
 - ✅ **v10.0 SDK Expansion** - Phases 129-133 (shipped 2026-03-20) -- see milestones/v10.0-ROADMAP.md
 - ✅ **v11.0 Audit Logging** - Phases 134-138 (shipped 2026-03-21) -- see milestones/v11.0-ROADMAP.md
+- 🔄 **v12.0 Admin Modules Overview** - Phases 139-142 (active)
 
-## Next Milestone
+## Phases
 
-Run `/gsd:new-milestone` to start the next milestone cycle.
+- [ ] **Phase 139: Toggle Extraction** - Extract module toggle logic into TenantModulesSection component and wire into TenantDetailPage
+- [ ] **Phase 140: Dependency Diagram** - Build interactive SVG module dependency diagram with hover edge highlighting
+- [ ] **Phase 141: Module Overview Cards** - Build read-only ModuleOverviewCard grid and transform ModulesPanel scaffold
+- [ ] **Phase 142: Integration and QA** - Wire diagram click-to-scroll navigation and complete full system QA pass
+
+## Phase Details
+
+### Phase 139: Toggle Extraction
+**Goal**: Tenant module management is fully functional on TenantDetailPage with zero logic in ModulesPanel
+**Depends on**: Nothing (first phase of milestone, can run independently)
+**Requirements**: TOGL-01, TOGL-02, TOGL-03
+**Success Criteria** (what must be TRUE):
+  1. Admin can navigate to a tenant on TenantDetailPage and toggle modules on/off without visiting /admin/modules
+  2. ModulesPanel no longer contains a tenant selector dropdown or module toggle switches
+  3. The "Gerenciar modulos" deep-link from TenantDetailPage to /admin/modules is removed
+  4. TenantModulesSection accepts an orgId prop and manages all Supabase state internally
+**Plans**: TBD
+
+### Phase 140: Dependency Diagram
+**Goal**: Admin can see and interact with a custom SVG diagram showing all platform modules and their extension dependencies
+**Depends on**: Nothing (can run in parallel with Phase 139)
+**Requirements**: DIAG-01, DIAG-02, DIAG-04
+**Success Criteria** (what must be TRUE):
+  1. Admin sees all platform modules rendered as labeled nodes in a single SVG diagram at /admin/modules
+  2. Admin can hover over a module node and see its connecting edges highlighted while unrelated edges dim
+  3. The diagram renders with correct node colors and edge styles in both dark and light mode
+  4. The GraphNode type contains only serializable primitives (no LucideIcon or React.ComponentType fields)
+**Plans**: TBD
+
+### Phase 141: Module Overview Cards
+**Goal**: Admin can read complete module information from a card grid on /admin/modules without any toggle controls
+**Depends on**: Phase 139 complete (toggles removed from ModulesPanel before card grid is inserted)
+**Requirements**: CARD-01, CARD-02, CARD-03, CARD-04
+**Success Criteria** (what must be TRUE):
+  1. Admin sees a card for every module with its name, description, and status badge (Active / Beta / Coming Soon)
+  2. Admin can read the list of main features for each module directly on its card
+  3. Admin can see which extensions each module provides and which slots it injects into, displayed on the card
+  4. Cards are arranged in a responsive grid that reflows correctly from 1 to 3 columns across viewport sizes
+**Plans**: TBD
+
+### Phase 142: Integration and QA
+**Goal**: The diagram and card grid are fully connected — clicking a node scrolls to its card — and the complete page passes TypeScript and visual QA
+**Depends on**: Phase 140 (diagram) + Phase 141 (cards) both complete
+**Requirements**: DIAG-03
+**Success Criteria** (what must be TRUE):
+  1. Admin can click any module node in the diagram and the page scrolls to the corresponding module card, which receives a visible ring highlight
+  2. `grep -r "admin/modules" src/` returns zero results inside TenantDetailPage.tsx
+  3. `grep -r "<Switch" src/platform/pages/admin/ModulesPanel` returns zero results
+  4. `npx tsc --noEmit` passes with zero errors after all changes
+**Plans**: TBD
+
+## Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 139. Toggle Extraction | 0/? | Not started | - |
+| 140. Dependency Diagram | 0/? | Not started | - |
+| 141. Module Overview Cards | 0/? | Not started | - |
+| 142. Integration and QA | 0/? | Not started | - |
 
 ---
-*30 milestones shipped. 138 phases completed.*
+*v12.0 milestone — 4 phases (139-142) — 11 requirements*
