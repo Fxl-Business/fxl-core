@@ -70,6 +70,7 @@ export interface UseNavItemsResult {
 export interface ModuleDefinition extends ModuleManifest {
   id: ModuleId
   description: string
+  features?: string[]
   badge?: number
   enabled?: boolean
   /** When true, module visibility is controlled per-org via tenant_modules table in org mode */
