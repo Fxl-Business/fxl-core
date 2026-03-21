@@ -7,9 +7,9 @@ last_updated: "2026-03-21"
 last_activity: 2026-03-21
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 2
+  completed_plans: 4
 ---
 
 # Project State
@@ -23,12 +23,12 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 
 ## Current Position
 
-Phase: 140 (Dependency Diagram) — Complete
-Plan: 140-02 (complete)
-Status: Phase 140 complete, Phase 141 next
-Last activity: 2026-03-21 — Phase 140 executed (2 plans)
+Phase: 139 (Toggle Extraction) + 140 (Dependency Diagram) — Both Complete
+Plan: 139-02 (complete), 140-02 (complete)
+Status: Phases 139 and 140 complete, Phase 141 next
+Last activity: 2026-03-21 — Phase 139 executed (2 plans)
 
-Progress: ██░░░░░░░░ 1/4 phases (25%)
+Progress: █████░░░░░ 2/4 phases (50%)
 
 ## Accumulated Context
 
@@ -45,12 +45,13 @@ Progress: ██░░░░░░░░ 1/4 phases (25%)
 
 - Phase 140 complete: SVG diagram with 6 nodes, hover interaction, dark/light mode. Currently 0 cross-module edges (tasks and connector self-reference in requires[]). Edges will appear automatically when cross-module deps are added.
 - Verified: requires[] in manifests contain self-references only (todo resolved)
+- Phase 139 complete: TenantModulesSection component created with orgId prop, Supabase toggle logic, optimistic upsert. Wired into TenantDetailPage replacing "Gerenciar modulos" link. ModulesPanel stripped to scaffold with exported STATUS_LABELS/STATUS_CLASSES.
 
 ### Pending Todos
 
 - ~~Verify actual `requires[]` contents in manifests before Phase 140~~ — DONE: self-references only, 0 cross-module edges
-- Verify current line numbers for stale "Gerenciar modulos" link in TenantDetailPage before Phase 139 (research cited lines 577-596 but file may have shifted)
-- Decide where STATUS_LABELS / STATUS_CLASSES constants live (shared file or inline per component) before Phase 141 to avoid duplication between TenantModulesSection and ModuleOverviewCard
+- ~~Verify current line numbers for stale "Gerenciar modulos" link in TenantDetailPage before Phase 139~~ — DONE: lines 577-596 confirmed, replaced with TenantModulesSection
+- Decide where STATUS_LABELS / STATUS_CLASSES constants live (shared file or inline per component) before Phase 141 to avoid duplication between TenantModulesSection and ModuleOverviewCard — NOTE: ModulesPanel now exports them, TenantModulesSection has local copies
 
 ### Blockers/Concerns
 
@@ -59,5 +60,5 @@ None.
 ## Session Continuity
 
 To resume: read `.planning/PROJECT.md` for milestone goals, `.planning/ROADMAP.md` for phase details and success criteria.
-Next action: Execute Phase 141 (Module Overview Cards) — requires Phase 139 complete
-Last activity: 2026-03-21 — Phase 140 executed (diagram types, buildGraph, ModuleDiagram SVG component)
+Next action: Execute Phase 141 (Module Overview Cards) — both prerequisites (139, 140) now complete
+Last activity: 2026-03-21 — Phase 139 executed (TenantModulesSection, TenantDetailPage wiring, ModulesPanel scaffold)

@@ -23,9 +23,9 @@ Requirements for Admin Modules Overview milestone. Each maps to roadmap phases.
 
 ### Migracao de Toggles
 
-- [ ] **TOGL-01**: Admin pode ativar/desativar modulos de um tenant na TenantDetailPage
-- [ ] **TOGL-02**: Pagina /admin/modules nao mostra mais seletor de tenant ou toggles de modulos
-- [ ] **TOGL-03**: Toggle logic extraido em componente reutilizavel com orgId prop
+- [x] **TOGL-01**: Admin pode ativar/desativar modulos de um tenant na TenantDetailPage
+- [x] **TOGL-02**: Pagina /admin/modules nao mostra mais seletor de tenant ou toggles de modulos
+- [x] **TOGL-03**: Toggle logic extraido em componente reutilizavel com orgId prop
 
 ## Future Requirements
 
@@ -60,9 +60,9 @@ Requirements for Admin Modules Overview milestone. Each maps to roadmap phases.
 | CARD-02 | Phase 141 | Pending |
 | CARD-03 | Phase 141 | Pending |
 | CARD-04 | Phase 141 | Pending |
-| TOGL-01 | Phase 139 | Pending |
-| TOGL-02 | Phase 139 | Pending |
-| TOGL-03 | Phase 139 | Pending |
+| TOGL-01 | Phase 139 | Complete |
+| TOGL-02 | Phase 139 | Complete |
+| TOGL-03 | Phase 139 | Complete |
 
 **Coverage:**
 - v12.0 requirements: 11 total

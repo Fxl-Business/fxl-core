@@ -36,8 +36,8 @@
 
 ## Phases
 
-- [ ] **Phase 139: Toggle Extraction** - Extract module toggle logic into TenantModulesSection component and wire into TenantDetailPage
-- [ ] **Phase 140: Dependency Diagram** - Build interactive SVG module dependency diagram with hover edge highlighting
+- [x] **Phase 139: Toggle Extraction** - Extract module toggle logic into TenantModulesSection component and wire into TenantDetailPage
+- [x] **Phase 140: Dependency Diagram** - Build interactive SVG module dependency diagram with hover edge highlighting
 - [ ] **Phase 141: Module Overview Cards** - Build read-only ModuleOverviewCard grid and transform ModulesPanel scaffold
 - [ ] **Phase 142: Integration and QA** - Wire diagram click-to-scroll navigation and complete full system QA pass
 
@@ -94,7 +94,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 139. Toggle Extraction | 0/2 | Planned | - |
+| 139. Toggle Extraction | 2/2 | Complete | 2026-03-21 |
 | 140. Dependency Diagram | 2/2 | Complete | 2026-03-21 |
 | 141. Module Overview Cards | 0/2 | Planned | - |
 | 142. Integration and QA | 0/2 | Planned | - |
