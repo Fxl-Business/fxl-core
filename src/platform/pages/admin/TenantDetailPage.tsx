@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useSession } from '@clerk/react'
-import { ArrowLeft, Building2, Users, Calendar, Shield, Blocks, ExternalLink, Trash2, Eye, UserPlus, ChevronsUpDown, Check, Archive } from 'lucide-react'
+import { ArrowLeft, Building2, Users, Calendar, Shield, Trash2, Eye, UserPlus, ChevronsUpDown, Check, Archive } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@shared/ui/command'
@@ -11,6 +11,7 @@ import { useImpersonation } from '@platform/auth/ImpersonationContext'
 import { toast } from 'sonner'
 import type { TenantDetail } from '@platform/types/tenant'
 import type { OrgMember, AdminUser } from '@platform/types/admin'
+import TenantModulesSection from './TenantModulesSection'
 
 // ---------------------------------------------------------------------------
 // Info card component
@@ -575,26 +576,7 @@ export default function TenantDetailPage() {
       </div>
 
       {/* Modules section */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-foreground">
-            Modulos
-          </h2>
-          <Link
-            to={`/admin/modules?org=${tenant.id}`}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-          >
-            <Blocks className="h-3.5 w-3.5" />
-            Gerenciar modulos
-            <ExternalLink className="h-3 w-3" />
-          </Link>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-card">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Gerencie os modulos ativos deste tenant na pagina de modulos.
-          </p>
-        </div>
-      </div>
+      <TenantModulesSection orgId={orgId!} />
 
       {/* Connectors section (placeholder) */}
       <div className="rounded-xl border border-dashed border-slate-200 p-6 dark:border-slate-700">
